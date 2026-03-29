@@ -1,0 +1,1091 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SafetyPlatform — Product Roadmap & Epic Breakdown</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --bg: #F7F6F2;
+  --surface: #FFFFFF;
+  --surface2: #F0EFE9;
+  --border: #E2E0D8;
+  --text: #1A1916;
+  --muted: #7A7870;
+  --mono: 'DM Mono', monospace;
+  --sans: 'DM Sans', sans-serif;
+  --v1: #1B4332;    --v1-dim: rgba(27,67,50,0.08);   --v1-border: rgba(27,67,50,0.2);   --v1-text: #1B4332;
+  --v2: #1E3A5F;    --v2-dim: rgba(30,58,95,0.08);   --v2-border: rgba(30,58,95,0.2);   --v2-text: #1E3A5F;
+  --v3: #4A1942;    --v3-dim: rgba(74,25,66,0.08);   --v3-border: rgba(74,25,66,0.2);   --v3-text: #4A1942;
+  --sup: #B45309;   --sup-dim: rgba(180,83,9,0.08);
+  --mgr: #0E7490;   --mgr-dim: rgba(14,116,144,0.08);
+  --sfm: #5B21B6;   --sfm-dim: rgba(91,33,182,0.08);
+  --div: #1B4332;   --div-dim: rgba(27,67,50,0.08);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 14px; line-height: 1.65; }
+
+/* HEADER */
+.page-header {
+  background: var(--text); color: var(--bg); padding: 48px 56px 40px;
+}
+.page-header .eyebrow { font-family: var(--mono); font-size: 10px; letter-spacing: 3px; text-transform: uppercase; opacity: 0.5; margin-bottom: 12px; }
+.page-header h1 { font-size: 32px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 8px; }
+.page-header .sub { font-size: 15px; opacity: 0.6; max-width: 560px; }
+.page-header .meta { margin-top: 24px; display: flex; gap: 24px; }
+.meta-item { font-family: var(--mono); font-size: 10px; letter-spacing: 1px; text-transform: uppercase; opacity: 0.45; }
+
+/* VERSION TABS */
+.version-nav { display: flex; gap: 0; border-bottom: 2px solid var(--border); background: var(--surface); padding: 0 56px; position: sticky; top: 0; z-index: 100; }
+.vtab { padding: 16px 24px; font-size: 12px; font-weight: 600; letter-spacing: 0.5px; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.15s; color: var(--muted); display: flex; align-items: center; gap: 8px; }
+.vtab:hover { color: var(--text); }
+.vtab.v1 { color: var(--v1); border-bottom-color: var(--v1); }
+.vtab .vdot { width: 8px; height: 8px; border-radius: 50%; }
+.vdot-1 { background: var(--v1); }
+.vdot-2 { background: var(--v2); }
+.vdot-3 { background: var(--v3); }
+
+/* LAYOUT */
+.content { padding: 48px 56px; max-width: 1200px; }
+
+/* VERSION BLOCK */
+.version-block { margin-bottom: 64px; }
+.version-header { display: flex; align-items: flex-start; gap: 20px; margin-bottom: 32px; padding-bottom: 20px; border-bottom: 2px solid var(--border); }
+.version-badge { padding: 6px 14px; border-radius: 4px; font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: 1px; white-space: nowrap; flex-shrink: 0; margin-top: 3px; }
+.vb-1 { background: var(--v1-dim); color: var(--v1); border: 1px solid var(--v1-border); }
+.vb-2 { background: var(--v2-dim); color: var(--v2); border: 1px solid var(--v2-border); }
+.vb-3 { background: var(--v3-dim); color: var(--v3); border: 1px solid var(--v3-border); }
+.version-title { font-size: 22px; font-weight: 700; letter-spacing: -0.3px; margin-bottom: 4px; }
+.version-desc { font-size: 14px; color: var(--muted); max-width: 680px; line-height: 1.6; }
+.version-goal { margin-top: 8px; font-size: 13px; font-style: italic; color: var(--muted); }
+
+/* ROLE COVERAGE */
+.role-coverage { display: flex; gap: 8px; margin-bottom: 28px; flex-wrap: wrap; }
+.role-chip { padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; font-family: var(--mono); letter-spacing: 0.5px; }
+.rc-sup { background: var(--sup-dim); color: var(--sup); }
+.rc-mgr { background: var(--mgr-dim); color: var(--mgr); }
+.rc-sfm { background: var(--sfm-dim); color: var(--sfm); }
+.rc-div { background: var(--div-dim); color: var(--div); }
+
+/* EPIC */
+.epic { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 16px; overflow: hidden; }
+.epic-header { padding: 18px 22px; display: flex; align-items: flex-start; gap: 14px; cursor: pointer; user-select: none; }
+.epic-header:hover { background: var(--surface2); }
+.epic-num { font-family: var(--mono); font-size: 10px; color: var(--muted); min-width: 32px; padding-top: 2px; }
+.epic-icon { font-size: 18px; flex-shrink: 0; }
+.epic-meta { flex: 1; }
+.epic-name { font-size: 15px; font-weight: 600; margin-bottom: 3px; }
+.epic-summary { font-size: 13px; color: var(--muted); line-height: 1.5; }
+.epic-roles { display: flex; gap: 5px; margin-top: 8px; flex-wrap: wrap; }
+.er { font-family: var(--mono); font-size: 9px; padding: 2px 7px; border-radius: 3px; font-weight: 500; }
+.er-sup { background: var(--sup-dim); color: var(--sup); }
+.er-mgr { background: var(--mgr-dim); color: var(--mgr); }
+.er-sfm { background: var(--sfm-dim); color: var(--sfm); }
+.er-div { background: var(--div-dim); color: var(--div); }
+.er-sys { background: var(--surface2); color: var(--muted); border: 1px solid var(--border); }
+.epic-toggle { font-size: 12px; color: var(--muted); flex-shrink: 0; padding-top: 2px; }
+
+.epic-body { padding: 0 22px 20px 68px; display: none; }
+.epic-body.open { display: block; }
+
+/* ISSUES */
+.issues { border-top: 1px solid var(--border); margin-top: 0; }
+.issue { display: grid; grid-template-columns: 28px 1fr auto; gap: 10px; padding: 11px 0; border-bottom: 1px dashed var(--border); align-items: flex-start; }
+.issue:last-child { border-bottom: none; }
+.issue-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--border); margin-top: 6px; flex-shrink: 0; }
+.issue-dot.must { background: var(--v1); }
+.issue-dot.should { background: #D97706; }
+.issue-dot.could { background: var(--muted); }
+.issue-text { font-size: 13px; line-height: 1.5; }
+.issue-text strong { font-weight: 600; display: block; margin-bottom: 1px; }
+.issue-text span { color: var(--muted); font-size: 12px; }
+.issue-tag { font-family: var(--mono); font-size: 9px; padding: 2px 7px; border-radius: 3px; white-space: nowrap; align-self: flex-start; margin-top: 3px; }
+.it-fe { background: #EFF6FF; color: #1E40AF; }
+.it-be { background: #F0FDF4; color: #166534; }
+.it-ai { background: #FAF5FF; color: #6B21A8; }
+.it-db { background: #FFF7ED; color: #9A3412; }
+.it-int { background: #F0FDFA; color: #134E4A; }
+
+/* DEFERRED TABLE */
+.deferred { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 20px 24px; margin-bottom: 32px; }
+.deferred h4 { font-family: var(--mono); font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
+.deferred-items { display: flex; gap: 8px; flex-wrap: wrap; }
+.deferred-item { font-size: 12px; color: var(--muted); background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 3px 10px; }
+
+/* FLOW DIAGRAM */
+.flow { margin: 24px 0; background: var(--surface2); border-radius: 8px; padding: 20px 24px; }
+.flow h4 { font-family: var(--mono); font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 14px; }
+.flow-row { display: flex; align-items: center; gap: 0; flex-wrap: wrap; margin-bottom: 8px; }
+.flow-row:last-child { margin-bottom: 0; }
+.flow-node { font-size: 12px; font-weight: 500; padding: 5px 12px; border-radius: 4px; white-space: nowrap; }
+.flow-arrow { color: var(--muted); font-size: 12px; padding: 0 6px; }
+.fn-sup { background: var(--sup-dim); color: var(--sup); }
+.fn-mgr { background: var(--mgr-dim); color: var(--mgr); }
+.fn-sfm { background: var(--sfm-dim); color: var(--sfm); }
+.fn-sys { background: var(--surface); border: 1px solid var(--border); color: var(--muted); }
+.fn-ai  { background: rgba(91,33,182,0.08); color: #5B21B6; }
+
+/* LEGEND */
+.legend { display: flex; gap: 20px; margin-bottom: 32px; flex-wrap: wrap; }
+.legend-item { display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--muted); }
+.l-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+/* SUMMARY TABLE */
+.summary-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 40px; }
+.summary-table th { text-align: left; font-family: var(--mono); font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); padding: 8px 12px; border-bottom: 2px solid var(--border); }
+.summary-table td { padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+.summary-table tr:last-child td { border-bottom: none; }
+.summary-table tr:hover td { background: var(--surface2); }
+
+hr.section { border: none; border-top: 2px solid var(--border); margin: 48px 0; }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="eyebrow">Forge Works · SafetyPlatform</div>
+  <h1>Product Roadmap — Epic Breakdown</h1>
+  <div class="sub">Ruthless MVP scope. Three-version arc from pilot to enterprise. Each version closes the loop at its level before adding depth.</div>
+  <div class="meta">
+    <div class="meta-item">Version 0.1 · March 2026</div>
+    <div class="meta-item">Status: For internal review</div>
+    <div class="meta-item">Owner: Product</div>
+  </div>
+</div>
+
+<div class="content">
+
+<!-- LEGEND -->
+<div class="legend" style="margin-top:0;padding-top:32px;">
+  <div class="legend-item"><div class="l-dot" style="background:var(--v1)"></div>Must have — loop breaks without it</div>
+  <div class="legend-item"><div class="l-dot" style="background:#D97706"></div>Should have — role incomplete without it</div>
+  <div class="legend-item"><div class="l-dot" style="background:var(--muted)"></div>Could have — enhances but not blocking</div>
+</div>
+
+<!-- SUMMARY TABLE -->
+<table class="summary-table">
+  <thead>
+    <tr>
+      <th>Version</th>
+      <th>Purpose</th>
+      <th>Epics</th>
+      <th>Pilot / Commercial</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><span class="version-badge vb-1">V1 — Core Loop</span></td>
+      <td>Observation → Insight → Talk → Delivery. Visit workflow. Simple enquiry. Corrective action check-off. Enough for a 90-day pilot.</td>
+      <td>8 epics</td>
+      <td>90-day fixed-fee pilot entry</td>
+    </tr>
+    <tr>
+      <td><span class="version-badge vb-2">V2 — Intelligence Depth</span></td>
+      <td>Structured enquiry, manual insights, visit briefing pack, Forge Works analytics, situational briefs. Converts pilots to annual.</td>
+      <td>6 epics</td>
+      <td>Standard worksite-based licence</td>
+    </tr>
+    <tr>
+      <td><span class="version-badge vb-3">V3 — Integration</span></td>
+      <td>Incident module, CoP seeding, board report, regulatory reporting, external system integration.</td>
+      <td>5 epics</td>
+      <td>Enterprise / multi-org</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr class="section">
+
+<!-- V1 -->
+<div class="version-block">
+  <div class="version-header">
+    <span class="version-badge vb-1">V1 — Core Loop</span>
+    <div>
+      <div class="version-title">The Pilot Version</div>
+      <div class="version-desc">Everything needed to run the full intelligence loop at one or more sites. Every role has enough to use the platform. The loop closes. The 90-day pilot produces evidence that it works.</div>
+      <div class="version-goal">Pilot goal: observations flowing → insights generating → talks delivering → corrective actions closing. Forge Works Map® classifications accumulating in background ready for V2 analytics.</div>
+    </div>
+  </div>
+
+  <div class="role-coverage">
+    <span class="role-chip rc-sup">Supervisor — mobile</span>
+    <span class="role-chip rc-mgr">Manager / Regional — mobile</span>
+    <span class="role-chip rc-sfm">Safety Manager — desktop</span>
+  </div>
+
+  <div class="flow">
+    <h4>V1 Core Flow</h4>
+    <div class="flow-row">
+      <div class="flow-node fn-sup">Supervisor logs observation</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node fn-ai">AI enriches</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node fn-sys">Trend algorithm</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node fn-ai">AI drafts insight</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node fn-sfm">Safety Mgr approves</div>
+    </div>
+    <div class="flow-row" style="margin-top:6px;">
+      <div class="flow-node fn-ai">AI generates talk</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node fn-sup">Supervisor delivers</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node fn-sfm">Safety Mgr creates actions</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node fn-sup">Supervisor checks off</div>
+    </div>
+    <div class="flow-row" style="margin-top:6px;">
+      <div class="flow-node fn-sfm">Safety Mgr sends enquiry</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node fn-sup">Supervisors answer free text</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node fn-ai">AI synthesises responses</div>
+    </div>
+    <div class="flow-row" style="margin-top:6px;">
+      <div class="flow-node fn-mgr">Atrophy alert → Manager plans visit</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node fn-mgr">Logs observations on site</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node fn-sys">Feeds trend pipeline</div>
+    </div>
+  </div>
+
+  <!-- EPIC 1 -->
+  <div class="epic">
+    <div class="epic-header" onclick="toggle(this)">
+      <div class="epic-num">E1</div>
+      <div class="epic-icon">🏗️</div>
+      <div class="epic-meta">
+        <div class="epic-name">Foundation — Auth, Org Model, Navigation Shell</div>
+        <div class="epic-summary">Platform infrastructure. Multi-org data model, role-based access, mobile and desktop shells. Nothing else works without this.</div>
+        <div class="epic-roles">
+          <span class="er er-sys">System</span>
+          <span class="er er-sup">Supervisor</span>
+          <span class="er er-mgr">Manager</span>
+          <span class="er er-sfm">Safety Manager</span>
+        </div>
+      </div>
+      <div class="epic-toggle">▼</div>
+    </div>
+    <div class="epic-body">
+      <div class="issues">
+        <div class="issue"><div class="issue-dot must"></div><div class="issue-text"><strong>Org, worksite, user schema</strong><span>Multi-org data model. Worksite hierarchy (site → region → division → org). Role enum: supervisor, manager, regional_manager, safety_manager, division_manager.</span></div><span class="issue-tag it-db">DB</span></div>
+        <div class="issue"><div class="issue-dot must"></div><div class="issue-text"><strong>Authentication</strong><span>Login, session, role-based route guards. Mobile and desktop. SSO not required in V1 — email/password sufficient for pilot.</span></div><span class="issue-tag it-be">BE</span></div>
+        <div class="issue"><div class="issue-dot must"></div><div class="issue-text"><strong>Mobile shell — Supervisor & Manager</strong><span>Bottom navigation. Home, Capture, Talk/Visits, Records tabs. ThemeProvider, responsive layout. Works at 375px minimum.</span></div><span class="issue-tag it-fe">FE</span></div>
+        <div class="issue"><div class="issue-dot must"></div><div class="issue-text"><strong>Desktop shell — Safety Manager</strong><span>Persistent left sidebar. Section navigation: Workbench, Insights, Enquiries, Actions, Analytics. Top bar with scope selector.</span></div><span class="issue-tag it-fe">FE</span></div>
+        <div class="issue"><div class="issue-dot must"></div><div class="issue-text"><strong>Work type & safety practice taxonomy</strong><span>Seeded from existing platform. Read-only FK references into observation and incident tables. Admin can add values.</span></div><span class="issue-tag it-db">DB</span></div>
+        <div class="issue"><div class="issue-dot must"></div><div class="issue-text"><strong>Async job queue</strong><span>Background job infrastructure. All AI calls and notifications run as jobs, not synchronously. Retry logic, failure logging.</span></div><span class="issue-tag it-be">BE</span></div>
+        <div class="issue"><div class="issue-dot must"></div><div class="issue-text"><strong>Push notification infrastructure</strong><span>Mobile push delivery. In-app notification centre. Required for talk ready, insight review, enquiry dispatch, action assignment alerts.</span></div><span class="issue-tag it-int">INT</span></div>
+        <div class="issue"><div class="issue-dot could"></div><div class="issue-text"><strong>SSO / SAML integration</strong><span>Enterprise orgs will require this. Pilot can run on email/password. Defer to V1.1 if needed to close a pilot deal.</span></div><span class="issue-tag it-int">INT</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EPIC 2 -->
+  <div class="epic">
+    <div class="epic-header" onclick="toggle(this)">
+      <div class="epic-num">E2</div>
+      <div class="epic-icon">👁️</div>
+      <div class="epic-meta">
+        <div class="epic-name">Observation Capture — Supervisor Mobile</div>
+        <div class="epic-summary">The primary data input. Safe, at-risk, near-miss. Observation and incident fork. AI enrichment. Stop-work signal. All on mobile.</div>
+        <div class="epic-roles">
+          <span class="er er-sup">Supervisor</span>
+          <span class="er er-mgr">Manager</span>
+        </div>
+      </div>
+      <div class="epic-toggle">▼</div>
+    </div>
+    <div class="epic-body">
+      <div class="issues">
+        <div class="issue"><div class="issue-dot must"></div><div class="issue-text"><strong>Observation capture form</strong><span>Fork question. Work type selector. Observation type (Safe / At-risk / Near-miss). Free text what was observed. Immediate action. Stop-work toggle. Involved role selector. Submit.</span></div><span class="issue-tag it-fe">FE</span></div>
+        <div class="issue"><div class="issue-dot must"></div><div class="issue-text"><strong>Observation data model & API</strong><span>observation table with all fields including stop_work_called, involved_role, photo_url. POST endpoint. Auto-sets observer_id, worksite_id, observer_role.</span></div><span class="issue-tag it-be">BE</span></div>
+        <div class="issue"><div class="issue-dot must"></div><div class="issue-text"><strong>AI observation enrichment job</strong><span>observation.enrich job. Prompt 1. Classifies failure_type, key_hazard, severity_signal, stop_work_warranted, anonymisation_flags. Stores in ai_* columns.</span></div><span class="issue-tag it-ai">AI</span></div>
+        <div class="issue"><div class="issue-dot must"></div><div class="issue-text"><strong>Incident capture form</strong><span>Incident type selector. Occurred at datetime. Injury classification chain (conditional). Body part, nature, mechanism (conditional on injury_classification). Site location. Notifiable flag triage post-submit.</span></div><span class="issue-tag it-fe">FE</span></div>
+        <div class="issue"><div class="issue-dot must"></div><div class="issue-text"><strong>Incident data model & API</strong><span>incident table with full injury classification fields, notifiable_flag, regulatory notification fields. Triage logic sets requires_investigation and notifiable_flag on create.</span></div><span class="issue-tag it-be">BE</span></div>
+        <div class="issue"><div class="issue-dot should"></div><div class="issue-text"><strong>Notifiable incident alert</strong><span>If notifiable_flag = true after triage, push notification N-notifiable to safety manager. "This incident may require regulatory notification — review." Safety manager confirms or dismisses.</span></div><span class="issue-tag it-be">BE</span></div>
+        <div class="issue"><div class="issue-dot could"></div><div class="issue-text"><strong>Photo upload</strong><span>Optional photo on observation and incident. Upload to object storage, store URL. Useful for evidence but not blocking for pilot.</span></div><span class="issue-tag it-be">BE</span></div>
+        <div class="issue"><div class="issue-dot could"></div><div class="issue-text"><strong>Offline capture</strong><span>Queue observations locally when offline, sync on reconnect. Useful on construction sites with poor connectivity. V1.1 if pilot sites flag it.</span></div><span class="issue-tag it-fe">FE</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EPIC 3 -->
+  <div class="epic">
+    <div class="epic-header" onclick="toggle(this)">
+      <div class="epic-num">E3</div>
+      <div class="epic-icon">💡</div>
+      <div class="epic-meta">
+        <div class="epic-name">Intelligence Pipeline — Trend Detection & Critical Insight</div>
+        <div class="epic-summary">The algorithm that turns observations into insight. Trend threshold detection, AI insight generation, safety manager review and approval gate.</div>
+        <div class="epic-roles">
+          <span class="er er-sfm">Safety Manager</span>
+          <span class="er er-sys">System</span>
+        </div>
+      </div>
+      <div class="epic-toggle">▼</div>
+    </div>
+    <div class="epic-body">
+      <div class="issues">
+        <div class="issue"><div class="issue-dot must"></div><div class="issue-text"><strong>Trend detection algorithm</strong><span>Configurable threshold engine. Near-miss count by work_type × org_level × time_window vs threshold. Fires critical_insight.generate job on crossing. Configurable thresholds per work type per org.</span></div><span class="issue-tag it-be">BE</span></div>
+        <div class="issue"><div class="issue-dot must"></div><div class="issue-text"><strong>Critical insight data model</strong><span>critical_insight table with trigger_source enum, source_metadata JSONB, all content fields, fw_* classification fields, human review fields. Indexes on level, work_type, cleared_for_toolbox.</span></div><span class="issue-tag it-db">DB</span></div>
+        <div class="issue"><div class="issue-dot must"></div><div class="issue-text"><strong>AI insight draft generation</strong><span>critical_insight.generate job. Prompt 2. Generates pattern_summary, likely_systemic_cause, toolbox_narrative (veteran voice), escalate_to_systemic. Notifies safety manager for review.</span></div><span class="issue-tag it-ai">AI</span></div>
+        <div class="issue"><div class="issue-dot must"></div><div class="issue-text"><strong>Forge Works Map® classification job</strong><span>fw_classify job. Prompt 8. Runs after insight generation. Confidence-gated at 0.70 — below threshold all fw_* fields remain NULL. Async, non-blocking.</span></div><span class="issue-tag it-ai">AI</span></div>
+        <div class="issue"><div class="issue-dot must"></div><div class="issue-text"><strong>Workbench — insight review queue</strong><span>Desktop. Queue of pending insights ordered by urgency/overdue. Insight detail panel: source observations, pattern summary, toolbox narrative, endorsement thread, scope selector. Approve / Edit / Reject actions.</span></div><span class="issue-tag it-fe">FE</span></div>
+        <div class="issue"><div class="issue-dot must"></div><div class="issue-text"><strong>Insight approval API</strong><span>POST /api/v1/critical-insights/:id/review. Sets cleared_for_toolbox, sharing_scope, review_action. Queues downstream jobs on approval: talk generation, enquiry draft (V1 simple version).</span></div><span class="issue-tag it-be">BE</span></div>
+        <div class="issue"><div class="issue-dot should"></div><div class="issue-text"><strong>Insight endorsement by managers</strong><span>Managers can endorse an insight from their mobile feed. Endorsement count shown in workbench. Gives safety manager confidence that the pattern is confirmed across sites.</span></div><span class="issue-tag it-fe">FE</span></div>
+        <div class="issue"><div class="issue-dot should"></div><div class="issue-text"><strong>Insight discussion thread</strong><span>Comments on insight in the workbench. Safety managers and regional managers can add context before approval. Not a full social feature — just threaded notes.</span></div><span class="issue-tag it-fe">FE</span></div>
+        <div class="issue" style="background:#fffbeb;border:1px dashed #d97706;border-radius:4px;padding:8px 10px;margin-top:4px;"><div class="issue-dot" style="background:#d97706;margin-top:4px;"></div><div class="issue-text"><strong style="color:#92400e;">→ V2 consideration: Insight lead assignment</strong><span style="color:#92400e;">Once an insight has been discussed and endorsed, a safety manager should be able to assign a lead — "who is taking ownership of resolving this?" Assign to a named safety manager or operational manager. The assignee is notified, the insight appears in their workbench queue, and progress is tracked. Particularly useful when two safety managers with overlapping scope both receive the insight notification — assignment clarifies accountability without removing visibility from either. Spec when V2 workbench is being designed.</span></div><span class="issue-tag" style="background:#fef3c7;color:#92400e;">V2</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EPIC 4 -->
+  <div class="epic">
+    <div class="epic-header" onclick="toggle(this)">
+      <div class="epic-num">E4</div>
+      <div class="epic-icon">📋</div>
+      <div class="epic-meta">
+        <div class="epic-name">Toolbox Talk — Generation & Delivery</div>
+        <div class="epic-summary">AI assembles the talk from approved insights. Supervisor delivers on mobile. Crew attendance recorded. Loop closes.</div>
+        <div class="epic-roles">
+          <span class="er er-sup">Supervisor</span>
+          <span class="er er-sfm">Safety Manager</span>
+        </div>
+      </div>
+      <div class="epic-toggle">▼</div>
+    </div>
+    <div class="epic-body">
+      <div class="issues">
+        <div class="issue"><div class="issue-dot must"></div><div class="issue-text"><strong>Talk generation job</strong><span>AI assembles talk from approved insight(s) and investigation narratives. Prompt 5. Generates hazard_intro, main_content, key_actions, discussion_questions, closing_line. Stored in toolbox_talk table.</span></div><span class="issue-tag it-ai">AI</span></div>
+        <div class="issue"><div class="issue-dot must"></div><div class="issue-text"><strong>Talk delivery view — mobile</strong><span>Full talk content. Language selector (display only V1). Key actions list. Discussion questions. Presenter note input. Crew attendance list — tap to acknowledge. Deliver action.</span></div><span class="issue-tag it-fe">FE</span></div>
+        <div class="issue"><div class="issue-dot must"></div><div class="issue-text"><strong>Talk delivery record</strong><span>On delivery: sets delivered_at, attendee_count, acknowledgement records. Delivery confirmation screen with reference number. Feeds pipeline health analytics.</span></div><span class="issue-tag it-be">BE</span></div>
+        <div class="issue"><div class="issue-dot must"></div><div class="issue-text"><strong>Supervisor home — talk ready card</strong><span>Pending talk surfaces as primary action on supervisor home screen. Work type, time since generated, crew count. Tap to open delivery view.</span></div><span class="issue-tag it-fe">FE</span></div>
+        <div class="issue"><div class="issue-dot should"></div><div class="issue-text"><strong>Talk provenance badge</strong><span>Source attribution shown to supervisor and safety manager. "Based on: 6 field observations across 4 sites" or "Based on: External Alert — Safe Work Australia." Builds trust in the content.</span></div><span class="issue-tag it-fe">FE</span></div>
+        <div class="issue"><div class="issue-dot could"></div><div class="issue-text"><strong>Supervisor talk edit before delivery</strong><span>Allow supervisor to add a personal note or edit the closing line before delivery. Content edit — not a full authoring tool.</span></div><span class="issue-tag it-fe">FE</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EPIC 5 -->
+  <div class="epic">
+    <div class="epic-header" onclick="toggle(this)">
+      <div class="epic-num">E5</div>
+      <div class="epic-icon">🗺️</div>
+      <div class="epic-meta">
+        <div class="epic-name">Manager Visit Workflow — Plan, Do, Submit</div>
+        <div class="epic-summary">Atrophy detection drives visit planning. Manager gets AI-recommended topics. Logs observations during visit. Closes visit. Site intelligence flows into the pipeline.</div>
+        <div class="epic-roles">
+          <span class="er er-mgr">Manager</span>
+          <span class="er er-sfm">Safety Manager</span>
+        </div>
+      </div>
+      <div class="epic-toggle">▼</div>
+    </div>
+    <div class="epic-body">
+      <div class="issues">
+        <div class="issue"><div class="issue-dot must"></div><div class="issue-text"><strong>Atrophy score calculation</strong><span>Daily job. Atrophy = (days_since_last_obs × 1.8) + (days_since_last_talk × 1.2) + (open_investigations × 8) + (near_miss_30d × 3). Capped at 100. Red >70, Amber 40–70, Green <40.</span></div><span class="issue-tag it-be">BE</span></div>
+        <div class="issue"><div class="issue-dot must"></div><div class="issue-text"><strong>Atrophy alert — notification & manager home</strong><span>When site crosses 70: push notification to assigned manager and safety manager. Manager home shows sites needing attention, ranked by atrophy score with colour coding.</span></div><span class="issue-tag it-be">BE</span></div>
+        <div class="issue"><div class="issue-dot must"></div><div class="issue-text"><strong>Visit plan — create & topic selection</strong><span>Manager taps Plan Visit from site card. AI recommends observation topics (Prompt — visit topics) with source badges: Trend / Investigation / AI. Manager selects topics, sets date. Creates visit_plan record.</span></div><span class="issue-tag it-fe">FE</span></div>
+        <div class="issue"><div class="issue-dot must"></div><div class="issue-text"><strong>Active visit — observation capture with topic prompts</strong><span>Manager taps Start Visit. Same observation capture form as supervisor but topic prompts shown above text field as optional reference. Observations tagged to visit_id.</span></div><span class="issue-tag it-fe">FE</span></div>
+        <div class="issue"><div class="issue-dot must"></div><div class="issue-text"><strong>Visit close & submit</strong><span>Manager taps Close Visit. Summary: observations logged, topics covered. Confirms close. Sets visit_plan.status = completed. Atrophy recalculated. Visit observations enter trend pipeline.</span></div><span class="issue-tag it-fe">FE</span></div>
+        <div class="issue"><div class="issue-dot must"></div><div class="issue-text"><strong>Visit plan data model & API</strong><span>visit_plan table. CRUD endpoints. Status lifecycle: planned → active → completed. Linked to worksite, manager, observations.</span></div><span class="issue-tag it-be">BE</span></div>
+        <div class="issue"><div class="issue-dot should"></div><div class="issue-text"><strong>Manager visits list — portfolio view</strong><span>All sites in manager's scope ranked by atrophy. Per site: score, days since last obs, open investigations, last visit. Plan Visit action per site.</span></div><span class="issue-tag it-fe">FE</span></div>
+        <div class="issue"><div class="issue-dot should"></div><div class="issue-text"><strong>Supervisor notified on visit start</strong><span>Push notification to site supervisor when manager starts a visit. "Your regional manager is on site today." Simple awareness signal, no action required.</span></div><span class="issue-tag it-be">BE</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EPIC 6 -->
+  <div class="epic">
+    <div class="epic-header" onclick="toggle(this)">
+      <div class="epic-num">E6</div>
+      <div class="epic-icon">❓</div>
+      <div class="epic-meta">
+        <div class="epic-name">Enquiry — Simple Free-Text Version</div>
+        <div class="epic-summary">Safety manager creates a question list (AI-assisted or manual). Dispatched to targeted supervisors. Supervisors answer in free text on mobile. AI synthesises responses. Simple, powerful, provably different from email.</div>
+        <div class="epic-roles">
+          <span class="er er-sfm">Safety Manager</span>
+          <span class="er er-sup">Supervisor</span>
+        </div>
+      </div>
+      <div class="epic-toggle">▼</div>
+    </div>
+    <div class="epic-body">
+      <div class="issues">
+        <div class="issue"><div class="issue-dot must"></div><div class="issue-text"><strong>Enquiry data model — simplified V1</strong><span>enquiry table with trigger_source, status lifecycle, deadline, targeting. enquiry_question table (free text only — no type enum in V1). enquiry_response table with free_text answer and responder_id.</span></div><span class="issue-tag it-db">DB</span></div>
+        <div class="issue"><div class="issue-dot must"></div><div class="issue-text"><strong>AI question generation — free text</strong><span>After insight approval, generates 3–5 plain questions relevant to the pattern. No question type classification in V1 — just well-formed questions that invite a real answer. Safety manager can edit before dispatch.</span></div><span class="issue-tag it-ai">AI</span></div>
+        <div class="issue"><div class="issue-dot must"></div><div class="issue-text"><strong>Enquiry builder — desktop</strong><span>Safety manager reviews AI questions, edits, adds custom questions, sets scope (sites / supervisors), sets deadline. Dispatch action sends to recipients and notifies them.</span></div><span class="issue-tag it-fe">FE</span></div>
+        <div class="issue"><div class="issue-dot must"></div><div class="issue-text"><strong>Enquiry response — mobile</strong><span>Supervisor receives push notification. Opens enquiry. Sees questions as a simple numbered list. Free text answer per question. Submit when done. Simple, fast, no cognitive overhead.</span></div><span class="issue-tag it-fe">FE</span></div>
+        <div class="issue"><div class="issue-dot must"></div><div class="issue-text"><strong>AI response synthesis</strong><span>enquiry.synthesise job runs after each response and on close. Reads all free text responses, generates 3–4 synthesis findings with signal icons. Runs enquiry.generate_summary on close.</span></div><span class="issue-tag it-ai">AI</span></div>
+        <div class="issue"><div class="issue-dot must"></div><div class="issue-text"><strong>Enquiry results view — desktop</strong><span>Response rate, live feed of responses, AI synthesis findings, summary narrative, recommended actions. Generate Corrective Actions button. Simple, not the full V2 results view.</span></div><span class="issue-tag it-fe">FE</span></div>
+        <div class="issue"><div class="issue-dot should"></div><div class="issue-text"><strong>Enquiry reminder notification</strong><span>Automated reminder 24h before deadline to non-responders. enquiry.reminder job. Increases response rate without manual follow-up.</span></div><span class="issue-tag it-be">BE</span></div>
+        <div class="issue" style="background:#fffbeb;border:1px dashed #d97706;border-radius:4px;padding:8px 10px;margin-top:4px;"><div class="issue-dot" style="background:#d97706;margin-top:4px;"></div><div class="issue-text"><strong style="color:#92400e;">→ V2 cascade: FW classification into question generation</strong><span style="color:#92400e;">In V1 the fw_classify job runs but its output is not passed to the enquiry question generation prompt. In V2 (Epic E9), pass fw_factors + fw_rationales into Prompt 4 so question types are selected per classified factor. Assurance questions for management_systems gaps, Work as Done for work_understanding gaps etc. Significantly improves question precision. See Prompt 4 V2 note in ai-prompt-library.md.</span></div><span class="issue-tag" style="background:#fef3c7;color:#92400e;">V2</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EPIC 7 -->
+  <div class="epic">
+    <div class="epic-header" onclick="toggle(this)">
+      <div class="epic-num">E7</div>
+      <div class="epic-icon">✅</div>
+      <div class="epic-meta">
+        <div class="epic-name">Corrective Actions — Assignment & Mobile Check-off</div>
+        <div class="epic-summary">Safety manager creates actions from insights and enquiry results. Assigns to site with owner and due date. Supervisor sees pending actions on mobile and checks off completion. Real-time close rate visible to safety manager.</div>
+        <div class="epic-roles">
+          <span class="er er-sfm">Safety Manager</span>
+          <span class="er er-sup">Supervisor</span>
+        </div>
+      </div>
+      <div class="epic-toggle">▼</div>
+    </div>
+    <div class="epic-body">
+      <div class="issues">
+        <div class="issue"><div class="issue-dot must"></div><div class="issue-text"><strong>Corrective action data model</strong><span>corrective_action table. Source FK (insight or enquiry). Owner, worksite, due_date, status lifecycle (open → in_progress → complete → overdue). completed_at, completed_by.</span></div><span class="issue-tag it-db">DB</span></div>
+        <div class="issue"><div class="issue-dot must"></div><div class="issue-text"><strong>Create actions — desktop</strong><span>Safety manager creates 1–5 corrective actions from insight approval or enquiry results. Each: description, owner (user selector), worksite, due date. Batch create from recommended actions list.</span></div><span class="issue-tag it-fe">FE</span></div>
+        <div class="issue"><div class="issue-dot must"></div><div class="issue-text"><strong>Action assignment notification</strong><span>Push to assigned supervisor on action creation. "A corrective action has been assigned to your site. Due [date]." In-app notification with direct link to action detail.</span></div><span class="issue-tag it-be">BE</span></div>
+        <div class="issue"><div class="issue-dot must"></div><div class="issue-text"><strong>Action check-off — mobile</strong><span>Supervisor sees pending actions in Records tab. Each action: description, due date, source insight or enquiry. Single tap to mark complete. Confirmation prompt. Sets completed_at, completed_by.</span></div><span class="issue-tag it-fe">FE</span></div>
+        <div class="issue"><div class="issue-dot must"></div><div class="issue-text"><strong>Action tracker — desktop</strong><span>Safety manager view. All open actions across scope. Grouped by overdue / due this week / upcoming. Per action: description, owner, site, days overdue, status. Completion rate % stat.</span></div><span class="issue-tag it-fe">FE</span></div>
+        <div class="issue"><div class="issue-dot should"></div><div class="issue-text"><strong>Overdue action alert</strong><span>Automated notification to owner and safety manager when action passes due date without completion. Daily job checks overdue actions and sends reminder. Stops after completion or manual dismissal.</span></div><span class="issue-tag it-be">BE</span></div>
+        <div class="issue"><div class="issue-dot could"></div><div class="issue-text"><strong>Action completion photo evidence</strong><span>Optional photo on check-off. Supervisor can attach evidence of completion. Useful for physical changes (new sign installed, equipment modified). Not blocking for pilot.</span></div><span class="issue-tag it-fe">FE</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EPIC 8 -->
+  <div class="epic">
+    <div class="epic-header" onclick="toggle(this)">
+      <div class="epic-num">E8</div>
+      <div class="epic-icon">📊</div>
+      <div class="epic-meta">
+        <div class="epic-name">Analytics — Safety Manager Dashboard (V1)</div>
+        <div class="epic-summary">Enough analytics to prove the pilot is working. Pipeline health, leading indicators, atrophy heatmap. Forge Works capacity analysis placeholder — shows data building but full view in V2.</div>
+        <div class="epic-roles">
+          <span class="er er-sfm">Safety Manager</span>
+        </div>
+      </div>
+      <div class="epic-toggle">▼</div>
+    </div>
+    <div class="epic-body">
+      <div class="issues">
+        <div class="issue"><div class="issue-dot must"></div><div class="issue-text"><strong>Pipeline health view</strong><span>Funnel: observations → enriched → near-miss → insights generated → approved → talks generated → delivered → crew reached. Count + conversion rate at each stage. Drop-off table with latency. Corrective action close rate.</span></div><span class="issue-tag it-fe">FE</span></div>
+        <div class="issue"><div class="issue-dot must"></div><div class="issue-text"><strong>Leading indicators — core stat tiles</strong><span>Near-miss rate %, stop-work events count, sites atrophy >50, manager visit coverage %. Period and scope selectors. These four stats answer "is the platform generating signal?"</span></div><span class="issue-tag it-fe">FE</span></div>
+        <div class="issue"><div class="issue-dot must"></div><div class="issue-text"><strong>Atrophy heatmap</strong><span>Sites (rows) × weeks (columns). Cell colour = observation activity level. The fastest way to see which sites are going quiet. Click site row to navigate to site detail.</span></div><span class="issue-tag it-fe">FE</span></div>
+        <div class="issue"><div class="issue-dot should"></div><div class="issue-text"><strong>Forge Works capacity — placeholder</strong><span>Show the capacity analysis section with a "Building — N of 5 classified findings needed" state. Visible from day one so safety managers understand what's coming. Full view in V2.</span></div><span class="issue-tag it-fe">FE</span></div>
+        <div class="issue"><div class="issue-dot should"></div><div class="issue-text"><strong>Work type risk table</strong><span>Per work type: observation volume, near-miss count, talk coverage %, active insight flag, trend direction. Helps safety manager see which work types need attention.</span></div><span class="issue-tag it-fe">FE</span></div>
+        <div class="issue"><div class="issue-dot could"></div><div class="issue-text"><strong>Insight source breakdown</strong><span>Of N insights this period — algorithm / manual / external. Amber flag if manual ≥ 40%. Useful signal but not critical until manual insight entry exists in V2.</span></div><span class="issue-tag it-fe">FE</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="deferred">
+    <h4>Explicitly deferred from V1</h4>
+    <div class="deferred-items">
+      <span class="deferred-item">Incident module</span>
+      <span class="deferred-item">Manual / external insight entry</span>
+      <span class="deferred-item">Structured enquiry question types</span>
+      <span class="deferred-item">Visit briefing pack (AI-generated)</span>
+      <span class="deferred-item">Situational briefs</span>
+      <span class="deferred-item">CoP thread seeding</span>
+      <span class="deferred-item">Board report / export</span>
+      <span class="deferred-item">Forge Works capacity analytics (full view)</span>
+      <span class="deferred-item">SSO / SAML</span>
+      <span class="deferred-item">Regulatory report generation</span>
+      <span class="deferred-item">Offline capture</span>
+      <span class="deferred-item">Multi-language talk delivery</span>
+    </div>
+  </div>
+</div>
+
+<hr class="section">
+
+<!-- V2 -->
+<div class="version-block">
+  <div class="version-header">
+    <span class="version-badge vb-2">V2 — Intelligence Depth</span>
+    <div>
+      <div class="version-title">The Conversion Version</div>
+      <div class="version-desc">Adds the features that convert pilot customers to annual contracts. The loop works — now add depth to the intelligence, the analytics, and the manager workflow.</div>
+      <div class="version-goal">Commercial goal: pilot orgs renew because the platform is now embedded in how the safety team works, not just being evaluated.</div>
+    </div>
+  </div>
+
+  <div class="role-coverage">
+    <span class="role-chip rc-sup">Supervisor — enhanced</span>
+    <span class="role-chip rc-mgr">Manager — briefing pack</span>
+    <span class="role-chip rc-sfm">Safety Manager — full analytics + manual insights</span>
+    <span class="role-chip rc-div">Division Manager — digest view</span>
+  </div>
+
+  <div class="epic">
+    <div class="epic-header" onclick="toggle(this)">
+      <div class="epic-num">E8b</div>
+      <div class="epic-icon">📬</div>
+      <div class="epic-meta">
+        <div class="epic-name">Talk Delivery Obligations — Expected Reach & Overdue Tracking</div>
+        <div class="epic-summary">When an insight is approved with a sharing scope, a delivery expectation is set for each site in scope. Tracks whether the talk reached the sites it was relevant to, within a meaningful timeframe. A site with 6 overdue topics is a different signal from general atrophy — specific learning obligations not met. Low priority V2 — establish baseline delivery tracking in V1 first.</div>
+        <div class="epic-roles">
+          <span class="er er-sfm">Safety Manager</span>
+          <span class="er er-mgr">Manager</span>
+          <span class="er er-sup">Supervisor</span>
+        </div>
+      </div>
+      <div class="epic-toggle">▲</div>
+    </div>
+    <div class="epic-body open">
+      <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:5px;padding:10px 12px;margin-bottom:12px;font-size:12px;color:#166534;line-height:1.6;">
+        <strong>Dependency:</strong> V1 must establish baseline talk delivery tracking before adding obligation logic. The data is already there — toolbox_talk records per site, insight sharing scope already stored. This is a query and a UI layer on top of existing data, not a new data model.
+      </div>
+      <div class="issues">
+        <div class="issue"><div class="issue-dot could"></div><div class="issue-text"><strong>Talk delivery obligation — set on insight approval</strong><span>When a Critical Insight is approved with sharing_scope, create a TalkDeliveryObligation record per worksite in scope where the work type is currently active. Fields: insight_id, worksite_id, work_type_id, due_by (insight approval + configurable window — 48h for high severity, 7 days standard), status (pending / delivered / not_applicable / overdue), fulfilled_by_talk_id.</span></div><span class="issue-tag it-db">DB</span></div>
+        <div class="issue"><div class="issue-dot could"></div><div class="issue-text"><strong>Obligation fulfilment — auto on talk delivery</strong><span>When a toolbox talk is delivered at a site, check for open obligations matching the insight and work type. Set status = delivered, fulfilled_by_talk_id. Daily job marks obligations past due_by as overdue. Work type activity check — do not create obligations for sites where the work type is not currently active.</span></div><span class="issue-tag it-be">BE</span></div>
+        <div class="issue"><div class="issue-dot could"></div><div class="issue-text"><strong>Not applicable override</strong><span>Supervisor or manager can mark an obligation not_applicable with a reason — site shutdown, work type not running, crew unavailable. Clears the overdue flag without counting as delivered. Reason is stored and visible to safety manager. Prevents legitimate exceptions looking the same as negligence.</span></div><span class="issue-tag it-fe">FE</span></div>
+        <div class="issue"><div class="issue-dot could"></div><div class="issue-text"><strong>Insight delivery status — workbench panel</strong><span>After insight approval, the insight detail view shows delivery status per site in scope: delivered (date), pending (days remaining), overdue (days overdue), not applicable (reason). Safety manager can see at a glance where the learning has landed and where it hasn't — without leaving the workbench.</span></div><span class="issue-tag it-fe">FE</span></div>
+        <div class="issue"><div class="issue-dot could"></div><div class="issue-text"><strong>Overdue topics in visit briefing</strong><span>Visit briefing pack surfaces overdue delivery obligations for the site being visited. "This site has 2 talks not yet delivered — Spotter Management (6 days overdue), Hot Work PTW (2 days overdue)." Manager's visit becomes a prompt to understand why and potentially deliver on site.</span></div><span class="issue-tag it-fe">FE</span></div>
+        <div class="issue"><div class="issue-dot could"></div><div class="issue-text"><strong>Talk reach analytics — per insight</strong><span>Analytics view showing delivery reach per insight: % of sites in scope delivered, average delivery latency (days from approval to delivery), sites overdue. Complements pipeline health funnel — measures not just that talks were delivered but whether they reached the right places in time.</span></div><span class="issue-tag it-fe">FE</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="epic">
+    <div class="epic-header" onclick="toggle(this)">
+      <div class="epic-num">E9</div>
+      <div class="epic-icon">🔍</div>
+      <div class="epic-meta">
+        <div class="epic-name">Structured Enquiry — Full Question Types & Live Synthesis</div>
+        <div class="epic-summary">Upgrades V1 free-text enquiry to the full system. Seven question types, structured response options, per-question targeting, real-time AI synthesis with signal icons, bar charts for structured responses.</div>
+        <div class="epic-roles"><span class="er er-sfm">Safety Manager</span><span class="er er-sup">Supervisor</span></div>
+      </div>
+      <div class="epic-toggle">▼</div>
+    </div>
+    <div class="epic-body">
+      <div class="issues">
+        <div class="issue"><div class="issue-dot must"></div><div class="issue-text"><strong>Question type model</strong><span>Seven types: Assurance Check, Likelihood Assessment, Prevalence Check, Evidence Request, Work as Done, Gap Identification, Comparative Check. Each with structured response options where applicable.</span></div><span class="issue-tag it-db">DB</span></div>
+        <div class="issue"><div class="issue-dot must"></div><div class="issue-text"><strong>Enhanced AI question generation — factor-aware</strong><span>Updated Prompt 6. Now receives fw_factors, fw_domains, fw_maturity_signals, fw_rationales from the classified insight. Selects question types per factor — Assurance for management_systems, Work as Done for work_understanding, Likelihood for operational_management. Questions probe each factor at its observed maturity level. Cascade from V1 fw_classify output that was not yet consumed by the question generation prompt.</span></div><span class="issue-tag it-ai">AI</span></div>
+        <div class="issue"><div class="issue-dot must"></div><div class="issue-text"><strong>Full enquiry builder — desktop</strong><span>Question cards with type badge, rationale, response preview, per-question scope targeting. Add custom question. Full targeting sidebar with site/supervisor counts, deadline, notification preview.</span></div><span class="issue-tag it-fe">FE</span></div>
+        <div class="issue"><div class="issue-dot must"></div><div class="issue-text"><strong>Structured response mobile UI</strong><span>Response options rendered per question type. Assurance: Yes/Partially/No. Likelihood: Low/Moderate/High. Gap: free text + category tag. Photo evidence option on assurance questions.</span></div><span class="issue-tag it-fe">FE</span></div>
+        <div class="issue"><div class="issue-dot must"></div><div class="issue-text"><strong>Live synthesis with signal icons & charts</strong><span>🔴🟠🟡💡 signal icons per finding. Bar charts for structured question distributions. Updates per response. Full results view with response feed, synthesis, summary, recommended actions.</span></div><span class="issue-tag it-fe">FE</span></div>
+        <div class="issue"><div class="issue-dot must"></div><div class="issue-text"><strong>Legal hold enforcement</strong><span>legal_hold flag on investigation blocks all enquiry dispatch. Hard block at data layer, no override. Investigation mid-enquiry trigger source.</span></div><span class="issue-tag it-be">BE</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="epic">
+    <div class="epic-header" onclick="toggle(this)">
+      <div class="epic-num">E10</div>
+      <div class="epic-icon">✍️</div>
+      <div class="epic-meta">
+        <div class="epic-name">Manual & External Critical Insight Entry</div>
+        <div class="epic-summary">Safety manager adds insights directly — from external alerts, foreign investigations, or their own field judgement. One shape, source-aware UI. Everything downstream fires identically.</div>
+        <div class="epic-roles"><span class="er er-sfm">Safety Manager</span></div>
+      </div>
+      <div class="epic-toggle">▼</div>
+    </div>
+    <div class="epic-body">
+      <div class="issues">
+        <div class="issue"><div class="issue-dot must"></div><div class="issue-text"><strong>Manual insight creation form</strong><span>Source type selector first (Manual / External Alert / External Investigation). Standard content fields. Source metadata fields conditional on type. AI structuring assist — paste raw text, AI populates fields, manager edits before save.</span></div><span class="issue-tag it-fe">FE</span></div>
+        <div class="issue"><div class="issue-dot must"></div><div class="issue-text"><strong>Creation API & immediate approval</strong><span>POST /api/v1/critical-insights with trigger_source. Creator is reviewer — cleared_for_toolbox = true on save. Queues fw_classify, talk generation, enquiry draft, all downstream jobs immediately.</span></div><span class="issue-tag it-be">BE</span></div>
+        <div class="issue"><div class="issue-dot must"></div><div class="issue-text"><strong>Source badge — workbench & talk provenance</strong><span>Visual distinction: source badge on insight queue item and on toolbox talk. "External Alert — Safe Work Australia" or "Manual — S. Reyes." Not a different entity — just a visible source attribution.</span></div><span class="issue-tag it-fe">FE</span></div>
+        <div class="issue"><div class="issue-dot must"></div><div class="issue-text"><strong>AI structuring assist — interactive</strong><span>Synchronous call from creation form. Safety manager pastes unstructured text. AI returns structured fields for review. Manager edits before submitting. Not a background job.</span></div><span class="issue-tag it-ai">AI</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="epic">
+    <div class="epic-header" onclick="toggle(this)">
+      <div class="epic-num">E11</div>
+      <div class="epic-icon">📱</div>
+      <div class="epic-meta">
+        <div class="epic-name">Visit Briefing Pack — Mobile, Pre-visit & Active States</div>
+        <div class="epic-summary">AI-generated briefing delivered to manager's phone 48h before a visit. Transitions to active guide on Start Visit. Replaces manual visit preparation entirely.</div>
+        <div class="epic-roles"><span class="er er-mgr">Manager</span></div>
+      </div>
+      <div class="epic-toggle">▼</div>
+    </div>
+    <div class="epic-body">
+      <div class="issues">
+        <div class="issue"><div class="issue-dot must"></div><div class="issue-text"><strong>Visit briefing generation job</strong><span>visit_briefing.generate triggered on visit plan creation. Prompt 12. Reads site snapshot, active insights, open actions, open investigations, last visit summary, FW signal. Stored in visit_briefing table.</span></div><span class="issue-tag it-ai">AI</span></div>
+        <div class="issue"><div class="issue-dot must"></div><div class="issue-text"><strong>Briefing push notification</strong><span>"Your visit briefing for [site] is ready." Sent on generation. Links directly to briefing view. 48h before visit ideally but fires immediately on plan creation regardless of timing.</span></div><span class="issue-tag it-be">BE</span></div>
+        <div class="issue"><div class="issue-dot must"></div><div class="issue-text"><strong>Briefing view — mobile, pre-visit state</strong><span>Headline, site reading, focus areas with source badges, watch for section, active insights cards, open actions, FW signal. Full read-only briefing. Start Visit button transitions to active state.</span></div><span class="issue-tag it-fe">FE</span></div>
+        <div class="issue"><div class="issue-dot must"></div><div class="issue-text"><strong>Active state transition</strong><span>On Start Visit: focus areas become capture prompts. Other sections collapse to quick-reference accordion. Stale flag if briefing > 48h old with refresh option.</span></div><span class="issue-tag it-fe">FE</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="epic">
+    <div class="epic-header" onclick="toggle(this)">
+      <div class="epic-num">E12</div>
+      <div class="epic-icon">🗺️</div>
+      <div class="epic-meta">
+        <div class="epic-name">Forge Works Map® Analytics — Full Capacity View</div>
+        <div class="epic-summary">The capacity health map. Domain summary, factor detail, maturity signal trend. Requires classified data to accumulate — shows progressively richer signal as the platform is used.</div>
+        <div class="epic-roles"><span class="er er-sfm">Safety Manager</span><span class="er er-div">Division Manager</span></div>
+      </div>
+      <div class="epic-toggle">▼</div>
+    </div>
+    <div class="epic-body">
+      <div class="issues">
+        <div class="issue"><div class="issue-dot must"></div><div class="issue-text"><strong>Domain summary view</strong><span>Guide / Enable / Execute distribution of classified insights and investigations. Pie or proportional bar. Scope and period controls. Replaces failure type donut. Shown once ≥5 classified findings exist.</span></div><span class="issue-tag it-fe">FE</span></div>
+        <div class="issue"><div class="issue-dot must"></div><div class="issue-text"><strong>Factor detail drill-down</strong><span>All 15 factors ranked by frequency of appearance in classified findings. Shows count, domain, most recent maturity signal. Tap factor to see associated insights and investigations.</span></div><span class="issue-tag it-fe">FE</span></div>
+        <div class="issue"><div class="issue-dot must"></div><div class="issue-text"><strong>Maturity signal trend table</strong><span>Per factor with sufficient data: current predominant maturity level + 90-day trend arrow. Is the organisation's Management Systems factor improving, stable, or declining? The hardest question in safety — now answerable from field data.</span></div><span class="issue-tag it-fe">FE</span></div>
+        <div class="issue"><div class="issue-dot should"></div><div class="issue-text"><strong>Insight source breakdown</strong><span>Of N insights this period — algorithm / manual / external alert / external investigation. Amber flag if manual ≥ 40%. Now meaningful since manual insight entry exists.</span></div><span class="issue-tag it-fe">FE</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="epic">
+    <div class="epic-header" onclick="toggle(this)">
+      <div class="epic-num">E13</div>
+      <div class="epic-icon">📄</div>
+      <div class="epic-meta">
+        <div class="epic-name">Situational Briefs & Leadership Digest</div>
+        <div class="epic-summary">Auto-generated brief when an insight is approved or investigation closes. Reviewed by safety manager, distributed to managers. Replaces the manual email entirely.</div>
+        <div class="epic-roles"><span class="er er-sfm">Safety Manager</span><span class="er er-mgr">Manager</span><span class="er er-div">Division Manager</span></div>
+      </div>
+      <div class="epic-toggle">▼</div>
+    </div>
+    <div class="epic-body">
+      <div class="issues">
+        <div class="issue"><div class="issue-dot must"></div><div class="issue-text"><strong>Situational brief generation</strong><span>situational_brief.generate job. Prompt 10. Triggered after insight approval or investigation close. What happened, what it means, Forge Works classification, what's being done, key questions. Stored as draft.</span></div><span class="issue-tag it-ai">AI</span></div>
+        <div class="issue"><div class="issue-dot must"></div><div class="issue-text"><strong>Brief review & approve — desktop</strong><span>Appears in workbench queue. Four editable content sections. Scope selector. Approve & Distribute action. Replaces the ad-hoc email the safety manager currently writes.</span></div><span class="issue-tag it-fe">FE</span></div>
+        <div class="issue"><div class="issue-dot must"></div><div class="issue-text"><strong>Brief distribution</strong><span>On approval: push + email to managers within sharing scope. Brief readable in-app. PDF download option.</span></div><span class="issue-tag it-be">BE</span></div>
+        <div class="issue"><div class="issue-dot should"></div><div class="issue-text"><strong>Periodic leadership digest</strong><span>Weekly/monthly roll-up across insights, investigations, enquiry summaries, action close rate. For division managers. AI-generated narrative, safety manager approves before send. Light version of board report.</span></div><span class="issue-tag it-ai">AI</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr class="section">
+
+<!-- V4 -->
+<div class="version-block">
+  <div class="version-header">
+    <span class="version-badge" style="background:rgba(15,23,42,0.08);color:#0f172a;border:1px solid rgba(15,23,42,0.2);padding:6px 14px;border-radius:4px;font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:1px;">V4 — Organisational Diagnostic</span>
+    <div>
+      <div class="version-title">The Full Map Version</div>
+      <div class="version-desc">Periodic role-targeted anonymous surveys that probe the Guide and Enable factors the field observation pipeline structurally cannot reach. Results trend over time, flavour the Forge Works Map® factor positions, and can surface Critical Insights for the improvement pipeline. Closes the loop on the top half of the Map.</div>
+      <div class="version-goal">Commercial goal: platform now delivers a continuous organisational diagnostic — the thing Forge Works currently delivers through consulting engagements, running automatically from within the organisation's own workflow.</div>
+    </div>
+  </div>
+
+  <div class="role-coverage">
+    <span class="role-chip rc-mgr">Operational Managers — Enable + lower Guide factors</span>
+    <span class="role-chip rc-sfm">Safety Professionals — Safety Organisation + Risk Management self-assessment</span>
+    <span class="role-chip rc-div">Senior Leaders — observed by others, not self-reporting</span>
+  </div>
+
+  <div class="flow">
+    <h4>V4 Survey Flow</h4>
+    <div class="flow-row">
+      <div class="flow-node fn-sfm">Safety Manager configures survey set</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node fn-ai">AI selects questions per factor per role</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node fn-sys">Dispatched anonymously to targeted roles</div>
+    </div>
+    <div class="flow-row" style="margin-top:6px;">
+      <div class="flow-node fn-mgr">Managers + Safety Professionals respond</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node fn-ai">AI synthesises → FW Map factor positions updated</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node fn-sfm">Trend visible in capacity analytics</div>
+    </div>
+    <div class="flow-row" style="margin-top:6px;">
+      <div class="flow-node fn-ai">AI identifies Critical Insight candidates from survey signal</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node fn-sfm">Safety Manager reviews → enters improvement pipeline</div>
+    </div>
+  </div>
+
+  <div class="epic">
+    <div class="epic-header" onclick="toggle(this)">
+      <div class="epic-num">E18</div>
+      <div class="epic-icon">🗺️</div>
+      <div class="epic-meta">
+        <div class="epic-name">Periodic Diagnostic Survey — Role-targeted, Anonymous, Factor-mapped</div>
+        <div class="epic-summary">Periodic surveys targeting the Guide and Enable factors the field observation pipeline cannot reach. Same enquiry infrastructure, different trigger model and anonymisation rules. Results trend over time and flavour the Forge Works Map® capacity profile.</div>
+        <div class="epic-roles">
+          <span class="er er-sfm">Safety Manager</span>
+          <span class="er er-mgr">Operational Manager</span>
+          <span class="er er-sys">System</span>
+        </div>
+      </div>
+      <div class="epic-toggle">▲</div>
+    </div>
+    <div class="epic-body open">
+      <div style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:5px;padding:10px 12px;margin-bottom:12px;font-size:12px;color:#0369a1;line-height:1.6;">
+        <strong>Infrastructure dependency:</strong> Requires V2 structured enquiry (E9) to be in place — the survey reuses the enquiry question model, dispatch system, response collection, and AI synthesis pipeline. Bring forward to V3 if E9 ships early and validation data supports the use case.
+      </div>
+      <div class="issues">
+        <div class="issue"><div class="issue-dot must"></div><div class="issue-text"><strong>Survey entity — extends enquiry model</strong><span>New trigger_source value: 'diagnostic_survey'. New fields: survey_period (quarterly/biannual/annual), anonymous=true (hard — no responder_id stored, only role and org level), factor_targets (array of FW Map factors this survey is designed to probe). Reuses enquiry_question and enquiry_response tables with anonymisation enforced at write.</span></div><span class="issue-tag it-db">DB</span></div>
+        <div class="issue"><div class="issue-dot must"></div><div class="issue-text"><strong>Role-targeted question sets — AI generated per factor per role</strong><span>New prompt: survey_generate. Input: target factors (which of the 15), target roles (operational_manager / safety_professional / senior_leader), org context. AI generates questions calibrated to what each role is best positioned to answer. Guide factors go to managers who observe leadership, not leaders assessing themselves. Enable factors go to operational managers at the system boundary.</span></div><span class="issue-tag it-ai">AI</span></div>
+        <div class="issue"><div class="issue-dot must"></div><div class="issue-text"><strong>Anonymisation — hard enforced, not optional</strong><span>responder_id is not stored. Only role and org level recorded with each response. Safety manager cannot de-anonymise. This is a data layer constraint not a UI toggle — required to get honest answers to questions about leadership behaviour and goal conflict. No override exists.</span></div><span class="issue-tag it-be">BE</span></div>
+        <div class="issue"><div class="issue-dot must"></div><div class="issue-text"><strong>Factor position output — updates FW Map capacity profile</strong><span>Survey synthesis produces a maturity signal per probed factor — same structure as fw_maturity_signals from field classifications. Stored as survey_factor_signal records with period, factor, signal, confidence, response_count. Displayed in the capacity analytics view alongside field-derived signals — source-badged so viewers can distinguish survey signal from field intelligence signal.</span></div><span class="issue-tag it-be">BE</span></div>
+        <div class="issue"><div class="issue-dot must"></div><div class="issue-text"><strong>Trend over time — factor maturity trend</strong><span>Each survey run produces a dated snapshot per factor. Analytics view shows factor maturity trend across survey periods — is Senior Leadership moving from Compliant toward Leading? Is Goal Conflict improving or worsening? This is the continuous diagnostic that currently requires a Forge Works consulting engagement to produce.</span></div><span class="issue-tag it-fe">FE</span></div>
+        <div class="issue"><div class="issue-dot must"></div><div class="issue-text"><strong>Critical Insight surfacing from survey signal</strong><span>After survey synthesis, AI assesses whether any factor signal is sufficiently concerning to warrant a Critical Insight entering the improvement pipeline. If a factor consistently signals Compliant maturity across multiple periods without improvement, or if a sharp regression is detected, a draft Critical Insight is created with trigger_source = 'diagnostic_survey'. Safety manager reviews before anything enters the pipeline. Same gate as algorithm-triggered insights.</span></div><span class="issue-tag it-ai">AI</span></div>
+        <div class="issue"><div class="issue-dot should"></div><div class="issue-text"><strong>Blind spot coverage map</strong><span>Analytics view showing which of the 15 factors have sufficient signal (from field intelligence + survey) and which are data-poor. Safety manager can see explicitly which factors the platform is not yet measuring and whether a survey run would address them. Makes the diagnostic coverage visible rather than implicit.</span></div><span class="issue-tag it-fe">FE</span></div>
+        <div class="issue"><div class="issue-dot should"></div><div class="issue-text"><strong>Benchmark comparison — optional</strong><span>If Forge Works maintains anonymised cross-org benchmark data, survey results can be positioned against industry or sector averages per factor. "Your organisation is signalling Compliant on Goal Conflict — sector average for construction is also Compliant, but leading organisations in your sector are at Leading." Requires Forge Works data infrastructure decision.</span></div><span class="issue-tag it-int">INT</span></div>
+        <div class="issue"><div class="issue-dot could"></div><div class="issue-text"><strong>Scheduled dispatch — no manual trigger required</strong><span>Safety manager configures survey cadence (quarterly, biannual) and target roles once. Platform dispatches automatically on schedule with a review step: "Your Q1 diagnostic survey is ready to dispatch — review questions and confirm." Reduces admin to near zero for recurring surveys.</span></div><span class="issue-tag it-be">BE</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:16px 20px;margin-bottom:24px;">
+    <div style="font-family:var(--mono);font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;">Why this closes the loop</div>
+    <div style="font-size:13px;color:var(--text);line-height:1.7;">
+      The field observation pipeline excels at Execute-domain factors — what frontline workers and supervisors can directly observe. The survey reaches Guide and Enable factors that are structurally invisible at field level. Together they cover all 15 factors across the Forge Works Map® with evidence from the people best positioned to answer each one.
+    </div>
+    <div style="margin-top:10px;font-size:12px;color:var(--muted);line-height:1.65;">
+      The platform also solves the honest-answer problem. Anonymous surveys dispatched through a tool people already use for safety intelligence are more likely to produce honest responses about leadership behaviour and goal conflict than surveys known to be commissioned by leadership. The anonymisation is architectural — not a setting, not a promise.
+    </div>
+    <div style="margin-top:10px;font-size:12px;color:var(--muted);line-height:1.65;">
+      And the output feeds directly back into the improvement pipeline. A survey that identifies a Senior Leadership factor gap doesn't just produce a report — it can surface a Critical Insight that enters the toolbox talk and enquiry pipeline. The diagnostic and the action system are the same system.
+    </div>
+  </div>
+
+</div>
+
+<hr class="section">
+
+<!-- V3 -->
+<div class="version-block">
+  <div class="version-header">
+    <span class="version-badge vb-3">V3 — Integration & Enterprise</span>
+    <div>
+      <div class="version-title">The Sticky Version</div>
+      <div class="version-desc">Platform becomes embedded in how the organisation runs — not just how the safety team works. External integrations, incident module, regulatory reporting, CoP seeding.</div>
+      <div class="version-goal">Commercial goal: platform is now a system of record. Switching cost is real. Multi-site enterprise contracts justified.</div>
+    </div>
+  </div>
+
+  <div class="role-coverage">
+    <span class="role-chip rc-sup">All roles — full feature access</span>
+    <span class="role-chip rc-div">Division Manager — board reporting</span>
+  </div>
+
+  <div class="epic">
+    <div class="epic-header" onclick="toggle(this)">
+      <div class="epic-num">E14</div><div class="epic-icon">🚨</div>
+      <div class="epic-meta">
+        <div class="epic-name">Incident Module — Opinionated, Lean, Regulation-Ready</div>
+        <div class="epic-summary">Full incident reporting, investigation framework, regulatory notification, corrective action linkage. Designed to be opinionated — not a configurable blank canvas.</div>
+        <div class="epic-roles"><span class="er er-sup">Supervisor</span><span class="er er-sfm">Safety Manager</span></div>
+      </div>
+      <div class="epic-toggle">▼</div>
+    </div>
+    <div class="epic-body">
+      <div class="issues">
+        <div class="issue"><div class="issue-dot must"></div><div class="issue-text"><strong>Full incident investigation framework</strong><span>Immediate cause, contributing factors, root cause — AI-assisted, human-confirmed. Corrective actions from investigation. Toolbox narrative generation on close.</span></div><span class="issue-tag it-ai">AI</span></div>
+        <div class="issue"><div class="issue-dot must"></div><div class="issue-text"><strong>Regulatory notification workflow</strong><span>Notifiable flag reviewed by safety manager. Regulatory report generation for jurisdiction (WHS, UK RIDDOR, US OSHA formats). Form pre-populated from incident data.</span></div><span class="issue-tag it-be">BE</span></div>
+        <div class="issue"><div class="issue-dot must"></div><div class="issue-text"><strong>External investigation insight path</strong><span>Close an investigation in external system, create a manual insight with trigger_source = external_investigation. Structured source_metadata captures system, reference, and summary. Full downstream pipeline fires.</span></div><span class="issue-tag it-int">INT</span></div>
+        <div class="issue"><div class="issue-dot should"></div><div class="issue-text"><strong>TRIFR & lagging indicator calculations</strong><span>Recordable injury frequency rate from injury_classification data. Lagging indicators analytics view. Requires meaningful incident data volume to be useful — hence V3.</span></div><span class="issue-tag it-be">BE</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="epic">
+    <div class="epic-header" onclick="toggle(this)">
+      <div class="epic-num">E15</div><div class="epic-icon">💬</div>
+      <div class="epic-meta">
+        <div class="epic-name">Community of Practice — Thread Seeding</div>
+        <div class="epic-summary">AI-generated discussion threads seeded to CoP rooms on approval of insights and investigations. Transparently AI-generated — UVP. Platform-agnostic integration adapter.</div>
+        <div class="epic-roles"><span class="er er-sfm">Safety Manager</span><span class="er er-sup">Supervisor</span><span class="er er-mgr">Manager</span></div>
+      </div>
+      <div class="epic-toggle">▼</div>
+    </div>
+    <div class="epic-body">
+      <div class="issues">
+        <div class="issue"><div class="issue-dot must"></div><div class="issue-text"><strong>Thread generation & review</strong><span>cop_thread.generate job. Prompt 11. Title, body, opening question, Forge Works tag. Safety manager reviews and selects room before seeding. Attribution line auto-appended.</span></div><span class="issue-tag it-ai">AI</span></div>
+        <div class="issue"><div class="issue-dot must"></div><div class="issue-text"><strong>CoP platform integration adapter</strong><span>Platform-agnostic adapter. Initial integrations: Viva Engage, Slack. Room ID mapping configured at org level. cop_thread.seed job calls platform API on approval.</span></div><span class="issue-tag it-int">INT</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="epic">
+    <div class="epic-header" onclick="toggle(this)">
+      <div class="epic-num">E16</div><div class="epic-icon">📊</div>
+      <div class="epic-meta">
+        <div class="epic-name">Board Report & Governance Export</div>
+        <div class="epic-summary">AI-generated board narrative. Export formats: slide deck, safety report PDF, raw CSV. Safety Culture Index. Governance-ready outputs for leadership and boards.</div>
+        <div class="epic-roles"><span class="er er-sfm">Safety Manager</span><span class="er er-div">Division Manager</span></div>
+      </div>
+      <div class="epic-toggle">▼</div>
+    </div>
+    <div class="epic-body">
+      <div class="issues">
+        <div class="issue"><div class="issue-dot must"></div><div class="issue-text"><strong>Board narrative generation</strong><span>On-demand AI narrative for selected scope and period. Safety Culture Index composite. Key findings from insights and enquiries. Recommended actions. Safety manager reviews before distribution.</span></div><span class="issue-tag it-ai">AI</span></div>
+        <div class="issue"><div class="issue-dot must"></div><div class="issue-text"><strong>Export formats</strong><span>Board slide deck (PPTX), safety report PDF, raw data CSV. Regulatory package export when incident module is live. Generated on demand via export jobs.</span></div><span class="issue-tag it-be">BE</span></div>
+      </div>
+      <div style="background:#fffbeb;border:1px dashed #d97706;border-radius:5px;padding:12px 14px;margin:8px 0 4px;">
+        <div style="font-family:var(--mono);font-size:9px;letter-spacing:1px;text-transform:uppercase;color:#92400e;margin-bottom:8px;">Reporting design note — revisit before building</div>
+        <div style="font-size:12px;color:#78350f;line-height:1.65;">
+          <strong>Reports are periodic, not ad hoc.</strong> Monthly or quarterly cadence, auto-generated, landing automatically in the hands of all safety managers whose scope includes that org unit. A North Region report is a North Region document — any safety manager scoped to North Region or above can see it.<br><br>
+          <strong>Ownership:</strong> Reports carry org_unit_type + org_unit_id, not an owner_id. generated_by is audit trail only — not access control. Scope membership determines visibility.<br><br>
+          <strong>Discussion artefact:</strong> Reports should be designed as prompts for conversation, not just documents. A safety manager reviewing a period report should be able to enter a manual insight directly from that context — "I spotted something in this period that the algorithm didn't flag."<br><br>
+          <strong>Notifications:</strong> Both safety managers with overlapping scope receive the notification when a report is generated. Intentional — best they discuss it. Platform doesn't decide ownership, it ensures awareness.<br><br>
+          <strong>Scope of this epic:</strong> Currently specced as on-demand generation. Revisit the full periodic reporting design — cadence configuration, auto-distribution, discussion threading, manual insight entry from report context — as a dedicated conversation before V3 reporting is built.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="epic">
+    <div class="epic-header" onclick="toggle(this)">
+      <div class="epic-num">E17</div><div class="epic-icon">🔗</div>
+      <div class="epic-meta">
+        <div class="epic-name">Enterprise Integration — SSO, External Systems, API</div>
+        <div class="epic-summary">SSO/SAML for enterprise orgs. Public API for integration with existing safety management systems. Webhook events for real-time integration. Makes the platform connectable rather than siloed.</div>
+        <div class="epic-roles"><span class="er er-sys">System / IT</span></div>
+      </div>
+      <div class="epic-toggle">▼</div>
+    </div>
+    <div class="epic-body">
+      <div class="issues">
+        <div class="issue"><div class="issue-dot must"></div><div class="issue-text"><strong>SSO / SAML 2.0</strong><span>Enterprise orgs require SSO. Integrate with corporate identity providers (Azure AD, Okta). Role mapping from IdP groups. Not required for pilot — standard login sufficient.</span></div><span class="issue-tag it-int">INT</span></div>
+        <div class="issue"><div class="issue-dot must"></div><div class="issue-text"><strong>Webhook events</strong><span>Key events published as webhooks: insight approved, talk delivered, enquiry closed, action completed. Allows integration with existing safety management systems, BI tools, notification platforms.</span></div><span class="issue-tag it-be">BE</span></div>
+        <div class="issue"><div class="issue-dot should"></div><div class="issue-text"><strong>Public API documentation</strong><span>OpenAPI spec for all V3 endpoints. Enables enterprise orgs to build their own integrations. Required for multi-system enterprise deals.</span></div><span class="issue-tag it-be">BE</span></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<hr class="section">
+
+<!-- V5 -->
+<div class="version-block">
+  <div class="version-header">
+    <span class="version-badge" style="background:rgba(15,23,42,0.05);color:#0f172a;border:1px solid rgba(15,23,42,0.15);padding:6px 14px;border-radius:4px;font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:1px;">V5 — Risk Assurance</span>
+    <div>
+      <div class="version-title">Critical Control Verification</div>
+      <div class="version-desc">A global critical control register scoped to the work type taxonomy. Controls pushed to worksites, accepted or locally overridden. Supervisors verify controls are in place before high-risk work begins. Verification results feed the intelligence pipeline, inform investigations, and provide the clearest leading indicator signal on the platform.</div>
+      <div class="version-goal">Bring forward to V2 or V3 if validation conversations surface this as a priority. The work type taxonomy should be built in V1 with critical controls in mind — flag has_critical_controls on WorkType from the start.</div>
+    </div>
+  </div>
+
+  <div class="role-coverage">
+    <span class="role-chip rc-sup">Supervisor — daily shift-start verification</span>
+    <span class="role-chip rc-sfm">Safety Manager — register maintenance, override governance</span>
+    <span class="role-chip rc-mgr">Manager — periodic independent effectiveness verification</span>
+  </div>
+
+  <div class="flow">
+    <h4>Control Verification Flow</h4>
+    <div class="flow-row">
+      <div class="flow-node fn-sfm">Safety team adds control to global register</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node fn-sys">Pushed to worksites doing that work type</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node fn-mgr">Site accepts, overrides, or flags inapplicable</div>
+    </div>
+    <div class="flow-row" style="margin-top:6px;">
+      <div class="flow-node fn-sup">Supervisor verifies controls at shift start</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node fn-sys">Failure feeds trend pipeline</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node fn-ai">Pattern → Critical Insight candidate</div>
+    </div>
+    <div class="flow-row" style="margin-top:6px;">
+      <div class="flow-node fn-mgr">Investigation opened</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node fn-sfm">Investigator selects failed controls as contributing factors</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node fn-ai">FW Map® classification — precise, structured signal</div>
+    </div>
+  </div>
+
+  <div class="epic">
+    <div class="epic-header" onclick="toggle(this)">
+      <div class="epic-num">E19</div>
+      <div class="epic-icon">🛡️</div>
+      <div class="epic-meta">
+        <div class="epic-name">Critical Control Register — Global Taxonomy, Worksite Inheritance</div>
+        <div class="epic-summary">Opinionated global register of critical controls scoped to work type. 5–10 controls per work type maximum — barriers whose failure leads directly to fatality or serious injury. Not a compliance checklist.</div>
+        <div class="epic-roles">
+          <span class="er er-sfm">Safety Manager</span>
+          <span class="er er-sys">System</span>
+        </div>
+      </div>
+      <div class="epic-toggle">▲</div>
+    </div>
+    <div class="epic-body open">
+      <div class="issues">
+        <div class="issue"><div class="issue-dot must"></div><div class="issue-text"><strong>CriticalControl entity — global register</strong><span>Scoped to work_type_id. Fields: control_name, description, failure_consequence (what goes wrong if absent), verification_prompt (the question asked of the supervisor), frequency_type (shift_start | daily | weekly | one_off | ad_hoc | event_triggered), frequency_trigger (nullable — e.g. "after rain", "after equipment change"), is_active, version. Owned centrally. 5–10 per work type maximum.</span></div><span class="issue-tag it-db">DB</span></div>
+        <div class="issue"><div class="issue-dot must"></div><div class="issue-text"><strong>Push model — global to worksite</strong><span>When a control is added or updated globally, it is pushed to all worksites currently active for that work type. New worksites inherit the full control set for their active work types on activation. Push creates a WorksiteControl record: accepted | pending_review | locally_overridden | inapplicable. Safety manager at site reviews pending controls before they become active verifications.</span></div><span class="issue-tag it-be">BE</span></div>
+        <div class="issue"><div class="issue-dot must"></div><div class="issue-text"><strong>Local override model</strong><span>WorksiteControl can be: accepted (inherits global), locally_added (site-specific additional control not in global register), inapplicable (valid local exception — requires reason and safety manager sign-off), locally_modified (site has a stricter version of the global control — allowed, not permitted to be weaker). Override history maintained. Global register retains authority.</span></div><span class="issue-tag it-db">DB</span></div>
+        <div class="issue"><div class="issue-dot must"></div><div class="issue-text"><strong>Verification schedule engine</strong><span>Calculates which controls are due for verification at which site based on frequency_type and last verified timestamp. Routes to control_verifier slot users at the worksite. Fallback chain if slot is empty: safety_professional → supervisor. shift_start controls appear in the verifier's queue every day that work type is scheduled. event_triggered controls appear when the trigger condition is logged. Overdue controls escalate to atrophy signal and notify manager slot.</span></div><span class="issue-tag it-be">BE</span></div>
+        <div class="issue"><div class="issue-dot must"></div><div class="issue-text"><strong>Control verifier — worksite slot (defined in V1 schema)</strong><span>control_verifier is a named slot in worksite_role_slot from V1. One or more users assigned. Clockwork verification items appear in their mobile queue — shift_start, daily, weekly, monthly, one_off, event_triggered. Cross-site verifiers see all their assigned sites' queues in one view, each item site-labelled. The slot exists in V1 schema even though verification UI ships in V5 — no migration needed when the module arrives.</span></div><span class="issue-tag it-db">DB</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="epic">
+    <div class="epic-header" onclick="toggle(this)">
+      <div class="epic-num">E20</div>
+      <div class="epic-icon">✅</div>
+      <div class="epic-meta">
+        <div class="epic-name">Control Verification — Mobile, Binary, Structured</div>
+        <div class="epic-summary">Supervisor verifies controls before high-risk work begins. Binary response — in place / not in place / not applicable. Optional note. Fast, mobile-first, not a scored assessment. Failed controls trigger immediate response pathway.</div>
+        <div class="epic-roles">
+          <span class="er er-sup">Supervisor</span>
+          <span class="er er-mgr">Manager (periodic independent)</span>
+        </div>
+      </div>
+      <div class="epic-toggle">▲</div>
+    </div>
+    <div class="epic-body open">
+      <div class="issues">
+        <div class="issue"><div class="issue-dot must"></div><div class="issue-text"><strong>Verification capture — mobile</strong><span>Supervisor sees due controls for their site and active work types. Per control: verification_prompt shown (plain language question), three response options: In Place / Not In Place / Not Applicable. Optional note on any response. Photo evidence optional on Not In Place. Submit all at once — not one by one.</span></div><span class="issue-tag it-fe">FE</span></div>
+        <div class="issue"><div class="issue-dot must"></div><div class="issue-text"><strong>ControlVerification entity</strong><span>worksite_id, control_id, verified_by, verified_at, result (in_place | not_in_place | not_applicable), note, photo_url, work_session_id (links to the shift or work period). Immutable on write — no editing after submission. Append-only audit trail.</span></div><span class="issue-tag it-db">DB</span></div>
+        <div class="issue"><div class="issue-dot must"></div><div class="issue-text"><strong>Not In Place — immediate response pathway</strong><span>If a critical control is verified as not in place: immediate notification to site manager and safety manager. Work of that type should not commence until resolved. Resolution logged — control re-verified, corrective action created, or site manager accepts risk with documented reason. Not automated stop — human decision, but the signal is immediate and tracked.</span></div><span class="issue-tag it-be">BE</span></div>
+        <div class="issue"><div class="issue-dot must"></div><div class="issue-text"><strong>Verification feeds trend pipeline</strong><span>Failed verifications (not_in_place) are treated as structured observations in the trend detection algorithm. A control failing verification repeatedly across sites is a pattern — generates a Critical Insight candidate the same way near-miss clusters do. More precise signal than free-text observations — control_id gives exact attribution.</span></div><span class="issue-tag it-be">BE</span></div>
+        <div class="issue"><div class="issue-dot must"></div><div class="issue-text"><strong>Verification overdue → atrophy contribution</strong><span>Overdue control verifications contribute to the worksite atrophy score. A site where critical controls haven't been verified in N days is going quiet in a way that matters. Add overdue_verifications count to the atrophy formula alongside existing components.</span></div><span class="issue-tag it-be">BE</span></div>
+        <div class="issue"><div class="issue-dot should"></div><div class="issue-text"><strong>Independent effectiveness verification — manager tier</strong><span>Periodic deeper verification by someone independent of the crew. Manager or safety professional verifies not just existence but effectiveness — is the harness correctly fitted, is the anchor point rated, is the fire watch covering the right area. Different verification form: existence check + effectiveness questions. Less frequent, more rigorous. Results stored against same control record with verifier_role flagged.</span></div><span class="issue-tag it-fe">FE</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="epic">
+    <div class="epic-header" onclick="toggle(this)">
+      <div class="epic-num">E21</div>
+      <div class="epic-icon">🔗</div>
+      <div class="epic-meta">
+        <div class="epic-name">Investigation Integration — Controls as Contributing Factors</div>
+        <div class="epic-summary">When an investigation is opened, the investigator can select which critical controls were absent or failed as contributing factors. Structured attribution replaces free-text guesswork. Forge Works Map® classification on control-derived insights is significantly more precise.</div>
+        <div class="epic-roles">
+          <span class="er er-sfm">Safety Manager</span>
+          <span class="er er-sys">System</span>
+        </div>
+      </div>
+      <div class="epic-toggle">▲</div>
+    </div>
+    <div class="epic-body open">
+      <div class="issues">
+        <div class="issue"><div class="issue-dot must"></div><div class="issue-text"><strong>Control selection in investigation framework</strong><span>When AI assists the investigation framework (Prompt 3), it checks recent verification records for the worksite and work type. Failed or missing verifications in the period preceding the incident are surfaced as candidate contributing factors — structured, not inferred. Investigator confirms or dismisses each. investigation_contributing_control junction table links the investigation to specific control records.</span></div><span class="issue-tag it-ai">AI</span></div>
+        <div class="issue"><div class="issue-dot must"></div><div class="issue-text"><strong>Control failure → precise FW classification</strong><span>A contributing control has a work_type and a failure_consequence already defined in the register. The fw_classify prompt receives this structured context alongside the narrative — significantly higher confidence classifications result. A harness anchor point control failing maps more precisely to management_systems than a free-text description of the same event ever could.</span></div><span class="issue-tag it-ai">AI</span></div>
+        <div class="issue"><div class="issue-dot should"></div><div class="issue-text"><strong>Control improvement loop — corrective actions back to register</strong><span>When an investigation identifies a control as a contributing factor, a corrective action can target the control itself — not just the incident response. "Update hot work PTW to require below-deck fire watch" becomes a proposed amendment to the global control register, reviewed by the safety team before being pushed to all sites. Investigation findings improve the register. The register improves future verifications. The loop closes.</span></div><span class="issue-tag it-be">BE</span></div>
+        <div class="issue"><div class="issue-dot should"></div><div class="issue-text"><strong>Verification history in investigation context</strong><span>Investigation detail view shows verification history for relevant controls at the incident site in the N days before the incident. "This control was last verified 12 days ago — result: in place. It was due for re-verification 4 days before the incident." That timeline is often the most important piece of evidence and currently has to be reconstructed manually.</span></div><span class="issue-tag it-fe">FE</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:16px 20px;margin-bottom:24px;">
+    <div style="font-family:var(--mono);font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;">V1 build note — work type taxonomy</div>
+    <div style="font-size:12px;color:var(--text);line-height:1.7;">
+      Add <code style="background:var(--surface);padding:1px 5px;border-radius:3px;font-size:11px;">has_critical_controls BOOLEAN DEFAULT false</code> to the WorkType entity in V1. Set true for work types that will have a control register when this module ships. This costs nothing in V1 and means the taxonomy doesn't need schema changes when V5 is built. The control register references work_type_id — if the FK is clean from day one, the module slots in without touching existing tables.
+    </div>
+    <div style="margin-top:10px;font-size:12px;color:var(--muted);line-height:1.65;">
+      When validation conversations surface control verification as a priority — which they likely will with larger organisations who already run critical control assurance programs — this module can be brought forward. The data model is designed to integrate cleanly. The intelligence pipeline already exists. The investigation framework already has contributing_factors. This is additive, not disruptive.
+    </div>
+  </div>
+
+  <!-- DISCOVERY DISCUSSION NOTES -->
+  <div style="background:#fffbeb;border:2px solid #d97706;border-radius:8px;padding:20px 24px;margin-bottom:24px;">
+    <div style="font-family:var(--mono);font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#92400e;margin-bottom:14px;">Discovery Discussion Notes — For Internal Expert Consultation</div>
+    <div style="font-size:12px;color:#78350f;line-height:1.6;margin-bottom:6px;">The following are open questions and directional options to work through with safety and product experts before V5 is designed. Not decisions — discussion starters.</div>
+
+    <div style="display:flex;flex-direction:column;gap:14px;margin-top:16px;">
+
+      <div style="background:white;border:1px solid #fde68a;border-radius:6px;padding:14px 16px;">
+        <div style="font-size:12px;font-weight:700;color:#92400e;margin-bottom:6px;">1. Register structure — work type vs MUE (Material Unwanted Event)</div>
+        <div style="font-size:12px;color:#78350f;line-height:1.65;margin-bottom:8px;">Current design scopes controls to work type (Hot Work, WAH etc). Industry standard (ICMM) organises controls around Material Unwanted Events — the specific fatal or catastrophic outcomes, not the work activity. A work type can have multiple MUEs; an MUE can span multiple work types.</div>
+        <div style="font-size:11px;color:#92400e;font-weight:600;margin-bottom:4px;">Options to discuss:</div>
+        <div style="font-size:11px;color:#78350f;line-height:1.6;">
+          A. Keep work-type scoping — simpler, consistent with rest of platform, sufficient for most construction and industrial contexts. Loses the bowtie rigour but avoids significant complexity.<br>
+          B. Add MUE as a first-class entity above controls — controls belong to MUEs, MUEs are associated with work types. More aligned to mining CCM practice, supports bowtie-style visualisation. More complex to maintain.<br>
+          C. Start with work-type scoping, allow MUE layer to be added later as an optional enhancement for mining customers.
+        </div>
+        <div style="font-size:11px;color:#b45309;margin-top:6px;font-style:italic;">Consult: Is your target customer base (construction, mining, industrial) using MUE/bowtie language? If mining is primary, B may be necessary. If construction is primary, A is sufficient.</div>
+      </div>
+
+      <div style="background:white;border:1px solid #fde68a;border-radius:6px;padding:14px 16px;">
+        <div style="font-size:12px;font-weight:700;color:#92400e;margin-bottom:6px;">2. Verification tier model — one tier or three</div>
+        <div style="font-size:12px;color:#78350f;line-height:1.65;margin-bottom:8px;">Industry practice uses three tiers: Tier 1 (frontline, shift-start, existence check), Tier 2 (supervisor/manager, weekly, early effectiveness), Tier 3 (safety professional/management, monthly/quarterly, full effectiveness). Current V5 design has two — supervisor daily and manager periodic.</div>
+        <div style="font-size:11px;color:#92400e;font-weight:600;margin-bottom:4px;">Options to discuss:</div>
+        <div style="font-size:11px;color:#78350f;line-height:1.6;">
+          A. Two tiers (supervisor + manager/safety professional) — simpler, sufficient for most contexts, aligns with existing platform roles.<br>
+          B. Full three tiers — adds a formal independent Tier 3 owned by safety professionals with deeper effectiveness questions. More aligned to mining CCM. Could reuse the enquiry infrastructure for Tier 3.<br>
+          C. Single configurable tier per control — the organisation sets who verifies and how often, no platform-defined tier structure. Maximum flexibility, minimum opinion.
+        </div>
+        <div style="font-size:11px;color:#b45309;margin-top:6px;font-style:italic;">Consult: Do your target organisations have formal verification tier structures today? Or is this aspirational? If aspirational, a simpler model they'll actually use beats a rigorous model they won't.</div>
+      </div>
+
+      <div style="background:white;border:1px solid #fde68a;border-radius:6px;padding:14px 16px;">
+        <div style="font-size:12px;font-weight:700;color:#92400e;margin-bottom:6px;">3. TARP — Trigger Action Response Plans</div>
+        <div style="font-size:12px;color:#78350f;line-height:1.65;margin-bottom:8px;">When a critical control is verified as not in place, what happens? Current design: notification to manager and safety manager, work should not commence, human decision. Industry standard (particularly mining) uses pre-defined TARPs — staged, unambiguous response actions defined per control, not decided ad hoc when a failure is discovered.</div>
+        <div style="font-size:11px;color:#92400e;font-weight:600;margin-bottom:4px;">Options to discuss:</div>
+        <div style="font-size:11px;color:#78350f;line-height:1.6;">
+          A. Platform-defined response: notification + work hold recommendation. Human decides. Simpler, less prescriptive, works across industries.<br>
+          B. TARP attached to each control in the register: pre-defined response steps surface immediately on failure. "Step 1: Stop work. Step 2: Notify supervisor. Step 3: Barricade area." Adds significant register maintenance complexity but removes ambiguity at the critical moment.<br>
+          C. Optional TARP — register supports it, organisations configure it if they want it, platform shows default notification response if TARP not defined.
+        </div>
+        <div style="font-size:11px;color:#b45309;margin-top:6px;font-style:italic;">Consult: Do target organisations already have TARPs documented? If yes, the platform should surface them. If no, the platform shouldn't try to create the capability — focus on notification first.</div>
+      </div>
+
+      <div style="background:white;border:1px solid #fde68a;border-radius:6px;padding:14px 16px;">
+        <div style="font-size:12px;font-weight:700;color:#92400e;margin-bottom:6px;">4. Control health score vs composite risk score</div>
+        <div style="font-size:12px;color:#78350f;line-height:1.65;margin-bottom:8px;">Two possible scoring outputs from verification data. Control health score: what % of critical controls for this work type / MUE are currently in a healthy state. Composite site risk score: combines control health, near-miss rate, atrophy signal, and incident history into a single number per site.</div>
+        <div style="font-size:11px;color:#92400e;font-weight:600;margin-bottom:4px;">Options to discuss:</div>
+        <div style="font-size:11px;color:#78350f;line-height:1.6;">
+          A. Control health score only — narrowly defensible, directly actionable, doesn't collapse multiple signals into one number that becomes a management target rather than a signal.<br>
+          B. Composite risk score — more powerful for leadership dashboards and board reporting. Risk: organisations optimise the score rather than the underlying conditions. Needs careful design to avoid becoming a vanity metric.<br>
+          C. Both scores, kept visually separate — safety manager sees them side by side, not combined. Preserves the distinction between "are controls in place" and "is the site at risk."
+        </div>
+        <div style="font-size:11px;color:#b45309;margin-top:6px;font-style:italic;">Consult: What does leadership currently use to communicate site risk? If they already have a risk matrix or heat map, the platform needs to connect to that mental model. If they don't, you have the opportunity to define it — carefully.</div>
+      </div>
+
+      <div style="background:white;border:1px solid #fde68a;border-radius:6px;padding:14px 16px;">
+        <div style="font-size:12px;font-weight:700;color:#92400e;margin-bottom:6px;">5. Failed controls in incident investigations — tally and effectiveness</div>
+        <div style="font-size:12px;color:#78350f;line-height:1.65;margin-bottom:8px;">When an investigation is opened, the investigator can select which critical controls were absent or degraded as contributing factors. Tallying these across investigations over time produces control effectiveness data — a control that appears as a contributing factor in multiple investigations is structurally underperforming, not just occasionally absent.</div>
+        <div style="font-size:11px;color:#92400e;font-weight:600;margin-bottom:4px;">Options to discuss:</div>
+        <div style="font-size:11px;color:#78350f;line-height:1.6;">
+          A. Simple tally — count how many times each control appears as an investigation contributing factor. Surface in the register: "This control has appeared in 3 investigations in 6 months." Flag for register review.<br>
+          B. Effectiveness signal — combine tally with verification pass rate. A control that verifies as in place 95% of the time but appears in 3 investigations suggests verification is not detecting real effectiveness. That gap is the insight.<br>
+          C. Automatic register review trigger — when a control crosses a tally threshold, the register owner receives a notification to review the control definition, performance requirement, or verification method.
+        </div>
+        <div style="font-size:11px;color:#b45309;margin-top:6px;font-style:italic;">Consult: This is the most defensible use of the data and the clearest differentiator from existing CCM tools. Worth prioritising in the discovery conversations.</div>
+      </div>
+
+      <div style="background:white;border:1px solid #fde68a;border-radius:6px;padding:14px 16px;">
+        <div style="font-size:12px;font-weight:700;color:#92400e;margin-bottom:6px;">6. Register governance — who can change a control and how</div>
+        <div style="font-size:12px;color:#78350f;line-height:1.65;margin-bottom:8px;">The global register is pushed to sites. Local overrides are permitted within bounds. But who can add a control to the global register? Who approves changes? What happens to sites mid-verification-cycle when a control is updated?</div>
+        <div style="font-size:11px;color:#92400e;font-weight:600;margin-bottom:4px;">Options to discuss:</div>
+        <div style="font-size:11px;color:#78350f;line-height:1.6;">
+          A. Safety Manager role owns the register — they add, edit, and retire controls. Changes are versioned and pushed with a review step at site level.<br>
+          B. Separate Register Owner role — a designated person (potentially above safety manager level) with exclusive write access to the global register. Prevents register drift from too many editors.<br>
+          C. Change request model — anyone can propose a control change, Register Owner approves. Investigation corrective actions that target a control create a proposed amendment automatically.
+        </div>
+        <div style="font-size:11px;color:#b45309;margin-top:6px;font-style:italic;">Consult: How do target organisations currently manage their critical control registers? If they have no register today, you're creating the governance model as well as the tool — that's a significant change management ask.</div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+</div>
+
+<script>
+function toggle(header) {
+  const body = header.nextElementSibling
+  const toggle = header.querySelector('.epic-toggle')
+  if (body.classList.contains('open')) {
+    body.classList.remove('open')
+    toggle.textContent = '▼'
+  } else {
+    body.classList.add('open')
+    toggle.textContent = '▲'
+  }
+}
+
+// Open all epics by default
+document.querySelectorAll('.epic-body').forEach(b => b.classList.add('open'))
+document.querySelectorAll('.epic-toggle').forEach(t => t.textContent = '▲')
+</script>
+</body>
+</html>

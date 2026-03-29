@@ -1,0 +1,2043 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SafetyPlatform — Journey Map</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Epilogue:wght@300;400;500;600;700;800;900&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@300;400;500;600&display=swap');
+
+:root {
+  --bg: #F7F5F0;
+  --surface: #FFFFFF;
+  --surface2: #F0EDE6;
+  --surface3: #E8E3DA;
+  --border: #DDD8CE;
+  --text: #1E1A14;
+  --muted: #7A7060;
+  --faint: #B8B0A0;
+
+  /* Role colours */
+  --sup:    #C4410C;  --sup-bg:  rgba(196,65,12,0.08);   --sup-border:  rgba(196,65,12,0.2);
+  --mgr:    #0057B8;  --mgr-bg:  rgba(0,87,184,0.08);    --mgr-border:  rgba(0,87,184,0.2);
+  --safety: #6B35B8;  --safety-bg: rgba(107,53,184,0.08); --safety-border: rgba(107,53,184,0.2);
+  --ai:     #0D7A7A;  --ai-bg:   rgba(13,122,122,0.08);  --ai-border:   rgba(13,122,122,0.2);
+  --algo:   #1A4FA0;  --algo-bg: rgba(26,79,160,0.08);   --algo-border: rgba(26,79,160,0.2);
+  --notif:  #B07D00;  --notif-bg:rgba(176,125,0,0.08);   --notif-border:rgba(176,125,0,0.22);
+
+  --serif: 'Instrument Serif', Georgia, serif;
+  --display: 'Epilogue', sans-serif;
+  --mono: 'JetBrains Mono', monospace;
+
+  --r: 10px;
+  --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.06);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--display);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+/* ── LAYOUT ─────────────────────────── */
+.shell {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  min-height: 100vh;
+}
+
+/* SIDEBAR */
+.sidebar {
+  background: var(--text);
+  padding: 28px 0;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  flex-shrink: 0;
+}
+
+.sidebar::-webkit-scrollbar { width: 0; }
+
+.sb-logo {
+  padding: 0 20px 24px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  margin-bottom: 20px;
+}
+
+.sb-logo-name {
+  font-family: var(--serif);
+  font-size: 18px;
+  color: white;
+  line-height: 1.1;
+}
+
+.sb-logo-name em { color: #E8A050; font-style: italic; }
+
+.sb-logo-sub {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.35);
+  margin-top: 4px;
+}
+
+.sb-section-label {
+  font-family: var(--mono);
+  font-size: 8px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.25);
+  padding: 10px 20px 4px;
+}
+
+.sb-link {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 7px 20px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.5);
+  cursor: pointer;
+  transition: all 0.12s;
+  border-left: 2px solid transparent;
+  line-height: 1.3;
+  text-decoration: none;
+}
+
+.sb-link:hover { color: rgba(255,255,255,0.85); background: rgba(255,255,255,0.05); }
+.sb-link.active { color: white; border-left-color: #E8A050; background: rgba(255,255,255,0.07); }
+
+.sb-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.sb-divider {
+  height: 1px;
+  background: rgba(255,255,255,0.07);
+  margin: 12px 20px;
+}
+
+/* LEGEND */
+.legend-block {
+  padding: 14px 20px;
+  margin-top: auto;
+}
+
+.legend-title {
+  font-family: var(--mono);
+  font-size: 8px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.25);
+  margin-bottom: 8px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: rgba(255,255,255,0.5);
+  margin-bottom: 5px;
+}
+
+.legend-swatch {
+  width: 10px; height: 10px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+/* MAIN */
+.main {
+  padding: 40px 48px 80px;
+  overflow-x: hidden;
+}
+
+/* PAGE HEADER */
+.page-header {
+  margin-bottom: 48px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--border);
+}
+
+.page-eyebrow {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+.page-title {
+  font-family: var(--serif);
+  font-size: 38px;
+  font-weight: 400;
+  color: var(--text);
+  line-height: 1.1;
+  margin-bottom: 6px;
+}
+
+.page-title em { color: var(--safety); font-style: italic; }
+
+.page-desc {
+  font-size: 14px;
+  color: var(--muted);
+  max-width: 600px;
+  line-height: 1.7;
+}
+
+/* ROLE LEGEND ROW */
+.role-legend {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 40px;
+}
+
+.role-pill {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  border: 1px solid;
+}
+
+/* ── JOURNEY ────────────────────────── */
+.journey {
+  margin-bottom: 60px;
+  scroll-margin-top: 32px;
+}
+
+.journey-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.journey-num {
+  font-family: var(--mono);
+  font-size: 32px;
+  font-weight: 600;
+  color: var(--border);
+  line-height: 1;
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+
+.journey-title-block {}
+
+.journey-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+
+.journey-title {
+  font-family: var(--serif);
+  font-size: 24px;
+  color: var(--text);
+  line-height: 1.2;
+}
+
+.journey-title em { font-style: italic; }
+
+.journey-desc {
+  font-size: 13px;
+  color: var(--muted);
+  margin-top: 5px;
+  max-width: 560px;
+  line-height: 1.65;
+}
+
+/* FLOW TRACK */
+.flow-track {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* CONNECTOR */
+.flow-track::before {
+  content: '';
+  position: absolute;
+  left: 19px;
+  top: 20px;
+  bottom: 20px;
+  width: 2px;
+  background: repeating-linear-gradient(
+    to bottom,
+    var(--border) 0,
+    var(--border) 6px,
+    transparent 6px,
+    transparent 12px
+  );
+  z-index: 0;
+}
+
+/* FLOW STEP */
+.flow-step {
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  gap: 16px;
+  padding-bottom: 4px;
+  position: relative;
+  z-index: 1;
+}
+
+.step-spine {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 6px;
+}
+
+.step-node {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px;
+  flex-shrink: 0;
+  border: 2px solid white;
+  box-shadow: var(--shadow);
+  z-index: 2;
+  position: relative;
+}
+
+.step-body {
+  padding: 4px 0 24px;
+}
+
+/* STEP CARD */
+.step-card {
+  background: var(--surface);
+  border-radius: var(--r);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+}
+
+.sc-top {
+  padding: 12px 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.sc-actor-tag {
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  padding: 3px 9px;
+  border-radius: 5px;
+  text-transform: uppercase;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.sc-title {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.3;
+}
+
+.sc-desc {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 3px;
+  line-height: 1.5;
+}
+
+.sc-view-tag {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--muted);
+  background: var(--surface2);
+  padding: 2px 8px;
+  border-radius: 4px;
+  margin-left: auto;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+/* NOTIFICATION BLOCK */
+.notif-block {
+  padding: 10px 16px;
+  background: var(--notif-bg);
+  border-top: 1px solid var(--notif-border);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.notif-label {
+  font-family: var(--mono);
+  font-size: 8px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--notif);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.notif-row {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.notif-icon {
+  font-size: 13px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.notif-body { flex: 1; }
+
+.notif-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.3;
+}
+
+.notif-recipients {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+.recipient-tag {
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 4px;
+  border: 1px solid;
+}
+
+.notif-channel {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+/* OUTCOME BLOCK */
+.outcome-block {
+  padding: 10px 16px;
+  background: var(--surface2);
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.outcome-icon { font-size: 16px; flex-shrink: 0; }
+
+.outcome-text {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.outcome-text strong { color: var(--text); }
+
+/* DIVIDER */
+.journey-divider {
+  height: 1px;
+  background: linear-gradient(to right, var(--border), transparent);
+  margin: 0 0 60px;
+}
+
+/* NOTIFICATION MATRIX */
+.notif-matrix {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  margin-bottom: 60px;
+}
+
+.matrix-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.matrix-title {
+  font-family: var(--serif);
+  font-size: 18px;
+  color: var(--text);
+}
+
+.matrix-sub {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+table.notif-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.notif-table th {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 10px 14px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface2);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.notif-table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+  line-height: 1.5;
+}
+
+.notif-table tr:last-child td { border-bottom: none; }
+.notif-table tr:hover td { background: var(--surface2); }
+
+.event-name {
+  font-weight: 600;
+  color: var(--text);
+  font-size: 12.5px;
+}
+
+.event-trigger {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.channel-tag {
+  font-family: var(--mono);
+  font-size: 9px;
+  padding: 2px 7px;
+  border-radius: 4px;
+  display: inline-block;
+  margin: 1px;
+}
+
+.ch-push { background: rgba(176,125,0,0.1); color: var(--notif); border: 1px solid rgba(176,125,0,0.2); }
+.ch-inbox { background: var(--safety-bg); color: var(--safety); border: 1px solid var(--safety-border); }
+.ch-email { background: rgba(26,79,160,0.08); color: var(--algo); border: 1px solid rgba(26,79,160,0.2); }
+.ch-feed { background: rgba(13,122,122,0.08); color: var(--ai); border: 1px solid var(--ai-border); }
+
+.tone-tag {
+  font-family: var(--mono);
+  font-size: 9px;
+  padding: 2px 7px;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+.tone-action { background: rgba(196,65,12,0.08); color: var(--sup); border: 1px solid var(--sup-border); }
+.tone-info { background: var(--ai-bg); color: var(--ai); border: 1px solid var(--ai-border); }
+.tone-social { background: var(--safety-bg); color: var(--safety); border: 1px solid var(--safety-border); }
+.tone-close { background: rgba(13,110,74,0.08); color: #0D6E4A; border: 1px solid rgba(13,110,74,0.2); }
+
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sb-logo">
+      <div class="sb-logo-name">Safety<em>Platform</em></div>
+      <div class="sb-logo-sub">Journey Map v0.2</div>
+    </div>
+
+    <div class="sb-section-label">Use Cases</div>
+    <a class="sb-link active" href="#uc1">
+      <div class="sb-dot" style="background:var(--sup)"></div>
+      UC1 — Observation Capture
+    </a>
+    <a class="sb-link" href="#uc2">
+      <div class="sb-dot" style="background:var(--ai)"></div>
+      UC2 — Trend → Insight
+    </a>
+    <a class="sb-link" href="#uc3">
+      <div class="sb-dot" style="background:var(--safety)"></div>
+      UC3 — Insight Review
+    </a>
+    <a class="sb-link" href="#uc4">
+      <div class="sb-dot" style="background:var(--sup)"></div>
+      UC4 — Talk Delivery
+    </a>
+    <a class="sb-link" href="#uc5">
+      <div class="sb-dot" style="background:var(--mgr)"></div>
+      UC5 — Manager Visit
+    </a>
+    <a class="sb-link" href="#uc6">
+      <div class="sb-dot" style="background:var(--sup)"></div>
+      UC6 — Incident → Investigation
+    </a>
+    <a class="sb-link" href="#uc7">
+      <div class="sb-dot" style="background:var(--safety)"></div>
+      UC7 — Corrective Action
+    </a>
+    <a class="sb-link" href="#uc8">
+      <div class="sb-dot" style="background:var(--safety)"></div>
+      UC8 — Atrophy Alert
+    </a>
+
+    <div class="sb-divider"></div>
+
+    <div class="sb-section-label">Enquiry Pipeline</div>
+    <a class="sb-link" href="#pipeline_arch">
+      <div class="sb-dot" style="background:var(--safety)"></div>
+      Pipeline Architecture
+    </a>
+    <a class="sb-link" href="#uc9">
+      <div class="sb-dot" style="background:var(--sup)"></div>
+      UC9 — Investigation Mid-Enquiry
+    </a>
+    <a class="sb-link" href="#uc10">
+      <div class="sb-dot" style="background:var(--mgr)"></div>
+      UC10 — Witness Enquiry
+    </a>
+    <a class="sb-link" href="#uc11">
+      <div class="sb-dot" style="background:var(--ai)"></div>
+      UC11 — Loop Closure
+    </a>
+
+    <div class="sb-divider"></div>
+
+    <a class="sb-link" href="#matrix">
+      <div class="sb-dot" style="background:var(--notif)"></div>
+      Notification Matrix
+    </a>
+
+    <div class="sb-divider"></div>
+    <div style="padding:16px 20px 4px;">
+      <div class="legend-title">Actors</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:var(--sup)"></div>Supervisor</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:var(--mgr)"></div>Manager / Regional Mgr</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:var(--safety)"></div>Safety Manager</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:var(--ai)"></div>AI (LLM)</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:var(--algo)"></div>Algorithm / System</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:var(--notif)"></div>Notification event</div>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="page-header">
+      <div class="page-eyebrow">SafetyPlatform · Product Design</div>
+      <div class="page-title">User Journey <em>Maps</em></div>
+      <div class="page-desc">Every use case mapped step by step — who does what, what fires when, who gets notified, and how the loop closes. Notification events are the connective tissue that keeps every role in the loop.</div>
+    </div>
+
+    <!-- ROLE PILLS -->
+    <div class="role-legend">
+      <div class="role-pill" style="background:var(--sup-bg);color:var(--sup);border-color:var(--sup-border)"><div style="width:8px;height:8px;border-radius:50%;background:var(--sup)"></div>Supervisor</div>
+      <div class="role-pill" style="background:var(--mgr-bg);color:var(--mgr);border-color:var(--mgr-border)"><div style="width:8px;height:8px;border-radius:50%;background:var(--mgr)"></div>Manager</div>
+      <div class="role-pill" style="background:var(--mgr-bg);color:var(--mgr);border-color:var(--mgr-border)"><div style="width:8px;height:8px;border-radius:50%;background:var(--mgr)"></div>Regional Manager</div>
+      <div class="role-pill" style="background:var(--safety-bg);color:var(--safety);border-color:var(--safety-border)"><div style="width:8px;height:8px;border-radius:50%;background:var(--safety)"></div>Safety Manager</div>
+      <div class="role-pill" style="background:var(--ai-bg);color:var(--ai);border-color:var(--ai-border)"><div style="width:8px;height:8px;border-radius:50%;background:var(--ai)"></div>AI</div>
+      <div class="role-pill" style="background:var(--algo-bg);color:var(--algo);border-color:var(--algo-border)"><div style="width:8px;height:8px;border-radius:50%;background:var(--algo)"></div>System / Algorithm</div>
+    </div>
+
+
+    <!-- ══════════════════════════════════════ -->
+    <!-- UC1: OBSERVATION CAPTURE              -->
+    <!-- ══════════════════════════════════════ -->
+    <div class="journey" id="uc1">
+      <div class="journey-header">
+        <div class="journey-num">01</div>
+        <div class="journey-title-block">
+          <div class="journey-label">Use Case</div>
+          <div class="journey-title">Observation <em>Capture</em></div>
+          <div class="journey-desc">A supervisor or manager sees something in the field and logs it. The simplest and most frequent interaction. The entry point for the entire intelligence pipeline.</div>
+        </div>
+      </div>
+
+      <div class="flow-track">
+
+        <div class="flow-step">
+          <div class="step-spine"><div class="step-node" style="background:var(--sup);border-color:var(--sup-bg)">👤</div></div>
+          <div class="step-body">
+            <div class="step-card">
+              <div class="sc-top">
+                <span class="sc-actor-tag" style="background:var(--sup-bg);color:var(--sup)">Supervisor</span>
+                <div><div class="sc-title">Opens Capture — sees something on site</div><div class="sc-desc">Taps Log Observation from home. Selects work type. Chooses Safe / At-risk / Near-miss. Writes what they saw. Submits.</div></div>
+                <span class="sc-view-tag">Mobile · View 1</span>
+              </div>
+              <div class="outcome-block"><div class="outcome-icon">💡</div><div class="outcome-text">If active visit plan exists, <strong>recommended topics surface as prompts</strong> — supervisor can reference them but is not locked to them.</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="flow-step">
+          <div class="step-spine"><div class="step-node" style="background:var(--algo)">⚙</div></div>
+          <div class="step-body">
+            <div class="step-card">
+              <div class="sc-top">
+                <span class="sc-actor-tag" style="background:var(--algo-bg);color:var(--algo)">System</span>
+                <div><div class="sc-title">Auto-tags and queues enrichment</div><div class="sc-desc">Sets observer_id, worksite_id, timestamp, observer_role, cleared_for_sharing = true. Queues observation.enrich AI job.</div></div>
+                <span class="sc-view-tag">Background · &lt;1s</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="flow-step">
+          <div class="step-spine"><div class="step-node" style="background:var(--ai)">🤖</div></div>
+          <div class="step-body">
+            <div class="step-card">
+              <div class="sc-top">
+                <span class="sc-actor-tag" style="background:var(--ai-bg);color:var(--ai)">AI</span>
+                <div><div class="sc-title">Enrichment — classifies the observation</div><div class="sc-desc">Reads free text. Infers failure_type (systemic / behavioural / environmental), key_hazard, anonymisation flags, confidence score. Stored in ai_suggested_* columns only.</div></div>
+                <span class="sc-view-tag">Background · ~2s</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="flow-step">
+          <div class="step-spine"><div class="step-node" style="background:var(--algo)">⚙</div></div>
+          <div class="step-body">
+            <div class="step-card">
+              <div class="sc-top">
+                <span class="sc-actor-tag" style="background:var(--algo-bg);color:var(--algo)">Algorithm</span>
+                <div><div class="sc-title">Trend detection evaluates the observation pool</div><div class="sc-desc">Counts near-misses by work_type + org_level in rolling window. Checks against configured thresholds. If threshold crossed → fires critical_insight.generate event.</div></div>
+                <span class="sc-view-tag">Background · &lt;1s</span>
+              </div>
+              <div class="notif-block">
+                <div class="notif-label">🔔 Notification Event — Conditional</div>
+                <div class="notif-row">
+                  <div class="notif-icon">⚠️</div>
+                  <div class="notif-body">
+                    <div class="notif-title">Threshold crossed — Critical Insight generating</div>
+                    <div class="notif-recipients">
+                      <span class="recipient-tag" style="background:var(--safety-bg);color:var(--safety);border-color:var(--safety-border)">Safety Manager (scope)</span>
+                    </div>
+                    <div class="notif-channel">Push + Workbench inbox · "A pattern has been detected in [work type]. An insight is being drafted for your review."</div>
+                  </div>
+                </div>
+              </div>
+              <div class="outcome-block"><div class="outcome-icon">➡️</div><div class="outcome-text">If threshold not crossed: observation sits in the pool. <strong>No notification</strong> — routine capture should be silent to avoid noise.</div></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <div class="journey-divider"></div>
+
+
+    <!-- ══════════════════════════════════════ -->
+    <!-- UC2: TREND → INSIGHT GENERATION       -->
+    <!-- ══════════════════════════════════════ -->
+    <div class="journey" id="uc2">
+      <div class="journey-header">
+        <div class="journey-num">02</div>
+        <div class="journey-title-block">
+          <div class="journey-label">Use Case</div>
+          <div class="journey-title">Trend Detection → <em>Critical Insight</em></div>
+          <div class="journey-desc">The algorithm detects a pattern. AI synthesises it into an actionable insight draft with a toolbox-ready narrative. Managers in the affected scope are invited to endorse before review.</div>
+        </div>
+      </div>
+
+      <div class="flow-track">
+
+        <div class="flow-step">
+          <div class="step-spine"><div class="step-node" style="background:var(--algo)">⚙</div></div>
+          <div class="step-body">
+            <div class="step-card">
+              <div class="sc-top">
+                <span class="sc-actor-tag" style="background:var(--algo-bg);color:var(--algo)">Algorithm</span>
+                <div><div class="sc-title">Threshold crossed — insight generation triggered</div><div class="sc-desc">N near-misses with same work_type in rolling window at an org level. Deterministic count — not AI. Creates CriticalInsight record with cleared_for_toolbox = false.</div></div>
+                <span class="sc-view-tag">Background</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="flow-step">
+          <div class="step-spine"><div class="step-node" style="background:var(--ai)">🤖</div></div>
+          <div class="step-body">
+            <div class="step-card">
+              <div class="sc-top">
+                <span class="sc-actor-tag" style="background:var(--ai-bg);color:var(--ai)">AI</span>
+                <div><div class="sc-title">Drafts insight — pattern summary + veteran narrative</div><div class="sc-desc">Receives anonymised observation cluster. Produces: pattern_summary, likely_systemic_cause, recommended_action, toolbox_narrative (veteran voice), escalation recommendation.</div></div>
+                <span class="sc-view-tag">Background · ~8s</span>
+              </div>
+              <div class="notif-block">
+                <div class="notif-label">🔔 Notification Events — On Draft Complete</div>
+                <div class="notif-row">
+                  <div class="notif-icon">🔵</div>
+                  <div class="notif-body">
+                    <div class="notif-title">New insight ready for review</div>
+                    <div class="notif-recipients">
+                      <span class="recipient-tag" style="background:var(--safety-bg);color:var(--safety);border-color:var(--safety-border)">Safety Manager (scope)</span>
+                    </div>
+                    <div class="notif-channel">Push + Workbench inbox · Urgent if 0 endorsements and &gt;48h</div>
+                  </div>
+                </div>
+                <div class="notif-row" style="margin-top:6px;">
+                  <div class="notif-icon">💬</div>
+                  <div class="notif-body">
+                    <div class="notif-title">Field managers invited to endorse — "We've detected a pattern at your sites. Does this match what you're seeing?"</div>
+                    <div class="notif-recipients">
+                      <span class="recipient-tag" style="background:var(--mgr-bg);color:var(--mgr);border-color:var(--mgr-border)">Managers (affected sites)</span>
+                      <span class="recipient-tag" style="background:var(--mgr-bg);color:var(--mgr);border-color:var(--mgr-border)">Regional Manager (scope)</span>
+                    </div>
+                    <div class="notif-channel">Push + In-app feed · Conversational tone — not a task, an invitation</div>
+                  </div>
+                </div>
+              </div>
+              <div class="outcome-block"><div class="outcome-icon">💡</div><div class="outcome-text">Managers can <strong>endorse with or without a comment</strong>. Each endorsement increments the count visible to the Safety Manager in their Workbench queue — before they open the item. High endorsement count = strong signal from the field.</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="flow-step">
+          <div class="step-spine"><div class="step-node" style="background:var(--mgr)">👔</div></div>
+          <div class="step-body">
+            <div class="step-card">
+              <div class="sc-top">
+                <span class="sc-actor-tag" style="background:var(--mgr-bg);color:var(--mgr)">Manager / Regional Mgr</span>
+                <div><div class="sc-title">Reviews insight — endorses or comments</div><div class="sc-desc">Opens insight from push notification. Reads AI draft narrative. Taps Endorse and optionally adds field context ("Saw this at my site Tuesday — spotter literally walked off mid-operation").</div></div>
+                <span class="sc-view-tag">Mobile · Insight Thread</span>
+              </div>
+              <div class="notif-block">
+                <div class="notif-label">🔔 Notification Event</div>
+                <div class="notif-row">
+                  <div class="notif-icon">👍</div>
+                  <div class="notif-body">
+                    <div class="notif-title">New endorsement + comment on insight</div>
+                    <div class="notif-recipients">
+                      <span class="recipient-tag" style="background:var(--safety-bg);color:var(--safety);border-color:var(--safety-border)">Safety Manager</span>
+                      <span class="recipient-tag" style="background:var(--mgr-bg);color:var(--mgr);border-color:var(--mgr-border)">Prior commenters</span>
+                    </div>
+                    <div class="notif-channel">In-app feed · Digest (not immediate — batched per insight)</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <div class="journey-divider"></div>
+
+
+    <!-- ══════════════════════════════════════ -->
+    <!-- UC3: INSIGHT REVIEW + APPROVAL        -->
+    <!-- ══════════════════════════════════════ -->
+    <div class="journey" id="uc3">
+      <div class="journey-header">
+        <div class="journey-num">03</div>
+        <div class="journey-title-block">
+          <div class="journey-label">Use Case</div>
+          <div class="journey-title">Insight <em>Review & Approval</em></div>
+          <div class="journey-desc">The Safety Manager reviews the AI draft, reads field endorsements, makes a decision, and sets sharing scope. The most consequential human gate in the pipeline.</div>
+        </div>
+      </div>
+
+      <div class="flow-track">
+
+        <div class="flow-step">
+          <div class="step-spine"><div class="step-node" style="background:var(--safety)">🛡</div></div>
+          <div class="step-body">
+            <div class="step-card">
+              <div class="sc-top">
+                <span class="sc-actor-tag" style="background:var(--safety-bg);color:var(--safety)">Safety Manager</span>
+                <div><div class="sc-title">Opens Workbench — insight appears in queue</div><div class="sc-desc">Queue shows: insight type, work type, age, endorsement count (from managers). Context panel shows site metrics, event timeline, related items.</div></div>
+                <span class="sc-view-tag">Desktop · Workbench</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="flow-step">
+          <div class="step-spine"><div class="step-node" style="background:var(--safety)">🛡</div></div>
+          <div class="step-body">
+            <div class="step-card">
+              <div class="sc-top">
+                <span class="sc-actor-tag" style="background:var(--safety-bg);color:var(--safety)">Safety Manager</span>
+                <div><div class="sc-title">Reviews AI draft + discussion thread</div><div class="sc-desc">Reads source observations, AI pattern summary, toolbox narrative. Reads manager endorsements and comments. Decides: Approve / Edit / Reject. Sets sharing scope (site / region / division / org). Toggles systemic escalation if warranted.</div></div>
+                <span class="sc-view-tag">Desktop · Work Panel</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="flow-step">
+          <div class="step-spine"><div class="step-node" style="background:var(--algo)">⚙</div></div>
+          <div class="step-body">
+            <div class="step-card">
+              <div class="sc-top">
+                <span class="sc-actor-tag" style="background:var(--algo-bg);color:var(--algo)">System — On Approval</span>
+                <div><div class="sc-title">cleared_for_toolbox = true · Insight enters content pool</div><div class="sc-desc">Insight is now eligible for toolbox talk content selection at the approved scope. If escalate_to_systemic = true, systemic investigation workflow is triggered.</div></div>
+                <span class="sc-view-tag">Background</span>
+              </div>
+              <div class="notif-block">
+                <div class="notif-label">🔔 Notification Events — On Approve</div>
+                <div class="notif-row">
+                  <div class="notif-icon">✅</div>
+                  <div class="notif-body">
+                    <div class="notif-title">Insight approved — visible in discussion thread</div>
+                    <div class="notif-recipients">
+                      <span class="recipient-tag" style="background:var(--mgr-bg);color:var(--mgr);border-color:var(--mgr-border)">All managers who endorsed</span>
+                      <span class="recipient-tag" style="background:var(--mgr-bg);color:var(--mgr);border-color:var(--mgr-border)">All commenters</span>
+                    </div>
+                    <div class="notif-channel">Push + In-app feed · "The insight you endorsed has been approved and will reach crews in upcoming toolbox talks." Closes the loop for field participants.</div>
+                  </div>
+                </div>
+                <div class="notif-row" style="margin-top:6px;">
+                  <div class="notif-icon">📋</div>
+                  <div class="notif-body">
+                    <div class="notif-title">Talk content updated — insight now in pool for your site</div>
+                    <div class="notif-recipients">
+                      <span class="recipient-tag" style="background:var(--sup-bg);color:var(--sup);border-color:var(--sup-border)">Supervisors (in scope)</span>
+                    </div>
+                    <div class="notif-channel">In-app feed only (not push) · "New safety insight is available for your next toolbox talk." Silent — next talk generation will include it automatically.</div>
+                  </div>
+                </div>
+                <div class="notif-row" style="margin-top:6px;">
+                  <div class="notif-icon">🔺</div>
+                  <div class="notif-body">
+                    <div class="notif-title">Systemic investigation initiated (if escalated)</div>
+                    <div class="notif-recipients">
+                      <span class="recipient-tag" style="background:var(--safety-bg);color:var(--safety);border-color:var(--safety-border)">Division Safety Manager</span>
+                      <span class="recipient-tag" style="background:var(--mgr-bg);color:var(--mgr);border-color:var(--mgr-border)">Regional Manager</span>
+                    </div>
+                    <div class="notif-channel">Push + Email · Escalation event logged in audit trail</div>
+                  </div>
+                </div>
+              </div>
+              <div class="outcome-block"><div class="outcome-icon">💡</div><div class="outcome-text"><strong>If rejected:</strong> Notify original AI generation system to reset cooldown for this work_type + level. No notification to field — rejected insights are silent failures, not public.</div></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <div class="journey-divider"></div>
+
+
+    <!-- ══════════════════════════════════════ -->
+    <!-- UC4: TALK DELIVERY                    -->
+    <!-- ══════════════════════════════════════ -->
+    <div class="journey" id="uc4">
+      <div class="journey-header">
+        <div class="journey-num">04</div>
+        <div class="journey-title-block">
+          <div class="journey-label">Use Case</div>
+          <div class="journey-title">Toolbox Talk <em>Delivery</em></div>
+          <div class="journey-desc">The supervisor generates and delivers the AI-assembled talk. The moment intelligence reaches the crew. Notifications close the loop back up the chain.</div>
+        </div>
+      </div>
+
+      <div class="flow-track">
+
+        <div class="flow-step">
+          <div class="step-spine"><div class="step-node" style="background:var(--sup)">👤</div></div>
+          <div class="step-body">
+            <div class="step-card">
+              <div class="sc-top">
+                <span class="sc-actor-tag" style="background:var(--sup-bg);color:var(--sup)">Supervisor</span>
+                <div><div class="sc-title">Opens Talk view — talk ready badge on home</div><div class="sc-desc">Taps the Talk card. Full-screen view opens. Sees AI-generated hazard intro, main narrative, key actions, discussion questions.</div></div>
+                <span class="sc-view-tag">Mobile · View 2</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="flow-step">
+          <div class="step-spine"><div class="step-node" style="background:var(--sup)">👤</div></div>
+          <div class="step-body">
+            <div class="step-card">
+              <div class="sc-top">
+                <span class="sc-actor-tag" style="background:var(--sup-bg);color:var(--sup)">Supervisor</span>
+                <div><div class="sc-title">Optionally selects language + reads aloud</div><div class="sc-desc">Selects crew language if non-English. AI translates. Taps Read Aloud — Web Speech API delivers talk. Supervisor can add a personal note (site-specific context AI can't know).</div></div>
+                <span class="sc-view-tag">Mobile · View 2 · Kiosk</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="flow-step">
+          <div class="step-spine"><div class="step-node" style="background:var(--sup)">👤</div></div>
+          <div class="step-body">
+            <div class="step-card">
+              <div class="sc-top">
+                <span class="sc-actor-tag" style="background:var(--sup-bg);color:var(--sup)">Supervisor + Crew</span>
+                <div><div class="sc-title">Discussion questions — crew conversation</div><div class="sc-desc">Supervisor uses the 3 AI-generated discussion questions. Crew responds. Supervisor notes anything new that surfaces (optional free text — feeds back as a new observation).</div></div>
+                <span class="sc-view-tag">Mobile · In person</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="flow-step">
+          <div class="step-spine"><div class="step-node" style="background:var(--sup)">👤</div></div>
+          <div class="step-body">
+            <div class="step-card">
+              <div class="sc-top">
+                <span class="sc-actor-tag" style="background:var(--sup-bg);color:var(--sup)">Supervisor</span>
+                <div><div class="sc-title">Records crew attendance + delivers</div><div class="sc-desc">Taps crew names from site list. Non-registered workers added manually. Taps Deliver — talk is locked. delivered_at set. Navigates to Record view.</div></div>
+                <span class="sc-view-tag">Mobile · View 3 → 4</span>
+              </div>
+              <div class="notif-block">
+                <div class="notif-label">🔔 Notification Events — On Delivery</div>
+                <div class="notif-row">
+                  <div class="notif-icon">✅</div>
+                  <div class="notif-body">
+                    <div class="notif-title">Talk delivered — [N] crew acknowledged at [site]</div>
+                    <div class="notif-recipients">
+                      <span class="recipient-tag" style="background:var(--mgr-bg);color:var(--mgr);border-color:var(--mgr-border)">Manager (site)</span>
+                      <span class="recipient-tag" style="background:var(--safety-bg);color:var(--safety);border-color:var(--safety-border)">Safety Manager</span>
+                    </div>
+                    <div class="notif-channel">In-app feed · Workbench pipeline metric updated · "Talk delivered at Riverside Tower — 14 crew reached. Content: Spotter Management (insight #CI-042)."</div>
+                  </div>
+                </div>
+                <div class="notif-row" style="margin-top:6px;">
+                  <div class="notif-icon">🔔</div>
+                  <div class="notif-body">
+                    <div class="notif-title">Managers who endorsed the insight — loop closure notification</div>
+                    <div class="notif-recipients">
+                      <span class="recipient-tag" style="background:var(--mgr-bg);color:var(--mgr);border-color:var(--mgr-border)">Endorsing managers</span>
+                    </div>
+                    <div class="notif-channel">In-app feed · "The insight you endorsed has now reached [N] crew members across [M] sites." This is the moment the field manager sees their input had impact.</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <div class="journey-divider"></div>
+
+
+    <!-- ══════════════════════════════════════ -->
+    <!-- UC5: MANAGER VISIT                    -->
+    <!-- ══════════════════════════════════════ -->
+    <div class="journey" id="uc5">
+      <div class="journey-header">
+        <div class="journey-num">05</div>
+        <div class="journey-title-block">
+          <div class="journey-label">Use Case</div>
+          <div class="journey-title">Manager <em>Field Visit</em></div>
+          <div class="journey-desc">Manager plans a visit based on atrophy data, arrives on site with recommended topics, logs observations, and closes the visit. The field intelligence loop from the management layer.</div>
+        </div>
+      </div>
+
+      <div class="flow-track">
+
+        <div class="flow-step">
+          <div class="step-spine"><div class="step-node" style="background:var(--mgr)">👔</div></div>
+          <div class="step-body">
+            <div class="step-card">
+              <div class="sc-top">
+                <span class="sc-actor-tag" style="background:var(--mgr-bg);color:var(--mgr)">Manager / Regional Mgr</span>
+                <div><div class="sc-title">Opens Visit Planning — sites ranked by atrophy</div><div class="sc-desc">Sees portfolio sorted by atrophy score. Taps a high-atrophy site. Sees context: days since last observation, open investigations, near-miss trend, last visit date.</div></div>
+                <span class="sc-view-tag">Mobile · Manager Home</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="flow-step">
+          <div class="step-spine"><div class="step-node" style="background:var(--ai)">🤖</div></div>
+          <div class="step-body">
+            <div class="step-card">
+              <div class="sc-top">
+                <span class="sc-actor-tag" style="background:var(--ai-bg);color:var(--ai)">AI</span>
+                <div><div class="sc-title">Generates recommended observation topics</div><div class="sc-desc">AI reads site's recent observations, open investigations, practice atrophy, and critical insights. Generates 4–6 recommended topics with source badges. Manager selects which to bring.</div></div>
+                <span class="sc-view-tag">Mobile · Visit Detail</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="flow-step">
+          <div class="step-spine"><div class="step-node" style="background:var(--mgr)">👔</div></div>
+          <div class="step-body">
+            <div class="step-card">
+              <div class="sc-top">
+                <span class="sc-actor-tag" style="background:var(--mgr-bg);color:var(--mgr)">Manager</span>
+                <div><div class="sc-title">Taps Start Visit — arrives on site, logs observations</div><div class="sc-desc">Visit plan activated. Selected topics surface as prompts in the Capture form. Manager logs observations same as supervisor. observer_role = manager, visit_id linked automatically.</div></div>
+                <span class="sc-view-tag">Mobile · View 1 (Capture)</span>
+              </div>
+              <div class="notif-block">
+                <div class="notif-label">🔔 Notification Event</div>
+                <div class="notif-row">
+                  <div class="notif-icon">🗓</div>
+                  <div class="notif-body">
+                    <div class="notif-title">Manager visit started at [site]</div>
+                    <div class="notif-recipients">
+                      <span class="recipient-tag" style="background:var(--sup-bg);color:var(--sup);border-color:var(--sup-border)">Site Supervisor</span>
+                      <span class="recipient-tag" style="background:var(--safety-bg);color:var(--safety);border-color:var(--safety-border)">Safety Manager</span>
+                    </div>
+                    <div class="notif-channel">Push to supervisor · "J. Thompson (Regional Manager) has started a visit at your site." Heads-up — not a task.</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="flow-step">
+          <div class="step-spine"><div class="step-node" style="background:var(--mgr)">👔</div></div>
+          <div class="step-body">
+            <div class="step-card">
+              <div class="sc-top">
+                <span class="sc-actor-tag" style="background:var(--mgr-bg);color:var(--mgr)">Manager</span>
+                <div><div class="sc-title">Closes visit — summary generated</div><div class="sc-desc">Taps Complete Visit. System generates visit summary: topics planned vs covered, observations logged, talk delivered (y/n). Archived against site record.</div></div>
+                <span class="sc-view-tag">Mobile · View 4 (Record)</span>
+              </div>
+              <div class="notif-block">
+                <div class="notif-label">🔔 Notification Events — On Visit Close</div>
+                <div class="notif-row">
+                  <div class="notif-icon">📊</div>
+                  <div class="notif-body">
+                    <div class="notif-title">Visit complete — [N] observations logged at [site]</div>
+                    <div class="notif-recipients">
+                      <span class="recipient-tag" style="background:var(--safety-bg);color:var(--safety);border-color:var(--safety-border)">Safety Manager</span>
+                    </div>
+                    <div class="notif-channel">Workbench feed · Atrophy score recalculated and updated.</div>
+                  </div>
+                </div>
+                <div class="notif-row" style="margin-top:6px;">
+                  <div class="notif-icon">🔁</div>
+                  <div class="notif-body">
+                    <div class="notif-title">New observations from manager visit entered pipeline — trend check runs</div>
+                    <div class="notif-recipients">
+                      <span class="recipient-tag" style="background:var(--algo-bg);color:var(--algo);border-color:var(--algo-border)">System (background)</span>
+                    </div>
+                    <div class="notif-channel">No user-facing notification unless threshold crossed</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <div class="journey-divider"></div>
+
+
+    <!-- ══════════════════════════════════════ -->
+    <!-- UC6: INCIDENT → INVESTIGATION         -->
+    <!-- ══════════════════════════════════════ -->
+    <div class="journey" id="uc6">
+      <div class="journey-header">
+        <div class="journey-num">06</div>
+        <div class="journey-title-block">
+          <div class="journey-label">Use Case</div>
+          <div class="journey-title">Incident → <em>Investigation</em></div>
+          <div class="journey-desc">A recordable incident triggers an automatic investigation. AI assists the investigator with framework fields. Safety Manager signs off. Findings enter the toolbox pipeline.</div>
+        </div>
+      </div>
+
+      <div class="flow-track">
+
+        <div class="flow-step">
+          <div class="step-spine"><div class="step-node" style="background:var(--sup)">👤</div></div>
+          <div class="step-body">
+            <div class="step-card">
+              <div class="sc-top">
+                <span class="sc-actor-tag" style="background:var(--sup-bg);color:var(--sup)">Supervisor</span>
+                <div><div class="sc-title">Reports incident via Capture — "Did anyone get hurt?" → YES</div><div class="sc-desc">Selects incident type (injury / near-miss / damage / environmental). Sets occurred_at. Describes what happened. Submits.</div></div>
+                <span class="sc-view-tag">Mobile · View 1</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="flow-step">
+          <div class="step-spine"><div class="step-node" style="background:var(--algo)">⚙</div></div>
+          <div class="step-body">
+            <div class="step-card">
+              <div class="sc-top">
+                <span class="sc-actor-tag" style="background:var(--algo-bg);color:var(--algo)">Algorithm — Triage</span>
+                <div><div class="sc-title">Evaluates requires_investigation — creates Investigation record</div><div class="sc-desc">Injury OR (near-miss + high-risk work type) → requires_investigation = true. Investigation record created with status = open. AI assistance job queued.</div></div>
+                <span class="sc-view-tag">Background · Synchronous</span>
+              </div>
+              <div class="notif-block">
+                <div class="notif-label">🔔 Notification Events — On Incident Report</div>
+                <div class="notif-row">
+                  <div class="notif-icon">🚨</div>
+                  <div class="notif-body">
+                    <div class="notif-title">Incident reported — [type] at [site]</div>
+                    <div class="notif-recipients">
+                      <span class="recipient-tag" style="background:var(--mgr-bg);color:var(--mgr);border-color:var(--mgr-border)">Site Manager</span>
+                      <span class="recipient-tag" style="background:var(--safety-bg);color:var(--safety);border-color:var(--safety-border)">Safety Manager</span>
+                    </div>
+                    <div class="notif-channel">Push + Email · Immediate. "Incident reported at Riverside Tower. Type: Injury. An investigation has been initiated."</div>
+                  </div>
+                </div>
+                <div class="notif-row" style="margin-top:6px;">
+                  <div class="notif-icon">🔍</div>
+                  <div class="notif-body">
+                    <div class="notif-title">Investigation assigned to you</div>
+                    <div class="notif-recipients">
+                      <span class="recipient-tag" style="background:var(--safety-bg);color:var(--safety);border-color:var(--safety-border)">Assigned Investigator</span>
+                    </div>
+                    <div class="notif-channel">Push + Email · "You've been assigned to investigate INC-0091. AI framework suggestions are ready."</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="flow-step">
+          <div class="step-spine"><div class="step-node" style="background:var(--ai)">🤖</div></div>
+          <div class="step-body">
+            <div class="step-card">
+              <div class="sc-top">
+                <span class="sc-actor-tag" style="background:var(--ai-bg);color:var(--ai)">AI</span>
+                <div><div class="sc-title">Assists investigation — suggests framework fields</div><div class="sc-desc">Reads incident narrative. Suggests immediate_cause, contributing_factors (systemic focus), root_cause, corrective_actions, interview questions. Stored as ai_suggested_* only.</div></div>
+                <span class="sc-view-tag">Background · ~10s</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="flow-step">
+          <div class="step-spine"><div class="step-node" style="background:var(--safety)">🛡</div></div>
+          <div class="step-body">
+            <div class="step-card">
+              <div class="sc-top">
+                <span class="sc-actor-tag" style="background:var(--safety-bg);color:var(--safety)">Safety Manager / Investigator</span>
+                <div><div class="sc-title">Completes investigation + signs off in Workbench</div><div class="sc-desc">Reviews AI suggestions. Confirms or edits each field. Sets cleared_for_sharing, sharing_scope, legal_hold. Closes investigation. AI narrative generation triggered if cleared.</div></div>
+                <span class="sc-view-tag">Desktop · Workbench</span>
+              </div>
+              <div class="notif-block">
+                <div class="notif-label">🔔 Notification Events — On Close</div>
+                <div class="notif-row">
+                  <div class="notif-icon">✅</div>
+                  <div class="notif-body">
+                    <div class="notif-title">Investigation closed — findings available for toolbox</div>
+                    <div class="notif-recipients">
+                      <span class="recipient-tag" style="background:var(--mgr-bg);color:var(--mgr);border-color:var(--mgr-border)">Site Manager</span>
+                      <span class="recipient-tag" style="background:var(--sup-bg);color:var(--sup);border-color:var(--sup-border)">Supervisor (reporter)</span>
+                    </div>
+                    <div class="notif-channel">In-app feed · "Investigation into INC-0091 has been closed. Findings will be included in upcoming toolbox talks."</div>
+                  </div>
+                </div>
+                <div class="notif-row" style="margin-top:6px;">
+                  <div class="notif-icon">⏰</div>
+                  <div class="notif-body">
+                    <div class="notif-title">Investigation overdue — [N] days open</div>
+                    <div class="notif-recipients">
+                      <span class="recipient-tag" style="background:var(--safety-bg);color:var(--safety);border-color:var(--safety-border)">Assigned Investigator</span>
+                      <span class="recipient-tag" style="background:var(--mgr-bg);color:var(--mgr);border-color:var(--mgr-border)">Site Manager</span>
+                    </div>
+                    <div class="notif-channel">Push · Escalating urgency after 14 days (configurable)</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <div class="journey-divider"></div>
+
+
+    <!-- ══════════════════════════════════════ -->
+    <!-- UC7: CORRECTIVE ACTION                -->
+    <!-- ══════════════════════════════════════ -->
+    <div class="journey" id="uc7">
+      <div class="journey-header">
+        <div class="journey-num">07</div>
+        <div class="journey-title-block">
+          <div class="journey-label">Use Case</div>
+          <div class="journey-title">Corrective <em>Action</em></div>
+          <div class="journey-desc">Investigation findings generate corrective actions with owners and due dates. The final link that closes the learning loop — from field observation to verified organisational change.</div>
+        </div>
+      </div>
+
+      <div class="flow-track">
+
+        <div class="flow-step">
+          <div class="step-spine"><div class="step-node" style="background:var(--safety)">🛡</div></div>
+          <div class="step-body">
+            <div class="step-card">
+              <div class="sc-top">
+                <span class="sc-actor-tag" style="background:var(--safety-bg);color:var(--safety)">Safety Manager</span>
+                <div><div class="sc-title">Creates corrective actions from investigation findings</div><div class="sc-desc">During investigation close, corrective_actions[] from the framework are converted to corrective_action records. Each gets an owner_id, due_date, and status = open.</div></div>
+                <span class="sc-view-tag">Desktop · Workbench</span>
+              </div>
+              <div class="notif-block">
+                <div class="notif-label">🔔 Notification Event</div>
+                <div class="notif-row">
+                  <div class="notif-icon">📌</div>
+                  <div class="notif-body">
+                    <div class="notif-title">You've been assigned a corrective action — due [date]</div>
+                    <div class="notif-recipients">
+                      <span class="recipient-tag" style="background:var(--mgr-bg);color:var(--mgr);border-color:var(--mgr-border)">Action Owner</span>
+                    </div>
+                    <div class="notif-channel">Push + Email · Includes action text, due date, and link to source investigation.</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="flow-step">
+          <div class="step-spine"><div class="step-node" style="background:var(--mgr)">👔</div></div>
+          <div class="step-body">
+            <div class="step-card">
+              <div class="sc-top">
+                <span class="sc-actor-tag" style="background:var(--mgr-bg);color:var(--mgr)">Action Owner</span>
+                <div><div class="sc-title">Updates action status — in progress → complete</div><div class="sc-desc">Owner marks complete from Workbench or mobile. Adds verification notes. Safety Manager can verify and close.</div></div>
+                <span class="sc-view-tag">Desktop or Mobile</span>
+              </div>
+              <div class="notif-block">
+                <div class="notif-label">🔔 Notification Events — Lifecycle</div>
+                <div class="notif-row">
+                  <div class="notif-icon">⏰</div>
+                  <div class="notif-body">
+                    <div class="notif-title">Corrective action due in 3 days</div>
+                    <div class="notif-recipients">
+                      <span class="recipient-tag" style="background:var(--mgr-bg);color:var(--mgr);border-color:var(--mgr-border)">Action Owner</span>
+                    </div>
+                    <div class="notif-channel">Push · Reminder only — not an escalation yet</div>
+                  </div>
+                </div>
+                <div class="notif-row" style="margin-top:6px;">
+                  <div class="notif-icon">🚨</div>
+                  <div class="notif-body">
+                    <div class="notif-title">Corrective action overdue — [N] days past due</div>
+                    <div class="notif-recipients">
+                      <span class="recipient-tag" style="background:var(--mgr-bg);color:var(--mgr);border-color:var(--mgr-border)">Action Owner</span>
+                      <span class="recipient-tag" style="background:var(--safety-bg);color:var(--safety);border-color:var(--safety-border)">Safety Manager</span>
+                    </div>
+                    <div class="notif-channel">Push + Workbench queue item</div>
+                  </div>
+                </div>
+                <div class="notif-row" style="margin-top:6px;">
+                  <div class="notif-icon">✅</div>
+                  <div class="notif-body">
+                    <div class="notif-title">Corrective action completed and verified</div>
+                    <div class="notif-recipients">
+                      <span class="recipient-tag" style="background:var(--safety-bg);color:var(--safety);border-color:var(--safety-border)">Safety Manager</span>
+                      <span class="recipient-tag" style="background:var(--sup-bg);color:var(--sup);border-color:var(--sup-border)">Supervisor (site)</span>
+                    </div>
+                    <div class="notif-channel">In-app feed · "Action closed: STMP updated to include spotter positioning requirements." Loop visibly closed on site.</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <div class="journey-divider"></div>
+
+
+    <!-- ══════════════════════════════════════ -->
+    <!-- UC8: ATROPHY ALERT                    -->
+    <!-- ══════════════════════════════════════ -->
+    <div class="journey" id="uc8">
+      <div class="journey-header">
+        <div class="journey-num">08</div>
+        <div class="journey-title-block">
+          <div class="journey-label">Use Case</div>
+          <div class="journey-title">Atrophy <em>Alert</em></div>
+          <div class="journey-desc">A site goes quiet — no observations for too long. The system detects it and routes an alert to the right people. The proactive intervention before silence becomes a problem.</div>
+        </div>
+      </div>
+
+      <div class="flow-track">
+
+        <div class="flow-step">
+          <div class="step-spine"><div class="step-node" style="background:var(--algo)">⚙</div></div>
+          <div class="step-body">
+            <div class="step-card">
+              <div class="sc-top">
+                <span class="sc-actor-tag" style="background:var(--algo-bg);color:var(--algo)">Algorithm — Daily</span>
+                <div><div class="sc-title">Atrophy scores recalculated for all sites</div><div class="sc-desc">Daily job. Calculates composite atrophy score per site. Sites crossing threshold (configurable, default 70) generate an Atrophy Alert queue item if no manager visit is already scheduled.</div></div>
+                <span class="sc-view-tag">Background · Daily cron</span>
+              </div>
+              <div class="notif-block">
+                <div class="notif-label">🔔 Notification Events</div>
+                <div class="notif-row">
+                  <div class="notif-icon">📉</div>
+                  <div class="notif-body">
+                    <div class="notif-title">Site atrophy alert — [site] has gone quiet for [N] days</div>
+                    <div class="notif-recipients">
+                      <span class="recipient-tag" style="background:var(--mgr-bg);color:var(--mgr);border-color:var(--mgr-border)">Assigned Manager</span>
+                      <span class="recipient-tag" style="background:var(--safety-bg);color:var(--safety);border-color:var(--safety-border)">Safety Manager</span>
+                    </div>
+                    <div class="notif-channel">Push to manager · Workbench queue item for Safety Manager · "Riverside Tower hasn't had an observation in 18 days. A visit is recommended."</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="flow-step">
+          <div class="step-spine"><div class="step-node" style="background:var(--safety)">🛡</div></div>
+          <div class="step-body">
+            <div class="step-card">
+              <div class="sc-top">
+                <span class="sc-actor-tag" style="background:var(--safety-bg);color:var(--safety)">Safety Manager</span>
+                <div><div class="sc-title">Workbench — assigns manager to visit or dismisses</div><div class="sc-desc">Atrophy Alert appears in queue. Safety manager can assign a manager to visit, or dismiss if site is on planned shutdown / known low-activity period.</div></div>
+                <span class="sc-view-tag">Desktop · Workbench</span>
+              </div>
+              <div class="notif-block">
+                <div class="notif-label">🔔 Notification Event — On Assignment</div>
+                <div class="notif-row">
+                  <div class="notif-icon">🗓</div>
+                  <div class="notif-body">
+                    <div class="notif-title">You've been asked to visit [site] — atrophy alert</div>
+                    <div class="notif-recipients">
+                      <span class="recipient-tag" style="background:var(--mgr-bg);color:var(--mgr);border-color:var(--mgr-border)">Assigned Manager</span>
+                    </div>
+                    <div class="notif-channel">Push + In-app · Links directly to Visit Planning view for that site.</div>
+                  </div>
+                </div>
+              </div>
+              <div class="outcome-block"><div class="outcome-icon">➡️</div><div class="outcome-text">Assigned manager follows <strong>UC5 — Manager Field Visit</strong>. Atrophy score recalculates on visit completion. Alert clears from Workbench automatically.</div></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <div class="journey-divider"></div>
+
+
+    <!-- ══════════════════════════════════════ -->
+    <!-- NOTIFICATION MATRIX                   -->
+    <!-- ══════════════════════════════════════ -->
+    <div class="notif-matrix" id="matrix">
+      <div class="matrix-header">
+        <div>
+          <div class="matrix-title">Complete Notification Matrix</div>
+          <div class="matrix-sub">Every notification event, its recipients, channel, and tone</div>
+        </div>
+      </div>
+      <table class="notif-table">
+        <thead>
+          <tr>
+            <th>Event</th>
+            <th>Recipients</th>
+            <th>Channel</th>
+            <th>Tone</th>
+            <th>Timing</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><div class="event-name">Trend threshold crossed</div><div class="event-trigger">Algorithm detects N near-misses</div></td>
+            <td><span class="recipient-tag" style="background:var(--safety-bg);color:var(--safety);border-color:var(--safety-border)">Safety Manager</span></td>
+            <td><span class="channel-tag ch-push">Push</span><span class="channel-tag ch-inbox">Inbox</span></td>
+            <td><span class="tone-tag tone-action">Action required</span></td>
+            <td>Immediate</td>
+          </tr>
+          <tr>
+            <td><div class="event-name">Critical Insight draft ready</div><div class="event-trigger">AI generation complete</div></td>
+            <td><span class="recipient-tag" style="background:var(--safety-bg);color:var(--safety);border-color:var(--safety-border)">Safety Manager</span><span class="recipient-tag" style="background:var(--mgr-bg);color:var(--mgr);border-color:var(--mgr-border)">Managers (affected)</span></td>
+            <td><span class="channel-tag ch-push">Push</span><span class="channel-tag ch-feed">Feed</span></td>
+            <td><span class="tone-tag tone-action">Action</span> <span class="tone-tag tone-social">Invite</span></td>
+            <td>Immediate</td>
+          </tr>
+          <tr>
+            <td><div class="event-name">Manager endorses insight</div><div class="event-trigger">Upvote or comment added</div></td>
+            <td><span class="recipient-tag" style="background:var(--safety-bg);color:var(--safety);border-color:var(--safety-border)">Safety Manager</span><span class="recipient-tag" style="background:var(--mgr-bg);color:var(--mgr);border-color:var(--mgr-border)">Prior commenters</span></td>
+            <td><span class="channel-tag ch-feed">Feed</span></td>
+            <td><span class="tone-tag tone-social">Social</span></td>
+            <td>Batched (per insight)</td>
+          </tr>
+          <tr>
+            <td><div class="event-name">Insight approved</div><div class="event-trigger">Safety Manager approves</div></td>
+            <td><span class="recipient-tag" style="background:var(--mgr-bg);color:var(--mgr);border-color:var(--mgr-border)">All endorsers</span><span class="recipient-tag" style="background:var(--sup-bg);color:var(--sup);border-color:var(--sup-border)">Supervisors (scope)</span></td>
+            <td><span class="channel-tag ch-push">Push</span><span class="channel-tag ch-feed">Feed</span></td>
+            <td><span class="tone-tag tone-close">Loop closure</span></td>
+            <td>Immediate</td>
+          </tr>
+          <tr>
+            <td><div class="event-name">Insight escalated (systemic)</div><div class="event-trigger">Safety Manager escalates</div></td>
+            <td><span class="recipient-tag" style="background:var(--safety-bg);color:var(--safety);border-color:var(--safety-border)">Division Safety Mgr</span><span class="recipient-tag" style="background:var(--mgr-bg);color:var(--mgr);border-color:var(--mgr-border)">Regional Manager</span></td>
+            <td><span class="channel-tag ch-push">Push</span><span class="channel-tag ch-email">Email</span></td>
+            <td><span class="tone-tag tone-action">Action required</span></td>
+            <td>Immediate</td>
+          </tr>
+          <tr>
+            <td><div class="event-name">Incident reported</div><div class="event-trigger">Supervisor submits incident</div></td>
+            <td><span class="recipient-tag" style="background:var(--mgr-bg);color:var(--mgr);border-color:var(--mgr-border)">Site Manager</span><span class="recipient-tag" style="background:var(--safety-bg);color:var(--safety);border-color:var(--safety-border)">Safety Manager</span></td>
+            <td><span class="channel-tag ch-push">Push</span><span class="channel-tag ch-email">Email</span></td>
+            <td><span class="tone-tag tone-action">Urgent action</span></td>
+            <td>Immediate</td>
+          </tr>
+          <tr>
+            <td><div class="event-name">Investigation assigned</div><div class="event-trigger">Triage auto-creates investigation</div></td>
+            <td><span class="recipient-tag" style="background:var(--safety-bg);color:var(--safety);border-color:var(--safety-border)">Assigned Investigator</span></td>
+            <td><span class="channel-tag ch-push">Push</span><span class="channel-tag ch-email">Email</span></td>
+            <td><span class="tone-tag tone-action">Action required</span></td>
+            <td>Immediate</td>
+          </tr>
+          <tr>
+            <td><div class="event-name">Investigation overdue</div><div class="event-trigger">Open &gt; N days (configurable)</div></td>
+            <td><span class="recipient-tag" style="background:var(--safety-bg);color:var(--safety);border-color:var(--safety-border)">Investigator</span><span class="recipient-tag" style="background:var(--mgr-bg);color:var(--mgr);border-color:var(--mgr-border)">Site Manager</span></td>
+            <td><span class="channel-tag ch-push">Push</span><span class="channel-tag ch-inbox">Inbox</span></td>
+            <td><span class="tone-tag tone-action">Escalating urgency</span></td>
+            <td>Daily until resolved</td>
+          </tr>
+          <tr>
+            <td><div class="event-name">Investigation closed</div><div class="event-trigger">Safety Manager signs off</div></td>
+            <td><span class="recipient-tag" style="background:var(--mgr-bg);color:var(--mgr);border-color:var(--mgr-border)">Site Manager</span><span class="recipient-tag" style="background:var(--sup-bg);color:var(--sup);border-color:var(--sup-border)">Reporter Supervisor</span></td>
+            <td><span class="channel-tag ch-feed">Feed</span></td>
+            <td><span class="tone-tag tone-close">Loop closure</span></td>
+            <td>Immediate</td>
+          </tr>
+          <tr>
+            <td><div class="event-name">Talk delivered</div><div class="event-trigger">Supervisor confirms delivery</div></td>
+            <td><span class="recipient-tag" style="background:var(--mgr-bg);color:var(--mgr);border-color:var(--mgr-border)">Site Manager</span><span class="recipient-tag" style="background:var(--safety-bg);color:var(--safety);border-color:var(--safety-border)">Safety Manager</span><span class="recipient-tag" style="background:var(--mgr-bg);color:var(--mgr);border-color:var(--mgr-border)">Endorsers</span></td>
+            <td><span class="channel-tag ch-feed">Feed</span><span class="channel-tag ch-inbox">Inbox</span></td>
+            <td><span class="tone-tag tone-close">Loop closure</span></td>
+            <td>Immediate</td>
+          </tr>
+          <tr>
+            <td><div class="event-name">Manager visit started</div><div class="event-trigger">Manager taps Start Visit</div></td>
+            <td><span class="recipient-tag" style="background:var(--sup-bg);color:var(--sup);border-color:var(--sup-border)">Site Supervisor</span><span class="recipient-tag" style="background:var(--safety-bg);color:var(--safety);border-color:var(--safety-border)">Safety Manager</span></td>
+            <td><span class="channel-tag ch-push">Push</span></td>
+            <td><span class="tone-tag tone-info">Info only</span></td>
+            <td>Immediate</td>
+          </tr>
+          <tr>
+            <td><div class="event-name">Visit completed</div><div class="event-trigger">Manager closes visit</div></td>
+            <td><span class="recipient-tag" style="background:var(--safety-bg);color:var(--safety);border-color:var(--safety-border)">Safety Manager</span></td>
+            <td><span class="channel-tag ch-feed">Feed</span></td>
+            <td><span class="tone-tag tone-info">Info</span></td>
+            <td>Immediate</td>
+          </tr>
+          <tr>
+            <td><div class="event-name">Corrective action assigned</div><div class="event-trigger">Safety Manager creates action</div></td>
+            <td><span class="recipient-tag" style="background:var(--mgr-bg);color:var(--mgr);border-color:var(--mgr-border)">Action Owner</span></td>
+            <td><span class="channel-tag ch-push">Push</span><span class="channel-tag ch-email">Email</span></td>
+            <td><span class="tone-tag tone-action">Action required</span></td>
+            <td>Immediate</td>
+          </tr>
+          <tr>
+            <td><div class="event-name">Corrective action overdue</div><div class="event-trigger">Past due_date</div></td>
+            <td><span class="recipient-tag" style="background:var(--mgr-bg);color:var(--mgr);border-color:var(--mgr-border)">Owner</span><span class="recipient-tag" style="background:var(--safety-bg);color:var(--safety);border-color:var(--safety-border)">Safety Manager</span></td>
+            <td><span class="channel-tag ch-push">Push</span><span class="channel-tag ch-inbox">Inbox</span></td>
+            <td><span class="tone-tag tone-action">Escalating</span></td>
+            <td>Daily until resolved</td>
+          </tr>
+          <tr>
+            <td><div class="event-name">Corrective action verified</div><div class="event-trigger">Safety Manager verifies</div></td>
+            <td><span class="recipient-tag" style="background:var(--sup-bg);color:var(--sup);border-color:var(--sup-border)">Site Supervisor</span><span class="recipient-tag" style="background:var(--mgr-bg);color:var(--mgr);border-color:var(--mgr-border)">Action Owner</span></td>
+            <td><span class="channel-tag ch-feed">Feed</span></td>
+            <td><span class="tone-tag tone-close">Loop closure</span></td>
+            <td>Immediate</td>
+          </tr>
+          <tr>
+            <td><div class="event-name">Atrophy alert generated</div><div class="event-trigger">Daily cron · score &gt; threshold</div></td>
+            <td><span class="recipient-tag" style="background:var(--mgr-bg);color:var(--mgr);border-color:var(--mgr-border)">Assigned Manager</span><span class="recipient-tag" style="background:var(--safety-bg);color:var(--safety);border-color:var(--safety-border)">Safety Manager</span></td>
+            <td><span class="channel-tag ch-push">Push</span><span class="channel-tag ch-inbox">Inbox</span></td>
+            <td><span class="tone-tag tone-action">Action required</span></td>
+            <td>Daily · 8am</td>
+          </tr>
+          <tr>
+            <td><div class="event-name">Insight review overdue</div><div class="event-trigger">No action &gt; 48h</div></td>
+            <td><span class="recipient-tag" style="background:var(--safety-bg);color:var(--safety);border-color:var(--safety-border)">Safety Manager</span></td>
+            <td><span class="channel-tag ch-push">Push</span><span class="channel-tag ch-email">Email</span></td>
+            <td><span class="tone-tag tone-action">Escalating</span></td>
+            <td>48h + daily</td>
+          </tr>
+
+          <!-- ENQUIRY EVENTS -->
+          <tr style="background:rgba(107,53,184,0.03)">
+            <td colspan="5" style="padding:8px 14px;font-family:var(--mono);font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border);">Enquiry Pipeline Events</td>
+          </tr>
+          <tr>
+            <td><div class="event-name">Enquiry draft ready</div><div class="event-trigger">AI generates questions post-insight approval</div></td>
+            <td><span class="recipient-tag" style="background:var(--safety-bg);color:var(--safety);border-color:var(--safety-border)">Safety Manager</span></td>
+            <td><span class="channel-tag ch-inbox">Inbox</span><span class="channel-tag ch-push">Push</span></td>
+            <td><span class="tone-tag tone-action">Action required</span></td>
+            <td>Immediate</td>
+          </tr>
+          <tr>
+            <td><div class="event-name">Enquiry dispatched to your site</div><div class="event-trigger">Safety Manager dispatches enquiry</div></td>
+            <td><span class="recipient-tag" style="background:var(--sup-bg);color:var(--sup);border-color:var(--sup-border)">Supervisors (targeted)</span></td>
+            <td><span class="channel-tag ch-push">Push</span><span class="channel-tag ch-feed">Feed</span></td>
+            <td><span class="tone-tag tone-action">Action required</span></td>
+            <td>Immediate</td>
+          </tr>
+          <tr>
+            <td><div class="event-name">Investigation enquiry — witness invited</div><div class="event-trigger">Investigator adds named individuals</div></td>
+            <td><span class="recipient-tag" style="background:var(--sup-bg);color:var(--sup);border-color:var(--sup-border)">Named individuals</span></td>
+            <td><span class="channel-tag ch-push">Push</span><span class="channel-tag ch-email">Email</span></td>
+            <td><span class="tone-tag tone-action">Sensitive · action</span></td>
+            <td>Immediate</td>
+          </tr>
+          <tr>
+            <td><div class="event-name">Enquiry response submitted</div><div class="event-trigger">Supervisor submits answers</div></td>
+            <td><span class="recipient-tag" style="background:var(--safety-bg);color:var(--safety);border-color:var(--safety-border)">Safety Manager</span></td>
+            <td><span class="channel-tag ch-feed">Feed</span></td>
+            <td><span class="tone-tag tone-info">Info (batched)</span></td>
+            <td>Batched · per 3 responses</td>
+          </tr>
+          <tr>
+            <td><div class="event-name">Enquiry deadline reminder</div><div class="event-trigger">24h before deadline</div></td>
+            <td><span class="recipient-tag" style="background:var(--sup-bg);color:var(--sup);border-color:var(--sup-border)">Non-respondents</span></td>
+            <td><span class="channel-tag ch-push">Push</span></td>
+            <td><span class="tone-tag tone-action">Nudge</span></td>
+            <td>24h before deadline</td>
+          </tr>
+          <tr>
+            <td><div class="event-name">Enquiry summary generated</div><div class="event-trigger">Enquiry closed or manually triggered</div></td>
+            <td><span class="recipient-tag" style="background:var(--safety-bg);color:var(--safety);border-color:var(--safety-border)">Safety Manager</span><span class="recipient-tag" style="background:var(--sup-bg);color:var(--sup);border-color:var(--sup-border)">All respondents</span></td>
+            <td><span class="channel-tag ch-push">Push</span><span class="channel-tag ch-feed">Feed</span></td>
+            <td><span class="tone-tag tone-close">Loop closure</span></td>
+            <td>Immediate</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- NEW USE CASES: ENQUIRY PIPELINE                         -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div style="background:var(--surface2);padding:0;margin:0;">
+<div class="main" style="padding-top:0;">
+
+  <!-- PIPELINE ARCHITECTURE -->
+  <div class="journey" id="pipeline_arch" style="padding-top:48px;">
+    <div class="journey-header">
+      <div class="journey-num" style="color:var(--safety)">⟳</div>
+      <div class="journey-title-block">
+        <div class="journey-label">Architecture</div>
+        <div class="journey-title">The Intelligence <em>Pipeline</em></div>
+        <div class="journey-desc">The Enquiry system is the pull counterpart to the Toolbox Talk push. Both are triggered by the same intelligence pipeline — one broadcasts learning to crews, the other gathers intelligence from sites. Three trigger sources, one reusable model.</div>
+      </div>
+    </div>
+
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:28px;box-shadow:var(--shadow);font-family:var(--mono);font-size:12px;line-height:1.9;color:var(--text);overflow-x:auto;">
+<pre style="font-family:var(--mono);font-size:11.5px;line-height:1.9;color:var(--text);white-space:pre;">
+Field Signal (Observation / Incident)
+  │
+  ▼
+Intelligence Layer
+  ├── Trend Detection Algorithm ──────────────────────────────┐
+  │                                                           │
+  └── Investigation (open)                                    │
+        ├── AI Framework Assist                               │
+        │                                                     ▼
+        ├── [mid-investigation] ──── ENQUIRY ◄────── Critical Insight (approved)
+        │   Suspected cross-site      │  pull          post-approval enquiry
+        │   condition check           │
+        └── [witness/participant] ────┤
+            Named individual          │
+            interview questions       │
+                                      │
+                         ┌────────────┴─────────────┐
+                         ▼                           ▼
+                   TOOLBOX TALK              ENQUIRY DISPATCH
+                   (BROADCAST)              (PULL / LEARN)
+                   Push learning            Gather field
+                   to crews                intelligence
+                         │                           │
+                         └────────────┬──────────────┘
+                                      ▼
+                               CORRECTIVE ACTIONS
+                               (verified, owned, dated)
+                                      │
+                                      ▼
+                               Loop Closed ✓
+</pre>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px;">
+      <div style="background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--safety);border-radius:var(--r);padding:14px;box-shadow:var(--shadow);">
+        <div style="font-family:var(--mono);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--safety);margin-bottom:6px;">Trigger 1</div>
+        <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px;">Critical Insight Approved</div>
+        <div style="font-size:12px;color:var(--muted);line-height:1.5;">AI generates recommended question set. Safety Manager reviews, targets, dispatches. Default scope: source sites. Roles: supervisors.</div>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--sup);border-radius:var(--r);padding:14px;box-shadow:var(--shadow);">
+        <div style="font-family:var(--mono);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--sup);margin-bottom:6px;">Trigger 2</div>
+        <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px;">Investigation Mid-Enquiry</div>
+        <div style="font-size:12px;color:var(--muted);line-height:1.5;">Investigator suspects cross-site condition. AI flags or investigator initiates. Blocked if legal_hold = true. Scope: same-region sites by default.</div>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--mgr);border-radius:var(--r);padding:14px;box-shadow:var(--shadow);">
+        <div style="font-family:var(--mono);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--mgr);margin-bottom:6px;">Trigger 3</div>
+        <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px;">Investigation Witness</div>
+        <div style="font-size:12px;color:var(--muted);line-height:1.5;">Named individuals targeted. Person-to-person, not site-scope. Pre-populated from AI investigation framework. Sensitive notification wording.</div>
+      </div>
+    </div>
+  </div>
+  <div class="journey-divider"></div>
+
+
+  <!-- UC9: INVESTIGATION MID-ENQUIRY -->
+  <div class="journey" id="uc9">
+    <div class="journey-header">
+      <div class="journey-num">09</div>
+      <div class="journey-title-block">
+        <div class="journey-label">Use Case</div>
+        <div class="journey-title">Investigation Mid-<em>Enquiry</em></div>
+        <div class="journey-desc">During an active investigation the AI assistant or investigator identifies a condition that may exist at other sites. An enquiry is dispatched to check — before the investigation closes, not after.</div>
+      </div>
+    </div>
+
+    <div class="flow-track">
+
+      <div class="flow-step">
+        <div class="step-spine"><div class="step-node" style="background:var(--ai)">🤖</div></div>
+        <div class="step-body">
+          <div class="step-card">
+            <div class="sc-top">
+              <span class="sc-actor-tag" style="background:var(--ai-bg);color:var(--ai)">AI — Investigation Assist</span>
+              <div><div class="sc-title">AI flags a suspected cross-site condition</div><div class="sc-desc">During framework completion, AI identifies that the root cause references a gap (procedure, equipment type, design) that likely exists across multiple sites — not just the incident site. AI adds a flag: "This condition may exist at other sites. Consider a mid-investigation enquiry."</div></div>
+              <span class="sc-view-tag">Workbench · Investigation panel</span>
+            </div>
+            <div class="outcome-block"><div class="outcome-icon">💡</div><div class="outcome-text">Investigator can also initiate manually without AI flagging — the option is always available in the investigation panel before close.</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flow-step">
+        <div class="step-spine"><div class="step-node" style="background:var(--safety)">🛡</div></div>
+        <div class="step-body">
+          <div class="step-card">
+            <div class="sc-top">
+              <span class="sc-actor-tag" style="background:var(--safety-bg);color:var(--safety)">Investigator / Safety Manager</span>
+              <div><div class="sc-title">Legal hold check — is an enquiry safe to send?</div><div class="sc-desc">System checks investigation.legal_hold. If true: enquiry creation is blocked entirely — no information gathering outside formal legal channels. If false: enquiry draft is created and AI generates questions from the investigation context.</div></div>
+              <span class="sc-view-tag">System check · automatic</span>
+            </div>
+            <div class="outcome-block"><div class="outcome-icon">⚖️</div><div class="outcome-text"><strong>Legal hold = hard block.</strong> The system never creates an enquiry from an investigation under legal hold. No override. This is enforced at the data layer.</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flow-step">
+        <div class="step-spine"><div class="step-node" style="background:var(--safety)">🛡</div></div>
+        <div class="step-body">
+          <div class="step-card">
+            <div class="sc-top">
+              <span class="sc-actor-tag" style="background:var(--safety-bg);color:var(--safety)">Investigator</span>
+              <div><div class="sc-title">Reviews questions — sets scope and dispatches</div><div class="sc-desc">AI-generated questions focused on verifying whether the specific gap exists at other sites. Investigator sets scope (default: same-region sites). Context narrative is partial — "we are investigating an incident at [site]" without investigation details.</div></div>
+              <span class="sc-view-tag">Desktop · Enquiry Builder</span>
+            </div>
+            <div class="notif-block">
+              <div class="notif-label">🔔 Notification Event — On Dispatch</div>
+              <div class="notif-row">
+                <div class="notif-icon">📋</div>
+                <div class="notif-body">
+                  <div class="notif-title">Safety check from active investigation — your input needed</div>
+                  <div class="notif-recipients">
+                    <span class="recipient-tag" style="background:var(--sup-bg);color:var(--sup);border-color:var(--sup-border)">Supervisors (targeted sites)</span>
+                  </div>
+                  <div class="notif-channel">Push + in-app · "We're currently investigating an incident at one of our sites. We need to check whether a related condition exists at your site. This will take about 3 minutes." — No investigation details disclosed.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flow-step">
+        <div class="step-spine"><div class="step-node" style="background:var(--sup)">👤</div></div>
+        <div class="step-body">
+          <div class="step-card">
+            <div class="sc-top">
+              <span class="sc-actor-tag" style="background:var(--sup-bg);color:var(--sup)">Supervisors</span>
+              <div><div class="sc-title">Respond to enquiry on mobile</div><div class="sc-desc">Same response flow as a standard enquiry. Assurance checks, Work as Done, Gap Identification. Responses aggregate in real time in the investigation workbench panel.</div></div>
+              <span class="sc-view-tag">Mobile · Enquiry view</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flow-step">
+        <div class="step-spine"><div class="step-node" style="background:var(--safety)">🛡</div></div>
+        <div class="step-body">
+          <div class="step-card">
+            <div class="sc-top">
+              <span class="sc-actor-tag" style="background:var(--safety-bg);color:var(--safety)">Investigator</span>
+              <div><div class="sc-title">Enquiry results inform investigation findings</div><div class="sc-desc">Mid-investigation enquiry results are visible inside the investigation panel — not as a separate report. The AI synthesis feeds directly into the investigation's contributing_factors and root_cause fields as additional evidence.</div></div>
+              <span class="sc-view-tag">Desktop · Investigation panel</span>
+            </div>
+            <div class="notif-block">
+              <div class="notif-label">🔔 Notification Events — Results</div>
+              <div class="notif-row">
+                <div class="notif-icon">📊</div>
+                <div class="notif-body">
+                  <div class="notif-title">Enquiry results available — investigation EQ-[id]</div>
+                  <div class="notif-recipients">
+                    <span class="recipient-tag" style="background:var(--safety-bg);color:var(--safety);border-color:var(--safety-border)">Investigator</span>
+                    <span class="recipient-tag" style="background:var(--safety-bg);color:var(--safety);border-color:var(--safety-border)">Safety Manager</span>
+                  </div>
+                  <div class="notif-channel">Push · "Responses from [N] sites confirm the condition exists beyond the incident site. See results in investigation EQ-[id]."</div>
+                </div>
+              </div>
+            </div>
+            <div class="outcome-block"><div class="outcome-icon">➡️</div><div class="outcome-text">If results confirm the condition is widespread → scope of investigation broadens. If contained → investigation proceeds normally. Either way, the evidence base is stronger before the investigation closes.</div></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+  <div class="journey-divider"></div>
+
+
+  <!-- UC10: INVESTIGATION WITNESS ENQUIRY -->
+  <div class="journey" id="uc10">
+    <div class="journey-header">
+      <div class="journey-num">10</div>
+      <div class="journey-title-block">
+        <div class="journey-label">Use Case</div>
+        <div class="journey-title">Investigation <em>Witness Enquiry</em></div>
+        <div class="journey-desc">Investigator identifies specific people — witnesses, participants, the affected worker's crew — and sends a structured question set to named individuals. Same model, person-targeted not site-targeted.</div>
+      </div>
+    </div>
+
+    <div class="flow-track">
+
+      <div class="flow-step">
+        <div class="step-spine"><div class="step-node" style="background:var(--safety)">🛡</div></div>
+        <div class="step-body">
+          <div class="step-card">
+            <div class="sc-top">
+              <span class="sc-actor-tag" style="background:var(--safety-bg);color:var(--safety)">Investigator</span>
+              <div><div class="sc-title">Adds named individuals to the investigation</div><div class="sc-desc">In the investigation panel, investigator selects named users from the platform directory — witnesses, supervisors on shift, crew members present. System creates witness enquiry draft with target_type = named_individuals.</div></div>
+              <span class="sc-view-tag">Desktop · Investigation panel</span>
+            </div>
+            <div class="outcome-block"><div class="outcome-icon">⚖️</div><div class="outcome-text"><strong>Legal hold check applies here too.</strong> Blocked entirely if investigation.legal_hold = true. When legal hold is lifted, the investigator can initiate then.</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flow-step">
+        <div class="step-spine"><div class="step-node" style="background:var(--ai)">🤖</div></div>
+        <div class="step-body">
+          <div class="step-card">
+            <div class="sc-top">
+              <span class="sc-actor-tag" style="background:var(--ai-bg);color:var(--ai)">AI</span>
+              <div><div class="sc-title">Pre-populates witness question set from investigation framework</div><div class="sc-desc">AI reads the investigation's current immediate_cause, contributing_factors context, and incident narrative. Generates witness-appropriate questions: Work as Done ("describe what you saw"), Assurance Check ("was the PTW signed and in place"), Gap Identification ("what would you change").</div></div>
+              <span class="sc-view-tag">Background · ~8s</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flow-step">
+        <div class="step-spine"><div class="step-node" style="background:var(--safety)">🛡</div></div>
+        <div class="step-body">
+          <div class="step-card">
+            <div class="sc-top">
+              <span class="sc-actor-tag" style="background:var(--safety-bg);color:var(--safety)">Investigator</span>
+              <div><div class="sc-title">Reviews, edits, dispatches to named individuals</div><div class="sc-desc">Investigator reviews AI-drafted questions. Can add, remove, or reorder. No targeting needed — recipients are already named. Notification wording is specific and sensitive — unlike a standard site enquiry.</div></div>
+              <span class="sc-view-tag">Desktop · Enquiry Builder</span>
+            </div>
+            <div class="notif-block">
+              <div class="notif-label">🔔 Notification Event — Witness Invitation</div>
+              <div class="notif-row">
+                <div class="notif-icon">🔐</div>
+                <div class="notif-body">
+                  <div class="notif-title">You have been identified as a witness — your account is needed</div>
+                  <div class="notif-recipients">
+                    <span class="recipient-tag" style="background:var(--sup-bg);color:var(--sup);border-color:var(--sup-border)">Named individuals</span>
+                  </div>
+                  <div class="notif-channel">Push + Email · Sensitive wording: "You have been identified as a witness or participant in a safety investigation at [site]. Your input helps us understand what happened and prevent it happening again. Responses are confidential within the investigation team." — Name of incident not disclosed. No pressure language.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flow-step">
+        <div class="step-spine"><div class="step-node" style="background:var(--sup)">👤</div></div>
+        <div class="step-body">
+          <div class="step-card">
+            <div class="sc-top">
+              <span class="sc-actor-tag" style="background:var(--sup-bg);color:var(--sup)">Named Individuals</span>
+              <div><div class="sc-title">Respond on mobile — same enquiry flow</div><div class="sc-desc">Identical mobile experience to a standard enquiry. Context narrative explains why they're being asked without disclosing investigation details. Work as Done responses capture what they actually witnessed. No character limits — more is better here.</div></div>
+              <span class="sc-view-tag">Mobile · Enquiry view</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flow-step">
+        <div class="step-spine"><div class="step-node" style="background:var(--safety)">🛡</div></div>
+        <div class="step-body">
+          <div class="step-card">
+            <div class="sc-top">
+              <span class="sc-actor-tag" style="background:var(--safety-bg);color:var(--safety)">Investigator</span>
+              <div><div class="sc-title">Responses feed investigation — not a standalone report</div><div class="sc-desc">Witness responses appear in the investigation panel alongside the framework fields. AI synthesis extracts consistent themes across witness accounts. Investigator uses this to confirm or refine immediate cause and contributing factors before closing.</div></div>
+              <span class="sc-view-tag">Desktop · Investigation panel</span>
+            </div>
+            <div class="notif-block">
+              <div class="notif-label">🔔 Notification Event</div>
+              <div class="notif-row">
+                <div class="notif-icon">✅</div>
+                <div class="notif-body">
+                  <div class="notif-title">Thank you — your response has been received</div>
+                  <div class="notif-recipients">
+                    <span class="recipient-tag" style="background:var(--sup-bg);color:var(--sup);border-color:var(--sup-border)">Respondent</span>
+                  </div>
+                  <div class="notif-channel">In-app only · "Your input has been recorded. The investigation team will use it to understand what happened and make the site safer. You'll be notified of any relevant outcomes." — Closes the loop for the witness without disclosing investigation findings.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+  <div class="journey-divider"></div>
+
+
+  <!-- UC11: ENQUIRY → TOOLBOX LOOP CLOSURE -->
+  <div class="journey" id="uc11">
+    <div class="journey-header">
+      <div class="journey-num">11</div>
+      <div class="journey-title-block">
+        <div class="journey-label">Use Case</div>
+        <div class="journey-title">Enquiry → <em>Loop Closure</em></div>
+        <div class="journey-desc">Enquiry closes. AI generates summary. Safety manager creates corrective actions. Summary feeds back into a Toolbox Talk — the field intelligence gathered by supervisors becomes the content delivered to crews. The loop closes completely.</div>
+      </div>
+    </div>
+
+    <div class="flow-track">
+
+      <div class="flow-step">
+        <div class="step-spine"><div class="step-node" style="background:var(--ai)">🤖</div></div>
+        <div class="step-body">
+          <div class="step-card">
+            <div class="sc-top">
+              <span class="sc-actor-tag" style="background:var(--ai-bg);color:var(--ai)">AI</span>
+              <div><div class="sc-title">Summary generated on close</div><div class="sc-desc">When enquiry closes (deadline reached or manually closed), AI generates the full learning summary: what was found, where the condition exists, what the field said in their own words, and recommended corrective actions. Three buttons immediately available: Create Corrective Actions, Generate Toolbox Talk, Export Summary.</div></div>
+              <span class="sc-view-tag">Desktop · Enquiry Results</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flow-step">
+        <div class="step-spine"><div class="step-node" style="background:var(--safety)">🛡</div></div>
+        <div class="step-body">
+          <div class="step-card">
+            <div class="sc-top">
+              <span class="sc-actor-tag" style="background:var(--safety-bg);color:var(--safety)">Safety Manager</span>
+              <div><div class="sc-title">Creates corrective actions from summary recommendations</div><div class="sc-desc">One click from the summary to the corrective action creator. AI-recommended actions pre-populated with text, suggested owner type, and suggested due date. Safety Manager confirms or edits each. Same corrective_action entity — fully in the existing pipeline.</div></div>
+              <span class="sc-view-tag">Desktop · Enquiry Results → Actions</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flow-step">
+        <div class="step-spine"><div class="step-node" style="background:var(--ai)">🤖</div></div>
+        <div class="step-body">
+          <div class="step-card">
+            <div class="sc-top">
+              <span class="sc-actor-tag" style="background:var(--ai-bg);color:var(--ai)">AI</span>
+              <div><div class="sc-title">Generates Toolbox Talk from enquiry summary</div><div class="sc-desc">The enquiry summary becomes a content source for a toolbox talk — a new trigger_source type. AI assembles a talk that reflects the field intelligence: "Here's what we asked across 4 sites. Here's what your fellow supervisors said. Here's what we're changing." This is the most credible toolbox talk content possible — it came from people doing the same work.</div></div>
+              <span class="sc-view-tag">Desktop → Mobile delivery</span>
+            </div>
+            <div class="notif-block">
+              <div class="notif-label">🔔 Notification Events — Loop Closure</div>
+              <div class="notif-row">
+                <div class="notif-icon">✅</div>
+                <div class="notif-body">
+                  <div class="notif-title">Enquiry closed — here's what we learned</div>
+                  <div class="notif-recipients">
+                    <span class="recipient-tag" style="background:var(--sup-bg);color:var(--sup);border-color:var(--sup-border)">All respondents</span>
+                    <span class="recipient-tag" style="background:var(--mgr-bg);color:var(--mgr);border-color:var(--mgr-border)">Endorsing managers</span>
+                  </div>
+                  <div class="notif-channel">Push + feed · "The enquiry you contributed to is closed. Here's what we found across [N] sites. Your input shaped what happens next." — This is the notification that makes people respond to the next one. People engage when they see their input had an outcome.</div>
+                </div>
+              </div>
+              <div class="notif-row" style="margin-top:8px;">
+                <div class="notif-icon">📋</div>
+                <div class="notif-body">
+                  <div class="notif-title">New talk ready — informed by field enquiry responses</div>
+                  <div class="notif-recipients">
+                    <span class="recipient-tag" style="background:var(--sup-bg);color:var(--sup);border-color:var(--sup-border)">All site supervisors (scope)</span>
+                  </div>
+                  <div class="notif-channel">In-app feed · Same talk delivery flow. Content carries a new provenance marker: "Based on responses from [N] supervisors across [M] sites" — not just an AI insight, a genuine field consensus.</div>
+                </div>
+              </div>
+            </div>
+            <div class="outcome-block"><div class="outcome-icon">⟳</div><div class="outcome-text"><strong>The loop is closed.</strong> Field signal → intelligence → enquiry → field intelligence → corrective action → toolbox talk → crews. Every person who contributed to the enquiry can see their input reached the people doing the work.</div></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+</div>
+
+<script>
+const links = document.querySelectorAll('.sb-link');
+const sections = document.querySelectorAll('[id]');
+
+window.addEventListener('scroll', () => {
+  let current = '';
+  sections.forEach(s => {
+    if (window.scrollY >= s.offsetTop - 100) current = s.id;
+  });
+  links.forEach(l => {
+    l.classList.toggle('active', l.getAttribute('href') === '#' + current);
+  });
+}, { passive: true });
+</script>
+</body>
+</html>

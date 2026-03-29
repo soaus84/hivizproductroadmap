@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SafetyPlatform — Enquiry Pipeline Simulator</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --bg: #0a0b0d; --surface: #13141a; --surface2: #1a1b23; --surface3: #1e1f28;
+  --border: #252630; --text: #dde1eb; --muted: #5a5d6e; --bright: #e8ecf8;
+  --mono: 'IBM Plex Mono', monospace; --sans: 'IBM Plex Sans', sans-serif;
+  --plum: #7635DC; --plum-dim: rgba(118,53,220,0.1); --plum-border: rgba(118,53,220,0.3); --plum-text: #a78bfa;
+  --teal: #0891b2; --teal-dim: rgba(8,145,178,0.1);  --teal-border: rgba(8,145,178,0.28); --teal-text: #22d3ee;
+  --amber: #d97706; --amber-dim: rgba(217,119,6,0.1); --amber-border: rgba(217,119,6,0.28); --amber-text: #fbbf24;
+  --green: #059669; --green-dim: rgba(5,150,105,0.1); --green-border: rgba(5,150,105,0.28); --green-text: #34d399;
+  --red: #dc2626;   --red-dim: rgba(220,38,38,0.1);   --red-border: rgba(220,38,38,0.28);   --red-text: #f87171;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 13px; line-height: 1.6; min-height: 100vh; }
+body::before { content:''; position:fixed; inset:0; background-image: linear-gradient(rgba(118,53,220,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(118,53,220,0.025) 1px, transparent 1px); background-size: 40px 40px; pointer-events:none; z-index:0; }
+
+.header { position:relative; z-index:10; padding:18px 28px 14px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; background:rgba(10,11,13,0.92); backdrop-filter:blur(10px); }
+.logo { display:flex; align-items:center; gap:10px; }
+.logo-mark { width:28px; height:28px; background:var(--plum); border-radius:6px; display:flex; align-items:center; justify-content:center; font-family:var(--mono); font-size:11px; font-weight:700; color:white; }
+.logo-name { font-family:var(--mono); font-size:12px; font-weight:700; color:var(--bright); }
+.logo-sub  { font-family:var(--mono); font-size:10px; color:var(--muted); }
+.legend { display:flex; gap:16px; align-items:center; }
+.legend-item { display:flex; align-items:center; gap:6px; font-family:var(--mono); font-size:9px; letter-spacing:1px; text-transform:uppercase; color:var(--muted); }
+.legend-dot { width:8px; height:8px; border-radius:50%; }
+
+.main { position:relative; z-index:1; display:grid; grid-template-columns:300px 1fr; height:calc(100vh - 65px); }
+
+.left { border-right:1px solid var(--border); overflow-y:auto; padding:20px; background:rgba(19,20,26,0.6); display:flex; flex-direction:column; gap:14px; }
+.left::-webkit-scrollbar{width:3px;} .left::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+.panel-label { font-family:var(--mono); font-size:9px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin-bottom:6px; }
+
+.sc-card { background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:13px 14px; cursor:pointer; transition:all 0.18s; position:relative; overflow:hidden; }
+.sc-card::before { content:''; position:absolute; left:0; top:0; bottom:0; width:3px; border-radius:3px 0 0 3px; }
+.sc-card.c0::before { background:var(--plum); }
+.sc-card.c1::before { background:var(--teal); }
+.sc-card.c2::before { background:var(--amber); }
+.sc-card:hover { background:var(--surface3); transform:translateX(2px); }
+.sc-card.active { border-color:var(--plum-border); background:var(--plum-dim); }
+.sc-title { font-size:13px; font-weight:600; color:var(--bright); margin-bottom:3px; }
+.sc-desc  { font-size:11.5px; color:var(--muted); line-height:1.5; margin-bottom:7px; }
+.sc-tags  { display:flex; gap:5px; flex-wrap:wrap; }
+.tag { font-family:var(--mono); font-size:9px; padding:2px 7px; border-radius:3px; }
+.tp{background:var(--plum-dim);color:var(--plum-text);border:1px solid var(--plum-border);}
+.tt{background:var(--teal-dim);color:var(--teal-text);border:1px solid var(--teal-border);}
+.ta{background:var(--amber-dim);color:var(--amber-text);border:1px solid var(--amber-border);}
+.tg{background:var(--green-dim);color:var(--green-text);border:1px solid var(--green-border);}
+.tr{background:var(--red-dim);color:var(--red-text);border:1px solid var(--red-border);}
+
+.run-btn { width:100%; background:var(--plum); color:white; border:none; border-radius:6px; padding:10px; font-family:var(--mono); font-size:11px; font-weight:700; letter-spacing:1px; text-transform:uppercase; cursor:pointer; transition:all 0.18s; display:flex; align-items:center; justify-content:center; gap:8px; }
+.run-btn:hover:not(:disabled) { background:#6020CC; transform:translateY(-1px); }
+.run-btn:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
+
+.canvas { overflow-y:auto; padding:24px 28px; display:flex; flex-direction:column; gap:0; }
+.canvas::-webkit-scrollbar{width:4px;} .canvas::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+
+.empty { display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; gap:12px; }
+.empty-icon { font-size:48px; opacity:0.25; }
+.empty-text { font-size:13px; color:var(--muted); text-align:center; max-width:260px; line-height:1.6; }
+
+.step { display:grid; grid-template-columns:44px 1fr; opacity:0; transform:translateY(8px); transition:opacity 0.35s, transform 0.35s; }
+.step.show { opacity:1; transform:none; }
+.spine { position:relative; display:flex; flex-direction:column; align-items:center; padding-top:10px; }
+.spine::after { content:''; position:absolute; left:21px; top:44px; bottom:-20px; width:2px; background:var(--border); }
+.step:last-child .spine::after { display:none; }
+.node { width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:14px; position:relative; z-index:1; border:2px solid var(--border); background:var(--surface); transition:all 0.3s; flex-shrink:0; }
+.node.ai    { border-color:var(--plum);  background:var(--plum-dim);  box-shadow:0 0 16px rgba(118,53,220,0.2); }
+.node.algo  { border-color:var(--teal);  background:var(--teal-dim);  box-shadow:0 0 16px rgba(8,145,178,0.2); }
+.node.human { border-color:var(--amber); background:var(--amber-dim); box-shadow:0 0 16px rgba(217,119,6,0.2); }
+.node.done  { border-color:var(--green); background:var(--green-dim); }
+.scontent { padding:8px 0 22px 16px; }
+.shead { display:flex; align-items:center; gap:8px; margin-bottom:8px; }
+.slabel { font-family:var(--mono); font-size:9px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; padding:2px 8px; border-radius:3px; }
+.lai   { background:var(--plum-dim);  color:var(--plum-text);  border:1px solid var(--plum-border); }
+.lalgo { background:var(--teal-dim);  color:var(--teal-text);  border:1px solid var(--teal-border); }
+.lhum  { background:var(--amber-dim); color:var(--amber-text); border:1px solid var(--amber-border); }
+.sname { font-size:14px; font-weight:600; color:var(--bright); }
+.sstatus { font-family:var(--mono); font-size:9px; letter-spacing:1px; color:var(--muted); text-transform:uppercase; margin-left:auto; }
+.sstatus.running { color:var(--plum-text); }
+.sstatus.done    { color:var(--green-text); }
+.scard { background:var(--surface); border:1px solid var(--border); border-radius:8px; overflow:hidden; }
+.scard.ai    { border-color:var(--plum-border); }
+.scard.algo  { border-color:var(--teal-border); }
+.scard.human { border-color:var(--amber-border); }
+
+.block { padding:13px 16px; border-bottom:1px solid var(--border); }
+.block:last-child { border-bottom:none; }
+.block-label { font-family:var(--mono); font-size:9px; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); margin-bottom:7px; }
+.fr { display:flex; gap:10px; margin-bottom:5px; align-items:flex-start; }
+.fk { font-family:var(--mono); font-size:11px; color:var(--teal-text); min-width:130px; flex-shrink:0; }
+.fv { font-size:12px; color:var(--text); line-height:1.55; }
+.chip { display:inline-block; font-family:var(--mono); font-size:10px; padding:2px 8px; border-radius:4px; }
+.cp{background:var(--plum-dim);color:var(--plum-text);border:1px solid var(--plum-border);}
+.ct{background:var(--teal-dim);color:var(--teal-text);border:1px solid var(--teal-border);}
+.ca{background:var(--amber-dim);color:var(--amber-text);border:1px solid var(--amber-border);}
+.cg{background:var(--green-dim);color:var(--green-text);border:1px solid var(--green-border);}
+.cr{background:var(--red-dim);color:var(--red-text);border:1px solid var(--red-border);}
+.inline-pass{background:var(--green-dim);color:var(--green-text);border:1px solid var(--green-border);font-family:var(--mono);font-size:10px;padding:2px 8px;border-radius:4px;display:inline-block;}
+.inline-block{background:var(--red-dim);color:var(--red-text);border:1px solid var(--red-border);font-family:var(--mono);font-size:10px;padding:2px 8px;border-radius:4px;display:inline-block;}
+.italic-block { font-style:italic; border-left:2px solid var(--plum-border); padding-left:10px; line-height:1.7; color:var(--bright); font-size:12.5px; }
+
+.q-card { background:var(--surface2); border:1px solid var(--border); border-radius:6px; padding:11px 13px; margin-bottom:7px; }
+.q-card:last-child { margin-bottom:0; }
+.q-head { display:flex; align-items:center; gap:7px; margin-bottom:5px; }
+.q-num { font-family:var(--mono); font-size:10px; color:var(--plum-text); font-weight:600; }
+.q-type { font-family:var(--mono); font-size:9px; padding:2px 6px; border-radius:3px; }
+.qt-assurance  {background:var(--green-dim);color:var(--green-text);border:1px solid var(--green-border);}
+.qt-likelihood {background:var(--amber-dim);color:var(--amber-text);border:1px solid var(--amber-border);}
+.qt-wad        {background:var(--plum-dim); color:var(--plum-text); border:1px solid var(--plum-border);}
+.qt-gap        {background:var(--red-dim);  color:var(--red-text);  border:1px solid var(--red-border);}
+.qt-comp       {background:var(--teal-dim); color:var(--teal-text); border:1px solid var(--teal-border);}
+.q-text { font-size:12.5px; color:var(--bright); line-height:1.5; margin-bottom:6px; font-weight:500; }
+.q-rationale { font-size:11px; color:var(--muted); font-style:italic; background:var(--surface); border-radius:4px; padding:6px 9px; margin-bottom:7px; }
+.q-footer { display:flex; gap:7px; align-items:center; flex-wrap:wrap; }
+.q-fl { font-family:var(--mono); font-size:9px; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; }
+.rp { font-family:var(--mono); font-size:9px; padding:2px 7px; border-radius:3px; }
+.rp-y{background:var(--green-dim);color:var(--green-text);} .rp-p{background:var(--amber-dim);color:var(--amber-text);} .rp-n{background:var(--red-dim);color:var(--red-text);} .rp-f{background:var(--plum-dim);color:var(--plum-text);}
+.tgt { font-family:var(--mono); font-size:9px; padding:2px 7px; border-radius:12px; }
+.tgt-a{background:var(--plum-dim);color:var(--plum-text);border:1px solid var(--plum-border);}
+.tgt-i{border:1px solid var(--border);color:var(--muted);}
+
+.resp-row { display:flex; gap:10px; align-items:flex-start; padding:10px 16px; border-bottom:1px solid var(--border); }
+.resp-row:last-child { border-bottom:none; }
+.resp-av { width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:700; color:white; flex-shrink:0; }
+.resp-meta { font-size:11.5px; font-weight:600; color:var(--bright); }
+.resp-site { font-size:10.5px; color:var(--muted); margin-top:1px; }
+.resp-ans { margin-top:5px; display:flex; gap:5px; flex-wrap:wrap; align-items:center; }
+.ans { font-family:var(--mono); font-size:10px; padding:2px 8px; border-radius:4px; font-weight:700; }
+.ans-y  {background:var(--green-dim);color:var(--green-text);}
+.ans-p  {background:var(--amber-dim);color:var(--amber-text);}
+.ans-n  {background:var(--red-dim);color:var(--red-text);}
+.ans-h  {background:var(--red-dim);color:var(--red-text);}
+.ans-m  {background:var(--amber-dim);color:var(--amber-text);}
+.ans-l  {background:var(--green-dim);color:var(--green-text);}
+.resp-q { font-size:11.5px; color:var(--text); font-style:italic; line-height:1.5; margin-top:3px; }
+
+.syn-card { background:var(--plum-dim); border:1px solid var(--plum-border); border-radius:8px; overflow:hidden; margin:10px 16px; }
+.syn-head { padding:9px 14px; border-bottom:1px solid var(--plum-border); display:flex; align-items:center; gap:8px; }
+.syn-pulse { width:7px; height:7px; border-radius:50%; background:var(--plum-text); animation:pulse 2s infinite; }
+.syn-label { font-family:var(--mono); font-size:9px; letter-spacing:1px; text-transform:uppercase; color:var(--plum-text); font-weight:600; }
+.syn-body { padding:10px 14px; display:flex; flex-direction:column; gap:8px; }
+.finding { display:flex; gap:8px; align-items:flex-start; font-size:12.5px; color:var(--bright); line-height:1.6; }
+
+.bar-chart { padding:12px 16px; display:flex; flex-direction:column; gap:7px; }
+.bc-row { display:flex; align-items:center; gap:8px; }
+.bc-label { font-family:var(--mono); font-size:10px; color:var(--text); min-width:70px; flex-shrink:0; }
+.bc-track { flex:1; height:18px; background:var(--surface2); border-radius:3px; overflow:hidden; }
+.bc-fill { height:100%; border-radius:3px; display:flex; align-items:center; padding-left:7px; font-family:var(--mono); font-size:10px; font-weight:700; color:white; }
+.bc-count { font-family:var(--mono); font-size:10px; color:var(--muted); min-width:18px; text-align:right; flex-shrink:0; }
+
+.sum-card { background:var(--surface2); border:2px solid var(--plum-border); border-radius:8px; overflow:hidden; margin:10px 16px; }
+.sum-head { background:var(--plum); padding:10px 14px; display:flex; align-items:center; justify-content:space-between; }
+.sum-title { font-size:13px; font-weight:700; color:white; }
+.sum-badge { background:rgba(255,255,255,0.2); color:white; border-radius:4px; padding:2px 8px; font-family:var(--mono); font-size:10px; }
+.sum-body { padding:14px; }
+.sum-narr { font-size:13px; color:var(--bright); line-height:1.75; margin-bottom:12px; }
+.sum-al { font-family:var(--mono); font-size:9px; letter-spacing:1px; text-transform:uppercase; color:var(--muted); margin-bottom:7px; }
+.sum-ar { display:flex; gap:7px; align-items:flex-start; margin-bottom:5px; }
+.sum-dot { width:6px; height:6px; border-radius:50%; background:var(--plum-text); flex-shrink:0; margin-top:6px; }
+.sum-at { font-size:12.5px; color:var(--text); line-height:1.5; }
+
+.hrow { display:flex; gap:12px; align-items:flex-start; padding:14px 16px; }
+.hprompt { flex:1; font-size:12.5px; line-height:1.6; color:var(--text); }
+.hbtns { display:flex; flex-direction:column; gap:6px; flex-shrink:0; }
+.hbtn { padding:6px 14px; border-radius:4px; font-family:var(--mono); font-size:10px; font-weight:700; cursor:pointer; border:none; transition:all 0.15s; white-space:nowrap; }
+.hbtn-g { background:var(--green); color:white; }
+.hbtn-a { background:var(--amber-dim); color:var(--amber-text); border:1px solid var(--amber-border); }
+
+.loading { display:flex; align-items:center; gap:10px; padding:16px; color:var(--muted); font-style:italic; font-size:12px; }
+.spinner { width:14px; height:14px; border:2px solid var(--border); border-top-color:var(--plum); border-radius:50%; animation:spin 0.7s linear infinite; flex-shrink:0; }
+
+.out-btns { display:flex; gap:8px; margin-top:14px; flex-wrap:wrap; }
+.ob-p { padding:7px 14px; border-radius:5px; font-family:var(--mono); font-size:10px; font-weight:700; cursor:pointer; border:none; background:var(--plum); color:white; }
+.ob-s { padding:7px 14px; border-radius:5px; font-family:var(--mono); font-size:10px; font-weight:700; cursor:pointer; background:var(--surface3); color:var(--text); border:1px solid var(--border); }
+
+@keyframes spin { to { transform:rotate(360deg); } }
+@keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.35} }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">
+    <div class="logo-mark">SP</div>
+    <div>
+      <div class="logo-name">SafetyPlatform</div>
+      <div class="logo-sub">Enquiry Pipeline Simulator</div>
+    </div>
+  </div>
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:var(--plum)"></div>AI</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--teal)"></div>Algorithm</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--amber)"></div>Human</div>
+  </div>
+</div>
+
+<div class="main">
+  <div class="left">
+    <div>
+      <div class="panel-label">Choose a Scenario</div>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px;">
+        <div class="sc-card c0" id="sc0" onclick="sel(0)">
+          <div class="sc-title">Critical Insight → Enquiry</div>
+          <div class="sc-desc">An insight is approved. AI generates questions. Safety Manager reviews, sets targeting, and dispatches to 4 sites. Supervisors respond. Results synthesise in real time with an AI summary.</div>
+          <div class="sc-tags"><span class="tag tp">Post-Insight</span><span class="tag tt">Heavy Vehicle</span><span class="tag tg">12 supervisors</span></div>
+        </div>
+        <div class="sc-card c1" id="sc1" onclick="sel(1)">
+          <div class="sc-title">Investigation Mid-Enquiry</div>
+          <div class="sc-desc">An active investigation flags a suspected cross-site gap. Legal hold check passes. AI generates cross-site verification questions. Dispatched to same-region sites before the investigation closes.</div>
+          <div class="sc-tags"><span class="tag ta">Mid-Investigation</span><span class="tag tt">Working at Height</span><span class="tag tp">6 sites</span></div>
+        </div>
+        <div class="sc-card c2" id="sc2" onclick="sel(2)">
+          <div class="sc-title">Witness Enquiry</div>
+          <div class="sc-desc">Investigator names three witnesses. AI generates interview questions from the investigation framework. Targeted to named individuals with sensitive notification wording. Responses feed the investigation.</div>
+          <div class="sc-tags"><span class="tag ta">Witness Collection</span><span class="tag tp">Named individuals</span><span class="tag tt">Hot Work</span></div>
+        </div>
+      </div>
+    </div>
+    <div id="runWrap" style="display:none;">
+      <button class="run-btn" id="runBtn" onclick="runSim()"><span>▶</span> Run Simulation</button>
+    </div>
+  </div>
+
+  <div class="canvas" id="canvas">
+    <div class="empty">
+      <div class="empty-icon">📋</div>
+      <div class="empty-text">Select a scenario to simulate the enquiry pipeline — from trigger to AI summary.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+let current = null, running = false
+
+const QUESTIONS = {
+  insight: [
+    { num:1, type:'likelihood', typeLabel:'Likelihood Assessment', typeClass:'qt-likelihood',
+      text:'How likely is it that a spotter could leave their position during a reversing operation without the operator knowing?',
+      rationale:'Establishes whether supervisors perceive this as a real risk before asking about controls — sets the frame for what follows.',
+      opts:['Low','Moderate','High'], optClasses:['rp-y','rp-p','rp-n'], target:'Source sites (4)', targetAlt:'Region' },
+    { num:2, type:'assurance', typeLabel:'Assurance Check', typeClass:'qt-assurance',
+      text:'Is a designated spotter assigned and confirmed in position before any heavy vehicle reversing operation begins on your site?',
+      rationale:'Primary control check. Directly verifies whether the root cause condition is being addressed. Note if "Partially" or "No": mandatory note required.',
+      opts:['Yes','Partially','No'], optClasses:['rp-y','rp-p','rp-n'], extra:'+ optional photo', target:'Source sites (4)', targetAlt:'Region' },
+    { num:3, type:'work_as_done', typeLabel:'Work as Done', typeClass:'qt-wad',
+      text:'Describe how spotter assignment actually works on your site — from when the task starts to when it\'s complete. What happens in practice?',
+      rationale:'Captures the gap between documented procedure and actual field practice. AI synthesises patterns across all responses.',
+      opts:null, target:'Source sites (4)', targetAlt:'Region' },
+    { num:4, type:'gap_identification', typeLabel:'Gap Identification', typeClass:'qt-gap',
+      text:'What would need to change on your site for spotter management to work reliably every single time — even when things get busy?',
+      rationale:'Invites supervisors to name the specific gap themselves. Often surfaces what the insight data didn\'t anticipate. Feeds corrective action design.',
+      opts:null, extra:'+ category tag (People / Process / Equipment / Environment)', target:'Source sites (4)', targetAlt:'Region' },
+    { num:5, type:'comparative', typeLabel:'Comparative Check', typeClass:'qt-comp',
+      text:'Does your site have a process for handing over spotter responsibility when a spotter needs to leave their position — and is it working reliably?',
+      rationale:'Tests whether the supporting system exists AND is effective. More nuanced than Yes/No — captures both existence and real-world performance.',
+      opts:['Exists & works','Has gaps','Doesn\'t exist'], optClasses:['rp-y','rp-p','rp-n'], target:'Source sites (4)', targetAlt:'Region' }
+  ],
+  investigation: [
+    { num:1, type:'assurance', typeLabel:'Assurance Check', typeClass:'qt-assurance',
+      text:'Is a harness self-rescue procedure communicated to workers before any working at height task begins on your site?',
+      rationale:'Tests whether the specific gap found in the investigation — missing self-rescue procedure — exists at other sites.',
+      opts:['Yes','Partially','No'], optClasses:['rp-y','rp-p','rp-n'], extra:'+ mandatory note if No/Partially', target:'Region sites (6)', targetAlt:'Division' },
+    { num:2, type:'work_as_done', typeLabel:'Work as Done', typeClass:'qt-wad',
+      text:'Describe what your pre-task brief covers for working at height — specifically what workers are told about harness management and what to do if a harness gets caught.',
+      rationale:'Checks whether the pre-task brief gap is isolated to the incident site or systemic across the region.',
+      opts:null, target:'Region sites (6)', targetAlt:'Division' },
+    { num:3, type:'gap_identification', typeLabel:'Gap Identification', typeClass:'qt-gap',
+      text:'What is missing from your current WAH pre-task brief or PTW that would prevent a harness management incident?',
+      rationale:'Surfaces the most actionable corrective direction across sites before the investigation closes.',
+      opts:null, extra:'+ category tag', target:'Region sites (6)', targetAlt:'Division' }
+  ],
+  witness: [
+    { num:1, type:'work_as_done', typeLabel:'Work as Done', typeClass:'qt-wad',
+      text:'Describe in your own words what you observed at the time of the incident — what was happening, where you were, and what you saw.',
+      rationale:'Open witness account. No leading language. AI will look for convergent patterns across witness responses.',
+      opts:null, target:'Named individuals (3)', targetAlt:'' },
+    { num:2, type:'assurance', typeLabel:'Assurance Check', typeClass:'qt-assurance',
+      text:'Was the PTW in place and had it been signed before the hot work began?',
+      rationale:'Verifies a specific control state at the time of the incident. Answer has evidentiary value for the investigation.',
+      opts:['Yes','Partially','No'], optClasses:['rp-y','rp-p','rp-n'], extra:'+ mandatory note', target:'Named individuals (3)', targetAlt:'' },
+    { num:3, type:'gap_identification', typeLabel:'Gap Identification', typeClass:'qt-gap',
+      text:'In your view, what was the single most important thing that was missing or not working at the time this happened?',
+      rationale:'Each witness\'s perspective on the gap. Together these converge toward root cause with more credibility than the investigation alone.',
+      opts:null, extra:'+ category tag', target:'Named individuals (3)', targetAlt:'' }
+  ]
+}
+
+const RESPONSES = {
+  insight: [
+    { initials:'MR', name:'Marcus Reyes', role:'Supervisor', site:'Riverside Tower', grad:'linear-gradient(135deg,#f093fb,#f5576c)', time:'2m ago',
+      ans:[ {cls:'ans-m',t:'Moderate'}, {cls:'ans-p',t:'Partially'} ], quote:'We assign in the brief but if the spotter gets pulled away there\'s no formal handover — they just assume the operator adjusts.' },
+    { initials:'KO', name:'K. Obi', role:'Supervisor', site:'Central Rail Depot', grad:'linear-gradient(135deg,#4facfe,#00f2fe)', time:'9m ago',
+      ans:[ {cls:'ans-h',t:'High'}, {cls:'ans-n',t:'No'} ], quote:'There is no handover process at my site. Never has been. Spotter walks off, operator is on their own.' },
+    { initials:'TW', name:'T. Walsh', role:'Supervisor', site:'Harbour Bridge Retrofit', grad:'linear-gradient(135deg,#43e97b,#38f9d7)', time:'17m ago',
+      ans:[ {cls:'ans-l',t:'Low'}, {cls:'ans-y',t:'Yes'} ], quote:'We manage this well — the operator won\'t move without eye contact confirmed. It\'s part of our pre-start.' },
+    { initials:'AC', name:'A. Chen', role:'Supervisor', site:'Westport Hub', grad:'linear-gradient(135deg,#a18cd1,#fbc2eb)', time:'24m ago',
+      ans:[ {cls:'ans-h',t:'High'}, {cls:'ans-p',t:'Partially'} ], quote:'PTW doesn\'t cover spotter continuity at all. Informal on our site.' },
+    { initials:'JB', name:'J. Brown', role:'Supervisor', site:'North Terminal', grad:'linear-gradient(135deg,#fccb90,#d57eeb)', time:'31m ago',
+      ans:[ {cls:'ans-m',t:'Moderate'}, {cls:'ans-n',t:'No'} ], quote:'No handover protocol. First I\'m hearing this is even a requirement.' }
+  ],
+  investigation: [
+    { initials:'SR', name:'S. Raj', role:'Supervisor', site:'Central Rail Depot', grad:'linear-gradient(135deg,#84fab0,#8fd3f4)', time:'4m ago',
+      ans:[ {cls:'ans-n',t:'No'} ], quote:'Our pre-task brief covers anchor points and tie-off but nothing about what to do if the harness gets snagged. That\'s a gap.' },
+    { initials:'DP', name:'D. Park', role:'Supervisor', site:'East Works', grad:'linear-gradient(135deg,#fddb92,#d1fdff)', time:'11m ago',
+      ans:[ {cls:'ans-p',t:'Partially'} ], quote:'We mention harness inspection but self-rescue has never come up. Workers probably don\'t know what to do.' },
+    { initials:'RL', name:'R. Lopez', role:'Supervisor', site:'South Terminal', grad:'linear-gradient(135deg,#96fbc4,#f9f586)', time:'19m ago',
+      ans:[ {cls:'ans-n',t:'No'} ], quote:'Nothing in our PTW about this. I\'d say across this region the pre-task brief for WAH doesn\'t cover harness failure scenarios at all.' },
+    { initials:'EM', name:'E. Müller', role:'Supervisor', site:'North Works', grad:'linear-gradient(135deg,#c2e9fb,#a1c4fd)', time:'28m ago',
+      ans:[ {cls:'ans-p',t:'Partially'} ], quote:'We cover harness inspection but not snag or catch scenarios. Workers are expected to figure it out.' }
+  ],
+  witness: [
+    { initials:'KO', name:'K. Obi', role:'Supervisor · Fire Watch', site:'Central Rail Depot', grad:'linear-gradient(135deg,#4facfe,#00f2fe)', time:'6m ago',
+      ans:[ {cls:'ans-y',t:'Yes — signed'} ], quote:'The PTW was in place and signed. The fire watch area was defined. My concern is that the area defined didn\'t account for the deck gap below the cutting point.' },
+    { initials:'TW', name:'T. Walsh', role:'Fire Watch', site:'Central Rail Depot', grad:'linear-gradient(135deg,#43e97b,#38f9d7)', time:'14m ago',
+      ans:[ {cls:'ans-p',t:'Partially'} ], quote:'I was watching the cutting area but the PTW didn\'t specify I had to monitor below the deck. I didn\'t know slag could travel that far.' },
+    { initials:'MR', name:'M. Reyes', role:'Welder', site:'Central Rail Depot', grad:'linear-gradient(135deg,#f093fb,#f5576c)', time:'22m ago',
+      ans:[ {cls:'ans-y',t:'Yes'} ], quote:'I followed the PTW as I understood it. The gap in the deck wasn\'t something we discussed in the pre-task brief and I\'ve been cutting in that area for weeks.' }
+  ]
+}
+
+const SCENARIOS = {
+  0: {
+    key: 'insight',
+    trigger: 'Critical Insight Approved',
+    legalHold: false,
+    targetLabel: '4 sites · 12 supervisors',
+    totalRecipients: 12,
+    dispatchMsg: 'A safety enquiry has been sent to your site following a regional pattern. Your input helps us understand what\'s actually happening on the ground. Due: Fri 28 Mar 5pm.',
+    context: {
+      title: 'Spotter management — 6 near-misses across 4 sites in 28 days',
+      source: 'Critical Insight CI-042',
+      narrative: '"Six times in the last month, a heavy vehicle reversed without someone properly watching the blind zone. The common factor isn\'t the drivers — it\'s that spotter roles aren\'t being managed as controlled positions."',
+      chips: [['cp','6 observations'],['ca','4 sites'],['cr','Systemic'],['ct','Heavy Vehicle']]
+    },
+    aiGenMsg: 'Reading insight pattern · checking observation pool for existing prevalence data · selecting question types...',
+    prevNote: 'Prevalence data already exists from 6 recent observations — Prevalence Check not recommended.',
+    dispatchSummary: { sites:4, supervisors:12, questions:5 },
+    responses: 'insight',
+    responseCount: 9,
+    synthesis: [
+      { icon:'🔴', text:'The primary control is not in place. 7 of 9 supervisors report the spotter assurance check is either Partial or absent. Consistent across all 4 source sites.' },
+      { icon:'🟠', text:'No formal handover process exists at any site. 8 of 9 responses confirm spotters have no mechanism for handing over responsibility when they need to leave position.' },
+      { icon:'🟡', text:'Supervisors perceive the risk — 6 of 9 rated likelihood as Moderate or High. The gap is known but there is no system to manage it.' },
+      { icon:'💡', text:'Gap responses converge on Process. 7 of 9 tagged Process. Most common suggestion: spotter handover embedded in the PTW or pre-task brief.' }
+    ],
+    summary: {
+      narrative: 'This enquiry confirms the spotter management gap identified in CI-042 is real, widespread, and recognised by supervisors. Across 4 sites and 9 responses, only 2 supervisors report the control is consistently in place. No site has a documented spotter handover process. Work as Done responses describe the same informal pattern: assignment at the brief, no system to maintain it, no handover when the spotter needs to leave.',
+      actions: [
+        'Develop and embed a spotter handover protocol into the PTW and pre-task brief template — applicable across all sites in scope',
+        'Update the STMP at all 4 source sites to define spotter positioning requirements and handover responsibilities explicitly',
+        'Generate a follow-up toolbox talk using this enquiry summary as primary content — 9 supervisor voices informing a crew conversation'
+      ]
+    },
+    barChart: { label:'Q2: Spotter confirmed before reversing', bars:[{l:'Yes',w:22,c:'#059669',n:2},{l:'Partially',w:55,c:'#d97706',n:5},{l:'No',w:22,c:'#dc2626',n:2}] }
+  },
+  1: {
+    key: 'investigation',
+    trigger: 'Investigation Mid-Enquiry',
+    legalHold: false,
+    targetLabel: '6 sites · 18 supervisors',
+    totalRecipients: 18,
+    dispatchMsg: 'We\'re currently investigating an incident at one of our sites and need to check whether a related condition exists at yours. This will take about 3 minutes. Due: Mon 30 Mar.',
+    context: {
+      title: 'INC-0091 — Fracture, Working at Height · Riverside Tower',
+      source: 'Active Investigation INV-0055',
+      narrative: '"Worker descended scaffold ladder, harness snagged on bracket, unclipped to free it rather than calling for help, fell 2.4m, fractured wrist. Root cause: no self-rescue procedure communicated."',
+      chips: [['ca','Open investigation'],['cr','Injury'],['ct','Working at Height'],['ca','Harness management gap']]
+    },
+    aiGenMsg: 'Reading investigation framework · identifying cross-site condition · generating verification questions...',
+    prevNote: null,
+    dispatchSummary: { sites:6, supervisors:18, questions:3 },
+    responses: 'investigation',
+    responseCount: 4,
+    synthesis: [
+      { icon:'🔴', text:'The gap is not isolated to the incident site. 3 of 4 responses confirm harness self-rescue is absent from the WAH pre-task brief — a regional systemic gap.' },
+      { icon:'🟠', text:'Workers across the region have not been told what to do if a harness gets caught. This is consistent across different supervisors, sites, and work contexts.' },
+      { icon:'💡', text:'Corrective action is straightforward: add harness snag self-rescue procedure to all WAH pre-task brief templates and PTW requirements. One change fixes the whole region.' }
+    ],
+    summary: {
+      narrative: 'The investigation into INC-0091 uncovered a systemic gap in WAH pre-task briefings that extends beyond the incident site. 3 of 4 responses confirm harness self-rescue procedures are absent from pre-task briefs across the region. Workers are not being told what to do if a harness gets caught. This is one procedural gap that needs one fix applied region-wide.',
+      actions: [
+        'Add harness snag self-rescue procedure to all WAH pre-task brief templates — applicable immediately across all 6 sites',
+        'Update PTW for WAH tasks to require self-rescue scenario brief before work begins',
+        'Include harness management scenario in the next toolbox talk at all affected sites'
+      ]
+    },
+    barChart: { label:'Q1: Self-rescue procedure communicated before WAH tasks', bars:[{l:'Yes',w:6,c:'#059669',n:0},{l:'Partially',w:25,c:'#d97706',n:1},{l:'No',w:69,c:'#dc2626',n:3}] }
+  },
+  2: {
+    key: 'witness',
+    trigger: 'Witness Enquiry',
+    legalHold: false,
+    targetLabel: 'Named individuals (3)',
+    totalRecipients: 3,
+    dispatchMsg: 'You have been identified as a witness or participant in a safety investigation at Central Rail Depot. Your input helps us understand what happened and prevent it happening again. Responses are confidential within the investigation team.',
+    context: {
+      title: 'INC-0094 — Near-miss, Hot Work · Central Rail Depot',
+      source: 'Investigation INV-0058 · Named Witnesses',
+      narrative: '"Welder cutting deck plate. Hot slag fell through gap in deck. Worker below narrowly avoided injury. Fire watch had not been assigned below-deck area."',
+      chips: [['ca','Near-miss'],['ct','Hot Work'],['cp','Named witnesses: 3']]
+    },
+    aiGenMsg: 'Reading investigation framework · adapting questions for witness context · applying sensitive language...',
+    prevNote: 'Witness enquiry — questions adapted to elicit observation accounts, not site-wide checks.',
+    dispatchSummary: { sites:1, supervisors:3, questions:3 },
+    responses: 'witness',
+    responseCount: 3,
+    synthesis: [
+      { icon:'🟠', text:'All three witnesses confirm the PTW was in place and signed. The gap was in scope definition — the fire watch area did not cover below-deck, and this was not specified in the PTW.' },
+      { icon:'🟡', text:'No witness identifies intent or negligence. The consistent picture: the PTW scope was ambiguous, the gap was not anticipated, and there was no pre-task discussion about slag travel distance.' },
+      { icon:'💡', text:'Root cause convergence: PTW template for hot work does not require below-deck fire watch assignment when cutting over deck gaps. Template update closes the gap.' }
+    ],
+    summary: {
+      narrative: 'Three witness accounts converge on the same root cause: the PTW scope for hot work does not require fire watch coverage below deck access points when cutting over gaps. All three witnesses followed their understanding of the PTW. The incident was not the result of individual failure — it was a predictable consequence of a template gap.',
+      actions: [
+        'Update the hot work PTW template to require explicit below-deck fire watch assignment when cutting over or near deck penetrations',
+        'Add slag travel distance assessment to the hot work pre-task brief checklist',
+        'Conduct a toolbox talk at all hot work sites covering fire watch scope and below-deck awareness'
+      ]
+    },
+    barChart: { label:'Q2: PTW in place and signed before hot work', bars:[{l:'Yes',w:33,c:'#059669',n:1},{l:'Partially',w:33,c:'#d97706',n:1},{l:'No',w:0,c:'#dc2626',n:0}] }
+  }
+}
+
+function sel(idx) {
+  if (running) return
+  current = idx
+  document.querySelectorAll('.sc-card').forEach((c,i)=>c.classList.toggle('active',i===idx))
+  document.getElementById('runWrap').style.display = 'block'
+  const sc = SCENARIOS[idx]
+  document.getElementById('canvas').innerHTML = `<div class="empty"><div class="empty-icon">▶</div><div class="empty-text">${sc.trigger} — press Run Simulation to begin.</div></div>`
+}
+
+async function runSim() {
+  if (current===null||running) return
+  running = true
+  const btn = document.getElementById('runBtn')
+  btn.disabled = true; btn.innerHTML = '<div class="spinner"></div> Running...'
+  document.getElementById('canvas').innerHTML = ''
+  await buildSteps(SCENARIOS[current])
+  running = false
+  btn.disabled = false; btn.innerHTML = '<span>↺</span> Run Again'
+}
+
+function delay(ms){ return new Promise(r=>setTimeout(r,ms)) }
+
+function addStep(canvas, id, type, name) {
+  const el = document.createElement('div')
+  el.className = 'step'; el.id = `step-${id}`
+  const lc = type==='ai'?'lai':type==='algo'?'lalgo':'lhum'
+  const lt = type==='ai'?'AI':type==='algo'?'Algorithm':'Human'
+  const ic = type==='ai'?'🤖':type==='algo'?'⚙':'👤'
+  el.innerHTML = `
+    <div class="spine"><div class="node ${type}" id="node-${id}">${ic}</div></div>
+    <div class="scontent">
+      <div class="shead"><span class="slabel ${lc}">${lt}</span><span class="sname">${name}</span><span class="sstatus running" id="status-${id}">running</span></div>
+      <div class="scard ${type}" id="card-${id}"><div class="loading"><div class="spinner"></div>Processing...</div></div>
+    </div>`
+  canvas.appendChild(el)
+  return el
+}
+
+async function show(el, canvas) {
+  await delay(50); el.classList.add('show'); el.scrollIntoView({behavior:'smooth',block:'center'}); await delay(200)
+}
+
+function markDone(id) {
+  const n = document.getElementById(`node-${id}`)
+  if(n){n.className='node done';n.textContent='✓'}
+  const s = document.getElementById(`status-${id}`)
+  if(s){s.textContent='✓ done';s.className='sstatus done'}
+}
+
+function setCard(id, html){ const c=document.getElementById(`card-${id}`); if(c) c.innerHTML=html }
+
+function qCards(qs) {
+  return `<div style="padding:8px 16px 12px;">${qs.map(q=>`
+    <div class="q-card">
+      <div class="q-head"><span class="q-num">${q.num}</span><span class="q-type ${q.typeClass}">${q.typeLabel}</span></div>
+      <div class="q-text">${q.text}</div>
+      <div class="q-rationale">${q.rationale}</div>
+      <div class="q-footer">
+        <span class="q-fl">Response</span>
+        ${q.opts ? q.opts.map((o,i)=>`<span class="rp ${q.optClasses[i]}">${o}</span>`).join('') : `<span class="rp rp-f">Free text — AI summarised</span>`}
+        ${q.extra ? `<span style="font-family:var(--mono);font-size:9px;color:var(--muted);">${q.extra}</span>` : ''}
+        ${q.target ? `<span class="q-fl" style="margin-left:8px;">Target</span><span class="tgt tgt-a">${q.target}</span>${q.targetAlt?`<span class="tgt tgt-i">${q.targetAlt}</span>`:''}` : ''}
+      </div>
+    </div>`).join('')}</div>`
+}
+
+function respFeed(sc, respKey) {
+  const rs = RESPONSES[respKey]
+  return rs.map(r=>`
+    <div class="resp-row">
+      <div class="resp-av" style="background:${r.grad}">${r.initials}</div>
+      <div style="flex:1;">
+        <div class="resp-meta">${r.name}</div>
+        <div class="resp-site">${r.role} · ${r.site} · ${r.time}</div>
+        <div class="resp-ans">${r.ans.map(a=>`<span class="ans ${a.cls}">${a.t}</span>`).join('')}</div>
+        ${r.quote?`<div class="resp-q">"${r.quote}"</div>`:''}
+      </div>
+    </div>`).join('')
+}
+
+function synthBlock(sc) {
+  return `
+    <div class="syn-card">
+      <div class="syn-head"><div class="syn-pulse"></div><span class="syn-label">AI Synthesis — ${sc.responseCount} of ${sc.totalRecipients} responses</span></div>
+      <div class="syn-body">${sc.synthesis.map(f=>`<div class="finding"><div style="font-size:14px;flex-shrink:0;">${f.icon}</div><div>${f.text}</div></div>`).join('')}</div>
+    </div>`
+}
+
+function barChart(sc) {
+  const b = sc.barChart
+  return `<div style="padding:12px 16px 4px;font-family:var(--mono);font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);">${b.label}</div>
+    <div class="bar-chart" style="padding:4px 16px 14px;">
+      ${b.bars.map(bar=>`<div class="bc-row"><div class="bc-label">${bar.l}</div><div class="bc-track"><div class="bc-fill" style="width:${bar.w}%;background:${bar.c}">${bar.n>0?bar.n:''}</div></div><div class="bc-count">${bar.n}</div></div>`).join('')}
+    </div>`
+}
+
+function summaryBlock(sc) {
+  return `
+    <div class="sum-card">
+      <div class="sum-head"><div class="sum-title">✦ What We Learned</div><span class="sum-badge">${sc.responseCount} of ${sc.totalRecipients} responses</span></div>
+      <div class="sum-body">
+        <div class="sum-narr">${sc.summary.narrative}</div>
+        <div class="sum-al">Recommended Actions</div>
+        ${sc.summary.actions.map(a=>`<div class="sum-ar"><div class="sum-dot"></div><div class="sum-at">${a}</div></div>`).join('')}
+        <div class="out-btns">
+          <div class="ob-p">→ Create Corrective Actions</div>
+          <div class="ob-s">📋 Generate Toolbox Talk</div>
+          <div class="ob-s">⬇ Export</div>
+        </div>
+      </div>
+    </div>`
+}
+
+
+function renderFWClass(sc) {
+  const fwData = [
+    { factor:'management_systems', domain:'enable', maturity:'compliant', confidence:'0.88',
+      rationale:'The organisation has pre-task briefs and PTW but neither covers spotter continuity — the system exists but does not reflect how the work is actually done.',
+      basis:'Work as Done responses describe a system gap (assignment without continuity mechanism). Gap responses tagged Process by 7 of 9 supervisors. Characteristic of Management Systems at Compliant maturity.' },
+    { factor:'management_systems', domain:'enable', maturity:'compliant', confidence:'0.83',
+      rationale:'WAH pre-task brief templates exist but do not include self-rescue scenarios — a procedural gap in the management system, not a behavioural failure.',
+      basis:'3 of 4 responses confirm procedure absent from pre-task briefs. Management system content gap — not a compliance or culture gap.' },
+    { factor:'work_understanding', domain:'guide', maturity:'compliant', confidence:'0.74',
+      rationale:"The PTW defined scope based on what was imagined (above-deck cutting) not what was done — the organisation's model of risk didn't account for emergent conditions.",
+      basis:"All witnesses followed their understanding of the PTW. Gap is in how risk was modelled — Work Understanding, Compliant maturity (procedures prescribe work but the prescription didn't match reality)." }
+  ]
+  const fw = fwData[sc.id] || fwData[0]
+
+  const domainColors = { guide:'#0891b2', enable:'#7635DC', execute:'#059669' }
+  const maturityColors = { compliant:'#d97706', leading:'#0891b2', resilient:'#059669' }
+  const dc = domainColors[fw.domain] || '#637381'
+  const mc = maturityColors[fw.maturity] || '#637381'
+  const pass = parseFloat(fw.confidence) >= 0.70
+  const srcType = sc.trigger === 'Critical Insight Approved' ? 'critical_insight' : sc.trigger === 'Witness Enquiry' ? 'investigation_witness' : 'investigation_mid'
+  const confColor = pass ? 'var(--green-text)' : 'var(--red-text)'
+  const confLabel = pass ? '&#10003; above threshold — stored' : '&#10005; below threshold — not stored'
+  const storeLabel = pass ? '&#10003; Stored' : 'Below threshold — NULL'
+  const storeColor = pass ? 'var(--green-text)' : 'var(--red-text)'
+
+  return '<div class="block">' +
+      '<div class="block-label">Classification Input</div>' +
+      '<div class="fr"><div class="fk">source_type</div><div class="fv">' + srcType + '</div></div>' +
+      '<div class="fr"><div class="fk">context</div><div class="fv">' + sc.context.title + '</div></div>' +
+      '<div class="fr"><div class="fk">confidence_threshold</div><div class="fv">0.70 — only classify if organisational context is sufficient</div></div>' +
+    '</div>' +
+    '<div class="ai-output">' +
+      '<div class="ai-label"><div class="pulse-dot"></div>Forge Works Map\u00ae Classification &mdash; <span style="color:' + storeColor + '">' + storeLabel + '</span></div>' +
+      '<div class="fr"><div class="fk">fw_factor</div><div class="fv" style="font-weight:700;">' + fw.factor + '</div></div>' +
+      '<div class="fr"><div class="fk">fw_domain</div><div class="fv"><span style="background:rgba(0,0,0,0.06);color:' + dc + ';padding:1px 8px;border-radius:4px;font-family:var(--mono);font-size:10px;font-weight:700;">' + fw.domain.toUpperCase() + '</span></div></div>' +
+      '<div class="fr"><div class="fk">fw_maturity_signal</div><div class="fv"><span style="background:rgba(0,0,0,0.06);color:' + mc + ';padding:1px 8px;border-radius:4px;font-family:var(--mono);font-size:10px;font-weight:700;">' + fw.maturity + '</span></div></div>' +
+      '<div class="fr"><div class="fk">fw_confidence</div><div class="fv" style="color:' + confColor + ';font-weight:700;">' + fw.confidence + ' ' + confLabel + '</div></div>' +
+      '<div class="fr"><div class="fk">fw_rationale</div><div class="fv" style="font-style:italic;">' + fw.rationale + '</div></div>' +
+    '</div>' +
+    '<div class="block">' +
+      '<div class="block-label">Classification Basis</div>' +
+      '<div style="font-size:12px;color:var(--muted);line-height:1.65;">' + fw.basis + '</div>' +
+      '<div style="margin-top:10px;font-size:11.5px;color:var(--muted);background:var(--surface2);border-radius:4px;padding:8px 10px;line-height:1.6;">This classification contributes to the organisation\'s live Forge Works Map\u00ae capacity profile. As insights, investigations, and enquiry summaries accumulate, the platform builds a continuous diagnostic picture — which of the 15 factors appears most in safety intelligence, and at what maturity level.</div>' +
+    '</div>'
+}
+
+async function buildSteps(sc) {
+  const canvas = document.getElementById('canvas')
+
+  // STEP 1: TRIGGER
+  const s1 = addStep(canvas,'trigger','algo',sc.trigger)
+  await show(s1, canvas); await delay(600)
+  setCard('trigger',`
+    <div class="block">
+      <div class="block-label">Source</div>
+      <div style="font-size:13.5px;font-weight:600;color:var(--bright);margin-bottom:5px;">${sc.context.title}</div>
+      <div style="font-size:10.5px;color:var(--muted);margin-bottom:8px;">${sc.context.source}</div>
+      <div class="italic-block">${sc.context.narrative}</div>
+      <div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:8px;">${sc.context.chips.map(([cls,t])=>`<span class="chip c${cls[1]}">${t}</span>`).join('')}</div>
+    </div>`)
+  markDone('trigger')
+
+  // STEP 2: LEGAL HOLD (not for insight trigger)
+  if (sc.trigger !== 'Critical Insight Approved') {
+    const s2 = addStep(canvas,'legal','algo','Legal Hold Check')
+    await show(s2, canvas); await delay(800)
+    setCard('legal',`
+      <div class="block" style="display:flex;align-items:center;justify-content:space-between;">
+        <div><div class="fr"><div class="fk">investigation</div><div class="fv">${sc.context.source.split('·')[0].trim()}</div></div>
+        <div class="fr"><div class="fk">legal_hold</div><div class="fv" style="color:var(--green-text)">false</div></div></div>
+        <div style="text-align:right;"><span class="inline-pass">✓ CLEAR</span><div style="font-size:10px;color:var(--muted);margin-top:4px;">Enquiry permitted</div></div>
+      </div>
+      <div class="block" style="font-size:11.5px;color:var(--muted);">If legal_hold = true this step would block entirely. No override exists. Enforced at the data layer.</div>`)
+    markDone('legal')
+  }
+
+  // STEP 3: AI GENERATES QUESTIONS
+  const s3 = addStep(canvas,'genq','ai','AI Generates Question Set')
+  await show(s3, canvas)
+  setCard('genq',`<div class="loading"><div class="spinner"></div>${sc.aiGenMsg}</div>`)
+  await delay(3000)
+  const qSet = QUESTIONS[sc.key]
+  setCard('genq', `
+    <div class="block">
+      <div class="block-label">AI Generated — ${qSet.length} Questions</div>
+      ${sc.prevNote ? `<div style="background:var(--teal-dim);border:1px solid var(--teal-border);border-radius:5px;padding:8px 10px;margin-bottom:10px;font-size:11.5px;color:var(--teal-text);">🔍 ${sc.prevNote}</div>` : ''}
+    </div>
+    ${qCards(qSet)}`)
+  markDone('genq')
+
+  // STEP 4: HUMAN REVIEWS + DISPATCHES
+  const s4 = addStep(canvas,'review','human', sc.trigger==='Witness Enquiry'?'Investigator Reviews & Dispatches':'Safety Manager Reviews & Dispatches')
+  await show(s4, canvas)
+  await new Promise(resolve => {
+    setCard('review',`
+      <div class="hrow">
+        <div class="hprompt">
+          <div style="font-weight:600;color:var(--bright);margin-bottom:6px;">${qSet.length} questions ready for dispatch</div>
+          <div style="font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:10px;">Targeting ${sc.targetLabel}. Default notification: "${sc.dispatchMsg.substring(0,90)}..."</div>
+          <div style="font-size:11px;color:var(--muted);">Deadline: ${sc.trigger==='Witness Enquiry'?'Thu 27 Mar':'Fri 28 Mar'} · ${sc.totalRecipients} recipients</div>
+        </div>
+        <div class="hbtns">
+          <button class="hbtn hbtn-g" onclick="res('review','dispatch')">🚀 Dispatch</button>
+          <button class="hbtn hbtn-a" onclick="res('review','dispatch')">✎ Edit first</button>
+        </div>
+      </div>`)
+    window._res_review = resolve
+  })
+  const ds = sc.dispatchSummary
+  setCard('review',`
+    <div class="block"><span class="inline-pass">✓ Dispatched</span> <span style="font-size:12px;color:var(--muted);margin-left:8px;">${ds.questions} questions · ${ds.supervisors} recipients across ${ds.sites} site${ds.sites>1?'s':''}</span></div>
+    <div class="block" style="font-size:11.5px;color:var(--muted);">"${sc.dispatchMsg}"</div>`)
+  markDone('review')
+
+  // STEP 5: RESPONSES
+  const s5 = addStep(canvas,'respond','human',sc.trigger==='Witness Enquiry'?'Witnesses Submit Responses':'Supervisors Respond on Mobile')
+  await show(s5, canvas); await delay(500)
+  setCard('respond',`
+    <div class="block">
+      <div class="block-label">Live Response Feed — ${sc.responseCount} of ${sc.totalRecipients} · ${Math.round(sc.responseCount/sc.totalRecipients*100)}% response rate</div>
+    </div>
+    ${respFeed(sc, sc.responses)}`)
+  markDone('respond')
+
+  // STEP 6: AI SYNTHESIS
+  const s6 = addStep(canvas,'synth','ai','AI Live Synthesis')
+  await show(s6, canvas)
+  setCard('synth',`<div class="loading"><div class="spinner"></div>Synthesising ${sc.responseCount} responses across ${qSet.length} questions...</div>`)
+  await delay(3000)
+  setCard('synth', synthBlock(sc) + barChart(sc))
+  markDone('synth')
+
+  // STEP 6b: FORGE WORKS MAP CLASSIFICATION
+  const s6b = addStep(canvas,'fwclass','ai','Forge Works Map® Classification')
+  await show(s6b, canvas)
+  setCard('fwclass',`<div class="loading"><div class="spinner"></div>Reading enquiry context · assessing organisational capacity signal · checking confidence threshold...</div>`)
+  await delay(3000)
+  setCard('fwclass', renderFWClass(sc))
+  markDone('fwclass')
+
+  // STEP 7: SUMMARY
+  const s7 = addStep(canvas,'summary','ai','AI Generates Final Summary')
+  await show(s7, canvas)
+  setCard('summary',`<div class="loading"><div class="spinner"></div>Generating final summary and recommended actions...</div>`)
+  await delay(3000)
+  setCard('summary', summaryBlock(sc))
+  markDone('summary')
+}
+
+function res(id, val) {
+  if (window[`_res_${id}`]) { window[`_res_${id}`](val); window[`_res_${id}`] = null }
+}
+</script>
+</body>
+</html>

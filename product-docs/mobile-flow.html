@@ -1,0 +1,1425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SafetyPlatform — Mobile Flow & Visit Planning</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+:root {
+  --bg: #f0ede8;
+  --surface: #faf8f5;
+  --surface2: #e8e4de;
+  --border: #d8d3cc;
+  --text: #1a1714;
+  --muted: #8a8279;
+  --bright: #0f0d0b;
+
+  --orange: #e8520a;
+  --orange-light: #f27340;
+  --orange-bg: rgba(232,82,10,0.08);
+  --orange-border: rgba(232,82,10,0.2);
+
+  --blue: #0057b8;
+  --blue-light: #2979e8;
+  --blue-bg: rgba(0,87,184,0.07);
+  --blue-border: rgba(0,87,184,0.2);
+
+  --green: #0a7c4e;
+  --green-light: #12a868;
+  --green-bg: rgba(10,124,78,0.08);
+  --green-border: rgba(10,124,78,0.2);
+
+  --amber: #c47d00;
+  --amber-bg: rgba(196,125,0,0.08);
+  --amber-border: rgba(196,125,0,0.2);
+
+  --red: #c41e1e;
+  --red-bg: rgba(196,30,30,0.07);
+  --red-border: rgba(196,30,30,0.2);
+
+  --mono: 'JetBrains Mono', monospace;
+  --sans: 'Sora', sans-serif;
+
+  --phone-w: 375px;
+  --phone-h: 780px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: #E8EBF0;
+  font-family: var(--sans);
+  font-size: 13px;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* OUTER LAYOUT */
+.outer {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  padding: 28px 24px;
+  gap: 40px;
+}
+
+/* SECTION HEADERS */
+.section-header {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #5a5550;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #2a2820;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.section-header span {
+  color: #3a3730;
+}
+
+/* ── FLOW DIAGRAM ─────────────────────────────────── */
+.flow-section {
+  max-width: 1100px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.flow-grid {
+  display: grid;
+  grid-template-columns: 1fr 24px 1fr;
+  gap: 0;
+}
+
+.flow-col {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.flow-col-header {
+  text-align: center;
+  padding: 10px 16px;
+  border-radius: 8px 8px 0 0;
+  margin-bottom: 0;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+.col-supervisor .flow-col-header {
+  background: rgba(232,82,10,0.15);
+  color: var(--orange-light);
+  border: 1px solid rgba(232,82,10,0.25);
+  border-bottom: none;
+}
+
+.col-manager .flow-col-header {
+  background: rgba(0,87,184,0.12);
+  color: #6aaeff;
+  border: 1px solid rgba(0,87,184,0.25);
+  border-bottom: none;
+}
+
+.flow-divider {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 60px;
+  gap: 4px;
+}
+
+.flow-divider-line {
+  width: 1px;
+  flex: 1;
+  background: #2a2820;
+}
+
+.flow-divider-label {
+  font-family: var(--mono);
+  font-size: 8px;
+  color: #3a3730;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  writing-mode: vertical-rl;
+  padding: 8px 0;
+}
+
+/* FLOW NODE */
+.flow-node {
+  border: 1px solid #2a2820;
+  border-top: none;
+  padding: 14px 16px;
+  position: relative;
+  transition: background 0.15s;
+  cursor: default;
+}
+
+.flow-node:last-child {
+  border-radius: 0 0 8px 8px;
+}
+
+.col-supervisor .flow-node {
+  background: #1a1714;
+  border-left-color: rgba(232,82,10,0.2);
+}
+
+.col-manager .flow-node {
+  background: #14161a;
+  border-left-color: rgba(0,87,184,0.2);
+}
+
+.flow-node.shared {
+  background: #161613;
+  border-left: 3px solid #2a2820;
+  position: relative;
+}
+
+.flow-node.shared::after {
+  content: 'SHARED';
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: var(--mono);
+  font-size: 8px;
+  letter-spacing: 1px;
+  color: #3a3730;
+}
+
+.flow-node-num {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: #3a3730;
+  margin-bottom: 4px;
+}
+
+.flow-node-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #d0ccc6;
+  margin-bottom: 4px;
+  line-height: 1.3;
+}
+
+.col-supervisor .flow-node-title { color: #e8c4a8; }
+.col-manager .flow-node-title { color: #a8c4e8; }
+.flow-node.shared .flow-node-title { color: #c8c4be; }
+
+.flow-node-desc {
+  font-size: 11.5px;
+  color: #5a5550;
+  line-height: 1.5;
+}
+
+.flow-node-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--mono);
+  font-size: 9px;
+  padding: 2px 7px;
+  border-radius: 3px;
+  margin-top: 6px;
+  font-weight: 500;
+}
+
+.tag-human { background: rgba(196,125,0,0.12); color: #f5c842; border: 1px solid rgba(196,125,0,0.25); }
+.tag-ai { background: rgba(99,102,241,0.12); color: #a5b4fc; border: 1px solid rgba(99,102,241,0.25); }
+.tag-algo { background: rgba(14,165,233,0.1); color: #7dd3fc; border: 1px solid rgba(14,165,233,0.25); }
+.tag-unique { background: rgba(0,87,184,0.12); color: #6aaeff; border: 1px solid rgba(0,87,184,0.25); }
+
+.flow-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 20px;
+  color: #3a3730;
+  font-size: 12px;
+  border-left: 1px solid #2a2820;
+  border-right: 1px solid #2a2820;
+}
+
+.col-supervisor .flow-arrow { border-color: rgba(232,82,10,0.15); }
+.col-manager .flow-arrow { border-color: rgba(0,87,184,0.15); }
+
+/* ── PHONE PROTOTYPES ─────────────────────────────── */
+.phones-section {
+  max-width: 1100px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.phones-row {
+  display: flex;
+  gap: 28px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* PHONE FRAME */
+.phone-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.phone-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: #5a5550;
+  text-align: center;
+}
+
+.phone {
+  width: var(--phone-w);
+  height: var(--phone-h);
+  background: var(--surface);
+  border-radius: 44px;
+  box-shadow:
+    0 0 0 10px #1a1714,
+    0 0 0 12px #2a2820,
+    0 40px 80px rgba(0,0,0,0.6);
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+/* STATUS BAR */
+.status-bar {
+  height: 44px;
+  background: var(--surface);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px 0 28px;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 10;
+}
+
+.status-time {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.status-icons {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: var(--text);
+}
+
+/* NOTCH */
+.notch {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 120px;
+  height: 34px;
+  background: #1a1714;
+  border-radius: 0 0 20px 20px;
+  z-index: 20;
+}
+
+/* APP CONTENT */
+.app-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: var(--bg);
+  position: relative;
+}
+
+.app-content::-webkit-scrollbar { display: none; }
+
+/* APP HEADER */
+.app-header {
+  background: var(--surface);
+  padding: 16px 20px 14px;
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+
+.app-header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2px;
+}
+
+.app-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.2;
+}
+
+.app-subtitle {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.avatar {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  background: var(--orange);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700; color: white;
+  flex-shrink: 0;
+}
+
+.avatar.mgr { background: var(--blue); }
+
+/* NAV BAR */
+.nav-bar {
+  height: 72px;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 5;
+}
+
+.nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  cursor: pointer;
+  padding-bottom: 8px;
+}
+
+.nav-icon { font-size: 20px; }
+.nav-label {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--muted);
+  letter-spacing: 0.2px;
+}
+
+.nav-item.active .nav-label { color: var(--orange); font-weight: 600; }
+.nav-item.active.mgr-active .nav-label { color: var(--blue); font-weight: 600; }
+
+.nav-badge {
+  position: absolute;
+  top: 10px;
+  right: calc(50% - 18px);
+  background: var(--red);
+  color: white;
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 700;
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* ── SUPERVISOR HOME ──────────────────── */
+.sup-home { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+
+.greeting {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  padding: 4px 0;
+}
+
+.greeting span { color: var(--orange); }
+
+.quick-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.qa-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.15s;
+  position: relative;
+  overflow: hidden;
+}
+
+.qa-card.primary {
+  background: var(--orange);
+  border-color: var(--orange);
+  grid-column: 1 / -1;
+}
+
+.qa-icon { font-size: 22px; }
+.qa-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.2;
+}
+
+.qa-card.primary .qa-title { color: white; font-size: 14px; }
+.qa-desc { font-size: 11px; color: var(--muted); }
+.qa-card.primary .qa-desc { color: rgba(255,255,255,0.75); }
+
+.section-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: -4px;
+}
+
+.feed-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 13px 14px;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.feed-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+
+.dot-amber { background: var(--amber); }
+.dot-green { background: var(--green); }
+.dot-red { background: var(--red); }
+.dot-blue { background: var(--blue); }
+
+.feed-text {
+  font-size: 12px;
+  color: var(--text);
+  line-height: 1.5;
+  flex: 1;
+}
+
+.feed-meta {
+  font-size: 10.5px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--mono);
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-weight: 500;
+}
+
+.chip-amber { background: var(--amber-bg); color: var(--amber); border: 1px solid var(--amber-border); }
+.chip-green { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-border); }
+.chip-red { background: var(--red-bg); color: var(--red); border: 1px solid var(--red-border); }
+.chip-blue { background: var(--blue-bg); color: var(--blue); border: 1px solid var(--blue-border); }
+.chip-orange { background: var(--orange-bg); color: var(--orange); border: 1px solid var(--orange-border); }
+
+/* ── MANAGER VISIT PLANNING ───────────── */
+.mgr-home { padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+
+.atrophy-banner {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--amber);
+  border-radius: 12px;
+  padding: 13px 14px;
+}
+
+.banner-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--amber);
+  margin-bottom: 3px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.banner-desc {
+  font-size: 11.5px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.site-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.site-card-header {
+  padding: 14px 16px 10px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.site-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.2;
+}
+
+.site-meta { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+.atrophy-score {
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.score-num {
+  font-family: var(--mono);
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.score-high { color: var(--red); }
+.score-med { color: var(--amber); }
+.score-low { color: var(--green); }
+
+.score-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--muted);
+}
+
+.site-signals {
+  padding: 0 16px 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.site-action {
+  padding: 10px 16px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.plan-btn {
+  background: var(--blue);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.plan-btn.mgr-plan { background: var(--blue); }
+
+/* ── VISIT DETAIL VIEW ────────────────── */
+.visit-view { padding: 0; display: flex; flex-direction: column; gap: 0; }
+
+.visit-header {
+  background: var(--blue);
+  padding: 18px 20px 16px;
+  color: white;
+}
+
+.visit-site-name {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+
+.visit-meta {
+  font-size: 11.5px;
+  opacity: 0.75;
+  margin-bottom: 12px;
+}
+
+.visit-date-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.date-pill {
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 8px;
+  padding: 7px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.visit-body { padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+
+.topics-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.topics-header {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.topics-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.topics-source {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--muted);
+  letter-spacing: 1px;
+}
+
+.topic-item {
+  padding: 11px 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  cursor: pointer;
+}
+
+.topic-item:last-child { border-bottom: none; }
+
+.topic-check {
+  width: 20px; height: 20px;
+  border-radius: 6px;
+  border: 2px solid var(--border);
+  flex-shrink: 0;
+  margin-top: 1px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px;
+  transition: all 0.15s;
+}
+
+.topic-check.checked {
+  background: var(--blue);
+  border-color: var(--blue);
+  color: white;
+}
+
+.topic-text {
+  flex: 1;
+  font-size: 12.5px;
+  color: var(--text);
+  line-height: 1.4;
+}
+
+.topic-source {
+  font-size: 10.5px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.topic-badge {
+  font-family: var(--mono);
+  font-size: 9px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.tb-ai { background: rgba(99,102,241,0.1); color: #a5b4fc; }
+.tb-trend { background: var(--amber-bg); color: var(--amber); }
+.tb-inv { background: var(--red-bg); color: var(--red); }
+
+.add-topic-row {
+  padding: 10px 16px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--blue);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.visit-context {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.context-header {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.context-row {
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.context-row:last-child { border-bottom: none; }
+
+.context-key {
+  font-size: 11.5px;
+  color: var(--muted);
+}
+
+.context-val {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+  text-align: right;
+}
+
+.context-val.warn { color: var(--amber); }
+.context-val.danger { color: var(--red); }
+.context-val.good { color: var(--green); }
+
+.start-visit-btn {
+  background: var(--blue);
+  color: white;
+  border: none;
+  border-radius: 14px;
+  padding: 16px;
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+/* ── ANNOTATIONS ──────────────────────── */
+.annotation-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* ── CALLOUTS ─────────────────────────── */
+.callout-section {
+  max-width: 1100px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.callout-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+}
+
+.callout-card {
+  background: #1a1814;
+  border: 1px solid #2a2820;
+  border-radius: 10px;
+  padding: 14px 16px;
+}
+
+.callout-num {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: #3a3730;
+  margin-bottom: 6px;
+}
+
+.callout-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #c8c4be;
+  margin-bottom: 4px;
+}
+
+.callout-body {
+  font-size: 12px;
+  color: #5a5550;
+  line-height: 1.6;
+}
+
+/* TOGGLE TABS */
+.toggle-row {
+  display: flex;
+  gap: 0;
+  background: #1a1814;
+  border: 1px solid #2a2820;
+  border-radius: 8px;
+  padding: 3px;
+  margin-bottom: 24px;
+  max-width: 360px;
+}
+
+.toggle-btn {
+  flex: 1;
+  padding: 7px 12px;
+  border-radius: 5px;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-align: center;
+  cursor: pointer;
+  color: #3a3730;
+  transition: all 0.2s;
+  border: none;
+  background: none;
+}
+
+.toggle-btn.active-sup {
+  background: rgba(232,82,10,0.15);
+  color: var(--orange-light);
+}
+
+.toggle-btn.active-mgr {
+  background: rgba(0,87,184,0.15);
+  color: #6aaeff;
+}
+
+</style>
+</head>
+<body>
+<div class="outer">
+
+  <!-- ═══ SECTION 1: FLOW DIAGRAM ══════════════════════════════════ -->
+  <div class="flow-section">
+    <div class="section-header">
+      <span>01 —</span> Mobile Navigation Flow — Both Roles
+    </div>
+
+    <div class="flow-grid">
+
+      <!-- SUPERVISOR COLUMN -->
+      <div class="flow-col col-supervisor">
+        <div class="flow-col-header">Supervisor</div>
+
+        <div class="flow-node">
+          <div class="flow-node-num">HOME</div>
+          <div class="flow-node-title">Today's Overview</div>
+          <div class="flow-node-desc">Quick actions: Log Observation, Report Incident. Recent site feed. Pending talk delivery alert.</div>
+          <div><span class="flow-node-tag tag-human">Mandatory view</span></div>
+        </div>
+
+        <div class="flow-arrow">↓</div>
+
+        <div class="flow-node shared">
+          <div class="flow-node-num">VIEW 1</div>
+          <div class="flow-node-title">Capture — Observation or Incident</div>
+          <div class="flow-node-desc">Single adaptive form. One question forks the path: did anyone get hurt? Work type, what happened, immediate action. Under 90 seconds.</div>
+          <div><span class="flow-node-tag tag-human">Touch point 1</span> <span class="flow-node-tag tag-algo">Auto-tags on submit</span></div>
+        </div>
+
+        <div class="flow-arrow">↓</div>
+
+        <div class="flow-node shared">
+          <div class="flow-node-num">VIEW 2</div>
+          <div class="flow-node-title">Review Queue</div>
+          <div class="flow-node-desc">For supervisors: pending talk ready for delivery. Not the insight approval queue — that belongs to safety managers on desktop.</div>
+          <div><span class="flow-node-tag tag-human">Touch point 2</span></div>
+        </div>
+
+        <div class="flow-arrow">↓</div>
+
+        <div class="flow-node shared">
+          <div class="flow-node-num">VIEW 3</div>
+          <div class="flow-node-title">Talk — Deliver</div>
+          <div class="flow-node-desc">Full screen. Generated talk content, language select, read aloud, crew acknowledgement. Nothing else on screen.</div>
+          <div><span class="flow-node-tag tag-human">Touch point 3</span> <span class="flow-node-tag tag-ai">AI narrates</span></div>
+        </div>
+
+        <div class="flow-arrow">↓</div>
+
+        <div class="flow-node shared">
+          <div class="flow-node-num">VIEW 4</div>
+          <div class="flow-node-title">Record — Delivery Confirmed</div>
+          <div class="flow-node-desc">Receipt screen. Who attended, timestamp, reference number. Talk is locked. Collapses naturally from View 3.</div>
+          <div><span class="flow-node-tag tag-human">Touch point 4</span></div>
+        </div>
+
+      </div>
+
+      <!-- DIVIDER -->
+      <div class="flow-divider">
+        <div class="flow-divider-line"></div>
+        <div class="flow-divider-label">Role divergence</div>
+        <div class="flow-divider-line"></div>
+      </div>
+
+      <!-- MANAGER COLUMN -->
+      <div class="flow-col col-manager">
+        <div class="flow-col-header">Manager</div>
+
+        <div class="flow-node">
+          <div class="flow-node-num">HOME</div>
+          <div class="flow-node-title">Visit Planning — Sites by Atrophy</div>
+          <div class="flow-node-desc">Sites ranked by atrophy score. Each shows signal summary: last observation, open investigations, near-miss trend. Manager selects a site to plan a visit.</div>
+          <div><span class="flow-node-tag tag-unique">Manager only</span> <span class="flow-node-tag tag-algo">Atrophy calculated</span></div>
+        </div>
+
+        <div class="flow-arrow">↓</div>
+
+        <div class="flow-node">
+          <div class="flow-node-num">VISIT</div>
+          <div class="flow-node-title">Visit Plan — Site Detail</div>
+          <div class="flow-node-desc">Site context: last talk, open incidents, trends. AI-recommended + selectable observation topics. Date/time. Start Visit button locks the plan and navigates to Capture.</div>
+          <div><span class="flow-node-tag tag-unique">Manager only</span> <span class="flow-node-tag tag-ai">Topics recommended</span></div>
+        </div>
+
+        <div class="flow-arrow">↓</div>
+
+        <div class="flow-node shared">
+          <div class="flow-node-num">VIEW 1</div>
+          <div class="flow-node-title">Capture — Observation or Incident</div>
+          <div class="flow-node-desc">Identical form. Auto-tagged observer_role: manager and linked to visit plan. Recommended topics surface as prompts during capture — not mandatory.</div>
+          <div><span class="flow-node-tag tag-human">Touch point 1</span> <span class="flow-node-tag tag-unique">Visit-linked</span></div>
+        </div>
+
+        <div class="flow-arrow">↓</div>
+
+        <div class="flow-node shared">
+          <div class="flow-node-num">VIEW 2</div>
+          <div class="flow-node-title">Review Queue</div>
+          <div class="flow-node-desc">For managers: post-visit summary of observations logged. Confirm visit complete. Observations feed same pipeline as supervisor.</div>
+          <div><span class="flow-node-tag tag-human">Touch point 2</span></div>
+        </div>
+
+        <div class="flow-arrow">↓</div>
+
+        <div class="flow-node shared">
+          <div class="flow-node-num">VIEW 3</div>
+          <div class="flow-node-title">Talk — Optional Delivery</div>
+          <div class="flow-node-desc">Manager can optionally deliver a talk during a site visit if no supervisor is present. Same view, same flow.</div>
+          <div><span class="flow-node-tag tag-human">Optional touch point</span></div>
+        </div>
+
+        <div class="flow-arrow">↓</div>
+
+        <div class="flow-node shared">
+          <div class="flow-node-num">VIEW 4</div>
+          <div class="flow-node-title">Record — Visit Closed</div>
+          <div class="flow-node-desc">Visit summary: observations logged, topics covered vs planned, talk delivered y/n. Visit record archived against site.</div>
+          <div><span class="flow-node-tag tag-human">Touch point 4</span></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ SECTION 2: PHONE MOCKUPS ═════════════════════════════════ -->
+  <div class="phones-section">
+    <div class="section-header">
+      <span>02 —</span> Screen Mockups
+    </div>
+
+    <div class="phones-row">
+
+      <!-- PHONE 1: SUPERVISOR HOME -->
+      <div class="phone-wrap">
+        <div class="phone-label">Supervisor — Home</div>
+        <div class="phone">
+          <div class="notch"></div>
+          <div class="status-bar">
+            <span class="status-time">9:14</span>
+            <div class="status-icons">▲ ◉◉◉ ▊</div>
+          </div>
+          <div class="app-content">
+            <div class="app-header">
+              <div class="app-header-top">
+                <div>
+                  <div class="app-title">Good morning,<br>Marcus.</div>
+                  <div class="app-subtitle">Riverside Tower — Level 7–9</div>
+                </div>
+                <div class="avatar">MR</div>
+              </div>
+            </div>
+            <div class="sup-home">
+              <div class="quick-actions">
+                <div class="qa-card primary">
+                  <div class="qa-icon">📋</div>
+                  <div class="qa-title">Talk Ready to Deliver</div>
+                  <div class="qa-desc">Heavy Vehicle — generated 8 min ago</div>
+                </div>
+                <div class="qa-card">
+                  <div class="qa-icon">👁️</div>
+                  <div class="qa-title">Log Observation</div>
+                  <div class="qa-desc">Safe, at-risk or near-miss</div>
+                </div>
+                <div class="qa-card">
+                  <div class="qa-icon">⚠️</div>
+                  <div class="qa-title">Report Incident</div>
+                  <div class="qa-desc">Injury, damage or near-miss</div>
+                </div>
+              </div>
+              <div class="section-label">Site Activity</div>
+              <div class="feed-item">
+                <div class="feed-dot dot-amber"></div>
+                <div>
+                  <div class="feed-text">Near-miss logged — excavator reversing, spotter not in position</div>
+                  <div class="feed-meta">Today 7:42am · <span class="chip chip-amber">Heavy Vehicle</span></div>
+                </div>
+              </div>
+              <div class="feed-item">
+                <div class="feed-dot dot-green"></div>
+                <div>
+                  <div class="feed-text">Talk delivered — Fall Protection · 14 crew attended</div>
+                  <div class="feed-meta">Yesterday · <span class="chip chip-green">Delivered</span></div>
+                </div>
+              </div>
+              <div class="feed-item">
+                <div class="feed-dot dot-blue"></div>
+                <div>
+                  <div class="feed-text">Critical Insight approved — Hot Work regional trend</div>
+                  <div class="feed-meta">2 days ago · <span class="chip chip-blue">Regional</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="nav-bar">
+            <div class="nav-item active" style="position:relative">
+              <div class="nav-icon">🏠</div>
+              <div class="nav-label" style="color:var(--orange)">Home</div>
+            </div>
+            <div class="nav-item" style="position:relative">
+              <div class="nav-icon">📋</div>
+              <div class="nav-label">Talk</div>
+              <div class="nav-badge">1</div>
+            </div>
+            <div class="nav-item">
+              <div class="nav-icon">👁️</div>
+              <div class="nav-label">Capture</div>
+            </div>
+            <div class="nav-item">
+              <div class="nav-icon">📁</div>
+              <div class="nav-label">Records</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PHONE 2: MANAGER HOME (VISIT LIST) -->
+      <div class="phone-wrap">
+        <div class="phone-label">Manager — Visit Planning</div>
+        <div class="phone">
+          <div class="notch"></div>
+          <div class="status-bar">
+            <span class="status-time">9:14</span>
+            <div class="status-icons">▲ ◉◉◉ ▊</div>
+          </div>
+          <div class="app-content">
+            <div class="app-header">
+              <div class="app-header-top">
+                <div>
+                  <div class="app-title">Field Visits</div>
+                  <div class="app-subtitle">North Region · 8 active sites</div>
+                </div>
+                <div class="avatar mgr">JT</div>
+              </div>
+            </div>
+            <div class="mgr-home">
+              <div class="atrophy-banner">
+                <div class="banner-title">⚠ 3 sites need attention</div>
+                <div class="banner-desc">No observations in 14+ days. Ranked by atrophy score.</div>
+              </div>
+
+              <div class="site-card">
+                <div class="site-card-header">
+                  <div>
+                    <div class="site-name">Riverside Tower</div>
+                    <div class="site-meta">Phase 2 · 47 workers · Heavy Vehicle, Hot Work</div>
+                  </div>
+                  <div class="atrophy-score">
+                    <div class="score-num score-high">87</div>
+                    <div class="score-label">Atrophy</div>
+                  </div>
+                </div>
+                <div class="site-signals">
+                  <span class="chip chip-red">18d no observation</span>
+                  <span class="chip chip-amber">2 open investigations</span>
+                  <span class="chip chip-orange">Near-miss trend ↑</span>
+                </div>
+                <div class="site-action">
+                  <div style="font-size:11px;color:var(--muted)">Last visit: 24 days ago</div>
+                  <button class="plan-btn mgr-plan">Plan Visit →</button>
+                </div>
+              </div>
+
+              <div class="site-card">
+                <div class="site-card-header">
+                  <div>
+                    <div class="site-name">Central Rail Depot</div>
+                    <div class="site-meta">Stage 3 · 31 workers · Confined Space</div>
+                  </div>
+                  <div class="atrophy-score">
+                    <div class="score-num score-med">54</div>
+                    <div class="score-label">Atrophy</div>
+                  </div>
+                </div>
+                <div class="site-signals">
+                  <span class="chip chip-amber">12d no observation</span>
+                  <span class="chip chip-blue">1 critical insight pending</span>
+                </div>
+                <div class="site-action">
+                  <div style="font-size:11px;color:var(--muted)">Last visit: 11 days ago</div>
+                  <button class="plan-btn mgr-plan">Plan Visit →</button>
+                </div>
+              </div>
+
+              <div class="site-card">
+                <div class="site-card-header">
+                  <div>
+                    <div class="site-name">Harbour Bridge Retrofit</div>
+                    <div class="site-meta">Zone B · 22 workers · Working at Height</div>
+                  </div>
+                  <div class="atrophy-score">
+                    <div class="score-num score-low">21</div>
+                    <div class="score-label">Atrophy</div>
+                  </div>
+                </div>
+                <div class="site-signals">
+                  <span class="chip chip-green">Active this week</span>
+                  <span class="chip chip-green">Talk delivered today</span>
+                </div>
+                <div class="site-action">
+                  <div style="font-size:11px;color:var(--muted)">Last visit: 3 days ago</div>
+                  <button class="plan-btn mgr-plan" style="background:var(--muted)">Plan Visit →</button>
+                </div>
+              </div>
+
+            </div>
+          </div>
+          <div class="nav-bar">
+            <div class="nav-item active">
+              <div class="nav-icon">🗺️</div>
+              <div class="nav-label mgr-active" style="color:var(--blue);font-weight:600;">Visits</div>
+            </div>
+            <div class="nav-item" style="position:relative">
+              <div class="nav-icon">👁️</div>
+              <div class="nav-label">Capture</div>
+            </div>
+            <div class="nav-item">
+              <div class="nav-icon">📁</div>
+              <div class="nav-label">Records</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PHONE 3: VISIT PLAN DETAIL -->
+      <div class="phone-wrap">
+        <div class="phone-label">Manager — Visit Plan Detail</div>
+        <div class="phone">
+          <div class="notch"></div>
+          <div class="status-bar">
+            <span class="status-time">9:14</span>
+            <div class="status-icons">▲ ◉◉◉ ▊</div>
+          </div>
+          <div class="app-content">
+            <div class="visit-view">
+              <div class="visit-header">
+                <div style="font-size:11px;opacity:0.65;margin-bottom:4px;">← Back to Sites</div>
+                <div class="visit-site-name">Riverside Tower</div>
+                <div class="visit-meta">Phase 2 · North Region · 47 workers</div>
+                <div class="visit-date-row">
+                  <div class="date-pill">📅 Tue 25 Mar</div>
+                  <div class="date-pill">🕘 09:00 AM</div>
+                </div>
+              </div>
+
+              <div class="visit-body">
+
+                <!-- OBSERVATION TOPICS -->
+                <div class="topics-section">
+                  <div class="topics-header">
+                    <div class="topics-title">🎯 Recommended Topics</div>
+                    <div class="topics-source">AI + trend data</div>
+                  </div>
+
+                  <div class="topic-item" onclick="this.querySelector('.topic-check').classList.toggle('checked')">
+                    <div class="topic-check checked">✓</div>
+                    <div style="flex:1">
+                      <div class="topic-text">Spotter positioning during heavy vehicle reversing</div>
+                      <div class="topic-source">Near-miss trend · 3 observations this month</div>
+                    </div>
+                    <div class="topic-badge tb-trend">Trend</div>
+                  </div>
+
+                  <div class="topic-item" onclick="this.querySelector('.topic-check').classList.toggle('checked')">
+                    <div class="topic-check checked">✓</div>
+                    <div style="flex:1">
+                      <div class="topic-text">Hot work pre-task checklist completion — are fire blankets in place before cutting starts?</div>
+                      <div class="topic-source">Open investigation · INC-0091</div>
+                    </div>
+                    <div class="topic-badge tb-inv">Investigation</div>
+                  </div>
+
+                  <div class="topic-item" onclick="this.querySelector('.topic-check').classList.toggle('checked')">
+                    <div class="topic-check">✓</div>
+                    <div style="flex:1">
+                      <div class="topic-text">Permit to Work sign-on — are workers reading PTW conditions before starting?</div>
+                      <div class="topic-source">AI recommended · Practice atrophy detected</div>
+                    </div>
+                    <div class="topic-badge tb-ai">AI</div>
+                  </div>
+
+                  <div class="topic-item" onclick="this.querySelector('.topic-check').classList.toggle('checked')">
+                    <div class="topic-check">✓</div>
+                    <div style="flex:1">
+                      <div class="topic-text">Harness inspection — are workers checking lanyards before working at height?</div>
+                      <div class="topic-source">AI recommended · No observation in 22 days</div>
+                    </div>
+                    <div class="topic-badge tb-ai">AI</div>
+                  </div>
+
+                  <div class="add-topic-row">
+                    <span style="font-size:16px;">＋</span> Add custom topic
+                  </div>
+                </div>
+
+                <!-- SITE CONTEXT -->
+                <div class="visit-context">
+                  <div class="context-header">📊 Site Context</div>
+                  <div class="context-row">
+                    <div class="context-key">Last observation</div>
+                    <div class="context-val warn">18 days ago</div>
+                  </div>
+                  <div class="context-row">
+                    <div class="context-key">Last talk delivered</div>
+                    <div class="context-val warn">11 days ago</div>
+                  </div>
+                  <div class="context-row">
+                    <div class="context-key">Open investigations</div>
+                    <div class="context-val danger">2 open</div>
+                  </div>
+                  <div class="context-row">
+                    <div class="context-key">Near-miss (30d)</div>
+                    <div class="context-val danger">6 logged ↑</div>
+                  </div>
+                  <div class="context-row">
+                    <div class="context-key">Atrophy score</div>
+                    <div class="context-val danger">87 / 100</div>
+                  </div>
+                  <div class="context-row">
+                    <div class="context-key">Active work types</div>
+                    <div class="context-val">Heavy Vehicle, Hot Work</div>
+                  </div>
+                </div>
+
+                <button class="start-visit-btn">
+                  🦺 Start Visit — Riverside Tower
+                </button>
+
+              </div>
+            </div>
+          </div>
+          <!-- No nav bar — visit detail is full-focus -->
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══ SECTION 3: CALLOUTS ═══════════════════════════════════════ -->
+  <div class="callout-section">
+    <div class="section-header">
+      <span>03 —</span> Key Design Decisions
+    </div>
+    <div class="callout-grid">
+      <div class="callout-card">
+        <div class="callout-num">01</div>
+        <div class="callout-title">One divergence point</div>
+        <div class="callout-body">The only difference between supervisor and manager mobile experience is the home screen. Supervisor sees today's site. Manager sees their site portfolio ranked by atrophy. Views 1–4 are identical code, different data.</div>
+      </div>
+      <div class="callout-card">
+        <div class="callout-num">02</div>
+        <div class="callout-title">Atrophy is a first-class signal</div>
+        <div class="callout-body">Score is calculated from: days since last observation, days since last talk, open overdue investigations, and near-miss trend vs site baseline. High atrophy = the system has gone quiet. That's always worth a visit.</div>
+      </div>
+      <div class="callout-card">
+        <div class="callout-num">03</div>
+        <div class="callout-title">Topics are recommended, never mandatory</div>
+        <div class="callout-body">AI and trend data surface recommended topics. Manager selects which to bring into the visit. They can add custom topics, deselect any, and the capture form uses selected topics as prompts — not locked fields.</div>
+      </div>
+      <div class="callout-card">
+        <div class="callout-num">04</div>
+        <div class="callout-title">Topic sources are transparent</div>
+        <div class="callout-body">Every recommended topic shows where it came from: a near-miss trend, an open investigation, an AI recommendation from practice atrophy, or a regional critical insight. The manager knows why each topic matters before they arrive.</div>
+      </div>
+      <div class="callout-card">
+        <div class="callout-num">05</div>
+        <div class="callout-title">Visit plan is a lightweight record</div>
+        <div class="callout-body">Starting a visit locks the plan — date, time, topics selected, site context snapshot. Post-visit, the record shows topics planned vs actually observed. Over time this creates a manager field presence audit trail.</div>
+      </div>
+      <div class="callout-card">
+        <div class="callout-num">06</div>
+        <div class="callout-title">Capture is the same form</div>
+        <div class="callout-body">Manager observations use the identical capture form as supervisors. The difference is auto-tagging: observer_role = manager, linked visit_id. This means manager observations feed the same trend detection and toolbox pipeline with no extra design cost.</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

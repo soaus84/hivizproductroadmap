@@ -1,0 +1,1364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SafetyPlatform — Minimal UI</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap');
+
+:root {
+  --bg: #F4F6F8;
+  --surface: #FFFFFF;
+  --text-primary: #212B36;
+  --text-secondary: #637381;
+  --text-disabled: #919EAB;
+  --border: #DFE3E8;
+  --border-light: #F4F6F8;
+
+  --rust:    #FF5630;
+  --rust-bg: #FFF2EF;
+  --amber:   #FFAB00;
+  --amber-bg:#FFF7CD;
+  --green:   #36B37E;
+  --green-bg:#E9FCD4;
+  --blue:    #1890FF;
+  --blue-bg: #D0F2FF;
+  --plum:    #7635DC;
+  --plum-bg: #EFE7FE;
+  --teal:    #00B8D9;
+  --teal-bg: #CAFDF5;
+  --pink:    #FF3366;
+  --pink-bg: #FFE7F0;
+
+  --shadow-card: 0 0 2px rgba(145,158,171,0.2), 0 12px 24px -4px rgba(145,158,171,0.12);
+  --shadow-sm: 0 1px 2px rgba(145,158,171,0.16);
+  --radius: 16px;
+  --radius-sm: 10px;
+
+  --sans: 'Public Sans', -apple-system, sans-serif;
+  --phone-w: 390px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: #E8EBF0;
+  font-family: var(--sans);
+  font-size: 14px;
+  line-height: 1.57;
+  min-height: 100vh;
+  padding: 32px 20px 60px;
+}
+
+/* OUTER LAYOUT */
+.page-title {
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #4A5568;
+  margin-bottom: 8px;
+  padding-left: 4px;
+}
+
+.page-desc {
+  font-size: 13px;
+  color: #4A5568;
+  margin-bottom: 28px;
+  padding-left: 4px;
+  max-width: 600px;
+  line-height: 1.6;
+}
+
+.views-row {
+  display: flex;
+  gap: 28px;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+.view-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+}
+
+.view-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #4A5568;
+  text-align: center;
+}
+
+/* PHONE FRAME */
+.phone {
+  width: var(--phone-w);
+  background: var(--bg);
+  border-radius: 44px;
+  box-shadow:
+    0 0 0 10px #0F1923,
+    0 0 0 12px #2A3540,
+    0 40px 80px rgba(0,0,0,0.6);
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+/* STATUS BAR */
+.status-bar {
+  height: 50px;
+  background: var(--surface);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px 0 28px;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 10;
+}
+
+.notch {
+  position: absolute;
+  top: 0; left: 50%; transform: translateX(-50%);
+  width: 126px; height: 37px;
+  background: #0F1923;
+  border-radius: 0 0 22px 22px;
+  z-index: 20;
+}
+
+.status-time { font-size: 15px; font-weight: 600; color: var(--text-primary); }
+.status-icons { font-size: 12px; color: var(--text-primary); display:flex;gap:5px;align-items:center; }
+
+/* APP TOP BAR */
+.app-topbar {
+  background: var(--surface);
+  padding: 10px 20px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px dashed var(--border);
+}
+
+.topbar-logo {
+  width: 32px; height: 32px;
+  background: linear-gradient(135deg, #7635DC 0%, #1890FF 100%);
+  border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px;
+  font-weight: 800;
+  color: white;
+  letter-spacing: -0.5px;
+  flex-shrink: 0;
+}
+
+.topbar-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+  flex: 1;
+}
+
+.topbar-subtitle {
+  font-size: 11px;
+  color: var(--text-secondary);
+  margin-top: 1px;
+}
+
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.icon-btn {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+  cursor: pointer;
+  background: var(--bg);
+  border: none;
+  position: relative;
+  color: var(--text-secondary);
+  transition: background 0.15s;
+}
+
+.icon-btn:hover { background: var(--border); }
+
+.badge {
+  position: absolute;
+  top: 2px; right: 2px;
+  width: 16px; height: 16px;
+  background: var(--rust);
+  border-radius: 50%;
+  font-size: 9px;
+  font-weight: 700;
+  color: white;
+  display: flex; align-items: center; justify-content: center;
+  border: 2px solid var(--surface);
+}
+
+.avatar-btn {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #84FAB0 0%, #8FD3F4 100%);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700;
+  color: var(--text-primary);
+  cursor: pointer;
+  border: 2px solid var(--green);
+  flex-shrink: 0;
+}
+
+/* SCROLL AREA */
+.scroll-area {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: var(--bg);
+}
+
+.scroll-area::-webkit-scrollbar { display: none; }
+
+/* BOTTOM NAV */
+.bottom-nav {
+  height: 70px;
+  background: var(--surface);
+  border-top: 1px solid var(--border-light);
+  display: flex;
+  padding-bottom: 8px;
+  flex-shrink: 0;
+}
+
+.bn-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  cursor: pointer;
+  padding-top: 6px;
+}
+
+.bn-icon { font-size: 20px; }
+.bn-label { font-size: 10px; font-weight: 500; color: var(--text-disabled); }
+.bn-item.active .bn-label { color: var(--plum); font-weight: 700; }
+
+/* ── COMPONENTS ────────────────────── */
+
+/* GREETING */
+.greeting-row {
+  padding: 4px 0 2px;
+}
+
+.greeting-hi {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.greeting-sub {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+/* STAT CARDS */
+.stat-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.stat-card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 18px 16px;
+  box-shadow: var(--shadow-card);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  cursor: pointer;
+  transition: box-shadow 0.15s;
+}
+
+.stat-card:hover { box-shadow: 0 0 2px rgba(145,158,171,0.3), 0 16px 32px -4px rgba(145,158,171,0.18); }
+
+.stat-card.full { grid-column: 1 / -1; }
+
+.sc-left {}
+.sc-value { font-size: 30px; font-weight: 800; color: var(--text-primary); line-height: 1; }
+.sc-label { font-size: 12px; color: var(--text-secondary); margin-top: 5px; font-weight: 500; }
+.sc-delta { font-size: 11px; margin-top: 4px; display: flex; align-items: center; gap: 3px; }
+.delta-up { color: var(--green); }
+.delta-down { color: var(--rust); }
+.delta-neutral { color: var(--text-secondary); }
+
+.sc-icon {
+  width: 48px; height: 48px;
+  border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+}
+
+/* SECTION LABEL */
+.section-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 2px 0;
+}
+
+.section-link {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--plum);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+/* ACTIVITY FEED */
+.feed-card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+}
+
+.feed-item {
+  padding: 12px 16px;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  border-bottom: 1px dashed var(--border-light);
+  cursor: pointer;
+  transition: background 0.12s;
+}
+
+.feed-item:last-child { border-bottom: none; }
+.feed-item:hover { background: var(--bg); }
+
+.fi-dot-wrap {
+  padding-top: 4px;
+  flex-shrink: 0;
+}
+
+.fi-dot {
+  width: 9px; height: 9px;
+  border-radius: 50%;
+}
+
+.fi-body { flex: 1; }
+.fi-title { font-size: 13px; font-weight: 600; color: var(--text-primary); line-height: 1.4; }
+.fi-meta { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+
+.chip-sm {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 6px;
+  margin-top: 4px;
+}
+
+.cs-amber { background: var(--amber-bg); color: #7A4100; }
+.cs-green { background: var(--green-bg); color: #1A6340; }
+.cs-blue  { background: var(--blue-bg);  color: #0C5FA8; }
+.cs-plum  { background: var(--plum-bg);  color: var(--plum); }
+.cs-rust  { background: var(--rust-bg);  color: #B31D00; }
+.cs-teal  { background: var(--teal-bg);  color: #006C82; }
+
+/* INSIGHT CARD — DISCUSSION VERSION */
+.insight-card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+}
+
+.ic-header {
+  padding: 14px 16px 12px;
+  border-bottom: 1px dashed var(--border-light);
+}
+
+.ic-type-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.ic-type-badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 6px;
+  background: var(--plum-bg);
+  color: var(--plum);
+}
+
+.ic-scope {
+  font-size: 10px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.ic-age {
+  font-size: 10px;
+  color: var(--text-disabled);
+  margin-left: auto;
+}
+
+.ic-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.4;
+  margin-bottom: 6px;
+}
+
+.ic-narrative {
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  font-style: italic;
+  border-left: 3px solid var(--plum-bg);
+  padding-left: 10px;
+  margin: 8px 0;
+}
+
+.ic-signals {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+/* SOCIAL ROW */
+.ic-social {
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px dashed var(--border-light);
+  background: var(--bg);
+}
+
+.upvote-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 5px 12px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  transition: all 0.15s;
+}
+
+.upvote-btn.active {
+  background: var(--green-bg);
+  border-color: var(--green);
+  color: var(--green);
+}
+
+.upvote-btn:hover { border-color: var(--green); color: var(--green); }
+
+.upvote-count {
+  background: var(--plum-bg);
+  color: var(--plum);
+  border-radius: 6px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.comment-count {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.escalate-badge {
+  margin-left: auto;
+  background: var(--rust-bg);
+  color: var(--rust);
+  border-radius: 6px;
+  padding: 3px 8px;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+/* DISCUSSION THREAD */
+.ic-discussion {
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.discussion-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.comment {
+  display: flex;
+  gap: 9px;
+  align-items: flex-start;
+}
+
+.comment-avatar {
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700;
+  color: white;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.comment-body {
+  flex: 1;
+  background: var(--bg);
+  border-radius: 10px;
+  padding: 9px 11px;
+}
+
+.comment-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 3px;
+}
+
+.comment-name {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.comment-role {
+  font-size: 10px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.comment-time {
+  font-size: 10px;
+  color: var(--text-disabled);
+  margin-left: auto;
+}
+
+.comment-text {
+  font-size: 12.5px;
+  color: var(--text-primary);
+  line-height: 1.5;
+}
+
+.comment-endorsed {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 5px;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--green);
+  background: var(--green-bg);
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+
+.add-comment {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 2px;
+}
+
+.comment-input {
+  flex: 1;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 8px 14px;
+  font-size: 12px;
+  font-family: var(--sans);
+  color: var(--text-primary);
+  outline: none;
+}
+
+.comment-input:focus { border-color: var(--plum); }
+
+.send-btn {
+  width: 32px; height: 32px;
+  background: var(--plum);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px;
+  color: white;
+  cursor: pointer;
+  border: none;
+  flex-shrink: 0;
+}
+
+/* DECISION BUTTONS */
+.ic-actions {
+  padding: 12px 16px;
+  display: flex;
+  gap: 8px;
+  border-top: 1px dashed var(--border-light);
+}
+
+.action-btn {
+  flex: 1;
+  padding: 10px;
+  border-radius: var(--radius-sm);
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+
+.btn-reject {
+  background: var(--bg);
+  color: var(--rust);
+  border: 1px solid var(--border);
+}
+
+.btn-edit {
+  background: var(--amber-bg);
+  color: #7A4100;
+}
+
+.btn-approve {
+  background: var(--green);
+  color: white;
+}
+
+/* VISIT CARD */
+.visit-site-card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+  cursor: pointer;
+  transition: box-shadow 0.15s;
+}
+
+.visit-site-card:hover { box-shadow: 0 0 2px rgba(145,158,171,0.3), 0 16px 32px -4px rgba(145,158,171,0.18); }
+
+.vsc-header {
+  padding: 14px 16px 10px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.vsc-icon {
+  width: 42px; height: 42px;
+  border-radius: 12px;
+  background: var(--blue-bg);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.vsc-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.3;
+}
+
+.vsc-meta { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+
+.atrophy-ring {
+  margin-left: auto;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.ring-value {
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.ring-label {
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 1px;
+}
+
+.vsc-signals {
+  padding: 0 16px 10px;
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+
+.vsc-bar {
+  height: 4px;
+  background: var(--border-light);
+  border-radius: 2px;
+  margin: 0 16px 12px;
+  overflow: hidden;
+}
+
+.vsc-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+}
+
+/* PROGRESS ITEM */
+.progress-item {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  box-shadow: var(--shadow-card);
+}
+
+.pi-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.pi-icon {
+  width: 38px; height: 38px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.pi-title { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+.pi-meta { font-size: 11px; color: var(--text-secondary); margin-top: 1px; }
+
+.progress-track {
+  height: 8px;
+  background: var(--border-light);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.5s ease;
+}
+
+.progress-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--text-secondary);
+  margin-top: 5px;
+}
+
+/* TALK CARD */
+.talk-card {
+  background: linear-gradient(135deg, #7635DC 0%, #1890FF 100%);
+  border-radius: var(--radius);
+  padding: 18px 16px;
+  box-shadow: 0 8px 24px rgba(118,53,220,0.35);
+  cursor: pointer;
+}
+
+.tc-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.7);
+  margin-bottom: 6px;
+}
+
+.tc-title {
+  font-size: 17px;
+  font-weight: 800;
+  color: white;
+  line-height: 1.3;
+  margin-bottom: 4px;
+}
+
+.tc-meta { font-size: 12px; color: rgba(255,255,255,0.75); margin-bottom: 14px; }
+
+.tc-btn {
+  background: rgba(255,255,255,0.2);
+  color: white;
+  border: 1px solid rgba(255,255,255,0.35);
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* TOPIC LIST */
+.topic-list {
+  background: var(--surface);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+}
+
+.topic-item {
+  padding: 11px 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  border-bottom: 1px dashed var(--border-light);
+  cursor: pointer;
+}
+
+.topic-item:last-child { border-bottom: none; }
+
+.topic-check {
+  width: 20px; height: 20px;
+  border-radius: 6px;
+  border: 2px solid var(--border);
+  flex-shrink: 0;
+  margin-top: 2px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px;
+  transition: all 0.12s;
+}
+
+.topic-check.checked {
+  background: var(--plum);
+  border-color: var(--plum);
+  color: white;
+}
+
+.topic-text { font-size: 12.5px; color: var(--text-primary); line-height: 1.4; flex: 1; }
+.topic-source { font-size: 10.5px; color: var(--text-secondary); margin-top: 2px; }
+
+/* START VISIT BTN */
+.start-visit {
+  background: var(--plum);
+  color: white;
+  border: none;
+  border-radius: var(--radius);
+  padding: 14px;
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 8px 16px rgba(118,53,220,0.3);
+}
+
+/* CONTEXT METRICS */
+.context-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.ctx-tile {
+  background: var(--surface);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  box-shadow: var(--shadow-sm);
+}
+
+.ctx-value { font-size: 20px; font-weight: 800; color: var(--text-primary); line-height: 1; }
+.ctx-label { font-size: 11px; color: var(--text-secondary); margin-top: 3px; font-weight: 500; }
+
+</style>
+</head>
+<body>
+
+<!-- PAGE HEADER -->
+<div class="page-title">SafetyPlatform — Mobile Views</div>
+<div class="page-desc">All views use the Minimal UI kit. Cards, progress, chip badges, and pastel icon blobs throughout. Insight discussion thread shown in full on View 3.</div>
+
+<div class="views-row">
+
+  <!-- ═══ VIEW 1: SUPERVISOR HOME ═══════════ -->
+  <div class="view-wrap">
+    <div class="view-label">Supervisor — Home</div>
+    <div class="phone" style="max-height:780px;">
+      <div class="notch"></div>
+      <div class="status-bar">
+        <span class="status-time">9:14</span>
+        <div class="status-icons">▲ ◉◉◉ ▊</div>
+      </div>
+      <div class="app-topbar">
+        <div class="topbar-logo">SP</div>
+        <div>
+          <div class="topbar-title">SafetyPlatform</div>
+          <div class="topbar-subtitle">Riverside Tower — Phase 2</div>
+        </div>
+        <div class="topbar-actions">
+          <button class="icon-btn" style="font-size:18px;">🔔<div class="badge">2</div></button>
+          <div class="avatar-btn">MR</div>
+        </div>
+      </div>
+      <div class="scroll-area">
+
+        <div class="greeting-row">
+          <div class="greeting-hi">Good morning, Marcus 👋</div>
+          <div class="greeting-sub">Let's keep the site safe today.</div>
+        </div>
+
+        <!-- TALK READY -->
+        <div class="talk-card">
+          <div class="tc-label">Talk Ready to Deliver</div>
+          <div class="tc-title">Heavy Vehicle — Spotter Management</div>
+          <div class="tc-meta">Generated 8 min ago · 14 crew expected</div>
+          <button class="tc-btn">▶ Open & Deliver</button>
+        </div>
+
+        <!-- STAT CARDS -->
+        <div class="stat-cards">
+          <div class="stat-card">
+            <div class="sc-left">
+              <div class="sc-value">3</div>
+              <div class="sc-label">Talks this week</div>
+              <div class="sc-delta delta-up">↑ vs last week</div>
+            </div>
+            <div class="sc-icon" style="background:var(--plum-bg);">📋</div>
+          </div>
+          <div class="stat-card">
+            <div class="sc-left">
+              <div class="sc-value">47</div>
+              <div class="sc-label">Crew reached</div>
+              <div class="sc-delta delta-up">↑ 12 this week</div>
+            </div>
+            <div class="sc-icon" style="background:var(--green-bg);">👷</div>
+          </div>
+        </div>
+
+        <div class="section-label">
+          Site Activity
+          <span class="section-link">See all</span>
+        </div>
+
+        <div class="feed-card">
+          <div class="feed-item">
+            <div class="fi-dot-wrap"><div class="fi-dot" style="background:var(--amber)"></div></div>
+            <div class="fi-body">
+              <div class="fi-title">Near-miss — excavator reversing, spotter absent</div>
+              <div class="fi-meta">Today 7:42am · J. Reyes</div>
+              <span class="chip-sm cs-amber">Heavy Vehicle</span>
+            </div>
+          </div>
+          <div class="feed-item">
+            <div class="fi-dot-wrap"><div class="fi-dot" style="background:var(--green)"></div></div>
+            <div class="fi-body">
+              <div class="fi-title">Talk delivered — Fall Protection · 14 attended</div>
+              <div class="fi-meta">Yesterday · 100% acknowledged</div>
+              <span class="chip-sm cs-green">Delivered</span>
+            </div>
+          </div>
+          <div class="feed-item">
+            <div class="fi-dot-wrap"><div class="fi-dot" style="background:var(--plum)"></div></div>
+            <div class="fi-body">
+              <div class="fi-title">Critical Insight approved — Hot Work regional trend</div>
+              <div class="fi-meta">2 days ago · 5 managers endorsed</div>
+              <span class="chip-sm cs-plum">Regional</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-label">Log Something</div>
+
+        <div class="stat-cards">
+          <div class="stat-card" style="cursor:pointer">
+            <div class="sc-left">
+              <div class="sc-label" style="font-size:13px;font-weight:700;color:var(--text-primary);">Log Observation</div>
+              <div class="sc-label" style="margin-top:3px;">Safe, at-risk or near-miss</div>
+            </div>
+            <div class="sc-icon" style="background:var(--teal-bg);">👁️</div>
+          </div>
+          <div class="stat-card" style="cursor:pointer">
+            <div class="sc-left">
+              <div class="sc-label" style="font-size:13px;font-weight:700;color:var(--text-primary);">Report Incident</div>
+              <div class="sc-label" style="margin-top:3px;">Injury or near-miss</div>
+            </div>
+            <div class="sc-icon" style="background:var(--rust-bg);">⚠️</div>
+          </div>
+        </div>
+
+      </div>
+      <div class="bottom-nav">
+        <div class="bn-item active"><div class="bn-icon">🏠</div><div class="bn-label" style="color:var(--plum)">Home</div></div>
+        <div class="bn-item" style="position:relative">
+          <div class="bn-icon">📋</div><div class="bn-label">Talk</div>
+          <div style="position:absolute;top:8px;right:22px;width:7px;height:7px;background:var(--rust);border-radius:50%;"></div>
+        </div>
+        <div class="bn-item"><div class="bn-icon">👁️</div><div class="bn-label">Capture</div></div>
+        <div class="bn-item"><div class="bn-icon">📁</div><div class="bn-label">Records</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ VIEW 2: MANAGER VISIT LIST ════════ -->
+  <div class="view-wrap">
+    <div class="view-label">Manager — Visit Planning</div>
+    <div class="phone" style="max-height:780px;">
+      <div class="notch"></div>
+      <div class="status-bar">
+        <span class="status-time">9:14</span>
+        <div class="status-icons">▲ ◉◉◉ ▊</div>
+      </div>
+      <div class="app-topbar">
+        <div class="topbar-logo">SP</div>
+        <div>
+          <div class="topbar-title">Field Visits</div>
+          <div class="topbar-subtitle">North Region · 8 active sites</div>
+        </div>
+        <div class="topbar-actions">
+          <button class="icon-btn">🔍</button>
+          <div class="avatar-btn" style="background:linear-gradient(135deg,#f093fb,#f5576c)">JT</div>
+        </div>
+      </div>
+      <div class="scroll-area">
+
+        <div class="stat-cards">
+          <div class="stat-card">
+            <div class="sc-left">
+              <div class="sc-value" style="color:var(--rust)">3</div>
+              <div class="sc-label">Sites need visit</div>
+              <div class="sc-delta delta-down">Atrophy &gt;70</div>
+            </div>
+            <div class="sc-icon" style="background:var(--rust-bg);">⚠️</div>
+          </div>
+          <div class="stat-card">
+            <div class="sc-left">
+              <div class="sc-value" style="color:var(--green)">5</div>
+              <div class="sc-label">Visited this month</div>
+              <div class="sc-delta delta-up">↑ 2 vs last month</div>
+            </div>
+            <div class="sc-icon" style="background:var(--green-bg);">✅</div>
+          </div>
+        </div>
+
+        <div class="section-label">Sites by Atrophy <span class="section-link">Filter</span></div>
+
+        <!-- SITE CARDS -->
+        <div class="visit-site-card">
+          <div class="vsc-header">
+            <div class="vsc-icon">🏗️</div>
+            <div>
+              <div class="vsc-name">Riverside Tower</div>
+              <div class="vsc-meta">Phase 2 · 47 workers</div>
+            </div>
+            <div class="atrophy-ring">
+              <div class="ring-value" style="color:var(--rust)">87</div>
+              <div class="ring-label">Atrophy</div>
+            </div>
+          </div>
+          <div class="vsc-signals">
+            <span class="chip-sm cs-rust">18d no obs.</span>
+            <span class="chip-sm cs-amber">2 open inv.</span>
+            <span class="chip-sm cs-plum">Near-miss ↑</span>
+          </div>
+          <div class="vsc-bar"><div class="vsc-bar-fill" style="width:87%;background:var(--rust)"></div></div>
+        </div>
+
+        <div class="visit-site-card">
+          <div class="vsc-header">
+            <div class="vsc-icon" style="background:var(--teal-bg)">🚇</div>
+            <div>
+              <div class="vsc-name">Central Rail Depot</div>
+              <div class="vsc-meta">Stage 3 · 31 workers</div>
+            </div>
+            <div class="atrophy-ring">
+              <div class="ring-value" style="color:var(--amber)">54</div>
+              <div class="ring-label">Atrophy</div>
+            </div>
+          </div>
+          <div class="vsc-signals">
+            <span class="chip-sm cs-amber">12d no obs.</span>
+            <span class="chip-sm cs-blue">1 insight pending</span>
+          </div>
+          <div class="vsc-bar"><div class="vsc-bar-fill" style="width:54%;background:var(--amber)"></div></div>
+        </div>
+
+        <div class="visit-site-card">
+          <div class="vsc-header">
+            <div class="vsc-icon" style="background:var(--green-bg)">🌉</div>
+            <div>
+              <div class="vsc-name">Harbour Bridge Retrofit</div>
+              <div class="vsc-meta">Zone B · 22 workers</div>
+            </div>
+            <div class="atrophy-ring">
+              <div class="ring-value" style="color:var(--green)">21</div>
+              <div class="ring-label">Atrophy</div>
+            </div>
+          </div>
+          <div class="vsc-signals">
+            <span class="chip-sm cs-green">Active this week</span>
+            <span class="chip-sm cs-green">Talk delivered</span>
+          </div>
+          <div class="vsc-bar"><div class="vsc-bar-fill" style="width:21%;background:var(--green)"></div></div>
+        </div>
+
+      </div>
+      <div class="bottom-nav">
+        <div class="bn-item active"><div class="bn-icon">🗺️</div><div class="bn-label" style="color:var(--plum)">Visits</div></div>
+        <div class="bn-item"><div class="bn-icon">👁️</div><div class="bn-label">Capture</div></div>
+        <div class="bn-item"><div class="bn-icon">📊</div><div class="bn-label">Insights</div></div>
+        <div class="bn-item"><div class="bn-icon">📁</div><div class="bn-label">Records</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ VIEW 3: INSIGHT WITH DISCUSSION ═══ -->
+  <div class="view-wrap">
+    <div class="view-label">Insight — Discussion Thread</div>
+    <div class="phone" style="max-height:780px;">
+      <div class="notch"></div>
+      <div class="status-bar">
+        <span class="status-time">9:14</span>
+        <div class="status-icons">▲ ◉◉◉ ▊</div>
+      </div>
+      <div class="app-topbar">
+        <div style="font-size:16px;cursor:pointer;color:var(--text-secondary)">←</div>
+        <div style="margin-left:10px;">
+          <div class="topbar-title">Critical Insight</div>
+          <div class="topbar-subtitle">Awaiting your review</div>
+        </div>
+        <div style="margin-left:auto">
+          <span class="chip-sm cs-rust">3d overdue</span>
+        </div>
+      </div>
+      <div class="scroll-area">
+
+        <!-- INSIGHT CARD WITH THREAD -->
+        <div class="insight-card">
+          <div class="ic-header">
+            <div class="ic-type-row">
+              <span class="ic-type-badge">Critical Insight</span>
+              <span class="ic-scope">North Region · Heavy Vehicle</span>
+              <span class="ic-age">25 Mar</span>
+            </div>
+            <div class="ic-title">Spotter management — 6 near-misses across 4 sites in 28 days</div>
+            <div class="ic-narrative">"Six times in the last month, a heavy vehicle reversed without someone properly watching the blind zone. The common factor isn't the drivers — it's that spotter roles aren't being managed as controlled positions."</div>
+            <div class="ic-signals">
+              <span class="chip-sm cs-plum">6 observations</span>
+              <span class="chip-sm cs-amber">4 sites</span>
+              <span class="chip-sm cs-rust">Systemic</span>
+              <span class="chip-sm cs-blue">AI recommended escalation</span>
+            </div>
+          </div>
+
+          <!-- SOCIAL ROW -->
+          <div class="ic-social">
+            <button class="upvote-btn active" onclick="this.classList.toggle('active')">
+              👍 Endorse
+            </button>
+            <span class="upvote-count">5 endorsements</span>
+            <span class="comment-count">💬 3 comments</span>
+            <span class="escalate-badge">⬆ Escalate?</span>
+          </div>
+
+          <!-- DISCUSSION -->
+          <div class="ic-discussion">
+            <div class="discussion-label">Discussion</div>
+
+            <div class="comment">
+              <div class="comment-avatar" style="background:linear-gradient(135deg,#f093fb,#f5576c)">JT</div>
+              <div class="comment-body">
+                <div class="comment-meta">
+                  <span class="comment-name">J. Thompson</span>
+                  <span class="comment-role">Regional Mgr</span>
+                  <span class="comment-time">2h ago</span>
+                </div>
+                <div class="comment-text">Saw this at Riverside on my visit Tuesday. The spotter literally walked off mid-operation. No handover. Definitely systemic — not a one-person problem.</div>
+                <div class="comment-endorsed">✓ Endorsed · Recommends escalation</div>
+              </div>
+            </div>
+
+            <div class="comment">
+              <div class="comment-avatar" style="background:linear-gradient(135deg,#4facfe,#00f2fe)">KO</div>
+              <div class="comment-body">
+                <div class="comment-meta">
+                  <span class="comment-name">K. Obi</span>
+                  <span class="comment-role">Supervisor · CRD</span>
+                  <span class="comment-time">1h ago</span>
+                </div>
+                <div class="comment-text">Same at Central Rail last week. PTW doesn't mention spotter continuity at all. That's probably the gap — the permit doesn't anchor the role for the duration.</div>
+              </div>
+            </div>
+
+            <div class="comment">
+              <div class="comment-avatar" style="background:linear-gradient(135deg,#43e97b,#38f9d7)">SR</div>
+              <div class="comment-body">
+                <div class="comment-meta">
+                  <span class="comment-name">S. Reyes</span>
+                  <span class="comment-role">Safety Mgr</span>
+                  <span class="comment-time">30m ago</span>
+                </div>
+                <div class="comment-text">Approving and escalating to systemic. Will update the STMP template across all sites this week. Thanks for the field context — it confirms this is the right call.</div>
+                <div class="comment-endorsed">✓ Approved this insight</div>
+              </div>
+            </div>
+
+            <div class="add-comment">
+              <div class="comment-avatar" style="background:linear-gradient(135deg,#a18cd1,#fbc2eb);font-size:11px;font-weight:700;color:var(--text-primary)">You</div>
+              <input class="comment-input" placeholder="Add your field experience...">
+              <button class="send-btn">➤</button>
+            </div>
+          </div>
+
+          <div class="ic-actions">
+            <button class="action-btn btn-reject">✕ Reject</button>
+            <button class="action-btn btn-edit">✎ Edit</button>
+            <button class="action-btn btn-approve">✓ Approve & Share</button>
+          </div>
+        </div>
+
+      </div>
+      <div class="bottom-nav">
+        <div class="bn-item"><div class="bn-icon">🏠</div><div class="bn-label">Home</div></div>
+        <div class="bn-item active"><div class="bn-icon">💡</div><div class="bn-label" style="color:var(--plum)">Insights</div></div>
+        <div class="bn-item"><div class="bn-icon">👁️</div><div class="bn-label">Capture</div></div>
+        <div class="bn-item"><div class="bn-icon">📁</div><div class="bn-label">Records</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ VIEW 4: VISIT PLAN DETAIL ═════════ -->
+  <div class="view-wrap">
+    <div class="view-label">Manager — Visit Plan Detail</div>
+    <div class="phone" style="max-height:780px;">
+      <div class="notch"></div>
+      <div class="status-bar">
+        <span class="status-time">9:14</span>
+        <div class="status-icons">▲ ◉◉◉ ▊</div>
+      </div>
+      <div class="app-topbar">
+        <div style="font-size:16px;cursor:pointer;color:var(--text-secondary)">←</div>
+        <div style="margin-left:10px;">
+          <div class="topbar-title">Riverside Tower</div>
+          <div class="topbar-subtitle">Plan visit · Tue 25 Mar</div>
+        </div>
+        <div style="margin-left:auto">
+          <span class="chip-sm cs-rust">Atrophy 87</span>
+        </div>
+      </div>
+      <div class="scroll-area">
+
+        <div class="context-grid">
+          <div class="ctx-tile">
+            <div class="ctx-value" style="color:var(--rust)">18d</div>
+            <div class="ctx-label">Last observation</div>
+          </div>
+          <div class="ctx-tile">
+            <div class="ctx-value" style="color:var(--amber)">2</div>
+            <div class="ctx-label">Open investigations</div>
+          </div>
+          <div class="ctx-tile">
+            <div class="ctx-value" style="color:var(--rust)">6</div>
+            <div class="ctx-label">Near-misses (30d)</div>
+          </div>
+          <div class="ctx-tile">
+            <div class="ctx-value" style="color:var(--amber)">11d</div>
+            <div class="ctx-label">Last talk</div>
+          </div>
+        </div>
+
+        <div class="section-label">
+          Recommended Topics
+          <span class="section-link">+ Add</span>
+        </div>
+
+        <div class="topic-list">
+          <div class="topic-item" onclick="this.querySelector('.topic-check').classList.toggle('checked')">
+            <div class="topic-check checked">✓</div>
+            <div>
+              <div class="topic-text">Spotter positioning — are spotters staying in position for the full reversing operation?</div>
+              <div class="topic-source">📈 Near-miss trend · 3 obs this month</div>
+              <span class="chip-sm cs-rust" style="margin-top:4px;">Trend</span>
+            </div>
+          </div>
+          <div class="topic-item" onclick="this.querySelector('.topic-check').classList.toggle('checked')">
+            <div class="topic-check checked">✓</div>
+            <div>
+              <div class="topic-text">Hot work pre-task checklist — are fire blankets in place before cutting starts?</div>
+              <div class="topic-source">🔍 Open investigation · INC-0091</div>
+              <span class="chip-sm cs-amber" style="margin-top:4px;">Investigation</span>
+            </div>
+          </div>
+          <div class="topic-item" onclick="this.querySelector('.topic-check').classList.toggle('checked')">
+            <div class="topic-check">✓</div>
+            <div>
+              <div class="topic-text">PTW sign-on — are workers reading permit conditions before starting?</div>
+              <div class="topic-source">🤖 AI · Practice atrophy detected</div>
+              <span class="chip-sm cs-plum" style="margin-top:4px;">AI</span>
+            </div>
+          </div>
+          <div class="topic-item" onclick="this.querySelector('.topic-check').classList.toggle('checked')">
+            <div class="topic-check">✓</div>
+            <div>
+              <div class="topic-text">Harness inspection — are lanyards checked before working at height?</div>
+              <div class="topic-source">🤖 AI · No height obs in 22 days</div>
+              <span class="chip-sm cs-plum" style="margin-top:4px;">AI</span>
+            </div>
+          </div>
+        </div>
+
+        <button class="start-visit">🦺 Start Visit — Riverside Tower</button>
+
+      </div>
+      <div class="bottom-nav">
+        <div class="bn-item active"><div class="bn-icon">🗺️</div><div class="bn-label" style="color:var(--plum)">Visits</div></div>
+        <div class="bn-item"><div class="bn-icon">👁️</div><div class="bn-label">Capture</div></div>
+        <div class="bn-item"><div class="bn-icon">📊</div><div class="bn-label">Insights</div></div>
+        <div class="bn-item"><div class="bn-icon">📁</div><div class="bn-label">Records</div></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

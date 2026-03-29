@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SafetyPlatform — Intelligence Pipeline Simulator</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --bg: #0a0b0d;
+  --surface: #13141a;
+  --surface2: #1a1b23;
+  --surface3: #1e1f28;
+  --border: #252630;
+  --text: #dde1eb;
+  --muted: #5a5d6e;
+  --bright: #e8ecf8;
+  --mono: 'IBM Plex Mono', monospace;
+  --sans: 'IBM Plex Sans', sans-serif;
+  --plum: #7635DC; --plum-dim: rgba(118,53,220,0.1); --plum-border: rgba(118,53,220,0.3); --plum-text: #a78bfa;
+  --teal: #0891b2; --teal-dim: rgba(8,145,178,0.1);  --teal-border: rgba(8,145,178,0.28); --teal-text: #22d3ee;
+  --amber: #d97706; --amber-dim: rgba(217,119,6,0.1); --amber-border: rgba(217,119,6,0.28); --amber-text: #fbbf24;
+  --green: #059669; --green-dim: rgba(5,150,105,0.1); --green-border: rgba(5,150,105,0.28); --green-text: #34d399;
+  --red: #dc2626;   --red-dim: rgba(220,38,38,0.1);   --red-border: rgba(220,38,38,0.28);   --red-text: #f87171;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg); color: var(--text);
+  font-family: var(--sans); font-size: 13px; line-height: 1.6; min-height: 100vh;
+}
+
+body::before {
+  content: ''; position: fixed; inset: 0;
+  background-image: linear-gradient(rgba(118,53,220,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(118,53,220,0.025) 1px, transparent 1px);
+  background-size: 40px 40px; pointer-events: none; z-index: 0;
+}
+
+.header {
+  position: relative; z-index: 10; padding: 18px 28px 14px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  background: rgba(10,11,13,0.92); backdrop-filter: blur(10px);
+}
+.logo { display: flex; align-items: center; gap: 10px; }
+.logo-mark { width: 28px; height: 28px; background: var(--plum); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 11px; font-weight: 700; color: white; }
+.logo-name { font-family: var(--mono); font-size: 12px; font-weight: 700; color: var(--bright); }
+.logo-sub  { font-family: var(--mono); font-size: 10px; color: var(--muted); }
+.legend { display: flex; gap: 16px; align-items: center; }
+.legend-item { display: flex; align-items: center; gap: 6px; font-family: var(--mono); font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); }
+.legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+.main { position: relative; z-index: 1; display: grid; grid-template-columns: 300px 1fr; height: calc(100vh - 65px); }
+
+.left { border-right: 1px solid var(--border); overflow-y: auto; padding: 20px; background: rgba(19,20,26,0.6); display: flex; flex-direction: column; gap: 14px; }
+.left::-webkit-scrollbar { width: 3px; } .left::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+.panel-label { font-family: var(--mono); font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+
+.sc-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 13px 14px; cursor: pointer; transition: all 0.18s; position: relative; overflow: hidden; }
+.sc-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; border-radius: 3px 0 0 3px; }
+.sc-card.c0::before { background: var(--plum); }
+.sc-card.c1::before { background: var(--teal); }
+.sc-card.c2::before { background: var(--red); }
+.sc-card:hover { background: var(--surface3); transform: translateX(2px); }
+.sc-card.active { border-color: var(--plum-border); background: var(--plum-dim); }
+.sc-title { font-size: 13px; font-weight: 600; color: var(--bright); margin-bottom: 3px; }
+.sc-desc  { font-size: 11.5px; color: var(--muted); line-height: 1.5; margin-bottom: 7px; }
+.sc-tags  { display: flex; gap: 5px; flex-wrap: wrap; }
+.tag { font-family: var(--mono); font-size: 9px; padding: 2px 7px; border-radius: 3px; }
+.tp { background: var(--plum-dim);  color: var(--plum-text);  border: 1px solid var(--plum-border); }
+.tt { background: var(--teal-dim);  color: var(--teal-text);  border: 1px solid var(--teal-border); }
+.ta { background: var(--amber-dim); color: var(--amber-text); border: 1px solid var(--amber-border); }
+.tg { background: var(--green-dim); color: var(--green-text); border: 1px solid var(--green-border); }
+.tr { background: var(--red-dim);   color: var(--red-text);   border: 1px solid var(--red-border); }
+
+.run-btn { width: 100%; background: var(--plum); color: white; border: none; border-radius: 6px; padding: 10px; font-family: var(--mono); font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; transition: all 0.18s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.run-btn:hover:not(:disabled) { background: #6020CC; transform: translateY(-1px); }
+.run-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+.canvas { overflow-y: auto; padding: 24px 28px; display: flex; flex-direction: column; gap: 0; }
+.canvas::-webkit-scrollbar { width: 4px; } .canvas::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+.empty { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 12px; }
+.empty-icon { font-size: 48px; opacity: 0.25; }
+.empty-text { font-size: 13px; color: var(--muted); text-align: center; max-width: 260px; line-height: 1.6; }
+
+/* STEP */
+.step { display: grid; grid-template-columns: 44px 1fr; opacity: 0; transform: translateY(8px); transition: opacity 0.35s, transform 0.35s; }
+.step.show { opacity: 1; transform: none; }
+.step.dim { opacity: 0.6; }
+
+.spine { position: relative; display: flex; flex-direction: column; align-items: center; padding-top: 10px; }
+.spine::after { content: ''; position: absolute; left: 21px; top: 44px; bottom: -20px; width: 2px; background: var(--border); }
+.step:last-child .spine::after { display: none; }
+
+.node { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; position: relative; z-index: 1; border: 2px solid var(--border); background: var(--surface); transition: all 0.3s; flex-shrink: 0; }
+.node.ai    { border-color: var(--plum);  background: var(--plum-dim);  box-shadow: 0 0 16px rgba(118,53,220,0.2); }
+.node.algo  { border-color: var(--teal);  background: var(--teal-dim);  box-shadow: 0 0 16px rgba(8,145,178,0.2); }
+.node.human { border-color: var(--amber); background: var(--amber-dim); box-shadow: 0 0 16px rgba(217,119,6,0.2); }
+.node.done  { border-color: var(--green); background: var(--green-dim); }
+
+.scontent { padding: 8px 0 22px 16px; }
+.shead { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.slabel { font-family: var(--mono); font-size: 9px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; padding: 2px 8px; border-radius: 3px; }
+.lai   { background: var(--plum-dim);  color: var(--plum-text);  border: 1px solid var(--plum-border); }
+.lalgo { background: var(--teal-dim);  color: var(--teal-text);  border: 1px solid var(--teal-border); }
+.lhum  { background: var(--amber-dim); color: var(--amber-text); border: 1px solid var(--amber-border); }
+.sname { font-size: 14px; font-weight: 600; color: var(--bright); }
+.sstatus { font-family: var(--mono); font-size: 9px; letter-spacing: 1px; color: var(--muted); text-transform: uppercase; margin-left: auto; }
+.sstatus.running { color: var(--plum-text); }
+.sstatus.done    { color: var(--green-text); }
+
+.scard { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+.scard.ai    { border-color: var(--plum-border); }
+.scard.algo  { border-color: var(--teal-border); }
+.scard.human { border-color: var(--amber-border); }
+
+/* CONTENT BLOCKS */
+.block { padding: 14px 16px; border-bottom: 1px solid var(--border); }
+.block:last-child { border-bottom: none; }
+.block-label { font-family: var(--mono); font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+
+.field-row { display: flex; gap: 10px; margin-bottom: 5px; align-items: flex-start; }
+.field-key { font-family: var(--mono); font-size: 11px; color: var(--teal-text); min-width: 140px; flex-shrink: 0; }
+.field-val { font-size: 12px; color: var(--text); line-height: 1.5; }
+
+.chip { display: inline-block; font-family: var(--mono); font-size: 10px; padding: 2px 8px; border-radius: 4px; }
+.chip-p { background: var(--plum-dim);  color: var(--plum-text);  border: 1px solid var(--plum-border); }
+.chip-t { background: var(--teal-dim);  color: var(--teal-text);  border: 1px solid var(--teal-border); }
+.chip-a { background: var(--amber-dim); color: var(--amber-text); border: 1px solid var(--amber-border); }
+.chip-g { background: var(--green-dim); color: var(--green-text); border: 1px solid var(--green-border); }
+.chip-r { background: var(--red-dim);   color: var(--red-text);   border: 1px solid var(--red-border); }
+
+.italic { font-style: italic; border-left: 2px solid var(--plum-border); padding-left: 10px; line-height: 1.7; color: var(--bright); font-size: 12.5px; }
+
+.ai-output { background: var(--plum-dim); border-top: 1px solid var(--plum-border); padding: 14px 16px; }
+.ai-label { font-family: var(--mono); font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: var(--plum-text); margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+.pulse-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--plum-text); animation: pulse 2s infinite; }
+
+.human-row { display: flex; gap: 12px; align-items: flex-start; padding: 14px 16px; }
+.human-prompt { flex: 1; font-size: 12.5px; line-height: 1.6; color: var(--text); }
+.human-btns { display: flex; flex-direction: column; gap: 6px; flex-shrink: 0; }
+.hbtn { padding: 6px 14px; border-radius: 4px; font-family: var(--mono); font-size: 10px; font-weight: 700; cursor: pointer; border: none; transition: all 0.15s; white-space: nowrap; }
+.hbtn-g { background: var(--green);     color: white; }
+.hbtn-a { background: var(--amber-dim); color: var(--amber-text); border: 1px solid var(--amber-border); }
+.hbtn-r { background: var(--red-dim);   color: var(--red-text);   border: 1px solid var(--red-border); }
+
+.loading { display: flex; align-items: center; gap: 10px; padding: 16px; color: var(--muted); font-style: italic; font-size: 12px; }
+.spinner { width: 14px; height: 14px; border: 2px solid var(--border); border-top-color: var(--plum); border-radius: 50%; animation: spin 0.7s linear infinite; flex-shrink: 0; }
+
+.finding { display: flex; gap: 8px; padding: 8px 0; border-bottom: 1px dashed var(--border); align-items: flex-start; font-size: 12.5px; color: var(--bright); line-height: 1.6; }
+.finding:last-child { border-bottom: none; padding-bottom: 0; }
+
+.action-row { display: flex; gap: 7px; align-items: flex-start; margin-bottom: 6px; }
+.action-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--plum-text); flex-shrink: 0; margin-top: 6px; }
+.action-text { font-size: 12.5px; color: var(--text); line-height: 1.5; }
+
+.sum-card { background: var(--surface2); border: 2px solid var(--plum-border); border-radius: 8px; overflow: hidden; margin-top: 4px; }
+.sum-head { background: var(--plum); padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; }
+.sum-title { font-size: 13px; font-weight: 700; color: white; }
+.sum-badge { background: rgba(255,255,255,0.2); color: white; border-radius: 4px; padding: 2px 8px; font-family: var(--mono); font-size: 10px; }
+.sum-body { padding: 14px; }
+.sum-narrative { font-size: 13px; color: var(--bright); line-height: 1.75; margin-bottom: 12px; }
+.sum-actions-label { font-family: var(--mono); font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+
+.out-btns { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
+.out-btn { padding: 7px 14px; border-radius: 5px; font-family: var(--mono); font-size: 10px; font-weight: 700; cursor: pointer; border: none; }
+.ob-p { background: var(--plum); color: white; }
+.ob-s { background: var(--surface3); color: var(--text); border: 1px solid var(--border); }
+
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.35} }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">
+    <div class="logo-mark">SP</div>
+    <div>
+      <div class="logo-name">SafetyPlatform</div>
+      <div class="logo-sub">Intelligence Pipeline Simulator</div>
+    </div>
+  </div>
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:var(--plum)"></div>AI</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--teal)"></div>Algorithm</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--amber)"></div>Human</div>
+  </div>
+</div>
+
+<div class="main">
+  <div class="left">
+    <div>
+      <div class="panel-label">Choose a Scenario</div>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px;">
+
+        <div class="sc-card c0" id="sc0" onclick="selectScenario(0)">
+          <div class="sc-title">Near-miss → Toolbox Talk</div>
+          <div class="sc-desc">A supervisor logs a near-miss. AI enriches it. The trend algorithm detects a pattern. A Critical Insight is drafted, approved, and a talk is generated for crew delivery.</div>
+          <div class="sc-tags"><span class="tag tp">Observation</span><span class="tag tt">Heavy Vehicle</span><span class="tag tg">Full loop</span></div>
+        </div>
+
+        <div class="sc-card c1" id="sc1" onclick="selectScenario(1)">
+          <div class="sc-title">Incident → Investigation → Talk</div>
+          <div class="sc-desc">An injury is reported. Investigation is auto-created. AI assists with framework fields. Safety Manager closes it. Findings generate a toolbox talk with an incident narrative.</div>
+          <div class="sc-tags"><span class="tag tr">Injury</span><span class="tag ta">Working at Height</span><span class="tag tp">Investigation path</span></div>
+        </div>
+
+        <div class="sc-card c2" id="sc2" onclick="selectScenario(2)">
+          <div class="sc-title">Atrophy Alert → Manager Visit → Talk</div>
+          <div class="sc-desc">A site goes quiet. Atrophy alert fires. Manager plans a visit with AI-recommended topics. Observations are logged. AI assembles a talk from fresh site intelligence.</div>
+          <div class="sc-tags"><span class="tag ta">Atrophy</span><span class="tag tt">Site visit</span><span class="tag tg">Leading indicator</span></div>
+        </div>
+
+      </div>
+    </div>
+    <div id="runWrap" style="display:none;">
+      <button class="run-btn" id="runBtn" onclick="runSim()"><span>▶</span> Run Simulation</button>
+    </div>
+  </div>
+
+  <div class="canvas" id="canvas">
+    <div class="empty">
+      <div class="empty-icon">🔁</div>
+      <div class="empty-text">Select a scenario to simulate the full intelligence pipeline — from field capture to crew delivery.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+let current = null
+let running = false
+
+const SCENARIOS = {
+  0: {
+    label: 'Near-miss → Toolbox Talk',
+    steps: [
+      {
+        id:'capture', type:'human', name:'Observation Captured — Supervisor',
+        render: () => `
+          <div class="block">
+            <div class="block-label">Observation Record</div>
+            ${frow('observer_role','supervisor')}
+            ${frow('observation_type','near-miss')}
+            ${frow('work_type','Heavy Vehicle Operation')}
+            ${frow('worksite','Riverside Tower — Phase 2')}
+            ${frow('free_text','"Excavator reversed — spotter had moved to assist crane lift without informing the operator. No one in the blind zone by luck only."')}
+            ${frow('cleared_for_sharing','true')}
+          </div>
+          <div class="block"><div style="display:flex;gap:6px;flex-wrap:wrap;"><span class="chip chip-t">queues observation.enrich</span><span class="chip chip-a">trend_detection triggered</span></div></div>`
+      },
+      {
+        id:'enrich', type:'ai', name:'AI Enrichment', aiDelay: true,
+        loadingText: 'Classifying observation — failure type, key hazard, anonymisation flags...',
+        render: () => `
+          <div class="block">
+            <div class="block-label">Input</div>
+            ${frow('text','"Excavator reversed — spotter moved to crane lift without informing operator"')}
+          </div>
+          <div class="ai-output">
+            <div class="ai-label"><div class="pulse-dot"></div>AI Output — observation.enrich</div>
+            ${frow('failure_type','systemic')}
+            ${frow('key_hazard','Heavy vehicle reversing without active spotter — blind zone exposed')}
+            ${frow('confidence_score','0.91')}
+            ${frow('anonymisation_flags','none required')}
+            ${frow('ai_suggested_practice','Spotter Management / Traffic Management')}
+          </div>`
+      },
+      {
+        id:'trend', type:'algo', name:'Trend Detection Algorithm',
+        render: () => `
+          <div class="block">
+            <div class="block-label">Algorithm Check</div>
+            ${frow('near_misses_in_window','6 in 28 days')}
+            ${frow('work_type','Heavy Vehicle Operation')}
+            ${frow('org_level','region')}
+            ${frow('configured_threshold','5 near-misses / 30 days')}
+          </div>
+          <div class="block" style="background:rgba(220,38,38,0.05);">
+            <div style="display:flex;align-items:center;gap:8px;"><span style="font-size:16px;">🔺</span><span style="font-size:13px;font-weight:700;color:var(--red-text)">Threshold crossed — Critical Insight generation triggered</span></div>
+            <div style="margin-top:6px;font-family:var(--mono);font-size:10px;color:var(--muted);">fires critical_insight.generate · notifies Safety Manager</div>
+          </div>`
+      },
+      {
+        id:'insight', type:'ai', name:'AI Drafts Critical Insight', aiDelay: true,
+        loadingText: 'Reading observation cluster · synthesising pattern · writing veteran narrative...',
+        render: () => `
+          <div class="block">
+            <div class="block-label">AI Draft — CI-042</div>
+            <div class="field-row"><div class="field-key">pattern_summary</div><div class="field-val">Six near-misses involving heavy vehicle spotters across four North Region sites in 28 days. In five of six cases the spotter was absent at the moment of the reversing movement — not because of negligence, but because spotter assignment and continuity are not systematically managed during operations.</div></div>
+          </div>
+          <div class="block">
+            <div class="block-label">Toolbox Narrative — Veteran Voice</div>
+            <div class="italic">"Six times in the last month, a heavy vehicle reversed without someone properly watching the blind zone. Six times. That's not bad luck — that's a system that isn't working. The common factor isn't the drivers. It's that we're not managing the spotter role the same way we manage everything else on site."</div>
+          </div>
+          <div class="block">
+            <div class="field-row"><div class="field-key">escalation_rec</div><div class="field-val">Recommend systemic review — pattern spans 4 sites</div></div>
+            <div class="field-row"><div class="field-key">cleared_for_toolbox</div><div class="field-val" style="color:var(--red-text)">false — awaiting human approval</div></div>
+          </div>`
+      },
+      {
+        id:'approve', type:'human', name:'Safety Manager Approves Insight',
+        isDecision: true,
+        prompt: 'Review the AI-drafted Critical Insight. Read endorsements from 5 field managers who confirmed this pattern. Set sharing scope. Approve or reject.',
+        buttons: [
+          { label:'✓ Approve & Share', cls:'hbtn-g', value:'approve' },
+          { label:'✎ Edit first',      cls:'hbtn-a', value:'approve' },
+          { label:'✕ Reject',          cls:'hbtn-r', value:'reject' }
+        ],
+        onApprove: () => `
+          <div class="block"><span class="chip chip-g">✓ Approved · cleared_for_toolbox = true</span> <span class="chip chip-t" style="margin-left:4px">Scope: North Region</span></div>
+          <div class="block" style="font-size:12px;color:var(--muted);">Managers who endorsed notified · Supervisors in scope notified · Enquiry draft auto-created</div>`,
+        onReject: () => `
+          <div class="block"><span class="chip chip-r">Rejected — cooldown reset for Heavy Vehicle / region</span></div>`
+      },
+      {
+        id:'fwclassify', type:'ai', name:'Forge Works Map® Classification', aiDelay: true,
+        loadingText: 'Reading pattern context · assessing all 15 factors independently · applying confidence threshold per factor...',
+        render: () => `
+          <div class="block">
+            <div class="block-label">Classification Input</div>
+            ${frow('source_type','critical_insight')}
+            ${frow('pattern_summary','"Six near-misses involving heavy vehicle spotters — spotter assignment and continuity not systematically managed"')}
+            ${frow('likely_systemic_cause','"No mechanism ensures a spotter stays assigned for the duration of a reversing operation"')}
+            ${frow('rule','Each factor assessed independently. Only factors ≥ 0.70 stored. Max 3.')}
+          </div>
+          <div class="ai-output">
+            <div class="ai-label"><div class="pulse-dot"></div>Forge Works Map® Classifications — 2 factors met threshold</div>
+            ${fwFactor('management_systems','enable','compliant','0.86','The PTW and pre-task brief exist and are used — but neither covers spotter continuity. The system doesn't enforce what it doesn't specify.')}
+            ${fwFactor('operational_management','enable','compliant','0.73','Managers visiting these sites have not identified or acted on the absence of a spotter handover mechanism — the oversight gap is organisational, not individual.')}
+            <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--plum-border);">
+              ${frow('fw_classification_basis','"Pattern directly evidences a management system content gap (no handover in PTW) and an operational management oversight gap (not detected across 4 sites by visiting managers)."')}
+            </div>
+          </div>
+          <div class="block" style="background:rgba(5,150,105,0.04);">
+            <div style="font-size:11.5px;color:var(--muted);line-height:1.6;">Each tag is independently defensible. If challenged — "why operational_management and not just management_systems?" — the per-factor rationale is the answer. The threshold is the standard, not a ranking.</div>
+          </div>`
+      },
+      {
+        id:'talkgen', type:'ai', name:'AI Assembles Toolbox Talk', aiDelay: true,
+        loadingText: 'Selecting content · assembling hazard intro, narrative, actions, discussion questions...',
+        render: () => `
+          <div class="block">
+            <div class="block-label">Content Selected</div>
+            ${frow('primary_source','CI-042 — Spotter Management insight')}
+            ${frow('work_type','Heavy Vehicle Operation')}
+            ${frow('site','Riverside Tower — Phase 2')}
+          </div>
+          <div class="block">
+            <div class="block-label">hazard_intro</div>
+            <div class="field-val" style="font-size:12.5px;line-height:1.65;">"We're working with heavy vehicles on levels 7–9 today. The single most important thing: blind zones during reversing. Someone needs to own that space — every single time."</div>
+          </div>
+          <div class="block">
+            <div class="block-label">key_actions</div>
+            <div style="display:flex;flex-direction:column;gap:5px;margin-top:4px;">
+              ${['Before any reversing movement — operator confirms spotter is in position and they have eye contact','If you\'re the spotter and need to step away — tell the operator first, then find a replacement','Spotter assignment is a controlled position, not an informal favour','Any gap in the perimeter plan is raised immediately — not assumed someone else saw it'].map((a,i)=>`<div style="display:flex;gap:8px;"><div style="font-family:var(--mono);font-size:10px;color:var(--plum-text);min-width:20px;">${i+1}.</div><div style="font-size:12px;color:var(--text);line-height:1.5;">${a}</div></div>`).join('')}
+            </div>
+          </div>
+          <div class="block"><div class="block-label">discussion_questions</div>
+            ${['Where are the blind zones in today\'s reversing path — and who is covering them?','What happens if your assigned spotter gets pulled away mid-operation?','Has anyone seen a reversing operation happen without a confirmed spotter this week?'].map(q=>`<div style="font-size:12px;color:var(--muted);padding:4px 0;border-bottom:1px dashed var(--border);">${q}</div>`).join('')}
+          </div>`
+      },
+      {
+        id:'deliver', type:'human', name:'Supervisor Delivers Talk to Crew',
+        render: () => `
+          <div class="block">
+            <div class="block-label">Delivery Record</div>
+            ${frow('talk_ref','TLK-0187')}
+            ${frow('site','Riverside Tower — Phase 2')}
+            ${frow('delivered_at','Today 07:14')}
+            ${frow('attendee_count','14')}
+            ${frow('acknowledgement_method','digital — crew names recorded')}
+          </div>
+          <div class="sum-card">
+            <div class="sum-head"><div class="sum-title">✦ Loop Closed</div><span class="sum-badge">14 crew reached</span></div>
+            <div class="sum-body">
+              <div class="sum-narrative">The near-miss logged this morning at Riverside Tower has been enriched by AI, confirmed as a regional pattern by 5 managers, approved by the Safety Manager, assembled into a toolbox talk, and delivered to 14 crew members before their shift began. The observation → intelligence → crew loop is complete.</div>
+              <div class="out-btns">
+                <div class="out-btn ob-p">📋 View Enquiry Draft</div>
+                <div class="out-btn ob-s">📊 Analytics</div>
+              </div>
+            </div>
+          </div>`
+      }
+    ]
+  },
+
+  1: {
+    label: 'Incident → Investigation → Talk',
+    steps: [
+      {
+        id:'incident', type:'human', name:'Incident Reported — Supervisor',
+        render: () => `
+          <div class="block">
+            <div class="block-label">Incident Record — INC-0091</div>
+            ${frow('incident_type','Injury')}
+            ${frow('work_type','Working at Height')}
+            ${frow('worksite','Riverside Tower')}
+            ${frow('occurred_at','Today 09:42')}
+            ${frow('description','"Worker descending vertical ladder on scaffold. Harness lanyard snagged on bracket. Worker unclipped to free it rather than calling for help. Lost grip and fell 2.4m to the platform. Fractured wrist."')}
+          </div>
+          <div class="block"><div style="display:flex;gap:6px;"><span class="chip chip-r">injury — requires_investigation = true</span><span class="chip chip-a">investigation.create triggered</span></div></div>`
+      },
+      {
+        id:'triage', type:'algo', name:'Triage Algorithm — Investigation Created',
+        render: () => `
+          <div class="block">
+            <div class="block-label">Triage Decision</div>
+            ${frow('incident_type','Injury → requires_investigation = true')}
+            ${frow('investigation_id','INV-0055')}
+            ${frow('status','open')}
+            ${frow('assigned_to','T. Walsh (Safety Manager)')}
+            ${frow('legal_hold','false')}
+          </div>
+          <div class="block"><span class="chip chip-t">queues investigation.assist AI job</span> <span class="chip chip-a" style="margin-left:4px">notification N09 → Site Manager, Safety Manager</span></div>`
+      },
+      {
+        id:'assist', type:'ai', name:'AI Investigation Framework Assist', aiDelay: true,
+        loadingText: 'Reading incident narrative · suggesting immediate cause, contributing factors, root cause...',
+        render: () => `
+          <div class="block">
+            <div class="block-label">AI Suggested Fields — ai_suggested_* columns only</div>
+            ${frow('immediate_cause','Worker unclipped harness lanyard mid-descent to free a snag — no safe self-rescue procedure had been communicated')}
+            ${frow('contributing_factors','1. Harness management not covered in pre-task brief\n2. No safe self-rescue procedure on site\n3. Task pressure — shift running 20 min behind schedule')}
+            ${frow('root_cause','Self-rescue protocols for harness snag scenarios are absent from site safety procedures — gap exists in PTW and pre-task brief template')}
+          </div>
+          <div class="block">
+            <div class="block-label">Suggested Corrective Actions</div>
+            ${['Add harness snag self-rescue procedure to all WAH pre-task brief templates','Update PTW to require harness inspection including snap hook housing check before WAH tasks','Add harness management to supervisor pre-shift checklist for scaffold and ladder work'].map(a=>`<div class="action-row"><div class="action-dot"></div><div class="action-text">${a}</div></div>`).join('')}
+          </div>`
+      },
+      {
+        id:'close', type:'human', name:'Safety Manager Closes Investigation',
+        isDecision: true,
+        prompt: 'Review AI-suggested fields. Confirm or edit each. Set cleared_for_sharing and sharing scope. Legal hold check: clear. Close and sign off.',
+        buttons: [
+          { label:'✓ Close & Sign Off', cls:'hbtn-g', value:'close' },
+          { label:'↩ Re-assign',        cls:'hbtn-a', value:'close' }
+        ],
+        onApprove: () => `
+          <div class="block">
+            <span class="chip chip-g">✓ Closed · status = closed</span>
+            <span class="chip chip-t" style="margin-left:4px">cleared_for_sharing = true</span>
+            <span class="chip chip-p" style="margin-left:4px">Scope: All sites / WAH work type</span>
+          </div>
+          <div class="block" style="font-size:12px;color:var(--muted);">3 corrective actions created with owners and due dates · investigation.generate_narrative queued</div>`,
+        onReject: () => `<div class="block"><span class="chip chip-a">Re-assigned — investigation remains open</span></div>`
+      },
+      {
+        id:'narrative', type:'ai', name:'AI Generates Investigation Narrative', aiDelay: true,
+        loadingText: 'Writing incident story, plain-language root cause, and what-we-do-now section...',
+        render: () => `
+          <div class="block">
+            <div class="block-label">incident_story</div>
+            <div class="italic">"Last Tuesday a worker on our scaffold ladder snagged their lanyard on a bracket during descent. Instead of calling for help — which wasn't an option they knew they had — they unclipped to free it. They fell 2.4 metres. Fractured wrist. We got lucky it wasn't worse."</div>
+          </div>
+          <div class="block">
+            <div class="block-label">root_cause_plain</div>
+            <div class="field-val" style="font-size:12.5px;line-height:1.65;">Nobody had ever told that worker — or any worker — what to do if their harness gets caught. It's not in the PTW. It's not in the pre-task brief. There's a gap, and we need to close it today.</div>
+          </div>
+          <div class="block">
+            <div class="block-label">what_we_do_now</div>
+            <div class="field-val" style="font-size:12.5px;line-height:1.65;">Three things: a self-rescue procedure is going into every WAH pre-task brief this week. Every harness gets a snap hook inspection before WAH work from today. And if your lanyard gets caught — stop, stay put, call for help.</div>
+          </div>`
+      },
+      {
+        id:'fwclassify1', type:'ai', name:'Forge Works Map® Classification', aiDelay: true,
+        loadingText: 'Reading investigation framework · assessing all 15 factors independently · applying confidence threshold per factor...',
+        render: () => `
+          <div class="block">
+            <div class="block-label">Classification Input — Investigation INC-0091</div>
+            ${frow('immediate_cause','"Worker unclipped harness to free a snag — no self-rescue procedure communicated"')}
+            ${frow('root_cause','"Self-rescue protocols absent from site safety procedures — gap in PTW and pre-task brief template"')}
+            ${frow('contributing_factors','["Harness management not in pre-task brief","No safe self-rescue procedure on site","Task pressure"]')}
+            ${frow('rule','Each factor assessed independently. Only factors ≥ 0.70 stored. Max 3.')}
+          </div>
+          <div class="ai-output">
+            <div class="ai-label"><div class="pulse-dot"></div>Forge Works Map® Classifications — 1 factor met threshold</div>
+            ${fwFactor('management_systems','enable','compliant','0.91','The PTW and pre-task brief exist and are used — but their content does not cover the harness snag scenario. The system gap is explicit: procedure exists, scenario is absent from it.')}
+            <div style="margin-top:6px;padding:6px 0;border-top:1px solid var(--plum-border);">
+              <div style="font-size:11px;color:var(--muted);">goal_conflict_tradeoffs assessed — task pressure mentioned as contributing factor but insufficient narrative evidence to reach 0.70 independently. Not tagged.</div>
+            </div>
+            <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--plum-border);">
+              ${frow('fw_classification_basis','"Investigation root cause directly identifies a management system content gap. Task pressure is mentioned but not elaborated sufficiently to independently evidence goal conflict at threshold."')}
+            </div>
+          </div>
+          <div class="block" style="background:rgba(5,150,105,0.04);">
+            <div style="font-size:11.5px;color:var(--muted);line-height:1.6;">Single-factor result is correct here — the evidence strongly concentrates on one factor. The threshold doing its job: task pressure was assessed and didn't make it. That's the right outcome.</div>
+          </div>`
+      },
+      {
+        id:'talkdeliver', type:'human', name:'Talk Delivered — Investigation Findings Reach Crew',
+        render: () => `
+          <div class="block">
+            <div class="block-label">Talk Delivery — TLK-0188</div>
+            ${frow('source','INC-0091 investigation findings')}
+            ${frow('sites_reached','22 — all WAH work type sites')}
+            ${frow('crew_reached','341 workers')}
+            ${frow('delivered_within','4 days of incident')}
+          </div>
+          <div class="sum-card">
+            <div class="sum-head"><div class="sum-title">✦ Loop Closed</div><span class="sum-badge">341 crew reached</span></div>
+            <div class="sum-body">
+              <div class="sum-narrative">An injury at Riverside Tower became a learning event for 341 workers across 22 sites within four days. The investigation findings — in plain language, in the voice of the site — were delivered as a toolbox talk before the next working day for each crew.</div>
+              <div class="out-btns">
+                <div class="out-btn ob-p">✅ View Corrective Actions</div>
+                <div class="out-btn ob-s">📊 Analytics</div>
+              </div>
+            </div>
+          </div>`
+      }
+    ]
+  },
+
+  2: {
+    label: 'Atrophy Alert → Visit → Talk',
+    steps: [
+      {
+        id:'atrophy', type:'algo', name:'Atrophy Alert — Site Goes Quiet',
+        render: () => `
+          <div class="block">
+            <div class="block-label">Daily Atrophy Calculation — Riverside Tower</div>
+            ${frow('days_since_last_obs','18 × 1.8 =', '32.4')}
+            ${frow('days_since_last_talk','11 × 1.2 =', '13.2')}
+            ${frow('open_investigations','2 × 8 =', '16.0')}
+            ${frow('near_miss_30d','6 × 3 =', '18.0')}
+            ${frow('atrophy_score','79.6 — threshold: 70', '🔺 ALERT')}
+          </div>
+          <div class="block"><span class="chip chip-r">Atrophy alert created</span> <span class="chip chip-a" style="margin-left:4px">notification N17 → Assigned Manager, Safety Manager</span></div>`
+      },
+      {
+        id:'visit', type:'human', name:'Manager Plans & Starts Visit',
+        render: () => `
+          <div class="block">
+            <div class="block-label">Visit Plan — Riverside Tower</div>
+            ${frow('manager','J. Thompson (Regional Manager)')}
+            ${frow('visit_date','Today 08:00')}
+            ${frow('topics_selected','Spotter positioning, PTW sign-on, Harness inspection')}
+            ${frow('atrophy_score_at_plan','79.6')}
+          </div>
+          <div class="block"><span class="chip chip-t">status = active · supervisor notified N15</span></div>`
+      },
+      {
+        id:'visitai', type:'ai', name:'AI Recommends Visit Topics', aiDelay: true,
+        loadingText: 'Reading site observations, open investigations, practice atrophy, critical insights...',
+        render: () => `
+          <div class="block">
+            <div class="block-label">AI Recommended Topics — Riverside Tower</div>
+            ${[
+              { topic:'Spotter positioning during reversing', source:'📈 Near-miss trend · 3 obs this month', badge:'chip-r', label:'Trend' },
+              { topic:'Hot work pre-task checklist', source:'🔍 Open investigation · INC-0088', badge:'chip-a', label:'Investigation' },
+              { topic:'PTW sign-on — are workers reading conditions before starting?', source:'🤖 AI · Practice atrophy · 14 days no PTW obs', badge:'chip-p', label:'AI' },
+              { topic:'Harness inspection before WAH tasks', source:'🤖 AI · No WAH observation in 22 days', badge:'chip-p', label:'AI' }
+            ].map(t=>`
+              <div style="padding:8px 0;border-bottom:1px dashed var(--border);display:flex;gap:10px;align-items:flex-start;">
+                <div style="flex:1;"><div style="font-size:12.5px;font-weight:600;color:var(--bright);margin-bottom:2px;">${t.topic}</div><div style="font-size:11px;color:var(--muted);">${t.source}</div></div>
+                <span class="chip ${t.badge}">${t.label}</span>
+              </div>`).join('')}
+          </div>`
+      },
+      {
+        id:'capture2', type:'human', name:'Manager Logs 3 Observations on Site',
+        render: () => `
+          <div class="block">
+            <div class="block-label">Observations Logged — Visit Active</div>
+            ${[
+              { type:'Near-miss', text:'Spotter left position during excavator reversing — no handover to operator', badge:'chip-r' },
+              { type:'At-risk',   text:'PTW sign-on sheet unsigned by 3 of 8 workers at 08:15 start', badge:'chip-a' },
+              { type:'Safe',      text:'Harness pre-start checks completed correctly by all WAH crew', badge:'chip-g' }
+            ].map(o=>`
+              <div style="padding:7px 0;border-bottom:1px dashed var(--border);display:flex;gap:8px;align-items:flex-start;">
+                <span class="chip ${o.badge}" style="flex-shrink:0;">${o.type}</span>
+                <div style="font-size:12px;color:var(--text);line-height:1.5;">${o.text}</div>
+              </div>`).join('')}
+          </div>
+          <div class="block"><span class="chip chip-t">visit closed · atrophy recalculated · trend detection runs</span></div>`
+      },
+      {
+        id:'talkgen2', type:'ai', name:'AI Assembles Talk from Visit Intelligence', aiDelay: true,
+        loadingText: 'Selecting visit observations and open insight · assembling site-specific talk...',
+        render: () => `
+          <div class="block">
+            <div class="block-label">Content Sources Selected</div>
+            ${frow('primary','Near-miss observation — spotter absence (logged today)')}
+            ${frow('supporting','CI-042 — Spotter management regional insight')}
+            ${frow('context','Manager visit confirmed pattern at this site')}
+          </div>
+          <div class="block">
+            <div class="block-label">hazard_intro</div>
+            <div class="italic">"This morning one of your managers walked your site. We want to share two things they saw — one of them needs your attention before you start today."</div>
+          </div>
+          <div class="block">
+            <div class="block-label">main_content</div>
+            <div class="field-val" style="font-size:12.5px;line-height:1.65;">The spotter on the excavator this morning moved off to assist with something else during a reversing operation. The operator didn't know. Nobody got hurt — but it was within arm's reach of someone getting seriously hurt. This isn't the first time we've seen it this month. It's now the sixth.</div>
+          </div>
+          <div class="block">
+            <div class="block-label">discussion_questions</div>
+            ${['When did you last check that your assigned spotter was still in position — not assumed?','What would you do if you needed to step away as a spotter but the operation hadn\'t finished?','Has anyone seen a gap in coverage today that we should know about?'].map(q=>`<div style="font-size:12px;color:var(--muted);padding:4px 0;border-bottom:1px dashed var(--border);">${q}</div>`).join('')}
+          </div>`
+      },
+      {
+        id:'deliver2', type:'human', name:'Supervisor Delivers Talk — Same Day as Visit',
+        render: () => `
+          <div class="block">
+            <div class="block-label">Delivery Record — TLK-0189</div>
+            ${frow('talk_ref','TLK-0189')}
+            ${frow('site','Riverside Tower — Phase 2')}
+            ${frow('delivered_at','Today 13:45 — 5h after manager visit')}
+            ${frow('attendee_count','14')}
+            ${frow('provenance','Manager visit observation + CI-042')}
+          </div>
+          <div class="sum-card">
+            <div class="sum-head"><div class="sum-title">✦ Loop Closed</div><span class="sum-badge">Atrophy 79 → 18</span></div>
+            <div class="sum-body">
+              <div class="sum-narrative">The site was quiet for 18 days. An atrophy alert fired. A manager visited within 24 hours. Fresh observations were logged. AI assembled a site-specific talk by midday. 14 crew were briefed the same afternoon on what was actually seen at their site that morning. Atrophy score dropped from 79 to 18.</div>
+              <div class="out-btns">
+                <div class="out-btn ob-p">📋 View Enquiry Draft</div>
+                <div class="out-btn ob-s">📊 Analytics</div>
+              </div>
+            </div>
+          </div>`
+      }
+    ]
+  }
+}
+
+function fwFactor(factor, domain, maturity, confidence, rationale) {
+  const domainColors = { guide:'var(--teal-text)', enable:'var(--plum-text)', execute:'var(--green-text)' }
+  const maturityColors = { compliant:'var(--amber-text)', leading:'var(--teal-text)', resilient:'var(--green-text)' }
+  const dc = domainColors[domain] || 'var(--muted)'
+  const mc = maturityColors[maturity] || 'var(--muted)'
+  return `<div style="background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:9px 11px;margin-bottom:7px;">
+    <div style="display:flex;gap:7px;align-items:center;margin-bottom:5px;flex-wrap:wrap;">
+      <span style="font-family:var(--mono);font-size:11px;font-weight:700;color:var(--bright);">${factor}</span>
+      <span style="font-family:var(--mono);font-size:9px;padding:1px 6px;border-radius:3px;background:rgba(0,0,0,0.06);color:${dc};font-weight:700;">${domain.toUpperCase()}</span>
+      <span style="font-family:var(--mono);font-size:9px;padding:1px 6px;border-radius:3px;background:rgba(0,0,0,0.06);color:${mc};font-weight:700;">${maturity}</span>
+      <span style="font-family:var(--mono);font-size:10px;color:var(--green-text);font-weight:700;margin-left:auto;">${confidence} ✓</span>
+    </div>
+    <div style="font-size:11.5px;color:var(--text);font-style:italic;line-height:1.55;">${rationale}</div>
+  </div>`
+}
+
+function frow(key, val, extra) {
+  const v = extra || val
+  return `<div class="field-row"><div class="field-key">${key}</div><div class="field-val">${v}</div></div>`
+}
+
+function selectScenario(idx) {
+  if (running) return
+  current = idx
+  document.querySelectorAll('.sc-card').forEach((c,i)=>c.classList.toggle('active', i===idx))
+  document.getElementById('runWrap').style.display = 'block'
+  document.getElementById('canvas').innerHTML = `<div class="empty"><div class="empty-icon">▶</div><div class="empty-text">${SCENARIOS[idx].label} — press Run Simulation to begin.</div></div>`
+}
+
+async function runSim() {
+  if (current === null || running) return
+  running = true
+  const btn = document.getElementById('runBtn')
+  btn.disabled = true; btn.innerHTML = '<div class="spinner"></div> Running...'
+
+  const canvas = document.getElementById('canvas')
+  canvas.innerHTML = ''
+
+  const sc = SCENARIOS[current]
+
+  for (const step of sc.steps) {
+    await renderStep(canvas, step)
+  }
+
+  running = false
+  btn.disabled = false; btn.innerHTML = '<span>↺</span> Run Again'
+}
+
+function delay(ms) { return new Promise(r=>setTimeout(r,ms)) }
+
+async function renderStep(canvas, step) {
+  const el = document.createElement('div')
+  el.className = 'step'
+  el.id = `step-${step.id}`
+
+  const nodeClass = step.type
+  const labelClass = step.type === 'ai' ? 'lai' : step.type === 'algo' ? 'lalgo' : 'lhum'
+  const labelText = step.type === 'ai' ? 'AI' : step.type === 'algo' ? 'Algorithm' : 'Human'
+  const icon = step.type === 'ai' ? '🤖' : step.type === 'algo' ? '⚙' : '👤'
+
+  el.innerHTML = `
+    <div class="spine">
+      <div class="node ${nodeClass}" id="node-${step.id}">${icon}</div>
+    </div>
+    <div class="scontent">
+      <div class="shead">
+        <span class="slabel ${labelClass}">${labelText}</span>
+        <span class="sname">${step.name}</span>
+        <span class="sstatus running" id="status-${step.id}">running</span>
+      </div>
+      <div class="scard ${step.type}" id="card-${step.id}">
+        <div class="loading"><div class="spinner"></div>${step.aiDelay ? step.loadingText : 'Processing...'}</div>
+      </div>
+    </div>`
+
+  canvas.appendChild(el)
+  await delay(50)
+  el.classList.add('show')
+  el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  await delay(200)
+
+  if (step.isDecision) {
+    await renderDecision(step)
+  } else if (step.aiDelay) {
+    await delay(3000)
+    document.getElementById(`card-${step.id}`).innerHTML = step.render()
+    markDone(step.id)
+    await delay(400)
+  } else {
+    await delay(600)
+    document.getElementById(`card-${step.id}`).innerHTML = step.render()
+    markDone(step.id)
+    await delay(300)
+  }
+}
+
+function markDone(id) {
+  const node = document.getElementById(`node-${id}`)
+  if (node) { node.classList.remove('ai','algo','human'); node.classList.add('done'); node.textContent = '✓' }
+  const st = document.getElementById(`status-${id}`)
+  if (st) { st.textContent = '✓ done'; st.className = 'sstatus done' }
+}
+
+async function renderDecision(step) {
+  return new Promise(resolve => {
+    const card = document.getElementById(`card-${step.id}`)
+    card.innerHTML = `
+      <div class="human-row">
+        <div class="human-prompt">${step.prompt}</div>
+        <div class="human-btns">
+          ${step.buttons.map(b=>`<button class="hbtn ${b.cls}" onclick="resolveDecision('${step.id}','${b.value}')">${b.label}</button>`).join('')}
+        </div>
+      </div>`
+    window[`resolve_${step.id}`] = (val) => {
+      const content = val === 'approve' || val === 'close' ? step.onApprove() : step.onReject()
+      card.innerHTML = content
+      markDone(step.id)
+      resolve()
+    }
+  })
+}
+
+function resolveDecision(id, val) {
+  if (window[`resolve_${id}`]) { window[`resolve_${id}`](val); window[`resolve_${id}`] = null }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,1268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SafetyPlatform — Workbench</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&family=JetBrains+Mono:wght@300;400;500;600&display=swap');
+
+:root {
+  --bg: #12110f;
+  --surface: #1a1916;
+  --surface2: #222019;
+  --surface3: #2a271f;
+  --border: #2e2b23;
+  --border2: #3a362c;
+  --text: #d8d2c4;
+  --muted: #6a6456;
+  --bright: #ede8de;
+  --faint: #3e3a30;
+
+  --amber: #d4890a;
+  --amber-dim: rgba(212,137,10,0.12);
+  --amber-border: rgba(212,137,10,0.25);
+
+  --red: #c4351a;
+  --red-dim: rgba(196,53,26,0.1);
+  --red-border: rgba(196,53,26,0.25);
+
+  --green: #2a7d52;
+  --green-dim: rgba(42,125,82,0.1);
+  --green-border: rgba(42,125,82,0.25);
+  --green-bright: #3aaa6e;
+
+  --blue: #2060c4;
+  --blue-dim: rgba(32,96,196,0.1);
+  --blue-border: rgba(32,96,196,0.25);
+  --blue-bright: #4d8de8;
+
+  --plum: #7040c0;
+  --plum-dim: rgba(112,64,192,0.1);
+  --plum-border: rgba(112,64,192,0.25);
+  --plum-bright: #a070e8;
+
+  --teal: #0d7a7a;
+  --teal-dim: rgba(13,122,122,0.1);
+  --teal-border: rgba(13,122,122,0.25);
+  --teal-bright: #18b0b0;
+
+  --serif: 'Lora', Georgia, serif;
+  --display: 'Syne', sans-serif;
+  --mono: 'JetBrains Mono', monospace;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--display);
+  font-size: 13px;
+  line-height: 1.5;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ── SHELL ────────────────────────────── */
+.shell {
+  display: grid;
+  grid-template-columns: 56px 260px 1fr 340px;
+  grid-template-rows: 100vh;
+  height: 100vh;
+}
+
+/* ── ICON RAIL ────────────────────────── */
+.icon-rail {
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px 0;
+  gap: 4px;
+  z-index: 10;
+}
+
+.rail-logo {
+  width: 32px; height: 32px;
+  background: var(--amber);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 600;
+  color: #0a0900;
+  margin-bottom: 16px;
+  flex-shrink: 0;
+}
+
+.rail-btn {
+  width: 40px; height: 40px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 17px;
+  cursor: pointer;
+  color: var(--muted);
+  transition: all 0.12s;
+  position: relative;
+  border: none;
+  background: none;
+}
+
+.rail-btn:hover { background: var(--surface2); color: var(--text); }
+
+.rail-btn.active {
+  background: var(--amber-dim);
+  color: var(--amber);
+}
+
+.rail-badge {
+  position: absolute;
+  top: 4px; right: 4px;
+  width: 14px; height: 14px;
+  background: var(--red);
+  border-radius: 50%;
+  font-family: var(--mono);
+  font-size: 8px;
+  font-weight: 600;
+  color: white;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.rail-divider {
+  width: 28px;
+  height: 1px;
+  background: var(--border);
+  margin: 6px 0;
+}
+
+.rail-spacer { flex: 1; }
+
+.rail-avatar {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: var(--surface3);
+  border: 1px solid var(--border2);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--amber);
+  cursor: pointer;
+}
+
+/* ── LEFT COLUMN — QUEUE ──────────────── */
+.queue-col {
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.queue-header {
+  padding: 18px 16px 14px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.queue-title {
+  font-family: var(--display);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+
+.queue-date {
+  font-family: var(--serif);
+  font-size: 19px;
+  font-weight: 500;
+  color: var(--bright);
+  line-height: 1.2;
+}
+
+.queue-date em { color: var(--amber); font-style: italic; }
+
+.queue-summary {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+/* FILTER TABS */
+.filter-tabs {
+  display: flex;
+  padding: 8px 10px;
+  gap: 4px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.filter-tab {
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  color: var(--muted);
+  border: none;
+  background: none;
+  transition: all 0.12s;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.filter-tab:hover { background: var(--surface2); color: var(--text); }
+.filter-tab.active { background: var(--amber-dim); color: var(--amber); }
+
+.tab-count {
+  background: var(--surface3);
+  border-radius: 10px;
+  padding: 0 5px;
+  font-size: 8px;
+  color: var(--muted);
+}
+
+.filter-tab.active .tab-count {
+  background: rgba(212,137,10,0.2);
+  color: var(--amber);
+}
+
+/* QUEUE ITEMS */
+.queue-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+}
+
+.queue-list::-webkit-scrollbar { width: 3px; }
+.queue-list::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+.queue-group-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--faint);
+  padding: 8px 8px 4px;
+}
+
+.q-item {
+  padding: 11px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.12s;
+  margin-bottom: 2px;
+  border: 1px solid transparent;
+  position: relative;
+}
+
+.q-item:hover { background: var(--surface2); border-color: var(--border); }
+
+.q-item.selected {
+  background: var(--surface3);
+  border-color: var(--border2);
+}
+
+.q-item.selected.type-insight { border-left: 3px solid var(--plum); }
+.q-item.selected.type-investigation { border-left: 3px solid var(--red); }
+.q-item.selected.type-action { border-left: 3px solid var(--amber); }
+.q-item.selected.type-atrophy { border-left: 3px solid var(--teal); }
+
+.qi-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 5px;
+}
+
+.qi-type {
+  font-family: var(--mono);
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+.qtype-insight { background: var(--plum-dim); color: var(--plum-bright); border: 1px solid var(--plum-border); }
+.qtype-investigation { background: var(--red-dim); color: #e87060; border: 1px solid var(--red-border); }
+.qtype-action { background: var(--amber-dim); color: var(--amber); border: 1px solid var(--amber-border); }
+.qtype-atrophy { background: var(--teal-dim); color: var(--teal-bright); border: 1px solid var(--teal-border); }
+
+.qi-age {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--muted);
+  margin-left: auto;
+}
+
+.qi-age.overdue { color: var(--red); }
+
+.qi-title {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--bright);
+  line-height: 1.3;
+  margin-bottom: 3px;
+}
+
+.qi-meta {
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.qi-urgency {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 6px;
+}
+
+.urgency-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.u-high { background: var(--red); }
+.u-med { background: var(--amber); }
+.u-low { background: var(--muted); }
+
+.urgency-text {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--muted);
+}
+
+/* ── CENTRE — WORK PANEL ──────────────── */
+.work-panel {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--bg);
+}
+
+.work-header {
+  padding: 18px 24px 14px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  background: var(--surface);
+}
+
+.work-breadcrumb {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 1px;
+  color: var(--muted);
+  margin-bottom: 5px;
+  text-transform: uppercase;
+}
+
+.work-title {
+  font-family: var(--serif);
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--bright);
+  line-height: 1.2;
+}
+
+.work-title em { color: var(--plum-bright); font-style: italic; }
+
+.work-meta {
+  font-size: 11.5px;
+  color: var(--muted);
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.work-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.wb-btn {
+  padding: 7px 16px;
+  border-radius: 7px;
+  font-family: var(--display);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all 0.12s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid var(--border2);
+}
+
+.btn-ghost:hover { background: var(--surface2); color: var(--text); }
+
+.btn-reject {
+  background: var(--red-dim);
+  color: #e87060;
+  border: 1px solid var(--red-border);
+}
+
+.btn-reject:hover { background: rgba(196,53,26,0.18); }
+
+.btn-edit {
+  background: var(--amber-dim);
+  color: var(--amber);
+  border: 1px solid var(--amber-border);
+}
+
+.btn-approve {
+  background: var(--green);
+  color: white;
+  border: 1px solid var(--green-border);
+}
+
+.btn-approve:hover { background: #358f60; }
+
+.work-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+}
+
+.work-body::-webkit-scrollbar { width: 3px; }
+.work-body::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+/* SOURCE DATA */
+.source-block {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.source-header {
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.source-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.source-tag {
+  font-family: var(--mono);
+  font-size: 9px;
+  padding: 2px 7px;
+  border-radius: 3px;
+}
+
+.st-algo { background: var(--blue-dim); color: var(--blue-bright); border: 1px solid var(--blue-border); }
+.st-ai { background: var(--plum-dim); color: var(--plum-bright); border: 1px solid var(--plum-border); }
+.st-field { background: var(--teal-dim); color: var(--teal-bright); border: 1px solid var(--teal-border); }
+
+.source-body {
+  padding: 14px 16px;
+}
+
+/* OBSERVATION CHIPS */
+.obs-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.obs-chip {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 11.5px;
+  color: var(--text);
+  line-height: 1.5;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.obs-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--amber);
+  flex-shrink: 0;
+  margin-top: 5px;
+}
+
+.obs-site {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+/* AI DRAFT */
+.ai-draft {
+  background: var(--plum-dim);
+  border: 1px solid var(--plum-border);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.ai-draft-header {
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--plum-border);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ai-draft-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--plum-bright);
+  font-weight: 600;
+}
+
+.ai-pulse {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--plum-bright);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.3} }
+
+.ai-draft-body {
+  padding: 16px;
+}
+
+.ai-field {
+  margin-bottom: 14px;
+}
+
+.ai-field:last-child { margin-bottom: 0; }
+
+.ai-field-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--plum-bright);
+  margin-bottom: 5px;
+  opacity: 0.7;
+}
+
+.ai-field-text {
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--bright);
+}
+
+.ai-narrative {
+  font-family: var(--serif);
+  font-size: 14px;
+  line-height: 1.8;
+  color: var(--bright);
+  font-style: italic;
+  padding: 12px 16px;
+  border-left: 2px solid var(--plum);
+  background: rgba(112,64,192,0.06);
+  border-radius: 0 6px 6px 0;
+}
+
+/* EDIT FIELD */
+.edit-area {
+  width: 100%;
+  background: var(--surface2);
+  border: 1px solid var(--plum-border);
+  border-radius: 6px;
+  padding: 10px 12px;
+  color: var(--bright);
+  font-family: var(--serif);
+  font-size: 13px;
+  line-height: 1.7;
+  resize: vertical;
+  outline: none;
+  min-height: 80px;
+}
+
+.edit-area:focus { border-color: var(--plum-bright); }
+
+/* SCOPE SELECTOR */
+.scope-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 12px;
+}
+
+.scope-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 1px;
+  color: var(--muted);
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+.scope-opt {
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-family: var(--mono);
+  font-size: 10px;
+  cursor: pointer;
+  border: 1px solid var(--border2);
+  color: var(--muted);
+  background: none;
+  transition: all 0.12s;
+}
+
+.scope-opt:hover { border-color: var(--plum-border); color: var(--plum-bright); }
+.scope-opt.selected { background: var(--plum-dim); border-color: var(--plum-border); color: var(--plum-bright); }
+
+/* ESCALATION TOGGLE */
+.escalation-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: var(--red-dim);
+  border: 1px solid var(--red-border);
+  border-radius: 8px;
+  margin-top: 12px;
+}
+
+.esc-label {
+  font-size: 12px;
+  color: #e87060;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.esc-desc { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+.toggle {
+  width: 40px; height: 22px;
+  background: var(--red);
+  border-radius: 11px;
+  position: relative;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.2s;
+}
+
+.toggle::after {
+  content: '';
+  position: absolute;
+  width: 16px; height: 16px;
+  background: white;
+  border-radius: 50%;
+  top: 3px;
+  right: 3px;
+  transition: right 0.2s;
+}
+
+.toggle.off { background: var(--surface3); }
+.toggle.off::after { right: 21px; }
+
+/* ── RIGHT COLUMN — CONTEXT ───────────── */
+.context-col {
+  background: var(--surface);
+  border-left: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.context-header {
+  padding: 18px 16px 14px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.context-title {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 2px;
+}
+
+.context-site {
+  font-family: var(--display);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--bright);
+}
+
+.context-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px;
+}
+
+.context-body::-webkit-scrollbar { display: none; }
+
+/* METRIC TILES */
+.metric-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.metric-tile {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+
+.mt-label {
+  font-family: var(--mono);
+  font-size: 8px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+
+.mt-value {
+  font-family: var(--mono);
+  font-size: 19px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.mv-amber { color: var(--amber); }
+.mv-red { color: var(--red); }
+.mv-green { color: var(--green-bright); }
+.mv-muted { color: var(--muted); }
+
+.mt-sub { font-size: 10px; color: var(--muted); margin-top: 3px; }
+
+/* TIMELINE */
+.timeline {
+  margin-bottom: 12px;
+}
+
+.tl-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 0 4px;
+  margin-bottom: 6px;
+}
+
+.tl-item {
+  display: flex;
+  gap: 10px;
+  padding: 6px 4px;
+  position: relative;
+}
+
+.tl-item::before {
+  content: '';
+  position: absolute;
+  left: 9px;
+  top: 22px;
+  bottom: -6px;
+  width: 1px;
+  background: var(--border);
+}
+
+.tl-item:last-child::before { display: none; }
+
+.tl-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 3px;
+  border: 2px solid var(--surface);
+}
+
+.tl-right { flex: 1; }
+
+.tl-event {
+  font-size: 11.5px;
+  color: var(--text);
+  line-height: 1.4;
+}
+
+.tl-time {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--muted);
+  margin-top: 1px;
+}
+
+/* RELATED ITEMS */
+.related-item {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 9px 11px;
+  margin-bottom: 5px;
+  cursor: pointer;
+  transition: all 0.12s;
+}
+
+.related-item:hover { border-color: var(--border2); }
+
+.ri-title { font-size: 12px; font-weight: 600; color: var(--text); margin-bottom: 2px; line-height: 1.3; }
+.ri-meta { font-size: 10.5px; color: var(--muted); }
+
+/* SEPARATOR */
+.ctx-sep {
+  height: 1px;
+  background: var(--border);
+  margin: 10px 0;
+}
+
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- ICON RAIL -->
+  <div class="icon-rail">
+    <div class="rail-logo">SP</div>
+
+    <button class="rail-btn active" title="Workbench">⬡</button>
+    <button class="rail-btn" title="Analytics" style="position:relative">
+      📊
+    </button>
+    <button class="rail-btn" title="Inbox" style="position:relative">
+      🔔
+      <div class="rail-badge">3</div>
+    </button>
+
+    <div class="rail-divider"></div>
+
+    <button class="rail-btn" title="Investigations">🔍</button>
+    <button class="rail-btn" title="Sites">⬡</button>
+    <button class="rail-btn" title="Reports">📄</button>
+
+    <div class="rail-spacer"></div>
+
+    <button class="rail-btn" title="Settings">⚙</button>
+    <div class="rail-avatar">SR</div>
+  </div>
+
+  <!-- QUEUE COLUMN -->
+  <div class="queue-col">
+    <div class="queue-header">
+      <div class="queue-title">Workbench</div>
+      <div class="queue-date">Wednesday,<br><em>25 March</em></div>
+      <div class="queue-summary">14 items · 3 overdue · 2 escalations pending</div>
+    </div>
+
+    <div class="filter-tabs">
+      <button class="filter-tab active">All <span class="tab-count">14</span></button>
+      <button class="filter-tab">Insights <span class="tab-count">3</span></button>
+      <button class="filter-tab">Investig. <span class="tab-count">4</span></button>
+      <button class="filter-tab">Actions <span class="tab-count">7</span></button>
+    </div>
+
+    <div class="queue-list">
+
+      <div class="queue-group-label">Overdue — Act Today</div>
+
+      <!-- ITEM 1 — selected -->
+      <div class="q-item type-insight selected" onclick="selectItem(this)">
+        <div class="qi-top">
+          <span class="qi-type qtype-insight">Critical Insight</span>
+          <span class="qi-age overdue">3d overdue</span>
+        </div>
+        <div class="qi-title">Heavy vehicle spotter management — Regional trend</div>
+        <div class="qi-meta">6 near-misses · North Region · Hot Work + Heavy Vehicle</div>
+        <div class="qi-urgency">
+          <div class="urgency-dot u-high"></div>
+          <div class="urgency-text">AI recommends systemic escalation</div>
+        </div>
+      </div>
+
+      <div class="q-item type-investigation" onclick="selectItem(this)">
+        <div class="qi-top">
+          <span class="qi-type qtype-investigation">Investigation</span>
+          <span class="qi-age overdue">1d overdue</span>
+        </div>
+        <div class="qi-title">INC-0091 — Fracture injury, Working at Height</div>
+        <div class="qi-meta">Riverside Tower · Opened 14 days ago · Investigator: T. Walsh</div>
+        <div class="qi-urgency">
+          <div class="urgency-dot u-high"></div>
+          <div class="urgency-text">Sign-off required before talk can use findings</div>
+        </div>
+      </div>
+
+      <div class="q-item type-action" onclick="selectItem(this)">
+        <div class="qi-top">
+          <span class="qi-type qtype-action">Corrective Action</span>
+          <span class="qi-age overdue">5d overdue</span>
+        </div>
+        <div class="qi-title">Update STMP to include spotter positioning requirements</div>
+        <div class="qi-meta">Owner: J. Reyes · From INC-0088 · Due 20 Mar</div>
+        <div class="qi-urgency">
+          <div class="urgency-dot u-high"></div>
+          <div class="urgency-text">No update from owner in 8 days</div>
+        </div>
+      </div>
+
+      <div class="queue-group-label">Due This Week</div>
+
+      <div class="q-item type-insight" onclick="selectItem(this)">
+        <div class="qi-top">
+          <span class="qi-type qtype-insight">Critical Insight</span>
+          <span class="qi-age">1d ago</span>
+        </div>
+        <div class="qi-title">PTW sign-on atrophy — Central Rail Depot</div>
+        <div class="qi-meta">4 observations · Site level · Permit to Work practice</div>
+        <div class="qi-urgency">
+          <div class="urgency-dot u-med"></div>
+          <div class="urgency-text">Below systemic threshold — site scope only</div>
+        </div>
+      </div>
+
+      <div class="q-item type-investigation" onclick="selectItem(this)">
+        <div class="qi-top">
+          <span class="qi-type qtype-investigation">Investigation</span>
+          <span class="qi-age">3d ago</span>
+        </div>
+        <div class="qi-title">INC-0094 — Near-miss, Hot Work, slag fall</div>
+        <div class="qi-meta">Central Rail Depot · Framework 60% complete</div>
+        <div class="qi-urgency">
+          <div class="urgency-dot u-med"></div>
+          <div class="urgency-text">AI suggestions ready for review</div>
+        </div>
+      </div>
+
+      <div class="q-item type-action" onclick="selectItem(this)">
+        <div class="qi-top">
+          <span class="qi-type qtype-action">Corrective Action</span>
+          <span class="qi-age">Due 27 Mar</span>
+        </div>
+        <div class="qi-title">Add reversing camera to vehicle pre-start checklist</div>
+        <div class="qi-meta">Owner: M. Chen · From INC-0088 · In progress</div>
+        <div class="qi-urgency">
+          <div class="urgency-dot u-med"></div>
+          <div class="urgency-text">Owner confirmed in progress</div>
+        </div>
+      </div>
+
+      <div class="q-item type-atrophy" onclick="selectItem(this)">
+        <div class="qi-top">
+          <span class="qi-type qtype-atrophy">Atrophy Alert</span>
+          <span class="qi-age">18d</span>
+        </div>
+        <div class="qi-title">Riverside Tower — no observations in 18 days</div>
+        <div class="qi-meta">Atrophy score: 87 · Manager visit not scheduled</div>
+        <div class="qi-urgency">
+          <div class="urgency-dot u-med"></div>
+          <div class="urgency-text">J. Thompson (manager) not yet assigned</div>
+        </div>
+      </div>
+
+      <div class="queue-group-label">Upcoming</div>
+
+      <div class="q-item type-action" onclick="selectItem(this)">
+        <div class="qi-top">
+          <span class="qi-type qtype-action">Corrective Action</span>
+          <span class="qi-age">Due 1 Apr</span>
+        </div>
+        <div class="qi-title">Pre-task brief template updated for spotter assignment</div>
+        <div class="qi-meta">Owner: Safety Team · From INC-0091</div>
+        <div class="qi-urgency">
+          <div class="urgency-dot u-low"></div>
+          <div class="urgency-text">Not started — 7 days remaining</div>
+        </div>
+      </div>
+
+      <div class="q-item type-insight" onclick="selectItem(this)">
+        <div class="qi-top">
+          <span class="qi-type qtype-insight">Critical Insight</span>
+          <span class="qi-age">Just now</span>
+        </div>
+        <div class="qi-title">Confined space entry — check-in atrophy, Harbour Bridge</div>
+        <div class="qi-meta">3 observations · Site level · Confined Space Entry</div>
+        <div class="qi-urgency">
+          <div class="urgency-dot u-low"></div>
+          <div class="urgency-text">New — not yet reviewed</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- WORK PANEL -->
+  <div class="work-panel">
+    <div class="work-header">
+      <div>
+        <div class="work-breadcrumb">Critical Insight · North Region · Heavy Vehicle</div>
+        <div class="work-title">Spotter Management <em>Pattern</em></div>
+        <div class="work-meta">
+          <span>Generated 3 days ago</span>
+          <span>·</span>
+          <span>6 source observations</span>
+          <span>·</span>
+          <span style="color:var(--red);">⚠ Overdue for review</span>
+        </div>
+      </div>
+      <div class="work-actions">
+        <button class="wb-btn btn-ghost">Skip</button>
+        <button class="wb-btn btn-reject">✕ Reject</button>
+        <button class="wb-btn btn-edit">✎ Edit</button>
+        <button class="wb-btn btn-approve">✓ Approve & Share</button>
+      </div>
+    </div>
+
+    <div class="work-body">
+
+      <!-- SOURCE DATA -->
+      <div class="source-block">
+        <div class="source-header">
+          <span class="source-label">Source — Algorithm Detected</span>
+          <span class="source-tag st-algo">Threshold: 5 near-misses / 30d · 6 detected</span>
+        </div>
+        <div class="source-body">
+          <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">6 near-miss observations across 4 sites, North Region, last 28 days. Work type: Heavy Vehicle Operation. Common AI-classified failure type: systemic.</div>
+          <div class="obs-list">
+            <div class="obs-chip">
+              <div class="obs-dot"></div>
+              <div>
+                <div>Excavator reversed without spotter in position. Spotter had moved to crane lift without informing operator.</div>
+                <div class="obs-site">Riverside Tower · 18 Mar · Sup: J. Reyes</div>
+              </div>
+            </div>
+            <div class="obs-chip">
+              <div class="obs-dot"></div>
+              <div>
+                <div>Dump truck reversing in laydown — no spotter present. Driver stopped when worker shouted warning.</div>
+                <div class="obs-site">Central Rail Depot · 14 Mar · Sup: K. Obi</div>
+              </div>
+            </div>
+            <div class="obs-chip">
+              <div class="obs-dot"></div>
+              <div>
+                <div>Spotter observed using phone during reversing operation. Not watching blind zone.</div>
+                <div class="obs-site">Riverside Tower · 11 Mar · Mgr: J. Thompson</div>
+              </div>
+            </div>
+            <div class="obs-chip" style="opacity:0.5;font-style:italic;">
+              <div class="obs-dot" style="background:var(--muted)"></div>
+              <div>
+                <div>+ 3 more observations — click to expand</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI DRAFT -->
+      <div class="ai-draft">
+        <div class="ai-draft-header">
+          <div class="ai-pulse"></div>
+          <span class="ai-draft-label">AI Draft — Awaiting Your Review</span>
+          <span style="margin-left:auto;font-family:var(--mono);font-size:9px;color:var(--plum-bright);opacity:0.6;">Generated 25 Mar 06:14</span>
+        </div>
+        <div class="ai-draft-body">
+
+          <div class="ai-field">
+            <div class="ai-field-label">Pattern Summary</div>
+            <div class="ai-field-text">Six near-misses involving heavy vehicle spotters have occurred across four North Region sites in 28 days. In five of six cases, the spotter was absent or distracted at the moment of the reversing movement — not because of individual negligence, but because spotter assignment and continuity are not systematically managed through the pre-task brief or site traffic management plans.</div>
+          </div>
+
+          <div class="ai-field">
+            <div class="ai-field-label">Likely Systemic Cause</div>
+            <div class="ai-field-text">Spotter roles are treated as informal task assignments rather than controlled positions — there is no system that ensures a spotter stays assigned and in position for the duration of a reversing operation.</div>
+          </div>
+
+          <div class="ai-field">
+            <div class="ai-field-label">Toolbox Narrative — Veteran Voice</div>
+            <div class="ai-narrative">
+              "Six times in the last month, across four of our sites, a heavy vehicle reversed without someone properly watching its blind zone. Six times. That's not bad luck — that's a system that isn't working.<br><br>
+              The common factor isn't the drivers. It's that we're not managing the spotter role the same way we manage everything else on site. Someone gets assigned in the morning and then drifts off to help with something else, and nobody has a mechanism to catch that gap.<br><br>
+              Before any reversing movement today: operator confirms spotter is in position and they have eye contact. If you're the spotter and you need to step away, you tell the operator first. That's the system. We're making it the system from today."
+            </div>
+          </div>
+
+          <div style="margin-top:14px;">
+            <div class="ai-field-label">Edit Narrative (optional)</div>
+            <textarea class="edit-area" placeholder="Edit the toolbox narrative here if needed..."></textarea>
+          </div>
+
+          <div class="scope-row">
+            <span class="scope-label">Share scope:</span>
+            <button class="scope-opt" onclick="toggleScope(this)">Site</button>
+            <button class="scope-opt selected" onclick="toggleScope(this)">Region</button>
+            <button class="scope-opt" onclick="toggleScope(this)">Division</button>
+            <button class="scope-opt" onclick="toggleScope(this)">Organisation</button>
+          </div>
+
+          <div class="escalation-row">
+            <div>
+              <div class="esc-label">⚠ AI recommends systemic escalation</div>
+              <div class="esc-desc">Pattern spans 4 sites. AI suggests routing to global systemic investigation workflow.</div>
+            </div>
+            <div class="toggle" id="escToggle" onclick="this.classList.toggle('off')"></div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- CONTEXT COLUMN -->
+  <div class="context-col">
+    <div class="context-header">
+      <div class="context-title">Site Context</div>
+      <div class="context-site">North Region — 4 sites</div>
+    </div>
+    <div class="context-body">
+
+      <div class="metric-grid">
+        <div class="metric-tile">
+          <div class="mt-label">Near-misses (28d)</div>
+          <div class="mt-value mv-red">6</div>
+          <div class="mt-sub">Heavy Vehicle</div>
+        </div>
+        <div class="metric-tile">
+          <div class="mt-label">Sites affected</div>
+          <div class="mt-value mv-amber">4</div>
+          <div class="mt-sub">of 8 in region</div>
+        </div>
+        <div class="metric-tile">
+          <div class="mt-label">Open investigations</div>
+          <div class="mt-value mv-red">2</div>
+          <div class="mt-sub">Related work type</div>
+        </div>
+        <div class="metric-tile">
+          <div class="mt-label">Talks delivered</div>
+          <div class="mt-value mv-muted">61%</div>
+          <div class="mt-sub">Heavy Vehicle cover</div>
+        </div>
+      </div>
+
+      <!-- TIMELINE -->
+      <div class="ctx-sep"></div>
+      <div class="timeline">
+        <div class="tl-label">Event Timeline</div>
+        <div class="tl-item">
+          <div class="tl-dot" style="background:var(--plum-bright)"></div>
+          <div class="tl-right">
+            <div class="tl-event">Critical Insight generated by algorithm</div>
+            <div class="tl-time">25 Mar 06:14 — 3 days overdue for review</div>
+          </div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot" style="background:var(--amber)"></div>
+          <div class="tl-right">
+            <div class="tl-event">6th near-miss logged — Riverside Tower</div>
+            <div class="tl-time">24 Mar · J. Thompson (manager visit)</div>
+          </div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot" style="background:var(--amber)"></div>
+          <div class="tl-right">
+            <div class="tl-event">5th near-miss — Central Rail Depot</div>
+            <div class="tl-time">21 Mar · K. Obi (supervisor)</div>
+          </div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot" style="background:var(--amber)"></div>
+          <div class="tl-right">
+            <div class="tl-event">Talk delivered — Heavy Vehicle, RVT</div>
+            <div class="tl-time">19 Mar · 14 crew · J. Reyes</div>
+          </div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot" style="background:var(--red)"></div>
+          <div class="tl-right">
+            <div class="tl-event">INC-0088 — near-miss, heavy vehicle</div>
+            <div class="tl-time">15 Mar · Riverside Tower · Inv. open</div>
+          </div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot" style="background:var(--muted)"></div>
+          <div class="tl-right">
+            <div class="tl-event">First near-miss in pattern — RVT</div>
+            <div class="tl-time">25 Feb · Pattern begins</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RELATED ITEMS -->
+      <div class="ctx-sep"></div>
+      <div class="tl-label" style="padding:0 4px;margin-bottom:6px;">Related Items</div>
+
+      <div class="related-item">
+        <div class="ri-title">INC-0088 — Heavy Vehicle near-miss</div>
+        <div class="ri-meta">Riverside Tower · Investigation open · 14d</div>
+      </div>
+      <div class="related-item">
+        <div class="ri-title">Corrective Action — Update STMP</div>
+        <div class="ri-meta">From INC-0088 · Overdue 5 days · Owner: J. Reyes</div>
+      </div>
+      <div class="related-item">
+        <div class="ri-title">Talk: Heavy Vehicle — RVT</div>
+        <div class="ri-meta">Delivered 19 Mar · 14 crew · Pre-insight</div>
+      </div>
+      <div class="related-item">
+        <div class="ri-title">Manager Visit — J. Thompson</div>
+        <div class="ri-meta">Riverside Tower · 24 Mar · 1 observation logged</div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<script>
+function selectItem(el) {
+  document.querySelectorAll('.q-item').forEach(i => i.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function toggleScope(btn) {
+  btn.classList.toggle('selected');
+}
+</script>
+</body>
+</html>

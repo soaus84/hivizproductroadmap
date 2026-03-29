@@ -1,0 +1,1431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SafetyPlatform — Product Specification</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+  --ink: #1a1714;
+  --bg: #faf8f4;
+  --surface: #ffffff;
+  --border: #e0dbd2;
+  --muted: #7a7468;
+  --faint: #b8b2a8;
+
+  --rust: #c4410c;
+  --rust-bg: rgba(196,65,12,0.06);
+  --teal: #0d6e6e;
+  --teal-bg: rgba(13,110,110,0.06);
+  --gold: #9a6e00;
+  --gold-bg: rgba(154,110,0,0.06);
+  --plum: #5e35a0;
+  --plum-bg: rgba(94,53,160,0.06);
+  --blue: #1a4fa0;
+  --blue-bg: rgba(26,79,160,0.06);
+
+  --serif: 'Libre Baskerville', Georgia, serif;
+  --sans: 'DM Sans', sans-serif;
+  --mono: 'JetBrains Mono', monospace;
+
+  --page-width: 860px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 13.5px;
+  line-height: 1.65;
+}
+
+/* NAV */
+.doc-nav {
+  position: fixed;
+  top: 0; left: 0;
+  width: 220px;
+  height: 100vh;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  padding: 24px 0;
+  overflow-y: auto;
+  z-index: 100;
+}
+
+.doc-nav::-webkit-scrollbar { width: 3px; }
+.doc-nav::-webkit-scrollbar-thumb { background: var(--border); }
+
+.nav-brand {
+  padding: 0 20px 20px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 16px;
+}
+
+.nav-brand-name {
+  font-family: var(--serif);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.nav-brand-sub {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.nav-section-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--faint);
+  padding: 8px 20px 4px;
+}
+
+.nav-item {
+  display: block;
+  padding: 5px 20px;
+  font-size: 12px;
+  color: var(--muted);
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.1s;
+  border-left: 2px solid transparent;
+  line-height: 1.4;
+}
+
+.nav-item:hover { color: var(--ink); background: var(--bg); }
+.nav-item.active { color: var(--rust); border-left-color: var(--rust); font-weight: 500; }
+
+.nav-sub {
+  padding-left: 32px;
+  font-size: 11.5px;
+}
+
+/* MAIN CONTENT */
+.doc-main {
+  margin-left: 220px;
+  padding: 48px 60px 80px;
+  max-width: calc(220px + var(--page-width));
+}
+
+/* COVER */
+.cover {
+  padding: 60px 0 48px;
+  border-bottom: 2px solid var(--ink);
+  margin-bottom: 48px;
+}
+
+.cover-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 16px;
+}
+
+.cover-title {
+  font-family: var(--serif);
+  font-size: 42px;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.1;
+  margin-bottom: 8px;
+}
+
+.cover-title em { color: var(--rust); font-style: italic; }
+
+.cover-subtitle {
+  font-size: 18px;
+  color: var(--muted);
+  font-weight: 300;
+  margin-bottom: 28px;
+}
+
+.cover-meta {
+  display: flex;
+  gap: 32px;
+  flex-wrap: wrap;
+}
+
+.cover-meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.cmi-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+
+.cmi-value {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink);
+}
+
+/* SECTIONS */
+.doc-section {
+  margin-bottom: 52px;
+  scroll-margin-top: 24px;
+}
+
+h1 {
+  font-family: var(--serif);
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 6px;
+  line-height: 1.2;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+h1 .section-num {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--faint);
+  margin-right: 8px;
+  font-weight: 400;
+}
+
+h2 {
+  font-family: var(--serif);
+  font-size: 19px;
+  font-weight: 700;
+  color: var(--ink);
+  margin-top: 32px;
+  margin-bottom: 10px;
+  line-height: 1.3;
+}
+
+h3 {
+  font-family: var(--sans);
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--ink);
+  margin-top: 22px;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+p {
+  margin-bottom: 14px;
+  max-width: 680px;
+}
+
+p:last-child { margin-bottom: 0; }
+
+/* ROLE TABLE */
+.role-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.role-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px;
+  position: relative;
+  overflow: hidden;
+}
+
+.role-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+}
+
+.rc-sup::before { background: var(--rust); }
+.rc-mgr::before { background: var(--blue); }
+.rc-safety::before { background: var(--plum); }
+.rc-exec::before { background: var(--ink); }
+
+.role-title {
+  font-family: var(--serif);
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.role-scope {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+
+.role-platform {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--muted);
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 10px;
+}
+
+.role-views {
+  font-size: 12px;
+  color: var(--ink);
+  line-height: 1.6;
+}
+
+/* VIEW SPEC CARDS */
+.view-spec {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  margin: 16px 0;
+}
+
+.vs-header {
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.vs-title {
+  font-family: var(--serif);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.vs-tags {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.vs-tag {
+  font-family: var(--mono);
+  font-size: 9px;
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-weight: 500;
+}
+
+.vt-mobile { background: var(--rust-bg); color: var(--rust); border: 1px solid rgba(196,65,12,0.2); }
+.vt-desktop { background: var(--blue-bg); color: var(--blue); border: 1px solid rgba(26,79,160,0.2); }
+.vt-shared { background: var(--teal-bg); color: var(--teal); border: 1px solid rgba(13,110,110,0.2); }
+.vt-role { background: var(--plum-bg); color: var(--plum); border: 1px solid rgba(94,53,160,0.2); }
+.vt-human { background: var(--gold-bg); color: var(--gold); border: 1px solid rgba(154,110,0,0.2); }
+
+.vs-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+}
+
+.vs-col {
+  padding: 16px 20px;
+}
+
+.vs-col:first-child { border-right: 1px solid var(--border); }
+
+.vs-col-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--faint);
+  margin-bottom: 10px;
+}
+
+.vs-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.vs-list li {
+  font-size: 12.5px;
+  color: var(--ink);
+  padding-left: 14px;
+  position: relative;
+  line-height: 1.5;
+}
+
+.vs-list li::before {
+  content: '→';
+  position: absolute;
+  left: 0;
+  color: var(--faint);
+  font-size: 11px;
+}
+
+.vs-list li strong { color: var(--ink); font-weight: 600; }
+.vs-list li em { color: var(--muted); font-style: normal; font-size: 11px; }
+
+.vs-queries {
+  padding: 0 20px 16px;
+  border-top: 1px solid var(--border);
+}
+
+/* DB TABLE */
+.db-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  margin: 12px 0;
+  font-family: var(--mono);
+}
+
+.db-table th {
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 8px 12px;
+  text-align: left;
+  border-bottom: 2px solid var(--border);
+  font-weight: 500;
+  background: var(--bg);
+}
+
+.db-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+  line-height: 1.5;
+  font-size: 11.5px;
+}
+
+.db-table tr:last-child td { border-bottom: none; }
+.db-table tr:hover td { background: var(--bg); }
+
+.db-table td:first-child { color: var(--teal); font-weight: 500; }
+.db-table td:nth-child(2) { color: var(--rust); }
+.db-table td:nth-child(3) { color: var(--muted); font-family: var(--sans); font-size: 11.5px; }
+
+/* SQL BLOCK */
+.sql-block {
+  background: #1a1714;
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin: 12px 0;
+  overflow-x: auto;
+}
+
+.sql-block pre {
+  font-family: var(--mono);
+  font-size: 11px;
+  line-height: 1.7;
+  color: #d8d2c4;
+  white-space: pre;
+}
+
+.sql-kw { color: #7dd3fc; }
+.sql-type { color: #a5b4fc; }
+.sql-str { color: #86efac; }
+.sql-comment { color: #4a5068; }
+
+/* INFO BOX */
+.info-box {
+  background: var(--teal-bg);
+  border: 1px solid rgba(13,110,110,0.2);
+  border-left: 3px solid var(--teal);
+  border-radius: 6px;
+  padding: 12px 16px;
+  margin: 14px 0;
+  font-size: 12.5px;
+  line-height: 1.6;
+  max-width: 680px;
+}
+
+.info-box strong { color: var(--teal); }
+
+.warn-box {
+  background: var(--gold-bg);
+  border: 1px solid rgba(154,110,0,0.2);
+  border-left: 3px solid var(--gold);
+  border-radius: 6px;
+  padding: 12px 16px;
+  margin: 14px 0;
+  font-size: 12.5px;
+  line-height: 1.6;
+  max-width: 680px;
+}
+
+.warn-box strong { color: var(--gold); }
+
+/* SCOPE TABLE */
+.scope-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+  margin: 12px 0;
+}
+
+.scope-table th {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 8px 14px;
+  text-align: left;
+  border-bottom: 2px solid var(--border);
+  background: var(--bg);
+  font-weight: 500;
+}
+
+.scope-table td {
+  padding: 9px 14px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+  line-height: 1.5;
+}
+
+.scope-table tr:last-child td { border-bottom: none; }
+.scope-table tr:hover td { background: var(--bg); }
+
+.chip {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 9px;
+  padding: 2px 7px;
+  border-radius: 3px;
+  font-weight: 500;
+  margin: 1px;
+}
+
+.ch-mobile { background: var(--rust-bg); color: var(--rust); border: 1px solid rgba(196,65,12,0.2); }
+.ch-desk { background: var(--blue-bg); color: var(--blue); border: 1px solid rgba(26,79,160,0.2); }
+.ch-both { background: var(--teal-bg); color: var(--teal); border: 1px solid rgba(13,110,110,0.2); }
+.ch-yes { background: #e8f5ee; color: #1a6e3a; border: 1px solid #b8dfc8; }
+.ch-no { background: #fce8e8; color: #8a1a1a; border: 1px solid #e8b8b8; }
+.ch-own { background: var(--gold-bg); color: var(--gold); border: 1px solid rgba(154,110,0,0.2); }
+
+/* API ENDPOINT */
+.endpoint {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 12px 16px;
+  margin: 8px 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.method {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.m-get { background: var(--teal-bg); color: var(--teal); border: 1px solid rgba(13,110,110,0.2); }
+.m-post { background: var(--rust-bg); color: var(--rust); border: 1px solid rgba(196,65,12,0.2); }
+.m-patch { background: var(--gold-bg); color: var(--gold); border: 1px solid rgba(154,110,0,0.2); }
+
+.ep-path { font-family: var(--mono); font-size: 12px; color: var(--ink); font-weight: 500; }
+.ep-desc { font-size: 11.5px; color: var(--muted); margin-top: 3px; }
+
+/* PAGE BREAK FOR PRINT */
+@media print {
+  .doc-nav { display: none; }
+  .doc-main { margin-left: 0; padding: 24px 40px; }
+  .doc-section { page-break-inside: avoid; }
+  h1 { page-break-before: always; }
+  .cover { page-break-after: always; }
+}
+
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="doc-nav">
+  <div class="nav-brand">
+    <div class="nav-brand-name">SafetyPlatform</div>
+    <div class="nav-brand-sub">Product Specification v0.2</div>
+  </div>
+
+  <div class="nav-section-label">Overview</div>
+  <a class="nav-item" href="#overview">1. Product Overview</a>
+  <a class="nav-item nav-sub" href="#principles">Design Principles</a>
+  <a class="nav-item nav-sub" href="#roles">Roles & Scope</a>
+
+  <div class="nav-section-label">Mobile App</div>
+  <a class="nav-item" href="#mobile">2. Mobile Views</a>
+  <a class="nav-item nav-sub" href="#v-capture">Capture</a>
+  <a class="nav-item nav-sub" href="#v-talk">Talk Delivery</a>
+  <a class="nav-item nav-sub" href="#v-record">Record</a>
+  <a class="nav-item nav-sub" href="#v-visit">Visit Planning</a>
+
+  <div class="nav-section-label">Desktop App</div>
+  <a class="nav-item" href="#desktop">3. Desktop Views</a>
+  <a class="nav-item nav-sub" href="#v-workbench">Workbench</a>
+  <a class="nav-item nav-sub" href="#v-analytics">Analytics</a>
+  <a class="nav-item nav-sub" href="#v-reports">Reports & Export</a>
+
+  <div class="nav-section-label">Data</div>
+  <a class="nav-item" href="#datamodel">4. Data Model</a>
+  <a class="nav-item nav-sub" href="#entities">Entity Schemas</a>
+  <a class="nav-item nav-sub" href="#viewmap">View → Query Map</a>
+  <a class="nav-item nav-sub" href="#scoping">Scope & Filtering</a>
+
+  <div class="nav-section-label">Intelligence</div>
+  <a class="nav-item" href="#pipeline">5. AI & Algorithm Pipeline</a>
+  <a class="nav-item nav-sub" href="#prompts">Prompt Library</a>
+  <a class="nav-item nav-sub" href="#rules">Logic Rules</a>
+
+  <div class="nav-section-label">API</div>
+  <a class="nav-item" href="#api">6. API Reference</a>
+</nav>
+
+<!-- MAIN -->
+<div class="doc-main">
+
+  <!-- COVER -->
+  <div class="cover">
+    <div class="cover-label">Product Specification — Prototype Ready</div>
+    <div class="cover-title">Safety<em>Platform</em></div>
+    <div class="cover-subtitle">Toolbox Talk Intelligence & Field Observation System</div>
+    <div class="cover-meta">
+      <div class="cover-meta-item"><div class="cmi-label">Version</div><div class="cmi-value">0.2 — Draft</div></div>
+      <div class="cover-meta-item"><div class="cmi-label">Date</div><div class="cmi-value">March 2026</div></div>
+      <div class="cover-meta-item"><div class="cmi-label">Status</div><div class="cmi-value">Prototype-ready</div></div>
+      <div class="cover-meta-item"><div class="cmi-label">Database</div><div class="cmi-value">PostgreSQL 14+</div></div>
+      <div class="cover-meta-item"><div class="cmi-label">AI</div><div class="cmi-value">Anthropic Claude Sonnet</div></div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- 1. OVERVIEW -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <div class="doc-section" id="overview">
+    <h1><span class="section-num">01</span>Product Overview</h1>
+
+    <p>SafetyPlatform is a lean, opinionated safety intelligence system for construction and industrial organisations. It converts field observations and incident data into structured learning and crew communication — using AI to reduce the manual work between a field observation and a toolbox talk delivered to a crew.</p>
+
+    <p>The platform operates across two surfaces: a <strong>mobile app</strong> for field-facing roles (supervisors, managers, regional managers) and a <strong>desktop app</strong> for safety practitioners and divisional leadership. The two surfaces share a single data layer but serve fundamentally different workflows.</p>
+
+    <h2 id="principles">Design Principles</h2>
+
+    <div class="info-box">
+      <strong>Core principle:</strong> Only the critical information required to drive operationally significant communication, learning, and improvement. Every field, every view, every prompt must justify its existence against this test.
+    </div>
+
+    <p>The platform is built around four mandatory human touch points — the minimum viable human interactions that cannot be automated without compromising safety, legal integrity, or operational trust:</p>
+
+    <table class="scope-table">
+      <thead>
+        <tr><th>#</th><th>Touch Point</th><th>Role</th><th>What They Do</th><th>Why Human</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>T1</td><td>Capture</td><td>Supervisor / Manager</td><td>Submit observation or incident</td><td>A human sees the thing. Cannot be automated.</td></tr>
+        <tr><td>T2</td><td>Insight Approval</td><td>Safety Manager</td><td>Review and approve AI-drafted Critical Insight</td><td>Legal and reputational gate before content reaches crews.</td></tr>
+        <tr><td>T3</td><td>Investigation Sign-off</td><td>Investigator / Safety Mgr</td><td>Close investigation, set sharing eligibility</td><td>Professional and legal liability requires human sign-off.</td></tr>
+        <tr><td>T4</td><td>Talk Delivery</td><td>Supervisor / Manager</td><td>Review generated talk, deliver to crew</td><td>Human context — knowing the crew and conditions — is irreplaceable.</td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="roles">Roles, Scope & Platform Access</h2>
+
+    <p>Every role has a defined organisational scope. All data queries, content visibility, and workflow routing are scoped to the authenticated user's position in the org hierarchy. The platform enforces scope at the data layer — not the application layer.</p>
+
+    <div class="role-grid">
+      <div class="role-card rc-sup">
+        <div class="role-title">Supervisor</div>
+        <div class="role-scope">Scope: Own worksite only</div>
+        <div class="role-platform">Mobile only</div>
+        <div class="role-views">Capture (observations + incidents) · Talk review & delivery · Record · Site activity feed</div>
+      </div>
+      <div class="role-card rc-mgr">
+        <div class="role-title">Manager</div>
+        <div class="role-scope">Scope: Assigned worksites</div>
+        <div class="role-platform">Mobile primary · Desktop read</div>
+        <div class="role-views">Visit planning · Capture (any assigned site) · Talk delivery (optional) · Site portfolio view</div>
+      </div>
+      <div class="role-card rc-mgr" style="border-top:3px solid var(--teal);">
+        <div class="role-title">Regional Manager</div>
+        <div class="role-scope">Scope: All sites in region</div>
+        <div class="role-platform">Mobile primary · Desktop read</div>
+        <div class="role-views">Identical to Manager — visit planning and capture scoped to region. Observations carry regional scope. Own observations feed regional trend detection.</div>
+      </div>
+      <div class="role-card rc-safety">
+        <div class="role-title">Safety Manager</div>
+        <div class="role-scope">Scope: Division or region</div>
+        <div class="role-platform">Desktop primary · Mobile read</div>
+        <div class="role-views">Workbench (insight approval, investigation sign-off, corrective actions, atrophy alerts) · Analytics · Reports · Admin</div>
+      </div>
+      <div class="role-card rc-exec">
+        <div class="role-title">Division / Exec</div>
+        <div class="role-scope">Scope: Full division or org</div>
+        <div class="role-platform">Desktop · Report recipients</div>
+        <div class="role-views">Analytics lenses · Board report · Export. Primarily receives generated reports. Not a daily platform user.</div>
+      </div>
+    </div>
+
+    <div class="warn-box">
+      <strong>Regional Manager note:</strong> Regional managers do their own field visits and submit observations exactly as site managers do. The only differences are: (1) their scope covers all sites in the region, not just assigned sites; (2) their observations are tagged <code>observer_role: regional_manager</code> and carry a higher default sharing scope; (3) their portfolio view on mobile shows all regional sites ranked by atrophy. They are a first-class field role, not just a management layer.
+    </div>
+
+  </div>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- 2. MOBILE VIEWS -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <div class="doc-section" id="mobile">
+    <h1><span class="section-num">02</span>Mobile Views</h1>
+
+    <p>The mobile app serves field-facing roles. All four mandatory human touch points occur here. The app is designed for one-handed use, works in bright sunlight, and functions with minimal connectivity (offline capture queued for sync).</p>
+
+    <!-- VIEW: CAPTURE -->
+    <div class="view-spec" id="v-capture">
+      <div class="vs-header">
+        <div class="vs-title">View 1 — Capture</div>
+        <div class="vs-tags">
+          <span class="vs-tag vt-mobile">Mobile</span>
+          <span class="vs-tag vt-shared">All field roles</span>
+          <span class="vs-tag vt-human">Touch point T1</span>
+        </div>
+      </div>
+      <div class="vs-body">
+        <div class="vs-col">
+          <div class="vs-col-label">UI Elements & Behaviour</div>
+          <ul class="vs-list">
+            <li><strong>Fork question:</strong> "Did anyone get hurt or could they have?" → YES routes to incident fields, NO routes to observation fields</li>
+            <li><strong>Work type selector:</strong> Filtered to work types active at the user's current worksite. Required field.</li>
+            <li><strong>Safety practice selector:</strong> Optional. Filtered to practices relevant to selected work type.</li>
+            <li><strong>Observation type:</strong> Safe / At-risk / Near-miss — required for observation path</li>
+            <li><strong>What was observed:</strong> Free text. Minimum 20 characters. No character limit.</li>
+            <li><strong>Immediate action taken:</strong> Optional free text.</li>
+            <li><strong>People count:</strong> Numeric stepper. Optional.</li>
+            <li><strong>Visit topic prompt:</strong> If user has an active visit plan, selected topics surface as optional prompts above the text field. Not locked fields.</li>
+            <li><strong>Incident path adds:</strong> Incident type (near-miss / injury / damage / environmental) + occurred_at datetime</li>
+            <li><strong>Submit:</strong> Single tap. Optimistic UI — confirm immediately, sync in background.</li>
+          </ul>
+        </div>
+        <div class="vs-col">
+          <div class="vs-col-label">Database Operations</div>
+          <ul class="vs-list">
+            <li><strong>Write:</strong> <code>observation</code> or <code>incident</code> table</li>
+            <li><strong>Auto-set:</strong> <code>observer_id</code> from auth token, <code>worksite_id</code> from user profile, <code>observed_at</code> = now(), <code>observer_role</code> from user role, <code>cleared_for_sharing</code> = true (default), <code>visit_id</code> if active visit exists</li>
+            <li><strong>Incident path also writes:</strong> Runs triage algorithm synchronously → may auto-create <code>investigation</code> record</li>
+            <li><strong>Post-write job:</strong> Queue <code>observation.enrich</code> AI job</li>
+            <li><strong>Offline:</strong> Write to local SQLite queue, sync on reconnect. <code>synced_at</code> field tracks.</li>
+          </ul>
+          <div style="margin-top:14px;" class="vs-col-label">Key Queries</div>
+          <ul class="vs-list">
+            <li><em>Load work types:</em> <code>SELECT * FROM work_type WHERE active = true ORDER BY label</code></li>
+            <li><em>Active visit:</em> <code>SELECT * FROM visit_plan WHERE presenter_id = $user AND status = 'active' AND worksite_id = $site</code></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- VIEW: TALK -->
+    <div class="view-spec" id="v-talk">
+      <div class="vs-header">
+        <div class="vs-title">View 2 & 3 — Talk Review & Delivery</div>
+        <div class="vs-tags">
+          <span class="vs-tag vt-mobile">Mobile</span>
+          <span class="vs-tag vt-shared">Supervisor + Manager</span>
+          <span class="vs-tag vt-human">Touch points T3 + T4</span>
+        </div>
+      </div>
+      <div class="vs-body">
+        <div class="vs-col">
+          <div class="vs-col-label">UI Elements & Behaviour</div>
+          <ul class="vs-list">
+            <li><strong>Talk card on home:</strong> Badge when a talk is generated and ready. Tapping opens full-screen talk view.</li>
+            <li><strong>Full-screen talk view:</strong> No navigation chrome. Content only: hazard intro, main narrative, key actions, discussion questions, closing line.</li>
+            <li><strong>Language selector:</strong> Dropdown — 10 languages. Changing language triggers AI translation and re-renders content. Selection persisted per user.</li>
+            <li><strong>Read Aloud button:</strong> Speaks generated (or translated) content via Web Speech API. Stop button appears during playback.</li>
+            <li><strong>Presenter note:</strong> Optional free text field. Appended to content before delivery. Not AI-generated.</li>
+            <li><strong>Crew acknowledgement:</strong> Scrollable list of site workers. Tap to select. Manual name entry for non-registered workers. Count displayed live.</li>
+            <li><strong>Deliver button:</strong> Locks the talk. Sets <code>delivered_at</code>. Navigates to Record view.</li>
+          </ul>
+        </div>
+        <div class="vs-col">
+          <div class="vs-col-label">Database Operations</div>
+          <ul class="vs-list">
+            <li><strong>Read:</strong> <code>toolbox_talk</code> WHERE <code>worksite_id = $site AND delivered_at IS NULL</code></li>
+            <li><strong>Read content sources:</strong> JOIN to <code>observation</code>, <code>investigation</code>, <code>critical_insight</code> via <code>observation_ids[]</code>, <code>investigation_ids[]</code>, <code>critical_insight_ids[]</code></li>
+            <li><strong>Translation:</strong> AI call with <code>returnRaw: true</code> — result stored in <code>toolbox_talk.translated_content</code> JSONB keyed by lang code</li>
+            <li><strong>On deliver:</strong> UPDATE <code>toolbox_talk</code> SET <code>delivered_at = now(), attendee_ids = $ids, attendee_count = $n, acknowledgement_method = 'digital', presenter_notes = $note</code></li>
+          </ul>
+          <div style="margin-top:14px;" class="vs-col-label">Key Queries</div>
+          <ul class="vs-list">
+            <li><em>Ready talks:</em> <code>SELECT * FROM toolbox_talk WHERE worksite_id = $site AND delivered_at IS NULL ORDER BY created_at DESC LIMIT 1</code></li>
+            <li><em>Site workers for attendance:</em> <code>SELECT id, name FROM users WHERE worksite_id = $site AND active = true ORDER BY name</code></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- VIEW: VISIT PLANNING -->
+    <div class="view-spec" id="v-visit">
+      <div class="vs-header">
+        <div class="vs-title">Visit Planning — Manager Home + Detail</div>
+        <div class="vs-tags">
+          <span class="vs-tag vt-mobile">Mobile</span>
+          <span class="vs-tag vt-role">Manager + Regional Manager</span>
+        </div>
+      </div>
+      <div class="vs-body">
+        <div class="vs-col">
+          <div class="vs-col-label">Home — Site List (sorted by atrophy)</div>
+          <ul class="vs-list">
+            <li><strong>Sites list:</strong> All sites in manager's scope, ranked by <code>atrophy_score DESC</code></li>
+            <li><strong>Per site card:</strong> Site name, worker count, active work types, atrophy score (0–100), signal chips (last observation age, open investigations, near-miss trend), last visit date</li>
+            <li><strong>Atrophy score:</strong> Calculated field — see algorithm section. Displayed as number + colour (red &gt;70, amber 40–70, green &lt;40)</li>
+            <li><strong>Plan Visit button:</strong> Navigates to Visit Detail</li>
+            <li><strong>Filter:</strong> All / High atrophy / Unvisited / Has open investigations</li>
+          </ul>
+          <div style="margin-top:14px;" class="vs-col-label">Visit Detail — Plan & Topics</div>
+          <ul class="vs-list">
+            <li><strong>Visit header:</strong> Site name, date/time selector (defaults to today)</li>
+            <li><strong>Recommended topics:</strong> AI + algorithm generated list. Each shows source badge (Trend / Investigation / AI / Practice atrophy)</li>
+            <li><strong>Topic interaction:</strong> Tap to check/uncheck. Add custom topic (free text). Re-order by drag.</li>
+            <li><strong>Site context panel:</strong> Last observation, last talk, open investigations, near-miss count (30d), atrophy score, active work types</li>
+            <li><strong>Start Visit:</strong> Creates <code>visit_plan</code> record with status = active. Navigates to Capture with visit context loaded.</li>
+          </ul>
+        </div>
+        <div class="vs-col">
+          <div class="vs-col-label">Database Operations</div>
+          <ul class="vs-list">
+            <li><strong>Atrophy score query:</strong> Calculated at query time from multiple tables (see algorithm section)</li>
+            <li><strong>Recommended topics:</strong> Async AI call using site's recent observations + open investigations + practice atrophy signals. Cached for 24h per site.</li>
+            <li><strong>On Start Visit:</strong> INSERT <code>visit_plan</code> with <code>manager_id, worksite_id, planned_at, topics_planned (JSONB), status = 'active'</code></li>
+            <li><strong>On visit complete:</strong> UPDATE <code>visit_plan</code> SET <code>status = 'completed', completed_at = now(), topics_covered (JSONB), observations_logged_ids[]</code></li>
+          </ul>
+          <div style="margin-top:14px;" class="vs-col-label">Key Queries</div>
+          <ul class="vs-list">
+            <li><em>Sites with atrophy:</em> Complex query — see View → Query Map section</li>
+            <li><em>Topic sources:</em> Recent at-risk/near-miss observations, open investigations, practice_id atrophy per site</li>
+            <li><em>Active visit:</em> <code>SELECT * FROM visit_plan WHERE manager_id = $user AND status = 'active'</code></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- VIEW: RECORD -->
+    <div class="view-spec" id="v-record">
+      <div class="vs-header">
+        <div class="vs-title">View 4 — Record</div>
+        <div class="vs-tags">
+          <span class="vs-tag vt-mobile">Mobile</span>
+          <span class="vs-tag vt-shared">All field roles</span>
+          <span class="vs-tag vt-human">Touch point T4 receipt</span>
+        </div>
+      </div>
+      <div class="vs-body">
+        <div class="vs-col">
+          <div class="vs-col-label">UI Elements</div>
+          <ul class="vs-list">
+            <li><strong>Confirmation:</strong> Talk reference number, site, date, crew count, work type</li>
+            <li><strong>Attendance summary:</strong> List of acknowledged attendees</li>
+            <li><strong>For managers:</strong> Visit summary — topics planned vs covered, observations logged count, next recommended visit date</li>
+            <li><strong>Content is locked:</strong> No edit after delivery. Read-only.</li>
+            <li><strong>Share:</strong> Optional PDF export of talk record for physical filing</li>
+          </ul>
+        </div>
+        <div class="vs-col">
+          <div class="vs-col-label">Database Operations</div>
+          <ul class="vs-list">
+            <li><strong>Read:</strong> <code>toolbox_talk</code> by ID (just delivered)</li>
+            <li><strong>Read:</strong> <code>visit_plan</code> if visit context exists — auto-closes visit on talk delivery</li>
+            <li><strong>All fields locked:</strong> No further writes to <code>toolbox_talk</code> after <code>delivered_at</code> is set</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- 3. DESKTOP VIEWS -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <div class="doc-section" id="desktop">
+    <h1><span class="section-num">03</span>Desktop Views</h1>
+
+    <p>The desktop app serves safety managers and divisional leadership. It is a workbench and intelligence platform — not a field tool. The primary surface is the Workbench queue. Analytics and reporting are secondary surfaces accessed from the sidebar.</p>
+
+    <!-- WORKBENCH -->
+    <div class="view-spec" id="v-workbench">
+      <div class="vs-header">
+        <div class="vs-title">Workbench — Safety Manager Primary Surface</div>
+        <div class="vs-tags">
+          <span class="vs-tag vt-desktop">Desktop</span>
+          <span class="vs-tag vt-role">Safety Manager</span>
+          <span class="vs-tag vt-human">Touch points T2 + T3</span>
+        </div>
+      </div>
+      <div class="vs-body">
+        <div class="vs-col">
+          <div class="vs-col-label">Layout (4 columns)</div>
+          <ul class="vs-list">
+            <li><strong>Icon rail (56px):</strong> App switcher — Workbench, Analytics, Notifications, Investigations, Sites, Reports</li>
+            <li><strong>Queue column (260px):</strong> Prioritised list of items requiring action. Filters: All / Insights / Investigations / Actions / Atrophy. Groups: Overdue / Due this week / Upcoming.</li>
+            <li><strong>Work panel (flex):</strong> Selected item expands here. Full decision surface for the active item.</li>
+            <li><strong>Context column (340px):</strong> Site/region context for the active item. Metrics, timeline, related items.</li>
+          </ul>
+          <div style="margin-top:14px;" class="vs-col-label">Queue Item Types</div>
+          <ul class="vs-list">
+            <li><strong>Critical Insight:</strong> AI draft awaiting approval. Shows pattern summary, source count, age. Actions: Approve / Edit / Reject.</li>
+            <li><strong>Investigation:</strong> Open investigation needing sign-off or overdue. Shows incident ref, site, days open. Actions: Review fields, Close + set sharing.</li>
+            <li><strong>Corrective Action:</strong> Overdue or approaching due date. Shows action, owner, days overdue. Actions: Mark complete, Chase owner, Extend.</li>
+            <li><strong>Atrophy Alert:</strong> Site with atrophy score > threshold and no manager visit scheduled. Actions: Assign manager, Dismiss.</li>
+          </ul>
+          <div style="margin-top:14px;" class="vs-col-label">Scope Filtering</div>
+          <ul class="vs-list">
+            <li>Queue always filtered to authenticated user's scope. A regional safety manager sees only items from their region.</li>
+            <li>Scope selector in topbar allows narrowing further (e.g. to a single site or work type).</li>
+          </ul>
+        </div>
+        <div class="vs-col">
+          <div class="vs-col-label">Database Operations</div>
+          <ul class="vs-list">
+            <li><strong>Queue load:</strong> Union query across <code>critical_insight</code> (pending), <code>investigation</code> (open/overdue), <code>corrective_action</code> (overdue/due-soon), <code>site_atrophy_view</code> — all filtered to user scope, ordered by urgency</li>
+            <li><strong>Insight approve:</strong> UPDATE <code>critical_insight</code> SET <code>cleared_for_toolbox = true, reviewed_by_id = $user, reviewed_at = now(), review_action = 'approved', sharing_scope = $scope</code></li>
+            <li><strong>Insight reject:</strong> Same UPDATE with <code>review_action = 'rejected'</code> — resets trend cooldown</li>
+            <li><strong>Investigation close:</strong> UPDATE <code>investigation</code> SET <code>status = 'closed', closed_by_id = $user, closed_at = now(), cleared_for_sharing = $bool, legal_hold = $bool, sharing_scope = $scope</code> — triggers <code>investigation.generate_narrative</code> job if cleared</li>
+            <li><strong>Corrective action update:</strong> UPDATE <code>corrective_action</code> SET <code>status = $status, updated_at = now()</code></li>
+            <li><strong>Context panel:</strong> Multiple reads — site metrics view, timeline events, related items JOIN</li>
+          </ul>
+          <div style="margin-top:14px;" class="vs-col-label">Key Queries</div>
+          <ul class="vs-list">
+            <li><em>Queue:</em> See View → Query Map section for full union query</li>
+            <li><em>Context timeline:</em> SELECT observations, incidents, talks, visits WHERE site = $site ORDER BY occurred_at DESC LIMIT 20</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- ANALYTICS -->
+    <div class="view-spec" id="v-analytics">
+      <div class="vs-header">
+        <div class="vs-title">Analytics — Intelligence Lenses</div>
+        <div class="vs-tags">
+          <span class="vs-tag vt-desktop">Desktop</span>
+          <span class="vs-tag vt-role">Safety Mgr + Division/Regional Mgr</span>
+        </div>
+      </div>
+      <div class="vs-body">
+        <div class="vs-col">
+          <div class="vs-col-label">Six Lenses</div>
+          <ul class="vs-list">
+            <li><strong>Intelligence Pipeline:</strong> Observation → Insight → Talk → Crew funnel. Volume, conversion rates, crew reached.</li>
+            <li><strong>Leading Indicators:</strong> Near-miss rate, atrophy heatmap by site/week, failure type distribution (AI-classified), manager visit coverage.</li>
+            <li><strong>Lagging Indicators:</strong> Incidents, TRIFR, LTI, near-miss:incident ratio — cross-referenced with observation volume and talk coverage per work type.</li>
+            <li><strong>Site Health Map:</strong> All sites in scope. Atrophy score, last observation, last visit, open investigations, talk delivery rate.</li>
+            <li><strong>Work Type Risk:</strong> Incidents + near-misses by work type. Trend lines. Talk coverage correlation.</li>
+            <li><strong>Pipeline Health:</strong> Drop-off at each pipeline stage. Latency metrics. Corrective action close rate.</li>
+          </ul>
+          <div style="margin-top:14px;" class="vs-col-label">Global Controls</div>
+          <ul class="vs-list">
+            <li><strong>Scope selector:</strong> Org / Division / Region / Site. Cascades all charts.</li>
+            <li><strong>Period selector:</strong> 7d / 30d / 90d / 12m</li>
+            <li><strong>Role-based visibility:</strong> Safety manager sees all lenses. Division manager sees Leading, Lagging, Site Health only.</li>
+          </ul>
+        </div>
+        <div class="vs-col">
+          <div class="vs-col-label">Key Queries per Lens</div>
+          <ul class="vs-list">
+            <li><em>Pipeline funnel:</em> COUNT observations, COUNT near-miss, COUNT critical_insight, COUNT critical_insight WHERE cleared, COUNT toolbox_talk WHERE delivered, SUM attendee_count — all for scope + period</li>
+            <li><em>Atrophy heatmap:</em> COUNT observations GROUP BY worksite_id, week — LEFT JOIN all sites to show zero weeks</li>
+            <li><em>Failure type distribution:</em> COUNT observations GROUP BY ai_failure_type WHERE ai_failure_type IS NOT NULL</li>
+            <li><em>Lagging by work type:</em> COUNT incidents JOIN work_type, COUNT observations JOIN work_type, COUNT toolbox_talk JOIN work_type — GROUP BY work_type_id</li>
+            <li><em>Pipeline drop-off:</em> Staged counts with latency AVG — see View → Query Map</li>
+          </ul>
+          <div style="margin-top:14px;" class="vs-col-label">Calculated Fields</div>
+          <ul class="vs-list">
+            <li><em>Safety Culture Index:</em> Composite of near-miss rate (40%) + talk delivery rate (40%) + manager visit coverage (20%). Score 0–100.</li>
+            <li><em>TRIFR:</em> (Recordable injuries ÷ hours worked) × 1,000,000. Hours from payroll integration or manual input.</li>
+            <li><em>Near-miss:incident ratio:</em> COUNT near-miss observations ÷ COUNT incidents for period.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- REPORTS -->
+    <div class="view-spec" id="v-reports">
+      <div class="vs-header">
+        <div class="vs-title">Reports & Export</div>
+        <div class="vs-tags">
+          <span class="vs-tag vt-desktop">Desktop</span>
+          <span class="vs-tag vt-role">Safety Mgr + Exec</span>
+        </div>
+      </div>
+      <div class="vs-body">
+        <div class="vs-col">
+          <div class="vs-col-label">Report Types</div>
+          <ul class="vs-list">
+            <li><strong>Board Report:</strong> AI-generated narrative summary. Safety Culture Index, TRIFR, pipeline health, key actions. 1–2 pages. PDF export.</li>
+            <li><strong>Manager Briefing:</strong> Per-manager summary. Sites visited, observations logged, insights generated, atrophy managed. For divisional review meetings.</li>
+            <li><strong>Regulatory Package:</strong> OSHA/WHS-formatted incident register, investigation log with root causes and corrective actions, toolbox talk attendance records. Filtered by period and scope.</li>
+            <li><strong>Raw Data Export:</strong> CSV of any entity set. Filtered by scope, period, work type, role. For third-party analysis.</li>
+            <li><strong>Site Health Snapshot:</strong> Single-site PDF. Atrophy score history, all observations, talks delivered, open items. For manager briefings before site visits.</li>
+          </ul>
+        </div>
+        <div class="vs-col">
+          <div class="vs-col-label">Database Operations</div>
+          <ul class="vs-list">
+            <li><strong>Board Report:</strong> Aggregation queries → AI narrative generation (Prompt 6 — Board narrative, not defined in earlier spec, new addition)</li>
+            <li><strong>Regulatory Package:</strong> SELECT from <code>incident</code> JOIN <code>investigation</code> JOIN <code>corrective_action</code> JOIN <code>toolbox_talk</code> — scoped and period-filtered. No AI involved.</li>
+            <li><strong>Raw export:</strong> Parameterised SELECT with scope and period filters. Sensitive fields stripped (observer names anonymised).</li>
+            <li><strong>PDF generation:</strong> Server-side render. Client receives download URL.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- 4. DATA MODEL -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <div class="doc-section" id="datamodel">
+    <h1><span class="section-num">04</span>Data Model</h1>
+
+    <h2 id="entities">Entity Schemas</h2>
+
+    <p>All new tables live in the <code>safety_intelligence</code> schema. Existing platform tables (<code>users</code>, <code>worksite</code>, <code>work_type</code>, <code>safety_practice</code>, org hierarchy) are in the <code>public</code> schema and are referenced by foreign key only — never modified.</p>
+
+    <h3>New Tables</h3>
+
+    <table class="db-table">
+      <thead>
+        <tr><th>Table</th><th>Type</th><th>Purpose</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>observation</td><td>Captured</td><td>Field observations by supervisors and managers</td></tr>
+        <tr><td>incident</td><td>Captured</td><td>Incident reports — near-miss, injury, damage, environmental</td></tr>
+        <tr><td>investigation</td><td>Generated</td><td>Opinionated investigation framework — auto-created by triage, AI-assisted</td></tr>
+        <tr><td>corrective_action</td><td>Generated</td><td>Actions from investigations. Owner, due date, status lifecycle.</td></tr>
+        <tr><td>critical_insight</td><td>Generated</td><td>AI-drafted pattern insights from trend detection. Human-reviewed.</td></tr>
+        <tr><td>toolbox_talk</td><td>Generated</td><td>AI-assembled talk. Content locked on delivery.</td></tr>
+        <tr><td>visit_plan</td><td>Captured</td><td>Manager field visit plans. Topics selected, observations linked.</td></tr>
+        <tr><td>ai_prompt_config</td><td>Config</td><td>Versioned prompt templates. Updateable without code deployment.</td></tr>
+        <tr><td>org_threshold_config</td><td>Config</td><td>Per-org trend detection thresholds and time windows.</td></tr>
+        <tr><td>audit_log</td><td>System</td><td>All write events with actor, timestamp, before/after values.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Key Schema — corrective_action (new — not in v0.1)</h3>
+    <div class="sql-block"><pre>
+<span class="sql-kw">CREATE TABLE</span> safety_intelligence.corrective_action (
+  id                UUID        <span class="sql-kw">PRIMARY KEY DEFAULT</span> gen_random_uuid(),
+  investigation_id  UUID        <span class="sql-kw">NOT NULL REFERENCES</span> safety_intelligence.investigation(id),
+  worksite_id       UUID        <span class="sql-kw">NOT NULL REFERENCES</span> public.worksite(id),
+
+  <span class="sql-comment">-- Content</span>
+  action_text       TEXT        <span class="sql-kw">NOT NULL</span>,
+  owner_id          UUID        <span class="sql-kw">REFERENCES</span> public.users(id),
+  due_date          DATE        <span class="sql-kw">NOT NULL</span>,
+
+  <span class="sql-comment">-- Status lifecycle</span>
+  status            VARCHAR(20) <span class="sql-kw">NOT NULL DEFAULT</span> <span class="sql-str">'open'</span>
+                    <span class="sql-kw">CHECK</span> (status <span class="sql-kw">IN</span> (<span class="sql-str">'open'</span>, <span class="sql-str">'in_progress'</span>, <span class="sql-str">'completed'</span>, <span class="sql-str">'extended'</span>, <span class="sql-str">'cancelled'</span>)),
+  completed_at      TIMESTAMPTZ,
+  verified_by_id    UUID        <span class="sql-kw">REFERENCES</span> public.users(id),
+  verified_at       TIMESTAMPTZ,
+  notes             TEXT,
+
+  <span class="sql-comment">-- Audit</span>
+  created_at        TIMESTAMPTZ <span class="sql-kw">NOT NULL DEFAULT</span> now(),
+  updated_at        TIMESTAMPTZ <span class="sql-kw">NOT NULL DEFAULT</span> now()
+);
+</pre></div>
+
+    <h3>Key Schema — visit_plan (new — not in v0.1)</h3>
+    <div class="sql-block"><pre>
+<span class="sql-kw">CREATE TABLE</span> safety_intelligence.visit_plan (
+  id                UUID        <span class="sql-kw">PRIMARY KEY DEFAULT</span> gen_random_uuid(),
+  manager_id        UUID        <span class="sql-kw">NOT NULL REFERENCES</span> public.users(id),
+  worksite_id       UUID        <span class="sql-kw">NOT NULL REFERENCES</span> public.worksite(id),
+  planned_at        TIMESTAMPTZ <span class="sql-kw">NOT NULL</span>,
+  status            VARCHAR(20) <span class="sql-kw">NOT NULL DEFAULT</span> <span class="sql-str">'planned'</span>
+                    <span class="sql-kw">CHECK</span> (status <span class="sql-kw">IN</span> (<span class="sql-str">'planned'</span>, <span class="sql-str">'active'</span>, <span class="sql-str">'completed'</span>, <span class="sql-str">'cancelled'</span>)),
+
+  <span class="sql-comment">-- Topics</span>
+  topics_planned    JSONB,  <span class="sql-comment">-- [{text, source_type, source_id, selected: bool}]</span>
+  topics_covered    JSONB,  <span class="sql-comment">-- same structure, populated on completion</span>
+
+  <span class="sql-comment">-- Outcomes</span>
+  completed_at      TIMESTAMPTZ,
+  observation_ids   JSONB,  <span class="sql-comment">-- observations logged during this visit</span>
+  talk_delivered    BOOLEAN <span class="sql-kw">DEFAULT</span> false,
+  notes             TEXT,
+
+  <span class="sql-comment">-- Atrophy snapshot at time of planning</span>
+  atrophy_score_at_plan  INTEGER,
+
+  created_at        TIMESTAMPTZ <span class="sql-kw">NOT NULL DEFAULT</span> now(),
+  updated_at        TIMESTAMPTZ <span class="sql-kw">NOT NULL DEFAULT</span> now()
+);
+</pre></div>
+
+    <h2 id="viewmap">View → Query Map</h2>
+
+    <p>Every view that reads data is mapped to its primary queries here. This section is the primary reference for the backend developer.</p>
+
+    <h3>Mobile: Manager Visit List — Atrophy Score Query</h3>
+    <div class="sql-block"><pre>
+<span class="sql-comment">-- Atrophy score per site for a manager's scope</span>
+<span class="sql-comment">-- Returns sites ranked by composite atrophy score</span>
+<span class="sql-kw">WITH</span> obs_age <span class="sql-kw">AS</span> (
+  <span class="sql-kw">SELECT</span> worksite_id,
+    EXTRACT(DAY <span class="sql-kw">FROM</span> now() - MAX(observed_at)) <span class="sql-kw">AS</span> days_since_obs
+  <span class="sql-kw">FROM</span> safety_intelligence.observation
+  <span class="sql-kw">WHERE</span> worksite_id = <span class="sql-kw">ANY</span>($manager_site_ids)
+  <span class="sql-kw">GROUP BY</span> worksite_id
+),
+talk_age <span class="sql-kw">AS</span> (
+  <span class="sql-kw">SELECT</span> worksite_id,
+    EXTRACT(DAY <span class="sql-kw">FROM</span> now() - MAX(delivered_at)) <span class="sql-kw">AS</span> days_since_talk
+  <span class="sql-kw">FROM</span> safety_intelligence.toolbox_talk
+  <span class="sql-kw">WHERE</span> worksite_id = <span class="sql-kw">ANY</span>($manager_site_ids)
+    <span class="sql-kw">AND</span> delivered_at <span class="sql-kw">IS NOT NULL</span>
+  <span class="sql-kw">GROUP BY</span> worksite_id
+),
+open_inv <span class="sql-kw">AS</span> (
+  <span class="sql-kw">SELECT</span> i.worksite_id, COUNT(*) <span class="sql-kw">AS</span> open_count
+  <span class="sql-kw">FROM</span> safety_intelligence.investigation inv
+  <span class="sql-kw">JOIN</span> safety_intelligence.incident i <span class="sql-kw">ON</span> inv.incident_id = i.id
+  <span class="sql-kw">WHERE</span> inv.status = <span class="sql-str">'open'</span>
+    <span class="sql-kw">AND</span> i.worksite_id = <span class="sql-kw">ANY</span>($manager_site_ids)
+  <span class="sql-kw">GROUP BY</span> i.worksite_id
+),
+nm_trend <span class="sql-kw">AS</span> (
+  <span class="sql-kw">SELECT</span> worksite_id,
+    COUNT(*) <span class="sql-kw">AS</span> near_miss_30d
+  <span class="sql-kw">FROM</span> safety_intelligence.observation
+  <span class="sql-kw">WHERE</span> observation_type = <span class="sql-str">'near-miss'</span>
+    <span class="sql-kw">AND</span> observed_at >= now() - <span class="sql-kw">INTERVAL</span> <span class="sql-str">'30 days'</span>
+    <span class="sql-kw">AND</span> worksite_id = <span class="sql-kw">ANY</span>($manager_site_ids)
+  <span class="sql-kw">GROUP BY</span> worksite_id
+)
+<span class="sql-kw">SELECT</span>
+  w.id, w.name, w.region_id,
+  COALESCE(oa.days_since_obs, 999)  <span class="sql-kw">AS</span> days_since_obs,
+  COALESCE(ta.days_since_talk, 999) <span class="sql-kw">AS</span> days_since_talk,
+  COALESCE(oi.open_count, 0)        <span class="sql-kw">AS</span> open_investigations,
+  COALESCE(nm.near_miss_30d, 0)     <span class="sql-kw">AS</span> near_miss_30d,
+  <span class="sql-comment">-- Atrophy score: weighted composite 0–100</span>
+  LEAST(100, (
+    COALESCE(oa.days_since_obs, 30) * 1.8 +
+    COALESCE(ta.days_since_talk, 30) * 1.2 +
+    COALESCE(oi.open_count, 0) * 8 +
+    COALESCE(nm.near_miss_30d, 0) * 3
+  )::INTEGER) <span class="sql-kw">AS</span> atrophy_score
+<span class="sql-kw">FROM</span> public.worksite w
+<span class="sql-kw">LEFT JOIN</span> obs_age oa  <span class="sql-kw">ON</span> w.id = oa.worksite_id
+<span class="sql-kw">LEFT JOIN</span> talk_age ta <span class="sql-kw">ON</span> w.id = ta.worksite_id
+<span class="sql-kw">LEFT JOIN</span> open_inv oi <span class="sql-kw">ON</span> w.id = oi.worksite_id
+<span class="sql-kw">LEFT JOIN</span> nm_trend nm <span class="sql-kw">ON</span> w.id = nm.worksite_id
+<span class="sql-kw">WHERE</span> w.id = <span class="sql-kw">ANY</span>($manager_site_ids)
+<span class="sql-kw">ORDER BY</span> atrophy_score <span class="sql-kw">DESC</span>;
+</pre></div>
+
+    <h3>Desktop Workbench — Queue Union Query</h3>
+    <div class="sql-block"><pre>
+<span class="sql-comment">-- Union all actionable items for safety manager's queue</span>
+<span class="sql-comment">-- Scoped to $user_scope_site_ids (derived from user's role + org hierarchy)</span>
+<span class="sql-kw">SELECT</span>
+  <span class="sql-str">'insight'</span> <span class="sql-kw">AS</span> item_type,
+  ci.id, ci.created_at <span class="sql-kw">AS</span> triggered_at,
+  ci.work_type_id, ci.generated_at_level, ci.pattern_summary <span class="sql-kw">AS</span> title,
+  EXTRACT(DAY <span class="sql-kw">FROM</span> now() - ci.created_at) <span class="sql-kw">AS</span> age_days,
+  <span class="sql-kw">CASE WHEN</span> EXTRACT(DAY <span class="sql-kw">FROM</span> now() - ci.created_at) > 2
+    <span class="sql-kw">THEN</span> <span class="sql-str">'overdue'</span> <span class="sql-kw">ELSE</span> <span class="sql-str">'pending'</span> <span class="sql-kw">END AS</span> urgency
+<span class="sql-kw">FROM</span> safety_intelligence.critical_insight ci
+<span class="sql-kw">WHERE</span> ci.cleared_for_toolbox = false
+  <span class="sql-kw">AND</span> ci.review_action <span class="sql-kw">IS NULL</span>
+  <span class="sql-kw">AND</span> ci.scope_ref_id = <span class="sql-kw">ANY</span>($user_scope_ids)
+
+<span class="sql-kw">UNION ALL</span>
+
+<span class="sql-kw">SELECT</span>
+  <span class="sql-str">'investigation'</span>, inv.id, inv.opened_at,
+  i.work_type_id, <span class="sql-str">'site'</span>,
+  <span class="sql-str">'INC-'</span> || RIGHT(i.id::text, 4) || <span class="sql-str">' — '</span> || i.incident_type,
+  EXTRACT(DAY <span class="sql-kw">FROM</span> now() - inv.opened_at),
+  <span class="sql-kw">CASE WHEN</span> EXTRACT(DAY <span class="sql-kw">FROM</span> now() - inv.opened_at) > $overdue_days
+    <span class="sql-kw">THEN</span> <span class="sql-str">'overdue'</span> <span class="sql-kw">ELSE</span> <span class="sql-str">'open'</span> <span class="sql-kw">END</span>
+<span class="sql-kw">FROM</span> safety_intelligence.investigation inv
+<span class="sql-kw">JOIN</span> safety_intelligence.incident i <span class="sql-kw">ON</span> inv.incident_id = i.id
+<span class="sql-kw">WHERE</span> inv.status = <span class="sql-str">'open'</span>
+  <span class="sql-kw">AND</span> i.worksite_id = <span class="sql-kw">ANY</span>($user_scope_site_ids)
+
+<span class="sql-kw">UNION ALL</span>
+
+<span class="sql-kw">SELECT</span>
+  <span class="sql-str">'action'</span>, ca.id, ca.created_at,
+  <span class="sql-str">NULL</span>, <span class="sql-str">'site'</span>, ca.action_text,
+  EXTRACT(DAY <span class="sql-kw">FROM</span> now() - ca.due_date),
+  <span class="sql-kw">CASE WHEN</span> ca.due_date < now() <span class="sql-kw">THEN</span> <span class="sql-str">'overdue'</span>
+       <span class="sql-kw">WHEN</span> ca.due_date < now() + <span class="sql-kw">INTERVAL</span> <span class="sql-str">'7 days'</span> <span class="sql-kw">THEN</span> <span class="sql-str">'due_soon'</span>
+       <span class="sql-kw">ELSE</span> <span class="sql-str">'upcoming'</span> <span class="sql-kw">END</span>
+<span class="sql-kw">FROM</span> safety_intelligence.corrective_action ca
+<span class="sql-kw">WHERE</span> ca.status <span class="sql-kw">NOT IN</span> (<span class="sql-str">'completed'</span>, <span class="sql-str">'cancelled'</span>)
+  <span class="sql-kw">AND</span> ca.worksite_id = <span class="sql-kw">ANY</span>($user_scope_site_ids)
+
+<span class="sql-kw">ORDER BY</span>
+  <span class="sql-kw">CASE</span> urgency <span class="sql-kw">WHEN</span> <span class="sql-str">'overdue'</span> <span class="sql-kw">THEN</span> 1
+              <span class="sql-kw">WHEN</span> <span class="sql-str">'open'</span> <span class="sql-kw">THEN</span> 2
+              <span class="sql-kw">WHEN</span> <span class="sql-str">'due_soon'</span> <span class="sql-kw">THEN</span> 3
+              <span class="sql-kw">ELSE</span> 4 <span class="sql-kw">END</span>,
+  age_days <span class="sql-kw">DESC</span>;
+</pre></div>
+
+    <h2 id="scoping">Scope & Filtering Rules</h2>
+
+    <p>All data access is filtered by the authenticated user's organisational scope. Scope is resolved at query time from the <code>users</code> table and the org hierarchy. It is never stored on the request object — it is always derived fresh from auth.</p>
+
+    <table class="scope-table">
+      <thead>
+        <tr><th>Role</th><th>Scope Derivation</th><th>Site IDs Query</th><th>Can See Other Regions</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Supervisor</strong></td>
+          <td>users.worksite_id directly</td>
+          <td><code>WHERE id = user.worksite_id</code></td>
+          <td><span class="chip ch-no">No</span></td>
+        </tr>
+        <tr>
+          <td><strong>Manager</strong></td>
+          <td>users.assigned_worksite_ids[] (many-to-many)</td>
+          <td><code>WHERE id = ANY(user.assigned_worksite_ids)</code></td>
+          <td><span class="chip ch-no">No</span></td>
+        </tr>
+        <tr>
+          <td><strong>Regional Manager</strong></td>
+          <td>users.region_id → all sites in that region</td>
+          <td><code>WHERE region_id = user.region_id</code></td>
+          <td><span class="chip ch-no">Own region only</span></td>
+        </tr>
+        <tr>
+          <td><strong>Safety Manager</strong></td>
+          <td>users.scope_type + users.scope_ref_id → resolve all sites</td>
+          <td>Recursive via org hierarchy to all sites in scope</td>
+          <td><span class="chip ch-yes">Within scope</span></td>
+        </tr>
+        <tr>
+          <td><strong>Division Manager</strong></td>
+          <td>users.division_id → all regions → all sites</td>
+          <td>Recursive via org hierarchy</td>
+          <td><span class="chip ch-yes">All in division</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="info-box">
+      <strong>Implementation note:</strong> Create a PostgreSQL function <code>get_user_site_ids(user_id UUID)</code> that resolves the correct site list for any user based on their role and org position. Every scoped query calls this function. Never hardcode scope logic in application code.
+    </div>
+
+  </div>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- 5. AI PIPELINE -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <div class="doc-section" id="pipeline">
+    <h1><span class="section-num">05</span>AI & Algorithm Pipeline</h1>
+
+    <p>Five AI calls and four deterministic algorithms make up the intelligence pipeline. Algorithms own selection and gating (auditable). AI owns language, classification, and synthesis (inferential).</p>
+
+    <table class="scope-table">
+      <thead>
+        <tr><th>Step</th><th>Type</th><th>Trigger</th><th>Input</th><th>Output</th><th>Human Gate</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>1. Obs Enrich</strong></td>
+          <td>AI (Prompt 1)</td>
+          <td>Observation created</td>
+          <td>Free text + taxonomies</td>
+          <td>failure_type, key_hazard, anon_flags</td>
+          <td><span class="chip ch-no">None</span></td>
+        </tr>
+        <tr>
+          <td><strong>2. Incident Triage</strong></td>
+          <td>Algorithm</td>
+          <td>Incident created</td>
+          <td>incident_type + work_type</td>
+          <td>requires_investigation bool, investigation record</td>
+          <td><span class="chip ch-no">None</span></td>
+        </tr>
+        <tr>
+          <td><strong>3. Trend Detection</strong></td>
+          <td>Algorithm</td>
+          <td>Observation created/enriched</td>
+          <td>Observation pool + thresholds</td>
+          <td>Threshold breach event</td>
+          <td><span class="chip ch-no">None</span></td>
+        </tr>
+        <tr>
+          <td><strong>4. Insight Draft</strong></td>
+          <td>AI (Prompt 2)</td>
+          <td>Threshold breach</td>
+          <td>Clustered observations (anon)</td>
+          <td>pattern_summary, toolbox_narrative, escalation rec</td>
+          <td><span class="chip ch-yes">T2 — Safety Mgr</span></td>
+        </tr>
+        <tr>
+          <td><strong>5. Inv. Assist</strong></td>
+          <td>AI (Prompt 3)</td>
+          <td>Investigation created</td>
+          <td>Incident narrative</td>
+          <td>Suggested framework fields (ai_suggested_*)</td>
+          <td><span class="chip ch-own">Investigator reviews</span></td>
+        </tr>
+        <tr>
+          <td><strong>6. Inv. Narrative</strong></td>
+          <td>AI (Prompt 4)</td>
+          <td>Investigation closed + cleared</td>
+          <td>Confirmed framework fields</td>
+          <td>toolbox_narrative, discussion_questions</td>
+          <td><span class="chip ch-no">None post-close</span></td>
+        </tr>
+        <tr>
+          <td><strong>7. Content Select</strong></td>
+          <td>Algorithm</td>
+          <td>Talk generation requested</td>
+          <td>Eligible content pool</td>
+          <td>Ranked content set (max 3)</td>
+          <td><span class="chip ch-no">None</span></td>
+        </tr>
+        <tr>
+          <td><strong>8. Talk Assembly</strong></td>
+          <td>AI (Prompt 5)</td>
+          <td>Talk generation requested</td>
+          <td>Ranked content set</td>
+          <td>Full structured talk JSON</td>
+          <td><span class="chip ch-own">Supervisor reviews</span></td>
+        </tr>
+        <tr>
+          <td><strong>9. Translation</strong></td>
+          <td>AI (Prompt raw)</td>
+          <td>Language changed on talk view</td>
+          <td>Full talk text + target language</td>
+          <td>Translated plain text</td>
+          <td><span class="chip ch-no">None</span></td>
+        </tr>
+        <tr>
+          <td><strong>10. Visit Topics</strong></td>
+          <td>AI (Prompt 6)</td>
+          <td>Visit plan detail opened</td>
+          <td>Site observations, open inv., practice atrophy</td>
+          <td>Recommended topic list with source badges</td>
+          <td><span class="chip ch-own">Manager selects</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2 id="prompts">Prompt Library Summary</h2>
+    <p>Full prompt templates are in <code>02-ai-prompt-library.md</code>. All prompts use <code>claude-sonnet-4-20250514</code>. All prompts output JSON except Prompt 9 (translation) which outputs plain text.</p>
+
+    <h2 id="rules">Algorithm: Atrophy Score</h2>
+    <div class="sql-block"><pre>
+atrophy_score = LEAST(100,
+  days_since_last_observation * 1.8  +  <span class="sql-comment">-- most weighted: observation culture</span>
+  days_since_last_talk        * 1.2  +  <span class="sql-comment">-- talk delivery cadence</span>
+  open_investigations_count   * 8    +  <span class="sql-comment">-- unresolved risk</span>
+  near_miss_30d_count         * 3       <span class="sql-comment">-- signal volume</span>
+)
+
+<span class="sql-comment">-- Score bands:</span>
+<span class="sql-comment">-- 0–39:  Green  — healthy site</span>
+<span class="sql-comment">-- 40–69: Amber  — needs attention</span>
+<span class="sql-comment">-- 70+:   Red    — visit required</span>
+</pre></div>
+
+  </div>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- 6. API REFERENCE -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <div class="doc-section" id="api">
+    <h1><span class="section-num">06</span>API Reference</h1>
+
+    <p>RESTful API. All endpoints require JWT auth. Scope is derived server-side from the authenticated user. Base path: <code>/api/v1/</code></p>
+
+    <h2>Observations</h2>
+    <div class="endpoint"><span class="method m-post">POST</span><div><div class="ep-path">/observations</div><div class="ep-desc">Create observation. Auto-queues AI enrichment. Auto-triggers trend check.</div></div></div>
+    <div class="endpoint"><span class="method m-get">GET</span><div><div class="ep-path">/observations?worksite_id=&amp;period=30d&amp;type=near-miss</div><div class="ep-desc">List observations scoped to user. Filterable by worksite, period, observation_type, work_type_id.</div></div></div>
+    <div class="endpoint"><span class="method m-patch">PATCH</span><div><div class="ep-path">/observations/:id/sharing</div><div class="ep-desc">Toggle cleared_for_sharing. Only callable by observer or safety manager.</div></div></div>
+
+    <h2>Incidents & Investigations</h2>
+    <div class="endpoint"><span class="method m-post">POST</span><div><div class="ep-path">/incidents</div><div class="ep-desc">Create incident. Runs triage synchronously. Returns incident + investigation (if created).</div></div></div>
+    <div class="endpoint"><span class="method m-get">GET</span><div><div class="ep-path">/investigations/:id</div><div class="ep-desc">Full investigation detail including AI suggestions and framework fields.</div></div></div>
+    <div class="endpoint"><span class="method m-patch">PATCH</span><div><div class="ep-path">/investigations/:id</div><div class="ep-desc">Update framework fields. Only updates human-confirmed fields — not ai_suggested_* columns.</div></div></div>
+    <div class="endpoint"><span class="method m-post">POST</span><div><div class="ep-path">/investigations/:id/close</div><div class="ep-desc">Close investigation. Body: { cleared_for_sharing, sharing_scope, legal_hold }. Triggers narrative generation if cleared.</div></div></div>
+
+    <h2>Critical Insights</h2>
+    <div class="endpoint"><span class="method m-get">GET</span><div><div class="ep-path">/critical-insights?status=pending&amp;scope_level=region</div><div class="ep-desc">List insights scoped to user. pending = awaiting review.</div></div></div>
+    <div class="endpoint"><span class="method m-post">POST</span><div><div class="ep-path">/critical-insights/:id/review</div><div class="ep-desc">Approve / edit / reject. Body: { action, edited_content?, sharing_scope, escalate_to_systemic }.</div></div></div>
+
+    <h2>Toolbox Talks</h2>
+    <div class="endpoint"><span class="method m-post">POST</span><div><div class="ep-path">/toolbox-talks/generate</div><div class="ep-desc">Body: { worksite_id, work_type_id, presenter_id }. Runs content selection then AI assembly. Synchronous. Target P95 &lt;8s.</div></div></div>
+    <div class="endpoint"><span class="method m-get">GET</span><div><div class="ep-path">/toolbox-talks?worksite_id=&amp;delivered=false</div><div class="ep-desc">List talks ready for delivery at worksite.</div></div></div>
+    <div class="endpoint"><span class="method m-post">POST</span><div><div class="ep-path">/toolbox-talks/:id/deliver</div><div class="ep-desc">Lock talk. Body: { attendee_ids, acknowledgement_method, presenter_notes? }. Irreversible.</div></div></div>
+    <div class="endpoint"><span class="method m-post">POST</span><div><div class="ep-path">/toolbox-talks/:id/translate</div><div class="ep-desc">Body: { lang_code }. Returns translated text. Cached per talk per lang_code.</div></div></div>
+
+    <h2>Visit Plans</h2>
+    <div class="endpoint"><span class="method m-get">GET</span><div><div class="ep-path">/sites/atrophy?scope=region</div><div class="ep-desc">Returns all sites in user scope with atrophy scores. Used for manager visit list.</div></div></div>
+    <div class="endpoint"><span class="method m-post">POST</span><div><div class="ep-path">/visit-plans</div><div class="ep-desc">Create visit plan. Body: { worksite_id, planned_at, topics_planned[] }.</div></div></div>
+    <div class="endpoint"><span class="method m-post">POST</span><div><div class="ep-path">/visit-plans/:id/start</div><div class="ep-desc">Activate visit. Sets status = active. Returns active visit context for capture form.</div></div></div>
+    <div class="endpoint"><span class="method m-post">POST</span><div><div class="ep-path">/visit-plans/:id/complete</div><div class="ep-desc">Close visit. Body: { topics_covered, observation_ids, talk_delivered, notes }.</div></div></div>
+
+    <h2>Workbench Queue</h2>
+    <div class="endpoint"><span class="method m-get">GET</span><div><div class="ep-path">/workbench/queue?filter=all&amp;scope=region</div><div class="ep-desc">Returns unified queue of actionable items scoped to user. filter: all / insights / investigations / actions / atrophy.</div></div></div>
+
+    <h2>Analytics</h2>
+    <div class="endpoint"><span class="method m-get">GET</span><div><div class="ep-path">/analytics/pipeline?scope=division&amp;period=90d</div><div class="ep-desc">Intelligence pipeline funnel data.</div></div></div>
+    <div class="endpoint"><span class="method m-get">GET</span><div><div class="ep-path">/analytics/leading?scope=region&amp;period=30d</div><div class="ep-desc">Leading indicators: atrophy heatmap, failure type distribution, visit coverage.</div></div></div>
+    <div class="endpoint"><span class="method m-get">GET</span><div><div class="ep-path">/analytics/lagging?scope=division&amp;period=90d</div><div class="ep-desc">Lagging indicators: incidents, TRIFR, LTI, ratio data.</div></div></div>
+    <div class="endpoint"><span class="method m-get">GET</span><div><div class="ep-path">/analytics/pipeline-health?scope=region</div><div class="ep-desc">Drop-off rates and latency by pipeline stage.</div></div></div>
+
+  </div>
+
+</div>
+
+<script>
+// Highlight active nav item on scroll
+const sections = document.querySelectorAll('.doc-section, [id]');
+const navItems = document.querySelectorAll('.nav-item');
+
+window.addEventListener('scroll', () => {
+  let current = '';
+  sections.forEach(s => {
+    if (window.scrollY >= s.offsetTop - 80) current = s.id;
+  });
+  navItems.forEach(item => {
+    item.classList.toggle('active', item.getAttribute('href') === '#' + current);
+  });
+}, { passive: true });
+</script>
+</body>
+</html>

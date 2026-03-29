@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Toolbox Talk – Fall Protection</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #1a1a1a;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    padding: 32px 16px;
+    font-family: 'Barlow', sans-serif;
+  }
+
+  .page {
+    background: #f5f0e8;
+    width: 680px;
+    padding: 0;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+  }
+
+  /* HEADER BAND */
+  .header {
+    background: #c0392b;
+    color: white;
+    padding: 18px 28px 14px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .header-left {
+    flex: 1;
+  }
+
+  .talk-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    opacity: 0.75;
+    margin-bottom: 4px;
+  }
+
+  .talk-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 34px;
+    font-weight: 800;
+    line-height: 1;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .header-meta {
+    text-align: right;
+    font-size: 11px;
+    opacity: 0.8;
+    line-height: 1.8;
+    flex-shrink: 0;
+    padding-top: 4px;
+  }
+
+  .header-meta strong {
+    display: block;
+    font-size: 13px;
+    opacity: 1;
+  }
+
+  /* STRIP */
+  .strip {
+    background: #e8b84b;
+    height: 6px;
+  }
+
+  /* META ROW */
+  .meta-row {
+    background: #2c2c2c;
+    color: #ccc;
+    display: flex;
+    gap: 0;
+    font-size: 11px;
+    font-family: 'Barlow Condensed', sans-serif;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .meta-cell {
+    padding: 8px 16px;
+    border-right: 1px solid #444;
+    flex: 1;
+  }
+
+  .meta-cell:last-child { border-right: none; }
+  .meta-cell span { color: #e8b84b; font-weight: 700; display: block; font-size: 13px; }
+
+  /* BODY */
+  .body {
+    padding: 22px 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  /* SECTION */
+  .section {}
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+
+  .section-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+
+  .section-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #555;
+  }
+
+  .section-content {
+    font-size: 13.5px;
+    line-height: 1.6;
+    color: #2a2a2a;
+    padding-left: 38px;
+  }
+
+  /* INCIDENT BOX */
+  .incident-box {
+    background: #2c2c2c;
+    color: #f5f0e8;
+    padding: 14px 16px;
+    border-left: 4px solid #c0392b;
+    margin-left: 38px;
+  }
+
+  .incident-box .incident-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #c0392b;
+    font-weight: 700;
+    margin-bottom: 5px;
+  }
+
+  .incident-box p {
+    font-size: 12.5px;
+    line-height: 1.6;
+    color: #ddd;
+  }
+
+  /* CHECKLIST */
+  .checklist {
+    list-style: none;
+    padding-left: 38px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .checklist li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 13.5px;
+    color: #2a2a2a;
+    line-height: 1.5;
+  }
+
+  .check-box {
+    width: 16px;
+    height: 16px;
+    border: 2px solid #aaa;
+    border-radius: 2px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  /* PPE GRID */
+  .ppe-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+    padding-left: 38px;
+  }
+
+  .ppe-item {
+    background: white;
+    border: 1.5px solid #ddd;
+    border-radius: 6px;
+    padding: 10px 6px 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    text-align: center;
+  }
+
+  .ppe-item .ppe-emoji { font-size: 22px; }
+  .ppe-item .ppe-label {
+    font-size: 10px;
+    font-weight: 600;
+    color: #555;
+    line-height: 1.2;
+    font-family: 'Barlow Condensed', sans-serif;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  /* DIVIDER */
+  .divider {
+    border: none;
+    border-top: 1.5px solid #ddd;
+  }
+
+  /* DISCUSSION BOX */
+  .discussion-box {
+    background: #eef4fb;
+    border: 1.5px solid #b8d0ec;
+    border-radius: 4px;
+    padding: 12px 14px;
+    margin-left: 38px;
+  }
+
+  .discussion-box .q {
+    font-size: 12.5px;
+    color: #2255aa;
+    line-height: 1.6;
+    margin-bottom: 4px;
+  }
+
+  .discussion-box .q::before {
+    content: "Q: ";
+    font-weight: 700;
+  }
+
+  /* EMERGENCY */
+  .emergency-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    padding-left: 38px;
+  }
+
+  .emergency-item {
+    background: white;
+    border: 1.5px solid #ddd;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 12px;
+    color: #333;
+    line-height: 1.5;
+  }
+
+  .emergency-item strong {
+    display: block;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #999;
+    margin-bottom: 2px;
+    font-family: 'Barlow Condensed', sans-serif;
+  }
+
+  .emergency-item .big {
+    font-size: 15px;
+    font-weight: 700;
+    color: #c0392b;
+    font-family: 'Barlow Condensed', sans-serif;
+  }
+
+  /* SIGN-OFF */
+  .signoff {
+    background: #2c2c2c;
+    padding: 18px 28px;
+    margin-top: 4px;
+  }
+
+  .signoff-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #888;
+    margin-bottom: 12px;
+  }
+
+  .sign-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+
+  .sign-row {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .sign-label {
+    font-size: 10px;
+    color: #666;
+    font-family: 'Barlow Condensed', sans-serif;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .sign-line {
+    border-bottom: 1px solid #555;
+    height: 22px;
+    width: 100%;
+  }
+
+  .sign-name {
+    font-size: 11px;
+    color: #aaa;
+    padding-top: 2px;
+  }
+
+  .supervisor-sign {
+    grid-column: 1 / -1;
+    background: #1a1a1a;
+    padding: 10px 14px;
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 4px;
+  }
+
+  .supervisor-sign .s-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #888;
+  }
+
+  .supervisor-sign .s-line {
+    flex: 1;
+    border-bottom: 1px solid #555;
+    margin: 0 16px;
+    height: 20px;
+  }
+
+  .supervisor-sign .s-date {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    letter-spacing: 1px;
+    color: #888;
+    white-space: nowrap;
+  }
+
+  .osha-ref {
+    text-align: center;
+    font-size: 10px;
+    color: #555;
+    margin-top: 10px;
+    font-family: 'Barlow Condensed', sans-serif;
+    letter-spacing: 1px;
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-left">
+      <div class="talk-label">Toolbox Talk</div>
+      <div class="talk-title">Fall Protection</div>
+    </div>
+    <div class="header-meta">
+      <strong>Acme Construction Co.</strong>
+      Job Site: Riverside Tower — Phase 2<br>
+      Date: March 24, 2026<br>
+      Duration: ~10 min
+    </div>
+  </div>
+  <div class="strip"></div>
+
+  <!-- META ROW -->
+  <div class="meta-row">
+    <div class="meta-cell">Crew / Trade<span>Ironworkers – Deck</span></div>
+    <div class="meta-cell">Risk Level<span>⬛ HIGH</span></div>
+    <div class="meta-cell">Ref. Standard<span>OSHA 1926.502</span></div>
+    <div class="meta-cell">Presented By<span>J. Reyes, Sup.</span></div>
+  </div>
+
+  <!-- BODY -->
+  <div class="body">
+
+    <!-- TODAY'S HAZARD -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-icon" style="background:#fdecea;">⚠️</div>
+        <div class="section-title">Today's Hazard</div>
+      </div>
+      <div class="section-content">
+        We're decking on levels 7–9 today. <strong>Any unprotected edge over 6 feet is a fall hazard.</strong> Wind gusts are forecast at 20–25 mph this afternoon — this affects your balance on open steel and the behavior of materials being hoisted. Falls remain the #1 cause of construction fatalities in the US — <strong>36% of all deaths in the trade.</strong>
+      </div>
+    </div>
+
+    <!-- INCIDENT -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-icon" style="background:#2c2c2c;">🔴</div>
+        <div class="section-title">Incident to Know</div>
+      </div>
+      <div class="incident-box">
+        <div class="incident-label">Near-Miss — This Site — March 18, 2026</div>
+        <p>A worker on Level 5 stepped back while aligning a beam and his heel went off an unguarded deck edge. A coworker grabbed him. He was not tied off. The leading edge at that point had a missing cable section that had not been replaced after crane access. <strong>Report every gap in cable systems immediately — don't assume someone else saw it.</strong></p>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <!-- CONTROLS -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-icon" style="background:#e8f5e9;">✅</div>
+        <div class="section-title">What We Do About It</div>
+      </div>
+      <ul class="checklist">
+        <li><div class="check-box"></div>Guardrails, safety nets, or personal fall arrest systems (PFAS) required for all work above 6 ft</li>
+        <li><div class="check-box"></div>Tie off <em>before</em> you move into position — not after you're already at the edge</li>
+        <li><div class="check-box"></div>Inspect your harness and lanyard before putting it on — look for fraying, cracks, missing labels</li>
+        <li><div class="check-box"></div>Never clip to an uncertified anchor point — minimum 5,000 lbs capacity required</li>
+        <li><div class="check-box"></div>Immediately flag and barricade any gap in the perimeter cable system</li>
+        <li><div class="check-box"></div>No work on leading edges alone — buddy rule enforced today due to wind conditions</li>
+      </ul>
+    </div>
+
+    <hr class="divider">
+
+    <!-- PPE -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-icon" style="background:#fff3e0;">🦺</div>
+        <div class="section-title">Required PPE Today</div>
+      </div>
+      <div class="ppe-grid">
+        <div class="ppe-item"><span class="ppe-emoji">⛑️</span><span class="ppe-label">Hard Hat Class E</span></div>
+        <div class="ppe-item"><span class="ppe-emoji">🦺</span><span class="ppe-label">Full-Body Harness</span></div>
+        <div class="ppe-item"><span class="ppe-emoji">🧤</span><span class="ppe-label">Cut-Res. Gloves</span></div>
+        <div class="ppe-item"><span class="ppe-emoji">👁️</span><span class="ppe-label">Safety Glasses</span></div>
+        <div class="ppe-item"><span class="ppe-emoji">👢</span><span class="ppe-label">Steel-Toe Boots</span></div>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <!-- DISCUSSION -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-icon" style="background:#e8f0fe;">💬</div>
+        <div class="section-title">Crew Discussion</div>
+      </div>
+      <div class="discussion-box">
+        <p class="q">Where are the anchor points on your work area today and have you verified them?</p>
+        <p class="q">Has anyone seen a gap in the perimeter cable since yesterday — Level 7 east side?</p>
+        <p class="q">What do you do if your lanyard snap hook shows a crack in the housing?</p>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <!-- EMERGENCY -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-icon" style="background:#fdecea;">🚨</div>
+        <div class="section-title">If Someone Falls</div>
+      </div>
+      <div class="emergency-grid">
+        <div class="emergency-item"><strong>Call First</strong><span class="big">911</span>then site office ext. 200</div>
+        <div class="emergency-item"><strong>Nearest Hospital</strong>St. Luke's Medical — 0.8 mi east on Riverside Blvd</div>
+        <div class="emergency-item"><strong>Do Not Move</strong>the worker unless there is immediate danger of further injury</div>
+        <div class="emergency-item"><strong>Muster Point</strong>South parking lot, Gate 2 — keep area clear for EMS</div>
+      </div>
+    </div>
+
+  </div><!-- /body -->
+
+  <!-- SIGN OFF -->
+  <div class="signoff">
+    <div class="signoff-title">Attendance &amp; Acknowledgment — All workers sign below</div>
+    <div class="supervisor-sign">
+      <span class="s-label">Supervisor Signature</span>
+      <span class="s-line"></span>
+      <span class="s-date">Date: _____ / _____ / _____</span>
+    </div>
+    <div class="sign-grid">
+      <div class="sign-row"><div class="sign-label">Print Name</div><div class="sign-line"></div></div>
+      <div class="sign-row"><div class="sign-label">Signature</div><div class="sign-line"></div></div>
+      <div class="sign-row"><div class="sign-label">Print Name</div><div class="sign-line"></div></div>
+      <div class="sign-row"><div class="sign-label">Signature</div><div class="sign-line"></div></div>
+      <div class="sign-row"><div class="sign-label">Print Name</div><div class="sign-line"></div></div>
+      <div class="sign-row"><div class="sign-label">Signature</div><div class="sign-line"></div></div>
+      <div class="sign-row"><div class="sign-label">Print Name</div><div class="sign-line"></div></div>
+      <div class="sign-row"><div class="sign-label">Signature</div><div class="sign-line"></div></div>
+      <div class="sign-row"><div class="sign-label">Print Name</div><div class="sign-line"></div></div>
+      <div class="sign-row"><div class="sign-label">Signature</div><div class="sign-line"></div></div>
+      <div class="sign-row"><div class="sign-label">Print Name</div><div class="sign-line"></div></div>
+      <div class="sign-row"><div class="sign-label">Signature</div><div class="sign-line"></div></div>
+    </div>
+    <div class="osha-ref">OSHA 29 CFR 1926.502 · Retained on file per 1926.33 · Form TBT-FP-001</div>
+  </div>
+
+</div>
+
+</body>
+</html>

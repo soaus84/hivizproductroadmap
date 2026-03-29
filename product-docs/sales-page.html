@@ -1,0 +1,1480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SafetyPlatform — The Safety Intelligence Platform</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Epilogue:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+  --ink:     #0F0D0A;
+  --bg:      #FAF8F4;
+  --surface: #FFFFFF;
+  --muted:   #6B6560;
+  --faint:   #C0BAB0;
+  --border:  #E8E2D8;
+
+  --rust:    #C8420E;
+  --rust-bg: rgba(200,66,14,0.07);
+  --rust-lt: #E8521E;
+
+  --gold:    #B07800;
+  --gold-bg: rgba(176,120,0,0.07);
+
+  --green:   #1A6E48;
+  --green-bg:rgba(26,110,72,0.07);
+  --green-lt: #22A066;
+
+  --teal:    #0D6E7A;
+  --teal-bg: rgba(13,110,122,0.07);
+
+  --serif:   'Instrument Serif', Georgia, serif;
+  --display: 'Epilogue', sans-serif;
+  --mono:    'JetBrains Mono', monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--display);
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── UTILITIES ──────────────────────── */
+.sr { font-family: var(--serif); }
+.mono { font-family: var(--mono); }
+
+/* ── HERO ───────────────────────────── */
+.hero {
+  background: var(--ink);
+  position: relative;
+  overflow: hidden;
+  padding: 0;
+}
+
+/* Subtle grain texture */
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  opacity: 0.4;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Warm glow behind headline */
+.hero::after {
+  content: '';
+  position: absolute;
+  top: -120px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 800px;
+  height: 500px;
+  background: radial-gradient(ellipse, rgba(200,66,14,0.18) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.hero-inner {
+  position: relative;
+  z-index: 1;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 80px 48px 72px;
+}
+
+/* NAV */
+.nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 80px;
+}
+
+.nav-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo-mark {
+  width: 36px; height: 36px;
+  background: var(--rust-lt);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 600;
+  color: white;
+}
+
+.logo-name {
+  font-size: 17px;
+  font-weight: 700;
+  color: white;
+  letter-spacing: -0.3px;
+}
+
+.nav-cta {
+  background: var(--rust-lt);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 22px;
+  font-family: var(--display);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 0.2px;
+  transition: background 0.15s;
+}
+
+.nav-cta:hover { background: #e85a28; }
+
+/* EYEBROW */
+.hero-eyebrow {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--rust-lt);
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.hero-eyebrow::before {
+  content: '';
+  width: 24px;
+  height: 1px;
+  background: var(--rust-lt);
+}
+
+/* HEADLINE */
+.hero-headline {
+  font-family: var(--serif);
+  font-size: clamp(42px, 5.5vw, 68px);
+  font-weight: 400;
+  color: white;
+  line-height: 1.08;
+  letter-spacing: -1px;
+  margin-bottom: 28px;
+  max-width: 780px;
+}
+
+.hero-headline em {
+  color: var(--rust-lt);
+  font-style: italic;
+}
+
+.hero-headline strong {
+  font-weight: 400;
+  color: rgba(255,255,255,0.5);
+}
+
+/* SUBHEAD */
+.hero-sub {
+  font-size: 18px;
+  color: rgba(255,255,255,0.55);
+  font-weight: 300;
+  max-width: 580px;
+  line-height: 1.65;
+  margin-bottom: 44px;
+}
+
+.hero-sub em {
+  color: rgba(255,255,255,0.8);
+  font-style: normal;
+  font-weight: 500;
+}
+
+/* CTA ROW */
+.hero-ctas {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 64px;
+}
+
+.cta-primary {
+  background: var(--rust-lt);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 14px 28px;
+  font-family: var(--display);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+  box-shadow: 0 4px 20px rgba(200,66,14,0.35);
+}
+
+.cta-primary:hover { background: #e85a28; transform: translateY(-1px); }
+
+.cta-secondary {
+  color: rgba(255,255,255,0.6);
+  font-size: 14px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  cursor: pointer;
+  transition: color 0.15s;
+}
+
+.cta-secondary:hover { color: white; }
+
+/* HERO STATS */
+.hero-stats {
+  display: flex;
+  gap: 0;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  padding-top: 40px;
+}
+
+.hs-item {
+  flex: 1;
+  padding-right: 40px;
+  border-right: 1px solid rgba(255,255,255,0.08);
+  margin-right: 40px;
+}
+
+.hs-item:last-child { border-right: none; margin-right: 0; }
+
+.hs-value {
+  font-family: var(--serif);
+  font-size: 42px;
+  color: white;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+
+.hs-value em { color: var(--rust-lt); font-style: italic; }
+
+.hs-label {
+  font-size: 13px;
+  color: rgba(255,255,255,0.4);
+  font-weight: 400;
+  line-height: 1.4;
+}
+
+/* ── PROBLEM SECTION ────────────────── */
+.problem {
+  padding: 100px 48px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.section-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--faint);
+  margin-bottom: 16px;
+}
+
+.problem-headline {
+  font-family: var(--serif);
+  font-size: clamp(28px, 3.5vw, 44px);
+  font-weight: 400;
+  color: var(--ink);
+  line-height: 1.15;
+  max-width: 720px;
+  margin-bottom: 24px;
+  letter-spacing: -0.5px;
+}
+
+.problem-headline em { color: var(--rust); font-style: italic; }
+
+.problem-body {
+  font-size: 17px;
+  color: var(--muted);
+  max-width: 600px;
+  line-height: 1.75;
+  margin-bottom: 52px;
+  font-weight: 300;
+}
+
+.problem-body strong { color: var(--ink); font-weight: 600; }
+
+/* TENSION CARDS */
+.tension-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.tension-card {
+  background: var(--surface);
+  padding: 28px 26px;
+}
+
+.tc-icon { font-size: 24px; margin-bottom: 14px; }
+
+.tc-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 8px;
+  line-height: 1.3;
+}
+
+.tc-body {
+  font-size: 13.5px;
+  color: var(--muted);
+  line-height: 1.65;
+}
+
+/* ── SOLUTION / HOW IT WORKS ────────── */
+.solution {
+  background: var(--ink);
+  padding: 100px 48px;
+  position: relative;
+  overflow: hidden;
+}
+
+.solution::before {
+  content: '';
+  position: absolute;
+  bottom: -200px;
+  right: -200px;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(ellipse, rgba(200,66,14,0.12) 0%, transparent 65%);
+  pointer-events: none;
+}
+
+.solution-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+.solution-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.25);
+  margin-bottom: 16px;
+}
+
+.solution-headline {
+  font-family: var(--serif);
+  font-size: clamp(28px, 3.5vw, 44px);
+  font-weight: 400;
+  color: white;
+  line-height: 1.15;
+  margin-bottom: 16px;
+  letter-spacing: -0.5px;
+}
+
+.solution-headline em { color: var(--rust-lt); font-style: italic; }
+
+.solution-sub {
+  font-size: 17px;
+  color: rgba(255,255,255,0.45);
+  max-width: 560px;
+  line-height: 1.7;
+  margin-bottom: 60px;
+  font-weight: 300;
+}
+
+/* PIPELINE VIS */
+.pipeline {
+  display: flex;
+  align-items: flex-start;
+  gap: 0;
+  margin-bottom: 64px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.pipeline::-webkit-scrollbar { height: 0; }
+
+.pipe-step {
+  flex: 1;
+  min-width: 140px;
+  position: relative;
+}
+
+.pipe-step::after {
+  content: '';
+  position: absolute;
+  top: 22px;
+  right: -1px;
+  width: 24px;
+  height: 1px;
+  background: linear-gradient(to right, rgba(255,255,255,0.12), rgba(255,255,255,0.04));
+}
+
+.pipe-step:last-child::after { display: none; }
+
+.ps-node {
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  margin-bottom: 14px;
+  position: relative;
+  z-index: 1;
+}
+
+.ps-actor {
+  font-family: var(--mono);
+  font-size: 8px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-bottom: 5px;
+}
+
+.ps-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: white;
+  line-height: 1.3;
+  margin-bottom: 4px;
+}
+
+.ps-desc {
+  font-size: 11.5px;
+  color: rgba(255,255,255,0.35);
+  line-height: 1.5;
+  max-width: 130px;
+}
+
+/* STEP COLOURS */
+.step-human .ps-node { background: rgba(200,66,14,0.15); }
+.step-human .ps-actor { color: var(--rust-lt); }
+.step-ai .ps-node { background: rgba(13,110,122,0.2); }
+.step-ai .ps-actor { color: #4DD8E8; }
+.step-algo .ps-node { background: rgba(26,79,160,0.2); }
+.step-algo .ps-actor { color: #6AAEFF; }
+
+/* FEATURES GRID */
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.feature-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 14px;
+  padding: 24px;
+  transition: background 0.15s;
+}
+
+.feature-card:hover { background: rgba(255,255,255,0.07); }
+
+.fc-icon {
+  width: 44px; height: 44px;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+  margin-bottom: 16px;
+}
+
+.fc-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 8px;
+  line-height: 1.3;
+}
+
+.fc-body {
+  font-size: 13px;
+  color: rgba(255,255,255,0.4);
+  line-height: 1.65;
+}
+
+/* ── DIFFERENTIATION ────────────────── */
+.diff {
+  padding: 100px 48px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.diff-headline {
+  font-family: var(--serif);
+  font-size: clamp(28px, 3.5vw, 44px);
+  color: var(--ink);
+  line-height: 1.15;
+  margin-bottom: 48px;
+  letter-spacing: -0.5px;
+  max-width: 600px;
+}
+
+.diff-headline em { color: var(--rust); font-style: italic; }
+
+.compare-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 64px;
+}
+
+.compare-card {
+  border-radius: 14px;
+  padding: 28px;
+  border: 1px solid var(--border);
+}
+
+.compare-card.old {
+  background: var(--surface);
+}
+
+.compare-card.new {
+  background: var(--ink);
+  border-color: transparent;
+}
+
+.cc-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+  font-weight: 600;
+}
+
+.cc-label.old-label { color: var(--faint); }
+.cc-label.new-label { color: var(--rust-lt); }
+
+.compare-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.compare-list li {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.cl-icon { flex-shrink: 0; font-size: 14px; margin-top: 1px; }
+
+.compare-card.old .compare-list li { color: var(--muted); }
+.compare-card.new .compare-list li { color: rgba(255,255,255,0.7); }
+
+.compare-card.new .compare-list li strong { color: white; }
+
+/* PRINCIPLES */
+.principles-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.principle {
+  background: var(--surface);
+  padding: 24px 20px;
+}
+
+.p-num {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--faint);
+  margin-bottom: 8px;
+}
+
+.p-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 6px;
+  line-height: 1.3;
+}
+
+.p-body {
+  font-size: 12.5px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+/* ── FOR WHO ────────────────────────── */
+.for-who {
+  background: var(--ink);
+  padding: 100px 48px;
+  position: relative;
+  overflow: hidden;
+}
+
+.for-who::before {
+  content: '';
+  position: absolute;
+  top: -150px; left: -150px;
+  width: 500px; height: 500px;
+  background: radial-gradient(ellipse, rgba(200,66,14,0.1) 0%, transparent 65%);
+  pointer-events: none;
+}
+
+.for-who-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+.fw-headline {
+  font-family: var(--serif);
+  font-size: clamp(28px, 3.5vw, 44px);
+  color: white;
+  line-height: 1.15;
+  margin-bottom: 48px;
+  letter-spacing: -0.5px;
+}
+
+.fw-headline em { color: var(--rust-lt); font-style: italic; }
+
+.roles-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 60px;
+}
+
+.role-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 14px;
+  padding: 24px;
+  transition: border-color 0.15s;
+}
+
+.role-card:hover { border-color: rgba(255,255,255,0.12); }
+
+.rc-role {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--rust-lt);
+  margin-bottom: 10px;
+}
+
+.rc-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 10px;
+  line-height: 1.3;
+}
+
+.rc-body {
+  font-size: 13px;
+  color: rgba(255,255,255,0.4);
+  line-height: 1.65;
+  margin-bottom: 14px;
+}
+
+.rc-gets {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.rc-get {
+  font-size: 12px;
+  color: rgba(255,255,255,0.55);
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  line-height: 1.4;
+}
+
+.rc-get::before {
+  content: '→';
+  color: var(--rust-lt);
+  flex-shrink: 0;
+  font-size: 11px;
+}
+
+/* INDUSTRIES */
+.industries {
+  padding: 40px 0 0;
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+
+.ind-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.2);
+  margin-bottom: 16px;
+}
+
+.ind-tags {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.ind-tag {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 20px;
+  padding: 6px 16px;
+  font-size: 13px;
+  color: rgba(255,255,255,0.5);
+  font-weight: 500;
+}
+
+/* ── OUTCOME METRICS ────────────────── */
+.outcomes {
+  padding: 100px 48px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.outcomes-headline {
+  font-family: var(--serif);
+  font-size: clamp(28px, 3.5vw, 44px);
+  color: var(--ink);
+  line-height: 1.15;
+  margin-bottom: 12px;
+  letter-spacing: -0.5px;
+  max-width: 640px;
+}
+
+.outcomes-headline em { color: var(--rust); font-style: italic; }
+
+.outcomes-sub {
+  font-size: 16px;
+  color: var(--muted);
+  margin-bottom: 52px;
+  max-width: 480px;
+  font-weight: 300;
+}
+
+.outcomes-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 48px;
+}
+
+.outcome-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 28px 24px;
+  position: relative;
+  overflow: hidden;
+}
+
+.outcome-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+}
+
+.oc-rust::before { background: var(--rust); }
+.oc-gold::before { background: var(--gold); }
+.oc-green::before { background: var(--green-lt); }
+.oc-teal::before { background: var(--teal); }
+
+.oc-value {
+  font-family: var(--serif);
+  font-size: 44px;
+  font-weight: 400;
+  color: var(--ink);
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.oc-value em { font-style: italic; }
+
+.oc-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 6px;
+  line-height: 1.3;
+}
+
+.oc-note {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+/* ROI CALLOUT */
+.roi-callout {
+  background: var(--ink);
+  border-radius: 16px;
+  padding: 40px 48px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  align-items: center;
+}
+
+.roi-left {}
+
+.roi-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.3);
+  margin-bottom: 12px;
+}
+
+.roi-headline {
+  font-family: var(--serif);
+  font-size: 28px;
+  color: white;
+  line-height: 1.2;
+  margin-bottom: 12px;
+}
+
+.roi-headline em { color: var(--rust-lt); font-style: italic; }
+
+.roi-body {
+  font-size: 14px;
+  color: rgba(255,255,255,0.45);
+  line-height: 1.7;
+}
+
+.roi-numbers {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.roi-line {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.roi-line:last-child { border-bottom: none; padding-bottom: 0; }
+
+.roi-num {
+  font-family: var(--serif);
+  font-size: 30px;
+  color: white;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.roi-num em { color: var(--rust-lt); font-style: italic; }
+
+.roi-desc {
+  font-size: 13px;
+  color: rgba(255,255,255,0.45);
+  line-height: 1.5;
+}
+
+/* ── CLOSING CTA ────────────────────── */
+.closing {
+  background: var(--rust);
+  padding: 100px 48px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.closing::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.06'/%3E%3C/svg%3E");
+  pointer-events: none;
+}
+
+.closing-inner {
+  max-width: 680px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+.closing-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.5);
+  margin-bottom: 20px;
+}
+
+.closing-headline {
+  font-family: var(--serif);
+  font-size: clamp(32px, 4vw, 52px);
+  font-weight: 400;
+  color: white;
+  line-height: 1.1;
+  margin-bottom: 20px;
+  letter-spacing: -0.8px;
+}
+
+.closing-sub {
+  font-size: 17px;
+  color: rgba(255,255,255,0.65);
+  margin-bottom: 40px;
+  font-weight: 300;
+  line-height: 1.65;
+}
+
+.closing-ctas {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.cta-white {
+  background: white;
+  color: var(--rust);
+  border: none;
+  border-radius: 10px;
+  padding: 14px 28px;
+  font-family: var(--display);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+}
+
+.cta-white:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(0,0,0,0.2); }
+
+.cta-ghost-white {
+  background: transparent;
+  color: white;
+  border: 2px solid rgba(255,255,255,0.4);
+  border-radius: 10px;
+  padding: 14px 28px;
+  font-family: var(--display);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.cta-ghost-white:hover { border-color: white; }
+
+/* ── FOOTER ─────────────────────────── */
+.footer {
+  background: var(--ink);
+  padding: 32px 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 100%;
+}
+
+.footer-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.footer-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.5);
+}
+
+.footer-right {
+  font-size: 12px;
+  color: rgba(255,255,255,0.2);
+}
+
+/* ── ANIMATIONS ─────────────────────── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.hero-eyebrow { animation: fadeUp 0.6s ease both; }
+.hero-headline { animation: fadeUp 0.7s 0.1s ease both; }
+.hero-sub { animation: fadeUp 0.7s 0.2s ease both; }
+.hero-ctas { animation: fadeUp 0.7s 0.3s ease both; }
+.hero-stats { animation: fadeUp 0.7s 0.4s ease both; }
+
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- HERO                                    -->
+<!-- ═══════════════════════════════════════ -->
+<section class="hero">
+  <div class="hero-inner">
+
+    <nav class="nav">
+      <div class="nav-logo">
+        <div class="logo-mark">SP</div>
+        <div class="logo-name">SafetyPlatform</div>
+      </div>
+      <button class="nav-cta">Request a Demo →</button>
+    </nav>
+
+    <div class="hero-eyebrow">Safety Intelligence Platform</div>
+
+    <h1 class="hero-headline">
+      Your crews are <em>telling you</em><br>
+      where the next incident is.<br>
+      <strong>Are you listening?</strong>
+    </h1>
+
+    <p class="hero-sub">
+      Most organisations don't fail because they <em>ignored safety</em> —
+      they fail because the signals were there and nobody connected them
+      to action fast enough. SafetyPlatform closes that gap.
+    </p>
+
+    <div class="hero-ctas">
+      <button class="cta-primary">See It in Action →</button>
+      <div class="cta-secondary">Talk to a safety specialist <span>↗</span></div>
+    </div>
+
+    <div class="hero-stats">
+      <div class="hs-item">
+        <div class="hs-value"><em>4</em></div>
+        <div class="hs-label">Human touch points from field observation to crew briefing</div>
+      </div>
+      <div class="hs-item">
+        <div class="hs-value"><em>10</em></div>
+        <div class="hs-label">Languages. Any crew, any site, any country.</div>
+      </div>
+      <div class="hs-item">
+        <div class="hs-value"><em>36%</em></div>
+        <div class="hs-label">of construction fatalities are falls. Preventable. With the right intelligence, in time.</div>
+      </div>
+      <div class="hs-item">
+        <div class="hs-value"><em>&lt;8s</em></div>
+        <div class="hs-label">From "generate talk" to a crew-ready briefing in the crew's language</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════ -->
+<!-- PROBLEM                                 -->
+<!-- ═══════════════════════════════════════ -->
+<section>
+  <div class="problem">
+
+    <div class="section-label">The Problem</div>
+
+    <h2 class="problem-headline">
+      Safety leaders are drowning in <em>data</em> and starving for <em>intelligence</em>
+    </h2>
+
+    <p class="problem-body">
+      You have observation apps, incident systems, training records, audit tools.
+      <strong>But the signals don't connect.</strong> A near-miss in Week 3 and another
+      in Week 7 at different sites don't look like a pattern — until someone gets hurt.
+      By then, it's a lagging indicator. You needed a leading one.
+    </p>
+
+    <div class="tension-grid">
+      <div class="tension-card">
+        <div class="tc-icon">📋</div>
+        <div class="tc-title">Compliance ≠ Safety</div>
+        <div class="tc-body">Toolbox talks become a box-ticking exercise. Supervisors read generic content crews have heard before. Nobody's learning because nobody connected the talk to what actually happened on site this week.</div>
+      </div>
+      <div class="tension-card">
+        <div class="tc-icon">🌐</div>
+        <div class="tc-title">Language is a live risk</div>
+        <div class="tc-body">30–40% of construction workforces speak English as a second or third language. A safety briefing delivered in a language a worker doesn't fully understand isn't a safety briefing — it's a liability.</div>
+      </div>
+      <div class="tension-card">
+        <div class="tc-icon">🔇</div>
+        <div class="tc-title">Silence is misread as safety</div>
+        <div class="tc-body">When a site stops logging observations, it's usually not because nothing's happening. It's because the system isn't worth using. That silence is the most dangerous signal of all — and most platforms can't detect it.</div>
+      </div>
+      <div class="tension-card">
+        <div class="tc-icon">📁</div>
+        <div class="tc-title">Investigations close, learning doesn't spread</div>
+        <div class="tc-body">An investigation produces findings, a corrective action, and a PDF that lives in a folder. The crew on the other side of the region who's about to make the same mistake never hears about it.</div>
+      </div>
+      <div class="tension-card">
+        <div class="tc-icon">👔</div>
+        <div class="tc-title">Field managers are reactive, not proactive</div>
+        <div class="tc-body">Without data telling them where to go, managers visit the sites they know best or the ones that are loudest — not the ones that need them most. Atrophy accumulates invisibly.</div>
+      </div>
+      <div class="tension-card">
+        <div class="tc-icon">🔁</div>
+        <div class="tc-title">The loop never closes</div>
+        <div class="tc-body">A supervisor logs a near-miss and never finds out it triggered a regional trend, prompted an insight, changed a toolbox talk, and reached 400 crew members. Absence of feedback kills reporting culture.</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════ -->
+<!-- SOLUTION                                -->
+<!-- ═══════════════════════════════════════ -->
+<section class="solution">
+  <div class="solution-inner">
+
+    <div class="solution-label">How It Works</div>
+
+    <h2 class="solution-headline">
+      From field observation to <em>crew briefing</em> — automatically
+    </h2>
+
+    <p class="solution-sub">
+      SafetyPlatform converts what your people see in the field into structured
+      intelligence, delivered to the right crews in the right language, with the minimum
+      possible human effort between capture and action.
+    </p>
+
+    <!-- PIPELINE -->
+    <div class="pipeline">
+      <div class="pipe-step step-human">
+        <div class="ps-node">👤</div>
+        <div class="ps-actor">Supervisor</div>
+        <div class="ps-title">Something is observed</div>
+        <div class="ps-desc">30 seconds. One form. Works offline. Language-agnostic capture.</div>
+      </div>
+      <div class="pipe-step step-ai">
+        <div class="ps-node">🤖</div>
+        <div class="ps-actor">AI — 2 seconds</div>
+        <div class="ps-title">Classified & enriched</div>
+        <div class="ps-desc">Systemic vs behavioural. Key hazard. Anonymisation. No human effort.</div>
+      </div>
+      <div class="pipe-step step-algo">
+        <div class="ps-node">⚙</div>
+        <div class="ps-actor">Algorithm</div>
+        <div class="ps-title">Pattern detected</div>
+        <div class="ps-desc">Deterministic trend detection across sites, regions, divisions.</div>
+      </div>
+      <div class="pipe-step step-ai">
+        <div class="ps-node">💡</div>
+        <div class="ps-actor">AI + Managers</div>
+        <div class="ps-title">Insight drafted & endorsed</div>
+        <div class="ps-desc">AI drafts. Field managers endorse. Safety manager approves.</div>
+      </div>
+      <div class="pipe-step step-human">
+        <div class="ps-node">🛡</div>
+        <div class="ps-actor">Safety Manager</div>
+        <div class="ps-title">One human decision</div>
+        <div class="ps-desc">Approve, edit, set scope. Under 2 minutes. Gate with full context.</div>
+      </div>
+      <div class="pipe-step step-ai">
+        <div class="ps-node">🎙</div>
+        <div class="ps-actor">AI</div>
+        <div class="ps-title">Talk assembled</div>
+        <div class="ps-desc">Veteran voice. Plain language. Cohesive narrative. In any language.</div>
+      </div>
+      <div class="pipe-step step-human">
+        <div class="ps-node">🦺</div>
+        <div class="ps-actor">Supervisor + Crew</div>
+        <div class="ps-title">Crew briefed</div>
+        <div class="ps-desc">Read aloud in crew language. Discussion. Acknowledged. Loop closed.</div>
+      </div>
+    </div>
+
+    <!-- FEATURES -->
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="fc-icon" style="background:rgba(200,66,14,0.15)">📡</div>
+        <div class="fc-title">Intelligence that surfaces itself</div>
+        <div class="fc-body">You don't search for trends — the platform finds them. Configurable thresholds fire when patterns emerge across any level of your organisation, from a single site to a global portfolio.</div>
+      </div>
+      <div class="feature-card">
+        <div class="fc-icon" style="background:rgba(13,110,122,0.2)">🌐</div>
+        <div class="fc-title">10-language kiosk delivery</div>
+        <div class="fc-body">AI translates and reads toolbox talks aloud in the crew's language. English, Mandarin, Spanish, Hindi, Arabic, Portuguese, Filipino, Vietnamese, Indonesian, and more. No interpreter required.</div>
+      </div>
+      <div class="feature-card">
+        <div class="fc-icon" style="background:rgba(26,110,72,0.15)">📉</div>
+        <div class="fc-title">Atrophy detection</div>
+        <div class="fc-body">When a site goes quiet, the platform notices. Composite atrophy scores drive manager visit planning — so field leadership is always deployed where it's most needed, not where it's most familiar.</div>
+      </div>
+      <div class="feature-card">
+        <div class="fc-icon" style="background:rgba(118,53,220,0.15)">💬</div>
+        <div class="fc-title">Social endorsement layer</div>
+        <div class="fc-body">Field managers endorse insights before approval. Their field experience validates the pattern, gives the safety manager context, and closes the loop — they see when their endorsement reaches a crew.</div>
+      </div>
+      <div class="feature-card">
+        <div class="fc-icon" style="background:rgba(176,120,0,0.12)">⚖️</div>
+        <div class="fc-title">Regulatory-ready by design</div>
+        <div class="fc-body">Legal hold, investigation sign-off, corrective action tracking, and full audit logging built in. Every content decision is documented with who made it, when, and why. Defensible by default.</div>
+      </div>
+      <div class="feature-card">
+        <div class="fc-icon" style="background:rgba(26,79,160,0.15)">🔁</div>
+        <div class="fc-title">The loop actually closes</div>
+        <div class="fc-body">The supervisor who logged the near-miss sees when it triggered a regional insight, prompted a toolbox talk, and reached 400 crew members. That feedback is what builds a reporting culture that lasts.</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════ -->
+<!-- DIFFERENTIATION                         -->
+<!-- ═══════════════════════════════════════ -->
+<section>
+  <div class="diff">
+
+    <div class="section-label">Why SafetyPlatform</div>
+
+    <h2 class="diff-headline">
+      Not a reporting tool.<br>Not a compliance system.<br>
+      A <em>safety intelligence</em> platform.
+    </h2>
+
+    <div class="compare-grid">
+      <div class="compare-card old">
+        <div class="cc-label old-label">What you have today</div>
+        <ul class="compare-list">
+          <li><span class="cl-icon">✗</span>Observation apps that collect data and do nothing with it</li>
+          <li><span class="cl-icon">✗</span>Incident systems where findings go to die in PDF reports</li>
+          <li><span class="cl-icon">✗</span>Toolbox talk templates written once, used forever, ignored by crews</li>
+          <li><span class="cl-icon">✗</span>Safety managers manually hunting for patterns across disconnected systems</li>
+          <li><span class="cl-icon">✗</span>No way to know when a site has gone quiet until something goes wrong</li>
+          <li><span class="cl-icon">✗</span>Field managers visiting familiar sites, not the sites that need them</li>
+          <li><span class="cl-icon">✗</span>A reporting culture that collapses when nobody sees their input have impact</li>
+        </ul>
+      </div>
+      <div class="compare-card new">
+        <div class="cc-label new-label">SafetyPlatform</div>
+        <ul class="compare-list">
+          <li><span class="cl-icon">→</span><strong>Every observation</strong> is enriched, trend-checked, and ready to inform a crew briefing</li>
+          <li><span class="cl-icon">→</span><strong>Investigation findings</strong> become toolbox content automatically, with one human sign-off</li>
+          <li><span class="cl-icon">→</span><strong>Talks are generated</strong> from real site intelligence, in the crew's language, in under 8 seconds</li>
+          <li><span class="cl-icon">→</span><strong>Patterns surface themselves</strong> — safety managers review, not hunt</li>
+          <li><span class="cl-icon">→</span><strong>Atrophy scores</strong> tell managers exactly which sites need a visit and why</li>
+          <li><span class="cl-icon">→</span><strong>Field managers are directed</strong> by data, not habit</li>
+          <li><span class="cl-icon">→</span><strong>Every contributor</strong> sees when their input reached a crew — the loop closes visibly</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="principles-grid">
+      <div class="principle">
+        <div class="p-num">01</div>
+        <div class="p-title">Minimum viable human effort</div>
+        <div class="p-body">4 mandatory human touch points. Everything between them is handled. AI does the work — humans make the decisions that require human judgement.</div>
+      </div>
+      <div class="principle">
+        <div class="p-num">02</div>
+        <div class="p-title">Field-led, not form-led</div>
+        <div class="p-body">Designed for one hand, bright sunlight, work gloves. 30-second capture. Offline-first. The form that gets used is the form that gets out of the way.</div>
+      </div>
+      <div class="principle">
+        <div class="p-num">03</div>
+        <div class="p-title">Algorithms decide. AI communicates.</div>
+        <div class="p-body">Pattern detection is deterministic and auditable. AI writes — it doesn't decide. A regulator can always see exactly why an insight was triggered.</div>
+      </div>
+      <div class="principle">
+        <div class="p-num">04</div>
+        <div class="p-title">Only critical information</div>
+        <div class="p-body">Every field, every view, every notification is tested against one question: does this drive operationally significant communication, learning, or improvement?</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════ -->
+<!-- FOR WHO                                 -->
+<!-- ═══════════════════════════════════════ -->
+<section class="for-who">
+  <div class="for-who-inner">
+
+    <h2 class="fw-headline">
+      Built for the people <em>responsible</em><br>when something goes wrong
+    </h2>
+
+    <div class="roles-grid">
+      <div class="role-card">
+        <div class="rc-role">Senior Safety Leader</div>
+        <div class="rc-title">Finally, a platform that matches how you actually think about risk</div>
+        <div class="rc-body">You don't need more data — you need the right intelligence at the right time. SafetyPlatform gives you leading indicators that tell you where risk is building before it becomes an incident.</div>
+        <div class="rc-gets">
+          <div class="rc-get">Safety Culture Index — one number that tells the truth</div>
+          <div class="rc-get">Board-ready reports generated automatically</div>
+          <div class="rc-get">Systemic investigation workflow for patterns that cross divisions</div>
+          <div class="rc-get">Complete audit trail for every decision and share action</div>
+        </div>
+      </div>
+      <div class="role-card">
+        <div class="rc-role">Safety Manager</div>
+        <div class="rc-title">A workbench that empties. A pipeline that flows.</div>
+        <div class="rc-body">Your job is to act on intelligence, not compile it. The Workbench surfaces what needs your attention today — insights to approve, investigations to close, actions overdue — and nothing else.</div>
+        <div class="rc-gets">
+          <div class="rc-get">Unified queue: insights, investigations, actions, atrophy alerts</div>
+          <div class="rc-get">AI-drafted insights with field endorsements — full context before you decide</div>
+          <div class="rc-get">Investigation framework AI-assisted, human-confirmed</div>
+          <div class="rc-get">2-minute approvals. Not 20-minute reviews.</div>
+        </div>
+      </div>
+      <div class="role-card">
+        <div class="rc-role">Field Manager / Regional Manager</div>
+        <div class="rc-title">Visit the sites that need you. Not the ones you know best.</div>
+        <div class="rc-body">Atrophy scores tell you which sites have gone quiet and why. Arrive with AI-recommended observation topics drawn from live site data — not a generic checklist.</div>
+        <div class="rc-gets">
+          <div class="rc-get">Site portfolio ranked by atrophy — where to go and when</div>
+          <div class="rc-get">AI-recommended observation topics before every visit</div>
+          <div class="rc-get">One-tap endorsement of insights from your field experience</div>
+          <div class="rc-get">See when your field intelligence reaches a crew</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="industries">
+      <div class="ind-label">Built for industries where safety is existential</div>
+      <div class="ind-tags">
+        <div class="ind-tag">🏗 Construction</div>
+        <div class="ind-tag">⛏ Mining & Resources</div>
+        <div class="ind-tag">🛢 Oil & Gas</div>
+        <div class="ind-tag">⚡ Energy & Utilities</div>
+        <div class="ind-tag">🚢 Maritime</div>
+        <div class="ind-tag">🏭 Heavy Manufacturing</div>
+        <div class="ind-tag">🌲 Forestry & Agriculture</div>
+        <div class="ind-tag">🚧 Civil Infrastructure</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════ -->
+<!-- OUTCOMES                                -->
+<!-- ═══════════════════════════════════════ -->
+<section>
+  <div class="outcomes">
+
+    <div class="section-label">Expected Outcomes</div>
+
+    <h2 class="outcomes-headline">
+      The platform pays for itself the first time it <em>prevents</em> an incident
+    </h2>
+
+    <p class="outcomes-sub">Indicative outcomes based on platform design and industry benchmarks. Your results depend on organisation size and baseline.</p>
+
+    <div class="outcomes-grid">
+      <div class="outcome-card oc-rust">
+        <div class="oc-value" style="color:var(--rust)">30–<em>50</em>%</div>
+        <div class="oc-label">Reduction in time from field observation to crew briefing</div>
+        <div class="oc-note">From days (manual) to minutes (automated pipeline)</div>
+      </div>
+      <div class="outcome-card oc-gold">
+        <div class="oc-value" style="color:var(--gold)">3–<em>5×</em></div>
+        <div class="oc-label">Increase in near-miss reporting within 90 days</div>
+        <div class="oc-note">When people see their reports have impact, they report more</div>
+      </div>
+      <div class="outcome-card oc-green">
+        <div class="oc-value" style="color:var(--green-lt)">90<em>%+</em></div>
+        <div class="oc-label">Talk delivery rate with consistent crew acknowledgement</div>
+        <div class="oc-note">vs typical 60–70% with manual systems and generic content</div>
+      </div>
+      <div class="outcome-card oc-teal">
+        <div class="oc-value" style="color:var(--teal)"><em>Zero</em></div>
+        <div class="oc-label">Patterns that cross sites without being detected</div>
+        <div class="oc-note">Configurable thresholds. No pattern falls through the gap.</div>
+      </div>
+    </div>
+
+    <div class="roi-callout">
+      <div class="roi-left">
+        <div class="roi-label">The Business Case</div>
+        <h3 class="roi-headline">
+          One prevented LTI<br>justifies the platform <em>for a year</em>
+        </h3>
+        <p class="roi-body">
+          The direct cost of a lost time injury in construction averages $45,000–$80,000.
+          Indirect costs — investigation, productivity loss, reputational damage, insurance premium — typically run 3–5× that. A single serious incident can cost $300,000–$500,000 all in.
+          SafetyPlatform is not a cost. It's a risk transfer mechanism.
+        </p>
+      </div>
+      <div class="roi-numbers">
+        <div class="roi-line">
+          <div class="roi-num">$<em>45k</em></div>
+          <div class="roi-desc">Average direct cost of a recordable injury in construction (Safe Work Australia, 2024)</div>
+        </div>
+        <div class="roi-line">
+          <div class="roi-num"><em>3–5×</em></div>
+          <div class="roi-desc">Indirect cost multiplier — lost productivity, investigation time, insurance impact</div>
+        </div>
+        <div class="roi-line">
+          <div class="roi-num"><em>36%</em></div>
+          <div class="roi-desc">Of construction fatalities are falls — the most common toolbox talk topic. Most are preceded by a near-miss that wasn't acted on.</div>
+        </div>
+        <div class="roi-line">
+          <div class="roi-num"><em>$0</em></div>
+          <div class="roi-desc">Cost of a regulatory fine for a well-documented, demonstrably proactive safety intelligence system</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════ -->
+<!-- CLOSING CTA                             -->
+<!-- ═══════════════════════════════════════ -->
+<section class="closing">
+  <div class="closing-inner">
+    <div class="closing-label">Ready to see it</div>
+    <h2 class="closing-headline">
+      The next incident is already signalling.<br>Let's make sure you hear it.
+    </h2>
+    <p class="closing-sub">
+      SafetyPlatform is in active development and available for pilot partnerships with senior safety functions in construction, resources, and heavy industry. We work with your existing org structure, taxonomy, and workflows.
+    </p>
+    <div class="closing-ctas">
+      <button class="cta-white">Request a Demo →</button>
+      <button class="cta-ghost-white">Download Product Brief</button>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-left">
+    <div class="logo-mark">SP</div>
+    <div class="footer-name">SafetyPlatform</div>
+  </div>
+  <div class="footer-right">Safety Intelligence Platform · Built for the field, designed for leadership</div>
+</footer>
+
+</body>
+</html>

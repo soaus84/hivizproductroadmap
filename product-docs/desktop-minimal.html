@@ -1,0 +1,2038 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SafetyPlatform Desktop — Minimal UI</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap');
+
+:root {
+  --bg:           #F4F6F8;
+  --surface:      #FFFFFF;
+  --surface2:     #F4F6F8;
+  --surface3:     #DFE3E8;
+  --border:       #DFE3E8;
+  --border-light: #F4F6F8;
+
+  --text-primary:   #212B36;
+  --text-secondary: #637381;
+  --text-disabled:  #919EAB;
+
+  --rust:    #FF5630; --rust-bg:   rgba(255,86,48,0.08);   --rust-border:  rgba(255,86,48,0.24);
+  --amber:   #FFAB00; --amber-bg:  rgba(255,171,0,0.08);   --amber-border: rgba(255,171,0,0.24);
+  --green:   #36B37E; --green-bg:  rgba(54,179,126,0.08);  --green-border: rgba(54,179,126,0.24);
+  --blue:    #1890FF; --blue-bg:   rgba(24,144,255,0.08);  --blue-border:  rgba(24,144,255,0.24);
+  --plum:    #7635DC; --plum-bg:   rgba(118,53,220,0.08);  --plum-border:  rgba(118,53,220,0.24);
+  --teal:    #00B8D9; --teal-bg:   rgba(0,184,217,0.08);   --teal-border:  rgba(0,184,217,0.24);
+  --ink:     #161C24;
+
+  --shadow-card: 0 0 2px rgba(145,158,171,0.2), 0 12px 24px -4px rgba(145,158,171,0.12);
+  --shadow-sm:   0 1px 2px rgba(145,158,171,0.16);
+  --shadow-md:   0 4px 8px rgba(145,158,171,0.16);
+
+  --r:    12px;
+  --r-sm: 8px;
+  --r-xs: 6px;
+
+  --nav-w: 260px;
+  --sans: 'Public Sans', -apple-system, sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: #E8EBF0;
+  font-family: var(--sans);
+  font-size: 13px;
+  line-height: 1.57;
+  padding: 28px 20px 60px;
+}
+
+/* ── OUTER WRAPPER ────────────────────── */
+.wrapper {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.screen-label {
+  font-family: var(--sans);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #4A5568;
+  padding-left: 4px;
+  margin-bottom: 10px;
+}
+
+/* ── DESKTOP FRAME ────────────────────── */
+.desktop-frame {
+  background: var(--bg);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.05),
+    0 40px 80px rgba(0,0,0,0.5);
+}
+
+/* TITLE BAR */
+.title-bar {
+  height: 38px;
+  background: #2A3440;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.tb-dot {
+  width: 12px; height: 12px;
+  border-radius: 50%;
+}
+
+.tb-url {
+  flex: 1;
+  background: rgba(255,255,255,0.06);
+  border-radius: 6px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  font-size: 11px;
+  color: rgba(255,255,255,0.3);
+  margin: 0 12px;
+  max-width: 360px;
+}
+
+/* APP SHELL */
+.app-shell {
+  display: grid;
+  grid-template-columns: var(--nav-w) 1fr;
+  grid-template-rows: 64px 1fr;
+  height: 820px;
+}
+
+/* ── TOP APP BAR ──────────────────────── */
+.app-topbar {
+  grid-column: 1 / -1;
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(6px);
+  border-bottom: 1px solid var(--border-light);
+  display: flex;
+  align-items: center;
+  padding: 0 20px 0 0;
+  gap: 0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 1px 2px rgba(145,158,171,0.08);
+}
+
+.topbar-brand {
+  width: var(--nav-w);
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-right: 1px dashed var(--border);
+  height: 100%;
+  flex-shrink: 0;
+}
+
+.brand-logo {
+  width: 36px; height: 36px;
+  background: linear-gradient(135deg, var(--plum) 0%, var(--blue) 100%);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 800; color: white;
+  letter-spacing: -0.5px;
+  flex-shrink: 0;
+}
+
+.brand-name {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.brand-version {
+  font-size: 10px;
+  color: var(--text-disabled);
+  margin-top: 1px;
+}
+
+.topbar-middle {
+  flex: 1;
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.search-bar {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  height: 36px;
+  padding: 0 12px 0 36px;
+  font-family: var(--sans);
+  font-size: 13px;
+  color: var(--text-primary);
+  width: 280px;
+  outline: none;
+  position: relative;
+}
+
+.search-wrap {
+  position: relative;
+}
+
+.search-wrap::before {
+  content: '🔍';
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 13px;
+  pointer-events: none;
+}
+
+.scope-select {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-primary);
+  outline: none;
+  cursor: pointer;
+}
+
+.period-tabs {
+  display: flex;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 3px;
+  gap: 2px;
+}
+
+.pt-btn {
+  padding: 4px 11px;
+  border-radius: 6px;
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--text-secondary);
+  border: none;
+  background: none;
+  transition: all 0.12s;
+}
+
+.pt-btn.active {
+  background: var(--surface);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-sm);
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 20px;
+  border-left: 1px dashed var(--border);
+  margin-left: auto;
+}
+
+.tb-icon-btn {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  color: var(--text-secondary);
+  position: relative;
+  transition: background 0.12s;
+}
+
+.tb-icon-btn:hover { background: var(--bg); }
+
+.tb-badge {
+  position: absolute;
+  top: 2px; right: 2px;
+  width: 16px; height: 16px;
+  background: var(--rust);
+  border-radius: 50%;
+  font-size: 9px; font-weight: 700;
+  color: white;
+  display: flex; align-items: center; justify-content: center;
+  border: 2px solid var(--surface);
+}
+
+.tb-avatar {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #84FAB0, #8FD3F4);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700;
+  color: var(--text-primary);
+  cursor: pointer;
+  border: 2px solid var(--green);
+}
+
+/* ── NAV SIDEBAR ──────────────────────── */
+.app-nav {
+  background: var(--surface);
+  border-right: 1px dashed var(--border);
+  padding: 16px 0;
+  overflow-y: auto;
+}
+
+.app-nav::-webkit-scrollbar { width: 0; }
+
+.nav-section-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--text-disabled);
+  padding: 10px 16px 5px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  border-radius: 8px;
+  margin: 1px 8px;
+  transition: all 0.12s;
+  position: relative;
+}
+
+.nav-item:hover { background: var(--bg); color: var(--text-primary); }
+
+.nav-item.active {
+  background: var(--plum-bg);
+  color: var(--plum);
+  font-weight: 600;
+}
+
+.nav-item.active::before {
+  content: '';
+  position: absolute;
+  left: -8px; top: 50%;
+  transform: translateY(-50%);
+  width: 3px; height: 20px;
+  background: var(--plum);
+  border-radius: 0 2px 2px 0;
+}
+
+.nav-icon { font-size: 17px; flex-shrink: 0; }
+
+.nav-badge {
+  margin-left: auto;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 7px;
+  border-radius: 10px;
+}
+
+.nb-rust { background: var(--rust-bg); color: var(--rust); }
+.nb-amber { background: var(--amber-bg); color: #7A4100; }
+
+.nav-divider {
+  height: 1px;
+  background: var(--border-light);
+  margin: 10px 16px;
+}
+
+/* ── MAIN CONTENT ─────────────────────── */
+.app-main {
+  overflow-y: auto;
+  background: var(--bg);
+}
+
+.app-main::-webkit-scrollbar { width: 4px; }
+.app-main::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+.main-inner {
+  padding: 24px;
+}
+
+/* PAGE HEADER */
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  gap: 16px;
+}
+
+.ph-left {}
+
+.ph-breadcrumb {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ph-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+
+.ph-sub {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-top: 3px;
+}
+
+.ph-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.btn {
+  padding: 8px 18px;
+  border-radius: 8px;
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.12s;
+}
+
+.btn-outlined {
+  background: var(--surface);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-outlined:hover { border-color: var(--text-secondary); }
+
+.btn-primary {
+  background: var(--plum);
+  color: white;
+  box-shadow: 0 4px 12px rgba(118,53,220,0.3);
+}
+
+.btn-primary:hover { background: #6020CC; }
+
+/* ── STAT CARDS ───────────────────────── */
+.stat-grid {
+  display: grid;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.sg-4 { grid-template-columns: repeat(4, 1fr); }
+.sg-3 { grid-template-columns: repeat(3, 1fr); }
+.sg-5 { grid-template-columns: repeat(5, 1fr); }
+
+.stat-card {
+  background: var(--surface);
+  border-radius: var(--r);
+  padding: 20px;
+  box-shadow: var(--shadow-card);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.sc-left {}
+.sc-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+
+.sc-value {
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1;
+  margin-bottom: 6px;
+}
+
+.sc-delta {
+  font-size: 12px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.delta-up { color: var(--green); }
+.delta-down { color: var(--rust); }
+.delta-flat { color: var(--text-secondary); }
+
+.sc-sub {
+  font-size: 11px;
+  color: var(--text-disabled);
+  margin-top: 2px;
+}
+
+.sc-icon {
+  width: 52px; height: 52px;
+  border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+/* ── GRID LAYOUTS ─────────────────────── */
+.content-grid {
+  display: grid;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.cg-2-1 { grid-template-columns: 2fr 1fr; }
+.cg-1-2 { grid-template-columns: 1fr 2fr; }
+.cg-2   { grid-template-columns: 1fr 1fr; }
+.cg-3   { grid-template-columns: repeat(3, 1fr); }
+
+/* ── CARDS ────────────────────────────── */
+.card {
+  background: var(--surface);
+  border-radius: var(--r);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+
+.card-header {
+  padding: 16px 20px 12px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  border-bottom: 1px dashed var(--border-light);
+}
+
+.card-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.3;
+}
+
+.card-sub {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+.card-body {
+  padding: 16px 20px;
+}
+
+.card-tag {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 6px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.ct-lead  { background: var(--teal-bg);  color: #006C82; }
+.ct-lag   { background: var(--rust-bg);  color: var(--rust); }
+.ct-intel { background: var(--plum-bg);  color: var(--plum); }
+.ct-ops   { background: var(--amber-bg); color: #7A4100; }
+
+/* ── WORKBENCH QUEUE ──────────────────── */
+.wb-shell {
+  display: grid;
+  grid-template-columns: 300px 1fr 320px;
+  gap: 16px;
+  height: 640px;
+}
+
+.wb-col {
+  background: var(--surface);
+  border-radius: var(--r);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.wb-col-header {
+  padding: 14px 16px 10px;
+  border-bottom: 1px dashed var(--border-light);
+  flex-shrink: 0;
+}
+
+.wb-col-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 2px;
+}
+
+.wb-col-sub {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.filter-row {
+  display: flex;
+  gap: 4px;
+  padding: 8px 10px;
+  border-bottom: 1px dashed var(--border-light);
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+
+.filter-chip {
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  background: none;
+  color: var(--text-disabled);
+  transition: all 0.12s;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.filter-chip:hover { background: var(--bg); color: var(--text-primary); }
+.filter-chip.active { background: var(--plum-bg); color: var(--plum); }
+
+.fc-count {
+  background: rgba(0,0,0,0.06);
+  border-radius: 10px;
+  padding: 0 5px;
+  font-size: 9px;
+}
+
+.queue-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+}
+
+.queue-scroll::-webkit-scrollbar { width: 3px; }
+.queue-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+.queue-group-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text-disabled);
+  padding: 8px 8px 4px;
+}
+
+.q-item {
+  padding: 11px 12px;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  transition: all 0.12s;
+  margin-bottom: 3px;
+  border: 1px solid transparent;
+}
+
+.q-item:hover { background: var(--bg); border-color: var(--border-light); }
+
+.q-item.selected {
+  background: var(--plum-bg);
+  border-color: rgba(118,53,220,0.2);
+}
+
+.qi-top {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 5px;
+}
+
+.qi-type {
+  font-size: 9px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 5px;
+  flex-shrink: 0;
+}
+
+.qtype-insight { background: var(--plum-bg); color: var(--plum); }
+.qtype-inv { background: var(--rust-bg); color: var(--rust); }
+.qtype-action { background: var(--amber-bg); color: #7A4100; }
+.qtype-atrophy { background: var(--teal-bg); color: #006C82; }
+
+.qi-age {
+  font-size: 10px;
+  color: var(--text-disabled);
+  margin-left: auto;
+}
+
+.qi-age.ov { color: var(--rust); font-weight: 600; }
+
+.qi-title {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.3;
+  margin-bottom: 3px;
+}
+
+.qi-meta { font-size: 11px; color: var(--text-secondary); }
+
+.qi-footer {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 6px;
+}
+
+.endorse-count {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 10px;
+  color: var(--green);
+  font-weight: 600;
+}
+
+/* WORK PANEL */
+.work-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.work-scroll::-webkit-scrollbar { width: 3px; }
+.work-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+.work-header-bar {
+  padding: 14px 16px 10px;
+  border-bottom: 1px dashed var(--border-light);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.wh-left {}
+.wh-breadcrumb { font-size: 11px; color: var(--text-secondary); margin-bottom: 3px; }
+.wh-title { font-size: 15px; font-weight: 700; color: var(--text-primary); line-height: 1.3; }
+.wh-meta { font-size: 11px; color: var(--text-secondary); margin-top: 3px; display: flex; align-items: center; gap: 8px; }
+
+.wh-actions { display: flex; gap: 6px; flex-shrink: 0; }
+
+.wb-btn {
+  padding: 7px 14px;
+  border-radius: 7px;
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all 0.12s;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.wbb-ghost { background: var(--bg); color: var(--text-secondary); border: 1px solid var(--border); }
+.wbb-reject { background: var(--rust-bg); color: var(--rust); }
+.wbb-edit { background: var(--amber-bg); color: #7A4100; }
+.wbb-approve { background: var(--green); color: white; box-shadow: 0 4px 8px rgba(54,179,126,0.3); }
+
+/* SOURCE BLOCK */
+.source-block {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  overflow: hidden;
+}
+
+.sb-header {
+  padding: 9px 14px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sb-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.sb-tag {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 5px;
+}
+
+.sbt-algo { background: var(--blue-bg); color: var(--blue); }
+.sbt-ai { background: var(--plum-bg); color: var(--plum); }
+.sbt-field { background: var(--teal-bg); color: #006C82; }
+
+.sb-body { padding: 12px 14px; }
+
+.obs-chip {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-xs);
+  padding: 8px 12px;
+  margin-bottom: 6px;
+  font-size: 12px;
+  color: var(--text-primary);
+  line-height: 1.5;
+  display: flex;
+  gap: 10px;
+}
+
+.obs-chip:last-child { margin-bottom: 0; }
+
+.obs-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--amber);
+  flex-shrink: 0;
+  margin-top: 5px;
+}
+
+.obs-site { font-size: 10px; color: var(--text-secondary); margin-top: 2px; }
+
+/* AI DRAFT */
+.ai-draft-card {
+  background: var(--plum-bg);
+  border: 1px solid var(--plum-border);
+  border-radius: var(--r-sm);
+  overflow: hidden;
+}
+
+.ai-draft-header {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--plum-border);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ai-pulse {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--plum);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+.ai-draft-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--plum);
+}
+
+.ai-draft-body { padding: 14px; }
+
+.ai-field { margin-bottom: 12px; }
+.ai-field:last-child { margin-bottom: 0; }
+
+.ai-field-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--plum);
+  margin-bottom: 5px;
+  opacity: 0.7;
+}
+
+.ai-field-text { font-size: 12.5px; color: var(--text-primary); line-height: 1.65; }
+
+.ai-narrative {
+  font-style: italic;
+  background: rgba(255,255,255,0.5);
+  border-left: 3px solid var(--plum);
+  padding: 10px 14px;
+  border-radius: 0 6px 6px 0;
+  font-size: 12.5px;
+  color: var(--text-primary);
+  line-height: 1.7;
+}
+
+/* DISCUSSION THREAD */
+.discussion-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  overflow: hidden;
+}
+
+.disc-header {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.disc-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.social-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.endorse-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--green-bg);
+  border: 1px solid var(--green-border);
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--green);
+  cursor: pointer;
+}
+
+.disc-body { padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; }
+
+.comment { display: flex; gap: 9px; align-items: flex-start; }
+
+.c-avatar {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 700; color: white;
+  flex-shrink: 0;
+}
+
+.c-body {
+  flex: 1;
+  background: var(--bg);
+  border-radius: var(--r-xs);
+  padding: 8px 10px;
+}
+
+.c-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 3px;
+}
+
+.c-name { font-size: 12px; font-weight: 700; color: var(--text-primary); }
+.c-role { font-size: 10px; color: var(--text-secondary); }
+.c-time { font-size: 10px; color: var(--text-disabled); margin-left: auto; }
+.c-text { font-size: 12px; color: var(--text-primary); line-height: 1.5; }
+
+.c-endorsed {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--green);
+  background: var(--green-bg);
+  padding: 2px 7px;
+  border-radius: 5px;
+  margin-top: 5px;
+}
+
+.add-comment-row {
+  display: flex;
+  gap: 7px;
+  align-items: center;
+  padding: 10px 14px;
+  border-top: 1px solid var(--border);
+}
+
+.add-c-input {
+  flex: 1;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 7px 14px;
+  font-size: 12px;
+  font-family: var(--sans);
+  color: var(--text-primary);
+  outline: none;
+}
+
+.add-c-input:focus { border-color: var(--plum); }
+
+.send-btn {
+  width: 30px; height: 30px;
+  background: var(--plum);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; color: white;
+  cursor: pointer; border: none;
+}
+
+/* SCOPE + ESCALATION */
+.scope-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: var(--bg);
+  border-radius: var(--r-xs);
+}
+
+.scope-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+
+.scope-opt {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  background: var(--surface);
+  transition: all 0.12s;
+}
+
+.scope-opt.sel { background: var(--plum-bg); border-color: var(--plum-border); color: var(--plum); }
+
+.escalation-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: var(--rust-bg);
+  border: 1px solid var(--rust-border);
+  border-radius: var(--r-xs);
+  gap: 10px;
+}
+
+.esc-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--rust);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.esc-desc { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+
+.toggle {
+  width: 40px; height: 22px;
+  background: var(--rust);
+  border-radius: 11px;
+  position: relative;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.toggle::after {
+  content: '';
+  position: absolute;
+  width: 16px; height: 16px;
+  background: white;
+  border-radius: 50%;
+  top: 3px; right: 3px;
+  transition: right 0.2s;
+}
+
+/* CONTEXT COL */
+.ctx-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ctx-scroll::-webkit-scrollbar { width: 3px; }
+.ctx-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+.metric-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.metric-tile {
+  background: var(--bg);
+  border-radius: var(--r-sm);
+  padding: 11px 12px;
+}
+
+.mt-value {
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1;
+  margin-bottom: 3px;
+}
+
+.mt-label { font-size: 11px; color: var(--text-secondary); font-weight: 500; }
+
+.timeline { display: flex; flex-direction: column; gap: 0; }
+
+.tl-item {
+  display: flex;
+  gap: 10px;
+  padding: 6px 0;
+  position: relative;
+}
+
+.tl-item::before {
+  content: '';
+  position: absolute;
+  left: 9px;
+  top: 20px;
+  bottom: -6px;
+  width: 1px;
+  background: var(--border);
+}
+
+.tl-item:last-child::before { display: none; }
+
+.tl-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 3px;
+  border: 2px solid var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.tl-event { font-size: 12px; color: var(--text-primary); line-height: 1.4; }
+.tl-time { font-size: 10px; color: var(--text-secondary); margin-top: 1px; }
+
+.related-item {
+  background: var(--bg);
+  border-radius: var(--r-xs);
+  padding: 9px 11px;
+  margin-bottom: 5px;
+  cursor: pointer;
+}
+
+.ri-title { font-size: 12px; font-weight: 600; color: var(--text-primary); margin-bottom: 1px; }
+.ri-meta { font-size: 10.5px; color: var(--text-secondary); }
+
+/* ── ANALYTICS CHARTS ─────────────────── */
+svg text { font-family: 'Public Sans', sans-serif; }
+
+.bar { transition: opacity 0.15s; cursor: pointer; }
+.bar:hover { opacity: 0.75; }
+
+.heat-cell { rx: 4; cursor: pointer; transition: opacity 0.15s; }
+.heat-cell:hover { opacity: 0.7; }
+
+/* DATA TABLE */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+}
+
+.data-table th {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  padding: 10px 14px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+}
+
+.data-table td {
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--border-light);
+  vertical-align: middle;
+  line-height: 1.4;
+}
+
+.data-table tr:last-child td { border-bottom: none; }
+.data-table tr:hover td { background: var(--bg); }
+
+.chip-xs {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 5px;
+  display: inline-block;
+}
+
+.cx-rust   { background: var(--rust-bg);  color: var(--rust); }
+.cx-amber  { background: var(--amber-bg); color: #7A4100; }
+.cx-green  { background: var(--green-bg); color: #1A6340; }
+.cx-plum   { background: var(--plum-bg);  color: var(--plum); }
+.cx-blue   { background: var(--blue-bg);  color: #0C5FA8; }
+.cx-teal   { background: var(--teal-bg);  color: #006C82; }
+
+.score-bar-track {
+  height: 6px;
+  background: var(--border);
+  border-radius: 3px;
+  width: 80px;
+  overflow: hidden;
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 6px;
+}
+
+.score-bar-fill { height: 100%; border-radius: 3px; }
+
+/* PIPELINE FUNNEL */
+.funnel-row {
+  display: flex;
+  align-items: center;
+  padding: 16px 20px;
+  gap: 0;
+}
+
+.funnel-stage {
+  flex: 1;
+  text-align: center;
+  position: relative;
+}
+
+.funnel-stage::after {
+  content: '→';
+  position: absolute;
+  right: -10px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 18px;
+  color: var(--border);
+  z-index: 1;
+}
+
+.funnel-stage:last-child::after { display: none; }
+
+.f-count {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1;
+}
+
+.f-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+.f-drop { font-size: 10px; color: var(--text-disabled); margin-top: 2px; }
+
+/* INSIGHT CALLOUT */
+.insight-banner {
+  background: var(--amber-bg);
+  border: 1px solid var(--amber-border);
+  border-left: 4px solid var(--amber);
+  border-radius: var(--r-sm);
+  padding: 12px 16px;
+  margin-bottom: 16px;
+}
+
+.ib-title { font-size: 13px; font-weight: 700; color: #7A4100; margin-bottom: 4px; display: flex; align-items: center; gap: 7px; }
+.ib-body { font-size: 12.5px; color: var(--text-secondary); line-height: 1.6; }
+
+/* VIEW TABS in analytics */
+.view-tabs {
+  display: flex;
+  gap: 2px;
+  padding: 0 20px;
+  border-bottom: 1px solid var(--border-light);
+  background: var(--surface);
+  flex-shrink: 0;
+}
+
+.vt {
+  padding: 10px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: all 0.12s;
+}
+
+.vt:hover { color: var(--text-primary); }
+.vt.active { color: var(--plum); border-bottom-color: var(--plum); }
+
+/* EXPORT PANEL */
+.export-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+}
+
+.export-item {
+  padding: 16px;
+  border-right: 1px dashed var(--border-light);
+  cursor: pointer;
+  transition: background 0.12s;
+}
+
+.export-item:last-child { border-right: none; }
+.export-item:hover { background: var(--bg); }
+
+.ei-icon { font-size: 24px; margin-bottom: 8px; }
+.ei-title { font-size: 13px; font-weight: 700; color: var(--text-primary); margin-bottom: 3px; }
+.ei-desc { font-size: 11px; color: var(--text-secondary); line-height: 1.5; }
+
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <!-- ══════════════════════════════════════════ -->
+  <!-- SCREEN 1: WORKBENCH                        -->
+  <!-- ══════════════════════════════════════════ -->
+  <div>
+    <div class="screen-label">Desktop View 1 — Safety Manager Workbench</div>
+    <div class="desktop-frame">
+
+      <!-- TITLE BAR -->
+      <div class="title-bar">
+        <div class="tb-dot" style="background:#FF5F57"></div>
+        <div class="tb-dot" style="background:#FEBC2E"></div>
+        <div class="tb-dot" style="background:#28C840"></div>
+        <div class="tb-url">app.safetyplatform.io/workbench</div>
+      </div>
+
+      <div class="app-shell">
+
+        <!-- TOP BAR -->
+        <div class="app-topbar">
+          <div class="topbar-brand">
+            <div class="brand-logo">SP</div>
+            <div>
+              <div class="brand-name">SafetyPlatform</div>
+              <div class="brand-version">v0.2 · Riverside Division</div>
+            </div>
+          </div>
+          <div class="topbar-middle">
+            <div class="search-wrap">
+              <input class="search-bar" placeholder="Search observations, sites, insights...">
+            </div>
+            <select class="scope-select">
+              <option>Riverside Division</option>
+              <option>North Region</option>
+              <option>All Divisions</option>
+            </select>
+          </div>
+          <div class="topbar-right">
+            <button class="tb-icon-btn" style="position:relative">🔔<div class="tb-badge">3</div></button>
+            <button class="tb-icon-btn">❓</button>
+            <div class="tb-avatar">SR</div>
+          </div>
+        </div>
+
+        <!-- NAV -->
+        <div class="app-nav">
+          <div class="nav-section-label">Main</div>
+          <div class="nav-item active"><span class="nav-icon">⬡</span>Workbench<span class="nav-badge nb-rust">14</span></div>
+          <div class="nav-item"><span class="nav-icon">📊</span>Analytics</div>
+          <div class="nav-item"><span class="nav-icon">🗺️</span>Site Map</div>
+          <div class="nav-divider"></div>
+          <div class="nav-section-label">Intelligence</div>
+          <div class="nav-item"><span class="nav-icon">💡</span>Insights<span class="nav-badge nb-amber">3</span></div>
+          <div class="nav-item"><span class="nav-icon">🔍</span>Investigations</div>
+          <div class="nav-item"><span class="nav-icon">✅</span>Actions<span class="nav-badge nb-rust">7</span></div>
+          <div class="nav-divider"></div>
+          <div class="nav-section-label">Reports</div>
+          <div class="nav-item"><span class="nav-icon">📋</span>Board Report</div>
+          <div class="nav-item"><span class="nav-icon">⚖️</span>Regulatory</div>
+          <div class="nav-item"><span class="nav-icon">📁</span>Manager Briefs</div>
+          <div class="nav-divider"></div>
+          <div class="nav-section-label">Admin</div>
+          <div class="nav-item"><span class="nav-icon">⚙</span>Thresholds</div>
+          <div class="nav-item"><span class="nav-icon">👥</span>Users & Roles</div>
+        </div>
+
+        <!-- MAIN -->
+        <div class="app-main">
+          <div class="main-inner">
+
+            <div class="page-header">
+              <div class="ph-left">
+                <div class="ph-breadcrumb">Home <span>›</span> Workbench</div>
+                <div class="ph-title">Workbench</div>
+                <div class="ph-sub">Wednesday, 25 March 2026 · 14 items · 3 overdue · 2 escalations pending</div>
+              </div>
+              <div class="ph-actions">
+                <button class="btn btn-outlined">⬇ Export Queue</button>
+                <button class="btn btn-primary">+ New Insight</button>
+              </div>
+            </div>
+
+            <div class="wb-shell">
+
+              <!-- QUEUE COL -->
+              <div class="wb-col">
+                <div class="wb-col-header">
+                  <div class="wb-col-title">Action Queue</div>
+                  <div class="wb-col-sub">14 items · sorted by urgency</div>
+                </div>
+                <div class="filter-row">
+                  <button class="filter-chip active">All <span class="fc-count">14</span></button>
+                  <button class="filter-chip">Insights <span class="fc-count">3</span></button>
+                  <button class="filter-chip">Investig. <span class="fc-count">4</span></button>
+                  <button class="filter-chip">Actions <span class="fc-count">7</span></button>
+                </div>
+                <div class="queue-scroll">
+
+                  <div class="queue-group-label">Overdue — Act Today</div>
+
+                  <div class="q-item selected">
+                    <div class="qi-top">
+                      <span class="qi-type qtype-insight">Critical Insight</span>
+                      <span class="qi-age ov">3d overdue</span>
+                    </div>
+                    <div class="qi-title">Heavy vehicle spotter management — Regional trend</div>
+                    <div class="qi-meta">6 near-misses · North Region</div>
+                    <div class="qi-footer">
+                      <span class="endorse-count">👍 5 endorsements</span>
+                      <span style="font-size:10px;color:var(--text-disabled)">💬 3 comments</span>
+                    </div>
+                  </div>
+
+                  <div class="q-item">
+                    <div class="qi-top">
+                      <span class="qi-type qtype-inv">Investigation</span>
+                      <span class="qi-age ov">1d overdue</span>
+                    </div>
+                    <div class="qi-title">INC-0091 — Fracture, Working at Height</div>
+                    <div class="qi-meta">Riverside Tower · 14 days open</div>
+                  </div>
+
+                  <div class="q-item">
+                    <div class="qi-top">
+                      <span class="qi-type qtype-action">Action</span>
+                      <span class="qi-age ov">5d overdue</span>
+                    </div>
+                    <div class="qi-title">Update STMP — spotter positioning requirements</div>
+                    <div class="qi-meta">Owner: J. Reyes · From INC-0088</div>
+                  </div>
+
+                  <div class="queue-group-label">Due This Week</div>
+
+                  <div class="q-item">
+                    <div class="qi-top">
+                      <span class="qi-type qtype-insight">Critical Insight</span>
+                      <span class="qi-age">1d ago</span>
+                    </div>
+                    <div class="qi-title">PTW sign-on atrophy — Central Rail Depot</div>
+                    <div class="qi-meta">4 observations · Site level · PTW</div>
+                    <div class="qi-footer">
+                      <span class="endorse-count">👍 2 endorsements</span>
+                    </div>
+                  </div>
+
+                  <div class="q-item">
+                    <div class="qi-top">
+                      <span class="qi-type qtype-inv">Investigation</span>
+                      <span class="qi-age">3d ago</span>
+                    </div>
+                    <div class="qi-title">INC-0094 — Near-miss, Hot Work slag fall</div>
+                    <div class="qi-meta">Central Rail Depot · 60% complete</div>
+                  </div>
+
+                  <div class="q-item">
+                    <div class="qi-top">
+                      <span class="qi-type qtype-action">Action</span>
+                      <span class="qi-age">Due 27 Mar</span>
+                    </div>
+                    <div class="qi-title">Add reversing camera to vehicle pre-start</div>
+                    <div class="qi-meta">Owner: M. Chen · In progress</div>
+                  </div>
+
+                  <div class="q-item">
+                    <div class="qi-top">
+                      <span class="qi-type qtype-atrophy">Atrophy Alert</span>
+                      <span class="qi-age">18d</span>
+                    </div>
+                    <div class="qi-title">Riverside Tower — 18 days no observation</div>
+                    <div class="qi-meta">Score: 87 · No visit scheduled</div>
+                  </div>
+
+                  <div class="queue-group-label">Upcoming</div>
+
+                  <div class="q-item">
+                    <div class="qi-top">
+                      <span class="qi-type qtype-action">Action</span>
+                      <span class="qi-age">Due 1 Apr</span>
+                    </div>
+                    <div class="qi-title">Pre-task brief template — spotter assignment</div>
+                    <div class="qi-meta">Safety Team · From INC-0091</div>
+                  </div>
+
+                </div>
+              </div>
+
+              <!-- WORK PANEL -->
+              <div class="wb-col">
+                <div class="work-header-bar">
+                  <div class="wh-left">
+                    <div class="wh-breadcrumb">Critical Insight · North Region · Heavy Vehicle</div>
+                    <div class="wh-title">Spotter Management Pattern</div>
+                    <div class="wh-meta">
+                      <span>Generated 3 days ago</span>
+                      <span>·</span>
+                      <span>6 observations</span>
+                      <span>·</span>
+                      <span style="color:var(--rust);font-weight:600;">⚠ Overdue</span>
+                    </div>
+                  </div>
+                  <div class="wh-actions">
+                    <button class="wb-btn wbb-ghost">Skip</button>
+                    <button class="wb-btn wbb-reject">✕ Reject</button>
+                    <button class="wb-btn wbb-edit">✎ Edit</button>
+                    <button class="wb-btn wbb-approve">✓ Approve & Share</button>
+                  </div>
+                </div>
+                <div class="work-scroll">
+
+                  <div class="source-block">
+                    <div class="sb-header">
+                      <span class="sb-label">Source Data — 6 Observations</span>
+                      <span class="sb-tag sbt-algo">Threshold: 5 near-misses / 30d</span>
+                    </div>
+                    <div class="sb-body">
+                      <div class="obs-chip"><div class="obs-dot"></div><div><div>Excavator reversed — spotter had moved to crane lift without informing operator.</div><div class="obs-site">Riverside Tower · 18 Mar · Sup: J. Reyes</div></div></div>
+                      <div class="obs-chip"><div class="obs-dot"></div><div><div>Dump truck reversing — no spotter present. Worker shouted warning.</div><div class="obs-site">Central Rail Depot · 14 Mar · Sup: K. Obi</div></div></div>
+                      <div class="obs-chip" style="opacity:0.5;font-style:italic"><div class="obs-dot" style="background:var(--text-disabled)"></div><div><div>+ 4 more observations</div></div></div>
+                    </div>
+                  </div>
+
+                  <div class="ai-draft-card">
+                    <div class="ai-draft-header">
+                      <div class="ai-pulse"></div>
+                      <span class="ai-draft-label">AI Draft — Awaiting Review</span>
+                      <span style="margin-left:auto;font-size:10px;color:var(--plum);opacity:0.6">25 Mar 06:14</span>
+                    </div>
+                    <div class="ai-draft-body">
+                      <div class="ai-field">
+                        <div class="ai-field-label">Pattern Summary</div>
+                        <div class="ai-field-text">Six near-misses involving heavy vehicle spotters across four North Region sites in 28 days. In five of six cases, the spotter was absent or distracted — not because of individual negligence, but because spotter assignment and continuity aren't systematically managed through pre-task briefs or traffic management plans.</div>
+                      </div>
+                      <div class="ai-field">
+                        <div class="ai-field-label">Toolbox Narrative</div>
+                        <div class="ai-narrative">"Six times in the last month, a heavy vehicle reversed without someone properly watching the blind zone. That's not bad luck — that's a system that isn't working. The common factor isn't the drivers. It's that spotter roles are being treated as informal assignments rather than controlled positions."</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="discussion-card">
+                    <div class="disc-header">
+                      <span class="disc-label">Discussion — 3 comments</span>
+                      <div class="social-row">
+                        <button class="endorse-btn">👍 Endorsed (5)</button>
+                        <span style="font-size:10px;color:var(--text-secondary)">💬 3 comments</span>
+                      </div>
+                    </div>
+                    <div class="disc-body">
+                      <div class="comment">
+                        <div class="c-avatar" style="background:linear-gradient(135deg,#f093fb,#f5576c)">JT</div>
+                        <div class="c-body">
+                          <div class="c-meta"><span class="c-name">J. Thompson</span><span class="c-role">Regional Mgr</span><span class="c-time">2h ago</span></div>
+                          <div class="c-text">Saw this at Riverside on my visit Tuesday. Spotter walked off mid-operation — no handover. Definitely systemic.</div>
+                          <div class="c-endorsed">✓ Endorsed · Recommends escalation</div>
+                        </div>
+                      </div>
+                      <div class="comment">
+                        <div class="c-avatar" style="background:linear-gradient(135deg,#4facfe,#00f2fe)">KO</div>
+                        <div class="c-body">
+                          <div class="c-meta"><span class="c-name">K. Obi</span><span class="c-role">Supervisor · CRD</span><span class="c-time">1h ago</span></div>
+                          <div class="c-text">Same at Central Rail. PTW doesn't mention spotter continuity — that's probably the gap.</div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="add-comment-row">
+                      <div class="c-avatar" style="background:linear-gradient(135deg,#43e97b,#38f9d7);font-size:10px;font-weight:700;color:#1a1a1a">SR</div>
+                      <input class="add-c-input" placeholder="Add your assessment...">
+                      <button class="send-btn">➤</button>
+                    </div>
+                  </div>
+
+                  <div class="scope-row">
+                    <span class="scope-label">Share scope:</span>
+                    <button class="scope-opt">Site</button>
+                    <button class="scope-opt sel">Region</button>
+                    <button class="scope-opt">Division</button>
+                    <button class="scope-opt">Organisation</button>
+                  </div>
+
+                  <div class="escalation-row">
+                    <div>
+                      <div class="esc-label">⚠ AI recommends systemic escalation</div>
+                      <div class="esc-desc">Pattern spans 4 sites — route to global systemic investigation workflow.</div>
+                    </div>
+                    <div class="toggle"></div>
+                  </div>
+
+                </div>
+              </div>
+
+              <!-- CONTEXT COL -->
+              <div class="wb-col">
+                <div class="wb-col-header">
+                  <div class="wb-col-title">Site Context</div>
+                  <div class="wb-col-sub">North Region — 4 affected sites</div>
+                </div>
+                <div class="ctx-scroll">
+
+                  <div class="metric-grid">
+                    <div class="metric-tile">
+                      <div class="mt-value" style="color:var(--rust)">6</div>
+                      <div class="mt-label">Near-misses (28d)</div>
+                    </div>
+                    <div class="metric-tile">
+                      <div class="mt-value" style="color:var(--amber)">4</div>
+                      <div class="mt-label">Sites affected</div>
+                    </div>
+                    <div class="metric-tile">
+                      <div class="mt-value" style="color:var(--rust)">2</div>
+                      <div class="mt-label">Open investigations</div>
+                    </div>
+                    <div class="metric-tile">
+                      <div class="mt-value" style="color:var(--text-secondary)">61%</div>
+                      <div class="mt-label">Talk coverage</div>
+                    </div>
+                  </div>
+
+                  <div class="wb-col-header" style="padding:10px 0 6px;border:none;">
+                    <div class="wb-col-sub" style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-disabled)">Timeline</div>
+                  </div>
+
+                  <div class="timeline">
+                    <div class="tl-item">
+                      <div class="tl-dot" style="background:var(--plum)"></div>
+                      <div><div class="tl-event">Critical Insight generated</div><div class="tl-time">25 Mar 06:14 · 3d overdue</div></div>
+                    </div>
+                    <div class="tl-item">
+                      <div class="tl-dot" style="background:var(--amber)"></div>
+                      <div><div class="tl-event">6th near-miss — Riverside Tower</div><div class="tl-time">24 Mar · J. Thompson (manager visit)</div></div>
+                    </div>
+                    <div class="tl-item">
+                      <div class="tl-dot" style="background:var(--amber)"></div>
+                      <div><div class="tl-event">5th near-miss — Central Rail Depot</div><div class="tl-time">21 Mar · K. Obi</div></div>
+                    </div>
+                    <div class="tl-item">
+                      <div class="tl-dot" style="background:var(--green)"></div>
+                      <div><div class="tl-event">Talk delivered — Heavy Vehicle, 14 crew</div><div class="tl-time">19 Mar · J. Reyes</div></div>
+                    </div>
+                    <div class="tl-item">
+                      <div class="tl-dot" style="background:var(--rust)"></div>
+                      <div><div class="tl-event">INC-0088 — near-miss heavy vehicle</div><div class="tl-time">15 Mar · Investigation open</div></div>
+                    </div>
+                  </div>
+
+                  <div class="wb-col-header" style="padding:10px 0 6px;border:none;">
+                    <div class="wb-col-sub" style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-disabled)">Related Items</div>
+                  </div>
+
+                  <div class="related-item"><div class="ri-title">INC-0088 — Heavy Vehicle near-miss</div><div class="ri-meta">Riverside Tower · Investigation open · 14d</div></div>
+                  <div class="related-item"><div class="ri-title">Action — Update STMP</div><div class="ri-meta">From INC-0088 · Overdue 5 days</div></div>
+                  <div class="related-item"><div class="ri-title">Talk: Heavy Vehicle — RVT</div><div class="ri-meta">Delivered 19 Mar · 14 crew</div></div>
+                  <div class="related-item"><div class="ri-title">Manager Visit — J. Thompson</div><div class="ri-meta">Riverside Tower · 24 Mar · 1 obs logged</div></div>
+
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════ -->
+  <!-- SCREEN 2: ANALYTICS — LEADING INDICATORS   -->
+  <!-- ══════════════════════════════════════════ -->
+  <div>
+    <div class="screen-label">Desktop View 2 — Analytics · Leading Indicators</div>
+    <div class="desktop-frame">
+
+      <div class="title-bar">
+        <div class="tb-dot" style="background:#FF5F57"></div>
+        <div class="tb-dot" style="background:#FEBC2E"></div>
+        <div class="tb-dot" style="background:#28C840"></div>
+        <div class="tb-url">app.safetyplatform.io/analytics/leading</div>
+      </div>
+
+      <div class="app-shell">
+
+        <div class="app-topbar">
+          <div class="topbar-brand">
+            <div class="brand-logo">SP</div>
+            <div>
+              <div class="brand-name">SafetyPlatform</div>
+              <div class="brand-version">v0.2 · Riverside Division</div>
+            </div>
+          </div>
+          <div class="topbar-middle">
+            <div class="search-wrap"><input class="search-bar" placeholder="Search..."></div>
+            <select class="scope-select"><option>Riverside Division</option></select>
+            <div class="period-tabs">
+              <button class="pt-btn">7d</button>
+              <button class="pt-btn">30d</button>
+              <button class="pt-btn active">90d</button>
+              <button class="pt-btn">12m</button>
+            </div>
+          </div>
+          <div class="topbar-right">
+            <button class="tb-icon-btn" style="position:relative">🔔<div class="tb-badge">3</div></button>
+            <div class="tb-avatar">SR</div>
+          </div>
+        </div>
+
+        <div class="app-nav">
+          <div class="nav-section-label">Main</div>
+          <div class="nav-item"><span class="nav-icon">⬡</span>Workbench<span class="nav-badge nb-rust">14</span></div>
+          <div class="nav-item active"><span class="nav-icon">📊</span>Analytics</div>
+          <div class="nav-item"><span class="nav-icon">🗺️</span>Site Map</div>
+          <div class="nav-divider"></div>
+          <div class="nav-section-label">Analytics Lenses</div>
+          <div class="nav-item" style="padding-left:28px;font-size:12px;"><span class="nav-icon" style="font-size:14px">⟳</span>Pipeline</div>
+          <div class="nav-item active" style="padding-left:28px;font-size:12px;"><span class="nav-icon" style="font-size:14px">◎</span>Leading</div>
+          <div class="nav-item" style="padding-left:28px;font-size:12px;"><span class="nav-icon" style="font-size:14px">◷</span>Lagging</div>
+          <div class="nav-item" style="padding-left:28px;font-size:12px;"><span class="nav-icon" style="font-size:14px">⬡</span>Site Health</div>
+          <div class="nav-item" style="padding-left:28px;font-size:12px;"><span class="nav-icon" style="font-size:14px">⚙</span>Work Type Risk</div>
+          <div class="nav-item" style="padding-left:28px;font-size:12px;"><span class="nav-icon" style="font-size:14px">◈</span>Pipeline Health</div>
+          <div class="nav-divider"></div>
+          <div class="nav-section-label">Reports</div>
+          <div class="nav-item"><span class="nav-icon">📋</span>Board Report</div>
+          <div class="nav-item"><span class="nav-icon">⚖️</span>Regulatory</div>
+          <div class="nav-divider"></div>
+          <div class="nav-section-label">Admin</div>
+          <div class="nav-item"><span class="nav-icon">⚙</span>Thresholds</div>
+        </div>
+
+        <div class="app-main">
+          <div class="main-inner">
+
+            <div class="page-header">
+              <div class="ph-left">
+                <div class="ph-breadcrumb">Analytics <span>›</span> Leading Indicators</div>
+                <div class="ph-title">Leading Indicators</div>
+                <div class="ph-sub">What the data says about where risk is building — before it becomes an incident.</div>
+              </div>
+              <div class="ph-actions">
+                <button class="btn btn-outlined">⬇ Download</button>
+                <button class="btn btn-primary">↗ Present</button>
+              </div>
+            </div>
+
+            <div class="insight-banner">
+              <div class="ib-title">⚠ Platform Signal — Heavy Vehicle Operation</div>
+              <div class="ib-body">Near-miss rate for heavy vehicle operations has increased 34% over 60 days across 5 sites. A regional Critical Insight is pending review. Spotter management is the common factor in 4 of 6 observations.</div>
+            </div>
+
+            <div class="stat-grid sg-4" style="margin-bottom:20px;">
+              <div class="stat-card">
+                <div class="sc-left">
+                  <div class="sc-label">Near-Miss Rate</div>
+                  <div class="sc-value" style="color:var(--teal)">19%</div>
+                  <div class="sc-delta delta-up">↑ of all observations</div>
+                  <div class="sc-sub">↑ from 8% — reporting culture improving</div>
+                </div>
+                <div class="sc-icon" style="background:var(--teal-bg)">📡</div>
+              </div>
+              <div class="stat-card">
+                <div class="sc-left">
+                  <div class="sc-label">Systemic Failure Type</div>
+                  <div class="sc-value" style="color:var(--rust)">64%</div>
+                  <div class="sc-delta delta-flat">of at-risk observations</div>
+                  <div class="sc-sub">Process failure — addressable at org level</div>
+                </div>
+                <div class="sc-icon" style="background:var(--rust-bg)">⚙</div>
+              </div>
+              <div class="stat-card">
+                <div class="sc-left">
+                  <div class="sc-label">Sites Atrophy &gt;50</div>
+                  <div class="sc-value" style="color:var(--amber)">3</div>
+                  <div class="sc-delta delta-down">↑ from 1 last period</div>
+                  <div class="sc-sub">Visits not keeping pace</div>
+                </div>
+                <div class="sc-icon" style="background:var(--amber-bg)">📉</div>
+              </div>
+              <div class="stat-card">
+                <div class="sc-left">
+                  <div class="sc-label">Manager Visit Coverage</div>
+                  <div class="sc-value">71%</div>
+                  <div class="sc-delta delta-flat">Target 90%</div>
+                  <div class="sc-sub">3 sites unvisited 30d+</div>
+                </div>
+                <div class="sc-icon" style="background:var(--plum-bg)">🗺️</div>
+              </div>
+            </div>
+
+            <div class="content-grid cg-2" style="margin-bottom:20px;">
+
+              <!-- ATROPHY HEATMAP -->
+              <div class="card">
+                <div class="card-header">
+                  <div>
+                    <div class="card-title">Site Atrophy Map — Observation Frequency</div>
+                    <div class="card-sub">Darker = active · White = no observations · Each row is a site</div>
+                  </div>
+                  <span class="card-tag ct-lead">Leading</span>
+                </div>
+                <div class="card-body">
+                  <svg width="100%" height="180" viewBox="0 0 480 180">
+                    <text x="50" y="14" font-size="9" fill="#919EAB" font-family="Public Sans">W1</text>
+                    <text x="96" y="14" font-size="9" fill="#919EAB" font-family="Public Sans">W3</text>
+                    <text x="142" y="14" font-size="9" fill="#919EAB" font-family="Public Sans">W5</text>
+                    <text x="188" y="14" font-size="9" fill="#919EAB" font-family="Public Sans">W7</text>
+                    <text x="234" y="14" font-size="9" fill="#919EAB" font-family="Public Sans">W9</text>
+                    <text x="278" y="14" font-size="9" fill="#919EAB" font-family="Public Sans">W11</text>
+                    <text x="322" y="14" font-size="9" fill="#919EAB" font-family="Public Sans">W13</text>
+
+                    <text x="0" y="33" font-size="10" fill="#637381" font-family="Public Sans" font-weight="600">RVT</text>
+                    <text x="0" y="57" font-size="10" fill="#637381" font-family="Public Sans" font-weight="600">CRD</text>
+                    <text x="0" y="81" font-size="10" fill="#637381" font-family="Public Sans" font-weight="600">HBR</text>
+                    <text x="0" y="105" font-size="10" fill="#637381" font-family="Public Sans" font-weight="600">WPK</text>
+                    <text x="0" y="129" font-size="10" fill="#637381" font-family="Public Sans" font-weight="600">NTH</text>
+                    <text x="0" y="153" font-size="10" fill="#637381" font-family="Public Sans" font-weight="600">SBY</text>
+
+                    <!-- RVT - active then drops -->
+                    <rect class="heat-cell" x="42" y="20" width="36" height="20" fill="#FF5630" opacity="0.8" rx="4"/>
+                    <rect class="heat-cell" x="86" y="20" width="36" height="20" fill="#FF5630" opacity="0.7" rx="4"/>
+                    <rect class="heat-cell" x="130" y="20" width="36" height="20" fill="#FF5630" opacity="0.9" rx="4"/>
+                    <rect class="heat-cell" x="174" y="20" width="36" height="20" fill="#FF5630" opacity="0.5" rx="4"/>
+                    <rect class="heat-cell" x="218" y="20" width="36" height="20" fill="#FF5630" opacity="0.2" rx="4"/>
+                    <rect class="heat-cell" x="262" y="20" width="36" height="20" fill="#DFE3E8" rx="4"/>
+                    <rect class="heat-cell" x="306" y="20" width="36" height="20" fill="#DFE3E8" rx="4"/>
+                    <text x="352" y="33" font-size="9" fill="#FF5630" font-family="Public Sans" font-weight="700">⚠ 18d</text>
+
+                    <!-- CRD -->
+                    <rect class="heat-cell" x="42" y="44" width="36" height="20" fill="#FF5630" opacity="0.6" rx="4"/>
+                    <rect class="heat-cell" x="86" y="44" width="36" height="20" fill="#FF5630" opacity="0.8" rx="4"/>
+                    <rect class="heat-cell" x="130" y="44" width="36" height="20" fill="#FF5630" opacity="0.4" rx="4"/>
+                    <rect class="heat-cell" x="174" y="44" width="36" height="20" fill="#FF5630" opacity="0.7" rx="4"/>
+                    <rect class="heat-cell" x="218" y="44" width="36" height="20" fill="#FF5630" opacity="0.3" rx="4"/>
+                    <rect class="heat-cell" x="262" y="44" width="36" height="20" fill="#FF5630" opacity="0.35" rx="4"/>
+                    <rect class="heat-cell" x="306" y="44" width="36" height="20" fill="#FF5630" opacity="0.2" rx="4"/>
+
+                    <!-- HBR - consistently active (teal = healthy) -->
+                    <rect class="heat-cell" x="42" y="68" width="36" height="20" fill="#00B8D9" opacity="0.7" rx="4"/>
+                    <rect class="heat-cell" x="86" y="68" width="36" height="20" fill="#00B8D9" opacity="0.8" rx="4"/>
+                    <rect class="heat-cell" x="130" y="68" width="36" height="20" fill="#00B8D9" opacity="0.9" rx="4"/>
+                    <rect class="heat-cell" x="174" y="68" width="36" height="20" fill="#00B8D9" opacity="0.8" rx="4"/>
+                    <rect class="heat-cell" x="218" y="68" width="36" height="20" fill="#00B8D9" opacity="0.85" rx="4"/>
+                    <rect class="heat-cell" x="262" y="68" width="36" height="20" fill="#00B8D9" opacity="0.9" rx="4"/>
+                    <rect class="heat-cell" x="306" y="68" width="36" height="20" fill="#00B8D9" opacity="0.8" rx="4"/>
+
+                    <!-- WPK, NTH, SBY -->
+                    <rect class="heat-cell" x="42" y="92" width="36" height="20" fill="#FF5630" opacity="0.4" rx="4"/>
+                    <rect class="heat-cell" x="86" y="92" width="36" height="20" fill="#DFE3E8" rx="4"/>
+                    <rect class="heat-cell" x="130" y="92" width="36" height="20" fill="#FF5630" opacity="0.3" rx="4"/>
+                    <rect class="heat-cell" x="174" y="92" width="36" height="20" fill="#FF5630" opacity="0.6" rx="4"/>
+                    <rect class="heat-cell" x="218" y="92" width="36" height="20" fill="#DFE3E8" rx="4"/>
+                    <rect class="heat-cell" x="262" y="92" width="36" height="20" fill="#DFE3E8" rx="4"/>
+                    <rect class="heat-cell" x="306" y="92" width="36" height="20" fill="#FF5630" opacity="0.2" rx="4"/>
+
+                    <rect class="heat-cell" x="42" y="116" width="36" height="20" fill="#FF5630" opacity="0.9" rx="4"/>
+                    <rect class="heat-cell" x="86" y="116" width="36" height="20" fill="#FF5630" opacity="0.7" rx="4"/>
+                    <rect class="heat-cell" x="130" y="116" width="36" height="20" fill="#FF5630" opacity="0.5" rx="4"/>
+                    <rect class="heat-cell" x="174" y="116" width="36" height="20" fill="#FF5630" opacity="0.8" rx="4"/>
+                    <rect class="heat-cell" x="218" y="116" width="36" height="20" fill="#FF5630" opacity="0.6" rx="4"/>
+                    <rect class="heat-cell" x="262" y="116" width="36" height="20" fill="#FF5630" opacity="0.5" rx="4"/>
+                    <rect class="heat-cell" x="306" y="116" width="36" height="20" fill="#FF5630" opacity="0.7" rx="4"/>
+
+                    <rect class="heat-cell" x="42" y="140" width="36" height="20" fill="#DFE3E8" rx="4"/>
+                    <rect class="heat-cell" x="86" y="140" width="36" height="20" fill="#FF5630" opacity="0.2" rx="4"/>
+                    <rect class="heat-cell" x="130" y="140" width="36" height="20" fill="#DFE3E8" rx="4"/>
+                    <rect class="heat-cell" x="174" y="140" width="36" height="20" fill="#DFE3E8" rx="4"/>
+                    <rect class="heat-cell" x="218" y="140" width="36" height="20" fill="#FF5630" opacity="0.3" rx="4"/>
+                    <rect class="heat-cell" x="262" y="140" width="36" height="20" fill="#DFE3E8" rx="4"/>
+                    <rect class="heat-cell" x="306" y="140" width="36" height="20" fill="#DFE3E8" rx="4"/>
+                    <text x="352" y="153" font-size="9" fill="#FF5630" font-family="Public Sans" font-weight="700">⚠ 22d</text>
+                  </svg>
+                  <div style="font-size:11px;color:var(--text-secondary);font-style:italic;margin-top:6px;">Teal = consistent healthy reporting · White = no activity. RVT and SBY show concerning gaps.</div>
+                </div>
+              </div>
+
+              <!-- FAILURE TYPE DONUT -->
+              <div class="card">
+                <div class="card-header">
+                  <div>
+                    <div class="card-title">Failure Type Distribution</div>
+                    <div class="card-sub">AI-classified across all at-risk + near-miss observations</div>
+                  </div>
+                  <span class="card-tag ct-intel">AI Classified</span>
+                </div>
+                <div class="card-body">
+                  <svg width="100%" height="180" viewBox="0 0 400 180">
+                    <circle cx="100" cy="90" r="60" fill="none" stroke="#F4F6F8" stroke-width="36"/>
+                    <circle cx="100" cy="90" r="60" fill="none" stroke="#FF5630" stroke-width="36" stroke-dasharray="241 377" stroke-dashoffset="94" opacity="0.85"/>
+                    <circle cx="100" cy="90" r="60" fill="none" stroke="#FFAB00" stroke-width="36" stroke-dasharray="83 377" stroke-dashoffset="-147" opacity="0.85"/>
+                    <circle cx="100" cy="90" r="60" fill="none" stroke="#00B8D9" stroke-width="36" stroke-dasharray="53 377" stroke-dashoffset="-230" opacity="0.85"/>
+                    <text x="100" y="84" text-anchor="middle" font-size="24" font-weight="800" fill="#212B36" font-family="Public Sans">64%</text>
+                    <text x="100" y="100" text-anchor="middle" font-size="11" fill="#637381" font-family="Public Sans">Systemic</text>
+
+                    <rect x="190" y="30" width="12" height="12" fill="#FF5630" opacity="0.85" rx="3"/>
+                    <text x="208" y="41" font-size="13" fill="#212B36" font-family="Public Sans" font-weight="600">Systemic</text>
+                    <text x="208" y="54" font-size="11" fill="#637381" font-family="Public Sans">Process / organisational failure</text>
+                    <text x="370" y="41" font-size="16" font-weight="800" fill="#FF5630" font-family="Public Sans" text-anchor="end">64%</text>
+
+                    <rect x="190" y="74" width="12" height="12" fill="#FFAB00" opacity="0.85" rx="3"/>
+                    <text x="208" y="85" font-size="13" fill="#212B36" font-family="Public Sans" font-weight="600">Behavioural</text>
+                    <text x="208" y="98" font-size="11" fill="#637381" font-family="Public Sans">Individual action / decision</text>
+                    <text x="370" y="85" font-size="16" font-weight="800" fill="#FFAB00" font-family="Public Sans" text-anchor="end">22%</text>
+
+                    <rect x="190" y="118" width="12" height="12" fill="#00B8D9" opacity="0.85" rx="3"/>
+                    <text x="208" y="129" font-size="13" fill="#212B36" font-family="Public Sans" font-weight="600">Environmental</text>
+                    <text x="208" y="142" font-size="11" fill="#637381" font-family="Public Sans">Site / weather / equipment</text>
+                    <text x="370" y="129" font-size="16" font-weight="800" fill="#00B8D9" font-family="Public Sans" text-anchor="end">14%</text>
+                  </svg>
+                  <div style="font-size:11px;color:var(--text-secondary);font-style:italic;margin-top:2px;">High systemic rate is positive — systemic causes are addressable at an organisational level.</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- WORK TYPE TABLE -->
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <div class="card-title">Work Type Risk Summary — 90 Days</div>
+                  <div class="card-sub">Incidents and near-misses cross-referenced with observation volume and talk coverage per work type</div>
+                </div>
+                <div style="display:flex;gap:6px;align-items:center;">
+                  <span class="card-tag ct-lag">Lagging</span>
+                  <button class="btn btn-outlined" style="padding:5px 12px;font-size:11px;">⬇ Export</button>
+                </div>
+              </div>
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Work Type</th>
+                    <th>Incidents</th>
+                    <th>Observations</th>
+                    <th>Talk Coverage</th>
+                    <th>Insight Status</th>
+                    <th>Trend</th>
+                    <th>Signal</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><strong>Heavy Vehicle</strong></td>
+                    <td><span style="font-weight:800;color:var(--rust);font-size:14px;">5</span></td>
+                    <td><div style="display:flex;align-items:center;gap:6px;"><div class="score-bar-track"><div class="score-bar-fill" style="width:72%;background:var(--rust)"></div></div><span style="font-size:11px;font-weight:600">72</span></div></td>
+                    <td><span class="chip-xs cx-rust">61%</span></td>
+                    <td><span class="chip-xs cx-amber">Pending review</span></td>
+                    <td><span style="color:var(--rust);font-weight:700;">↑ +34%</span></td>
+                    <td><span class="chip-xs cx-rust">⚠ Act now</span></td>
+                  </tr>
+                  <tr>
+                    <td><strong>Working at Height</strong></td>
+                    <td><span style="font-weight:800;color:var(--amber);font-size:14px;">4</span></td>
+                    <td><div style="display:flex;align-items:center;gap:6px;"><div class="score-bar-track"><div class="score-bar-fill" style="width:58%;background:var(--amber)"></div></div><span style="font-size:11px;font-weight:600">58</span></div></td>
+                    <td><span class="chip-xs cx-amber">78%</span></td>
+                    <td><span class="chip-xs cx-teal">Approved</span></td>
+                    <td><span style="color:var(--text-secondary);font-weight:600;">→ stable</span></td>
+                    <td><span class="chip-xs cx-amber">Monitor</span></td>
+                  </tr>
+                  <tr>
+                    <td><strong>Hot Work</strong></td>
+                    <td><span style="font-weight:800;color:var(--amber);font-size:14px;">3</span></td>
+                    <td><div style="display:flex;align-items:center;gap:6px;"><div class="score-bar-track"><div class="score-bar-fill" style="width:44%;background:var(--amber)"></div></div><span style="font-size:11px;font-weight:600">44</span></div></td>
+                    <td><span class="chip-xs cx-teal">91%</span></td>
+                    <td><span class="chip-xs cx-teal">Approved</span></td>
+                    <td><span style="color:var(--green);font-weight:700;">↓ -18%</span></td>
+                    <td><span class="chip-xs cx-green">Improving</span></td>
+                  </tr>
+                  <tr>
+                    <td><strong>Confined Space</strong></td>
+                    <td><span style="font-weight:800;font-size:14px;">1</span></td>
+                    <td><div style="display:flex;align-items:center;gap:6px;"><div class="score-bar-track"><div class="score-bar-fill" style="width:88%;background:var(--green)"></div></div><span style="font-size:11px;font-weight:600">88</span></div></td>
+                    <td><span class="chip-xs cx-teal">95%</span></td>
+                    <td><span class="chip-xs cx-green">None needed</span></td>
+                    <td><span style="color:var(--green);font-weight:700;">↓ -60%</span></td>
+                    <td><span class="chip-xs cx-green">Strong</span></td>
+                  </tr>
+                  <tr>
+                    <td><strong>Blasting</strong></td>
+                    <td><span style="font-weight:800;color:var(--green);font-size:14px;">0</span></td>
+                    <td><div style="display:flex;align-items:center;gap:6px;"><div class="score-bar-track"><div class="score-bar-fill" style="width:94%;background:var(--green)"></div></div><span style="font-size:11px;font-weight:600">94</span></div></td>
+                    <td><span class="chip-xs cx-teal">100%</span></td>
+                    <td><span class="chip-xs cx-green">None needed</span></td>
+                    <td><span style="color:var(--green);font-weight:700;">↓ maintained</span></td>
+                    <td><span class="chip-xs cx-green">Excellent</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>
