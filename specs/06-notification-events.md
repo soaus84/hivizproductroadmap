@@ -1,6 +1,6 @@
 # Notification Events Registry
 
-**SafetyPlatform — Complete Notification Reference**  
+**Hiviz — Complete Notification Reference**  
 Version: 0.3 — March 2026
 
 All notification events, recipients, channels, tone, timing, and message content.

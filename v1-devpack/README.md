@@ -1,4 +1,4 @@
-# SafetyPlatform — V1 Build Pack
+# Hiviz — V1 Build Pack
 
 **For:** Two full-stack developers  
 **Scope:** V1 — Core Loop (Epic E1–E8)  

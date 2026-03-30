@@ -1,6 +1,6 @@
 # Integration & Logic Rules
 
-**Safety Platform — Toolbox Talk Intelligence Module**  
+**Hiviz — Toolbox Talk Intelligence Module**  
 Version: 0.1-draft  
 Status: For architect review
 

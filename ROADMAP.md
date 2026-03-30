@@ -1,4 +1,4 @@
-# SafetyPlatform — Product Roadmap
+# Hiviz — Product Roadmap
 
 **Forge Works** | Field Intelligence Platform  
 **Status:** V1 ready to build · V2–V3 designed · V4–V5 discovery  
@@ -9,7 +9,7 @@
 
 ## Product Overview
 
-SafetyPlatform is a field intelligence module added to the existing Forge Works platform. It turns field observations into crew learning through an AI-powered intelligence pipeline, closing the loop from what supervisors see on site to what crews hear in toolbox talks.
+Hiviz is a field intelligence module added to the existing Forge Works platform. It turns field observations into crew learning through an AI-powered intelligence pipeline, closing the loop from what supervisors see on site to what crews hear in toolbox talks.
 
 **Core loop:**
 ```

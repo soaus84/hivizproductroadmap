@@ -1,6 +1,6 @@
 # View Information Specification
 
-**SafetyPlatform — Critical Information Needs Per View**  
+**Hiviz — Critical Information Needs Per View**  
 Version: 0.4 — March 2026
 
 This document defines what each view **reads**, **writes**, **requires from the user**, and **communicates to the user**. It is the primary reference for frontend development. Design decisions are excluded — see design files separately.

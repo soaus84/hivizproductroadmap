@@ -1,8 +1,8 @@
-# SafetyPlatform Demo — Build Brief
+# Hiviz Demo — Build Brief
 
 ## What This Is
 
-A clickable prototype demonstrating the SafetyPlatform intelligence loop. Four navigable flows. No database — all data is static TypeScript objects in `/src/data/`. The kit handles all navigation, layout, and component patterns. This brief defines screens, their purpose, their data, and their navigation targets only.
+A clickable prototype demonstrating the Hiviz intelligence loop. Four navigable flows. No database — all data is static TypeScript objects in `/src/data/`. The kit handles all navigation, layout, and component patterns. This brief defines screens, their purpose, their data, and their navigation targets only.
 
 ---
 

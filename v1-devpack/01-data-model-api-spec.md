@@ -1,6 +1,6 @@
 # Data Model & API Specification
 
-**Safety Platform — Toolbox Talk Intelligence Module**  
+**Hiviz — Toolbox Talk Intelligence Module**  
 Version: 0.4-draft  
 Status: For architect review
 

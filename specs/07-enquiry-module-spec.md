@@ -1,6 +1,6 @@
 # Enquiry Module Specification
 
-**SafetyPlatform — Field Intelligence Enquiry System**  
+**Hiviz — Field Intelligence Enquiry System**  
 Version: 0.3 — March 2026
 
 ---

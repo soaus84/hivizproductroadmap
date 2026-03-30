@@ -1,4 +1,4 @@
-# SafetyPlatform — Master Snapshot
+# Hiviz — Master Snapshot
 **Date:** March 2026  
 **Status:** Pre-repository setup. Next step: GitHub + Vercel + Supabase.
 

@@ -1,8 +1,8 @@
-# SafetyPlatform Demo — Claude Code Instructions
+# Hiviz Demo — Claude Code Instructions
 
 ## What This Project Is
 
-A clickable prototype demonstrating the SafetyPlatform intelligence loop. No database, no real API calls, no authentication. All data is static TypeScript objects. The goal is a navigable demo across four flows.
+A clickable prototype demonstrating the Hiviz intelligence loop. No database, no real API calls, no authentication. All data is static TypeScript objects. The goal is a navigable demo across four flows.
 
 ---
 
