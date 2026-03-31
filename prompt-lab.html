@@ -1,0 +1,1254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hiviz — Prompt Lab</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0b0c0a;
+  --surface: #111210;
+  --surface2: #161714;
+  --surface3: #1c1d1a;
+  --border: #242520;
+  --border2: #2e2f2a;
+  --text: #d8d5cc;
+  --muted: #5a5850;
+  --bright: #eceae2;
+  --mono: 'JetBrains Mono', monospace;
+  --sans: 'IBM Plex Sans', sans-serif;
+  --accent: #c49b35;
+  --accent-dim: rgba(196,155,53,0.1);
+  --accent-border: rgba(196,155,53,0.25);
+  --accent-text: #e8bc55;
+  --green: #4a9e6a;
+  --green-dim: rgba(74,158,106,0.08);
+  --green-border: rgba(74,158,106,0.25);
+  --green-text: #6dc98a;
+  --red: #c04a4a;
+  --red-dim: rgba(192,74,74,0.08);
+  --red-border: rgba(192,74,74,0.25);
+  --red-text: #e87070;
+  --blue: #3a7fc4;
+  --blue-dim: rgba(58,127,196,0.08);
+  --blue-border: rgba(58,127,196,0.25);
+  --blue-text: #68a8e8;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 13px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── HEADER ── */
+.header {
+  height: 48px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  gap: 20px;
+  background: var(--surface);
+  flex-shrink: 0;
+  z-index: 10;
+}
+
+.logo { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.logo-mark {
+  width: 22px; height: 22px;
+  background: var(--accent);
+  border-radius: 4px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--mono); font-size: 9px; font-weight: 600; color: #000;
+}
+.logo-name { font-family: var(--mono); font-size: 11px; font-weight: 600; color: var(--bright); }
+.logo-sep { color: var(--muted); font-size: 12px; }
+.logo-sub { font-family: var(--mono); font-size: 10px; color: var(--accent-text); letter-spacing: 0.05em; }
+
+.header-spacer { flex: 1; }
+
+.model-badge {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  border: 1px solid var(--border2);
+  padding: 3px 8px;
+  border-radius: 3px;
+  white-space: nowrap;
+}
+
+.api-key-wrap { display: flex; align-items: center; gap: 8px; }
+.api-key-label { font-family: var(--mono); font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
+.api-key-input {
+  font-family: var(--mono);
+  font-size: 11px;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 4px;
+  color: var(--text);
+  padding: 4px 10px;
+  width: 220px;
+  outline: none;
+}
+.api-key-input:focus { border-color: var(--accent-border); }
+.api-key-input::placeholder { color: var(--muted); }
+
+.api-status {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--muted);
+  flex-shrink: 0;
+}
+.api-status.ok { background: var(--green); }
+.api-status.err { background: var(--red); }
+
+/* ── LAYOUT ── */
+.main {
+  display: grid;
+  grid-template-columns: 260px 1fr 380px;
+  height: calc(100vh - 48px);
+  overflow: hidden;
+}
+
+/* ── LEFT PANEL ── */
+.left {
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--surface);
+}
+
+.panel-head {
+  padding: 12px 14px 10px;
+  border-bottom: 1px solid var(--border);
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  flex-shrink: 0;
+}
+
+.prompt-list { overflow-y: auto; flex-shrink: 0; }
+.prompt-list::-webkit-scrollbar { width: 3px; }
+.prompt-list::-webkit-scrollbar-thumb { background: var(--border2); }
+
+.prompt-item {
+  padding: 10px 14px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.12s;
+  position: relative;
+}
+.prompt-item:hover { background: var(--surface2); }
+.prompt-item.active { background: var(--accent-dim); border-left: 2px solid var(--accent); padding-left: 12px; }
+.prompt-num { font-family: var(--mono); font-size: 9px; color: var(--muted); margin-bottom: 2px; }
+.prompt-name { font-size: 12px; font-weight: 500; color: var(--bright); margin-bottom: 3px; }
+.prompt-trigger { font-family: var(--mono); font-size: 9px; color: var(--muted); line-height: 1.4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.vars-section { flex: 1; overflow-y: auto; padding: 12px 14px; }
+.vars-section::-webkit-scrollbar { width: 3px; }
+.vars-section::-webkit-scrollbar-thumb { background: var(--border2); }
+
+.var-group { margin-bottom: 10px; }
+.var-label { font-family: var(--mono); font-size: 9px; color: var(--accent-text); letter-spacing: 0.06em; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
+.var-label span { font-size: 9px; color: var(--muted); font-family: var(--sans); letter-spacing: 0; }
+
+.var-input, .var-textarea, .var-select {
+  width: 100%;
+  background: var(--surface3);
+  border: 1px solid var(--border2);
+  border-radius: 4px;
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 10.5px;
+  padding: 5px 8px;
+  outline: none;
+  resize: vertical;
+  line-height: 1.5;
+  transition: border-color 0.12s;
+}
+.var-input:focus, .var-textarea:focus, .var-select:focus { border-color: var(--accent-border); }
+.var-textarea { resize: vertical; min-height: 52px; }
+.var-select { cursor: pointer; }
+.var-select option { background: var(--surface3); }
+
+.vars-empty { font-size: 11px; color: var(--muted); font-style: italic; padding: 12px 0; }
+
+/* ── CENTER PANEL ── */
+.center {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-right: 1px solid var(--border);
+}
+
+.editor-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  flex-shrink: 0;
+}
+.editor-tab {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 9px 16px;
+  cursor: pointer;
+  color: var(--muted);
+  border-bottom: 2px solid transparent;
+  transition: all 0.12s;
+  user-select: none;
+}
+.editor-tab.active { color: var(--accent-text); border-bottom-color: var(--accent); }
+.editor-tab:hover:not(.active) { color: var(--text); }
+
+.editor-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.editor-body::-webkit-scrollbar { width: 4px; }
+.editor-body::-webkit-scrollbar-thumb { background: var(--border2); }
+
+.editor-section-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.prompt-textarea {
+  width: 100%;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 5px;
+  color: var(--bright);
+  font-family: var(--mono);
+  font-size: 11.5px;
+  line-height: 1.65;
+  padding: 12px 14px;
+  resize: vertical;
+  outline: none;
+  min-height: 120px;
+  transition: border-color 0.12s;
+}
+.prompt-textarea:focus { border-color: var(--accent-border); }
+
+.preview-box {
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 5px;
+  padding: 12px 14px;
+  font-family: var(--mono);
+  font-size: 11px;
+  line-height: 1.7;
+  color: var(--text);
+  white-space: pre-wrap;
+  word-break: break-word;
+  min-height: 120px;
+}
+.preview-var { color: var(--accent-text); background: var(--accent-dim); border-radius: 2px; padding: 0 2px; }
+.preview-unfilled { color: var(--red-text); background: var(--red-dim); border-radius: 2px; padding: 0 2px; }
+
+.center-footer {
+  padding: 12px 18px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--surface);
+  flex-shrink: 0;
+}
+
+.run-btn {
+  background: var(--accent);
+  color: #000;
+  border: none;
+  border-radius: 5px;
+  padding: 8px 20px;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.run-btn:hover:not(:disabled) { background: #d4a83a; transform: translateY(-1px); }
+.run-btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+
+.copy-btn {
+  background: transparent;
+  border: 1px solid var(--border2);
+  border-radius: 4px;
+  color: var(--muted);
+  padding: 6px 12px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: all 0.12s;
+}
+.copy-btn:hover { color: var(--text); border-color: var(--border); background: var(--surface2); }
+.copy-btn.copied { color: var(--green-text); border-color: var(--green-border); }
+
+.token-info { font-family: var(--mono); font-size: 9px; color: var(--muted); margin-left: auto; }
+
+/* ── RIGHT PANEL ── */
+.right {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--surface);
+}
+
+.output-head {
+  padding: 9px 14px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.output-title { font-family: var(--mono); font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+.output-status { margin-left: auto; }
+
+.status-badge {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  padding: 2px 8px;
+  border-radius: 3px;
+  text-transform: uppercase;
+}
+.status-idle { background: var(--surface3); color: var(--muted); }
+.status-running { background: var(--accent-dim); color: var(--accent-text); border: 1px solid var(--accent-border); animation: pulse-badge 1.5s infinite; }
+.status-ok { background: var(--green-dim); color: var(--green-text); border: 1px solid var(--green-border); }
+.status-err { background: var(--red-dim); color: var(--red-text); border: 1px solid var(--red-border); }
+
+@keyframes pulse-badge { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+.output-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  flex-shrink: 0;
+}
+.output-tab {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 7px 14px;
+  cursor: pointer;
+  color: var(--muted);
+  border-bottom: 2px solid transparent;
+  transition: all 0.12s;
+  user-select: none;
+}
+.output-tab.active { color: var(--accent-text); border-bottom-color: var(--accent); }
+.output-tab:hover:not(.active) { color: var(--text); }
+
+.output-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px;
+}
+.output-body::-webkit-scrollbar { width: 4px; }
+.output-body::-webkit-scrollbar-thumb { background: var(--border2); }
+
+.output-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 10px;
+  color: var(--muted);
+  font-size: 12px;
+  font-style: italic;
+  text-align: center;
+  padding: 20px;
+  line-height: 1.6;
+}
+
+.raw-output {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  line-height: 1.7;
+  color: var(--text);
+  white-space: pre-wrap;
+  word-break: break-all;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 5px;
+  padding: 12px;
+}
+
+.fields-output { display: flex; flex-direction: column; gap: 8px; }
+.field-card {
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 5px;
+  overflow: hidden;
+}
+.field-card-head {
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.field-card-key { font-family: var(--mono); font-size: 9px; color: var(--accent-text); letter-spacing: 0.06em; font-weight: 600; }
+.field-card-type { font-family: var(--mono); font-size: 8px; color: var(--muted); }
+.field-card-body { padding: 8px 10px; font-size: 11.5px; color: var(--bright); line-height: 1.6; }
+.field-card-body.mono { font-family: var(--mono); font-size: 10.5px; }
+.field-array-item { padding: 3px 0; border-bottom: 1px solid var(--border); display: flex; gap: 6px; }
+.field-array-item:last-child { border-bottom: none; }
+.field-array-idx { font-family: var(--mono); font-size: 9px; color: var(--muted); flex-shrink: 0; min-width: 16px; }
+.field-nested { background: var(--surface3); border-radius: 3px; padding: 6px 8px; margin: 3px 0; font-size: 11px; }
+.field-nested-key { font-family: var(--mono); font-size: 9px; color: var(--muted); margin-bottom: 2px; }
+.field-val-num { color: var(--accent-text); font-family: var(--mono); }
+.field-val-bool-true { color: var(--green-text); font-family: var(--mono); font-size: 10.5px; }
+.field-val-bool-false { color: var(--red-text); font-family: var(--mono); font-size: 10.5px; }
+
+.output-footer {
+  padding: 10px 14px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.validation-row { display: flex; flex-direction: column; gap: 4px; padding: 8px 0; }
+.val-item { display: flex; align-items: flex-start; gap: 8px; padding: 4px 0; border-bottom: 1px solid var(--border); font-size: 11px; }
+.val-item:last-child { border-bottom: none; }
+.val-icon { flex-shrink: 0; font-size: 11px; }
+.val-text { color: var(--text); line-height: 1.5; }
+
+.spinner {
+  width: 12px; height: 12px;
+  border: 2px solid var(--border2);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Scrollbars */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="logo">
+    <div class="logo-mark">HV</div>
+    <span class="logo-name">Hiviz</span>
+    <span class="logo-sep">/</span>
+    <span class="logo-sub">Prompt Lab</span>
+  </div>
+  <div class="model-badge" id="modelBadge">claude-sonnet-4-6</div>
+  <div class="header-spacer"></div>
+  <div class="api-key-wrap">
+    <span class="api-key-label">API Key</span>
+    <input class="api-key-input" id="apiKeyInput" type="password" placeholder="sk-ant-..." autocomplete="off" />
+    <div class="api-status" id="apiStatus"></div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- LEFT: Prompt list + Variables -->
+  <div class="left">
+    <div class="panel-head">Prompts</div>
+    <div class="prompt-list" id="promptList"></div>
+    <div class="panel-head" style="margin-top:0;">Variables</div>
+    <div class="vars-section" id="varSection">
+      <div class="vars-empty">Select a prompt to edit its variables.</div>
+    </div>
+  </div>
+
+  <!-- CENTER: Editors -->
+  <div class="center">
+    <div class="editor-tabs">
+      <div class="editor-tab active" id="tabSystem" onclick="setEditorTab('system')">System Prompt</div>
+      <div class="editor-tab" id="tabUser" onclick="setEditorTab('user')">User Prompt</div>
+      <div class="editor-tab" id="tabPreview" onclick="setEditorTab('preview')">Preview</div>
+    </div>
+    <div class="editor-body" id="editorBody">
+      <div style="font-size:12px;color:var(--muted);font-style:italic;padding:20px 0;text-align:center;">Select a prompt from the left to begin.</div>
+    </div>
+    <div class="center-footer">
+      <button class="run-btn" id="runBtn" onclick="runPrompt()" disabled>
+        <span id="runIcon">▶</span> Run
+      </button>
+      <button class="copy-btn" id="copySystemBtn" onclick="copyPrompt('system')" disabled>Copy System</button>
+      <button class="copy-btn" id="copyUserBtn" onclick="copyPrompt('user')" disabled>Copy User</button>
+      <button class="copy-btn" id="copyCodeBtn" onclick="copyPrompt('code')" disabled>Copy as Code</button>
+      <span class="token-info" id="tokenInfo"></span>
+    </div>
+  </div>
+
+  <!-- RIGHT: Output -->
+  <div class="right">
+    <div class="output-head">
+      <span class="output-title">Output</span>
+      <div class="output-status"><span class="status-badge status-idle" id="statusBadge">Idle</span></div>
+    </div>
+    <div class="output-tabs">
+      <div class="output-tab active" id="outTabFields" onclick="setOutputTab('fields')">Fields</div>
+      <div class="output-tab" id="outTabRaw" onclick="setOutputTab('raw')">Raw JSON</div>
+      <div class="output-tab" id="outTabValidation" onclick="setOutputTab('validation')">Validation</div>
+    </div>
+    <div class="output-body" id="outputBody">
+      <div class="output-empty">Run a prompt to see output here.</div>
+    </div>
+    <div class="output-footer">
+      <button class="copy-btn" id="copyOutputBtn" onclick="copyOutput()" disabled>Copy Output</button>
+      <button class="copy-btn" id="copySpecBtn" onclick="copyAsSpec()" disabled>Copy as Spec</button>
+      <span class="token-info" id="outputTokenInfo"></span>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const MODEL = 'claude-sonnet-4-6'
+
+const PROMPTS = [
+  {
+    id: 'observation.enrich',
+    num: 'P1',
+    label: 'Observation Enrichment',
+    trigger: 'observation.enrich — after observation creation',
+    maxTokens: 1000,
+    system:
+`You are a safety classification assistant for a construction and industrial safety platform.
+Your job is to read field observations written by supervisors and enrich them with structured metadata.
+You never change or rewrite the original text.
+You identify phrases that could identify specific individuals and flag them for anonymisation.
+You output only valid JSON with no preamble, explanation, or markdown formatting.
+You do not hallucinate taxonomy values — only use IDs explicitly provided to you.
+If you are uncertain, reflect that in enrichment_confidence.`,
+    template:
+`Observation text: "{{what_was_observed}}"
+
+Work type declared by supervisor: {{work_type_label}}
+
+Available work type taxonomy:
+{{work_type_taxonomy_json}}
+
+Available safety practice taxonomy:
+{{practice_taxonomy_json}}
+
+Return JSON matching this exact schema:
+{
+  "inferred_work_type_ids": ["uuid"],
+  "inferred_practice_ids": ["uuid"],
+  "failure_type": "systemic | behavioural | environmental | unclear",
+  "severity_signal": "at-risk | near-miss | safe",
+  "key_hazard": "short plain-language string",
+  "anonymisation_flags": ["phrase that could identify a person"],
+  "enrichment_confidence": 0.0
+}`,
+    vars: [
+      { key: 'what_was_observed', label: 'Observation Text', type: 'textarea', rows: 3, placeholder: 'e.g. Spotter was not in position when truck reversed. Driver completed the manoeuvre without a spotter present.' },
+      { key: 'work_type_label', label: 'Work Type', type: 'text', placeholder: 'e.g. Heavy Vehicle Operations', def: 'Heavy Vehicle Operations' },
+      { key: 'work_type_taxonomy_json', label: 'Work Type Taxonomy', type: 'textarea', rows: 3, def: '[{"id":"wt-001","label":"Heavy Vehicle Operations"},{"id":"wt-002","label":"Working at Height"},{"id":"wt-003","label":"Hot Work"},{"id":"wt-004","label":"Lifting Operations"}]' },
+      { key: 'practice_taxonomy_json', label: 'Practice Taxonomy', type: 'textarea', rows: 3, def: '[{"id":"pr-001","label":"Spotter Use"},{"id":"pr-002","label":"Permit to Work"},{"id":"pr-003","label":"Pre-task Brief"},{"id":"pr-004","label":"Harness Inspection"}]' },
+    ]
+  },
+  {
+    id: 'critical_insight.generate',
+    num: 'P2',
+    label: 'Critical Insight Draft',
+    trigger: 'critical_insight.generate — trend threshold crossed',
+    maxTokens: 1000,
+    system:
+`You are a senior safety advisor drafting internal safety intelligence for a construction and resource industry platform.
+
+Your writing voice:
+- Direct and plain-spoken — no corporate safety jargon
+- Experienced and measured — not alarmist
+- Focused on systemic causes, never individual blame
+- Written as if speaking to safety managers who are experienced professionals
+
+You do not name individuals, specific dates, or identify specific worksites beyond what the org level scope permits.
+
+You output only valid JSON with no preamble, explanation, or markdown formatting.`,
+    template:
+`A trend threshold has been crossed. Here is the cluster data:
+
+Work type: {{work_type_label}}
+Org level: {{level}} — {{level_name}}
+Time window: {{window_days}} days
+Near-miss observation count: {{count}}
+Threshold was: {{threshold}}
+
+Anonymised observation summaries:
+{{observation_summaries_json}}
+
+Return JSON matching this exact schema:
+{
+  "pattern_summary": "2–3 sentences. What is the pattern and why does it matter operationally.",
+  "pattern_summary_basis": "1 sentence. Which observations most strongly evidence this pattern.",
+  "likely_systemic_cause": "1 sentence. The underlying condition probably driving this pattern.",
+  "likely_systemic_cause_rationale": "1 sentence. What across the observations points to this cause.",
+  "recommended_action": "1 sentence. The change that would most directly address the cause.",
+  "recommended_action_rationale": "1 sentence. Why this action addresses the root cause rather than a symptom.",
+  "toolbox_narrative": "4–6 sentences. Written so a supervisor can read it aloud to their crew. Plain English. Present tense. No jargon. No blame.",
+  "escalate_to_systemic": true,
+  "escalation_rationale": "1 sentence if escalate_to_systemic is true, null if false"
+}`,
+    vars: [
+      { key: 'work_type_label', label: 'Work Type', type: 'text', def: 'Heavy Vehicle Operations' },
+      { key: 'level', label: 'Org Level', type: 'select', options: ['site','region','division','organisation'], def: 'region' },
+      { key: 'level_name', label: 'Level Name', type: 'text', def: 'Northern Region' },
+      { key: 'window_days', label: 'Window (days)', type: 'text', def: '30' },
+      { key: 'count', label: 'Near-miss Count', type: 'text', def: '6' },
+      { key: 'threshold', label: 'Threshold', type: 'text', def: '5' },
+      { key: 'observation_summaries_json', label: 'Observation Summaries (JSON)', type: 'textarea', rows: 5, def: '[{"summary":"Spotter not present during reversing operation","failure_type":"systemic","key_hazard":"Reversing blind zone"},{"summary":"Spotter left position mid-manoeuvre","failure_type":"systemic","key_hazard":"Spotter continuity"},{"summary":"No spotter assigned despite PTW requirement","failure_type":"systemic","key_hazard":"PTW compliance"},{"summary":"Truck reversed without confirming spotter in position","failure_type":"behavioural","key_hazard":"Driver confirmation"},{"summary":"End-of-shift spotter handover not completed","failure_type":"systemic","key_hazard":"Spotter continuity"},{"summary":"Spotter was positioned outside the safe zone","failure_type":"systemic","key_hazard":"Spotter positioning"}]' },
+    ]
+  },
+  {
+    id: 'investigation.assist',
+    num: 'P3',
+    label: 'Investigation Framework',
+    trigger: 'investigation.assist — after investigation record created',
+    maxTokens: 1000,
+    system:
+`You are an investigation framework assistant for a construction and industrial safety platform.
+Your role is to help investigators complete a structured investigation framework by suggesting likely contributing factors, root causes, corrective actions, and interview questions.
+
+Your suggestions:
+- Focus on systemic and organisational factors, not individual error
+- Are clearly labelled as suggestions requiring human confirmation
+- Do not make assumptions about what actually happened — you work only from the narrative provided
+- Are concise and operational — investigators need to act on them, not read essays
+
+You output only valid JSON with no preamble, explanation, or markdown formatting.`,
+    template:
+`Incident description: "{{incident_description}}"
+Work type: {{work_type_label}}
+Incident type: {{incident_type}}
+
+Based only on the information provided, suggest investigation framework fields.
+These are starting points for the investigator — they will confirm, modify, or replace them.
+
+Return JSON matching this exact schema:
+{
+  "immediate_cause": "1 sentence. What directly caused the event.",
+  "immediate_cause_rationale": "1 sentence. What in the narrative led to this conclusion.",
+  "contributing_factors": [
+    { "factor": "Factor description — systemic or organisational", "rationale": "1 sentence." }
+  ],
+  "contributing_factors_rationale": "1 sentence. Overall basis for the contributing factor set.",
+  "root_cause": "1–2 sentences. The underlying reason the contributing factors existed.",
+  "root_cause_rationale": "1 sentence. Why this root cause.",
+  "corrective_actions": [
+    { "action": "Action description — specific and implementable", "rationale": "1 sentence." }
+  ],
+  "suggested_interview_questions": [
+    { "question": "Open-ended question focused on system understanding not blame", "rationale": "1 sentence." }
+  ]
+}`,
+    vars: [
+      { key: 'incident_description', label: 'Incident Description', type: 'textarea', rows: 4, placeholder: 'Describe what happened in plain language...' },
+      { key: 'work_type_label', label: 'Work Type', type: 'text', def: 'Working at Height' },
+      { key: 'incident_type', label: 'Incident Type', type: 'select', options: ['near_miss','first_aid','lost_time_injury','medical_treatment','property_damage','dangerous_occurrence'], def: 'near_miss' },
+    ]
+  },
+  {
+    id: 'investigation.generate_narrative',
+    num: 'P4',
+    label: 'Investigation Toolbox Narrative',
+    trigger: 'investigation.generate_narrative — investigation closed + cleared',
+    maxTokens: 1000,
+    system:
+`You are a safety communicator translating closed incident investigation findings into toolbox talk content for frontline construction and industrial crews.
+
+Your writing voice:
+- That of a veteran site supervisor — someone who has seen things go wrong and wants to make sure it does not happen again
+- Present tense — more immediate and direct than past tense
+- Plain English — no acronyms, no corporate safety language
+- Never references names, specific dates, or worksite identifiers
+- Focuses entirely on the systemic cause and what crews can do differently today
+- Does not moralise or lecture — treats crew as experienced professionals
+
+You output only valid JSON with no preamble, explanation, or markdown formatting.`,
+    template:
+`Confirmed investigation findings:
+Work type: {{work_type_label}}
+Immediate cause: {{immediate_cause}}
+Contributing factors: {{contributing_factors_json}}
+Root cause: {{root_cause}}
+Corrective actions: {{corrective_actions_json}}
+Approved sharing scope: {{sharing_scope}}
+
+Generate toolbox content from these confirmed findings.
+
+Return JSON matching this exact schema:
+{
+  "incident_story": "3–4 sentences. What happened and how. Present tense. No names. No specific dates or locations beyond work type context.",
+  "root_cause_plain": "1–2 sentences. The real reason this happened. Systemic framing, not personal.",
+  "what_we_do_now": [
+    "Action 1 — specific and behaviourally concrete",
+    "Action 2",
+    "Action 3"
+  ],
+  "discussion_questions": [
+    "Question 1 — prompts crew to think about their own work context",
+    "Question 2 — prompts crew to identify gaps in current practice",
+    "Question 3 — prompts crew to name a specific action they can take"
+  ]
+}`,
+    vars: [
+      { key: 'work_type_label', label: 'Work Type', type: 'text', def: 'Working at Height' },
+      { key: 'immediate_cause', label: 'Immediate Cause', type: 'text', placeholder: 'e.g. Worker unclipped harness lanyard to free a snag' },
+      { key: 'contributing_factors_json', label: 'Contributing Factors (JSON)', type: 'textarea', rows: 3, def: '[{"factor":"Harness management not covered in pre-task brief"},{"factor":"No safe self-rescue procedure on site"},{"factor":"Task pressure — shift running 20 minutes behind schedule"}]' },
+      { key: 'root_cause', label: 'Root Cause', type: 'textarea', rows: 2, placeholder: 'e.g. Self-rescue protocols for harness snag scenarios are absent from site safety procedures' },
+      { key: 'corrective_actions_json', label: 'Corrective Actions (JSON)', type: 'textarea', rows: 3, def: '[{"action":"Add harness self-rescue procedure to all WAH pre-task brief templates"},{"action":"Update PTW to require self-rescue scenario brief before WAH tasks begin"}]' },
+      { key: 'sharing_scope', label: 'Sharing Scope', type: 'select', options: ['site','region','division','organisation'], def: 'region' },
+    ]
+  },
+  {
+    id: 'toolbox_talk.generate',
+    num: 'P5',
+    label: 'Full Toolbox Talk Assembly',
+    trigger: 'POST /api/v1/toolbox-talks/generate — supervisor-initiated',
+    maxTokens: 1500,
+    system:
+`You produce toolbox talks for frontline construction and industrial crews.
+
+Your voice:
+- A 20-year site veteran: plain English, no corporate speak, no moralising, no filler
+- Assumes the crew are experienced professionals who do not need to be lectured
+- Writes as if the supervisor is speaking directly to their team
+- Every sentence earns its place — no padding, no repetition
+- Discussion questions feel fresh and specific, not recycled from a template
+
+Rules:
+- Never reference specific names of individuals
+- Never reproduce identifying details from investigation source materials
+- Weave the content items into a single cohesive narrative — do not list them separately
+- The closing line should sound like something a real person would say, not a safety slogan
+
+You output only valid JSON with no preamble, explanation, or markdown formatting.`,
+    template:
+`Today's context:
+Worksite: {{worksite_name}}
+Work scheduled: {{work_type_label}}
+Presenter first name: {{presenter_first_name}}
+
+Content items (in priority order, algorithm-selected):
+{{content_items_json}}
+
+Assemble a complete toolbox talk from these content items.
+
+Return JSON matching this exact schema:
+{
+  "hazard_intro": "2–3 sentences. What today's work is and the single most important hazard to keep in mind.",
+  "main_content": "6–10 sentences. Cohesive narrative weaving all content items together. Written to be spoken aloud.",
+  "key_actions": [
+    "Action 1 — specific, behaviourally concrete, relevant to today's work",
+    "Action 2",
+    "Action 3",
+    "Action 4"
+  ],
+  "discussion_questions": [
+    "Question 1 — specific to today's work and the hazard",
+    "Question 2 — prompts crew to reflect on their own practice",
+    "Question 3 — identifies a gap or condition the crew can act on today"
+  ],
+  "closing_line": "1 sentence. Something a real supervisor would say to close. Not a slogan."
+}`,
+    vars: [
+      { key: 'worksite_name', label: 'Worksite Name', type: 'text', def: 'Northgate Terminal' },
+      { key: 'work_type_label', label: 'Work Scheduled', type: 'text', def: 'Heavy Vehicle Operations' },
+      { key: 'presenter_first_name', label: 'Presenter First Name', type: 'text', def: 'Marcus' },
+      { key: 'content_items_json', label: 'Content Items (JSON)', type: 'textarea', rows: 5, def: '[{"type":"critical_insight","narrative":"Six near-misses in 30 days have shown that spotter assignment and continuity is not being systematically managed during reversing operations. The PTW covers the requirement but not the mechanism for maintaining it throughout the task.","work_type":"Heavy Vehicle Operations","practice":"Spotter Use","scope":"region"}]' },
+    ]
+  }
+]
+
+// ── STATE ──
+let currentPrompt = null
+let editorTab = 'system'
+let outputTab = 'fields'
+let lastOutput = null
+let isRunning = false
+let varValues = {}
+
+// ── INIT ──
+function init() {
+  const saved = sessionStorage.getItem('hiviz_api_key')
+  if (saved) {
+    document.getElementById('apiKeyInput').value = saved
+    updateApiStatus(true)
+  }
+
+  document.getElementById('apiKeyInput').addEventListener('input', e => {
+    const v = e.target.value.trim()
+    sessionStorage.setItem('hiviz_api_key', v)
+    updateApiStatus(v.startsWith('sk-ant-') && v.length > 20)
+  })
+
+  renderPromptList()
+}
+
+function updateApiStatus(ok) {
+  const el = document.getElementById('apiStatus')
+  el.className = 'api-status ' + (ok ? 'ok' : '')
+}
+
+// ── PROMPT LIST ──
+function renderPromptList() {
+  const list = document.getElementById('promptList')
+  list.innerHTML = PROMPTS.map((p, i) => `
+    <div class="prompt-item ${currentPrompt === i ? 'active' : ''}" onclick="selectPrompt(${i})">
+      <div class="prompt-num">${p.num}</div>
+      <div class="prompt-name">${p.label}</div>
+      <div class="prompt-trigger">${p.trigger}</div>
+    </div>
+  `).join('')
+}
+
+function selectPrompt(idx) {
+  currentPrompt = idx
+  const p = PROMPTS[idx]
+
+  // Reset var values to defaults
+  varValues = {}
+  p.vars.forEach(v => { varValues[v.key] = v.def || '' })
+
+  renderPromptList()
+  renderVars()
+  renderEditor()
+  renderEditorContent()
+
+  // Enable buttons
+  document.getElementById('runBtn').disabled = false
+  document.getElementById('copySystemBtn').disabled = false
+  document.getElementById('copyUserBtn').disabled = false
+  document.getElementById('copyCodeBtn').disabled = false
+
+  updateTokenInfo()
+}
+
+// ── VARIABLE PANEL ──
+function renderVars() {
+  if (currentPrompt === null) return
+  const p = PROMPTS[currentPrompt]
+  const sec = document.getElementById('varSection')
+
+  sec.innerHTML = p.vars.map(v => {
+    const val = varValues[v.key] || ''
+    if (v.type === 'textarea') {
+      return `<div class="var-group">
+        <div class="var-label">{{${v.key}}}</div>
+        <textarea class="var-textarea" rows="${v.rows || 3}" placeholder="${v.placeholder || ''}" oninput="updateVar('${v.key}', this.value)">${escHtml(val)}</textarea>
+      </div>`
+    } else if (v.type === 'select') {
+      const opts = v.options.map(o => `<option value="${o}" ${o === val ? 'selected' : ''}>${o}</option>`).join('')
+      return `<div class="var-group">
+        <div class="var-label">{{${v.key}}}</div>
+        <select class="var-select" onchange="updateVar('${v.key}', this.value)">${opts}</select>
+      </div>`
+    } else {
+      return `<div class="var-group">
+        <div class="var-label">{{${v.key}}}</div>
+        <input class="var-input" type="text" value="${escHtml(val)}" placeholder="${v.placeholder || ''}" oninput="updateVar('${v.key}', this.value)" />
+      </div>`
+    }
+  }).join('')
+}
+
+function updateVar(key, val) {
+  varValues[key] = val
+  if (editorTab === 'preview') renderEditorContent()
+  updateTokenInfo()
+}
+
+// ── EDITOR ──
+function setEditorTab(tab) {
+  editorTab = tab
+  document.querySelectorAll('.editor-tab').forEach(t => t.classList.remove('active'))
+  document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.add('active')
+  renderEditorContent()
+}
+
+function renderEditor() {
+  setEditorTab(editorTab)
+}
+
+function renderEditorContent() {
+  if (currentPrompt === null) return
+  const p = PROMPTS[currentPrompt]
+  const body = document.getElementById('editorBody')
+
+  if (editorTab === 'system') {
+    body.innerHTML = `
+      <div>
+        <div class="editor-section-label">System Prompt</div>
+        <textarea class="prompt-textarea" id="systemTextarea" rows="18" oninput="updateSystemPrompt(this.value)">${escHtml(p.system)}</textarea>
+      </div>`
+  } else if (editorTab === 'user') {
+    body.innerHTML = `
+      <div>
+        <div class="editor-section-label">User Prompt Template <span style="color:var(--muted);font-size:9px;font-family:var(--sans);">{{variables}} substituted at runtime</span></div>
+        <textarea class="prompt-textarea" id="userTextarea" rows="22" oninput="updateUserTemplate(this.value)">${escHtml(p.template)}</textarea>
+      </div>`
+  } else if (editorTab === 'preview') {
+    const substituted = substituteVars(p.template, varValues)
+    const highlighted = substituted
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    body.innerHTML = `
+      <div>
+        <div class="editor-section-label">Preview — variables substituted</div>
+        <div class="preview-box">${highlighted}</div>
+      </div>`
+  }
+}
+
+function updateSystemPrompt(val) {
+  if (currentPrompt !== null) PROMPTS[currentPrompt].system = val
+  updateTokenInfo()
+}
+
+function updateUserTemplate(val) {
+  if (currentPrompt !== null) PROMPTS[currentPrompt].template = val
+  updateTokenInfo()
+}
+
+function substituteVars(template, vals) {
+  return template.replace(/\{\{(\w+)\}\}/g, (match, key) => {
+    return vals[key] !== undefined && vals[key] !== '' ? vals[key] : match
+  })
+}
+
+function updateTokenInfo() {
+  if (currentPrompt === null) return
+  const p = PROMPTS[currentPrompt]
+  const fullText = p.system + substituteVars(p.template, varValues)
+  const approxTokens = Math.round(fullText.length / 4)
+  document.getElementById('tokenInfo').textContent = `~${approxTokens.toLocaleString()} input tokens · max_out ${p.maxTokens}`
+}
+
+// ── RUN ──
+async function runPrompt() {
+  if (isRunning || currentPrompt === null) return
+
+  const apiKey = document.getElementById('apiKeyInput').value.trim()
+  if (!apiKey) {
+    alert('Enter your Anthropic API key in the header to run prompts.')
+    return
+  }
+
+  const p = PROMPTS[currentPrompt]
+  const userPrompt = substituteVars(p.template, varValues)
+
+  // Check for unfilled vars
+  const unfilled = (userPrompt.match(/\{\{(\w+)\}\}/g) || [])
+  if (unfilled.length > 0) {
+    if (!confirm(`${unfilled.length} variable(s) still unfilled: ${unfilled.join(', ')}. Run anyway?`)) return
+  }
+
+  isRunning = true
+  setStatus('running', 'Running...')
+  document.getElementById('runBtn').disabled = true
+  document.getElementById('runBtn').innerHTML = '<div class="spinner"></div> Running'
+  document.getElementById('outputBody').innerHTML = '<div class="output-empty"><div class="spinner"></div><span>Waiting for Claude...</span></div>'
+  lastOutput = null
+  document.getElementById('copyOutputBtn').disabled = true
+  document.getElementById('copySpecBtn').disabled = true
+  document.getElementById('outputTokenInfo').textContent = ''
+
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: MODEL,
+        max_tokens: p.maxTokens,
+        system: p.system,
+        messages: [{ role: 'user', content: userPrompt }]
+      })
+    })
+
+    if (!resp.ok) {
+      const err = await resp.json().catch(() => ({ error: { message: resp.statusText } }))
+      throw new Error(err.error?.message || `HTTP ${resp.status}`)
+    }
+
+    const data = await resp.json()
+    const rawText = (data.content || []).map(b => b.text || '').join('')
+    const clean = rawText.replace(/```json\s*|```/g, '').trim()
+
+    let parsed = null
+    let parseErr = null
+    try {
+      parsed = JSON.parse(clean)
+    } catch(e) {
+      parseErr = e.message
+    }
+
+    lastOutput = { raw: clean, parsed, parseErr, usage: data.usage }
+
+    const outTokens = data.usage?.output_tokens || 0
+    const inTokens = data.usage?.input_tokens || 0
+    document.getElementById('outputTokenInfo').textContent = `in ${inTokens} · out ${outTokens} tokens`
+
+    document.getElementById('copyOutputBtn').disabled = false
+    document.getElementById('copySpecBtn').disabled = false
+
+    if (parsed) {
+      setStatus('ok', 'Valid JSON')
+    } else {
+      setStatus('err', 'Parse error')
+    }
+
+    renderOutput()
+
+  } catch(err) {
+    setStatus('err', 'Error')
+    document.getElementById('outputBody').innerHTML = `<div style="padding:16px;">
+      <div style="color:var(--red-text);font-family:var(--mono);font-size:11px;line-height:1.7;">
+        <div style="font-weight:600;margin-bottom:6px;">Request failed</div>
+        <div>${escHtml(err.message)}</div>
+        <div style="margin-top:8px;color:var(--muted);font-size:10px;">Check your API key and network connection.</div>
+      </div>
+    </div>`
+  }
+
+  isRunning = false
+  document.getElementById('runBtn').disabled = false
+  document.getElementById('runBtn').innerHTML = '<span>▶</span> Run'
+}
+
+// ── OUTPUT ──
+function setOutputTab(tab) {
+  outputTab = tab
+  document.querySelectorAll('.output-tab').forEach(t => t.classList.remove('active'))
+  document.getElementById('outTab' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.add('active')
+  if (lastOutput) renderOutput()
+}
+
+function renderOutput() {
+  if (!lastOutput) return
+  const body = document.getElementById('outputBody')
+
+  if (outputTab === 'raw') {
+    body.innerHTML = `<div class="raw-output">${escHtml(lastOutput.raw)}</div>`
+  } else if (outputTab === 'fields') {
+    if (lastOutput.parseErr) {
+      body.innerHTML = `<div style="padding:8px;">
+        <div style="color:var(--red-text);font-family:var(--mono);font-size:11px;margin-bottom:8px;">JSON parse failed: ${escHtml(lastOutput.parseErr)}</div>
+        <div class="raw-output">${escHtml(lastOutput.raw)}</div>
+      </div>`
+    } else {
+      body.innerHTML = `<div class="fields-output">${renderFields(lastOutput.parsed)}</div>`
+    }
+  } else if (outputTab === 'validation') {
+    body.innerHTML = renderValidation()
+  }
+}
+
+function renderFields(obj) {
+  if (!obj || typeof obj !== 'object') return '<div style="color:var(--muted);font-size:11px;padding:8px;">No fields to display.</div>'
+  return Object.entries(obj).map(([key, val]) => {
+    let bodyHtml = ''
+    if (Array.isArray(val)) {
+      if (val.length === 0) {
+        bodyHtml = '<div style="color:var(--muted);font-size:11px;font-style:italic;">empty array</div>'
+      } else if (typeof val[0] === 'object') {
+        bodyHtml = val.map((item, i) => `
+          <div class="field-array-item">
+            <span class="field-array-idx">${i+1}.</span>
+            <div>${Object.entries(item).map(([k,v]) => `<div class="field-nested"><div class="field-nested-key">${k}</div><div>${escHtml(String(v))}</div></div>`).join('')}</div>
+          </div>`).join('')
+      } else {
+        bodyHtml = val.map((item, i) => `<div class="field-array-item"><span class="field-array-idx">${i+1}.</span><span>${escHtml(String(item))}</span></div>`).join('')
+      }
+    } else if (typeof val === 'boolean') {
+      bodyHtml = `<span class="${val ? 'field-val-bool-true' : 'field-val-bool-false'}">${val}</span>`
+    } else if (typeof val === 'number') {
+      bodyHtml = `<span class="field-val-num">${val}</span>`
+    } else if (val === null) {
+      bodyHtml = '<span style="color:var(--muted);font-family:var(--mono);font-size:10.5px;">null</span>'
+    } else {
+      bodyHtml = escHtml(String(val))
+    }
+
+    const typeLabel = Array.isArray(val) ? `array[${val.length}]` : typeof val
+    return `<div class="field-card">
+      <div class="field-card-head">
+        <span class="field-card-key">${key}</span>
+        <span class="field-card-type">${typeLabel}</span>
+      </div>
+      <div class="field-card-body ${typeof val === 'number' || typeof val === 'boolean' ? 'mono' : ''}">${bodyHtml}</div>
+    </div>`
+  }).join('')
+}
+
+function renderValidation() {
+  const items = []
+  if (!lastOutput) return ''
+
+  if (!lastOutput.parseErr) {
+    items.push({ ok: true, text: 'Output is valid JSON' })
+    const parsed = lastOutput.parsed
+    if (parsed) {
+      const keys = Object.keys(parsed)
+      items.push({ ok: true, text: `${keys.length} fields returned: ${keys.join(', ')}` })
+
+      // Prompt-specific checks
+      if (currentPrompt !== null) {
+        const pid = PROMPTS[currentPrompt].id
+        if (pid === 'observation.enrich') {
+          const ftypes = ['systemic','behavioural','environmental','unclear']
+          if (parsed.failure_type && ftypes.includes(parsed.failure_type)) {
+            items.push({ ok: true, text: `failure_type "${parsed.failure_type}" is a valid enum value` })
+          } else {
+            items.push({ ok: false, text: `failure_type "${parsed.failure_type}" is not a valid enum value` })
+          }
+          if (parsed.enrichment_confidence >= 0.5) {
+            items.push({ ok: true, text: `enrichment_confidence ${parsed.enrichment_confidence} ≥ 0.5 — would be stored` })
+          } else {
+            items.push({ ok: false, text: `enrichment_confidence ${parsed.enrichment_confidence} < 0.5 — would be discarded` })
+          }
+        }
+        if (pid === 'critical_insight.generate') {
+          if (parsed.toolbox_narrative) items.push({ ok: true, text: 'toolbox_narrative present — required field ✓' })
+          else items.push({ ok: false, text: 'toolbox_narrative missing — would be rejected' })
+          if (typeof parsed.escalate_to_systemic === 'boolean') items.push({ ok: true, text: `escalate_to_systemic is boolean: ${parsed.escalate_to_systemic}` })
+          else items.push({ ok: false, text: 'escalate_to_systemic is not boolean — defaulting to false' })
+        }
+        if (pid === 'toolbox_talk.generate') {
+          if (parsed.main_content) items.push({ ok: true, text: 'main_content present — required field ✓' })
+          else items.push({ ok: false, text: 'main_content missing — entire generation would be rejected' })
+          const ka = parsed.key_actions || []
+          if (ka.length >= 3 && ka.length <= 5) items.push({ ok: true, text: `key_actions has ${ka.length} items (required: 3–5) ✓` })
+          else items.push({ ok: false, text: `key_actions has ${ka.length} items — must be 3–5` })
+          const dq = parsed.discussion_questions || []
+          if (dq.length === 3) items.push({ ok: true, text: 'discussion_questions has 3 items ✓' })
+          else items.push({ ok: false, text: `discussion_questions has ${dq.length} items — must be exactly 3` })
+        }
+        if (pid === 'investigation.assist') {
+          ;['immediate_cause','root_cause','immediate_cause_rationale','root_cause_rationale'].forEach(f => {
+            if (parsed[f]) items.push({ ok: true, text: `${f} present ✓` })
+            else items.push({ ok: false, text: `${f} missing` })
+          })
+          const cf = parsed.contributing_factors || []
+          if (cf.length >= 2 && cf.length <= 4) items.push({ ok: true, text: `contributing_factors has ${cf.length} items (2–4) ✓` })
+          else items.push({ ok: false, text: `contributing_factors has ${cf.length} items — expected 2–4` })
+          const missingRationale = cf.filter(c => !c.rationale)
+          if (missingRationale.length === 0) items.push({ ok: true, text: 'All contributing_factors have rationale fields ✓' })
+          else items.push({ ok: false, text: `${missingRationale.length} contributing factor(s) missing rationale` })
+        }
+      }
+    }
+  } else {
+    items.push({ ok: false, text: `JSON parse failed: ${lastOutput.parseErr}` })
+    items.push({ ok: null, text: 'Spec rule: log raw output, retry once before alerting' })
+  }
+
+  return `<div class="validation-row">${items.map(i => `
+    <div class="val-item">
+      <span class="val-icon">${i.ok === true ? '✓' : i.ok === false ? '✗' : '·'}</span>
+      <span class="val-text" style="color:${i.ok === true ? 'var(--green-text)' : i.ok === false ? 'var(--red-text)' : 'var(--muted)'}">${escHtml(i.text)}</span>
+    </div>`).join('')}</div>`
+}
+
+function setStatus(state, label) {
+  const el = document.getElementById('statusBadge')
+  el.className = 'status-badge status-' + (state === 'ok' ? 'ok' : state === 'err' ? 'err' : state === 'running' ? 'running' : 'idle')
+  el.textContent = label
+}
+
+// ── COPY ──
+function copyPrompt(type) {
+  if (currentPrompt === null) return
+  const p = PROMPTS[currentPrompt]
+  let text = ''
+  const btn = type === 'system' ? 'copySystemBtn' : type === 'user' ? 'copyUserBtn' : 'copyCodeBtn'
+
+  if (type === 'system') {
+    text = p.system
+  } else if (type === 'user') {
+    text = p.template
+  } else if (type === 'code') {
+    text = `// ${p.num} — ${p.label}\n// Trigger: ${p.trigger}\n// Max tokens: ${p.maxTokens}\n\nconst SYSTEM_PROMPT_${p.id.toUpperCase().replace(/\./g,'_')} = \`${p.system}\`\n\nconst USER_TEMPLATE_${p.id.toUpperCase().replace(/\./g,'_')} = \`${p.template}\``
+  }
+
+  copyToClipboard(text, btn)
+}
+
+function copyOutput() {
+  if (!lastOutput) return
+  copyToClipboard(lastOutput.raw, 'copyOutputBtn')
+}
+
+function copyAsSpec() {
+  if (currentPrompt === null || !lastOutput) return
+  const p = PROMPTS[currentPrompt]
+  const text = `## ${p.num} — ${p.label}\n\n**Trigger:** ${p.trigger}  \n**Max tokens:** ${p.maxTokens}\n\n### System Prompt\n\n\`\`\`\n${p.system}\n\`\`\`\n\n### User Prompt Template\n\n\`\`\`\n${p.template}\n\`\`\`\n\n### Sample Output\n\n\`\`\`json\n${lastOutput.raw}\n\`\`\``
+  copyToClipboard(text, 'copySpecBtn')
+}
+
+function copyToClipboard(text, btnId) {
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById(btnId)
+    const orig = btn.textContent
+    btn.textContent = 'Copied!'
+    btn.classList.add('copied')
+    setTimeout(() => { btn.textContent = orig; btn.classList.remove('copied') }, 1800)
+  })
+}
+
+function escHtml(str) {
+  return String(str)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+}
+
+init()
+</script>
+</body>
+</html>
