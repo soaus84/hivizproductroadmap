@@ -497,6 +497,26 @@
 
   .api-key-btn:hover { background: #e0b84f; }
 
+  .mode-toggle-btn {
+    padding: 8px 18px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    color: rgba(255,255,255,0.4);
+    text-align: center;
+    line-height: 1.4;
+    transition: all 0.15s;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .mode-toggle-btn.active {
+    background: rgba(255,255,255,0.12);
+    color: white;
+  }
+
   /* Fallback form */
   .fallback-view {
     flex: 1;
@@ -609,6 +629,19 @@
   </div>
   <div class="page-title">What if logging felt like a conversation?</div>
   <div class="page-sub">Real AI back-and-forth gets the story out naturally. No forms. Just tell Hiviz what you saw.</div>
+
+  <!-- Mode toggle -->
+  <div style="display:flex;align-items:center;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:10px;padding:3px;gap:2px;margin-top:16px;">
+    <button class="mode-toggle-btn active" id="modeA" onclick="setMode('split')">
+      Split entry<br><span style="font-size:10px;opacity:0.6;">Obs / Incident</span>
+    </button>
+    <button class="mode-toggle-btn" id="modeB" onclick="setMode('single')">
+      Single entry ✦<br><span style="font-size:10px;opacity:0.6;">AI routes it</span>
+    </button>
+  </div>
+  <div style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:8px;max-width:340px;text-align:center;" id="modeDesc">
+    Two entry points — person decides upfront what they're logging
+  </div>
 </div>
 
 <!-- Phone shell -->
@@ -635,22 +668,41 @@
 
   <!-- LANDING -->
   <div class="landing" id="landing">
-    <div class="landing-prompt">What do you want to log?</div>
-    <div class="landing-sub">Tell Hiviz what happened in your own words — it'll ask the right questions to get what it needs.</div>
-    <button class="type-btn type-btn-obs" onclick="startChat('observation')">
-      <div class="type-icon" style="background:rgba(255,255,255,0.1);">👁</div>
-      <div>
-        <div class="type-label">Log an Observation</div>
-        <div class="type-desc">Something you saw — safe, concerning, or a near-miss</div>
+    <!-- Split mode (default) -->
+    <div id="splitLanding">
+      <div class="landing-prompt">What do you want to log?</div>
+      <div class="landing-sub">Tell Hiviz what happened in your own words — it'll ask the right questions to get what it needs.</div>
+      <button class="type-btn type-btn-obs" onclick="startChat('observation')">
+        <div class="type-icon" style="background:rgba(255,255,255,0.1);">👁</div>
+        <div>
+          <div class="type-label">Log an Observation</div>
+          <div class="type-desc">Something you saw — safe, concerning, or a near-miss</div>
+        </div>
+      </button>
+      <button class="type-btn type-btn-inc" onclick="startChat('incident')">
+        <div class="type-icon" style="background:rgba(255,86,48,0.15);">⚠️</div>
+        <div>
+          <div class="type-label" style="color:var(--error);">Report an Incident</div>
+          <div class="type-desc" style="color:var(--error);opacity:0.7;">Injury, near-miss, property damage, or environmental</div>
+        </div>
+      </button>
+    </div>
+
+    <!-- Single entry mode -->
+    <div id="singleLanding" style="display:none;width:100%;">
+      <div class="landing-prompt">What happened?</div>
+      <div class="landing-sub" style="margin-bottom:20px;">Describe what you saw or what happened. Hiviz will figure out the rest.</div>
+      <button class="type-btn type-btn-obs" onclick="startChat('auto')" style="background:var(--hiviz-dark);padding:20px;">
+        <div class="type-icon" style="background:rgba(255,255,255,0.1);font-size:22px;">💬</div>
+        <div>
+          <div class="type-label">Tell Hiviz what happened</div>
+          <div class="type-desc" style="opacity:0.6;">Observation or incident — AI will route it correctly</div>
+        </div>
+      </button>
+      <div style="margin-top:12px;background:rgba(118,53,220,0.12);border:1px solid rgba(118,53,220,0.25);border-radius:10px;padding:10px 12px;font-size:11px;color:rgba(255,255,255,0.5);line-height:1.6;">
+        ✦ After you describe what happened, Hiviz will show you what it captured — including which pipeline it's routing to and why.
       </div>
-    </button>
-    <button class="type-btn type-btn-inc" onclick="startChat('incident')">
-      <div class="type-icon" style="background:rgba(255,86,48,0.15);">⚠️</div>
-      <div>
-        <div class="type-label" style="color:var(--error);">Report an Incident</div>
-        <div class="type-desc" style="color:var(--error);opacity:0.7;">Injury, near-miss, property damage, or environmental</div>
-      </div>
-    </button>
+    </div>
   </div>
 
   <!-- CHAT VIEW -->
@@ -769,6 +821,52 @@ function saveApiKey() {
 
 // ── SYSTEM PROMPTS ────────────────────────────────────────────────────────────
 
+const AUTO_SYSTEM = `You are Hiviz, a friendly safety intelligence assistant for a construction and mining safety platform. Someone on site is logging something that happened — they have not specified whether it's an observation or an incident yet.
+
+Your job is to have a short natural conversation to understand what happened, then determine whether this is an observation or a reportable incident.
+
+CRITICAL RULES:
+- Always respond in whatever language the user writes in. Summary JSON fields must always be in English.
+- One question at a time. Short messages. Plain language. No jargon.
+- Do NOT ask them to categorise it — that's your job, not theirs.
+- Start with "What happened?" and listen. Ask follow-ups only to get what you need.
+- The key routing question: did anyone or anything get hurt, or was harm only potential?
+  - Harm occurred (injury, property damage, environmental event) → incident
+  - Harm was only potential (near-miss, unsafe condition, barrier failure) → observation
+- If the first message makes the routing obvious, don't ask unnecessary questions.
+- Assess confidence as you go. Summarise as soon as you have enough — could be after 1 exchange.
+- Maximum 4 exchanges before summarising.
+
+ROUTING LOGIC:
+- observation → signal_type: positive_performance, weak_signal, at_risk_condition, unwanted_energy_event, barrier_failure
+- incident → incident_type: near-miss (very close call), injury, property-damage, environmental
+
+If truly ambiguous (e.g. "near-miss" where no harm occurred but it was extremely close), route as observation with signal_type = unwanted_energy_event, and note it in routing_rationale.
+
+SUMMARY — when you have enough, produce wrapped in <summary> tags, then a natural confirmation line:
+
+<summary>
+{
+  "routed_to": "observation|incident",
+  "routing_rationale": "1 sentence — why this was routed as observation vs incident",
+  "what_happened": "...",
+  "work_type": "...",
+  "signal_type": "positive_performance|weak_signal|at_risk_condition|unwanted_energy_event|barrier_failure|null",
+  "incident_type": "near-miss|injury|property-damage|environmental|null",
+  "injury_classification": "none|first_aid|medical_treatment|restricted_work|lost_time|fatality",
+  "people_involved_count": 0,
+  "stop_work_relevant": true,
+  "stop_work_called": true,
+  "energy_type": "kinetic|gravitational|electrical|thermal|chemical|pressure|none",
+  "barrier_assessment": "barrier_absent|barrier_failed|barrier_degraded|barrier_held|none",
+  "fw_factor_hint": "...",
+  "confidence": "high|medium|low"
+}
+</summary>
+
+- Never mention JSON, field names, or routing logic to the user.
+- The site is Northgate Open Cut. Be warm, human, direct.`;
+
 const OBSERVATION_SYSTEM = `You are Hiviz, a friendly safety intelligence assistant for a construction and mining safety platform. A supervisor or manager is logging a field observation from their phone.
 
 Your job is to have a short, natural conversation to get the key information — like asking a knowledgeable colleague, not filling out a form.
@@ -866,19 +964,45 @@ function startChat(type) {
   const badge = document.getElementById('chatTypeBadge');
   if (type === 'observation') {
     badge.innerHTML = `<div class="chat-type-dot" style="background:#1C252E;"></div><span style="font-size:13px;font-weight:700;">Observation</span>`;
-  } else {
+  } else if (type === 'incident') {
     badge.innerHTML = `<div class="chat-type-dot" style="background:var(--error);"></div><span style="font-size:13px;font-weight:700;color:var(--error);">Incident Report</span>`;
+  } else {
+    badge.innerHTML = `<div class="chat-type-dot" style="background:var(--purple);"></div><span style="font-size:13px;font-weight:700;color:var(--purple);">Hiviz ✦</span>`;
   }
 
   // Opening message from Hiviz
   const openingMsg = type === 'observation'
     ? "Hey Marcus — what did you see out there?"
-    : "Thanks for flagging this. What happened?";
+    : type === 'incident'
+    ? "Thanks for flagging this. What happened?"
+    : "Hey Marcus — what happened?";
 
   addMessage('hiviz', openingMsg);
   conversationHistory.push({ role: 'assistant', content: openingMsg });
 
   document.getElementById('inputField').focus();
+}
+
+function setMode(mode) {
+  const modeA = document.getElementById('modeA');
+  const modeB = document.getElementById('modeB');
+  const splitLanding = document.getElementById('splitLanding');
+  const singleLanding = document.getElementById('singleLanding');
+  const modeDesc = document.getElementById('modeDesc');
+
+  if (mode === 'single') {
+    modeB.classList.add('active');
+    modeA.classList.remove('active');
+    splitLanding.style.display = 'none';
+    singleLanding.style.display = 'block';
+    modeDesc.textContent = 'One entry point — AI determines observation or incident from description';
+  } else {
+    modeA.classList.add('active');
+    modeB.classList.remove('active');
+    splitLanding.style.display = 'block';
+    singleLanding.style.display = 'none';
+    modeDesc.textContent = "Two entry points — person decides upfront what they're logging";
+  }
 }
 
 function resetChat() {
@@ -961,36 +1085,49 @@ function addMessage(sender, text, quickReplies) {
 }
 
 function buildSummaryCard(data) {
-  const isObs = captureType === 'observation';
+  const isAuto = captureType === 'auto';
+  const isObs = captureType === 'observation' || (isAuto && data.routed_to === 'observation');
+  const routeColor = isObs ? 'var(--primary)' : 'var(--error)';
+  const routeLabel = isObs ? 'Observation' : 'Incident Report';
+
   const rows = isObs ? [
-    { k: 'What observed', v: data.what_was_observed },
+    { k: 'What observed', v: data.what_was_observed || data.what_happened },
     { k: 'Work type', v: data.work_type },
-    { k: 'Signal type', v: data.signal_type?.replace(/_/g, ' ') },
-    { k: 'Energy', v: data.energy_type !== 'none' ? data.energy_type : '—' },
+    { k: 'Signal type', v: (data.signal_type || '').replace(/_/g, ' ') || null },
+    { k: 'Energy', v: (data.energy_type && data.energy_type !== 'none') ? data.energy_type : null },
+    { k: 'Barrier state', v: (data.barrier_assessment && data.barrier_assessment !== 'none') ? data.barrier_assessment?.replace(/_/g, ' ') : null },
     { k: 'FW factor hint', v: data.fw_factor_hint },
-    { k: 'Stop work', v: data.stop_work_called ? 'Yes' : 'No' },
-    { k: 'Action taken', v: data.immediate_action_taken || '—' },
+    { k: 'Stop work', v: data.stop_work_relevant ? (data.stop_work_called ? 'Yes — called' : 'No') : null },
   ] : [
-    { k: 'Incident type', v: data.incident_type?.replace(/-/g, ' ') },
-    { k: 'What happened', v: data.description },
-    { k: 'When', v: data.occurred_at },
+    { k: 'Incident type', v: (data.incident_type || '').replace(/-/g, ' ') },
+    { k: 'What happened', v: data.description || data.what_happened },
     { k: 'Work type', v: data.work_type },
-    { k: 'Injury', v: data.injury_classification?.replace(/_/g, ' ') || 'none' },
-    { k: 'People involved', v: data.people_involved_count },
-    { k: 'Action taken', v: data.immediate_action_taken || '—' },
+    { k: 'Injury', v: (data.injury_classification || 'none').replace(/_/g, ' ') },
+    { k: 'People involved', v: data.people_involved_count || null },
+    { k: 'Energy', v: (data.energy_type && data.energy_type !== 'none') ? data.energy_type : null },
   ];
+
+  const routingBlock = isAuto ? `
+    <div style="display:flex;align-items:center;gap:8px;background:rgba(0,0,0,0.04);border-radius:7px;padding:8px 10px;margin-bottom:10px;">
+      <div style="width:8px;height:8px;border-radius:50%;background:${routeColor};flex-shrink:0;"></div>
+      <div>
+        <div style="font-size:11px;font-weight:700;color:${routeColor};">Routed → ${routeLabel}</div>
+        <div style="font-size:11px;color:var(--text-secondary);margin-top:1px;">${data.routing_rationale || ''}</div>
+      </div>
+    </div>` : '';
 
   return `
     <div class="summary-card">
       <div class="summary-title">✓ Captured — ready to submit</div>
-      ${rows.filter(r => r.v).map(r => `
+      ${routingBlock}
+      ${rows.filter(r => r.v !== null && r.v !== undefined && r.v !== '').map(r => `
         <div class="summary-row">
           <div class="summary-key">${r.k}</div>
           <div class="summary-val">${r.v}</div>
         </div>
       `).join('')}
       <div style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(0,171,85,0.2);font-size:11px;color:var(--primary-dark);font-style:italic;">
-        AI enrichment will run after submission — signal type, energy classification, Forge Works factor, and barrier assessment will be added automatically.
+        Tap Submit to see the full AI enrichment — signal classification, energy type, Forge Works factor, and barrier assessment.
       </div>
     </div>
   `;
@@ -1034,7 +1171,7 @@ async function sendMessage() {
   document.getElementById('chatHeaderSub').textContent = 'Hiviz is thinking...';
 
   try {
-    const systemPrompt = captureType === 'observation' ? OBSERVATION_SYSTEM : INCIDENT_SYSTEM;
+    const systemPrompt = captureType === 'auto' ? AUTO_SYSTEM : (captureType === 'observation' ? OBSERVATION_SYSTEM : INCIDENT_SYSTEM);
 
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -1136,35 +1273,192 @@ function showSubmitBar() {
   inputArea.parentNode.insertBefore(bar, inputArea);
 }
 
-function submitCapture() {
-  // Hide submit bar and input
+async function submitCapture() {
   const bar = document.getElementById('submitBar');
   if (bar) bar.remove();
   document.querySelector('.input-area').style.display = 'none';
+  document.getElementById('chatHeaderSub').textContent = 'Submitting...';
 
-  // Show submitted confirmation
   const msgs = document.getElementById('messages');
+
+  // Step 1 — Submitted confirmation
   const conf = document.createElement('div');
-  conf.style.cssText = 'background:var(--primary);border-radius:16px;padding:16px;margin:8px 0;animation:msgIn 0.3s ease;text-align:center;';
+  conf.style.cssText = 'background:var(--hiviz-dark);border-radius:14px;padding:14px 16px;margin:8px 0;animation:msgIn 0.3s ease;display:flex;align-items:center;gap:10px;';
   conf.innerHTML = `
-    <div style="font-size:24px;margin-bottom:8px;">✓</div>
-    <div style="font-size:15px;font-weight:700;color:white;margin-bottom:4px;">${captureType === 'observation' ? 'Observation submitted' : 'Incident reported'}</div>
-    <div style="font-size:12px;color:rgba(255,255,255,0.7);line-height:1.5;">AI enrichment running — signal type, energy classification, and Forge Works factor will be added automatically. You'll see this in the pipeline shortly.</div>
+    <div style="width:32px;height:32px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+      <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+    <div>
+      <div style="font-size:13px;font-weight:700;color:white;">${captureType === 'incident' ? 'Incident reported' : 'Observation submitted'}</div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.5);margin-top:1px;">Running AI enrichment...</div>
+    </div>
   `;
   msgs.appendChild(conf);
   msgs.scrollTop = msgs.scrollHeight;
 
-  // Update header
-  document.getElementById('chatHeaderSub').textContent = 'Submitted ✓';
+  // Step 2 — Run enrichment call
+  await runEnrichment(msgs);
+}
 
-  // Show start again option after a moment
+async function runEnrichment(msgs) {
+  document.getElementById('chatHeaderSub').textContent = 'Enriching...';
+
+  // Show enrichment typing indicator
+  const enrichTyping = document.createElement('div');
+  enrichTyping.id = 'enrichTyping';
+  enrichTyping.className = 'msg msg-hiviz';
+  enrichTyping.innerHTML = `
+    <div class="msg-sender" style="color:var(--purple);">AI Enrichment</div>
+    <div class="typing-indicator">
+      <div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>
+    </div>
+  `;
+  msgs.appendChild(enrichTyping);
+  msgs.scrollTop = msgs.scrollHeight;
+
+  const observationText = captureData.what_was_observed || captureData.what_happened || '';
+  const workType = captureData.work_type || 'unknown';
+
+  const enrichPrompt = `You are an AI enrichment engine for a safety platform. Analyse this observation and return a structured enrichment JSON.
+
+Observation: "${observationText}"
+Work type: ${workType}
+Initial capture data: ${JSON.stringify(captureData, null, 2)}
+
+Return ONLY valid JSON, no preamble:
+{
+  "signal_type": "positive_performance|weak_signal|at_risk_condition|unwanted_energy_event|barrier_failure",
+  "signal_type_confidence": 0.0,
+  "signal_type_rationale": "1 sentence why",
+  "energy_type": "kinetic|gravitational|electrical|thermal|chemical|pressure|noise_vibration|none",
+  "energy_type_confidence": 0.0,
+  "energy_type_rationale": "1 sentence why",
+  "energy_release_potential": "catastrophic|high|moderate|low|none",
+  "barrier_assessment": "barrier_absent|barrier_failed|barrier_degraded|barrier_held|none",
+  "barrier_assessment_rationale": "1 sentence why",
+  "fw_factor": "management_systems|operational_management|frontline_workers|communications_coordination|work_understanding|monitoring_metrics|goal_conflict_tradeoffs|learning_development|resource_allocation|decision_making|contractor_management|senior_leadership|strategy|risk_management|safety_organisation|null",
+  "fw_domain": "guide|enable|execute|null",
+  "fw_maturity_signal": "compliant|leading|resilient|null",
+  "fw_confidence": 0.0,
+  "fw_rationale": "1 sentence why this factor",
+  "context_questions_needed": false,
+  "context_question": "if needed, one targeted question to improve confidence — else null"
+}`;
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 600,
+        messages: [{ role: 'user', content: enrichPrompt }]
+      })
+    });
+
+    const data = await response.json();
+    const raw = data.content[0].text.replace(/```json|```/g, '').trim();
+    const enriched = JSON.parse(raw);
+
+    document.getElementById('enrichTyping')?.remove();
+    document.getElementById('chatHeaderSub').textContent = 'Enrichment complete ✓';
+
+    showEnrichmentCard(msgs, enriched);
+
+  } catch(e) {
+    document.getElementById('enrichTyping')?.remove();
+    document.getElementById('chatHeaderSub').textContent = 'Enrichment failed';
+
+    const errEl = document.createElement('div');
+    errEl.className = 'msg msg-hiviz';
+    errEl.innerHTML = `<div class="msg-sender" style="color:var(--purple);">AI Enrichment</div><div class="msg-bubble" style="font-size:12px;color:var(--text-secondary);">Enrichment couldn't run right now — will retry when connection restores. The observation has been saved.</div>`;
+    msgs.appendChild(errEl);
+    msgs.scrollTop = msgs.scrollHeight;
+    showRestartOption(msgs);
+  }
+}
+
+function showEnrichmentCard(msgs, e) {
+  const confColor = (c) => c >= 0.7 ? 'var(--primary)' : c >= 0.5 ? 'var(--warning)' : 'var(--error)';
+  const confLabel = (c) => c >= 0.7 ? '✓ confident' : c >= 0.5 ? '~ moderate' : '? low';
+
+  const card = document.createElement('div');
+  card.style.cssText = 'animation:msgIn 0.3s ease;';
+  card.innerHTML = `
+    <div style="background:var(--surface);border:1.5px solid var(--purple);border-radius:14px;overflow:hidden;margin:4px 0;">
+      <div style="background:var(--purple);padding:8px 14px;display:flex;align-items:center;gap:7px;">
+        <div style="width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,0.6);animation:pulse 2s infinite;"></div>
+        <span style="font-size:11px;font-weight:700;color:white;letter-spacing:0.5px;">AI ENRICHMENT COMPLETE</span>
+      </div>
+      <div style="padding:12px 14px;display:flex;flex-direction:column;gap:8px;">
+
+        <!-- Signal type -->
+        <div style="background:var(--bg);border-radius:8px;padding:9px 10px;">
+          <div style="font-size:9px;font-weight:700;color:var(--text-secondary);letter-spacing:1px;margin-bottom:4px;">SIGNAL TYPE</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+            <span style="font-size:13px;font-weight:700;">${(e.signal_type || '').replace(/_/g,' ')}</span>
+            <span style="font-size:10px;font-weight:600;color:${confColor(e.signal_type_confidence)};">${confLabel(e.signal_type_confidence)} ${(e.signal_type_confidence*100).toFixed(0)}%</span>
+          </div>
+          <div style="font-size:11px;color:var(--text-secondary);font-style:italic;margin-top:4px;">${e.signal_type_rationale || ''}</div>
+        </div>
+
+        <!-- Energy -->
+        ${e.energy_type && e.energy_type !== 'none' ? `
+        <div style="background:var(--bg);border-radius:8px;padding:9px 10px;">
+          <div style="font-size:9px;font-weight:700;color:var(--text-secondary);letter-spacing:1px;margin-bottom:4px;">ENERGY</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;">
+            <span style="font-size:13px;font-weight:700;">${e.energy_type}</span>
+            <span style="font-size:10px;background:var(--warning-light);color:#B76E00;padding:2px 7px;border-radius:5px;font-weight:600;">${e.energy_release_potential} potential</span>
+            <span style="font-size:10px;background:var(--error-light);color:var(--error);padding:2px 7px;border-radius:5px;font-weight:600;">${(e.barrier_assessment||'').replace(/_/g,' ')}</span>
+          </div>
+          <div style="font-size:11px;color:var(--text-secondary);font-style:italic;margin-top:4px;">${e.barrier_assessment_rationale || ''}</div>
+        </div>` : ''}
+
+        <!-- FW Factor -->
+        ${e.fw_factor && e.fw_factor !== 'null' && e.fw_confidence >= 0.7 ? `
+        <div style="background:var(--purple-light);border-radius:8px;padding:9px 10px;">
+          <div style="font-size:9px;font-weight:700;color:var(--purple);letter-spacing:1px;margin-bottom:4px;">FORGE WORKS MAP® FACTOR</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;">
+            <span style="font-size:13px;font-weight:700;color:var(--purple);">${(e.fw_factor||'').replace(/_/g,' ')}</span>
+            <span style="font-size:10px;background:rgba(118,53,220,0.15);color:var(--purple);padding:2px 7px;border-radius:5px;font-weight:600;">${e.fw_domain?.toUpperCase() || ''} · ${e.fw_maturity_signal || ''}</span>
+            <span style="font-size:10px;color:var(--primary);font-weight:600;">${(e.fw_confidence*100).toFixed(0)}% ✓</span>
+          </div>
+          <div style="font-size:11px;color:var(--purple);font-style:italic;margin-top:4px;">${e.fw_rationale || ''}</div>
+        </div>` : `
+        <div style="background:var(--bg);border-radius:8px;padding:9px 10px;">
+          <div style="font-size:9px;font-weight:700;color:var(--text-secondary);letter-spacing:1px;margin-bottom:4px;">FORGE WORKS MAP®</div>
+          <div style="font-size:12px;color:var(--text-secondary);">${e.fw_confidence >= 0.5 ? `Possible: ${(e.fw_factor||'').replace(/_/g,' ')} — confidence below threshold (${(e.fw_confidence*100).toFixed(0)}%)` : 'Insufficient context for factor classification'}</div>
+        </div>`}
+
+        <!-- Context question if needed -->
+        ${e.context_questions_needed && e.context_question ? `
+        <div style="background:var(--info-light);border-radius:8px;padding:9px 10px;border:1px solid rgba(0,108,156,0.2);">
+          <div style="font-size:9px;font-weight:700;color:var(--info);letter-spacing:1px;margin-bottom:4px;">FOLLOW-UP QUESTION</div>
+          <div style="font-size:12px;color:var(--info);">${e.context_question}</div>
+          <div style="font-size:10px;color:var(--text-secondary);margin-top:3px;">A follow-up notification would be sent to the observer.</div>
+        </div>` : ''}
+
+      </div>
+    </div>
+  `;
+  msgs.appendChild(card);
+  msgs.scrollTop = msgs.scrollHeight;
+  showRestartOption(msgs);
+}
+
+function showRestartOption(msgs) {
   setTimeout(() => {
     const restart = document.createElement('div');
     restart.style.cssText = 'text-align:center;padding:16px;';
     restart.innerHTML = `<button onclick="resetChat()" style="background:transparent;border:1.5px solid var(--border);border-radius:20px;padding:8px 20px;font-size:13px;font-weight:600;color:var(--text-secondary);cursor:pointer;font-family:Inter,sans-serif;">Log another</button>`;
     msgs.appendChild(restart);
     msgs.scrollTop = msgs.scrollHeight;
-  }, 800);
+  }, 600);
 }
 
 function escapeHtml(text) {
