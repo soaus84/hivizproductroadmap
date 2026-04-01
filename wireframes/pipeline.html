@@ -1,0 +1,1546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Insights Pipeline — Hiviz</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Balsamiq+Sans:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F4F6F8;
+    --surface: #FFFFFF;
+    --surface2: #F9FAFB;
+    --border: #E5E8EB;
+    --text-primary: #1C252E;
+    --text-secondary: #637381;
+    --text-disabled: #919EAB;
+    --primary: #00AB55;
+    --primary-light: #D1FAE5;
+    --primary-dark: #007B40;
+    --error: #FF5630;
+    --error-light: #FFE9E5;
+    --warning: #FFAB00;
+    --warning-light: #FFF3CD;
+    --info: #006C9C;
+    --info-light: #E0F4FF;
+    --purple: #7635DC;
+    --purple-light: #EFE6FF;
+    --radius: 12px;
+    --radius-sm: 8px;
+    --shadow-card: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-elevated: 0 8px 24px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06);
+    --col-width: 320px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text-primary);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* ── TOP NAV ── */
+  .topnav {
+    height: 64px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    gap: 12px;
+    flex-shrink: 0;
+    z-index: 100;
+  }
+
+  .nav-logo {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .nav-logo-dot {
+    width: 8px; height: 8px;
+    background: var(--primary);
+    border-radius: 50%;
+  }
+
+  .nav-workspace-chip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 5px 10px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
+    cursor: pointer;
+    margin-left: 4px;
+  }
+
+  .nav-workspace-chip svg { color: var(--text-secondary); }
+
+  .nav-divider { width: 1px; height: 24px; background: var(--border); margin: 0 4px; }
+
+  .nav-tabs {
+    display: flex;
+    gap: 2px;
+    flex: 1;
+  }
+
+  .nav-tab {
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .nav-tab:hover { background: var(--bg); color: var(--text-primary); }
+  .nav-tab.active { background: var(--bg); color: var(--text-primary); font-weight: 600; }
+
+  .nav-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: auto;
+  }
+
+  .nav-icon-btn {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    position: relative;
+    color: var(--text-secondary);
+  }
+
+  .nav-icon-btn:hover { background: var(--bg); }
+
+  .notif-badge {
+    position: absolute;
+    top: 2px; right: 2px;
+    width: 16px; height: 16px;
+    background: var(--error);
+    border-radius: 50%;
+    font-size: 9px;
+    font-weight: 700;
+    color: white;
+    display: flex; align-items: center; justify-content: center;
+    border: 2px solid white;
+  }
+
+  .avatar {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #7635DC, #00AB55);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    color: white;
+    cursor: pointer;
+    border: 2px solid var(--border);
+  }
+
+  /* ── PAGE HEADER ── */
+  .page-header {
+    padding: 20px 20px 0;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+
+  .page-title { font-size: 22px; font-weight: 700; }
+  .page-subtitle { font-size: 13px; color: var(--text-secondary); margin-top: 2px; }
+
+  .header-actions { display: flex; gap: 8px; align-items: center; }
+
+  .btn {
+    height: 36px;
+    padding: 0 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex; align-items: center; gap: 6px;
+    border: none;
+    transition: all 0.15s;
+  }
+
+  .btn-primary { background: var(--primary); color: white; }
+  .btn-primary:hover { background: var(--primary-dark); }
+  .btn-outlined { background: transparent; color: var(--text-primary); border: 1px solid var(--border); }
+  .btn-outlined:hover { background: var(--bg); }
+
+  /* ── KANBAN ── */
+  .kanban-wrap {
+    flex: 1;
+    overflow: hidden;
+    padding: 16px 20px 20px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .kanban-board {
+    display: flex;
+    gap: 12px;
+    flex: 1;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-bottom: 8px;
+  }
+
+  .kanban-board::-webkit-scrollbar { height: 6px; }
+  .kanban-board::-webkit-scrollbar-track { background: transparent; }
+  .kanban-board::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  .kanban-col {
+    width: var(--col-width);
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 100%;
+  }
+
+  .col-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 4px;
+    flex-shrink: 0;
+  }
+
+  .col-count {
+    width: 22px; height: 22px;
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .col-title { font-size: 14px; font-weight: 700; }
+  .col-subtitle { font-size: 11px; color: var(--text-secondary); margin-top: 1px; }
+
+  .col-cards {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-right: 2px;
+  }
+
+  .col-cards::-webkit-scrollbar { width: 4px; }
+  .col-cards::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  /* Column colour themes */
+  .col-prioritise .col-count { background: #FFF3CD; color: #B76E00; }
+  .col-learn .col-count { background: var(--info-light); color: var(--info); }
+  .col-improve .col-count { background: var(--purple-light); color: var(--purple); }
+  .col-resolved .col-count { background: var(--primary-light); color: var(--primary-dark); }
+
+  /* ── CARDS ── */
+  .card {
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 14px;
+    box-shadow: var(--shadow-card);
+    cursor: pointer;
+    transition: all 0.15s;
+    border: 1.5px solid transparent;
+    position: relative;
+  }
+
+  .card:hover {
+    box-shadow: var(--shadow-elevated);
+    border-color: var(--border);
+    transform: translateY(-1px);
+  }
+
+  .card.active {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(0,171,85,0.12), var(--shadow-elevated);
+  }
+
+  .card-type-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    padding: 3px 8px;
+    border-radius: 6px;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+  }
+
+  .badge-cross-site { background: #F3E8FF; color: #6D28D9; }
+  .badge-worksite { background: var(--info-light); color: var(--info); }
+  .badge-critical { background: var(--error-light); color: var(--error); }
+  .badge-investigation { background: #FFF3CD; color: #B76E00; }
+  .badge-positive { background: var(--primary-light); color: var(--primary-dark); }
+
+  .card-title {
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.45;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+  }
+
+  .card-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+  }
+
+  .card-meta-dot { width: 3px; height: 3px; background: var(--border); border-radius: 50%; }
+
+  .card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 8px;
+  }
+
+  .endorsement-row {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    color: var(--text-secondary);
+  }
+
+  .endorsement-avatars { display: flex; }
+  .endorsement-avatar {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    border: 1.5px solid white;
+    margin-left: -4px;
+    font-size: 8px;
+    font-weight: 700;
+    color: white;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .endorsement-avatar:first-child { margin-left: 0; }
+
+  .progress-row {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    flex: 1;
+  }
+
+  .progress-label { font-size: 10px; color: var(--text-secondary); }
+
+  .progress-bar {
+    height: 4px;
+    background: var(--bg);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    border-radius: 2px;
+    background: var(--primary);
+  }
+
+  .pattern-analysis-chip {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 10px;
+    color: var(--purple);
+    font-weight: 500;
+  }
+
+  .assignee-chip {
+    font-size: 11px;
+    color: var(--text-secondary);
+    font-weight: 500;
+  }
+
+  .resolved-date {
+    font-size: 10px;
+    color: var(--primary);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  /* ── RESOLVED COLUMN ── */
+  .col-resolved .card {
+    opacity: 0.85;
+  }
+
+  /* ── DETAIL PANEL ── */
+  .detail-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(22, 28, 36, 0.48);
+    z-index: 200;
+    display: flex;
+    align-items: stretch;
+    justify-content: flex-end;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s;
+  }
+
+  .detail-overlay.open {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  .detail-panel {
+    width: 560px;
+    background: var(--surface);
+    height: 100%;
+    overflow-y: auto;
+    box-shadow: -8px 0 32px rgba(0,0,0,0.16);
+    transform: translateX(40px);
+    transition: transform 0.25s cubic-bezier(0.32, 0.72, 0, 1);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .detail-overlay.open .detail-panel {
+    transform: translateX(0);
+  }
+
+  .detail-panel::-webkit-scrollbar { width: 6px; }
+  .detail-panel::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  .panel-header {
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+    position: sticky;
+    top: 0;
+    background: var(--surface);
+    z-index: 10;
+  }
+
+  .panel-header-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+
+  .panel-close {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    color: var(--text-secondary);
+    flex-shrink: 0;
+  }
+
+  .panel-close:hover { background: var(--bg); color: var(--text-primary); }
+
+  .panel-stage-tabs {
+    display: flex;
+    gap: 4px;
+  }
+
+  .stage-tab {
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+    background: transparent;
+  }
+
+  .stage-tab.active {
+    background: var(--text-primary);
+    color: white;
+    border-color: var(--text-primary);
+  }
+
+  .stage-tab.completed {
+    background: var(--primary-light);
+    color: var(--primary-dark);
+    border-color: var(--primary-light);
+  }
+
+  .panel-body { padding: 20px 24px; flex: 1; }
+
+  .panel-section { margin-bottom: 24px; }
+
+  .panel-section-title {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    margin-bottom: 10px;
+  }
+
+  .ai-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 14px;
+    margin-bottom: 10px;
+  }
+
+  .ai-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--purple);
+    margin-bottom: 6px;
+  }
+
+  .ai-pulse {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--purple);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  .ai-content {
+    font-size: 13px;
+    color: var(--text-primary);
+    line-height: 1.55;
+  }
+
+  .ai-rationale {
+    font-size: 11px;
+    color: var(--text-secondary);
+    font-style: italic;
+    margin-top: 5px;
+    padding-top: 5px;
+    border-top: 1px solid var(--border);
+    line-height: 1.5;
+  }
+
+  .fw-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: var(--purple-light);
+    color: var(--purple);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 6px;
+    margin-right: 5px;
+    margin-bottom: 5px;
+  }
+
+  .fw-domain-badge {
+    font-size: 9px;
+    background: rgba(118,53,220,0.15);
+    padding: 1px 5px;
+    border-radius: 4px;
+  }
+
+  .fw-confidence {
+    font-size: 10px;
+    color: var(--primary);
+    font-weight: 600;
+    margin-left: 4px;
+  }
+
+  .source-obs-card {
+    background: var(--bg);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+    margin-bottom: 6px;
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--text-primary);
+    border-left: 3px solid var(--border);
+  }
+
+  .source-obs-card.barrier { border-left-color: var(--error); }
+  .source-obs-card.energy { border-left-color: var(--warning); }
+
+  .obs-meta {
+    display: flex;
+    gap: 8px;
+    margin-top: 5px;
+  }
+
+  .obs-chip {
+    font-size: 10px;
+    padding: 2px 7px;
+    border-radius: 5px;
+    font-weight: 600;
+  }
+
+  .chip-barrier { background: var(--error-light); color: var(--error); }
+  .chip-energy { background: var(--warning-light); color: #B76E00; }
+  .chip-signal { background: var(--info-light); color: var(--info); }
+
+  .endorser-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--bg);
+    font-size: 13px;
+  }
+
+  .endorser-avatar {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    font-size: 10px;
+    font-weight: 700;
+    color: white;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .endorser-name { font-weight: 600; flex: 1; }
+  .endorser-note { font-size: 11px; color: var(--text-secondary); }
+
+  .endorse-btn {
+    width: 100%;
+    height: 40px;
+    border: 1.5px dashed var(--border);
+    border-radius: var(--radius-sm);
+    background: transparent;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all 0.15s;
+    margin-top: 8px;
+  }
+
+  .endorse-btn:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-light); }
+
+  .panel-actions {
+    padding: 16px 24px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+    background: var(--surface);
+    position: sticky;
+    bottom: 0;
+  }
+
+  .btn-move {
+    flex: 1;
+    height: 40px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    border: none;
+    background: var(--primary);
+    color: white;
+    transition: all 0.15s;
+  }
+
+  .btn-move:hover { background: var(--primary-dark); }
+
+  .btn-secondary-action {
+    height: 40px;
+    padding: 0 16px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-primary);
+    transition: all 0.15s;
+  }
+
+  .btn-secondary-action:hover { background: var(--bg); }
+
+  .enquiry-question {
+    background: var(--bg);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+    margin-bottom: 6px;
+  }
+
+  .eq-question { font-size: 12px; font-weight: 600; margin-bottom: 4px; }
+  .eq-rationale { font-size: 10px; color: var(--text-secondary); font-style: italic; }
+
+  .eq-response-count {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 6px;
+  }
+
+  .eq-resp-bar { flex: 1; height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; margin-right: 8px; }
+  .eq-resp-fill { height: 100%; background: var(--info); border-radius: 2px; }
+  .eq-resp-label { font-size: 10px; color: var(--text-secondary); }
+
+  .synthesis-finding {
+    display: flex;
+    gap: 8px;
+    padding: 8px 0;
+    font-size: 12px;
+    border-bottom: 1px solid var(--bg);
+    line-height: 1.5;
+  }
+
+  .finding-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+
+  .action-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--bg);
+    font-size: 12px;
+  }
+
+  .action-status {
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .action-status.done { background: var(--primary); border-color: var(--primary); }
+
+  .action-text { flex: 1; line-height: 1.45; }
+  .action-meta { font-size: 10px; color: var(--text-secondary); margin-top: 2px; }
+
+  .stage-note {
+    background: var(--info-light);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+    font-size: 12px;
+    color: var(--info);
+    line-height: 1.5;
+    margin-bottom: 16px;
+  }
+
+  /* Energy badge */
+  .energy-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: var(--warning-light);
+    color: #B76E00;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 5px;
+  }
+
+  /* Empty column state */
+  .col-empty {
+    border: 2px dashed var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    text-align: center;
+    color: var(--text-disabled);
+    font-size: 12px;
+    line-height: 1.6;
+  }
+
+  /* ── WIREFRAME MODE (toggled from index) ── */
+  body.wireframe-mode, body.wireframe-mode * {
+    font-family: 'Balsamiq Sans', cursive !important;
+    color: #333 !important;
+  }
+  body.wireframe-mode {
+    background: #F5F5F5 !important;
+  }
+  body.wireframe-mode .phone-shell,
+  body.wireframe-mode .modal-shell {
+    box-shadow: 4px 4px 0 #999 !important;
+  }
+  body.wireframe-mode .top-nav,
+  body.wireframe-mode .status-bar,
+  body.wireframe-mode .nav-tabs,
+  body.wireframe-mode .bottom-bar,
+  body.wireframe-mode .bottom-nav,
+  body.wireframe-mode .modal-header,
+  body.wireframe-mode .stepper,
+  body.wireframe-mode .panel-header,
+  body.wireframe-mode .panel-actions {
+    background: #EFEFEF !important;
+    border-color: #999 !important;
+  }
+  body.wireframe-mode .site-hero,
+  body.wireframe-mode .talk-card,
+  body.wireframe-mode .alert-bar {
+    background: #333 !important;
+  }
+  body.wireframe-mode .site-hero *,
+  body.wireframe-mode .talk-card * {
+    color: #EEE !important;
+  }
+  body.wireframe-mode .card,
+  body.wireframe-mode .flow-card,
+  body.wireframe-mode .site-card,
+  body.wireframe-mode .date-option,
+  body.wireframe-mode .focus-card,
+  body.wireframe-mode .ai-card,
+  body.wireframe-mode .source-obs-card,
+  body.wireframe-mode .enquiry-question,
+  body.wireframe-mode .action-item,
+  body.wireframe-mode .enquiry-card,
+  body.wireframe-mode .visit-card,
+  body.wireframe-mode .stat-tile,
+  body.wireframe-mode .blueprint-card,
+  body.wireframe-mode .insight-strip,
+  body.wireframe-mode .pipeline-stage,
+  body.wireframe-mode .work-type-chip,
+  body.wireframe-mode .obs-textarea {
+    background: white !important;
+    border: 2px solid #999 !important;
+    border-radius: 4px !important;
+    box-shadow: 2px 2px 0 #CCC !important;
+  }
+  body.wireframe-mode .card.active,
+  body.wireframe-mode .site-card.selected,
+  body.wireframe-mode .date-option.selected,
+  body.wireframe-mode .focus-card.selected,
+  body.wireframe-mode .work-type-chip.selected {
+    border: 2px solid #333 !important;
+    background: #F5F5F5 !important;
+    box-shadow: 2px 2px 0 #999 !important;
+  }
+  body.wireframe-mode .card-type-badge,
+  body.wireframe-mode .focus-source,
+  body.wireframe-mode .obs-signal-badge,
+  body.wireframe-mode .is-stage,
+  body.wireframe-mode .factor-maturity,
+  body.wireframe-mode .visit-signal-chip,
+  body.wireframe-mode .energy-badge,
+  body.wireframe-mode .obs-chip,
+  body.wireframe-mode .fw-tag,
+  body.wireframe-mode .endorsement-avatar,
+  body.wireframe-mode .endorser-avatar,
+  body.wireframe-mode .avatar,
+  body.wireframe-mode .nav-avatar,
+  body.wireframe-mode .step-circle.active,
+  body.wireframe-mode .step-circle.complete {
+    background: #555 !important;
+    color: white !important;
+    border-color: #555 !important;
+  }
+  body.wireframe-mode .btn-next,
+  body.wireframe-mode .btn-submit,
+  body.wireframe-mode .btn-move,
+  body.wireframe-mode .talk-btn-primary,
+  body.wireframe-mode .site-action-btn.btn-add-obs,
+  body.wireframe-mode .fab {
+    background: #333 !important;
+    color: white !important;
+    border-radius: 4px !important;
+    box-shadow: 2px 2px 0 #999 !important;
+  }
+  body.wireframe-mode .btn-back,
+  body.wireframe-mode .btn-secondary-action,
+  body.wireframe-mode .talk-btn-secondary,
+  body.wireframe-mode .btn-outlined,
+  body.wireframe-mode .site-action-btn.btn-plan-visit,
+  body.wireframe-mode .site-action-btn.btn-report {
+    background: white !important;
+    color: #333 !important;
+    border: 2px solid #999 !important;
+    border-radius: 4px !important;
+  }
+  body.wireframe-mode .detail-panel {
+    box-shadow: -4px 0 0 #999 !important;
+    border-left: 2px solid #999 !important;
+  }
+  body.wireframe-mode .stage-tab.active {
+    background: #333 !important;
+    color: white !important;
+    border-color: #333 !important;
+    border-radius: 4px !important;
+  }
+  body.wireframe-mode .stage-tab {
+    border-radius: 4px !important;
+    border-color: #999 !important;
+  }
+  body.wireframe-mode .progress-fill,
+  body.wireframe-mode .logo-dot,
+  body.wireframe-mode .notif-dot,
+  body.wireframe-mode .recording-dot,
+  body.wireframe-mode .ai-pulse {
+    background: #555 !important;
+  }
+  body.wireframe-mode .step-connector.complete { background: #555 !important; }
+  body.wireframe-mode .toggle.on { background: #555 !important; }
+  body.wireframe-mode .endorse-btn {
+    border: 2px dashed #999 !important;
+    border-radius: 4px !important;
+    background: white !important;
+  }
+  body.wireframe-mode .kanban-col .col-count {
+    background: #E0E0E0 !important;
+    color: #333 !important;
+  }
+  /* Annotation badges in wireframe mode */
+  body.wireframe-mode .wf-annotation {
+    display: flex !important;
+  }
+
+</style>
+</head>
+<body>
+
+<!-- TOP NAV -->
+<nav class="topnav">
+  <div class="nav-logo">
+    <div class="nav-logo-dot"></div>
+    Hiviz
+  </div>
+  <div class="nav-workspace-chip">
+    <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+    Insights
+    <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M19 9l-7 7-7-7"/></svg>
+  </div>
+  <div class="nav-divider"></div>
+  <div class="nav-tabs">
+    <div class="nav-tab">Dashboard</div>
+    <div class="nav-tab active">Pipeline</div>
+    <div class="nav-tab">Observations</div>
+    <div class="nav-tab">Resolved</div>
+    <div class="nav-tab">Settings</div>
+  </div>
+  <div class="nav-right">
+    <div class="nav-icon-btn">
+      <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      <div class="notif-badge">4</div>
+    </div>
+    <div class="avatar">SJ</div>
+  </div>
+</nav>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+  <div>
+    <div class="page-title">Pipeline</div>
+    <div class="page-subtitle">7 unresolved insights across 4 sites</div>
+  </div>
+  <div class="header-actions">
+    <button class="btn btn-outlined" onclick="openNewInsight()">
+      <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+      New Insight
+    </button>
+  </div>
+</div>
+
+<!-- KANBAN -->
+<div class="kanban-wrap">
+  <div class="kanban-board">
+
+    <!-- PRIORITISE -->
+    <div class="kanban-col col-prioritise">
+      <div class="col-header">
+        <div class="col-count">3</div>
+        <div>
+          <div class="col-title">Prioritise</div>
+          <div class="col-subtitle">Endorse for action &amp; triage</div>
+        </div>
+      </div>
+      <div class="col-cards">
+
+        <div class="card" onclick="openPanel('heat')">
+          <div class="card-type-badge badge-cross-site">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            Cross-site Pattern
+          </div>
+          <div class="card-title">Heat Management Plan Non-Compliance During Elevated Temperature Events</div>
+          <div class="card-meta">
+            <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            Copper Flats Mine, +2
+            <div class="card-meta-dot"></div>
+            <span class="pattern-analysis-chip">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+              Pattern Analy...
+            </span>
+          </div>
+          <div class="card-footer">
+            <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--primary);font-weight:600;">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+              Endorsed · ready to learn
+            </div>
+            <div class="endorsement-row">
+              <div class="endorsement-avatars">
+                <div class="endorsement-avatar" style="background:#7635DC;">KO</div>
+                <div class="endorsement-avatar" style="background:#006C9C;">TM</div>
+              </div>
+              <span>2</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" onclick="openPanel('loto')">
+          <div class="card-type-badge badge-worksite">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+            Worksite Trend
+          </div>
+          <div class="card-title">Exemplary LOTO Buddy-Check Practice Emerging at Sylvania</div>
+          <div class="card-meta">
+            <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            Sylvania Underground
+            <div class="card-meta-dot"></div>
+            <span class="pattern-analysis-chip">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+              Pattern Analy...
+            </span>
+          </div>
+          <div class="card-footer">
+            <div class="endorsement-row">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/></svg>
+              <div class="endorsement-avatars">
+                <div class="endorsement-avatar" style="background:#00AB55;">AL</div>
+                <div class="endorsement-avatar" style="background:#FF5630;">PM</div>
+                <div class="endorsement-avatar" style="background:#7635DC;">KO</div>
+                <div class="endorsement-avatar" style="background:#006C9C;">TM</div>
+              </div>
+              <span>7</span>
+            </div>
+            <div style="font-size:11px;color:var(--text-secondary);">15 sites</div>
+          </div>
+        </div>
+
+        <div class="card" onclick="openPanel('fragmentation')">
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;">
+            <div class="card-type-badge badge-critical" style="margin-bottom:0;">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+              Critical Observation
+            </div>
+            <div class="card-type-badge badge-investigation" style="margin-bottom:0;">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+              From Investigation
+            </div>
+          </div>
+          <div class="card-title">Secondary Fragmentation Risk Underestimated in Elevated Blasting Operations</div>
+          <div class="card-meta">
+            <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            Northgate Open Cut
+          </div>
+          <div class="card-footer">
+            <div class="endorsement-row">
+              <div class="endorsement-avatars">
+                <div class="endorsement-avatar" style="background:#FF5630;">PN</div>
+                <div class="endorsement-avatar" style="background:#7635DC;">KO</div>
+              </div>
+              <span>4</span>
+            </div>
+            <div style="font-size:11px;color:var(--text-secondary);">15 sites</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- LEARN -->
+    <div class="kanban-col col-learn">
+      <div class="col-header">
+        <div class="col-count">2</div>
+        <div>
+          <div class="col-title">Learn</div>
+          <div class="col-subtitle">Learning actions &amp; questions</div>
+        </div>
+      </div>
+      <div class="col-cards">
+
+        <div class="card" onclick="openPanel('prestart')">
+          <div class="card-type-badge badge-cross-site">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            Cross-site Pattern
+          </div>
+          <div class="card-title">Pre-Start Check Non-Compliance Detected Across Heavy Vehicle Fleet</div>
+          <div class="card-meta">
+            <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            Northgate Open Cut, +2
+            <div class="card-meta-dot"></div>
+            <span class="pattern-analysis-chip">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+              Pattern Analy...
+            </span>
+          </div>
+          <div class="progress-row" style="margin-top:6px;">
+            <div class="progress-label">1/3 questions answered</div>
+            <div class="progress-bar"><div class="progress-fill" style="width:33%;background:var(--info);"></div></div>
+          </div>
+        </div>
+
+        <div class="card" onclick="openPanel('confined')">
+          <div class="card-type-badge badge-worksite">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+            Worksite Trend
+          </div>
+          <div class="card-title">Confined Space Entry Permit Failures Trending at Ridgeback Processing</div>
+          <div class="card-meta">
+            <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            Ridgeback Processing
+            <div class="card-meta-dot"></div>
+            <span class="pattern-analysis-chip">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+              Pattern Analy...
+            </span>
+          </div>
+          <div class="progress-row" style="margin-top:6px;">
+            <div class="progress-label">1/3 questions answered</div>
+            <div class="progress-bar"><div class="progress-fill" style="width:33%;background:var(--info);"></div></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- IMPROVE -->
+    <div class="kanban-col col-improve">
+      <div class="col-header">
+        <div class="col-count">2</div>
+        <div>
+          <div class="col-title">Improve</div>
+          <div class="col-subtitle">Improvement actions &amp; resolution</div>
+        </div>
+      </div>
+      <div class="col-cards">
+
+        <div class="card" onclick="openPanel('berm')">
+          <div class="card-type-badge badge-critical">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+            Critical Observation
+          </div>
+          <div class="card-title">Berm Height Non-Compliance on Pit 3 Haul Road</div>
+          <div class="card-meta">
+            <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            Northgate Open Cut
+            <div class="card-meta-dot"></div>
+            <span class="assignee-chip">Jake Morrow</span>
+          </div>
+          <div class="progress-row" style="margin-top:6px;">
+            <div class="progress-label">1/3 actions complete</div>
+            <div class="progress-bar"><div class="progress-fill" style="width:33%;background:var(--purple);"></div></div>
+          </div>
+        </div>
+
+        <div class="card" onclick="openPanel('cable')">
+          <div class="card-type-badge badge-critical">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+            Critical Observation
+          </div>
+          <div class="card-title">Cable Strike Near-Miss in 7 Level North Development</div>
+          <div class="card-meta">
+            <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            Sylvania Underground
+            <div class="card-meta-dot"></div>
+            <span class="assignee-chip">Priya Nair</span>
+          </div>
+          <div class="progress-row" style="margin-top:6px;">
+            <div class="progress-label">2/3 actions complete</div>
+            <div class="progress-bar"><div class="progress-fill" style="width:67%;background:var(--purple);"></div></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- RESOLVED -->
+    <div class="kanban-col col-resolved" style="width:280px;">
+      <div class="col-header">
+        <div class="col-count" style="background:var(--primary-light);">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div>
+          <div class="col-title">Resolved</div>
+          <div class="col-subtitle">Last 45 days</div>
+        </div>
+      </div>
+      <div class="col-cards">
+
+        <div class="card" onclick="openPanel('load')">
+          <div class="card-type-badge badge-critical">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+            Critical Observation
+          </div>
+          <div class="card-title">Unsecured Load Restraints on Light Vehicle Fleet</div>
+          <div class="card-meta">
+            <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            Northgate Open Cut
+            <div class="card-meta-dot"></div>
+            Jake Morrow
+          </div>
+          <div class="resolved-date">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            Resolved · 17d ago
+          </div>
+        </div>
+
+        <div class="card" onclick="openPanel('spotter')">
+          <div class="card-type-badge badge-cross-site">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            Cross-site Pattern
+          </div>
+          <div class="card-title">Inadequate Spotter Communication Protocol on Heavy Vehicle Operations</div>
+          <div class="card-meta">
+            <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            Ridgeback Processing, +3
+            <div class="card-meta-dot"></div>
+            <span class="pattern-analysis-chip" style="color:var(--text-secondary);">Pattern Analy...</span>
+          </div>
+          <div class="resolved-date">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            Resolved · 28d ago
+          </div>
+        </div>
+
+        <div class="card" onclick="openPanel('heat-illness')">
+          <div class="card-type-badge badge-worksite">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+            Worksite Trend
+          </div>
+          <div class="card-title">Heat Illness Near-Miss Cluster at Blackrock Coal (Summer Season)</div>
+          <div class="card-meta">
+            <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            Blackrock Coal
+            <div class="card-meta-dot"></div>
+            <span class="pattern-analysis-chip" style="color:var(--text-secondary);">Pattern Analy...</span>
+          </div>
+          <div class="resolved-date">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            Resolved · 40d ago
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- DETAIL PANEL OVERLAY -->
+<div class="detail-overlay" id="detailOverlay" onclick="closePanel(event)">
+  <div class="detail-panel" id="detailPanel">
+
+    <!-- Panel content injected by JS -->
+    <div class="panel-header">
+      <div class="panel-header-top">
+        <div id="panelBadge"></div>
+        <div class="panel-close" onclick="closePanel()">
+          <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </div>
+      </div>
+      <div id="panelTitle" style="font-size:16px;font-weight:700;line-height:1.4;margin-bottom:12px;"></div>
+      <div class="panel-stage-tabs" id="panelStageTabs"></div>
+    </div>
+
+    <div class="panel-body" id="panelBody"></div>
+
+    <div class="panel-actions" id="panelActions"></div>
+
+  </div>
+</div>
+
+<script>
+const CARDS = {
+
+  heat: {
+    badge: { text: 'Cross-site Pattern', cls: 'badge-cross-site' },
+    title: 'Heat Management Plan Non-Compliance During Elevated Temperature Events',
+    stage: 'prioritise',
+    meta: 'Copper Flats Mine, +2 sites · 4 observations · Thermal energy',
+    body_prioritise: `
+      <div class="stage-note">
+        AI routed this to the pipeline — 4 unwanted energy events (thermal) detected across 3 sites in 14 days. Barrier assessment: barrier_degraded on 3 of 4 observations.
+      </div>
+      <div class="panel-section">
+        <div class="panel-section-title">AI Pattern Summary</div>
+        <div class="ai-card">
+          <div class="ai-label"><div class="ai-pulse"></div>AI has suggested</div>
+          <div class="ai-content">Heat management plan requirements are not being applied consistently during sustained elevated temperature periods. Workers are continuing tasks beyond threshold temperatures without mandatory rest or hydration breaks.</div>
+          <div class="ai-rationale">Based on: 4 observations across Copper Flats, Ridgeback, and Northgate — all describing work continuing past temperature thresholds. 3 of 4 flagged barrier_degraded on thermal energy.</div>
+        </div>
+        <div class="ai-card">
+          <div class="ai-label"><div class="ai-pulse"></div>Likely systemic cause</div>
+          <div class="ai-content">Temperature monitoring and enforcement responsibilities are not clearly assigned during operations — supervisors are aware of the plan but the trigger mechanism for stopping work is ambiguous in practice.</div>
+          <div class="ai-rationale">Consistent across all 4 observations: work continued because "someone else was supposed to call it."</div>
+        </div>
+      </div>
+      <div class="panel-section">
+        <div class="panel-section-title">Energy Classification</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;">
+          <span class="energy-badge">🌡 Thermal</span>
+          <span class="obs-chip chip-barrier">barrier_degraded</span>
+          <span class="obs-chip chip-energy">High release potential</span>
+        </div>
+        <div style="font-size:11px;color:var(--text-secondary);font-style:italic;">Control exists but not functioning as designed — temperature thresholds not triggering mandatory stops.</div>
+      </div>
+      <div class="panel-section">
+        <div class="panel-section-title">Source Observations (4)</div>
+        <div class="source-obs-card energy">
+          <div>"Crew working through 42°C — no rest break called despite plan threshold being 38°C. TBH did not check in."</div>
+          <div class="obs-meta">
+            <span class="obs-chip chip-energy">Thermal</span>
+            <span class="obs-chip chip-barrier">barrier_degraded</span>
+            <span style="font-size:10px;color:var(--text-secondary);">Copper Flats · 2d ago</span>
+          </div>
+        </div>
+        <div class="source-obs-card energy">
+          <div>"Temperature hit 40°C at 1100. No work stop. Observed crew continuing ore loading."</div>
+          <div class="obs-meta">
+            <span class="obs-chip chip-energy">Thermal</span>
+            <span class="obs-chip chip-barrier">barrier_degraded</span>
+            <span style="font-size:10px;color:var(--text-secondary);">Ridgeback · 4d ago</span>
+          </div>
+        </div>
+      </div>
+      <div class="panel-section">
+        <div class="panel-section-title">Forge Works Map® Classification</div>
+        <div style="margin-bottom:8px;">
+          <div class="fw-tag">management_systems <span class="fw-domain-badge">ENABLE</span><span class="fw-confidence">0.84 ✓</span></div>
+          <div class="fw-tag">operational_management <span class="fw-domain-badge">ENABLE</span><span class="fw-confidence">0.72 ✓</span></div>
+        </div>
+        <div style="font-size:11px;color:var(--text-secondary);font-style:italic;">management_systems: The heat management plan exists and is referenced, but does not specify who is responsible for calling a work stop — the system content gap is the cause. / operational_management: Managers visiting these sites have not identified or actioned the enforcement ambiguity.</div>
+      </div>
+      <div class="panel-section">
+        <div class="panel-section-title">Endorsements (2)</div>
+        <div class="endorser-row">
+          <div class="endorser-avatar" style="background:#7635DC;">KO</div>
+          <div>
+            <div class="endorser-name">Kwame Osei</div>
+            <div class="endorser-note">Saw the same pattern at Blackrock last summer — this needs a system fix, not individual coaching</div>
+          </div>
+        </div>
+        <div class="endorser-row">
+          <div class="endorser-avatar" style="background:#006C9C;">TM</div>
+          <div>
+            <div class="endorser-name">Tanya Morrow</div>
+            <div class="endorser-note">Regional heat plan review is overdue — this is the right trigger</div>
+          </div>
+        </div>
+        <button class="endorse-btn">
+          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/></svg>
+          Add your endorsement
+        </button>
+      </div>
+    `,
+    actions_prioritise: `
+      <button class="btn-move" onclick="alert('Moving to Learn — AI questions will be generated')">Move to Learn →</button>
+      <button class="btn-secondary-action">Reject</button>
+    `
+  },
+
+  prestart: {
+    badge: { text: 'Cross-site Pattern', cls: 'badge-cross-site' },
+    title: 'Pre-Start Check Non-Compliance Detected Across Heavy Vehicle Fleet',
+    stage: 'learn',
+    body_learn: `
+      <div class="stage-note" style="background:var(--info-light);color:var(--info);">
+        Enquiry dispatched to 8 supervisors across 3 sites. 1 of 3 questions has responses. AI synthesis is live — updates as responses arrive.
+      </div>
+      <div class="panel-section">
+        <div class="panel-section-title">AI-Generated Enquiry Questions</div>
+        <div class="enquiry-question">
+          <div class="eq-question">How is the pre-start check carried out in practice on your site — from when the operator arrives to when the machine moves?</div>
+          <div class="eq-rationale">Work as Done — captures gap between documented procedure and actual practice. Targets management_systems gap at Compliant maturity.</div>
+          <div class="eq-response-count">
+            <div class="eq-resp-bar"><div class="eq-resp-fill" style="width:62%;"></div></div>
+            <div class="eq-resp-label">5/8 responded</div>
+          </div>
+        </div>
+        <div class="enquiry-question">
+          <div class="eq-question">Is a completed pre-start check confirmed before every machine movement, or are there situations where it gets skipped or deferred?</div>
+          <div class="eq-rationale">Assurance Check — verifies whether the root cause condition is being addressed.</div>
+          <div class="eq-response-count">
+            <div class="eq-resp-bar"><div class="eq-resp-fill" style="width:0%;"></div></div>
+            <div class="eq-resp-label">0/8 responded</div>
+          </div>
+        </div>
+        <div class="enquiry-question">
+          <div class="eq-question">What would need to change for pre-start checks to happen reliably every time — even when the crew is short or the pressure is on?</div>
+          <div class="eq-rationale">Gap Identification — invites supervisors to name the specific fix themselves.</div>
+          <div class="eq-response-count">
+            <div class="eq-resp-bar"><div class="eq-resp-fill" style="width:0%;"></div></div>
+            <div class="eq-resp-label">0/8 responded</div>
+          </div>
+        </div>
+      </div>
+      <div class="panel-section">
+        <div class="panel-section-title">Live Synthesis (5 responses so far)</div>
+        <div class="synthesis-finding"><div class="finding-icon">🔴</div><div>4 of 5 supervisors confirm pre-start checks are signed off before machines move on paper, but physical checks are often done by the operator alone without a second person confirming.</div></div>
+        <div class="synthesis-finding"><div class="finding-icon">🟠</div><div>Time pressure consistently cited — "if the shovel is waiting, the pressure to get moving is real."</div></div>
+        <div class="synthesis-finding"><div class="finding-icon">💡</div><div>Two supervisors independently suggested a buddy-check system embedded in the pre-start form would address the gap without adding time.</div></div>
+      </div>
+    `,
+    actions_learn: `
+      <button class="btn-move" onclick="alert('Moving to Improve — corrective actions can now be created')">Move to Improve →</button>
+      <button class="btn-secondary-action">View Toolbox Talk</button>
+    `
+  },
+
+  cable: {
+    badge: { text: 'Critical Observation', cls: 'badge-critical' },
+    title: 'Cable Strike Near-Miss in 7 Level North Development',
+    stage: 'improve',
+    body_improve: `
+      <div class="panel-section">
+        <div class="panel-section-title">Corrective Actions (2/3 complete)</div>
+        <div class="action-item">
+          <div class="action-status done"></div>
+          <div>
+            <div class="action-text">Mark all electrical cable routes on the 7 Level development plan and brief the heading crew before each shift.</div>
+            <div class="action-meta">Completed by Priya Nair · 3 days ago</div>
+          </div>
+        </div>
+        <div class="action-item">
+          <div class="action-status done"></div>
+          <div>
+            <div class="action-text">Review and update the cable protection standard for development headings — add mandatory sweep before drilling commences.</div>
+            <div class="action-meta">Completed by Site Manager · 5 days ago</div>
+          </div>
+        </div>
+        <div class="action-item">
+          <div class="action-status"></div>
+          <div>
+            <div class="action-text">Update PTW template for underground development to include electrical services check in the pre-task brief.</div>
+            <div class="action-meta">Assigned to Priya Nair · Due in 4 days</div>
+          </div>
+        </div>
+      </div>
+      <div class="panel-section">
+        <div class="panel-section-title">Forge Works Map®</div>
+        <div class="fw-tag">management_systems <span class="fw-domain-badge">ENABLE</span><span class="fw-confidence">0.88 ✓</span></div>
+        <div style="font-size:11px;color:var(--text-secondary);font-style:italic;margin-top:6px;">PTW template for development headings does not include electrical services verification — the system gap is explicit and directly evidenced by the near-miss.</div>
+      </div>
+      <div class="panel-section">
+        <div class="panel-section-title">Energy Classification</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          <span class="energy-badge">⚡ Electrical</span>
+          <span class="obs-chip chip-barrier">barrier_absent</span>
+          <span class="obs-chip chip-energy">Catastrophic potential</span>
+        </div>
+      </div>
+    `,
+    actions_improve: `
+      <button class="btn-move" onclick="alert('Marking as Resolved — all endorsers will be notified')">Mark Resolved ✓</button>
+      <button class="btn-secondary-action">Add Action</button>
+    `
+  }
+
+}
+
+// Default content for cards without full data
+function defaultBody(card) {
+  return `<div style="padding:20px 0;color:var(--text-secondary);font-size:13px;line-height:1.6;">
+    This is the ${card.stage} stage view for this insight. In the full build this panel shows the relevant state-based content — AI suggestions, enquiry questions, corrective actions — depending on which column the card is in.
+  </div>`
+}
+
+function getStageContent(id, card) {
+  const stage = card.stage
+  const bodyKey = `body_${stage}`
+  const actionsKey = `actions_${stage}`
+  return {
+    body: card[bodyKey] || defaultBody(card),
+    actions: card[actionsKey] || `<button class="btn-move">Continue →</button>`
+  }
+}
+
+function getStageTabs(stage) {
+  const stages = [
+    { key: 'prioritise', label: 'Prioritise' },
+    { key: 'learn', label: 'Learn' },
+    { key: 'improve', label: 'Improve' },
+  ]
+  return stages.map(s => {
+    const idx = stages.findIndex(x => x.key === stage)
+    const thisIdx = stages.findIndex(x => x.key === s.key)
+    if (thisIdx < idx) return `<div class="stage-tab completed">${s.label} ✓</div>`
+    if (s.key === stage) return `<div class="stage-tab active">${s.label}</div>`
+    return `<div class="stage-tab">${s.label}</div>`
+  }).join('')
+}
+
+function openPanel(id) {
+  const card = CARDS[id]
+  if (!card) return
+
+  document.querySelectorAll('.card').forEach(c => c.classList.remove('active'))
+  event.currentTarget.classList.add('active')
+
+  const badgeEl = document.getElementById('panelBadge')
+  badgeEl.innerHTML = `<div class="card-type-badge ${card.badge.cls}" style="font-size:10px;">${card.badge.text}</div>`
+
+  document.getElementById('panelTitle').textContent = card.title
+  document.getElementById('panelStageTabs').innerHTML = getStageTabs(card.stage)
+
+  const content = getStageContent(id, card)
+  document.getElementById('panelBody').innerHTML = content.body
+  document.getElementById('panelActions').innerHTML = content.actions
+
+  document.getElementById('detailOverlay').classList.add('open')
+  document.body.style.overflow = 'hidden'
+}
+
+function closePanel(e) {
+  if (e && e.target !== document.getElementById('detailOverlay')) return
+  document.getElementById('detailOverlay').classList.remove('open')
+  document.body.style.overflow = ''
+  document.querySelectorAll('.card').forEach(c => c.classList.remove('active'))
+}
+
+function openNewInsight() {
+  alert('New Insight — Manual entry form. Opens full page or modal depending on context.')
+}
+</script>
+
+<script>
+// Apply wireframe mode if set from index
+(function() {
+  var mode = localStorage.getItem('hiviz_wireframe_mode');
+  if (mode === 'wireframe') document.body.classList.add('wireframe-mode');
+})();
+</script>
+
+</body>
+</html>

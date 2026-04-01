@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Add Observation — Hiviz</title>
+<link href="https://fonts.googleapis.com/css2?family=Balsamiq+Sans:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F4F6F8; --surface: #FFFFFF; --border: #E5E8EB;
+    --text-primary: #1C252E; --text-secondary: #637381; --text-disabled: #919EAB;
+    --primary: #00AB55; --primary-light: #D1FAE5; --primary-dark: #007B40;
+    --error: #FF5630; --error-light: #FFE9E5;
+    --warning: #FFAB00; --warning-light: #FFF3CD;
+    --info: #006C9C; --info-light: #E0F4FF;
+    --purple: #7635DC; --purple-light: #EFE6FF;
+    --radius: 12px; --radius-sm: 8px;
+    --shadow-card: 0 1px 3px rgba(0,0,0,0.08);
+    --shadow-elevated: 0 8px 24px rgba(0,0,0,0.12);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', sans-serif; background: #1C252E; color: var(--text-primary); min-height: 100vh; display: flex; align-items: flex-end; justify-content: center; }
+
+  /* Full page version on left, modal version on right */
+  .demo-layout { display: flex; gap: 40px; align-items: flex-end; justify-content: center; width: 100%; padding: 40px; min-height: 100vh; }
+
+  .demo-label { font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: rgba(255,255,255,0.4); text-align: center; margin-bottom: 12px; }
+
+  /* Phone shell */
+  .phone-shell { width: 390px; background: var(--surface); border-radius: 0; display: flex; flex-direction: column; box-shadow: 0 0 60px rgba(0,0,0,0.4); overflow: hidden; max-height: 844px; }
+
+  /* Status bar */
+  .status-bar { height: 44px; background: var(--surface); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; flex-shrink: 0; }
+  .status-time { font-size: 15px; font-weight: 700; }
+  .status-right { display: flex; align-items: center; gap: 8px; }
+
+  /* Top nav */
+  .top-nav { height: 52px; padding: 0 16px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+  .back-btn { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-secondary); border-radius: 8px; }
+  .nav-title { font-size: 16px; font-weight: 700; flex: 1; }
+  .nav-site-chip { display: flex; align-items: center; gap: 5px; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 4px 10px; font-size: 12px; font-weight: 500; color: var(--text-secondary); margin-left: auto; }
+
+  /* Form */
+  .form-body { flex: 1; overflow-y: auto; padding: 16px; }
+  .form-body::-webkit-scrollbar { display: none; }
+
+  .form-section { margin-bottom: 20px; }
+  .form-label { font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+
+  /* Work type selector */
+  .work-type-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .work-type-chip { background: var(--bg); border: 1.5px solid var(--border); border-radius: var(--radius-sm); padding: 10px 12px; font-size: 12px; font-weight: 600; cursor: pointer; text-align: center; transition: all 0.15s; }
+  .work-type-chip:hover { border-color: var(--primary); }
+  .work-type-chip.selected { border-color: var(--primary); background: var(--primary-light); color: var(--primary-dark); }
+
+  /* Text area */
+  .obs-textarea { width: 100%; min-height: 100px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); padding: 12px; font-family: 'Inter', sans-serif; font-size: 14px; color: var(--text-primary); resize: none; outline: none; transition: border-color 0.15s; background: var(--surface); }
+  .obs-textarea:focus { border-color: var(--primary); }
+  .obs-textarea::placeholder { color: var(--text-disabled); }
+
+  /* Voice note button */
+  .voice-row { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+  .mic-btn { display: flex; align-items: center; gap: 8px; background: var(--bg); border: 1.5px solid var(--border); border-radius: 20px; padding: 8px 14px; font-size: 12px; font-weight: 600; color: var(--text-secondary); cursor: pointer; transition: all 0.15s; }
+  .mic-btn:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-light); }
+  .mic-btn.recording { border-color: var(--error); color: var(--error); background: var(--error-light); }
+  .recording-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--error); animation: blink 1s infinite; }
+  @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+  .photo-btn { display: flex; align-items: center; gap: 6px; background: var(--bg); border: 1.5px solid var(--border); border-radius: 20px; padding: 8px 14px; font-size: 12px; font-weight: 600; color: var(--text-secondary); cursor: pointer; margin-left: auto; }
+
+  /* Involved role */
+  .role-grid { display: flex; flex-wrap: wrap; gap: 6px; }
+  .role-chip { background: var(--bg); border: 1.5px solid var(--border); border-radius: 20px; padding: 6px 12px; font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.15s; }
+  .role-chip:hover { border-color: var(--primary); }
+  .role-chip.selected { border-color: var(--primary); background: var(--primary-light); color: var(--primary-dark); font-weight: 600; }
+
+  /* Stop work toggle */
+  .toggle-row { display: flex; align-items: center; justify-content: space-between; background: var(--bg); border-radius: var(--radius-sm); padding: 12px 14px; }
+  .toggle-label { font-size: 14px; font-weight: 600; }
+  .toggle-sub { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+  .toggle { width: 44px; height: 26px; border-radius: 13px; background: var(--border); cursor: pointer; position: relative; transition: background 0.2s; flex-shrink: 0; }
+  .toggle.on { background: var(--primary); }
+  .toggle-thumb { position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: white; transition: transform 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+  .toggle.on .toggle-thumb { transform: translateX(18px); }
+
+  /* AI hint */
+  .ai-hint { display: flex; align-items: center; gap: 6px; background: var(--purple-light); border-radius: var(--radius-sm); padding: 8px 10px; font-size: 11px; color: var(--purple); margin-top: 8px; }
+
+  /* Bottom bar */
+  .bottom-bar { padding: 12px 16px; border-top: 1px solid var(--border); background: var(--surface); flex-shrink: 0; }
+  .btn-submit { width: 100%; height: 48px; border-radius: var(--radius-sm); font-size: 14px; font-weight: 700; cursor: pointer; border: none; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; gap: 8px; }
+
+  /* Modal version */
+  .modal-shell { width: 390px; background: var(--surface); border-radius: 20px 20px 0 0; display: flex; flex-direction: column; box-shadow: 0 -8px 40px rgba(0,0,0,0.3); overflow: hidden; max-height: 720px; }
+  .modal-handle { width: 36px; height: 4px; background: var(--border); border-radius: 2px; margin: 10px auto 4px; flex-shrink: 0; }
+  .modal-header { padding: 10px 16px 14px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+  .modal-title { font-size: 16px; font-weight: 700; }
+  .modal-site { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+  .modal-close { width: 28px; height: 28px; border-radius: 50%; background: var(--bg); display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-secondary); }
+
+  /* FAB context */
+  .fab-context { position: relative; width: 390px; height: 120px; background: #2C3A47; border-radius: var(--radius); display: flex; align-items: flex-end; justify-content: flex-end; padding: 16px; overflow: hidden; }
+  .fab-bg-text { position: absolute; top: 10px; left: 14px; font-size: 11px; color: rgba(255,255,255,0.3); font-weight: 500; }
+  .fab-btn { width: 52px; height: 52px; border-radius: 50%; background: var(--primary); box-shadow: 0 4px 16px rgba(0,171,85,0.4); display: flex; align-items: center; justify-content: center; cursor: pointer; border: none; }
+  .fab-arrow { position: absolute; bottom: 76px; right: 30px; }
+
+  /* ── WIREFRAME MODE (toggled from index) ── */
+  body.wireframe-mode, body.wireframe-mode * {
+    font-family: 'Balsamiq Sans', cursive !important;
+    color: #333 !important;
+  }
+  body.wireframe-mode {
+    background: #F5F5F5 !important;
+  }
+  body.wireframe-mode .phone-shell,
+  body.wireframe-mode .modal-shell {
+    box-shadow: 4px 4px 0 #999 !important;
+  }
+  body.wireframe-mode .top-nav,
+  body.wireframe-mode .status-bar,
+  body.wireframe-mode .nav-tabs,
+  body.wireframe-mode .bottom-bar,
+  body.wireframe-mode .bottom-nav,
+  body.wireframe-mode .modal-header,
+  body.wireframe-mode .stepper,
+  body.wireframe-mode .panel-header,
+  body.wireframe-mode .panel-actions {
+    background: #EFEFEF !important;
+    border-color: #999 !important;
+  }
+  body.wireframe-mode .site-hero,
+  body.wireframe-mode .talk-card,
+  body.wireframe-mode .alert-bar {
+    background: #333 !important;
+  }
+  body.wireframe-mode .site-hero *,
+  body.wireframe-mode .talk-card * {
+    color: #EEE !important;
+  }
+  body.wireframe-mode .card,
+  body.wireframe-mode .flow-card,
+  body.wireframe-mode .site-card,
+  body.wireframe-mode .date-option,
+  body.wireframe-mode .focus-card,
+  body.wireframe-mode .ai-card,
+  body.wireframe-mode .source-obs-card,
+  body.wireframe-mode .enquiry-question,
+  body.wireframe-mode .action-item,
+  body.wireframe-mode .enquiry-card,
+  body.wireframe-mode .visit-card,
+  body.wireframe-mode .stat-tile,
+  body.wireframe-mode .blueprint-card,
+  body.wireframe-mode .insight-strip,
+  body.wireframe-mode .pipeline-stage,
+  body.wireframe-mode .work-type-chip,
+  body.wireframe-mode .obs-textarea {
+    background: white !important;
+    border: 2px solid #999 !important;
+    border-radius: 4px !important;
+    box-shadow: 2px 2px 0 #CCC !important;
+  }
+  body.wireframe-mode .card.active,
+  body.wireframe-mode .site-card.selected,
+  body.wireframe-mode .date-option.selected,
+  body.wireframe-mode .focus-card.selected,
+  body.wireframe-mode .work-type-chip.selected {
+    border: 2px solid #333 !important;
+    background: #F5F5F5 !important;
+    box-shadow: 2px 2px 0 #999 !important;
+  }
+  body.wireframe-mode .card-type-badge,
+  body.wireframe-mode .focus-source,
+  body.wireframe-mode .obs-signal-badge,
+  body.wireframe-mode .is-stage,
+  body.wireframe-mode .factor-maturity,
+  body.wireframe-mode .visit-signal-chip,
+  body.wireframe-mode .energy-badge,
+  body.wireframe-mode .obs-chip,
+  body.wireframe-mode .fw-tag,
+  body.wireframe-mode .endorsement-avatar,
+  body.wireframe-mode .endorser-avatar,
+  body.wireframe-mode .avatar,
+  body.wireframe-mode .nav-avatar,
+  body.wireframe-mode .step-circle.active,
+  body.wireframe-mode .step-circle.complete {
+    background: #555 !important;
+    color: white !important;
+    border-color: #555 !important;
+  }
+  body.wireframe-mode .btn-next,
+  body.wireframe-mode .btn-submit,
+  body.wireframe-mode .btn-move,
+  body.wireframe-mode .talk-btn-primary,
+  body.wireframe-mode .site-action-btn.btn-add-obs,
+  body.wireframe-mode .fab {
+    background: #333 !important;
+    color: white !important;
+    border-radius: 4px !important;
+    box-shadow: 2px 2px 0 #999 !important;
+  }
+  body.wireframe-mode .btn-back,
+  body.wireframe-mode .btn-secondary-action,
+  body.wireframe-mode .talk-btn-secondary,
+  body.wireframe-mode .btn-outlined,
+  body.wireframe-mode .site-action-btn.btn-plan-visit,
+  body.wireframe-mode .site-action-btn.btn-report {
+    background: white !important;
+    color: #333 !important;
+    border: 2px solid #999 !important;
+    border-radius: 4px !important;
+  }
+  body.wireframe-mode .detail-panel {
+    box-shadow: -4px 0 0 #999 !important;
+    border-left: 2px solid #999 !important;
+  }
+  body.wireframe-mode .stage-tab.active {
+    background: #333 !important;
+    color: white !important;
+    border-color: #333 !important;
+    border-radius: 4px !important;
+  }
+  body.wireframe-mode .stage-tab {
+    border-radius: 4px !important;
+    border-color: #999 !important;
+  }
+  body.wireframe-mode .progress-fill,
+  body.wireframe-mode .logo-dot,
+  body.wireframe-mode .notif-dot,
+  body.wireframe-mode .recording-dot,
+  body.wireframe-mode .ai-pulse {
+    background: #555 !important;
+  }
+  body.wireframe-mode .step-connector.complete { background: #555 !important; }
+  body.wireframe-mode .toggle.on { background: #555 !important; }
+  body.wireframe-mode .endorse-btn {
+    border: 2px dashed #999 !important;
+    border-radius: 4px !important;
+    background: white !important;
+  }
+  body.wireframe-mode .kanban-col .col-count {
+    background: #E0E0E0 !important;
+    color: #333 !important;
+  }
+  /* Annotation badges in wireframe mode */
+  body.wireframe-mode .wf-annotation {
+    display: flex !important;
+  }
+
+</style>
+</head>
+<body>
+<div class="demo-layout">
+
+  <!-- Full page version -->
+  <div>
+    <div class="demo-label">Full page view</div>
+    <div class="phone-shell">
+      <div class="status-bar">
+        <div class="status-time">9:41</div>
+        <div class="status-right">
+          <svg width="16" height="12" viewBox="0 0 16 12" fill="currentColor"><rect x="0" y="3" width="3" height="9" rx="1" opacity="0.3"/><rect x="4.5" y="2" width="3" height="10" rx="1" opacity="0.5"/><rect x="9" y="0" width="3" height="12" rx="1" opacity="0.7"/><rect x="13.5" y="0" width="2.5" height="12" rx="1"/></svg>
+          <svg width="16" height="12" viewBox="0 0 24 12" fill="currentColor"><rect x="0.5" y="0.5" width="21" height="11" rx="2.5" stroke="currentColor" stroke-opacity="0.35" fill="none"/><rect x="22" y="3.5" width="2" height="5" rx="1" fill="currentColor" opacity="0.4"/><rect x="2" y="2" width="16" height="8" rx="1.5" fill="currentColor"/></svg>
+        </div>
+      </div>
+
+      <div class="top-nav">
+        <div class="back-btn">
+          <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </div>
+        <div class="nav-title">Add Observation</div>
+        <div class="nav-site-chip">
+          <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          Northgate Open Cut
+          <svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M19 9l-7 7-7-7"/></svg>
+        </div>
+      </div>
+
+      <div class="form-body" id="formBody">
+
+        <!-- Work type -->
+        <div class="form-section">
+          <div class="form-label">
+            <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+            Work type
+          </div>
+          <div class="work-type-grid">
+            <div class="work-type-chip selected" onclick="selectWorkType(this)">Heavy Vehicle</div>
+            <div class="work-type-chip" onclick="selectWorkType(this)">Working at Height</div>
+            <div class="work-type-chip" onclick="selectWorkType(this)">Hot Work</div>
+            <div class="work-type-chip" onclick="selectWorkType(this)">Confined Space</div>
+            <div class="work-type-chip" onclick="selectWorkType(this)">Electrical</div>
+            <div class="work-type-chip" onclick="selectWorkType(this)">Blasting</div>
+          </div>
+        </div>
+
+        <!-- What was observed -->
+        <div class="form-section">
+          <div class="form-label">
+            <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            What did you observe?
+          </div>
+          <textarea class="obs-textarea" placeholder="Describe what you saw. Be specific — what was happening, where, and what made it stand out."></textarea>
+          <div class="voice-row">
+            <div class="mic-btn" id="micBtn" onclick="toggleRecording()">
+              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+              Record with voice
+            </div>
+            <div class="photo-btn">
+              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+              Photo
+            </div>
+          </div>
+        </div>
+
+        <!-- Who was involved -->
+        <div class="form-section">
+          <div class="form-label">
+            <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+            Who was involved? <span style="font-weight:400;color:var(--text-disabled);">optional</span>
+          </div>
+          <div class="role-grid">
+            <div class="role-chip selected" onclick="toggleRole(this)">Operator</div>
+            <div class="role-chip" onclick="toggleRole(this)">Employee</div>
+            <div class="role-chip" onclick="toggleRole(this)">Subcontractor</div>
+            <div class="role-chip" onclick="toggleRole(this)">Visitor</div>
+          </div>
+        </div>
+
+        <!-- Stop work -->
+        <div class="form-section">
+          <div class="form-label">
+            <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><rect x="9" y="9" width="6" height="6"/></svg>
+            Actions taken
+          </div>
+          <div class="toggle-row">
+            <div>
+              <div class="toggle-label">Did you stop the work?</div>
+              <div class="toggle-sub">I called a stop before continuing</div>
+            </div>
+            <div class="toggle" id="stopWorkToggle" onclick="this.classList.toggle('on')">
+              <div class="toggle-thumb"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- AI hint -->
+        <div class="ai-hint">
+          <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+          AI will classify the signal type, energy involved, and barrier state after you submit — no extra steps needed.
+        </div>
+
+      </div>
+
+      <div class="bottom-bar">
+        <button class="btn-submit" onclick="submitObs()">
+          <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>
+          Submit Observation
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FAB + Modal version -->
+  <div>
+    <div class="demo-label">Quick-add — FAB from anywhere</div>
+
+    <!-- FAB context simulation -->
+    <div class="fab-context" style="margin-bottom:0;border-radius:var(--radius) var(--radius) 0 0;">
+      <div class="fab-bg-text">Any screen in Hiviz — the + FAB is always accessible</div>
+      <div style="position:absolute;bottom:72px;right:34px;">
+        <svg width="60" height="40" viewBox="0 0 60 40" fill="none">
+          <path d="M30 5 C30 5, 50 10, 52 30" stroke="rgba(255,255,255,0.3)" stroke-width="1.5" stroke-dasharray="4 3" fill="none"/>
+          <path d="M48 28 L52 30 L50 25" stroke="rgba(255,255,255,0.3)" stroke-width="1.5" fill="none"/>
+          <text x="0" y="18" font-size="10" fill="rgba(255,255,255,0.4)" font-family="Inter">Tap + from</text>
+          <text x="0" y="30" font-size="10" fill="rgba(255,255,255,0.4)" font-family="Inter">anywhere</text>
+        </svg>
+      </div>
+      <button class="fab-btn">
+        <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+      </button>
+    </div>
+
+    <!-- Modal sheet -->
+    <div class="modal-shell">
+      <div class="modal-handle"></div>
+      <div class="modal-header">
+        <div>
+          <div class="modal-title">Add Observation</div>
+          <div class="modal-site">
+            <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="display:inline;margin-right:3px;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            Northgate Open Cut · change
+          </div>
+        </div>
+        <div class="modal-close">
+          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </div>
+      </div>
+
+      <div class="form-body">
+        <!-- Work type compact -->
+        <div class="form-section">
+          <div class="form-label">Work type</div>
+          <div class="work-type-grid">
+            <div class="work-type-chip selected">Heavy Vehicle</div>
+            <div class="work-type-chip">Working at Height</div>
+            <div class="work-type-chip">Hot Work</div>
+            <div class="work-type-chip">Confined Space</div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <div class="form-label">What did you observe?</div>
+          <textarea class="obs-textarea" placeholder="What did you see?" style="min-height:80px;"></textarea>
+          <div class="voice-row">
+            <div class="mic-btn">
+              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>
+              Record
+            </div>
+            <div class="photo-btn">
+              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+              Photo
+            </div>
+            <div class="toggle-row" style="background:transparent;padding:0;margin-left:auto;">
+              <div style="font-size:12px;color:var(--text-secondary);margin-right:8px;">Stop work?</div>
+              <div class="toggle" id="t2" onclick="this.classList.toggle('on')">
+                <div class="toggle-thumb"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="ai-hint">
+          <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+          AI classifies signal type, energy, and barrier state after submit
+        </div>
+      </div>
+
+      <div class="bottom-bar">
+        <button class="btn-submit" onclick="submitObs()">
+          <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>
+          Submit
+        </button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function selectWorkType(el) { el.closest('.work-type-grid').querySelectorAll('.work-type-chip').forEach(c => c.classList.remove('selected')); el.classList.add('selected'); }
+function toggleRole(el) { el.classList.toggle('selected'); }
+let recording = false;
+function toggleRecording() {
+  recording = !recording;
+  const btn = document.getElementById('micBtn');
+  if (recording) { btn.classList.add('recording'); btn.innerHTML = '<div class="recording-dot"></div> Recording... tap to stop'; }
+  else { btn.classList.remove('recording'); btn.innerHTML = '<svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg> Record with voice'; }
+}
+function submitObs() { alert('Observation submitted. AI enrichment running in background — signal type, energy classification, and barrier assessment will complete within a few seconds.'); }
+</script>
+
+<script>
+// Apply wireframe mode if set from index
+(function() {
+  var mode = localStorage.getItem('hiviz_wireframe_mode');
+  if (mode === 'wireframe') document.body.classList.add('wireframe-mode');
+})();
+</script>
+
+</body>
+</html>

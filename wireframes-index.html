@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hiviz — UX Wireframe Pack</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Balsamiq+Sans:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F4F6F8;
+    --surface: #FFFFFF;
+    --border: #E5E8EB;
+    --text-primary: #1C252E;
+    --text-secondary: #637381;
+    --primary: #00AB55;
+    --primary-light: #D1FAE5;
+    --radius: 12px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-elevated: 0 8px 32px rgba(0,0,0,0.12);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text-primary);
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 40px;
+    display: flex;
+    align-items: center;
+    height: 64px;
+    gap: 24px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .logo {
+    font-size: 18px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-primary);
+  }
+
+  .logo-dot {
+    width: 8px; height: 8px;
+    background: var(--primary);
+    border-radius: 50%;
+  }
+
+  .header-divider { width: 1px; height: 24px; background: var(--border); }
+
+  .header-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-secondary);
+  }
+
+  .header-right {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .mode-toggle {
+    display: flex;
+    align-items: center;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 3px;
+    gap: 2px;
+  }
+
+  .mode-btn {
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+
+  .mode-btn.active {
+    background: var(--surface);
+    color: var(--text-primary);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  }
+
+  .badge-new {
+    font-size: 9px;
+    background: var(--primary);
+    color: white;
+    padding: 1px 5px;
+    border-radius: 10px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    padding: 48px 40px 32px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .hero-eyebrow {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--primary);
+    margin-bottom: 10px;
+  }
+
+  .hero-title {
+    font-size: 36px;
+    font-weight: 800;
+    line-height: 1.15;
+    margin-bottom: 12px;
+    color: var(--text-primary);
+  }
+
+  .hero-sub {
+    font-size: 16px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    max-width: 600px;
+    margin-bottom: 24px;
+  }
+
+  .hero-meta {
+    display: flex;
+    gap: 24px;
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+
+  .hero-meta-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 500;
+  }
+
+  /* ── SECTION ── */
+  .section {
+    padding: 0 40px 48px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .section-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    margin-bottom: 16px;
+    padding-top: 8px;
+    border-top: 1px solid var(--border);
+  }
+
+  /* ── FLOW CARDS GRID ── */
+  .flows-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 48px;
+  }
+
+  .flow-card {
+    background: var(--surface);
+    border-radius: var(--radius);
+    border: 1.5px solid var(--border);
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+
+  .flow-card:hover {
+    border-color: var(--primary);
+    box-shadow: var(--shadow-elevated);
+    transform: translateY(-2px);
+  }
+
+  .flow-card.featured {
+    grid-column: span 2;
+  }
+
+  /* Preview frame */
+  .preview-frame {
+    width: 100%;
+    aspect-ratio: 16/9;
+    background: var(--bg);
+    overflow: hidden;
+    position: relative;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .flow-card.featured .preview-frame {
+    aspect-ratio: 16/7;
+  }
+
+  .preview-iframe {
+    width: 200%;
+    height: 200%;
+    transform: scale(0.5);
+    transform-origin: top left;
+    border: none;
+    pointer-events: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+
+  /* Mobile preview — narrower */
+  .preview-mobile {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 16px;
+    gap: 12px;
+  }
+
+  .preview-phone {
+    width: 140px;
+    height: 220px;
+    border-radius: 16px;
+    background: var(--surface);
+    border: 2px solid var(--border);
+    overflow: hidden;
+    flex-shrink: 0;
+    position: relative;
+  }
+
+  .preview-phone iframe {
+    width: 360px;
+    height: 500px;
+    transform: scale(0.39);
+    transform-origin: top left;
+    border: none;
+    pointer-events: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+
+  .preview-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: var(--text-disabled);
+  }
+
+  .preview-icon {
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+  }
+
+  /* Card footer */
+  .flow-card-body {
+    padding: 16px;
+    flex: 1;
+  }
+
+  .card-type-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+
+  .card-type-badge {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 5px;
+  }
+
+  .badge-core { background: #1C252E; color: white; }
+  .badge-wizard { background: var(--primary-light); color: #007B40; }
+  .badge-capture { background: #FFF3CD; color: #B76E00; }
+  .badge-workspace { background: #E0F4FF; color: #006C9C; }
+  .badge-worksite { background: var(--primary-light); color: #007B40; }
+
+  .role-tags { display: flex; gap: 4px; flex-wrap: wrap; }
+  .role-tag { font-size: 10px; color: var(--text-secondary); background: var(--bg); border: 1px solid var(--border); padding: 2px 7px; border-radius: 10px; }
+
+  .card-title { font-size: 16px; font-weight: 700; margin-bottom: 5px; line-height: 1.3; }
+  .card-desc { font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 10px; }
+
+  .card-views {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .view-chip {
+    font-size: 11px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    padding: 3px 9px;
+    border-radius: 5px;
+    color: var(--text-secondary);
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .open-arrow {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    width: 28px; height: 28px;
+    border-radius: 7px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-secondary);
+    transition: all 0.15s;
+  }
+
+  .flow-card:hover .open-arrow {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: white;
+  }
+
+  /* ── WIREFRAME MODE ── */
+  body.wireframe-mode {
+    background: #F5F5F5;
+    font-family: 'Balsamiq Sans', cursive;
+  }
+
+  body.wireframe-mode .header {
+    background: #EFEFEF;
+    border-bottom: 2px solid #999;
+  }
+
+  body.wireframe-mode .logo { color: #333; }
+  body.wireframe-mode .logo-dot { background: #333; }
+  body.wireframe-mode .header-title { color: #666; }
+
+  body.wireframe-mode .hero-eyebrow { color: #555; font-family: 'Balsamiq Sans', cursive; }
+  body.wireframe-mode .hero-title { font-family: 'Balsamiq Sans', cursive; }
+  body.wireframe-mode .hero-sub { font-family: 'Balsamiq Sans', cursive; color: #555; }
+  body.wireframe-mode .hero-meta { font-family: 'Balsamiq Sans', cursive; }
+
+  body.wireframe-mode .flow-card {
+    background: white;
+    border: 2px solid #999;
+    border-radius: 4px;
+    box-shadow: 3px 3px 0 #999;
+  }
+
+  body.wireframe-mode .flow-card:hover {
+    border-color: #333;
+    box-shadow: 4px 4px 0 #333;
+    transform: none;
+  }
+
+  body.wireframe-mode .preview-frame {
+    background: #F0F0F0;
+    border-bottom: 2px solid #999;
+  }
+
+  body.wireframe-mode .preview-phone {
+    border: 2px solid #999;
+    border-radius: 4px;
+  }
+
+  body.wireframe-mode .card-type-badge {
+    background: #333 !important;
+    color: white !important;
+    border-radius: 2px;
+    font-family: 'Balsamiq Sans', cursive;
+  }
+
+  body.wireframe-mode .card-title { font-family: 'Balsamiq Sans', cursive; }
+  body.wireframe-mode .card-desc { font-family: 'Balsamiq Sans', cursive; color: #555; }
+  body.wireframe-mode .view-chip { font-family: 'Balsamiq Sans', cursive; background: white; border: 1.5px solid #999; border-radius: 2px; color: #444; }
+  body.wireframe-mode .role-tag { font-family: 'Balsamiq Sans', cursive; background: white; border: 1.5px solid #999; border-radius: 2px; color: #444; }
+
+  body.wireframe-mode .section-label { font-family: 'Balsamiq Sans', cursive; color: #555; border-top-color: #999; }
+
+  body.wireframe-mode .mode-toggle { background: white; border-color: #999; }
+  body.wireframe-mode .mode-btn.active { background: #333; color: white; box-shadow: 2px 2px 0 #999; }
+  body.wireframe-mode .mode-btn { font-family: 'Balsamiq Sans', cursive; color: #555; }
+
+  body.wireframe-mode .open-arrow { background: white; border-color: #999; }
+  body.wireframe-mode .flow-card:hover .open-arrow { background: #333; border-color: #333; }
+
+  body.wireframe-mode .wireframe-note {
+    display: flex !important;
+  }
+
+  /* ── WIREFRAME NOTE ── */
+  .wireframe-note {
+    display: none;
+    background: #FFFDE7;
+    border: 2px solid #F9A825;
+    border-radius: 4px;
+    padding: 12px 16px;
+    font-family: 'Balsamiq Sans', cursive;
+    font-size: 13px;
+    color: #5D4037;
+    margin-bottom: 20px;
+    align-items: flex-start;
+    gap: 10px;
+    line-height: 1.6;
+  }
+
+  /* ── PIPELINE DETAIL section ── */
+  .pipeline-detail {
+    background: var(--surface);
+    border-radius: var(--radius);
+    border: 1.5px solid var(--border);
+    padding: 24px;
+    margin-bottom: 16px;
+  }
+
+  body.wireframe-mode .pipeline-detail {
+    background: white;
+    border: 2px solid #999;
+    border-radius: 4px;
+    box-shadow: 3px 3px 0 #999;
+  }
+
+  .pipeline-title { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+  .pipeline-desc { font-size: 13px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 16px; }
+
+  .pipeline-stages {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .pipeline-stage {
+    flex: 1;
+    min-width: 140px;
+    background: var(--bg);
+    border-radius: 8px;
+    padding: 12px;
+    border: 1px solid var(--border);
+  }
+
+  body.wireframe-mode .pipeline-stage { background: #F5F5F5; border: 1.5px solid #999; border-radius: 2px; }
+
+  .stage-name { font-size: 13px; font-weight: 700; margin-bottom: 3px; }
+  .stage-sub { font-size: 11px; color: var(--text-secondary); line-height: 1.4; }
+
+  body.wireframe-mode .stage-name,
+  body.wireframe-mode .stage-sub,
+  body.wireframe-mode .pipeline-title,
+  body.wireframe-mode .pipeline-desc { font-family: 'Balsamiq Sans', cursive; }
+
+  /* ── ROUTING DIAGRAM ── */
+  .routing-diagram {
+    background: var(--surface);
+    border-radius: var(--radius);
+    border: 1.5px solid var(--border);
+    padding: 24px;
+    margin-bottom: 48px;
+  }
+
+  body.wireframe-mode .routing-diagram {
+    background: white;
+    border: 2px solid #999;
+    border-radius: 4px;
+    box-shadow: 3px 3px 0 #999;
+  }
+
+  .routing-title { font-size: 16px; font-weight: 700; margin-bottom: 16px; }
+  body.wireframe-mode .routing-title { font-family: 'Balsamiq Sans', cursive; }
+
+  .routing-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--bg);
+    font-size: 13px;
+  }
+
+  body.wireframe-mode .routing-row { font-family: 'Balsamiq Sans', cursive; color: #333; }
+
+  .route-signal { font-weight: 700; min-width: 160px; }
+  .route-arrow { color: var(--text-disabled); flex-shrink: 0; }
+  .route-dest { color: var(--text-secondary); }
+  .route-badge { font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 4px; margin-left: auto; flex-shrink: 0; }
+
+  /* ── FOOTER ── */
+  .footer {
+    border-top: 1px solid var(--border);
+    padding: 24px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--text-secondary);
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  body.wireframe-mode .footer { font-family: 'Balsamiq Sans', cursive; color: #666; border-top-color: #999; }
+</style>
+</head>
+<body id="body">
+
+<!-- HEADER -->
+<div class="header">
+  <div class="logo"><div class="logo-dot"></div>Hiviz</div>
+  <div class="header-divider"></div>
+  <div class="header-title">UX Wireframe Pack — SafetyPlatform V1</div>
+  <div class="header-right">
+    <div class="mode-toggle">
+      <button class="mode-btn active" id="mockupBtn" onclick="setMode('mockup')">
+        <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+        Mockup
+      </button>
+      <button class="mode-btn" id="wireframeBtn" onclick="setMode('wireframe')">
+        <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="0"/><path d="M3 9h18M9 21V9"/></svg>
+        Wireframe
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-eyebrow">Hiviz · SafetyPlatform · V1</div>
+  <div class="hero-title">UX Wireframe Pack</div>
+  <div class="hero-sub">Five clickable flows covering every critical path in V1. Switch between mockup and wireframe mode — mockup for stakeholder review, wireframe for developer component mapping.</div>
+  <div class="hero-meta">
+    <div class="hero-meta-item">
+      <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      5 flows
+    </div>
+    <div class="hero-meta-item">
+      <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      4 roles — supervisor, manager, safety manager, worksite
+    </div>
+    <div class="hero-meta-item">
+      <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      Responsive — one app, phone and desktop breakpoints
+    </div>
+  </div>
+</div>
+
+<!-- FLOWS -->
+<div class="section">
+
+  <div class="wireframe-note" id="wireframeNote">
+    <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:1px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    <div><strong>Wireframe mode:</strong> Use this view when working with your UI kit (Minimals/MUI). Components, spacing, and layout annotations are shown without colour influence. Each screen maps to specific kit components — Kanban, Modal, Wizard Stepper, Card, FAB, Bottom Navigation, Drawer. Mockup mode shows the intended visual outcome.</div>
+  </div>
+
+  <div class="section-label">Core flows</div>
+
+  <div class="flows-grid">
+
+    <!-- PIPELINE — featured -->
+    <a class="flow-card featured" href="wireframes/pipeline.html" target="_blank">
+      <div class="preview-frame">
+        <div class="preview-placeholder">
+          <div class="preview-icon" style="background:#1C252E;font-size:22px;">📋</div>
+          <div style="font-size:13px;font-weight:600;color:#637381;">Insights Pipeline</div>
+          <div style="font-size:11px;color:#919EAB;">Kanban + Detail Panel</div>
+        </div>
+      </div>
+      <div class="flow-card-body">
+        <div class="card-type-row">
+          <span class="card-type-badge badge-core">Core workflow</span>
+          <div class="role-tags">
+            <span class="role-tag">Safety Manager</span>
+          </div>
+        </div>
+        <div class="card-title">Insights Pipeline</div>
+        <div class="card-desc">The centrepiece. Kanban board with Prioritise → Learn → Improve → Resolved. Cards open to a state-based detail panel showing AI suggestions, enquiry synthesis, or corrective actions depending on stage.</div>
+        <div class="card-views">
+          <span class="view-chip">
+            <svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+            Kanban board
+          </span>
+          <span class="view-chip">Side panel — state-based</span>
+          <span class="view-chip">Endorsement model</span>
+          <span class="view-chip">FW Map® tags</span>
+          <span class="view-chip">Energy classification</span>
+        </div>
+      </div>
+      <div class="open-arrow"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></div>
+    </a>
+
+    <!-- OBSERVATION -->
+    <a class="flow-card" href="wireframes/add-observation.html" target="_blank">
+      <div class="preview-frame preview-mobile">
+        <div class="preview-placeholder">
+          <div class="preview-icon" style="background:#FFF3CD;font-size:22px;">👁</div>
+          <div style="font-size:13px;font-weight:600;color:#637381;">Add Observation</div>
+          <div style="font-size:11px;color:#919EAB;">Full page + FAB modal</div>
+        </div>
+      </div>
+      <div class="flow-card-body">
+        <div class="card-type-row">
+          <span class="card-type-badge badge-capture">Capture</span>
+          <div class="role-tags">
+            <span class="role-tag">Supervisor</span>
+            <span class="role-tag">Manager</span>
+          </div>
+        </div>
+        <div class="card-title">Add Observation</div>
+        <div class="card-desc">Type-agnostic capture form — no observation type selection. AI classifies signal type and energy async. Side-by-side: full page and FAB-triggered modal sheet.</div>
+        <div class="card-views">
+          <span class="view-chip">Full page</span>
+          <span class="view-chip">FAB → modal sheet</span>
+          <span class="view-chip">Voice record</span>
+          <span class="view-chip">Stop work toggle</span>
+        </div>
+      </div>
+      <div class="open-arrow"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></div>
+    </a>
+
+    <!-- VISIT WIZARD -->
+    <a class="flow-card" href="wireframes/visit-wizard.html" target="_blank">
+      <div class="preview-frame preview-mobile">
+        <div class="preview-placeholder">
+          <div class="preview-icon" style="background:#D1FAE5;font-size:22px;">🗓</div>
+          <div style="font-size:13px;font-weight:600;color:#637381;">Plan a Visit</div>
+          <div style="font-size:11px;color:#919EAB;">3-step wizard</div>
+        </div>
+      </div>
+      <div class="flow-card-body">
+        <div class="card-type-row">
+          <span class="card-type-badge badge-wizard">Wizard</span>
+          <div class="role-tags">
+            <span class="role-tag">Manager</span>
+          </div>
+        </div>
+        <div class="card-title">Plan a Visit</div>
+        <div class="card-desc">Three-step wizard: Site selection with Blueprint signals, date/schedule, focus topic selection with AI recommendations. Confirms with briefing pack notification.</div>
+        <div class="card-views">
+          <span class="view-chip">Step 1 — Site</span>
+          <span class="view-chip">Step 2 — When</span>
+          <span class="view-chip">Step 3 — Focus</span>
+          <span class="view-chip">Confirmation</span>
+        </div>
+      </div>
+      <div class="open-arrow"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></div>
+    </a>
+
+    <!-- MY WORKSPACE -->
+    <a class="flow-card" href="wireframes/my-workspace.html" target="_blank">
+      <div class="preview-frame preview-mobile">
+        <div class="preview-placeholder">
+          <div class="preview-icon" style="background:#E0F4FF;font-size:22px;">🏠</div>
+          <div style="font-size:13px;font-weight:600;color:#637381;">My Workspace</div>
+          <div style="font-size:11px;color:#919EAB;">Personal dashboard</div>
+        </div>
+      </div>
+      <div class="flow-card-body">
+        <div class="card-type-row">
+          <span class="card-type-badge badge-workspace">Workspace</span>
+          <div class="role-tags">
+            <span class="role-tag">Manager</span>
+            <span class="role-tag">Supervisor</span>
+          </div>
+        </div>
+        <div class="card-title">My Workspace</div>
+        <div class="card-desc">Personal landing. Pending talk as primary CTA, focus items, pending enquiry responses, upcoming visits. FAB always accessible. Endorser resolution notifications visible.</div>
+        <div class="card-views">
+          <span class="view-chip">Dashboard</span>
+          <span class="view-chip">Pending talk CTA</span>
+          <span class="view-chip">Focus items</span>
+          <span class="view-chip">FAB + bottom nav</span>
+        </div>
+      </div>
+      <div class="open-arrow"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></div>
+    </a>
+
+    <!-- WORKSITE DASHBOARD -->
+    <a class="flow-card" href="wireframes/worksite-dashboard.html" target="_blank">
+      <div class="preview-frame preview-mobile">
+        <div class="preview-placeholder">
+          <div class="preview-icon" style="background:#D1FAE5;font-size:22px;">📍</div>
+          <div style="font-size:13px;font-weight:600;color:#637381;">Worksite Dashboard</div>
+          <div style="font-size:11px;color:#919EAB;">Site-scoped view</div>
+        </div>
+      </div>
+      <div class="flow-card-body">
+        <div class="card-type-row">
+          <span class="card-type-badge badge-worksite">Worksite</span>
+          <div class="role-tags">
+            <span class="role-tag">All roles</span>
+          </div>
+        </div>
+        <div class="card-title">Worksite Dashboard</div>
+        <div class="card-desc">Site context view. Atrophy score hero, quick actions, open insights strip, Blueprint capacity signal cards, recent observations with AI signal type badges.</div>
+        <div class="card-views">
+          <span class="view-chip">Atrophy hero</span>
+          <span class="view-chip">Quick actions</span>
+          <span class="view-chip">Blueprint signals</span>
+          <span class="view-chip">Observation feed</span>
+        </div>
+      </div>
+      <div class="open-arrow"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></div>
+    </a>
+
+  </div>
+
+  <!-- PIPELINE STAGES reference -->
+  <div class="section-label">Pipeline stages — how insights flow</div>
+
+  <div class="pipeline-detail">
+    <div class="pipeline-title">Insight & Incident Pipeline — Prioritise → Learn → Improve → Resolved</div>
+    <div class="pipeline-desc">The same Kanban structure handles both insights (generated by AI from observation patterns) and incidents (triaged from the incident pipeline). Cards move manually — no gate required. Endorsement adds social weight but never blocks progression.</div>
+    <div class="pipeline-stages">
+      <div class="pipeline-stage">
+        <div class="stage-name" style="color:#B76E00;">Prioritise</div>
+        <div class="stage-sub">Endorse for action & triage. AI draft + source observations visible. Safety manager decides whether to act.</div>
+      </div>
+      <div class="pipeline-stage">
+        <div class="stage-name" style="color:#006C9C;">Learn</div>
+        <div class="stage-sub">Enquiry dispatched to supervisors. Live synthesis updates as responses arrive. Toolbox talk generated and delivered.</div>
+      </div>
+      <div class="pipeline-stage">
+        <div class="stage-name" style="color:#7635DC;">Improve</div>
+        <div class="stage-sub">Corrective actions assigned and tracked. Actions created from enquiry findings. Progress shown on card.</div>
+      </div>
+      <div class="pipeline-stage">
+        <div class="stage-name" style="color:#00AB55;">Resolved</div>
+        <div class="stage-sub">All actions complete. Endorsers notified automatically. Archived in Resolved column for 45 days.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AI ROUTING reference -->
+  <div class="section-label">AI signal routing — how observations enter the pipeline</div>
+
+  <div class="routing-diagram">
+    <div class="routing-title">Observation → AI enrichment → Routing decision (no human required)</div>
+    <div class="routing-row">
+      <div class="route-signal">barrier_failure</div>
+      <div class="route-arrow">→</div>
+      <div class="route-dest">Pipeline direct → Prioritise column as Critical Observation card</div>
+      <span class="route-badge" style="background:#FFE9E5;color:#FF5630;">Immediate</span>
+    </div>
+    <div class="routing-row">
+      <div class="route-signal">unwanted_energy_event</div>
+      <div class="route-arrow">→</div>
+      <div class="route-dest">Pipeline direct → Prioritise column as Critical Observation card</div>
+      <span class="route-badge" style="background:#FFE9E5;color:#FF5630;">Immediate</span>
+    </div>
+    <div class="routing-row">
+      <div class="route-signal">emerging_pattern</div>
+      <div class="route-arrow">→</div>
+      <div class="route-dest">Pipeline direct → Prioritise as Cross-site Pattern or Worksite Trend card</div>
+      <span class="route-badge" style="background:#FFE9E5;color:#FF5630;">Immediate</span>
+    </div>
+    <div class="routing-row">
+      <div class="route-signal">weak_signal</div>
+      <div class="route-arrow">→</div>
+      <div class="route-dest">Pool → Trend detection → threshold crossed → Insight generated → Pipeline</div>
+      <span class="route-badge" style="background:#E0F4FF;color:#006C9C;">Pooled</span>
+    </div>
+    <div class="routing-row">
+      <div class="route-signal">at_risk_condition</div>
+      <div class="route-arrow">→</div>
+      <div class="route-dest">Pool → Trend detection → threshold crossed → Insight generated → Pipeline</div>
+      <span class="route-badge" style="background:#E0F4FF;color:#006C9C;">Pooled</span>
+    </div>
+    <div class="routing-row" style="border-bottom:none;">
+      <div class="route-signal">positive_performance</div>
+      <div class="route-arrow">→</div>
+      <div class="route-dest">Pool → Analytics only (contributing to Resilient maturity signal)</div>
+      <span class="route-badge" style="background:#D1FAE5;color:#007B40;">Analytics</span>
+    </div>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <div>Hiviz · SafetyPlatform · V1 Wireframe Pack · April 2026</div>
+  <div>Forge Works · Confidential</div>
+</div>
+
+<script>
+function setMode(mode) {
+  const body = document.getElementById('body');
+  const mockupBtn = document.getElementById('mockupBtn');
+  const wireframeBtn = document.getElementById('wireframeBtn');
+
+  if (mode === 'wireframe') {
+    body.classList.add('wireframe-mode');
+    wireframeBtn.classList.add('active');
+    mockupBtn.classList.remove('active');
+    // Store mode for sub-pages
+    localStorage.setItem('hiviz_wireframe_mode', 'wireframe');
+  } else {
+    body.classList.remove('wireframe-mode');
+    mockupBtn.classList.add('active');
+    wireframeBtn.classList.remove('active');
+    localStorage.setItem('hiviz_wireframe_mode', 'mockup');
+  }
+}
+
+// Check stored preference
+const stored = localStorage.getItem('hiviz_wireframe_mode');
+if (stored === 'wireframe') setMode('wireframe');
+</script>
+</body>
+</html>

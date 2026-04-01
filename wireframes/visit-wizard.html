@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Plan a Visit — Hiviz</title>
+<link href="https://fonts.googleapis.com/css2?family=Balsamiq+Sans:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F4F6F8;
+    --surface: #FFFFFF;
+    --border: #E5E8EB;
+    --text-primary: #1C252E;
+    --text-secondary: #637381;
+    --text-disabled: #919EAB;
+    --primary: #00AB55;
+    --primary-light: #D1FAE5;
+    --primary-dark: #007B40;
+    --error: #FF5630;
+    --error-light: #FFE9E5;
+    --warning: #FFAB00;
+    --warning-light: #FFF3CD;
+    --info: #006C9C;
+    --info-light: #E0F4FF;
+    --purple: #7635DC;
+    --purple-light: #EFE6FF;
+    --radius: 12px;
+    --radius-sm: 8px;
+    --shadow-card: 0 1px 3px rgba(0,0,0,0.08);
+    --shadow-elevated: 0 8px 24px rgba(0,0,0,0.12);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text-primary); min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 0; }
+
+  /* Mobile shell */
+  .phone-shell {
+    width: 390px;
+    min-height: 100vh;
+    background: var(--surface);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    box-shadow: 0 0 60px rgba(0,0,0,0.15);
+  }
+
+  /* Status bar */
+  .status-bar {
+    height: 44px;
+    background: var(--surface);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    flex-shrink: 0;
+  }
+
+  .status-left { display: flex; align-items: center; gap: 8px; }
+  .signal-badges { display: flex; gap: 3px; align-items: flex-end; }
+  .signal-bar { width: 3px; background: var(--text-primary); border-radius: 1px; }
+  .status-time { font-size: 15px; font-weight: 700; }
+  .status-right { display: flex; align-items: center; gap: 8px; }
+
+  /* Alert bar */
+  .alert-bar {
+    background: var(--error);
+    padding: 6px 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .alert-count { display: flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 700; color: white; }
+  .alert-divider { width: 1px; height: 14px; background: rgba(255,255,255,0.4); }
+  .alert-warning { display: flex; align-items: center; gap: 4px; font-size: 13px; color: white; }
+
+  /* Top nav */
+  .top-nav {
+    height: 52px;
+    padding: 0 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .back-btn { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-secondary); border-radius: 8px; }
+  .back-btn:hover { background: var(--bg); }
+  .nav-title { font-size: 16px; font-weight: 700; }
+  .nav-right-icons { margin-left: auto; display: flex; gap: 4px; }
+  .nav-icon { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-secondary); border-radius: 8px; position: relative; }
+  .notif-dot { position: absolute; top: 5px; right: 5px; width: 8px; height: 8px; background: var(--error); border-radius: 50%; border: 2px solid white; }
+  .nav-avatar { width: 30px; height: 30px; border-radius: 50%; background: linear-gradient(135deg, #7635DC, #00AB55); font-size: 10px; font-weight: 700; color: white; display: flex; align-items: center; justify-content: center; }
+
+  /* Wizard stepper */
+  .stepper {
+    padding: 16px 20px 12px;
+    display: flex;
+    align-items: center;
+    gap: 0;
+    flex-shrink: 0;
+  }
+  .step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    flex: 1;
+  }
+  .step-circle {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    transition: all 0.2s;
+  }
+  .step-circle.active { background: var(--primary); color: white; box-shadow: 0 0 0 4px var(--primary-light); }
+  .step-circle.complete { background: var(--primary); color: white; }
+  .step-circle.inactive { background: var(--bg); color: var(--text-disabled); border: 2px solid var(--border); }
+  .step-label { font-size: 11px; font-weight: 600; color: var(--text-secondary); }
+  .step-label.active { color: var(--primary); }
+  .step-connector { flex: 1; height: 2px; background: var(--border); margin-bottom: 16px; transition: background 0.2s; }
+  .step-connector.complete { background: var(--primary); }
+
+  /* Page content */
+  .page-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 16px;
+  }
+  .page-content::-webkit-scrollbar { display: none; }
+
+  .page-headline { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+  .page-sub { font-size: 13px; color: var(--text-secondary); margin-bottom: 20px; line-height: 1.5; }
+
+  /* Site cards */
+  .site-card {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  .site-card:hover { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
+  .site-card.selected { border-color: var(--primary); background: #F6FEF9; box-shadow: 0 0 0 3px var(--primary-light); }
+
+  .site-card-radio {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    flex-shrink: 0;
+    margin-top: 1px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s;
+  }
+  .site-card.selected .site-card-radio { border-color: var(--primary); background: var(--primary); }
+  .site-card-radio-dot { width: 8px; height: 8px; border-radius: 50%; background: white; display: none; }
+  .site-card.selected .site-card-radio-dot { display: block; }
+
+  .site-card-body { flex: 1; }
+  .site-name { font-size: 15px; font-weight: 700; margin-bottom: 2px; }
+  .site-location { font-size: 12px; color: var(--text-secondary); margin-bottom: 8px; }
+
+  .site-signals { display: flex; flex-direction: column; gap: 4px; margin-top: 8px; }
+  .signal-row { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-secondary); }
+  .signal-dot-red { width: 7px; height: 7px; border-radius: 50%; background: var(--error); flex-shrink: 0; }
+  .signal-dot-grey { width: 7px; height: 7px; border-radius: 50%; background: var(--text-disabled); flex-shrink: 0; }
+  .signal-attention { color: var(--error); font-weight: 600; }
+  .signal-insights { color: var(--warning); }
+
+  .blind-spots-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 3px 8px;
+    font-size: 11px;
+    color: var(--text-secondary);
+    font-weight: 500;
+    margin-left: 4px;
+  }
+
+  .need-attention-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 6px;
+  }
+
+  .attention-badge {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--error);
+  }
+
+  /* When step */
+  .date-option {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .date-option:hover { border-color: var(--primary); }
+  .date-option.selected { border-color: var(--primary); background: #F6FEF9; }
+  .date-icon { width: 40px; height: 40px; border-radius: 10px; background: var(--bg); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .date-label { font-size: 14px; font-weight: 600; }
+  .date-sub { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+  .date-check { margin-left: auto; color: var(--primary); display: none; }
+  .date-option.selected .date-check { display: block; }
+
+  /* Focus step */
+  .focus-card {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 14px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .focus-card:hover { border-color: var(--primary); }
+  .focus-card.selected { border-color: var(--primary); background: #F6FEF9; }
+  .focus-checkbox { width: 20px; height: 20px; border-radius: 5px; border: 2px solid var(--border); flex-shrink: 0; margin-top: 1px; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+  .focus-card.selected .focus-checkbox { border-color: var(--primary); background: var(--primary); }
+  .focus-topic { font-size: 13px; font-weight: 600; margin-bottom: 3px; }
+  .focus-evidence { font-size: 11px; color: var(--text-secondary); }
+  .focus-source { display: inline-flex; align-items: center; gap: 3px; font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 5px; margin-top: 5px; }
+  .source-trend { background: var(--error-light); color: var(--error); }
+  .source-investigation { background: var(--warning-light); color: #B76E00; }
+  .source-ai { background: var(--purple-light); color: var(--purple); }
+  .source-blueprint { background: var(--info-light); color: var(--info); }
+  .ai-recommended { display: flex; align-items: center; gap: 4px; font-size: 10px; color: var(--purple); font-weight: 500; margin-bottom: 10px; }
+
+  /* Confirmation step */
+  .confirm-section { margin-bottom: 20px; }
+  .confirm-label { font-size: 11px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 8px; }
+  .confirm-value { font-size: 15px; font-weight: 600; }
+  .confirm-sub { font-size: 13px; color: var(--text-secondary); margin-top: 2px; }
+  .confirm-focus-item { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px solid var(--bg); font-size: 13px; }
+  .confirm-check { color: var(--primary); flex-shrink: 0; }
+
+  /* Bottom bar */
+  .bottom-bar {
+    padding: 12px 16px;
+    border-top: 1px solid var(--border);
+    background: var(--surface);
+    display: flex;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+  .btn-back { height: 48px; flex: 1; border-radius: var(--radius-sm); font-size: 14px; font-weight: 600; cursor: pointer; border: 1.5px solid var(--border); background: transparent; color: var(--text-primary); display: flex; align-items: center; justify-content: center; gap: 6px; }
+  .btn-next { height: 48px; flex: 2; border-radius: var(--radius-sm); font-size: 14px; font-weight: 600; cursor: pointer; border: none; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; gap: 6px; transition: background 0.15s; }
+  .btn-next:hover { background: var(--primary-dark); }
+  .btn-next:disabled { background: var(--border); color: var(--text-disabled); cursor: default; }
+  .btn-confirm { height: 48px; flex: 1; border-radius: var(--radius-sm); font-size: 14px; font-weight: 600; cursor: pointer; border: none; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; gap: 6px; }
+
+  .step-content { display: none; }
+  .step-content.active { display: block; }
+
+  /* ── WIREFRAME MODE (toggled from index) ── */
+  body.wireframe-mode, body.wireframe-mode * {
+    font-family: 'Balsamiq Sans', cursive !important;
+    color: #333 !important;
+  }
+  body.wireframe-mode {
+    background: #F5F5F5 !important;
+  }
+  body.wireframe-mode .phone-shell,
+  body.wireframe-mode .modal-shell {
+    box-shadow: 4px 4px 0 #999 !important;
+  }
+  body.wireframe-mode .top-nav,
+  body.wireframe-mode .status-bar,
+  body.wireframe-mode .nav-tabs,
+  body.wireframe-mode .bottom-bar,
+  body.wireframe-mode .bottom-nav,
+  body.wireframe-mode .modal-header,
+  body.wireframe-mode .stepper,
+  body.wireframe-mode .panel-header,
+  body.wireframe-mode .panel-actions {
+    background: #EFEFEF !important;
+    border-color: #999 !important;
+  }
+  body.wireframe-mode .site-hero,
+  body.wireframe-mode .talk-card,
+  body.wireframe-mode .alert-bar {
+    background: #333 !important;
+  }
+  body.wireframe-mode .site-hero *,
+  body.wireframe-mode .talk-card * {
+    color: #EEE !important;
+  }
+  body.wireframe-mode .card,
+  body.wireframe-mode .flow-card,
+  body.wireframe-mode .site-card,
+  body.wireframe-mode .date-option,
+  body.wireframe-mode .focus-card,
+  body.wireframe-mode .ai-card,
+  body.wireframe-mode .source-obs-card,
+  body.wireframe-mode .enquiry-question,
+  body.wireframe-mode .action-item,
+  body.wireframe-mode .enquiry-card,
+  body.wireframe-mode .visit-card,
+  body.wireframe-mode .stat-tile,
+  body.wireframe-mode .blueprint-card,
+  body.wireframe-mode .insight-strip,
+  body.wireframe-mode .pipeline-stage,
+  body.wireframe-mode .work-type-chip,
+  body.wireframe-mode .obs-textarea {
+    background: white !important;
+    border: 2px solid #999 !important;
+    border-radius: 4px !important;
+    box-shadow: 2px 2px 0 #CCC !important;
+  }
+  body.wireframe-mode .card.active,
+  body.wireframe-mode .site-card.selected,
+  body.wireframe-mode .date-option.selected,
+  body.wireframe-mode .focus-card.selected,
+  body.wireframe-mode .work-type-chip.selected {
+    border: 2px solid #333 !important;
+    background: #F5F5F5 !important;
+    box-shadow: 2px 2px 0 #999 !important;
+  }
+  body.wireframe-mode .card-type-badge,
+  body.wireframe-mode .focus-source,
+  body.wireframe-mode .obs-signal-badge,
+  body.wireframe-mode .is-stage,
+  body.wireframe-mode .factor-maturity,
+  body.wireframe-mode .visit-signal-chip,
+  body.wireframe-mode .energy-badge,
+  body.wireframe-mode .obs-chip,
+  body.wireframe-mode .fw-tag,
+  body.wireframe-mode .endorsement-avatar,
+  body.wireframe-mode .endorser-avatar,
+  body.wireframe-mode .avatar,
+  body.wireframe-mode .nav-avatar,
+  body.wireframe-mode .step-circle.active,
+  body.wireframe-mode .step-circle.complete {
+    background: #555 !important;
+    color: white !important;
+    border-color: #555 !important;
+  }
+  body.wireframe-mode .btn-next,
+  body.wireframe-mode .btn-submit,
+  body.wireframe-mode .btn-move,
+  body.wireframe-mode .talk-btn-primary,
+  body.wireframe-mode .site-action-btn.btn-add-obs,
+  body.wireframe-mode .fab {
+    background: #333 !important;
+    color: white !important;
+    border-radius: 4px !important;
+    box-shadow: 2px 2px 0 #999 !important;
+  }
+  body.wireframe-mode .btn-back,
+  body.wireframe-mode .btn-secondary-action,
+  body.wireframe-mode .talk-btn-secondary,
+  body.wireframe-mode .btn-outlined,
+  body.wireframe-mode .site-action-btn.btn-plan-visit,
+  body.wireframe-mode .site-action-btn.btn-report {
+    background: white !important;
+    color: #333 !important;
+    border: 2px solid #999 !important;
+    border-radius: 4px !important;
+  }
+  body.wireframe-mode .detail-panel {
+    box-shadow: -4px 0 0 #999 !important;
+    border-left: 2px solid #999 !important;
+  }
+  body.wireframe-mode .stage-tab.active {
+    background: #333 !important;
+    color: white !important;
+    border-color: #333 !important;
+    border-radius: 4px !important;
+  }
+  body.wireframe-mode .stage-tab {
+    border-radius: 4px !important;
+    border-color: #999 !important;
+  }
+  body.wireframe-mode .progress-fill,
+  body.wireframe-mode .logo-dot,
+  body.wireframe-mode .notif-dot,
+  body.wireframe-mode .recording-dot,
+  body.wireframe-mode .ai-pulse {
+    background: #555 !important;
+  }
+  body.wireframe-mode .step-connector.complete { background: #555 !important; }
+  body.wireframe-mode .toggle.on { background: #555 !important; }
+  body.wireframe-mode .endorse-btn {
+    border: 2px dashed #999 !important;
+    border-radius: 4px !important;
+    background: white !important;
+  }
+  body.wireframe-mode .kanban-col .col-count {
+    background: #E0E0E0 !important;
+    color: #333 !important;
+  }
+  /* Annotation badges in wireframe mode */
+  body.wireframe-mode .wf-annotation {
+    display: flex !important;
+  }
+
+</style>
+</head>
+<body>
+<div class="phone-shell">
+
+  <!-- Status bar -->
+  <div class="status-bar">
+    <div class="status-left">
+      <div class="status-time">9:41</div>
+    </div>
+    <div class="status-right">
+      <svg width="16" height="12" viewBox="0 0 16 12" fill="currentColor"><rect x="0" y="3" width="3" height="9" rx="1" opacity="0.3"/><rect x="4.5" y="2" width="3" height="10" rx="1" opacity="0.5"/><rect x="9" y="0" width="3" height="12" rx="1" opacity="0.7"/><rect x="13.5" y="0" width="2.5" height="12" rx="1"/></svg>
+      <svg width="16" height="12" viewBox="0 0 24 12" fill="currentColor"><rect x="0.5" y="0.5" width="21" height="11" rx="2.5" stroke="currentColor" stroke-opacity="0.35" fill="none"/><rect x="22" y="3.5" width="2" height="5" rx="1" fill="currentColor" opacity="0.4"/><rect x="2" y="2" width="16" height="8" rx="1.5" fill="currentColor"/></svg>
+    </div>
+  </div>
+
+  <!-- Alert bar -->
+  <div class="alert-bar">
+    <div class="alert-count">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+      8
+    </div>
+    <div class="alert-divider"></div>
+    <div class="alert-warning">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+      0
+    </div>
+    <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2" style="margin-left:auto;opacity:0.6;"><path d="M19 9l-7 7-7-7"/></svg>
+  </div>
+
+  <!-- Top nav -->
+  <div class="top-nav">
+    <div class="back-btn" onclick="goBack()">
+      <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+    </div>
+    <div class="nav-title">Plan a Visit</div>
+    <div class="nav-right-icons">
+      <div class="nav-icon">
+        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <div class="notif-dot"></div>
+      </div>
+      <div class="nav-avatar">JW</div>
+    </div>
+  </div>
+
+  <!-- Stepper -->
+  <div class="stepper" id="stepper">
+    <!-- injected by JS -->
+  </div>
+
+  <!-- Page content -->
+  <div class="page-content">
+
+    <!-- STEP 1: SITE -->
+    <div class="step-content active" id="step-1">
+      <div class="page-headline">Where will you visit?</div>
+      <div class="page-sub">Based on Blueprint signals and visit history, these sites need the most attention.</div>
+
+      <div class="site-card selected" id="site-northgate" onclick="selectSite(this)">
+        <div class="site-card-radio"><div class="site-card-radio-dot"></div></div>
+        <div class="site-card-body">
+          <div class="site-name">Northgate Open Cut</div>
+          <div class="site-location">Pilbara, WA · Iron Ore West</div>
+          <div class="need-attention-row">
+            <span class="attention-badge">● 1 need attention</span>
+            <span class="blind-spots-chip">● 10 blind spots</span>
+          </div>
+          <div class="site-signals">
+            <div class="signal-row"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FFAB00" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg><span>Management Systems needs attention</span></div>
+            <div class="signal-row"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-disabled)" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg><span>Senior Leadership unmeasured</span></div>
+            <div class="signal-row"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--warning)" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><span style="color:var(--warning);font-weight:500;">5 open insights</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="site-card" id="site-ridgeback" onclick="selectSite(this)">
+        <div class="site-card-radio"><div class="site-card-radio-dot"></div></div>
+        <div class="site-card-body">
+          <div class="site-name">Ridgeback Processing</div>
+          <div class="site-location">Newman, WA · Iron Ore West</div>
+          <div class="need-attention-row">
+            <span class="attention-badge">● 3 need attention</span>
+            <span class="blind-spots-chip">● 9 blind spots</span>
+          </div>
+          <div class="site-signals">
+            <div class="signal-row"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FFAB00" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg><span>Work Understanding & Decision-making needs attention</span></div>
+            <div class="signal-row"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-disabled)" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg><span>Senior Leadership unmeasured</span></div>
+            <div class="signal-row"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--warning)" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><span style="color:var(--warning);font-weight:500;">3 open insights</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="site-card" onclick="selectSite(this)">
+        <div class="site-card-radio"><div class="site-card-radio-dot"></div></div>
+        <div class="site-card-body">
+          <div class="site-name">Sylvania Underground</div>
+          <div class="site-location">Kalgoorlie, WA · Gold South</div>
+          <div class="need-attention-row">
+            <span class="attention-badge" style="color:var(--primary);">● 0 need attention</span>
+            <span class="blind-spots-chip">● 6 blind spots</span>
+          </div>
+          <div class="site-signals">
+            <div class="signal-row"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg><span style="color:var(--primary);">Looking healthy — good LOTO practice emerging</span></div>
+            <div class="signal-row"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--warning)" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><span style="color:var(--warning);font-weight:500;">1 open insight</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 2: WHEN -->
+    <div class="step-content" id="step-2">
+      <div class="page-headline">When will you visit?</div>
+      <div class="page-sub">Select a date or schedule for later. Your briefing pack will be generated 48h before.</div>
+
+      <div class="date-option selected" onclick="selectDate(this)">
+        <div class="date-icon"><svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="var(--primary)" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+        <div>
+          <div class="date-label">Today</div>
+          <div class="date-sub">Wednesday, 1 April 2026</div>
+        </div>
+        <div class="date-check"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+      </div>
+
+      <div class="date-option" onclick="selectDate(this)">
+        <div class="date-icon"><svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="var(--text-secondary)" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+        <div>
+          <div class="date-label">Tomorrow</div>
+          <div class="date-sub">Thursday, 2 April 2026</div>
+        </div>
+        <div class="date-check"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+      </div>
+
+      <div class="date-option" onclick="selectDate(this)">
+        <div class="date-icon"><svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="var(--text-secondary)" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+        <div>
+          <div class="date-label">Choose a date</div>
+          <div class="date-sub">Pick from calendar</div>
+        </div>
+        <div class="date-check"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+      </div>
+
+      <div class="date-option" onclick="selectDate(this)">
+        <div class="date-icon"><svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="var(--text-secondary)" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+        <div>
+          <div class="date-label">Schedule for later</div>
+          <div class="date-sub">I'll confirm the date before visiting</div>
+        </div>
+        <div class="date-check"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+      </div>
+    </div>
+
+    <!-- STEP 3: FOCUS -->
+    <div class="step-content" id="step-3">
+      <div class="page-headline">What will you focus on?</div>
+      <div class="page-sub">Select the topics you plan to observe and discuss. Based on open insights, Blueprint signals, and site activity.</div>
+
+      <div class="ai-recommended">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+        AI has suggested these based on current site intelligence
+      </div>
+
+      <div class="focus-card selected" onclick="toggleFocus(this)">
+        <div class="focus-checkbox"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+        <div>
+          <div class="focus-topic">Pre-start check compliance — Heavy Vehicle</div>
+          <div class="focus-evidence">6 observations + active enquiry with 1/3 questions answered</div>
+          <div><span class="focus-source source-trend">↑ Cross-site trend</span></div>
+        </div>
+      </div>
+
+      <div class="focus-card selected" onclick="toggleFocus(this)">
+        <div class="focus-checkbox"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+        <div>
+          <div class="focus-topic">Heat management plan — work stop enforcement</div>
+          <div class="focus-evidence">Management Systems flagged by Blueprint — 2 thermal energy observations</div>
+          <div><span class="focus-source source-blueprint">◇ Blueprint signal</span></div>
+        </div>
+      </div>
+
+      <div class="focus-card" onclick="toggleFocus(this)">
+        <div class="focus-checkbox"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+        <div>
+          <div class="focus-topic">Berm height compliance — Pit 3 haul road</div>
+          <div class="focus-evidence">Open corrective action — 1/3 complete · assigned Jake Morrow</div>
+          <div><span class="focus-source source-investigation">⚠ Open action</span></div>
+        </div>
+      </div>
+
+      <div class="focus-card" onclick="toggleFocus(this)">
+        <div class="focus-checkbox"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+        <div>
+          <div class="focus-topic">PTW sign-on — are workers reading conditions?</div>
+          <div class="focus-evidence">No control of work observation in 18 days — practice atrophy signal</div>
+          <div><span class="focus-source source-ai">✦ AI suggested</span></div>
+        </div>
+      </div>
+
+      <div class="focus-card" onclick="toggleFocus(this)">
+        <div class="focus-checkbox"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+        <div>
+          <div class="focus-topic">Senior Leadership visibility on site</div>
+          <div class="focus-evidence">Blueprint blind spot — Senior Leadership unmeasured for this site</div>
+          <div><span class="focus-source source-blueprint">◇ Blueprint blind spot</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 4: CONFIRM (shown as step 3 completion) -->
+    <div class="step-content" id="step-confirm">
+      <div class="page-headline">Visit planned ✓</div>
+      <div class="page-sub">Your visit briefing pack will be ready 48 hours before. You'll receive a notification.</div>
+
+      <div style="background:var(--primary-light);border-radius:var(--radius);padding:16px;margin-bottom:20px;display:flex;align-items:center;gap:12px;">
+        <div style="width:40px;height:40px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div>
+          <div style="font-size:14px;font-weight:700;color:var(--primary-dark);">Northgate Open Cut</div>
+          <div style="font-size:12px;color:var(--primary-dark);opacity:0.8;">Wednesday, 1 April 2026</div>
+        </div>
+      </div>
+
+      <div class="confirm-section">
+        <div class="confirm-label">Focus Topics (2 selected)</div>
+        <div class="confirm-focus-item">
+          <div class="confirm-check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+          Pre-start check compliance — Heavy Vehicle
+        </div>
+        <div class="confirm-focus-item">
+          <div class="confirm-check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+          Heat management plan — work stop enforcement
+        </div>
+      </div>
+
+      <div style="background:var(--bg);border-radius:var(--radius-sm);padding:12px 14px;font-size:12px;color:var(--text-secondary);line-height:1.6;">
+        <strong style="color:var(--text-primary);">Visit briefing pack</strong> will include: current site intelligence, open insights, active corrective actions, Blueprint capacity signals, and suggested observation prompts for your selected focus topics. Available 48h before your visit.
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom bar -->
+  <div class="bottom-bar" id="bottomBar">
+    <!-- injected by JS -->
+  </div>
+
+</div>
+
+<script>
+let currentStep = 1;
+const TOTAL_STEPS = 3;
+
+function renderStepper() {
+  const steps = [
+    { num: 1, label: 'Site' },
+    { num: 2, label: 'When' },
+    { num: 3, label: 'Focus' },
+  ];
+  let html = '';
+  steps.forEach((s, i) => {
+    const cls = s.num < currentStep ? 'complete' : s.num === currentStep ? 'active' : 'inactive';
+    const labelCls = s.num === currentStep ? 'active' : '';
+    const icon = s.num < currentStep
+      ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>`
+      : s.num;
+    html += `<div class="step">
+      <div class="step-circle ${cls}">${icon}</div>
+      <div class="step-label ${labelCls}">${s.label}</div>
+    </div>`;
+    if (i < steps.length - 1) {
+      html += `<div class="step-connector ${s.num < currentStep ? 'complete' : ''}"></div>`;
+    }
+  });
+  document.getElementById('stepper').innerHTML = html;
+}
+
+function renderBottomBar() {
+  const bar = document.getElementById('bottomBar');
+  if (currentStep === 'confirm') {
+    bar.innerHTML = `
+      <button class="btn-next" onclick="goHome()" style="flex:1;">Done</button>
+    `;
+    return;
+  }
+  const isFirst = currentStep === 1;
+  const isLast = currentStep === TOTAL_STEPS;
+  bar.innerHTML = `
+    ${!isFirst ? `<button class="btn-back" onclick="goBack()"><svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg> Back</button>` : ''}
+    <button class="btn-next" onclick="goNext()">${isLast ? 'Confirm Visit' : 'Next'} <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></button>
+  `;
+}
+
+function showStep(step) {
+  document.querySelectorAll('.step-content').forEach(el => el.classList.remove('active'));
+  if (step === 'confirm') {
+    document.getElementById('step-confirm').classList.add('active');
+  } else {
+    document.getElementById(`step-${step}`).classList.add('active');
+  }
+}
+
+function goNext() {
+  if (currentStep < TOTAL_STEPS) {
+    currentStep++;
+    showStep(currentStep);
+    renderStepper();
+    renderBottomBar();
+  } else {
+    currentStep = 'confirm';
+    showStep('confirm');
+    document.getElementById('stepper').innerHTML = '';
+    document.getElementById('stepper').style.display = 'none';
+    renderBottomBar();
+  }
+}
+
+function goBack() {
+  if (currentStep === 'confirm') {
+    currentStep = TOTAL_STEPS;
+    document.getElementById('stepper').style.display = 'flex';
+    showStep(currentStep);
+    renderStepper();
+    renderBottomBar();
+  } else if (currentStep > 1) {
+    currentStep--;
+    showStep(currentStep);
+    renderStepper();
+    renderBottomBar();
+  }
+}
+
+function goHome() { alert('Visit saved. Returning to My Workspace.'); }
+
+function selectSite(el) {
+  document.querySelectorAll('.site-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function selectDate(el) {
+  document.querySelectorAll('.date-option').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function toggleFocus(el) {
+  el.classList.toggle('selected');
+}
+
+renderStepper();
+renderBottomBar();
+</script>
+
+<script>
+// Apply wireframe mode if set from index
+(function() {
+  var mode = localStorage.getItem('hiviz_wireframe_mode');
+  if (mode === 'wireframe') document.body.classList.add('wireframe-mode');
+})();
+</script>
+
+</body>
+</html>
