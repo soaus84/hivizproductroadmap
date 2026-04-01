@@ -84,6 +84,23 @@
   .toggle.on .toggle-thumb { transform: translateX(18px); }
 
   /* AI hint */
+  .suggestion-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 20px;
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .suggestion-chip:hover { border-color: var(--primary); color: var(--primary); }
+  .suggestion-chip.selected { border-color: var(--primary); background: var(--primary-light); color: var(--primary-dark); }
+
   .ai-hint { display: flex; align-items: center; gap: 6px; background: var(--purple-light); border-radius: var(--radius-sm); padding: 8px 10px; font-size: 11px; color: var(--purple); margin-top: 8px; }
 
   /* Bottom bar */
@@ -343,10 +360,35 @@
           </div>
         </div>
 
+        <!-- Post-write suggestion chips (appear after typing, before submit) -->
+        <div class="form-section" id="suggestionRow" style="display:none;">
+          <div class="form-label">
+            <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+            Does this match? <span style="font-weight:400;color:var(--text-disabled);">tap to confirm</span>
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;" id="suggestionChips">
+            <div class="suggestion-chip" onclick="selectSuggestion(this,'Heavy Vehicle Operation','work_type')">
+              <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+              Heavy Vehicle
+            </div>
+            <div class="suggestion-chip" onclick="selectSuggestion(this,'Permit to Work','practice')">
+              <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              Permit to Work
+            </div>
+            <div class="suggestion-chip" onclick="selectSuggestion(this,'Communications & Coordination','fw_factor')">
+              <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/></svg>
+              Comms & Coordination
+            </div>
+          </div>
+          <div style="font-size:11px;color:var(--text-secondary);margin-top:6px;font-style:italic;">
+            AI suggested — based on what you wrote. Ignore if not relevant.
+          </div>
+        </div>
+
         <!-- AI hint -->
         <div class="ai-hint">
           <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
-          AI will classify the signal type, energy involved, and barrier state after you submit — no extra steps needed.
+          Work type + your description = precise classification. AI determines signal type, energy, barrier state, and Forge Works factor — together they tell a complete story. If context was unclear, you may get a follow-up question.
         </div>
 
       </div>
@@ -430,7 +472,7 @@
         </div>
         <div class="ai-hint">
           <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
-          AI classifies signal type, energy, and barrier state after submit
+          Work type + description = precise classification. AI determines signal, energy, barrier state &amp; Forge Works factor. Unclear context? You may get a follow-up question.
         </div>
       </div>
 
@@ -447,6 +489,25 @@
 
 <script>
 function selectWorkType(el) { el.closest('.work-type-grid').querySelectorAll('.work-type-chip').forEach(c => c.classList.remove('selected')); el.classList.add('selected'); }
+
+let suggestionTimer = null;
+document.addEventListener('DOMContentLoaded', function() {
+  const textarea = document.querySelector('.obs-textarea');
+  if (!textarea) return;
+  textarea.addEventListener('input', function() {
+    clearTimeout(suggestionTimer);
+    if (this.value.length < 20) return;
+    suggestionTimer = setTimeout(() => {
+      // Simulate AI suggestion appearing after short pause
+      const row = document.getElementById('suggestionRow');
+      if (row) row.style.display = 'block';
+    }, 1500);
+  });
+});
+
+function selectSuggestion(el, label, type) {
+  el.classList.toggle('selected');
+}
 function toggleRole(el) { el.classList.toggle('selected'); }
 let recording = false;
 function toggleRecording() {

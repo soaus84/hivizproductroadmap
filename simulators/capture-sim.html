@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Capture Sim — Hiviz</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F4F6F8;
+    --surface: #FFFFFF;
+    --border: #E5E8EB;
+    --text-primary: #1C252E;
+    --text-secondary: #637381;
+    --text-disabled: #919EAB;
+    --primary: #00AB55;
+    --primary-light: #D1FAE5;
+    --primary-dark: #007B40;
+    --error: #FF5630;
+    --error-light: #FFE9E5;
+    --warning: #FFAB00;
+    --warning-light: #FFF3CD;
+    --info: #006C9C;
+    --info-light: #E0F4FF;
+    --purple: #7635DC;
+    --purple-light: #EFE6FF;
+    --hiviz-dark: #1C252E;
+    --radius: 16px;
+    --radius-sm: 10px;
+    --shadow-card: 0 1px 3px rgba(0,0,0,0.08);
+    --shadow-elevated: 0 8px 32px rgba(0,0,0,0.16);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #0e0f0d;
+    color: var(--text-primary);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 40px 20px;
+  }
+
+  /* Page header */
+  .page-header {
+    text-align: center;
+    margin-bottom: 32px;
+    color: white;
+  }
+
+  .page-logo {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #d4a843;
+    margin-bottom: 8px;
+  }
+
+  .page-title {
+    font-size: 24px;
+    font-weight: 800;
+    margin-bottom: 8px;
+  }
+
+  .page-sub {
+    font-size: 13px;
+    color: rgba(255,255,255,0.4);
+    max-width: 440px;
+    line-height: 1.6;
+  }
+
+  .exp-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: rgba(212,168,67,0.15);
+    border: 1px solid rgba(212,168,67,0.3);
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #d4a843;
+    margin-bottom: 12px;
+  }
+
+  /* Phone shell */
+  .phone-shell {
+    width: 390px;
+    background: var(--surface);
+    border-radius: 40px;
+    overflow: hidden;
+    box-shadow: 0 32px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.08);
+    display: flex;
+    flex-direction: column;
+    min-height: 750px;
+    position: relative;
+  }
+
+  /* Status bar */
+  .status-bar {
+    height: 44px;
+    background: var(--hiviz-dark);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    flex-shrink: 0;
+  }
+
+  .status-time { font-size: 15px; font-weight: 700; color: white; }
+  .status-right { display: flex; align-items: center; gap: 6px; color: white; }
+
+  /* App header */
+  .app-header {
+    background: var(--hiviz-dark);
+    padding: 12px 20px 16px;
+    flex-shrink: 0;
+  }
+
+  .app-header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 4px;
+  }
+
+  .app-logo {
+    font-size: 16px;
+    font-weight: 800;
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .logo-dot { width: 7px; height: 7px; background: var(--primary); border-radius: 50%; }
+
+  .app-site {
+    font-size: 11px;
+    color: rgba(255,255,255,0.4);
+  }
+
+  /* Landing — choose type */
+  .landing {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    gap: 12px;
+  }
+
+  .landing-prompt {
+    font-size: 17px;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 8px;
+  }
+
+  .landing-sub {
+    font-size: 13px;
+    color: var(--text-secondary);
+    text-align: center;
+    line-height: 1.5;
+    margin-bottom: 16px;
+  }
+
+  .type-btn {
+    width: 100%;
+    padding: 18px 20px;
+    border-radius: var(--radius);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    transition: all 0.15s;
+    text-align: left;
+  }
+
+  .type-btn:active { transform: scale(0.98); }
+
+  .type-btn-obs {
+    background: var(--hiviz-dark);
+    color: white;
+  }
+
+  .type-btn-inc {
+    background: var(--error-light);
+    color: var(--error);
+    border: 1.5px solid var(--error);
+  }
+
+  .type-icon {
+    width: 44px; height: 44px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    font-size: 20px;
+  }
+
+  .type-label { font-size: 16px; font-weight: 700; }
+  .type-desc { font-size: 12px; opacity: 0.6; margin-top: 2px; }
+
+  /* Chat interface */
+  .chat-view {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    display: none;
+  }
+
+  .chat-header {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+
+  .chat-back {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    color: var(--text-secondary);
+    border: none;
+    background: transparent;
+  }
+
+  .chat-back:hover { background: var(--bg); }
+
+  .chat-type-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .chat-type-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+  }
+
+  .chat-header-sub {
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin-left: auto;
+  }
+
+  /* Messages */
+  .messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background: var(--bg);
+  }
+
+  .messages::-webkit-scrollbar { display: none; }
+
+  .msg {
+    display: flex;
+    flex-direction: column;
+    max-width: 82%;
+    animation: msgIn 0.2s ease;
+  }
+
+  @keyframes msgIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .msg-hiviz { align-self: flex-start; }
+  .msg-user { align-self: flex-end; }
+
+  .msg-bubble {
+    padding: 10px 14px;
+    border-radius: 16px;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .msg-hiviz .msg-bubble {
+    background: var(--surface);
+    color: var(--text-primary);
+    border-bottom-left-radius: 4px;
+    box-shadow: var(--shadow-card);
+  }
+
+  .msg-user .msg-bubble {
+    background: var(--hiviz-dark);
+    color: white;
+    border-bottom-right-radius: 4px;
+  }
+
+  .msg-sender {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--text-disabled);
+    margin-bottom: 3px;
+    padding: 0 4px;
+  }
+
+  .msg-hiviz .msg-sender { color: var(--primary); }
+
+  /* Quick reply chips */
+  .quick-replies {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 0 4px;
+    margin-top: 4px;
+  }
+
+  .qr-chip {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 20px;
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all 0.12s;
+    white-space: nowrap;
+  }
+
+  .qr-chip:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-light); }
+  .qr-chip:active { transform: scale(0.97); }
+
+  /* Typing indicator */
+  .typing-indicator {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 10px 14px;
+    background: var(--surface);
+    border-radius: 16px;
+    border-bottom-left-radius: 4px;
+    width: fit-content;
+    box-shadow: var(--shadow-card);
+  }
+
+  .typing-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--text-disabled);
+    animation: typingBounce 1.2s infinite;
+  }
+
+  .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes typingBounce {
+    0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+    30% { transform: translateY(-4px); opacity: 1; }
+  }
+
+  /* Input area */
+  .input-area {
+    padding: 10px 12px;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    display: flex;
+    gap: 8px;
+    align-items: flex-end;
+    flex-shrink: 0;
+  }
+
+  .input-field {
+    flex: 1;
+    min-height: 40px;
+    max-height: 100px;
+    border: 1.5px solid var(--border);
+    border-radius: 20px;
+    padding: 9px 14px;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    color: var(--text-primary);
+    resize: none;
+    outline: none;
+    overflow-y: auto;
+    line-height: 1.4;
+    transition: border-color 0.15s;
+  }
+
+  .input-field:focus { border-color: var(--primary); }
+  .input-field::placeholder { color: var(--text-disabled); }
+
+  .send-btn {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: var(--hiviz-dark);
+    border: none;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    color: white;
+    flex-shrink: 0;
+    transition: all 0.15s;
+  }
+
+  .send-btn:hover { background: var(--primary); }
+  .send-btn:disabled { background: var(--border); cursor: default; }
+
+  /* Summary card */
+  .summary-card {
+    background: var(--primary-light);
+    border: 1.5px solid var(--primary);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    margin-top: 4px;
+  }
+
+  .summary-title {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--primary-dark);
+    margin-bottom: 8px;
+  }
+
+  .summary-row {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 5px;
+    font-size: 12px;
+  }
+
+  .summary-key {
+    color: var(--primary-dark);
+    font-weight: 600;
+    min-width: 90px;
+    flex-shrink: 0;
+  }
+
+  .summary-val { color: var(--hiviz-dark); line-height: 1.4; }
+
+  .api-note {
+    margin-top: 32px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    padding: 14px 16px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.4);
+    max-width: 390px;
+    line-height: 1.6;
+    text-align: center;
+  }
+
+  .api-key-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+  }
+
+  .api-key-input {
+    flex: 1;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 12px;
+    color: white;
+    font-family: 'Inter', sans-serif;
+    outline: none;
+  }
+
+  .api-key-input::placeholder { color: rgba(255,255,255,0.25); }
+  .api-key-input:focus { border-color: rgba(212,168,67,0.5); }
+
+  .api-key-btn {
+    background: #d4a843;
+    color: #0e0f0d;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .api-key-btn:hover { background: #e0b84f; }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="page-logo">Hiviz · Experiment</div>
+  <div class="exp-badge">
+    <svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2v-4M9 21H5a2 2 0 0 1-2-2v-4m0 0h18"/></svg>
+    Conversational Capture — Live AI
+  </div>
+  <div class="page-title">What if logging felt like a conversation?</div>
+  <div class="page-sub">Real AI back-and-forth gets the story out naturally. No forms. Just tell Hiviz what you saw.</div>
+</div>
+
+<!-- Phone shell -->
+<div class="phone-shell">
+
+  <div class="status-bar">
+    <div class="status-time">9:41</div>
+    <div class="status-right">
+      <svg width="15" height="11" viewBox="0 0 16 12" fill="currentColor"><rect x="0" y="3" width="3" height="9" rx="1" opacity="0.4"/><rect x="4.5" y="2" width="3" height="10" rx="1" opacity="0.6"/><rect x="9" y="0" width="3" height="12" rx="1" opacity="0.8"/><rect x="13.5" y="0" width="2.5" height="12" rx="1"/></svg>
+      <svg width="22" height="11" viewBox="0 0 24 12" fill="currentColor"><rect x="0.5" y="0.5" width="21" height="11" rx="2.5" stroke="currentColor" stroke-opacity="0.35" fill="none"/><rect x="22" y="3.5" width="2" height="5" rx="1" fill="currentColor" opacity="0.4"/><rect x="2" y="2" width="14" height="8" rx="1.5"/></svg>
+    </div>
+  </div>
+
+  <div class="app-header">
+    <div class="app-header-row">
+      <div class="app-logo"><div class="logo-dot"></div>Hiviz</div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="rgba(255,255,255,0.4)" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/></svg>
+        <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#7635DC,#00AB55);font-size:10px;font-weight:700;color:white;display:flex;align-items:center;justify-content:center;">MR</div>
+      </div>
+    </div>
+    <div class="app-site">📍 Northgate Open Cut · Iron Ore West</div>
+  </div>
+
+  <!-- LANDING -->
+  <div class="landing" id="landing">
+    <div class="landing-prompt">What do you want to log?</div>
+    <div class="landing-sub">Tell Hiviz what happened in your own words — it'll ask the right questions to get what it needs.</div>
+    <button class="type-btn type-btn-obs" onclick="startChat('observation')">
+      <div class="type-icon" style="background:rgba(255,255,255,0.1);">👁</div>
+      <div>
+        <div class="type-label">Log an Observation</div>
+        <div class="type-desc">Something you saw — safe, concerning, or a near-miss</div>
+      </div>
+    </button>
+    <button class="type-btn type-btn-inc" onclick="startChat('incident')">
+      <div class="type-icon" style="background:rgba(255,86,48,0.15);">⚠️</div>
+      <div>
+        <div class="type-label" style="color:var(--error);">Report an Incident</div>
+        <div class="type-desc" style="color:var(--error);opacity:0.7;">Injury, near-miss, property damage, or environmental</div>
+      </div>
+    </button>
+  </div>
+
+  <!-- CHAT VIEW -->
+  <div class="chat-view" id="chatView">
+    <div class="chat-header">
+      <button class="chat-back" onclick="resetChat()">
+        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <div class="chat-type-badge" id="chatTypeBadge"></div>
+      <div class="chat-header-sub" id="chatHeaderSub">Hiviz is listening</div>
+    </div>
+
+    <div class="messages" id="messages"></div>
+
+    <div class="input-area">
+      <textarea
+        class="input-field"
+        id="inputField"
+        placeholder="Type your message..."
+        rows="1"
+        onkeydown="handleKey(event)"
+        oninput="autoResize(this)"
+      ></textarea>
+      <button class="send-btn" id="sendBtn" onclick="sendMessage()">
+        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<!-- API Key -->
+<div class="api-note">
+  <div>This experiment calls the Anthropic API directly. Add your API key to experience the real conversation — it stays in your browser only.</div>
+  <div class="api-key-row">
+    <input type="password" class="api-key-input" id="apiKeyInput" placeholder="sk-ant-..." />
+    <button class="api-key-btn" onclick="saveApiKey()">Save</button>
+  </div>
+  <div style="margin-top:8px;font-size:11px;" id="apiKeyStatus"></div>
+</div>
+
+<script>
+let captureType = null;
+let conversationHistory = [];
+let apiKey = localStorage.getItem('hiviz_api_key') || '';
+let captureData = {};
+let isComplete = false;
+
+// Restore API key display
+if (apiKey) {
+  document.getElementById('apiKeyInput').value = apiKey;
+  document.getElementById('apiKeyStatus').textContent = '✓ API key saved';
+  document.getElementById('apiKeyStatus').style.color = '#00AB55';
+}
+
+function saveApiKey() {
+  const key = document.getElementById('apiKeyInput').value.trim();
+  if (!key.startsWith('sk-ant-')) {
+    document.getElementById('apiKeyStatus').textContent = 'Looks wrong — should start with sk-ant-';
+    document.getElementById('apiKeyStatus').style.color = '#FF5630';
+    return;
+  }
+  apiKey = key;
+  localStorage.setItem('hiviz_api_key', key);
+  document.getElementById('apiKeyStatus').textContent = '✓ Saved — start a conversation';
+  document.getElementById('apiKeyStatus').style.color = '#00AB55';
+}
+
+// ── SYSTEM PROMPTS ────────────────────────────────────────────────────────────
+
+const OBSERVATION_SYSTEM = `You are Hiviz, a friendly safety intelligence assistant for a construction and mining safety platform. A supervisor or manager is logging a field observation from their phone.
+
+Your job is to have a short, natural conversation to get the key information you need — like asking a knowledgeable colleague, not filling out a form.
+
+RULES:
+- One question at a time. Never ask multiple questions in one message.
+- Keep messages short — this is a phone conversation.
+- Be warm and direct. Use plain language. Never use safety jargon.
+- Don't use bullet points or lists in your messages.
+- Start by asking what they saw. Then naturally follow up to get: what work was happening, whether anyone was exposed or at risk, whether they took any action, and anything else relevant.
+- After 4-6 exchanges when you have enough, produce a structured summary in this exact JSON format wrapped in <summary> tags:
+<summary>
+{
+  "what_was_observed": "...",
+  "work_type": "...",
+  "signal_type": "positive_performance|weak_signal|at_risk_condition|unwanted_energy_event|barrier_failure",
+  "involved_role": "...",
+  "stop_work_called": true|false,
+  "immediate_action_taken": "...",
+  "energy_type": "kinetic|gravitational|electrical|thermal|chemical|pressure|none",
+  "fw_factor_hint": "...",
+  "confidence": "high|medium|low"
+}
+</summary>
+Then say something like "Got it — I've captured that. Anything else before I submit?"
+
+- If confidence is low on something important, ask one targeted follow-up.
+- Never mention the JSON or the field names to the user. Just have a conversation.
+- The site is Northgate Open Cut. The observer is Marcus Reyes, a supervisor.`;
+
+const INCIDENT_SYSTEM = `You are Hiviz, a friendly safety intelligence assistant for a construction and mining safety platform. Someone is reporting an incident from their phone.
+
+Your job is to have a short, natural conversation to get the key information — calm, clear, and efficient. This is important information but the person may be stressed.
+
+RULES:
+- One question at a time. Never ask multiple questions in one message.
+- Keep messages short and calm. Plain language only.
+- Start by acknowledging and asking what happened. Then naturally get: what type of incident, when it happened, whether anyone was injured (and how seriously), what work was being done, and what immediate actions were taken.
+- Be human. If someone reports an injury, acknowledge it before asking the next question.
+- After 5-7 exchanges when you have enough, produce a structured summary in this exact JSON format wrapped in <summary> tags:
+<summary>
+{
+  "incident_type": "near-miss|injury|property-damage|environmental",
+  "description": "...",
+  "occurred_at": "...",
+  "work_type": "...",
+  "injury_classification": "none|first_aid|medical_treatment|restricted_work|lost_time|fatality",
+  "people_involved_count": 0,
+  "immediate_action_taken": "...",
+  "notifiable_flag": true|false,
+  "energy_type": "kinetic|gravitational|electrical|thermal|chemical|pressure|none"
+}
+</summary>
+Then confirm what you've captured and ask if there's anything to add.
+
+- Never mention the JSON or field names.
+- Stay calm and professional throughout.
+- The site is Northgate Open Cut.`;
+
+// ── CHAT LOGIC ────────────────────────────────────────────────────────────────
+
+function startChat(type) {
+  if (!apiKey) {
+    alert('Add your Anthropic API key below the phone first.');
+    return;
+  }
+
+  captureType = type;
+  conversationHistory = [];
+  captureData = {};
+  isComplete = false;
+
+  document.getElementById('landing').style.display = 'none';
+  document.getElementById('chatView').style.display = 'flex';
+  document.getElementById('messages').innerHTML = '';
+
+  const badge = document.getElementById('chatTypeBadge');
+  if (type === 'observation') {
+    badge.innerHTML = `<div class="chat-type-dot" style="background:#1C252E;"></div><span style="font-size:13px;font-weight:700;">Observation</span>`;
+  } else {
+    badge.innerHTML = `<div class="chat-type-dot" style="background:var(--error);"></div><span style="font-size:13px;font-weight:700;color:var(--error);">Incident Report</span>`;
+  }
+
+  // Opening message from Hiviz
+  const openingMsg = type === 'observation'
+    ? "Hey Marcus — what did you see out there?"
+    : "Thanks for flagging this. What happened?";
+
+  addMessage('hiviz', openingMsg);
+  conversationHistory.push({ role: 'assistant', content: openingMsg });
+
+  document.getElementById('inputField').focus();
+}
+
+function resetChat() {
+  captureType = null;
+  conversationHistory = [];
+  document.getElementById('landing').style.display = 'flex';
+  document.getElementById('chatView').style.display = 'none';
+  document.getElementById('chatHeaderSub').textContent = 'Hiviz is listening';
+}
+
+function addMessage(sender, text, quickReplies) {
+  const msgs = document.getElementById('messages');
+
+  const msgEl = document.createElement('div');
+  msgEl.className = `msg msg-${sender}`;
+
+  if (sender === 'hiviz') {
+    // Check for summary JSON
+    if (text.includes('<summary>')) {
+      const jsonMatch = text.match(/<summary>([\s\S]*?)<\/summary>/);
+      const narrativeText = text.replace(/<summary>[\s\S]*?<\/summary>/, '').trim();
+
+      if (jsonMatch) {
+        try {
+          const data = JSON.parse(jsonMatch[1].trim());
+          captureData = data;
+
+          // Show the narrative part as a bubble
+          if (narrativeText) {
+            const bubble = document.createElement('div');
+            bubble.innerHTML = `<div class="msg-sender">Hiviz</div><div class="msg-bubble">${narrativeText}</div>`;
+            bubble.className = 'msg msg-hiviz';
+            // Animate the summary in
+            bubble.style.animation = 'msgIn 0.2s ease';
+            msgs.appendChild(bubble);
+          }
+
+          // Show summary card
+          msgEl.innerHTML = buildSummaryCard(data);
+          msgEl.style.maxWidth = '100%';
+
+        } catch(e) {
+          msgEl.innerHTML = `<div class="msg-sender">Hiviz</div><div class="msg-bubble">${escapeHtml(text)}</div>`;
+        }
+      }
+    } else {
+      msgEl.innerHTML = `<div class="msg-sender">Hiviz</div><div class="msg-bubble">${escapeHtml(text)}</div>`;
+    }
+  } else {
+    msgEl.innerHTML = `<div class="msg-sender" style="text-align:right;">You</div><div class="msg-bubble">${escapeHtml(text)}</div>`;
+  }
+
+  // Add quick replies if provided
+  if (quickReplies && quickReplies.length) {
+    const qrRow = document.createElement('div');
+    qrRow.className = 'quick-replies';
+    quickReplies.forEach(qr => {
+      const chip = document.createElement('div');
+      chip.className = 'qr-chip';
+      chip.textContent = qr;
+      chip.onclick = () => {
+        document.getElementById('inputField').value = qr;
+        qrRow.remove();
+        sendMessage();
+      };
+      qrRow.appendChild(chip);
+    });
+    msgEl.appendChild(qrRow);
+  }
+
+  msgs.appendChild(msgEl);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function buildSummaryCard(data) {
+  const isObs = captureType === 'observation';
+  const rows = isObs ? [
+    { k: 'What observed', v: data.what_was_observed },
+    { k: 'Work type', v: data.work_type },
+    { k: 'Signal type', v: data.signal_type?.replace(/_/g, ' ') },
+    { k: 'Energy', v: data.energy_type !== 'none' ? data.energy_type : '—' },
+    { k: 'FW factor hint', v: data.fw_factor_hint },
+    { k: 'Stop work', v: data.stop_work_called ? 'Yes' : 'No' },
+    { k: 'Action taken', v: data.immediate_action_taken || '—' },
+  ] : [
+    { k: 'Incident type', v: data.incident_type?.replace(/-/g, ' ') },
+    { k: 'What happened', v: data.description },
+    { k: 'When', v: data.occurred_at },
+    { k: 'Work type', v: data.work_type },
+    { k: 'Injury', v: data.injury_classification?.replace(/_/g, ' ') || 'none' },
+    { k: 'People involved', v: data.people_involved_count },
+    { k: 'Action taken', v: data.immediate_action_taken || '—' },
+  ];
+
+  return `
+    <div class="summary-card">
+      <div class="summary-title">✓ Captured — ready to submit</div>
+      ${rows.filter(r => r.v).map(r => `
+        <div class="summary-row">
+          <div class="summary-key">${r.k}</div>
+          <div class="summary-val">${r.v}</div>
+        </div>
+      `).join('')}
+      <div style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(0,171,85,0.2);font-size:11px;color:var(--primary-dark);font-style:italic;">
+        AI enrichment will run after submission — signal type, energy classification, Forge Works factor, and barrier assessment will be added automatically.
+      </div>
+    </div>
+  `;
+}
+
+function addTypingIndicator() {
+  const msgs = document.getElementById('messages');
+  const el = document.createElement('div');
+  el.id = 'typingIndicator';
+  el.className = 'msg msg-hiviz';
+  el.innerHTML = `
+    <div class="msg-sender">Hiviz</div>
+    <div class="typing-indicator">
+      <div class="typing-dot"></div>
+      <div class="typing-dot"></div>
+      <div class="typing-dot"></div>
+    </div>
+  `;
+  msgs.appendChild(el);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function removeTypingIndicator() {
+  const el = document.getElementById('typingIndicator');
+  if (el) el.remove();
+}
+
+async function sendMessage() {
+  const input = document.getElementById('inputField');
+  const text = input.value.trim();
+  if (!text || !apiKey) return;
+
+  input.value = '';
+  autoResize(input);
+
+  addMessage('user', text);
+  conversationHistory.push({ role: 'user', content: text });
+
+  addTypingIndicator();
+  document.getElementById('sendBtn').disabled = true;
+  document.getElementById('chatHeaderSub').textContent = 'Hiviz is thinking...';
+
+  try {
+    const systemPrompt = captureType === 'observation' ? OBSERVATION_SYSTEM : INCIDENT_SYSTEM;
+
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 600,
+        system: systemPrompt,
+        messages: conversationHistory
+      })
+    });
+
+    if (!response.ok) {
+      const err = await response.json();
+      throw new Error(err.error?.message || 'API error');
+    }
+
+    const data = await response.json();
+    const replyText = data.content[0].text;
+
+    removeTypingIndicator();
+    document.getElementById('sendBtn').disabled = false;
+    document.getElementById('chatHeaderSub').textContent = 'Hiviz is listening';
+
+    conversationHistory.push({ role: 'assistant', content: replyText });
+
+    // Determine if we should show quick replies
+    let quickReplies = null;
+    if (replyText.toLowerCase().includes('work') && !replyText.includes('<summary>')) {
+      const workTypes = ['Heavy Vehicle', 'Working at Height', 'Hot Work', 'Confined Space', 'Electrical', 'Blasting'];
+      // Only show if explicitly asking about work type
+      if (replyText.toLowerCase().includes('what work') || replyText.toLowerCase().includes('type of work') || replyText.toLowerCase().includes('working on')) {
+        quickReplies = workTypes.slice(0, 4);
+      }
+    }
+
+    if (replyText.toLowerCase().includes('anyone hurt') || replyText.toLowerCase().includes('was anyone injured') || replyText.toLowerCase().includes('anyone injured')) {
+      quickReplies = ['No injuries', 'First aid needed', 'Medical treatment', 'Lost time injury'];
+    }
+
+    if (replyText.toLowerCase().includes('stop the work') || replyText.toLowerCase().includes('stop work')) {
+      quickReplies = ['Yes, I stopped the work', 'No, work continued', 'Work was already stopped'];
+    }
+
+    addMessage('hiviz', replyText, quickReplies);
+
+    // If summary was captured, disable further input after one more exchange
+    if (replyText.includes('<summary>')) {
+      isComplete = true;
+      input.placeholder = 'Add anything else, or leave blank to submit...';
+    }
+
+  } catch (err) {
+    removeTypingIndicator();
+    document.getElementById('sendBtn').disabled = false;
+    document.getElementById('chatHeaderSub').textContent = 'Hiviz is listening';
+
+    if (err.message.includes('401') || err.message.includes('authentication')) {
+      addMessage('hiviz', 'Your API key doesn\'t seem right — check it below and try again.');
+    } else if (err.message.includes('CORS') || err.message.includes('fetch')) {
+      addMessage('hiviz', 'Having trouble connecting. Make sure your API key is saved correctly.');
+    } else {
+      addMessage('hiviz', `Something went wrong: ${err.message}`);
+    }
+  }
+}
+
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
+}
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 100) + 'px';
+}
+
+function escapeHtml(text) {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/\n/g, '<br>');
+}
+</script>
+</body>
+</html>
