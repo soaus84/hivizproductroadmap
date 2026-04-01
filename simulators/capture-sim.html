@@ -496,6 +496,107 @@
   }
 
   .api-key-btn:hover { background: #e0b84f; }
+
+  /* Fallback form */
+  .fallback-view {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    display: none;
+  }
+
+  .fallback-banner {
+    background: var(--warning-light);
+    border-bottom: 1px solid var(--warning);
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: #92400e;
+    flex-shrink: 0;
+  }
+
+  .fallback-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    background: var(--bg);
+  }
+
+  .fallback-body::-webkit-scrollbar { display: none; }
+
+  .form-section { margin-bottom: 16px; }
+  .form-label-fb {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+    display: block;
+  }
+
+  .fb-textarea {
+    width: 100%;
+    min-height: 90px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    color: var(--text-primary);
+    resize: none;
+    outline: none;
+    background: var(--surface);
+    transition: border-color 0.15s;
+  }
+
+  .fb-textarea:focus { border-color: var(--primary); }
+  .fb-textarea::placeholder { color: var(--text-disabled); }
+
+  .wt-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+
+  .wt-chip {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 9px 10px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.12s;
+  }
+
+  .wt-chip:hover { border-color: var(--primary); }
+  .wt-chip.selected { border-color: var(--primary); background: var(--primary-light); color: var(--primary-dark); }
+
+  .fb-toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--surface);
+    border-radius: var(--radius-sm);
+    padding: 11px 14px;
+    border: 1.5px solid var(--border);
+  }
+
+  .fb-toggle-label { font-size: 13px; font-weight: 600; }
+  .fb-toggle { width: 42px; height: 24px; border-radius: 12px; background: var(--border); cursor: pointer; position: relative; transition: background 0.2s; }
+  .fb-toggle.on { background: var(--primary); }
+  .fb-toggle-thumb { position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: white; transition: transform 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+  .fb-toggle.on .fb-toggle-thumb { transform: translateX(18px); }
+
+  .fb-hint {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--purple-light);
+    border-radius: var(--radius-sm);
+    padding: 8px 10px;
+    font-size: 11px;
+    color: var(--purple);
+    margin-top: 12px;
+  }
 </style>
 </head>
 <body>
@@ -579,6 +680,54 @@
     </div>
   </div>
 
+  <!-- FALLBACK FORM VIEW -->
+  <div class="fallback-view" id="fallbackView">
+    <div class="fallback-banner">
+      <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      <span><strong>AI unavailable</strong> — using standard form. Enrichment will run when connection restores.</span>
+      <button onclick="retryChat()" style="margin-left:auto;background:transparent;border:1px solid #d97706;border-radius:5px;padding:3px 8px;font-size:11px;font-weight:600;color:#92400e;cursor:pointer;font-family:Inter,sans-serif;">Retry AI</button>
+    </div>
+
+    <div class="fallback-body">
+      <div class="form-section">
+        <label class="form-label-fb">What work type?</label>
+        <div class="wt-grid">
+          <div class="wt-chip" onclick="toggleWT(this)">Heavy Vehicle</div>
+          <div class="wt-chip" onclick="toggleWT(this)">Working at Height</div>
+          <div class="wt-chip" onclick="toggleWT(this)">Hot Work</div>
+          <div class="wt-chip" onclick="toggleWT(this)">Confined Space</div>
+          <div class="wt-chip" onclick="toggleWT(this)">Electrical</div>
+          <div class="wt-chip" onclick="toggleWT(this)">Blasting</div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <label class="form-label-fb">What did you observe?</label>
+        <textarea class="fb-textarea" id="fbTextarea" placeholder="Describe what you saw. Be specific."></textarea>
+      </div>
+
+      <div class="form-section">
+        <div class="fb-toggle-row">
+          <div class="fb-toggle-label">Did you stop the work?</div>
+          <div class="fb-toggle" id="fbToggle" onclick="this.classList.toggle('on')">
+            <div class="fb-toggle-thumb"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="fb-hint">
+        <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+        AI enrichment will classify signal type, energy, and Forge Works factor once connection restores — no action needed.
+      </div>
+    </div>
+
+    <div style="padding:10px 12px;background:white;border-top:1px solid var(--border);flex-shrink:0;">
+      <button onclick="submitFallback()" style="width:100%;height:44px;border-radius:22px;background:var(--hiviz-dark);color:white;border:none;font-size:14px;font-weight:700;cursor:pointer;font-family:Inter,sans-serif;">
+        Submit Observation
+      </button>
+    </div>
+  </div>
+
 </div>
 
 <!-- API Key -->
@@ -622,15 +771,26 @@ function saveApiKey() {
 
 const OBSERVATION_SYSTEM = `You are Hiviz, a friendly safety intelligence assistant for a construction and mining safety platform. A supervisor or manager is logging a field observation from their phone.
 
-Your job is to have a short, natural conversation to get the key information you need — like asking a knowledgeable colleague, not filling out a form.
+Your job is to have a short, natural conversation to get the key information — like asking a knowledgeable colleague, not filling out a form.
 
-RULES:
+CRITICAL RULES:
+- Always respond in whatever language the user writes in. If they switch language mid-conversation, follow them. The summary JSON fields must always be in English regardless of conversation language.
 - One question at a time. Never ask multiple questions in one message.
-- Keep messages short — this is a phone conversation.
-- Be warm and direct. Use plain language. Never use safety jargon.
-- Don't use bullet points or lists in your messages.
-- Start by asking what they saw. Then naturally follow up to get: what work was happening, whether anyone was exposed or at risk, whether they took any action, and anything else relevant.
-- After 4-6 exchanges when you have enough, produce a structured summary in this exact JSON format wrapped in <summary> tags:
+- Keep messages short — this is a phone conversation, not a report.
+- Be warm and direct. Plain language only. No safety jargon.
+- No bullet points or lists in your messages.
+
+INFORMATION GATHERING:
+- Start by asking what they saw.
+- You need: what happened, what work was being done, whether anyone was exposed, whether action was taken.
+- Assess confidence as you go. If the very first message gives you enough — a clear description, obvious work type, clear signal — summarise immediately. Don't ask questions you don't need.
+- If after 1-2 messages you have high confidence on all key fields, go straight to summary.
+- Maximum 4 exchanges before summarising regardless of confidence — never drag it out.
+- If one specific thing is unclear and matters, ask one targeted question. Otherwise summarise with what you have and note confidence.
+
+SUMMARY:
+When you have enough — which may be after just 1 or 2 messages — produce the structured summary wrapped in <summary> tags, then on a new line say something natural like "Got it — anything to add before I submit this?"
+
 <summary>
 {
   "what_was_observed": "...",
@@ -644,22 +804,31 @@ RULES:
   "confidence": "high|medium|low"
 }
 </summary>
-Then say something like "Got it — I've captured that. Anything else before I submit?"
 
-- If confidence is low on something important, ask one targeted follow-up.
-- Never mention the JSON or the field names to the user. Just have a conversation.
+- Never mention the JSON or field names to the user.
 - The site is Northgate Open Cut. The observer is Marcus Reyes, a supervisor.`;
 
 const INCIDENT_SYSTEM = `You are Hiviz, a friendly safety intelligence assistant for a construction and mining safety platform. Someone is reporting an incident from their phone.
 
-Your job is to have a short, natural conversation to get the key information — calm, clear, and efficient. This is important information but the person may be stressed.
+Your job is to have a short, natural conversation to get the key information — calm, clear, efficient. The person may be stressed or shaken.
 
-RULES:
+CRITICAL RULES:
+- Always respond in whatever language the user writes in. Summary JSON fields must always be in English.
 - One question at a time. Never ask multiple questions in one message.
 - Keep messages short and calm. Plain language only.
-- Start by acknowledging and asking what happened. Then naturally get: what type of incident, when it happened, whether anyone was injured (and how seriously), what work was being done, and what immediate actions were taken.
-- Be human. If someone reports an injury, acknowledge it before asking the next question.
-- After 5-7 exchanges when you have enough, produce a structured summary in this exact JSON format wrapped in <summary> tags:
+- If someone reports an injury, acknowledge it warmly before asking the next question.
+- Never ask for information you can reasonably infer.
+
+INFORMATION GATHERING:
+- Start by acknowledging and asking what happened.
+- You need: what type of event, when, whether anyone was injured and how seriously, what work was happening, and what immediate actions were taken.
+- If the first message makes the situation clear, summarise after 2-3 follow-ups maximum.
+- For clear near-misses with no injury, summarise faster. For injuries, take one extra exchange to get severity right.
+- Maximum 5 exchanges before summarising.
+
+SUMMARY:
+When you have enough, produce the structured summary wrapped in <summary> tags, then say something human like "I've captured that. Is there anything else important before this is submitted?"
+
 <summary>
 {
   "incident_type": "near-miss|injury|property-damage|environmental",
@@ -673,10 +842,8 @@ RULES:
   "energy_type": "kinetic|gravitational|electrical|thermal|chemical|pressure|none"
 }
 </summary>
-Then confirm what you've captured and ask if there's anything to add.
 
 - Never mention the JSON or field names.
-- Stay calm and professional throughout.
 - The site is Northgate Open Cut.`;
 
 // ── CHAT LOGIC ────────────────────────────────────────────────────────────────
@@ -742,9 +909,8 @@ function addMessage(sender, text, quickReplies) {
           // Show the narrative part as a bubble
           if (narrativeText) {
             const bubble = document.createElement('div');
-            bubble.innerHTML = `<div class="msg-sender">Hiviz</div><div class="msg-bubble">${narrativeText}</div>`;
+            bubble.innerHTML = `<div class="msg-sender">Hiviz</div><div class="msg-bubble">${escapeHtml(narrativeText)}</div>`;
             bubble.className = 'msg msg-hiviz';
-            // Animate the summary in
             bubble.style.animation = 'msgIn 0.2s ease';
             msgs.appendChild(bubble);
           }
@@ -752,6 +918,9 @@ function addMessage(sender, text, quickReplies) {
           // Show summary card
           msgEl.innerHTML = buildSummaryCard(data);
           msgEl.style.maxWidth = '100%';
+
+          // Show submit button after a moment
+          setTimeout(() => showSubmitBar(), 400);
 
         } catch(e) {
           msgEl.innerHTML = `<div class="msg-sender">Hiviz</div><div class="msg-bubble">${escapeHtml(text)}</div>`;
@@ -773,6 +942,11 @@ function addMessage(sender, text, quickReplies) {
       chip.className = 'qr-chip';
       chip.textContent = qr;
       chip.onclick = () => {
+        if (qr === 'Switch to form') {
+          qrRow.remove();
+          showFallback(captureType);
+          return;
+        }
         document.getElementById('inputField').value = qr;
         qrRow.remove();
         sendMessage();
@@ -943,6 +1117,54 @@ function handleKey(e) {
 function autoResize(el) {
   el.style.height = 'auto';
   el.style.height = Math.min(el.scrollHeight, 100) + 'px';
+}
+
+function showSubmitBar() {
+  const existing = document.getElementById('submitBar');
+  if (existing) return;
+  const inputArea = document.querySelector('.input-area');
+  const bar = document.createElement('div');
+  bar.id = 'submitBar';
+  bar.style.cssText = 'padding:10px 12px;background:white;border-top:1px solid var(--border);display:flex;gap:8px;flex-shrink:0;animation:msgIn 0.2s ease;';
+  bar.innerHTML = `
+    <button onclick="submitCapture()" style="flex:1;height:44px;border-radius:22px;background:var(--primary);color:white;border:none;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;font-family:Inter,sans-serif;">
+      <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>
+      Submit ${captureType === 'observation' ? 'Observation' : 'Incident Report'}
+    </button>
+    <button onclick="bar.remove()" style="height:44px;padding:0 14px;border-radius:22px;background:transparent;color:var(--text-secondary);border:1.5px solid var(--border);font-size:13px;font-weight:600;cursor:pointer;font-family:Inter,sans-serif;">Add more</button>
+  `;
+  inputArea.parentNode.insertBefore(bar, inputArea);
+}
+
+function submitCapture() {
+  // Hide submit bar and input
+  const bar = document.getElementById('submitBar');
+  if (bar) bar.remove();
+  document.querySelector('.input-area').style.display = 'none';
+
+  // Show submitted confirmation
+  const msgs = document.getElementById('messages');
+  const conf = document.createElement('div');
+  conf.style.cssText = 'background:var(--primary);border-radius:16px;padding:16px;margin:8px 0;animation:msgIn 0.3s ease;text-align:center;';
+  conf.innerHTML = `
+    <div style="font-size:24px;margin-bottom:8px;">✓</div>
+    <div style="font-size:15px;font-weight:700;color:white;margin-bottom:4px;">${captureType === 'observation' ? 'Observation submitted' : 'Incident reported'}</div>
+    <div style="font-size:12px;color:rgba(255,255,255,0.7);line-height:1.5;">AI enrichment running — signal type, energy classification, and Forge Works factor will be added automatically. You'll see this in the pipeline shortly.</div>
+  `;
+  msgs.appendChild(conf);
+  msgs.scrollTop = msgs.scrollHeight;
+
+  // Update header
+  document.getElementById('chatHeaderSub').textContent = 'Submitted ✓';
+
+  // Show start again option after a moment
+  setTimeout(() => {
+    const restart = document.createElement('div');
+    restart.style.cssText = 'text-align:center;padding:16px;';
+    restart.innerHTML = `<button onclick="resetChat()" style="background:transparent;border:1.5px solid var(--border);border-radius:20px;padding:8px 20px;font-size:13px;font-weight:600;color:var(--text-secondary);cursor:pointer;font-family:Inter,sans-serif;">Log another</button>`;
+    msgs.appendChild(restart);
+    msgs.scrollTop = msgs.scrollHeight;
+  }, 800);
 }
 
 function escapeHtml(text) {
