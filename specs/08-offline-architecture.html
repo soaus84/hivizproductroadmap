@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Offline-First Capture — Architecture</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0b0c0a;
+    --surface: #111210;
+    --surface2: #181917;
+    --border: #242522;
+    --border-light: #1c1d1a;
+    --accent: #c8f73a;
+    --accent-dim: #7a9a22;
+    --accent-glow: rgba(200,247,58,0.08);
+    --red: #ff4d3d;
+    --red-bg: rgba(255,77,61,0.1);
+    --amber: #f5a623;
+    --amber-bg: rgba(245,166,35,0.1);
+    --blue: #3d9cf5;
+    --blue-bg: rgba(61,156,245,0.1);
+    --purple: #a855f7;
+    --purple-bg: rgba(168,85,247,0.1);
+    --green: #22c55e;
+    --green-bg: rgba(34,197,94,0.1);
+    --text: #d4d2cb;
+    --text-dim: #6b6960;
+    --text-muted: #3a3935;
+    --mono: 'DM Mono', monospace;
+    --display: 'Syne', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 1.6;
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  /* Grain overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.5;
+  }
+
+  .page { max-width: 960px; margin: 0 auto; padding: 64px 32px 80px; position: relative; z-index: 1; }
+
+  /* ── HEADER ── */
+  header { margin-bottom: 64px; }
+
+  .kicker {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent-dim);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .kicker::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+    max-width: 200px;
+  }
+
+  h1 {
+    font-family: var(--display);
+    font-size: clamp(28px, 5vw, 44px);
+    font-weight: 800;
+    color: white;
+    line-height: 1.1;
+    margin-bottom: 16px;
+    letter-spacing: -0.02em;
+  }
+
+  h1 span { color: var(--accent); }
+
+  .header-desc {
+    font-size: 14px;
+    color: var(--text-dim);
+    max-width: 560px;
+    line-height: 1.7;
+    border-left: 2px solid var(--border);
+    padding-left: 16px;
+    margin-top: 20px;
+  }
+
+  .header-meta {
+    display: flex;
+    gap: 24px;
+    margin-top: 24px;
+    flex-wrap: wrap;
+  }
+
+  .meta-item {
+    font-size: 11px;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .meta-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); }
+
+  /* ── SECTION HEADINGS ── */
+  .section { margin-bottom: 52px; }
+
+  .section-label {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border-light);
+  }
+
+  /* ── PRINCIPLE CARDS ── */
+  .principles {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 48px;
+  }
+
+  .principle {
+    background: var(--surface);
+    padding: 20px;
+  }
+
+  .principle-num {
+    font-size: 32px;
+    font-weight: 800;
+    font-family: var(--display);
+    color: var(--text-muted);
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+
+  .principle-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+
+  .principle-desc {
+    font-size: 12px;
+    color: var(--text-dim);
+    line-height: 1.55;
+  }
+
+  /* ── MAIN FLOW DIAGRAM ── */
+  .flow-diagram {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 32px;
+    margin-bottom: 48px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .flow-diagram::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent) 0%, transparent 100%);
+  }
+
+  .flow-title {
+    font-family: var(--display);
+    font-size: 16px;
+    font-weight: 700;
+    color: white;
+    margin-bottom: 28px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .flow-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* Main flow row */
+  .flow-row {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+    row-gap: 8px;
+  }
+
+  .flow-node {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text);
+    position: relative;
+    flex-shrink: 0;
+    transition: border-color 0.2s;
+  }
+
+  .flow-node:hover { border-color: var(--border); }
+
+  .flow-node.accent { border-color: var(--accent-dim); color: var(--accent); }
+  .flow-node.red { border-color: rgba(255,77,61,0.4); color: var(--red); background: var(--red-bg); }
+  .flow-node.amber { border-color: rgba(245,166,35,0.4); color: var(--amber); background: var(--amber-bg); }
+  .flow-node.blue { border-color: rgba(61,156,245,0.4); color: var(--blue); background: var(--blue-bg); }
+  .flow-node.purple { border-color: rgba(168,85,247,0.4); color: var(--purple); background: var(--purple-bg); }
+  .flow-node.green { border-color: rgba(34,197,94,0.4); color: var(--green); background: var(--green-bg); }
+
+  .flow-node-label {
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 3px;
+  }
+
+  .flow-node-value { font-size: 13px; font-weight: 500; }
+  .flow-node-sub { font-size: 10px; opacity: 0.6; margin-top: 2px; }
+
+  .flow-arrow {
+    color: var(--text-muted);
+    padding: 0 8px;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+
+  /* Branch decision */
+  .branch-block {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin-bottom: 16px;
+    position: relative;
+  }
+
+  .branch-header {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-dim);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .diamond {
+    width: 16px; height: 16px;
+    background: var(--amber);
+    transform: rotate(45deg);
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  .branch-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .branch-arm {
+    background: var(--surface);
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    padding: 14px;
+  }
+
+  .arm-condition {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border-light);
+  }
+
+  .arm-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 5px 0;
+    font-size: 12px;
+    color: var(--text-dim);
+  }
+
+  .arm-step-num {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: var(--surface2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9px;
+    font-weight: 500;
+    flex-shrink: 0;
+    color: var(--text-muted);
+    margin-top: 1px;
+  }
+
+  .arm-step-text { line-height: 1.45; }
+
+  .arm-step-code {
+    font-family: var(--mono);
+    font-size: 10px;
+    background: var(--border-light);
+    padding: 1px 6px;
+    border-radius: 3px;
+    color: var(--accent);
+    display: inline-block;
+    margin-top: 3px;
+  }
+
+  /* ── STATES TABLE ── */
+  .states-grid {
+    display: grid;
+    grid-template-columns: 200px 1fr 1fr 1fr;
+    gap: 1px;
+    background: var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 48px;
+    font-size: 12px;
+  }
+
+  .states-grid .cell {
+    background: var(--surface);
+    padding: 12px 14px;
+  }
+
+  .states-grid .header {
+    background: var(--surface2);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: 10px 14px;
+  }
+
+  .state-name {
+    font-size: 12px;
+    font-weight: 500;
+    margin-bottom: 3px;
+  }
+
+  .state-indicator {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 6px;
+  }
+
+  /* ── DB SCHEMA ── */
+  .schema-block {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 48px;
+  }
+
+  .schema-header {
+    background: var(--surface2);
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--border);
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-dim);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .schema-body {
+    padding: 20px;
+    font-family: var(--mono);
+    font-size: 12px;
+    line-height: 1.8;
+  }
+
+  .schema-comment { color: var(--text-muted); }
+  .schema-keyword { color: var(--blue); }
+  .schema-type { color: var(--purple); }
+  .schema-field { color: var(--text); }
+  .schema-value { color: var(--accent); }
+  .schema-enum { color: var(--amber); }
+
+  /* ── RETRY SCHEDULE ── */
+  .timeline {
+    position: relative;
+    padding-left: 24px;
+    margin-bottom: 48px;
+  }
+
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 6px;
+    top: 8px;
+    bottom: 8px;
+    width: 1px;
+    background: var(--border);
+  }
+
+  .timeline-item {
+    position: relative;
+    padding: 0 0 20px 20px;
+  }
+
+  .timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -18px;
+    top: 6px;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+  }
+
+  .timeline-item.active::before {
+    background: var(--accent);
+    border-color: var(--accent);
+    box-shadow: 0 0 8px var(--accent-dim);
+  }
+
+  .timeline-time {
+    font-size: 10px;
+    color: var(--accent-dim);
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    margin-bottom: 3px;
+  }
+
+  .timeline-event { font-size: 13px; color: var(--text); margin-bottom: 3px; }
+  .timeline-detail { font-size: 11px; color: var(--text-dim); }
+
+  /* ── CONSIDERATIONS ── */
+  .considerations {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 48px;
+  }
+
+  .consideration {
+    background: var(--surface);
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    padding: 16px;
+  }
+
+  .consideration-label {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+
+  .consideration-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+
+  .consideration-body {
+    font-size: 12px;
+    color: var(--text-dim);
+    line-height: 1.55;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 1px solid var(--border-light);
+    padding-top: 24px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--text-muted);
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  @media (max-width: 640px) {
+    .page { padding: 40px 20px 60px; }
+    .principles { grid-template-columns: 1fr; }
+    .branch-grid { grid-template-columns: 1fr; }
+    .states-grid { grid-template-columns: 1fr 1fr; }
+    .states-grid .header:nth-child(3),
+    .states-grid .header:nth-child(4),
+    .states-grid .cell:nth-child(4n+3),
+    .states-grid .cell:nth-child(4n) { display: none; }
+    .considerations { grid-template-columns: 1fr; }
+    .flow-row { flex-direction: column; align-items: flex-start; gap: 4px; }
+    .flow-arrow { transform: rotate(90deg); padding: 4px 0; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- HEADER -->
+  <header>
+    <div class="kicker">Hiviz · SafetyPlatform · Engineering</div>
+    <h1>Offline-First <span>Capture</span><br>Architecture</h1>
+    <div class="header-desc">
+      How observation and incident capture works when connectivity is partial or absent. Observations are always written locally first. Classification runs async. The supervisor never waits.
+    </div>
+    <div class="header-meta">
+      <div class="meta-item"><div class="meta-dot"></div>V1 scope</div>
+      <div class="meta-item"><div class="meta-dot"></div>Mobile-first (Capacitor)</div>
+      <div class="meta-item"><div class="meta-dot"></div>April 2026</div>
+    </div>
+  </header>
+
+  <!-- CORE PRINCIPLES -->
+  <div class="section">
+    <div class="section-label">Core principles</div>
+    <div class="principles">
+      <div class="principle">
+        <div class="principle-num">01</div>
+        <div class="principle-title">Local write first</div>
+        <div class="principle-desc">Every observation is written to the local database immediately on submission — before any network call is attempted. The supervisor's action is never blocked by connectivity.</div>
+      </div>
+      <div class="principle">
+        <div class="principle-num">02</div>
+        <div class="principle-title">Enrichment is async</div>
+        <div class="principle-desc">AI classification (signal type, energy, Forge Works factor) runs in a background job after submission. The record exists and is valid without it. Enrichment updates the record when it completes.</div>
+      </div>
+      <div class="principle">
+        <div class="principle-num">03</div>
+        <div class="principle-title">Eventually consistent</div>
+        <div class="principle-desc">Classification is eventually consistent — not real-time. A record moves through enrichment_status states (pending → processing → complete) on its own schedule. The user experience never degrades.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN FLOW DIAGRAM -->
+  <div class="section">
+    <div class="section-label">Submission flow</div>
+    <div class="flow-diagram">
+      <div class="flow-title">Happy path — connected with API available</div>
+
+      <div class="flow-row">
+        <div class="flow-node accent">
+          <div class="flow-node-label">Step 1</div>
+          <div class="flow-node-value">Supervisor submits</div>
+          <div class="flow-node-sub">Chat or basic form</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node">
+          <div class="flow-node-label">Step 2</div>
+          <div class="flow-node-value">Local write</div>
+          <div class="flow-node-sub">SQLite / IndexedDB</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node green">
+          <div class="flow-node-label">Step 3</div>
+          <div class="flow-node-value">Sync to server</div>
+          <div class="flow-node-sub">POST /observations</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node blue">
+          <div class="flow-node-label">Step 4</div>
+          <div class="flow-node-value">Enrichment queued</div>
+          <div class="flow-node-sub">BullMQ job created</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node purple">
+          <div class="flow-node-label">Step 5</div>
+          <div class="flow-node-value">AI classifies</div>
+          <div class="flow-node-sub">claude-sonnet-4</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node green">
+          <div class="flow-node-label">Step 6</div>
+          <div class="flow-node-value">Record updated</div>
+          <div class="flow-node-sub">enrichment_status: complete</div>
+        </div>
+      </div>
+
+      <div class="flow-title" style="margin-top:28px;">Degraded paths — connectivity or API failure</div>
+
+      <div class="branch-block">
+        <div class="branch-header">
+          <div class="diamond"></div>
+          Decision point: is network and API available at submission time?
+        </div>
+
+        <div class="branch-grid">
+          <!-- ARM A -->
+          <div class="branch-arm">
+            <div class="arm-condition" style="color:var(--amber);">⚡ API unavailable — network present</div>
+            <div class="arm-step">
+              <div class="arm-step-num">1</div>
+              <div class="arm-step-text">
+                Local write succeeds immediately
+                <div class="arm-step-code">enrichment_status: pending</div>
+              </div>
+            </div>
+            <div class="arm-step">
+              <div class="arm-step-num">2</div>
+              <div class="arm-step-text">Record synced to server — observation is live</div>
+            </div>
+            <div class="arm-step">
+              <div class="arm-step-num">3</div>
+              <div class="arm-step-text">
+                Enrichment worker retries on schedule
+                <div class="arm-step-code">every 5 min × 12 attempts</div>
+              </div>
+            </div>
+            <div class="arm-step">
+              <div class="arm-step-num">4</div>
+              <div class="arm-step-text">
+                On API restored → enriches → status updated
+                <div class="arm-step-code">enrichment_status: complete</div>
+              </div>
+            </div>
+            <div class="arm-step">
+              <div class="arm-step-num">5</div>
+              <div class="arm-step-text">
+                After 12 failures → flag for manual review
+                <div class="arm-step-code">enrichment_status: failed</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ARM B -->
+          <div class="branch-arm">
+            <div class="arm-condition" style="color:var(--red);">📵 Offline — no network</div>
+            <div class="arm-step">
+              <div class="arm-step-num">1</div>
+              <div class="arm-step-text">
+                Local write to device storage only
+                <div class="arm-step-code">sync_status: queued</div>
+              </div>
+            </div>
+            <div class="arm-step">
+              <div class="arm-step-num">2</div>
+              <div class="arm-step-text">Observation sits in local sync queue — can log more</div>
+            </div>
+            <div class="arm-step">
+              <div class="arm-step-num">3</div>
+              <div class="arm-step-text">
+                On network restore → queue flushes in order
+                <div class="arm-step-code">POST /observations (batched)</div>
+              </div>
+            </div>
+            <div class="arm-step">
+              <div class="arm-step-num">4</div>
+              <div class="arm-step-text">
+                Each synced record queues enrichment job
+                <div class="arm-step-code">enrichment_status: pending</div>
+              </div>
+            </div>
+            <div class="arm-step">
+              <div class="arm-step-num">5</div>
+              <div class="arm-step-text">Enrichment runs — same path as happy path from step 5</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- STATES TABLE -->
+  <div class="section">
+    <div class="section-label">Observation record states</div>
+    <div class="states-grid">
+      <div class="header">State</div>
+      <div class="header">sync_status</div>
+      <div class="header">enrichment_status</div>
+      <div class="header">Visible in pipeline?</div>
+
+      <div class="cell"><div class="state-name"><span class="state-indicator" style="background:#f5a623;"></span>Just submitted, offline</div></div>
+      <div class="cell" style="color:var(--amber); font-family:var(--mono);font-size:11px;">queued</div>
+      <div class="cell" style="color:var(--text-muted); font-family:var(--mono);font-size:11px;">not_started</div>
+      <div class="cell" style="color:var(--text-muted);">No — local only</div>
+
+      <div class="cell"><div class="state-name"><span class="state-indicator" style="background:#3d9cf5;"></span>Synced, awaiting enrich</div></div>
+      <div class="cell" style="color:var(--green); font-family:var(--mono);font-size:11px;">synced</div>
+      <div class="cell" style="color:var(--amber); font-family:var(--mono);font-size:11px;">pending</div>
+      <div class="cell" style="color:var(--text-dim);">Yes — unclassified</div>
+
+      <div class="cell"><div class="state-name"><span class="state-indicator" style="background:#a855f7;"></span>Enrichment running</div></div>
+      <div class="cell" style="color:var(--green); font-family:var(--mono);font-size:11px;">synced</div>
+      <div class="cell" style="color:var(--blue); font-family:var(--mono);font-size:11px;">processing</div>
+      <div class="cell" style="color:var(--text-dim);">Yes — unclassified</div>
+
+      <div class="cell"><div class="state-name"><span class="state-indicator" style="background:#22c55e;"></span>Fully enriched</div></div>
+      <div class="cell" style="color:var(--green); font-family:var(--mono);font-size:11px;">synced</div>
+      <div class="cell" style="color:var(--green); font-family:var(--mono);font-size:11px;">complete</div>
+      <div class="cell" style="color:var(--green);">Yes — classified</div>
+
+      <div class="cell"><div class="state-name"><span class="state-indicator" style="background:#ff4d3d;"></span>Enrichment failed (12×)</div></div>
+      <div class="cell" style="color:var(--green); font-family:var(--mono);font-size:11px;">synced</div>
+      <div class="cell" style="color:var(--red); font-family:var(--mono);font-size:11px;">failed</div>
+      <div class="cell" style="color:var(--amber);">Yes — needs review</div>
+    </div>
+  </div>
+
+  <!-- DB SCHEMA SNIPPET -->
+  <div class="section">
+    <div class="section-label">Data model — relevant fields</div>
+    <div class="schema-block">
+      <div class="schema-header">
+        <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+        Prisma schema — Observation model (relevant fields only)
+      </div>
+      <div class="schema-body">
+<span class="schema-comment">// Sync state — tracks device → server journey</span>
+<span class="schema-field">sync_status</span>         <span class="schema-type">SyncStatus</span>        <span class="schema-comment">// queued | syncing | synced | failed</span>
+<span class="schema-field">sync_queued_at</span>      <span class="schema-type">DateTime?</span>
+<span class="schema-field">sync_completed_at</span>   <span class="schema-type">DateTime?</span>
+<span class="schema-field">sync_attempts</span>       <span class="schema-type">Int</span>               <span class="schema-value">@default(0)</span>
+
+<span class="schema-comment">// Enrichment state — tracks AI classification journey</span>
+<span class="schema-field">enrichment_status</span>   <span class="schema-type">EnrichmentStatus</span>  <span class="schema-comment">// not_started | pending | processing | complete | failed</span>
+<span class="schema-field">enrichment_queued_at</span>  <span class="schema-type">DateTime?</span>
+<span class="schema-field">enrichment_completed_at</span> <span class="schema-type">DateTime?</span>
+<span class="schema-field">enrichment_attempts</span>   <span class="schema-type">Int</span>             <span class="schema-value">@default(0)</span>
+<span class="schema-field">enrichment_last_error</span> <span class="schema-type">String?</span>
+
+<span class="schema-comment">// AI-classified fields (null until enrichment completes)</span>
+<span class="schema-field">ai_signal_type</span>         <span class="schema-type">SignalType?</span>       <span class="schema-comment">// barrier_failure | unwanted_energy_event | …</span>
+<span class="schema-field">ai_signal_confidence</span>   <span class="schema-type">Float?</span>
+<span class="schema-field">ai_signal_rationale</span>    <span class="schema-type">String?</span>
+<span class="schema-field">ai_energy_type</span>         <span class="schema-type">EnergyType?</span>
+<span class="schema-field">ai_energy_release</span>      <span class="schema-type">EnergyRelease?</span>
+<span class="schema-field">ai_barrier_assessment</span>  <span class="schema-type">BarrierState?</span>
+<span class="schema-field">fw_factors</span>             <span class="schema-type">String[]</span>          <span class="schema-comment">// parallel arrays — max 3</span>
+<span class="schema-field">fw_confidences</span>         <span class="schema-type">Float[]</span>
+<span class="schema-field">fw_rationales</span>          <span class="schema-type">String[]</span>
+
+<span class="schema-comment">// Photo attachments</span>
+<span class="schema-field">photos</span>                  <span class="schema-type">ObservationPhoto[]</span>
+<span class="schema-comment">// Photos are uploaded separately — observation record</span>
+<span class="schema-comment">// is not blocked waiting for photo upload to complete</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ENRICHMENT RETRY SCHEDULE -->
+  <div class="section">
+    <div class="section-label">Enrichment retry schedule</div>
+    <div class="timeline">
+      <div class="timeline-item active">
+        <div class="timeline-time">T+0 — immediate</div>
+        <div class="timeline-event">First enrichment attempt</div>
+        <div class="timeline-detail">Queued as BullMQ job immediately after sync. Runs within seconds on happy path.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-time">T+5 min</div>
+        <div class="timeline-event">Retry 2 — exponential backoff begins</div>
+        <div class="timeline-detail">enrichment_attempts incremented. Last error logged to enrichment_last_error.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-time">T+15 min</div>
+        <div class="timeline-event">Retry 3</div>
+        <div class="timeline-detail">Covers brief API outages and rate limit windows.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-time">T+30 min · T+1h · T+2h · …</div>
+        <div class="timeline-event">Retries 4–11 — extended backoff</div>
+        <div class="timeline-detail">Covers longer API degradation events. Observation is visible and usable throughout — just unclassified.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-time">T+12 attempts</div>
+        <div class="timeline-event">Final failure — escalate</div>
+        <div class="timeline-detail">enrichment_status → failed. Safety manager notified. Manual classification available in admin panel. Observation remains in pool — not lost.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PHOTO HANDLING NOTE -->
+  <div class="section">
+    <div class="section-label">Photo attachment handling</div>
+    <div class="branch-block">
+      <div class="branch-header">
+        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        Photos are decoupled from the observation record — separate upload lifecycle
+      </div>
+      <div class="branch-grid">
+        <div class="branch-arm">
+          <div class="arm-condition" style="color:var(--blue);">Connected at submission</div>
+          <div class="arm-step"><div class="arm-step-num">1</div><div class="arm-step-text">Observation record created — photos queued for upload</div></div>
+          <div class="arm-step"><div class="arm-step-num">2</div><div class="arm-step-text">Photos upload to S3/R2 in background (non-blocking)<div class="arm-step-code">photo_upload_status: uploading</div></div></div>
+          <div class="arm-step"><div class="arm-step-num">3</div><div class="arm-step-text">Enrichment includes photos as base64 content blocks if available within 30s<div class="arm-step-code">// Claude vision — improves classification</div></div></div>
+          <div class="arm-step"><div class="arm-step-num">4</div><div class="arm-step-text">If photos arrive after enrichment → re-enrichment with photos queued</div></div>
+        </div>
+        <div class="branch-arm">
+          <div class="arm-condition" style="color:var(--red);">Offline at submission</div>
+          <div class="arm-step"><div class="arm-step-num">1</div><div class="arm-step-text">Photos stored in local device storage alongside observation<div class="arm-step-code">photo_sync_status: queued</div></div></div>
+          <div class="arm-step"><div class="arm-step-num">2</div><div class="arm-step-text">On reconnect — observation syncs first, then photos upload</div></div>
+          <div class="arm-step"><div class="arm-step-num">3</div><div class="arm-step-text">Enrichment runs after photo upload completes — has full visual context</div></div>
+          <div class="arm-step"><div class="arm-step-num">4</div><div class="arm-step-text">Photos may be large — upload may take time on poor signal. Observation record not blocked.</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- IMPLEMENTATION CONSIDERATIONS -->
+  <div class="section">
+    <div class="section-label">Implementation considerations</div>
+    <div class="considerations">
+      <div class="consideration">
+        <div class="consideration-label">Local storage</div>
+        <div class="consideration-title">Use SQLite via Capacitor on device</div>
+        <div class="consideration-body">@capacitor-community/sqlite gives a consistent SQL interface across iOS and Android. Mirror the server Prisma schema for the local tables that need offline support — observations, photos, sync_queue.</div>
+      </div>
+      <div class="consideration">
+        <div class="consideration-label">Sync queue</div>
+        <div class="consideration-title">Simple FIFO with retry tracking</div>
+        <div class="consideration-body">A local sync_queue table holds pending observations ordered by created_at. On reconnect, flush in order. Each item tracks attempt count and last error. Network reconnect events trigger flush via Capacitor Network plugin.</div>
+      </div>
+      <div class="consideration">
+        <div class="consideration-label">Conflict resolution</div>
+        <div class="consideration-title">Last-write-wins on enrichment fields only</div>
+        <div class="consideration-body">The observation text, work type, and stop_work_called are immutable after submission. Only enrichment fields are updated post-sync. No conflict risk — server is authoritative for enrichment, device is authoritative for submission content.</div>
+      </div>
+      <div class="consideration">
+        <div class="consideration-label">Enrichment worker</div>
+        <div class="consideration-title">BullMQ with Redis — existing infrastructure</div>
+        <div class="consideration-body">Enrichment jobs use the same BullMQ queue already specified in the V1 arch. Job payload: observation_id. Worker fetches fresh from DB, calls Anthropic API, writes results back. Idempotent — safe to retry.</div>
+      </div>
+      <div class="consideration">
+        <div class="consideration-label">Token cost</div>
+        <div class="consideration-title">~$0.002 per enrichment call</div>
+        <div class="consideration-body">Enrichment prompt is ~600 tokens on Sonnet ($3/M input, $15/M output). With photos: ~2,000–4,000 tokens depending on image count and size. At 1,000 observations/month: ~$2 without photos, ~$10–15 with photos.</div>
+      </div>
+      <div class="consideration">
+        <div class="consideration-label">Failed enrichment UX</div>
+        <div class="consideration-title">Unclassified observations are still useful</div>
+        <div class="consideration-body">A failed enrichment observation still appears in the safety manager's observation list — just without signal type or FW factor tags. It can be manually classified. It contributes to observation count. It is not silently dropped.</div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div>Hiviz · SafetyPlatform · Offline-First Capture Architecture · April 2026</div>
+    <div>Forge Works · Engineering Reference · Confidential</div>
+  </footer>
+
+</div>
+</body>
+</html>
