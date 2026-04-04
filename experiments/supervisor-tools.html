@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hiviz — Supervisor Tools v2</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  /*
+    STATUS TOKEN SYSTEM — applied to all three tools
+    ─────────────────────────────────────────────────────
+    --status-critical : overdue, blocked, failed
+    --status-caution  : approaching deadline, soft warning
+    --status-positive : delivered, answered, complete
+    --neutral-*       : default — everything that carries no status
+
+    The brand appears ONLY in:
+    — app chrome (header bar)
+    — wordmark
+    — section headings (subtle)
+
+    Status appears ONLY when it carries information about state.
+    ─────────────────────────────────────────────────────
+  */
+  :root {
+    --status-critical:        #FF3B30;
+    --status-critical-bg:     rgba(255,59,48,0.06);
+    --status-critical-border: rgba(255,59,48,0.22);
+    --status-caution:         #FF9500;
+    --status-caution-bg:      rgba(255,149,0,0.06);
+    --status-caution-border:  rgba(255,149,0,0.22);
+    --status-positive:        #00AB55;
+    --status-positive-bg:     rgba(0,171,85,0.06);
+    --status-positive-border: rgba(0,171,85,0.22);
+
+    --bg:           #F7F6F4;
+    --surface:      #FFFFFF;
+    --surface-2:    #F0EEEB;
+    --border:       #E3E0DB;
+    --border-mid:   #CCCAC5;
+    --text-primary: #1A1916;
+    --text-body:    #3D3B37;
+    --text-muted:   #7A7772;
+    --text-faint:   #B0ADA8;
+    --app-dark:     #1A1916;
+
+    --phone-w: 355px;
+    --r: 14px;
+    --r-sm: 10px;
+    --sans: 'DM Sans', sans-serif;
+    --display: 'DM Serif Display', serif;
+    --mono: 'DM Mono', monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #141413;
+    font-family: var(--sans);
+    padding: 48px 16px 72px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* ── PAGE HEADER ── */
+  .ph { text-align: center; margin-bottom: 56px; max-width: 520px; }
+  .ph-kicker { font-size: 10px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: rgba(255,255,255,0.25); margin-bottom: 10px; }
+  .ph-title { font-family: var(--display); font-size: 38px; color: white; margin-bottom: 8px; line-height: 1.1; letter-spacing: -0.01em; }
+  .ph-title em { font-style: italic; color: rgba(255,255,255,0.45); }
+  .ph-desc { font-size: 13px; color: rgba(255,255,255,0.3); line-height: 1.65; }
+
+  /* ── TOOL ROW ── */
+  .tool-row { width: 100%; max-width: 1140px; margin-bottom: 72px; }
+
+  .tool-label {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .tool-n { font-family: var(--mono); font-size: 10px; color: rgba(255,255,255,0.2); }
+  .tool-name { font-family: var(--display); font-size: 20px; color: rgba(255,255,255,0.7); font-style: italic; }
+  .tool-principle { font-family: var(--mono); font-size: 10px; color: rgba(255,255,255,0.18); margin-left: auto; }
+  .tool-div { flex: 1; height: 1px; background: rgba(255,255,255,0.05); }
+
+  .screens { display: flex; gap: 16px; align-items: flex-start; justify-content: center; flex-wrap: wrap; }
+  .scene { display: flex; flex-direction: column; align-items: center; }
+  .cap { font-size: 9px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: rgba(255,255,255,0.15); margin-top: 10px; }
+
+  .arr { display: flex; align-items: center; padding-top: 100px; }
+  .arr-line { width: 16px; height: 1px; background: rgba(255,255,255,0.08); }
+  .arr-ch { color: rgba(255,255,255,0.12); font-size: 12px; }
+
+  /* ── PHONE ── */
+  .phone {
+    width: var(--phone-w);
+    border-radius: 38px;
+    overflow: hidden;
+    box-shadow: 0 28px 70px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.04);
+    display: flex;
+    flex-direction: column;
+    background: var(--bg);
+    flex-shrink: 0;
+  }
+
+  /* ── STATUS BAR ── */
+  .sb { height: 48px; padding: 0 20px; display: flex; align-items: flex-end; justify-content: space-between; padding-bottom: 9px; flex-shrink: 0; }
+  .sb-dark { background: var(--app-dark); }
+  .sb-bg { background: var(--bg); }
+  .sb-t { font-size: 15px; font-weight: 700; }
+  .sb-dark .sb-t { color: white; }
+  .sb-bg .sb-t { color: var(--text-primary); }
+
+  /* ── APP HEADER — brand chrome, always neutral ── */
+  .ah { background: var(--app-dark); padding: 12px 18px 16px; flex-shrink: 0; }
+  .ah-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .ah-back { width: 28px; height: 28px; border-radius: 7px; background: rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: center; color: white; font-size: 13px; flex-shrink: 0; }
+  .ah-title { font-size: 14px; font-weight: 700; color: white; flex: 1; }
+  .ah-right { font-family: var(--mono); font-size: 10px; color: rgba(255,255,255,0.3); }
+  .ah-sub { font-size: 11px; color: rgba(255,255,255,0.35); }
+
+  /* ── BODY ── */
+  .body { background: var(--bg); flex: 1; padding: 14px; display: flex; flex-direction: column; gap: 9px; }
+
+  /* ── SECTION LABEL ── */
+  .sl { font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text-faint); padding: 2px 0; margin-top: 4px; }
+
+  /* ── CARD — default neutral ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-sm);
+    padding: 13px;
+  }
+
+  /* Status variants — only applied when card has status meaning */
+  .card.s-overdue { border-color: var(--status-critical-border); background: var(--status-critical-bg); }
+  .card.s-caution { border-color: var(--status-caution-border); }
+  .card.s-positive { border-color: var(--status-positive-border); background: var(--status-positive-bg); }
+  .card.s-done { opacity: 0.45; }
+
+  /* ── CHIP ── */
+  .chip { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 4px; letter-spacing: 0.1px; }
+  .chip-neutral  { background: var(--surface-2); color: var(--text-faint); }
+  .chip-overdue  { background: var(--status-critical-bg); color: var(--status-critical); }
+  .chip-caution  { background: var(--status-caution-bg); color: var(--status-caution); }
+  .chip-positive { background: var(--status-positive-bg); color: var(--status-positive); }
+  .chip-src      { background: var(--surface-2); color: var(--text-faint); }
+
+  /* ── PRIMARY BUTTON — neutral ── */
+  .btn-primary { width: 100%; height: 50px; border-radius: var(--r-sm); background: var(--app-dark); color: white; border: none; font-family: var(--sans); font-size: 15px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
+
+  /* ── STATUS BUTTONS — earn their colour ── */
+  .btn-positive { background: var(--status-positive-bg); border: 1.5px solid var(--status-positive-border); color: var(--status-positive); }
+  .btn-critical { background: var(--status-critical-bg); border: 1.5px solid var(--status-critical-border); color: var(--status-critical); }
+  .btn-neutral  { background: var(--surface); border: 1.5px solid var(--border); color: var(--text-muted); }
+
+
+  /* ═══════════════════════════════════════════════
+     TOOL 1 — TOOLBOX TALK
+  ════════════════════════════════════════════════ */
+
+  .talk-meta { display: flex; gap: 6px; margin-bottom: 8px; }
+  .talk-title { font-family: var(--display); font-size: 17px; color: white; line-height: 1.3; }
+
+  .talk-section { margin-bottom: 12px; }
+  .talk-sec-label { font-family: var(--mono); font-size: 9px; font-weight: 500; letter-spacing: 1.5px; text-transform: uppercase; color: rgba(255,255,255,0.3); margin-bottom: 6px; }
+  .talk-text { font-size: 12px; line-height: 1.6; color: rgba(255,255,255,0.6); }
+
+  .talk-bullet { display: flex; gap: 8px; align-items: flex-start; font-size: 12px; color: rgba(255,255,255,0.65); line-height: 1.4; padding: 3px 0; }
+  .talk-dot { width: 5px; height: 5px; border-radius: 50%; background: rgba(255,255,255,0.3); flex-shrink: 0; margin-top: 5px; }
+
+  .talk-q { background: rgba(255,255,255,0.04); border-left: 2px solid rgba(255,255,255,0.15); border-radius: 0 6px 6px 0; padding: 8px 12px; font-size: 12px; color: rgba(255,255,255,0.4); font-style: italic; line-height: 1.4; }
+
+  .talk-scroll { flex: 1; padding: 0 18px; display: flex; flex-direction: column; gap: 12px; overflow: hidden; }
+
+  .talk-footer { padding: 12px 18px 26px; background: var(--app-dark); }
+
+  .crew-row { background: rgba(255,255,255,0.06); border-radius: var(--r-sm); padding: 11px 14px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .crew-label { font-size: 12px; color: rgba(255,255,255,0.45); }
+  .crew-stepper { display: flex; align-items: center; gap: 12px; }
+  .step-b { width: 30px; height: 30px; border-radius: 50%; background: rgba(255,255,255,0.1); border: none; color: white; font-size: 17px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-family: var(--sans); }
+  .crew-n { font-size: 20px; font-weight: 700; color: white; min-width: 26px; text-align: center; }
+
+  /* Delivered button — earns positive colour, the action is complete and good */
+  .btn-delivered {
+    width: 100%;
+    height: 52px;
+    border-radius: var(--r-sm);
+    background: var(--status-positive);
+    color: white;
+    border: none;
+    font-family: var(--sans);
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  /* Done screen — earns positive because everything is resolved */
+  .talk-done { background: var(--status-positive); flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 28px 28px; text-align: center; }
+  .done-icon { width: 68px; height: 68px; border-radius: 50%; background: rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center; font-size: 34px; margin-bottom: 16px; }
+  .done-title { font-family: var(--display); font-size: 26px; color: white; margin-bottom: 5px; }
+  .done-sub { font-size: 13px; color: rgba(255,255,255,0.55); line-height: 1.55; max-width: 200px; }
+  .done-stats { display: flex; background: rgba(0,0,0,0.08); border-radius: 12px; overflow: hidden; margin-top: 22px; width: 100%; }
+  .done-s { flex: 1; padding: 13px; text-align: center; }
+  .done-s + .done-s { border-left: 1px solid rgba(0,0,0,0.08); }
+  .done-sn { font-size: 21px; font-weight: 800; color: white; }
+  .done-sl { font-size: 10px; color: rgba(255,255,255,0.4); margin-top: 2px; }
+  .done-footer { padding: 12px 20px 30px; background: rgba(0,0,0,0.08); width: 100%; }
+  .done-close { width: 100%; height: 48px; border-radius: var(--r-sm); background: rgba(0,0,0,0.12); border: none; color: white; font-family: var(--sans); font-size: 14px; font-weight: 700; cursor: pointer; }
+
+
+  /* ═══════════════════════════════════════════════
+     TOOL 2 — ENQUIRY
+  ════════════════════════════════════════════════ */
+
+  .enq-bg { background: var(--bg); flex: 1; display: flex; flex-direction: column; }
+  .enq-header { background: var(--app-dark); padding: 12px 18px 16px; }
+  .enq-prog-track { height: 2px; background: rgba(255,255,255,0.1); border-radius: 1px; margin-top: 10px; overflow: hidden; }
+  .enq-prog-fill { height: 100%; background: rgba(255,255,255,0.45); border-radius: 1px; }
+
+  .enq-body { flex: 1; padding: 14px 16px; display: flex; flex-direction: column; }
+
+  /* Context — neutral, just informational */
+  .enq-ctx {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-sm);
+    padding: 10px 13px;
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.5;
+    margin-bottom: 12px;
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+  }
+
+  .enq-q-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-sm);
+    padding: 18px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 12px;
+  }
+
+  .enq-q-type { font-family: var(--mono); font-size: 9px; font-weight: 500; letter-spacing: 1px; text-transform: uppercase; color: var(--text-faint); margin-bottom: 10px; }
+  .enq-q-text { font-family: var(--display); font-size: 16px; color: var(--text-primary); line-height: 1.4; flex: 1; }
+  .enq-q-why { font-size: 11px; color: var(--text-faint); font-style: italic; margin-top: 10px; line-height: 1.4; border-top: 1px solid var(--border); padding-top: 10px; }
+
+  .enq-textarea {
+    width: 100%;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--r-sm);
+    padding: 12px 13px;
+    font-family: var(--sans);
+    font-size: 13px;
+    color: var(--text-primary);
+    resize: none;
+    min-height: 76px;
+    line-height: 1.5;
+    margin-bottom: 10px;
+  }
+
+  .enq-textarea::placeholder { color: var(--text-faint); }
+
+  /* Options — neutral by default, positive when selected */
+  .enq-options { display: flex; flex-direction: column; gap: 7px; margin-bottom: 12px; }
+
+  .enq-opt {
+    padding: 13px 14px;
+    border-radius: var(--r-sm);
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+    cursor: pointer;
+    text-align: left;
+    font-family: var(--sans);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  /* Selected option earns positive colour — it's a confirmed answer */
+  .enq-opt.selected {
+    background: var(--status-positive-bg);
+    border-color: var(--status-positive-border);
+    color: var(--status-positive);
+  }
+
+  .opt-dot { width: 16px; height: 16px; border-radius: 50%; border: 1.5px solid var(--border-mid); flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+  .enq-opt.selected .opt-dot { background: var(--status-positive); border-color: var(--status-positive); }
+
+  .btn-next { width: 100%; height: 48px; border-radius: var(--r-sm); background: var(--app-dark); color: white; border: none; font-family: var(--sans); font-size: 14px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; }
+
+  /* Enquiry done — neutral, informational completion */
+  .enq-done {
+    background: var(--surface-2);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 36px 28px;
+    text-align: center;
+  }
+
+  .enq-done-icon { width: 60px; height: 60px; border-radius: 50%; background: var(--status-positive-bg); border: 1.5px solid var(--status-positive-border); display: flex; align-items: center; justify-content: center; font-size: 26px; margin-bottom: 14px; }
+  .enq-done-title { font-family: var(--display); font-size: 22px; color: var(--text-primary); margin-bottom: 6px; }
+  .enq-done-sub { font-size: 12px; color: var(--text-muted); line-height: 1.6; max-width: 200px; }
+  .enq-done-note { margin-top: 20px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-sm); padding: 12px 14px; font-size: 12px; color: var(--text-muted); text-align: left; line-height: 1.55; max-width: 240px; }
+
+
+  /* ═══════════════════════════════════════════════
+     TOOL 3 — ACTIONS
+  ════════════════════════════════════════════════ */
+
+  .act-bg { background: var(--bg); flex: 1; display: flex; flex-direction: column; }
+  .act-header { background: var(--app-dark); padding: 12px 18px 16px; }
+  .act-header-row { display: flex; align-items: flex-start; justify-content: space-between; }
+  .act-header-titles {}
+  .act-header-label { font-family: var(--mono); font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; color: rgba(255,255,255,0.3); margin-bottom: 3px; }
+  .act-header-title { font-family: var(--display); font-size: 19px; color: white; font-style: italic; }
+  .act-badges { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+  .act-badge { font-family: var(--mono); font-size: 10px; font-weight: 500; padding: 2px 9px; border-radius: 20px; }
+  .ab-overdue { background: var(--status-critical-bg); color: var(--status-critical); }
+  .ab-open    { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.4); }
+  .ab-clear   { background: var(--status-positive-bg); color: var(--status-positive); }
+
+  .act-list { flex: 1; padding: 13px 14px; display: flex; flex-direction: column; gap: 8px; overflow: hidden; }
+
+  .act-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-sm); padding: 12px 13px; display: flex; gap: 11px; align-items: flex-start; cursor: pointer; }
+  .act-card.s-overdue { border-color: var(--status-critical-border); background: var(--status-critical-bg); }
+  .act-card.s-done { opacity: 0.38; }
+  .act-card.s-completing { border-color: var(--status-positive-border); background: var(--status-positive-bg); }
+
+  .act-check { width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid var(--border-mid); display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; transition: all 0.15s; }
+  .act-card.s-overdue .act-check { border-color: var(--status-critical-border); }
+  .act-card.s-completing .act-check { background: var(--status-positive); border-color: var(--status-positive); }
+  .act-card.s-done .act-check { background: var(--status-positive-bg); border-color: var(--status-positive-border); }
+
+  .act-body { flex: 1; }
+  .act-name { font-size: 13px; font-weight: 600; color: var(--text-primary); line-height: 1.35; margin-bottom: 4px; }
+  .act-meta { font-size: 11px; color: var(--text-muted); margin-bottom: 6px; line-height: 1.3; }
+  .act-chips { display: flex; gap: 4px; flex-wrap: wrap; }
+
+  .act-hint { font-size: 10px; color: var(--text-faint); font-style: italic; font-family: var(--mono); text-align: center; padding: 0 0 4px; }
+
+  /* Completion panel — confirm or skip */
+  .complete-panel {
+    background: var(--status-positive-bg);
+    border: 1.5px solid var(--status-positive-border);
+    border-radius: var(--r-sm);
+    padding: 13px;
+    margin-top: -4px;
+  }
+
+  .cp-head { font-size: 12px; font-weight: 700; color: var(--status-positive); margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+
+  .cp-textarea { width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px 11px; font-family: var(--sans); font-size: 12px; color: var(--text-primary); min-height: 52px; resize: none; line-height: 1.4; margin-bottom: 8px; }
+  .cp-textarea::placeholder { color: var(--text-faint); font-style: italic; }
+
+  .cp-btns { display: flex; gap: 7px; }
+  .cp-skip { flex: 1; height: 38px; border-radius: 8px; background: var(--surface); border: 1px solid var(--border); color: var(--text-muted); font-family: var(--sans); font-size: 12px; font-weight: 600; cursor: pointer; }
+  /* Submit earns positive — completing an action is a positive outcome */
+  .cp-submit { flex: 2; height: 38px; border-radius: 8px; background: var(--status-positive); border: none; color: white; font-family: var(--sans); font-size: 12px; font-weight: 700; cursor: pointer; }
+
+  /* All clear state */
+  .act-clear {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 28px;
+    text-align: center;
+  }
+
+  .clear-check { width: 56px; height: 56px; border-radius: 50%; background: var(--status-positive-bg); border: 1.5px solid var(--status-positive-border); display: flex; align-items: center; justify-content: center; font-size: 26px; margin-bottom: 14px; }
+  .clear-title { font-family: var(--display); font-size: 20px; color: var(--text-primary); margin-bottom: 5px; }
+  .clear-sub { font-size: 12px; color: var(--text-muted); line-height: 1.6; max-width: 180px; }
+
+  /* Section divider */
+  .divider { width: 100%; max-width: 1140px; height: 1px; background: rgba(255,255,255,0.05); margin-bottom: 72px; }
+</style>
+</head>
+<body>
+
+<!-- PAGE HEADER -->
+<div class="ph">
+  <div class="ph-kicker">Hiviz · Supervisor · Revised</div>
+  <div class="ph-title">Three tools,<br><em>one system</em></div>
+  <div class="ph-desc">Neutral brand throughout. Colour appears only when it carries status information — and nowhere else.</div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════
+     TOOL 1 — TOOLBOX TALK
+════════════════════════════════════════════════════════ -->
+<div class="tool-row">
+  <div class="tool-label">
+    <span class="tool-n">01</span>
+    <span class="tool-name">Toolbox Talk</span>
+    <div class="tool-div"></div>
+    <span class="tool-principle">Read it. Deliver it. Tap done.</span>
+  </div>
+
+  <div class="screens">
+
+    <!-- 1A: READ -->
+    <div class="scene">
+      <div class="phone" style="min-height:640px;display:flex;flex-direction:column;">
+        <div class="sb sb-dark"><span class="sb-t" style="color:white;">7:52</span></div>
+        <div class="ah">
+          <div class="ah-row">
+            <div class="ah-title">Talk ready</div>
+          </div>
+          <div class="ah-sub">Hot Work · Northgate Open Cut · Based on 6 field observations</div>
+        </div>
+
+        <div class="talk-scroll" style="padding:14px 16px;gap:12px;">
+          <!-- Talk chips — neutral, informational only -->
+          <div class="talk-meta">
+            <span class="chip chip-neutral">Hot Work</span>
+            <span class="chip chip-neutral">6 observations</span>
+          </div>
+
+          <!-- Title stays brand dark — it's chrome, not status -->
+          <div style="font-family:var(--display);font-size:17px;color:var(--text-primary);line-height:1.3;">
+            Permit gaps becoming a pattern — here's what the crew needs to know
+          </div>
+
+          <div>
+            <div style="font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-faint);margin-bottom:6px;">The hazard</div>
+            <div style="font-size:13px;line-height:1.6;color:var(--text-body);">Six near-misses in three weeks where hot work started without a completed permit at the work location. The risk isn't the paperwork — it's an unchecked fire watch and an unchecked isolation.</div>
+          </div>
+
+          <div>
+            <div style="font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-faint);margin-bottom:6px;">What we need today</div>
+            <div style="display:flex;flex-direction:column;gap:5px;">
+              <div style="display:flex;gap:8px;align-items:flex-start;font-size:13px;color:var(--text-body);line-height:1.4;"><div style="width:5px;height:5px;border-radius:50%;background:var(--text-faint);flex-shrink:0;margin-top:5px;"></div><span>Permit signed, physically present at work location — not in the ute</span></div>
+              <div style="display:flex;gap:8px;align-items:flex-start;font-size:13px;color:var(--text-body);line-height:1.4;"><div style="width:5px;height:5px;border-radius:50%;background:var(--text-faint);flex-shrink:0;margin-top:5px;"></div><span>Fire watch confirmed before the first spark</span></div>
+              <div style="display:flex;gap:8px;align-items:flex-start;font-size:13px;color:var(--text-body);line-height:1.4;"><div style="width:5px;height:5px;border-radius:50%;background:var(--text-faint);flex-shrink:0;margin-top:5px;"></div><span>No permit present — work doesn't start. No verbal OKs.</span></div>
+            </div>
+          </div>
+
+          <div style="background:var(--surface-2);border-left:2px solid var(--border-mid);border-radius:0 6px 6px 0;padding:9px 12px;font-size:12px;color:var(--text-muted);font-style:italic;line-height:1.45;">
+            "Has anyone ever started hot work without a permit because someone said it was fine?"
+          </div>
+        </div>
+
+        <div style="padding:12px 14px 26px;background:var(--surface);border-top:1px solid var(--border);">
+          <div class="crew-row" style="background:var(--surface-2);border-radius:var(--r-sm);padding:11px 14px;display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+            <span style="font-size:12px;color:var(--text-muted);">Crew on shift</span>
+            <div class="crew-stepper">
+              <button class="step-b" style="background:var(--surface);border:1px solid var(--border);color:var(--text-primary);">−</button>
+              <span class="crew-n" style="color:var(--text-primary);">11</span>
+              <button class="step-b" style="background:var(--surface);border:1px solid var(--border);color:var(--text-primary);">+</button>
+            </div>
+          </div>
+          <!-- Delivered button earns positive green — the action is completed and good -->
+          <button class="btn-delivered">✓ Talk delivered</button>
+        </div>
+      </div>
+      <div class="cap">1a · read &amp; deliver</div>
+    </div>
+
+    <div class="arr"><div class="arr-line"></div><div class="arr-ch">›</div><div class="arr-line"></div></div>
+
+    <!-- 1B: DONE — positive earns green -->
+    <div class="scene">
+      <div class="phone" style="min-height:400px;display:flex;flex-direction:column;">
+        <div class="sb" style="background:var(--status-positive);"><span class="sb-t" style="color:white;">7:58</span></div>
+        <div class="talk-done">
+          <div class="done-icon">✓</div>
+          <div class="done-title">Talk delivered</div>
+          <div class="done-sub">Hot Work · Northgate · 11 crew. Logged.</div>
+          <div class="done-stats">
+            <div class="done-s"><div class="done-sn">11</div><div class="done-sl">Crew</div></div>
+            <div class="done-s"><div class="done-sn">6m</div><div class="done-sl">Duration</div></div>
+            <div class="done-s"><div class="done-sn">✓</div><div class="done-sl">Logged</div></div>
+          </div>
+        </div>
+        <div class="done-footer">
+          <button class="done-close">Done</button>
+        </div>
+      </div>
+      <div class="cap">1b · done</div>
+    </div>
+
+  </div>
+</div>
+
+<div class="divider"></div>
+
+
+<!-- ═══════════════════════════════════════════════════════
+     TOOL 2 — ENQUIRY
+════════════════════════════════════════════════════════ -->
+<div class="tool-row">
+  <div class="tool-label">
+    <span class="tool-n">02</span>
+    <span class="tool-name">Enquiry</span>
+    <div class="tool-div"></div>
+    <span class="tool-principle">One question. Answer it. Move on.</span>
+  </div>
+
+  <div class="screens">
+
+    <!-- 2A: FREE TEXT -->
+    <div class="scene">
+      <div class="phone" style="min-height:620px;display:flex;flex-direction:column;">
+        <div class="sb sb-dark"><span class="sb-t" style="color:white;">10:14</span></div>
+        <div class="enq-header">
+          <div class="ah-row">
+            <div class="ah-back">←</div>
+            <div class="ah-title">Hot Work Permit Patterns</div>
+            <div class="ah-right">1 of 3</div>
+          </div>
+          <div class="enq-prog-track"><div class="enq-prog-fill" style="width:33%;"></div></div>
+        </div>
+
+        <div class="enq-body">
+          <!-- Context pill — neutral, not status -->
+          <div class="enq-ctx">
+            <span style="opacity:0.5;">💡</span>
+            <span>Safety manager is looking at permit compliance patterns after 6 near-misses. Your experience helps.</span>
+          </div>
+
+          <div class="enq-q-card">
+            <div class="enq-q-type">Work as done</div>
+            <div class="enq-q-text">When you do a hot work job, where does the permit actually end up during the job?</div>
+            <div class="enq-q-why">Why this question: understanding the gap between where the permit should be and where it actually ends up.</div>
+          </div>
+
+          <textarea class="enq-textarea" placeholder="What actually happens on your site…">Half the time it stays in the ute because someone filled it out there. We know we're meant to put it at the work location but when we're rushed it ends up staying in the vehicle. No one checks during the job.</textarea>
+
+          <!-- Next button — neutral, just progression -->
+          <button class="btn-next">Next →</button>
+        </div>
+      </div>
+      <div class="cap">2a · free text</div>
+    </div>
+
+    <div class="arr"><div class="arr-line"></div><div class="arr-ch">›</div><div class="arr-line"></div></div>
+
+    <!-- 2B: STRUCTURED — selected option earns positive -->
+    <div class="scene">
+      <div class="phone" style="min-height:620px;display:flex;flex-direction:column;">
+        <div class="sb sb-dark"><span class="sb-t" style="color:white;">10:15</span></div>
+        <div class="enq-header">
+          <div class="ah-row">
+            <div class="ah-back">←</div>
+            <div class="ah-title">Hot Work Permit Patterns</div>
+            <div class="ah-right">2 of 3</div>
+          </div>
+          <div class="enq-prog-track"><div class="enq-prog-fill" style="width:66%;"></div></div>
+        </div>
+
+        <div class="enq-body">
+          <div class="enq-q-card">
+            <div class="enq-q-type">Assurance check</div>
+            <div class="enq-q-text">Does your crew check the permit is physically at the work location before starting?</div>
+            <div class="enq-q-why">Why this question: establishes whether the check happens in practice, not just in procedure.</div>
+          </div>
+
+          <div class="enq-options">
+            <button class="enq-opt">
+              <div class="opt-dot"></div>
+              Yes — always
+            </button>
+            <!-- Selected earns positive colour — it's a confirmed answer -->
+            <button class="enq-opt selected">
+              <div class="opt-dot"><svg width="6" height="6" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" fill="white"/></svg></div>
+              Sometimes — not consistently
+            </button>
+            <button class="enq-opt">
+              <div class="opt-dot"></div>
+              No — not something we check
+            </button>
+          </div>
+
+          <button class="btn-next">Next →</button>
+        </div>
+      </div>
+      <div class="cap">2b · structured</div>
+    </div>
+
+    <div class="arr"><div class="arr-line"></div><div class="arr-ch">›</div><div class="arr-line"></div></div>
+
+    <!-- 2C: DONE — neutral complete -->
+    <div class="scene">
+      <div class="phone" style="min-height:500px;display:flex;flex-direction:column;">
+        <div class="sb sb-bg"><span class="sb-t" style="color:var(--text-primary);">10:17</span></div>
+        <div class="enq-done">
+          <!-- Positive icon — completion is a positive outcome -->
+          <div class="enq-done-icon">✓</div>
+          <div class="enq-done-title">Responses sent</div>
+          <div class="enq-done-sub">3 questions · Hot Work Permit Patterns.</div>
+          <div class="enq-done-note">
+            <strong style="color:var(--text-body);display:block;margin-bottom:3px;">What happens next</strong>
+            Safety manager sees your responses alongside 11 other supervisors. If a pattern emerges you may see a corrective action in your list.
+          </div>
+        </div>
+      </div>
+      <div class="cap">2c · sent</div>
+    </div>
+
+  </div>
+</div>
+
+<div class="divider"></div>
+
+
+<!-- ═══════════════════════════════════════════════════════
+     TOOL 3 — ACTIONS
+════════════════════════════════════════════════════════ -->
+<div class="tool-row">
+  <div class="tool-label">
+    <span class="tool-n">03</span>
+    <span class="tool-name">Actions</span>
+    <div class="tool-div"></div>
+    <span class="tool-principle">Tap to complete. Type only if you want to add a note.</span>
+  </div>
+
+  <div class="screens">
+
+    <!-- 3A: LIST — overdue earns critical, normal stays neutral -->
+    <div class="scene">
+      <div class="phone" style="min-height:660px;display:flex;flex-direction:column;">
+        <div class="sb sb-dark"><span class="sb-t" style="color:white;">14:22</span></div>
+        <div class="act-header">
+          <div class="act-header-row">
+            <div class="act-header-titles">
+              <div class="act-header-label">My actions</div>
+              <div class="act-header-title">What needs doing</div>
+            </div>
+            <div class="act-badges">
+              <!-- Overdue badge earns critical colour -->
+              <span class="act-badge ab-overdue">1 overdue</span>
+              <!-- Open count stays neutral -->
+              <span class="act-badge ab-open">3 open</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="act-list">
+          <div class="sl">Overdue</div>
+
+          <!-- Overdue card — full critical treatment, the weight matches the urgency -->
+          <div class="act-card s-overdue">
+            <div class="act-check"></div>
+            <div class="act-body">
+              <div class="act-name">Ensure PTW board positioned at hot work location before job starts</div>
+              <div class="act-meta">Priya Nair · Hot Work Permit Pattern insight</div>
+              <div class="act-chips">
+                <span class="chip chip-overdue">2 days overdue</span>
+                <span class="chip chip-src">CI-047</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="sl" style="margin-top:4px;">This week</div>
+
+          <!-- Normal cards — completely neutral until they have status -->
+          <div class="act-card">
+            <div class="act-check"></div>
+            <div class="act-body">
+              <div class="act-name">Brief fire watch crew on position requirements before each session</div>
+              <div class="act-meta">From: Hot work enquiry findings</div>
+              <div class="act-chips">
+                <span class="chip chip-neutral">Due Friday</span>
+                <span class="chip chip-src">ENQ-012</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="act-card">
+            <div class="act-check"></div>
+            <div class="act-body">
+              <div class="act-name">Add spotter confirmation to morning pre-start for heavy vehicle shifts</div>
+              <div class="act-meta">From: Spotter gap insight</div>
+              <div class="act-chips">
+                <span class="chip chip-caution">Due tomorrow</span>
+                <span class="chip chip-src">CI-039</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="sl" style="margin-top:4px;">Done this week</div>
+
+          <!-- Done item — neutral, faded -->
+          <div class="act-card s-done">
+            <div class="act-check" style="background:var(--status-positive-bg);border-color:var(--status-positive-border);">
+              <svg width="9" height="7" viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-5" stroke="#00AB55" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="act-body">
+              <div class="act-name" style="text-decoration:line-through;color:var(--text-muted);">Update site induction slides with PTW location requirement</div>
+              <div class="act-chips"><span class="chip chip-positive">Done Tue</span></div>
+            </div>
+          </div>
+
+          <div class="act-hint">tap circle to complete</div>
+        </div>
+      </div>
+      <div class="cap">3a · list</div>
+    </div>
+
+    <div class="arr"><div class="arr-line"></div><div class="arr-ch">›</div><div class="arr-line"></div></div>
+
+    <!-- 3B: COMPLETING — positive earns its colour -->
+    <div class="scene">
+      <div class="phone" style="min-height:660px;display:flex;flex-direction:column;">
+        <div class="sb sb-dark"><span class="sb-t" style="color:white;">14:24</span></div>
+        <div class="act-header">
+          <div class="act-header-row">
+            <div class="act-header-titles">
+              <div class="act-header-label">My actions</div>
+              <div class="act-header-title">What needs doing</div>
+            </div>
+            <div class="act-badges">
+              <span class="act-badge ab-overdue">1 overdue</span>
+              <span class="act-badge ab-open">3 open</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="act-list" style="overflow:visible;">
+          <div class="sl">Overdue</div>
+
+          <!-- Being completed — positive takes over from critical -->
+          <div class="act-card s-completing">
+            <div class="act-check">
+              <svg width="9" height="7" viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="act-body">
+              <div class="act-name">Ensure PTW board positioned at hot work location</div>
+              <div class="act-chips" style="margin-top:3px;"><span class="chip chip-positive">Marking complete…</span></div>
+            </div>
+          </div>
+
+          <!-- Confirmation panel drops in — positive framing throughout -->
+          <div class="complete-panel">
+            <div class="cp-head">
+              <svg width="13" height="13" viewBox="0 0 16 16" fill="#00AB55"><path d="M8 0a8 8 0 100 16A8 8 0 008 0zm3.78-1.22a1 1 0 00-1.56 1.25L7.5 10.5 5.28 8.28a1 1 0 00-1.56 1.25l2.5 3a1 1 0 001.56 0l3.5-5a1 1 0 000-1.25z"/></svg>
+              Add a completion note? (optional)
+            </div>
+            <textarea class="cp-textarea" placeholder="What did you do…">Put laminated copy of permit requirements on the PTW board this morning. Reminded crew at pre-start.</textarea>
+            <div class="cp-btns">
+              <button class="cp-skip">Skip</button>
+              <button class="cp-submit">✓ Mark complete</button>
+            </div>
+          </div>
+
+          <div class="sl" style="margin-top:10px;">This week</div>
+
+          <div class="act-card" style="opacity:0.5;">
+            <div class="act-check"></div>
+            <div class="act-body">
+              <div class="act-name">Brief fire watch crew on position requirements</div>
+              <div class="act-chips"><span class="chip chip-neutral">Due Friday</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="cap">3b · completing</div>
+    </div>
+
+    <div class="arr"><div class="arr-line"></div><div class="arr-ch">›</div><div class="arr-line"></div></div>
+
+    <!-- 3C: ALL CLEAR — positive earns its colour at the resolved state -->
+    <div class="scene">
+      <div class="phone" style="min-height:500px;display:flex;flex-direction:column;">
+        <div class="sb sb-dark"><span class="sb-t" style="color:white;">16:45</span></div>
+        <div class="act-header">
+          <div class="act-header-row">
+            <div class="act-header-titles">
+              <div class="act-header-label">My actions</div>
+              <div class="act-header-title">What needs doing</div>
+            </div>
+            <div class="act-badges">
+              <!-- Clear badge earns positive — everything resolved -->
+              <span class="act-badge ab-clear">All clear</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="act-clear">
+          <!-- Positive icon — earned by all items being resolved -->
+          <div class="clear-check">✓</div>
+          <div class="clear-title">Nothing open</div>
+          <div class="clear-sub">All actions closed. New actions will appear here when assigned.</div>
+
+          <div style="margin-top:20px;width:100%;display:flex;flex-direction:column;gap:7px;">
+            <div class="sl" style="text-align:left;width:100%;">Closed this week</div>
+            <div class="act-card s-done">
+              <div class="act-check" style="background:var(--status-positive-bg);border-color:var(--status-positive-border);">
+                <svg width="9" height="7" viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-5" stroke="#00AB55" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+              <div class="act-body">
+                <div class="act-name" style="text-decoration:line-through;color:var(--text-muted);">PTW board positioned at work location</div>
+                <div class="act-chips"><span class="chip chip-positive">Done today</span></div>
+              </div>
+            </div>
+            <div class="act-card s-done">
+              <div class="act-check" style="background:var(--status-positive-bg);border-color:var(--status-positive-border);">
+                <svg width="9" height="7" viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-5" stroke="#00AB55" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+              <div class="act-body">
+                <div class="act-name" style="text-decoration:line-through;color:var(--text-muted);">Fire watch crew briefed on position requirements</div>
+                <div class="act-chips"><span class="chip chip-positive">Done today</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="cap">3c · all clear</div>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>

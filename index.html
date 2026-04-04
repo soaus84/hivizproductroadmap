@@ -27,6 +27,8 @@
     --tag-ts-text: #9b7fd8;
     --tag-sim: #3d2a1e;
     --tag-sim-text: #d8936a;
+    --tag-exp: #2a1e0e;
+    --tag-exp-text: #d4a843;
   }
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -65,6 +67,8 @@
   nav { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 56px; }
   nav a { font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-muted); text-decoration: none; padding: 5px 10px; border: 1px solid var(--border-light); border-radius: 2px; transition: all 0.15s ease; }
   nav a:hover { color: var(--text-secondary); border-color: var(--border); background: var(--bg-hover); }
+  nav a.exp-nav { border-color: rgba(212,168,67,0.2); color: var(--accent-dim); }
+  nav a.exp-nav:hover { color: var(--accent); border-color: var(--accent-dim); background: rgba(212,168,67,0.04); }
 
   .section { margin-bottom: 52px; animation: fadeUp 0.4s ease both; }
   .section:nth-child(1) { animation-delay: 0.05s; }
@@ -77,6 +81,7 @@
   .section:nth-child(8) { animation-delay: 0.40s; }
   .section:nth-child(9) { animation-delay: 0.45s; }
   .section:nth-child(10) { animation-delay: 0.50s; }
+  .section:nth-child(11) { animation-delay: 0.55s; }
 
   @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
@@ -84,6 +89,9 @@
   .section-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); }
   .section-note { font-size: 11px; color: var(--text-muted); font-style: italic; }
   .section-rule { height: 1px; background: var(--border-light); margin-bottom: 16px; }
+
+  .section.experiment { border: 1px solid rgba(212,168,67,0.1); border-radius: 4px; padding: 16px 16px 8px; background: rgba(212,168,67,0.02); margin: 0 -16px 52px; }
+  .section.experiment .section-rule { background: rgba(212,168,67,0.12); }
 
   .file-list { list-style: none; }
   .file-item { display: flex; align-items: baseline; gap: 0; padding: 9px 12px; margin: 0 -12px; border-radius: 3px; transition: background 0.12s ease; border-bottom: 1px solid transparent; }
@@ -99,6 +107,10 @@
   .tag-md   { background: var(--tag-md);   color: var(--tag-md-text);   }
   .tag-ts   { background: var(--tag-ts);   color: var(--tag-ts-text);   }
   .tag-sim  { background: var(--tag-sim);  color: var(--tag-sim-text);  }
+  .tag-exp  { background: var(--tag-exp);  color: var(--tag-exp-text);  }
+
+  .file-item.exp-item .file-link { color: rgba(212,168,67,0.6); }
+  .file-item.exp-item:hover .file-link { color: var(--accent); }
 
   footer { border-top: 1px solid var(--border-light); padding: 32px 0 48px; margin-top: 24px; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
   .footer-left { font-size: 11px; color: var(--text-muted); letter-spacing: 0.04em; }
@@ -112,11 +124,11 @@
     .file-item { flex-wrap: wrap; gap: 4px; }
     nav { gap: 4px; }
     footer { flex-direction: column; align-items: flex-start; gap: 8px; }
+    .section.experiment { margin: 0 0 52px; }
   }
 </style>
 </head>
 <body>
-
 <div class="container">
 
   <header>
@@ -125,9 +137,7 @@
       <span class="wordmark-sep">/</span>
       <span class="wordmark-product">Hiviz <span class="version-tag">V1</span></span>
     </div>
-    <p class="header-desc">
-      Working design resource for Hiviz V1. Contains scaffolded specs, interactive product docs, simulators, and build scaffolding. Nothing here is final production code — it's the thinking and structure behind what gets built.
-    </p>
+    <p class="header-desc">Working design resource for Hiviz V1. Contains scaffolded specs, interactive product docs, simulators, and build scaffolding. Nothing here is final production code — it's the thinking and structure behind what gets built.</p>
   </header>
 
   <nav>
@@ -141,9 +151,9 @@
     <a href="#claude-code">Claude Code</a>
     <a href="#v2-devpack">V2 Devpack</a>
     <a href="#prompt-lab">Prompt Lab</a>
+    <a href="#ux-experiments" class="exp-nav">UX Experiments ✦</a>
   </nav>
 
-  <!-- Overview -->
   <section class="section" id="overview">
     <div class="section-header"><span class="section-title">Overview</span></div>
     <div class="section-rule"></div>
@@ -153,7 +163,6 @@
     </ul>
   </section>
 
-  <!-- MVP Scope -->
   <section class="section" id="mvp-scope">
     <div class="section-header"><span class="section-title">MVP Scope</span></div>
     <div class="section-rule"></div>
@@ -162,12 +171,8 @@
     </ul>
   </section>
 
-  <!-- Wireframes — NEW -->
   <section class="section" id="wireframes">
-    <div class="section-header">
-      <span class="section-title">UX Wireframes</span>
-      <span class="section-note">clickable — mockup &amp; wireframe toggle</span>
-    </div>
+    <div class="section-header"><span class="section-title">UX Wireframes</span><span class="section-note">clickable — mockup &amp; wireframe toggle</span></div>
     <div class="section-rule"></div>
     <ul class="file-list">
       <li class="file-item"><span class="file-tag tag-html">html</span><a href="wireframes-index.html" class="file-link">wireframes/index.html</a><span class="file-dot"></span><span class="file-desc">Wireframe pack — all 5 flows, mockup/wireframe mode toggle</span></li>
@@ -179,7 +184,6 @@
     </ul>
   </section>
 
-  <!-- Product Docs -->
   <section class="section" id="product-docs">
     <div class="section-header"><span class="section-title">Product Docs</span><span class="section-note">interactive — open in browser</span></div>
     <div class="section-rule"></div>
@@ -196,18 +200,16 @@
     </ul>
   </section>
 
-  <!-- Simulators -->
   <section class="section" id="simulators">
     <div class="section-header"><span class="section-title">Simulators</span><span class="section-note">interactive — open in browser</span></div>
     <div class="section-rule"></div>
     <ul class="file-list">
       <li class="file-item"><span class="file-tag tag-sim">sim</span><a href="simulators/workflow-sim.html" class="file-link">workflow-sim.html</a><span class="file-dot"></span><span class="file-desc">End-to-end workflow simulator — 3 scenarios</span></li>
       <li class="file-item"><span class="file-tag tag-sim">sim</span><a href="simulators/enquiry-sim.html" class="file-link">enquiry-sim.html</a><span class="file-dot"></span><span class="file-desc">Enquiry pipeline simulator — 3 scenarios</span></li>
-      <li class="file-item"><span class="file-tag tag-sim">sim</span><a href="simulators/capture-sim.html" class="file-link">capture-sim.html</a><span class="file-dot"></span><span class="file-desc">Chat Capture sim - 2 forms</span></li>
+      <li class="file-item"><span class="file-tag tag-sim">sim</span><a href="simulators/capture-sim.html" class="file-link">capture-sim.html</a><span class="file-dot"></span><span class="file-desc">Chat Capture sim — 4 states including offline &amp; API unavailable</span></li>
     </ul>
   </section>
 
-  <!-- Technical Specs -->
   <section class="section" id="specs">
     <div class="section-header"><span class="section-title">Technical Specs</span><span class="section-note">markdown</span></div>
     <div class="section-rule"></div>
@@ -219,16 +221,15 @@
       <li class="file-item"><span class="file-tag tag-md">md</span><a href="specs/05-view-information-spec.md" class="file-link">05-view-information-spec.md</a><span class="file-dot"></span><span class="file-desc">View information spec</span></li>
       <li class="file-item"><span class="file-tag tag-md">md</span><a href="specs/06-notification-events.md" class="file-link">06-notification-events.md</a><span class="file-dot"></span><span class="file-desc">Notification events — 30 events</span></li>
       <li class="file-item"><span class="file-tag tag-md">md</span><a href="specs/07-enquiry-module-spec.md" class="file-link">07-enquiry-module-spec.md</a><span class="file-dot"></span><span class="file-desc">Enquiry module spec</span></li>
-      <li class="file-item"><span class="file-tag tag-md">md</span><a href="specs/08-offline-architecture.html" class="file-link">08-offline-architecture.html</a><span class="file-dot"></span><span class="file-desc">Offline Architecture diagram</span></li>
+      <li class="file-item"><span class="file-tag tag-html">html</span><a href="specs/08-offline-architecture.html" class="file-link">08-offline-architecture.html</a><span class="file-dot"></span><span class="file-desc">Offline architecture diagram — dev reference</span></li>
     </ul>
   </section>
 
-  <!-- V1 Devpack -->
   <section class="section" id="devpack">
     <div class="section-header"><span class="section-title">V1 Devpack</span><span class="section-note">scaffolding for developers</span></div>
     <div class="section-rule"></div>
     <ul class="file-list">
-      <li class="file-item"><span class="file-tag tag-md">md</span><a href="v1-devpack/README.md" class="file-link">v1-devpack/README.md</a><span class="file-dot"></span><span class="file-desc">Devpack guide</span></li>
+      <li class="file-item"><span class="file-tag tag-md">md</span><a href="v1-devpack/README.md" class="file-link">v1-devpack/README.md</a><span class="file-dot"></span><span class="file-desc">Devpack guide — schema, jobs, API, build sequence</span></li>
       <li class="file-item"><span class="file-tag tag-md">md</span><a href="v1-devpack/01-data-model-api-spec.md" class="file-link">v1-devpack/01-data-model-api-spec.md</a><span class="file-dot"></span><span class="file-desc">Data model copy</span></li>
       <li class="file-item"><span class="file-tag tag-md">md</span><a href="v1-devpack/02-ai-prompt-library.md" class="file-link">v1-devpack/02-ai-prompt-library.md</a><span class="file-dot"></span><span class="file-desc">Prompt library copy</span></li>
       <li class="file-item"><span class="file-tag tag-md">md</span><a href="v1-devpack/04-integration-logic-rules.md" class="file-link">v1-devpack/04-integration-logic-rules.md</a><span class="file-dot"></span><span class="file-desc">Logic rules copy</span></li>
@@ -242,7 +243,6 @@
     </ul>
   </section>
 
-  <!-- Claude Code Brief -->
   <section class="section" id="claude-code">
     <div class="section-header"><span class="section-title">Claude Code Brief</span></div>
     <div class="section-rule"></div>
@@ -252,7 +252,6 @@
     </ul>
   </section>
 
-  <!-- V2 Devpack -->
   <section class="section" id="v2-devpack">
     <div class="section-header"><span class="section-title">V2 Devpack</span><span class="section-note">light resource — full pack available if needed</span></div>
     <div class="section-rule"></div>
@@ -264,18 +263,40 @@
     </ul>
   </section>
 
-  <!-- Prompt Lab -->
   <section class="section" id="prompt-lab">
     <div class="section-header"><span class="section-title">Prompt Lab</span><span class="section-note">live prompt tuning — requires Anthropic API key</span></div>
     <div class="section-rule"></div>
     <ul class="file-list">
       <li class="file-item"><span class="file-tag tag-html">html</span><a href="prompt-lab.html" class="file-link">prompt-lab.html</a><span class="file-dot"></span><span class="file-desc">Interactive prompt editor — tune, run, validate &amp; copy</span></li>
-      <li class="file-item"><span class="file-tag tag-html">html</span><a href="taxonomy.html" class="file-link">taxonomy.html</a><span class="file-dot"></span><span class="file-desc">List of all taxonomy used in classification with prompt simulator</span></li>
+      <li class="file-item"><span class="file-tag tag-html">html</span><a href="taxonomy.html" class="file-link">taxonomy.html</a><span class="file-dot"></span><span class="file-desc">Classification taxonomy reference with live AI classifier</span></li>
+    </ul>
+  </section>
+
+  <!-- ── UX EXPERIMENTS ── -->
+  <section class="section experiment" id="ux-experiments">
+    <div class="section-header">
+      <span class="section-title">UX Experiments ✦</span>
+      <span class="section-note">KISS mobile — ideated, not specced</span>
+    </div>
+    <div class="section-rule"></div>
+    <ul class="file-list">
+      <li class="file-item exp-item">
+        <span class="file-tag tag-exp">exp</span>
+        <a href="experiments/verification-flow.html" class="file-link">verification-flow.html</a>
+        <span class="file-dot"></span>
+        <span class="file-desc">V5 control verifier — queue, binary check, not-in-place, manager alert</span>
+      </li>
+      <li class="file-item exp-item">
+        <span class="file-tag tag-exp">exp</span>
+        <a href="experiments/supervisor-tools.html" class="file-link">supervisor-tools.html</a>
+        <span class="file-dot"></span>
+        <span class="file-desc">Supervisor tools — talk delivery, enquiry response, corrective actions</span>
+      </li>
     </ul>
   </section>
 
   <footer>
-    <div class="footer-left"><strong>Hiviz — Hiviz</strong> &nbsp;·&nbsp; Design resource snapshot, March 2026</div>
+    <div class="footer-left"><strong>Hiviz — Hiviz</strong> &nbsp;·&nbsp; Design resource snapshot, April 2026</div>
     <div class="footer-right">scaffolding, not shipping</div>
   </footer>
 

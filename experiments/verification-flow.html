@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hiviz — Control Verification v2</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  /*
+    STATUS TOKEN SYSTEM
+    ─────────────────────────────────────────────────────
+    Colour only appears when it carries status information.
+    Never decorative. Never brand. Never variety.
+
+    --status-critical : overdue, not-in-place, barrier failure
+    --status-caution  : due today, approaching, soft warning
+    --status-positive : complete, in-place, resolved, all clear
+    --neutral-*       : everything else — the default state
+
+    Rule: if removing the colour loses no information, it shouldn't be there.
+    ─────────────────────────────────────────────────────
+  */
+
+  :root {
+    /* Status tokens — used ONLY for status communication */
+    --status-critical:      #FF3B30;
+    --status-critical-bg:   rgba(255,59,48,0.07);
+    --status-critical-border: rgba(255,59,48,0.25);
+    --status-caution:       #FF9500;
+    --status-caution-bg:    rgba(255,149,0,0.07);
+    --status-caution-border: rgba(255,149,0,0.25);
+    --status-positive:      #00AB55;
+    --status-positive-bg:   rgba(0,171,85,0.07);
+    --status-positive-border: rgba(0,171,85,0.25);
+
+    /* Neutral brand tokens — everything non-status */
+    --bg:           #F7F6F4;
+    --surface:      #FFFFFF;
+    --surface-2:    #F2F1EF;
+    --border:       #E4E2DE;
+    --border-mid:   #D0CEC9;
+    --text-primary: #1A1916;
+    --text-body:    #3D3B37;
+    --text-muted:   #7A7772;
+    --text-faint:   #B0ADA8;
+    --app-header:   #1A1916;  /* App chrome stays brand-dark */
+
+    --radius:    20px;
+    --radius-sm: 12px;
+    --radius-xs: 8px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #18191A;
+    font-family: 'Inter', sans-serif;
+    padding: 48px 16px 64px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+  }
+
+  /* ── PAGE HEADER ── */
+  .page-header { text-align: center; margin-bottom: 52px; }
+  .page-kicker { font-size: 10px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: rgba(255,255,255,0.25); margin-bottom: 10px; }
+  .page-title { font-size: 26px; font-weight: 800; color: white; margin-bottom: 6px; letter-spacing: -0.3px; }
+  .page-rule { font-size: 12px; color: rgba(255,255,255,0.3); line-height: 1.6; max-width: 480px; margin: 0 auto; }
+
+  .token-legend {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin-top: 16px;
+    flex-wrap: wrap;
+  }
+
+  .token-item {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 11px;
+    color: rgba(255,255,255,0.3);
+    font-weight: 500;
+  }
+
+  .token-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+  }
+
+  /* ── LAYOUT ── */
+  .screens-row {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 64px;
+  }
+
+  .scene-group { display: flex; flex-direction: column; align-items: center; }
+  .scene-cap { font-size: 9px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: rgba(255,255,255,0.2); text-align: center; margin-top: 10px; }
+
+  .conn { display: flex; align-items: center; padding-top: 120px; }
+  .conn-line { width: 20px; height: 1px; background: rgba(255,255,255,0.1); }
+  .conn-arr { color: rgba(255,255,255,0.15); font-size: 13px; }
+
+  /* ── PHONE ── */
+  .phone {
+    width: 360px;
+    border-radius: 44px;
+    overflow: hidden;
+    box-shadow: 0 32px 80px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.04);
+    display: flex;
+    flex-direction: column;
+    background: var(--bg);
+  }
+
+  /* ── STATUS BAR ── */
+  .sb { height: 50px; display: flex; align-items: flex-end; justify-content: space-between; padding: 0 22px 10px; flex-shrink: 0; }
+  .sb-dark { background: var(--app-header); }
+  .sb-light { background: var(--surface); }
+  .sb-success { background: #003D20; }
+  .sb-time { font-size: 15px; font-weight: 700; }
+  .sb-dark .sb-time, .sb-success .sb-time { color: white; }
+  .sb-light .sb-time { color: var(--text-primary); }
+  .sb-icons { display: flex; gap: 5px; align-items: center; }
+
+  /* ── APP HEADER ── */
+  .app-header {
+    background: var(--app-header);
+    padding: 14px 20px 18px;
+    flex-shrink: 0;
+  }
+
+  .app-header-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .back-chip {
+    width: 30px; height: 30px;
+    border-radius: var(--radius-xs);
+    background: rgba(255,255,255,0.08);
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 14px; cursor: pointer; flex-shrink: 0;
+  }
+
+  .header-title { font-size: 15px; font-weight: 700; color: white; flex: 1; }
+  .header-sub { font-size: 11px; color: rgba(255,255,255,0.4); }
+
+  /* ── PROGRESS BAR — neutral, positive fill only ── */
+  .progress-wrap { display: flex; align-items: center; gap: 10px; }
+  .progress-track { flex: 1; height: 3px; background: rgba(255,255,255,0.12); border-radius: 2px; overflow: hidden; }
+  .progress-fill { height: 100%; background: rgba(255,255,255,0.5); border-radius: 2px; }
+  .progress-label { font-size: 11px; color: rgba(255,255,255,0.4); font-weight: 600; white-space: nowrap; }
+
+  /* ── SCREEN BODY ── */
+  .screen-body { background: var(--bg); flex: 1; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+
+  /* ── SECTION LABEL ── */
+  .section-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    padding: 0 2px;
+    margin-top: 4px;
+  }
+
+  /* ── HERO SUMMARY — queue overview ── */
+  .queue-hero {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2px;
+  }
+
+  .hero-due { }
+  .hero-count { font-size: 32px; font-weight: 800; color: var(--text-primary); line-height: 1; }
+  .hero-label { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+  /* Overdue count gets status-critical weight */
+  .hero-overdue-count { font-size: 22px; font-weight: 800; color: var(--status-critical); line-height: 1; }
+  .hero-overdue-label { font-size: 11px; color: var(--status-critical); margin-top: 2px; opacity: 0.7; }
+
+  /* ── CONTROL CARD ── */
+  .ctrl-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 14px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  /* Status-driven border — only when status requires it */
+  .ctrl-card.is-overdue {
+    border-color: var(--status-critical-border);
+    background: var(--status-critical-bg);
+  }
+
+  .ctrl-card.is-caution {
+    border-color: var(--status-caution-border);
+  }
+
+  .ctrl-icon {
+    width: 36px; height: 36px;
+    border-radius: var(--radius-xs);
+    background: var(--surface-2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 17px;
+    flex-shrink: 0;
+  }
+
+  .ctrl-body { flex: 1; }
+  .ctrl-name { font-size: 13px; font-weight: 600; color: var(--text-primary); line-height: 1.35; margin-bottom: 3px; }
+  .ctrl-meta { font-size: 11px; color: var(--text-muted); margin-bottom: 7px; line-height: 1.3; }
+
+  .ctrl-chips { display: flex; gap: 5px; flex-wrap: wrap; }
+  .chip {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 5px;
+    letter-spacing: 0.1px;
+  }
+
+  /* Chips only get status colour when they carry status info */
+  .chip-neutral { background: var(--surface-2); color: var(--text-muted); }
+  .chip-overdue { background: var(--status-critical-bg); color: var(--status-critical); }
+  .chip-caution { background: var(--status-caution-bg); color: var(--status-caution); }
+  .chip-site    { background: var(--surface-2); color: var(--text-faint); }
+
+  /* ── START BUTTON — neutral ── */
+  .start-btn {
+    width: 100%;
+    height: 52px;
+    border-radius: var(--radius-sm);
+    background: var(--text-primary);
+    color: white;
+    border: none;
+    font-size: 15px;
+    font-weight: 700;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 4px;
+  }
+
+  /* ── VERIFY SCREEN BODY ── */
+  .verify-body { background: var(--bg); flex: 1; padding: 16px; display: flex; flex-direction: column; }
+
+  .ctrl-context {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    margin-bottom: 12px;
+  }
+
+  .ctx-tag {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    margin-bottom: 5px;
+  }
+
+  .ctx-name { font-size: 15px; font-weight: 700; color: var(--text-primary); line-height: 1.3; }
+
+  .prompt-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 20px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 14px;
+  }
+
+  .prompt-label { font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text-faint); margin-bottom: 10px; }
+  .prompt-text { font-size: 17px; font-weight: 600; color: var(--text-primary); line-height: 1.45; }
+
+  /* ── RESPONSE BUTTONS ── the centrepiece ── */
+  .response-btns { display: flex; flex-direction: column; gap: 8px; }
+
+  .resp-btn {
+    height: 62px;
+    border-radius: var(--radius-sm);
+    border: 1.5px solid;
+    font-size: 16px;
+    font-weight: 700;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    letter-spacing: -0.2px;
+    transition: all 0.1s;
+  }
+
+  /* In Place — positive status, earns its colour */
+  .resp-in-place {
+    background: var(--status-positive-bg);
+    border-color: var(--status-positive-border);
+    color: var(--status-positive);
+  }
+
+  /* Not In Place — critical status, earns its colour */
+  .resp-not-in-place {
+    background: var(--status-critical-bg);
+    border-color: var(--status-critical-border);
+    color: var(--status-critical);
+  }
+
+  /* Not Applicable — no status, stays neutral */
+  .resp-na {
+    background: var(--surface);
+    border-color: var(--border);
+    color: var(--text-muted);
+    height: 48px;
+    font-size: 13px;
+  }
+
+  .resp-icon { font-size: 18px; }
+
+  /* ── NOT IN PLACE SCREEN ── */
+  .nip-header {
+    background: var(--app-header);
+    padding: 14px 20px 16px;
+    flex-shrink: 0;
+  }
+
+  /* Status alert — earns its red */
+  .nip-alert {
+    background: var(--status-critical-bg);
+    border: 1px solid var(--status-critical-border);
+    border-radius: var(--radius-xs);
+    padding: 12px 14px;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+
+  .nip-alert-icon { font-size: 18px; flex-shrink: 0; }
+  .nip-alert-title { font-size: 13px; font-weight: 700; color: var(--status-critical); margin-bottom: 2px; }
+  .nip-alert-sub { font-size: 11px; color: rgba(255,59,48,0.6); line-height: 1.4; }
+
+  .nip-body { background: var(--bg); flex: 1; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+
+  /* The flagged control — critical left border earns its colour */
+  .nip-ctrl {
+    background: var(--surface);
+    border: 1px solid var(--status-critical-border);
+    border-left: 3px solid var(--status-critical);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1.3;
+  }
+
+  .field-label { font-size: 11px; font-weight: 600; color: var(--text-muted); margin-bottom: 5px; }
+
+  .nip-textarea {
+    width: 100%;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    color: var(--text-primary);
+    resize: none;
+    min-height: 76px;
+    line-height: 1.5;
+  }
+
+  .photo-row {
+    background: var(--surface);
+    border: 1.5px dashed var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+  }
+
+  .notify-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+  }
+
+  .notify-box-label { font-size: 10px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; color: var(--text-faint); margin-bottom: 8px; }
+  .notify-row { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-muted); padding: 3px 0; }
+  .nav-av { width: 22px; height: 22px; border-radius: 50%; font-size: 8px; font-weight: 700; color: white; display: flex; align-items: center; justify-content: center; background: var(--text-faint); flex-shrink: 0; }
+
+  /* Submit earns its critical colour — the action is consequential */
+  .nip-submit {
+    width: 100%;
+    height: 52px;
+    border-radius: var(--radius-sm);
+    background: var(--status-critical);
+    color: white;
+    border: none;
+    font-size: 15px;
+    font-weight: 700;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    margin-top: auto;
+  }
+
+  /* ── ALL CLEAR ── earns its positive colour ── */
+  .clear-screen {
+    background: var(--status-positive);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .clear-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 28px 20px;
+    text-align: center;
+  }
+
+  .clear-icon {
+    width: 72px; height: 72px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.1);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 36px;
+    margin-bottom: 18px;
+  }
+
+  .clear-title { font-size: 28px; font-weight: 800; color: white; margin-bottom: 6px; letter-spacing: -0.3px; }
+  .clear-sub { font-size: 13px; color: rgba(255,255,255,0.65); line-height: 1.55; max-width: 200px; }
+
+  .clear-stats {
+    display: flex;
+    background: rgba(0,0,0,0.08);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-top: 24px;
+    width: 100%;
+  }
+
+  .clear-stat { flex: 1; padding: 14px; text-align: center; }
+  .clear-stat + .clear-stat { border-left: 1px solid rgba(0,0,0,0.08); }
+  .clear-stat-n { font-size: 22px; font-weight: 800; color: white; }
+  .clear-stat-l { font-size: 10px; color: rgba(255,255,255,0.5); margin-top: 2px; font-weight: 500; }
+
+  .clear-footer { padding: 14px 20px 32px; background: rgba(0,0,0,0.08); }
+  .clear-done { width: 100%; height: 50px; border-radius: var(--radius-sm); background: rgba(0,0,0,0.12); border: none; color: rgba(255,255,255,0.8); font-size: 15px; font-weight: 700; font-family: 'Inter', sans-serif; cursor: pointer; }
+
+  /* ── ISSUES RESULT ── */
+  .result-header {
+    background: var(--app-header);
+    padding: 16px 20px 18px;
+    flex-shrink: 0;
+  }
+
+  .result-title { font-size: 18px; font-weight: 800; color: white; margin-bottom: 3px; display: flex; align-items: center; gap: 8px; }
+  .result-sub { font-size: 12px; color: rgba(255,255,255,0.4); }
+
+  /* Warning flag earns its critical colour */
+  .result-flag { color: var(--status-critical); }
+
+  .result-body { background: var(--bg); flex: 1; padding: 14px 16px; }
+
+  /* Notification banner — caution earns its colour */
+  .notified-banner {
+    background: var(--status-caution-bg);
+    border: 1px solid var(--status-caution-border);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+    font-size: 12px;
+    color: var(--status-caution);
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    margin-bottom: 12px;
+    line-height: 1.45;
+  }
+
+  .result-row {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 11px 13px;
+    margin-bottom: 7px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .result-row.is-fail { border-color: var(--status-critical-border); }
+  .result-row.is-pass { border-color: var(--status-positive-border); }
+
+  .result-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+  .dot-fail { background: var(--status-critical); }
+  .dot-pass { background: var(--status-positive); }
+  .dot-na   { background: var(--text-faint); }
+
+  .result-name { font-size: 12px; font-weight: 600; color: var(--text-primary); flex: 1; line-height: 1.3; }
+
+  .result-badge { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 4px; white-space: nowrap; }
+  .badge-fail { background: var(--status-critical-bg); color: var(--status-critical); }
+  .badge-pass { background: var(--status-positive-bg); color: var(--status-positive); }
+  .badge-na   { background: var(--surface-2); color: var(--text-faint); }
+
+  .result-done { width: 100%; height: 50px; border-radius: var(--radius-sm); background: var(--text-primary); color: white; border: none; font-size: 15px; font-weight: 700; font-family: 'Inter', sans-serif; cursor: pointer; margin-top: 10px; }
+
+  /* ── MANAGER NOTIFICATION ── */
+  .lock-screen {
+    background: linear-gradient(160deg, #111214 0%, #1C1E22 100%);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .lock-top { padding: 36px 24px 20px; display: flex; flex-direction: column; align-items: center; }
+  .lock-time { font-size: 54px; font-weight: 200; color: white; letter-spacing: -2px; line-height: 1; }
+  .lock-date { font-size: 14px; color: rgba(255,255,255,0.35); margin-top: 4px; margin-bottom: 28px; }
+
+  .notif-card {
+    width: 100%;
+    background: rgba(255,255,255,0.08);
+    border-radius: 14px;
+    padding: 12px;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    margin-bottom: 8px;
+  }
+
+  /* Critical notification — earns its colour in the icon tint */
+  .notif-card.is-critical { background: rgba(255,59,48,0.1); border: 1px solid rgba(255,59,48,0.15); }
+
+  .notif-app-icon { width: 36px; height: 36px; border-radius: 9px; background: var(--app-header); display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+  .notif-app-label { font-size: 10px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; color: rgba(255,255,255,0.35); margin-bottom: 2px; }
+  .notif-title { font-size: 13px; font-weight: 700; color: white; margin-bottom: 2px; line-height: 1.3; }
+  .notif-body { font-size: 12px; color: rgba(255,255,255,0.55); line-height: 1.4; }
+  .notif-time { font-size: 10px; color: rgba(255,255,255,0.25); white-space: nowrap; }
+
+  .lock-actions {
+    background: rgba(255,255,255,0.04);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    margin-top: 16px;
+    width: 100%;
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .lock-action-row {
+    padding: 13px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .lock-action-row:last-child { border-bottom: none; }
+  .lock-action-row.is-neutral { color: rgba(255,255,255,0.7); }
+
+  /* Accept risk is a consequential action — earns caution colour */
+  .lock-action-row.is-caution { color: var(--status-caution); }
+
+  .lock-hint { font-size: 10px; color: rgba(255,255,255,0.2); font-style: italic; margin-top: 8px; line-height: 1.5; text-align: center; padding: 0 4px; }
+
+  /* ── SECTION BREAK ── */
+  .section-break {
+    width: 100%;
+    max-width: 960px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 48px;
+  }
+
+  .section-break-line { flex: 1; height: 1px; background: rgba(255,255,255,0.06); }
+  .section-break-label { font-size: 10px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: rgba(255,255,255,0.15); white-space: nowrap; }
+</style>
+</head>
+<body>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+  <div class="page-kicker">Hiviz · V5 · Revised</div>
+  <div class="page-title">Control Verification</div>
+  <div class="page-rule">Neutral brand. Status colour earns its place — nowhere else.</div>
+  <div class="token-legend">
+    <div class="token-item"><div class="token-dot" style="background:#FF3B30;"></div>Critical — overdue, not in place</div>
+    <div class="token-item"><div class="token-dot" style="background:#FF9500;"></div>Caution — approaching, notified</div>
+    <div class="token-item"><div class="token-dot" style="background:#00AB55;"></div>Positive — complete, in place</div>
+    <div class="token-item"><div class="token-dot" style="background:#B0ADA8;"></div>Neutral — everything else</div>
+  </div>
+</div>
+
+<!-- ROW 1: Queue → Verify → Not In Place -->
+<div class="screens-row">
+
+  <!-- SCREEN 1 — QUEUE -->
+  <div class="scene-group">
+    <div class="phone" style="min-height:700px;">
+      <div class="sb sb-dark">
+        <span class="sb-time" style="color:white;">7:52</span>
+        <div class="sb-icons">
+          <svg width="15" height="11" viewBox="0 0 16 12" fill="white"><rect x="0" y="3" width="3" height="9" rx="1" opacity="0.4"/><rect x="4.5" y="1" width="3" height="11" rx="1" opacity="0.6"/><rect x="9" y="0" width="3" height="12" rx="1" opacity="0.8"/><rect x="13.5" y="0" width="2.5" height="12" rx="1"/></svg>
+          <svg width="14" height="11" viewBox="0 0 24 12" fill="white"><rect x="0.5" y="0.5" width="21" height="11" rx="2.5" stroke="white" stroke-opacity="0.3" fill="none"/><rect x="22" y="3.5" width="2" height="5" rx="1" opacity="0.4"/><rect x="2" y="2" width="15" height="8" rx="1.5"/></svg>
+        </div>
+      </div>
+      <div class="app-header">
+        <div class="app-header-row">
+          <div class="header-title">Northgate Open Cut</div>
+          <div style="font-family:monospace;font-size:10px;color:rgba(255,255,255,0.3);">7 APR</div>
+        </div>
+      </div>
+      <div class="screen-body">
+
+        <!-- Hero: total due / overdue — neutral count, critical overdue -->
+        <div class="queue-hero">
+          <div class="hero-due">
+            <div class="hero-count">7</div>
+            <div class="hero-label">due today</div>
+          </div>
+          <div style="text-align:right;">
+            <div class="hero-overdue-count">2</div>
+            <div class="hero-overdue-label">overdue</div>
+          </div>
+        </div>
+
+        <div class="section-label" style="margin-top:6px;">Overdue</div>
+
+        <!-- Overdue card — earns critical treatment -->
+        <div class="ctrl-card is-overdue">
+          <div class="ctrl-icon">⚡</div>
+          <div class="ctrl-body">
+            <div class="ctrl-name">Electrical isolation confirmed before maintenance</div>
+            <div class="ctrl-meta">Heavy Vehicle · Northgate Open Cut</div>
+            <div class="ctrl-chips">
+              <span class="chip chip-overdue">2 days overdue</span>
+              <span class="chip chip-site">Northgate</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="ctrl-card is-overdue">
+          <div class="ctrl-icon">🔐</div>
+          <div class="ctrl-body">
+            <div class="ctrl-name">LOTO verified before conveyor maintenance</div>
+            <div class="ctrl-meta">Maintenance · Sylvania Underground</div>
+            <div class="ctrl-chips">
+              <span class="chip chip-overdue">1 day overdue</span>
+              <span class="chip chip-site">Sylvania</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-label" style="margin-top:6px;">Due this shift</div>
+
+        <!-- Normal cards — fully neutral -->
+        <div class="ctrl-card">
+          <div class="ctrl-icon">📋</div>
+          <div class="ctrl-body">
+            <div class="ctrl-name">Hot work permit signed and physically present</div>
+            <div class="ctrl-meta">Hot Work · Northgate Open Cut</div>
+            <div class="ctrl-chips">
+              <span class="chip chip-neutral">Shift start</span>
+              <span class="chip chip-site">Northgate</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="ctrl-card">
+          <div class="ctrl-icon">👷</div>
+          <div class="ctrl-body">
+            <div class="ctrl-name">Spotter confirmed in position before reversing</div>
+            <div class="ctrl-meta">Heavy Vehicle · Northgate Open Cut</div>
+            <div class="ctrl-chips">
+              <span class="chip chip-neutral">Shift start</span>
+              <span class="chip chip-site">Northgate</span>
+            </div>
+          </div>
+        </div>
+
+        <button class="start-btn">Start session →</button>
+      </div>
+    </div>
+    <div class="scene-cap">1 · queue</div>
+  </div>
+
+  <div class="conn"><div class="conn-line"></div><div class="conn-arr">›</div><div class="conn-line"></div></div>
+
+  <!-- SCREEN 2 — ACTIVE VERIFICATION -->
+  <div class="scene-group">
+    <div class="phone" style="min-height:700px;">
+      <div class="sb sb-dark">
+        <span class="sb-time" style="color:white;">7:53</span>
+        <div class="sb-icons">
+          <svg width="15" height="11" viewBox="0 0 16 12" fill="white"><rect x="0" y="3" width="3" height="9" rx="1" opacity="0.4"/><rect x="4.5" y="1" width="3" height="11" rx="1" opacity="0.6"/><rect x="9" y="0" width="3" height="12" rx="1" opacity="0.8"/></svg>
+        </div>
+      </div>
+      <div class="app-header">
+        <div class="app-header-row">
+          <div class="back-chip">←</div>
+          <div class="header-title">Northgate Open Cut</div>
+        </div>
+        <div class="progress-wrap">
+          <div class="progress-track"><div class="progress-fill" style="width:43%;"></div></div>
+          <div class="progress-label">3 of 7</div>
+        </div>
+      </div>
+
+      <div class="verify-body">
+        <div class="ctrl-context">
+          <div class="ctx-tag">Hot Work · Shift start</div>
+          <div class="ctx-name">Hot work permit signed and physically present</div>
+        </div>
+
+        <div class="prompt-card">
+          <div class="prompt-label">Check now</div>
+          <div class="prompt-text">Is the hot work permit signed by all parties and physically present at the work location right now?</div>
+        </div>
+
+        <!-- Three responses — colour carries meaning, not decoration -->
+        <div class="response-btns">
+          <button class="resp-btn resp-in-place">
+            <span class="resp-icon">✓</span> In Place
+          </button>
+          <button class="resp-btn resp-not-in-place">
+            <span class="resp-icon">✕</span> Not In Place
+          </button>
+          <button class="resp-btn resp-na">— Not Applicable</button>
+        </div>
+      </div>
+    </div>
+    <div class="scene-cap">2 · verify</div>
+  </div>
+
+  <div class="conn"><div class="conn-line"></div><div class="conn-arr">›</div><div class="conn-line"></div></div>
+
+  <!-- SCREEN 3 — NOT IN PLACE -->
+  <div class="scene-group">
+    <div class="phone" style="min-height:700px;">
+      <div class="sb sb-dark"><span class="sb-time" style="color:white;">7:54</span></div>
+      <div class="nip-header">
+        <div class="app-header-row" style="margin-bottom:10px;">
+          <div class="back-chip">←</div>
+          <div class="header-title">Not In Place</div>
+        </div>
+        <!-- Alert earns critical colour — it is the critical message -->
+        <div class="nip-alert">
+          <div class="nip-alert-icon">⚠️</div>
+          <div>
+            <div class="nip-alert-title">Work should not commence</div>
+            <div class="nip-alert-sub">Note what you observed. Manager notified immediately.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="nip-body">
+        <!-- Flagged control — left border earns critical colour -->
+        <div class="nip-ctrl">Hot work permit signed and physically present</div>
+
+        <div>
+          <div class="field-label">What did you observe?</div>
+          <textarea class="nip-textarea" readonly>Permit board empty — crew said permit was done yesterday but no physical copy at the work location this morning. Crew was about to start.</textarea>
+        </div>
+
+        <div class="photo-row">
+          <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          Add photo evidence (optional)
+        </div>
+
+        <div class="notify-box">
+          <div class="notify-box-label">Notifying immediately</div>
+          <div class="notify-row"><div class="nav-av">JM</div>Jake Morrow — Site Manager</div>
+          <div class="notify-row"><div class="nav-av">PN</div>Priya Nair — Safety Manager</div>
+          <div style="font-size:10px;color:var(--text-faint);margin-top:6px;font-style:italic;">Work hold recommended. Manager makes the call.</div>
+        </div>
+
+        <!-- Submit earns critical colour — consequential, irreversible action -->
+        <button class="nip-submit">Submit — notify manager</button>
+      </div>
+    </div>
+    <div class="scene-cap">3 · not in place</div>
+  </div>
+
+</div>
+
+<!-- ROW 2: All Clear + Issues + Manager alert -->
+<div class="screens-row">
+
+  <!-- SCREEN 4A — ALL CLEAR -->
+  <div class="scene-group">
+    <div class="phone" style="min-height:560px;">
+      <!-- Positive status screen — the whole surface earns green because everything is resolved -->
+      <div class="sb" style="background:var(--status-positive);">
+        <span class="sb-time" style="color:white;">8:01</span>
+      </div>
+      <div class="clear-screen">
+        <div class="clear-body">
+          <div class="clear-icon">✓</div>
+          <div class="clear-title">All in place</div>
+          <div class="clear-sub">7 controls verified. Everything checked out this morning.</div>
+          <div class="clear-stats">
+            <div class="clear-stat"><div class="clear-stat-n">7</div><div class="clear-stat-l">Verified</div></div>
+            <div class="clear-stat" style="border-left:1px solid rgba(0,0,0,0.08);"><div class="clear-stat-n">0</div><div class="clear-stat-l">Issues</div></div>
+            <div class="clear-stat" style="border-left:1px solid rgba(0,0,0,0.08);"><div class="clear-stat-n">8m</div><div class="clear-stat-l">Duration</div></div>
+          </div>
+        </div>
+        <div class="clear-footer">
+          <button class="clear-done">Done</button>
+        </div>
+      </div>
+    </div>
+    <div class="scene-cap">4a · all clear</div>
+  </div>
+
+  <!-- SCREEN 4B — ISSUES FOUND -->
+  <div class="scene-group">
+    <div class="phone" style="min-height:560px;">
+      <div class="sb sb-dark"><span class="sb-time" style="color:white;">8:03</span></div>
+      <div class="result-header">
+        <!-- Critical flag earns its colour — one issue found -->
+        <div class="result-title">
+          <span class="result-flag">▲</span> 1 issue found
+        </div>
+        <div class="result-sub">Notified. Work hold recommended.</div>
+      </div>
+      <div class="result-body">
+        <!-- Notification banner — caution because it's informational about action taken -->
+        <div class="notified-banner">
+          <span>📣</span>
+          <span><strong>Jake Morrow + Priya Nair notified.</strong> They will respond before work commences.</span>
+        </div>
+
+        <!-- Result rows — only failing row gets critical treatment -->
+        <div class="result-row is-fail">
+          <div class="result-dot dot-fail"></div>
+          <div class="result-name">Hot work permit physically present</div>
+          <span class="result-badge badge-fail">Not in place</span>
+        </div>
+        <div class="result-row is-pass">
+          <div class="result-dot dot-pass"></div>
+          <div class="result-name">Fire watch confirmed and positioned</div>
+          <span class="result-badge badge-pass">In place</span>
+        </div>
+        <div class="result-row is-pass">
+          <div class="result-dot dot-pass"></div>
+          <div class="result-name">Hot work area clear of flammables</div>
+          <span class="result-badge badge-pass">In place</span>
+        </div>
+        <div class="result-row">
+          <div class="result-dot dot-na"></div>
+          <div class="result-name" style="color:var(--text-muted);">Sprinkler isolated in work zone</div>
+          <span class="result-badge badge-na">N/A</span>
+        </div>
+
+        <button class="result-done">Done</button>
+      </div>
+    </div>
+    <div class="scene-cap">4b · issues found</div>
+  </div>
+
+  <!-- SCREEN 5 — MANAGER ALERT -->
+  <div class="scene-group">
+    <div class="phone" style="min-height:560px;">
+      <div class="sb" style="background:#111214;">
+        <span class="sb-time" style="color:white;">8:03</span>
+      </div>
+      <div class="lock-screen">
+        <div class="lock-top">
+          <div class="lock-time">8:03</div>
+          <div class="lock-date">Monday 7 April</div>
+
+          <!-- Critical notification — icon tint earns red, card gets subtle red wash -->
+          <div class="notif-card is-critical">
+            <div class="notif-app-icon">🛡️</div>
+            <div style="flex:1;">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px;">
+                <div class="notif-app-label">Hiviz</div>
+                <div class="notif-time">now</div>
+              </div>
+              <div class="notif-title">Critical control not in place</div>
+              <div class="notif-body">Northgate · Hot work permit missing at work location. Aaron flagged this at shift start. Work hold recommended.</div>
+            </div>
+          </div>
+
+          <!-- Second notification — neutral, just informational -->
+          <div class="notif-card" style="opacity:0.6;">
+            <div class="notif-app-icon">🛡️</div>
+            <div style="flex:1;">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px;">
+                <div class="notif-app-label">Hiviz</div>
+                <div class="notif-time">6:45</div>
+              </div>
+              <div class="notif-title">2 verifications overdue</div>
+              <div class="notif-body">Electrical isolation (Northgate) and LOTO check (Sylvania) are past due.</div>
+            </div>
+          </div>
+
+          <!-- Response actions -->
+          <div class="lock-actions">
+            <div class="lock-action-row is-neutral">
+              Accept work hold <span style="color:rgba(255,255,255,0.2);font-size:14px;">›</span>
+            </div>
+            <!-- Accept risk is a caution action — earns amber -->
+            <div class="lock-action-row is-caution">
+              Accept risk — document reason <span style="font-size:14px;">›</span>
+            </div>
+          </div>
+          <div class="lock-hint">Both options require a documented reason. Decision is logged.</div>
+        </div>
+      </div>
+    </div>
+    <div class="scene-cap">5 · manager alert</div>
+  </div>
+
+</div>
+
+</body>
+</html>
