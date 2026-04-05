@@ -1,0 +1,1506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hiviz — Platform Architecture</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,700;1,9..144,300&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* Workspace palette */
+    --obs:   #5B9FFF;  --obs-bg:  rgba(91,159,255,0.08);   --obs-border:  rgba(91,159,255,0.2);
+    --risk:  #FF8C42;  --risk-bg: rgba(255,140,66,0.08);   --risk-border: rgba(255,140,66,0.2);
+    --ms:    #A78BFA;  --ms-bg:   rgba(167,139,250,0.08);  --ms-border:   rgba(167,139,250,0.2);
+    --inc:   #F87171;  --inc-bg:  rgba(248,113,113,0.08);  --inc-border:  rgba(248,113,113,0.2);
+    --diag:  #34D399;  --diag-bg: rgba(52,211,153,0.08);   --diag-border: rgba(52,211,153,0.2);
+
+    /* Status */
+    --positive: #00AB55;
+    --caution:  #FF9500;
+    --critical: #FF3B30;
+
+    /* Surfaces */
+    --bg:      #0B0C0A;
+    --s1:      #111210;
+    --s2:      #181917;
+    --s3:      #1E2019;
+    --border:  #252722;
+    --border2: #1C1E1A;
+
+    /* Text */
+    --t1: #E8E4DC;
+    --t2: #6B6960;
+    --t3: #353530;
+    --accent: #C8F73A;
+    --accent2: #7A9A22;
+
+    --mono: 'DM Mono', monospace;
+    --sans: 'DM Sans', sans-serif;
+    --display: 'Fraunces', serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--t1);
+    font-family: var(--sans);
+    font-size: 13px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── COVER ── */
+  .cover {
+    padding: 80px 80px 64px;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Grid background */
+  .cover::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--border2) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border2) 1px, transparent 1px);
+    background-size: 40px 40px;
+    opacity: 0.6;
+  }
+
+  .cover::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 50%;
+    background: linear-gradient(to top, var(--bg), transparent);
+  }
+
+  .cover-inner { position: relative; z-index: 1; max-width: 780px; }
+
+  .cover-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent2);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .cover-label::before { content: ''; width: 24px; height: 1px; background: var(--accent2); }
+
+  h1 {
+    font-family: var(--display);
+    font-size: clamp(36px, 6vw, 60px);
+    font-weight: 300;
+    line-height: 1.08;
+    letter-spacing: -0.02em;
+    margin-bottom: 8px;
+  }
+  h1 strong { font-weight: 700; color: var(--accent); }
+
+  .cover-sub {
+    font-family: var(--display);
+    font-size: clamp(16px, 2.5vw, 22px);
+    font-weight: 300;
+    font-style: italic;
+    color: var(--t2);
+    margin-bottom: 28px;
+  }
+
+  .cover-desc {
+    font-size: 14px;
+    color: var(--t2);
+    max-width: 560px;
+    line-height: 1.75;
+    border-left: 2px solid var(--border);
+    padding-left: 18px;
+    margin-bottom: 40px;
+  }
+
+  .cover-meta { display: flex; gap: 28px; flex-wrap: wrap; }
+  .cm { }
+  .cm-l { font-family: var(--mono); font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--t3); margin-bottom: 3px; }
+  .cm-v { font-size: 12px; color: var(--t2); font-weight: 500; }
+
+  /* ── NAV ── */
+  .nav-bar {
+    position: sticky;
+    top: 0;
+    z-index: 200;
+    background: rgba(11,12,10,0.94);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 80px;
+    gap: 0;
+    overflow-x: auto;
+  }
+  .nav-bar::-webkit-scrollbar { display: none; }
+
+  .nav-item {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--t3);
+    text-decoration: none;
+    padding: 13px 12px;
+    white-space: nowrap;
+    transition: color 0.1s;
+    border-bottom: 1px solid transparent;
+    margin-bottom: -1px;
+  }
+  .nav-item:hover { color: var(--t2); }
+
+  /* ── PAGE ── */
+  .page { max-width: 1040px; margin: 0 auto; padding: 0 80px 80px; }
+
+  /* ── SECTION ── */
+  .sec { margin-top: 72px; scroll-margin-top: 50px; }
+  .sec-label { font-family: var(--mono); font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--accent2); margin-bottom: 8px; }
+  .sec-title { font-family: var(--display); font-size: clamp(22px, 3vw, 32px); font-weight: 300; letter-spacing: -0.02em; margin-bottom: 6px; line-height: 1.2; }
+  .sec-title strong { font-weight: 700; }
+  .sec-intro { font-size: 13px; color: var(--t2); max-width: 660px; line-height: 1.75; margin-bottom: 28px; }
+  .rule { border: none; border-top: 1px solid var(--border); margin-bottom: 28px; }
+
+  /* ── REUSABLE CHIP ── */
+  .tag {
+    font-family: var(--mono);
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    border: 1px solid;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+  }
+
+  /* ══════════════════════════════════════════════════
+     SECTION 1 — PLATFORM LAYER DIAGRAM
+  ════════════════════════════════════════════════════ */
+
+  .platform-stack {
+    background: var(--s1);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    margin-bottom: 32px;
+  }
+
+  .stack-header {
+    background: var(--s2);
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--border);
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--t2);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .layer {
+    padding: 18px 20px;
+    border-bottom: 1px solid var(--border);
+    display: grid;
+    grid-template-columns: 160px 1fr;
+    gap: 20px;
+    align-items: start;
+  }
+  .layer:last-child { border-bottom: none; }
+
+  .layer-tag {
+    font-family: var(--mono);
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 5px 10px;
+    border-radius: 5px;
+    text-align: center;
+    align-self: flex-start;
+  }
+
+  .layer-content {}
+  .layer-title { font-size: 13px; font-weight: 700; color: var(--t1); margin-bottom: 4px; }
+  .layer-desc { font-size: 12px; color: var(--t2); line-height: 1.6; }
+  .layer-items { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+  .layer-item { font-family: var(--mono); font-size: 10px; color: var(--t2); background: var(--s2); border: 1px solid var(--border); padding: 3px 9px; border-radius: 4px; }
+
+
+  /* ══════════════════════════════════════════════════
+     SECTION 2 — WORKSPACE DETAIL
+  ════════════════════════════════════════════════════ */
+
+  .ws-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 28px; }
+  .ws-cell { background: var(--s1); padding: 20px 22px; }
+  .ws-cell-tag { font-family: var(--mono); font-size: 9px; font-weight: 500; letter-spacing: 1px; text-transform: uppercase; padding: 3px 9px; border-radius: 4px; border: 1px solid; margin-bottom: 10px; display: inline-block; }
+  .ws-cell-name { font-size: 15px; font-weight: 700; margin-bottom: 5px; }
+  .ws-cell-version { font-family: var(--mono); font-size: 9px; color: var(--t3); margin-bottom: 8px; }
+  .ws-cell-desc { font-size: 12px; color: var(--t2); line-height: 1.6; margin-bottom: 10px; }
+  .ws-cell-objects { font-family: var(--mono); font-size: 10px; color: var(--t3); line-height: 1.8; }
+  .ws-cell-objects span { color: var(--t2); }
+
+  /* Always-on badge */
+  .badge-always { font-family: var(--mono); font-size: 9px; padding: 2px 8px; border-radius: 3px; background: rgba(200,247,58,0.07); color: var(--accent2); border: 1px solid rgba(200,247,58,0.15); }
+  .badge-optional { font-family: var(--mono); font-size: 9px; padding: 2px 8px; border-radius: 3px; background: var(--s2); color: var(--t3); border: 1px solid var(--border); }
+
+
+  /* ══════════════════════════════════════════════════
+     SECTION 3 — COMPOUND INTELLIGENCE MATRIX
+  ════════════════════════════════════════════════════ */
+
+  /* Visual matrix: rows = workspace combos, cols = intelligence surfaces */
+  .compound-table { width: 100%; border-collapse: collapse; }
+  .compound-table th {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--t2);
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border);
+    background: var(--s2);
+    text-align: left;
+    white-space: nowrap;
+  }
+  .compound-table td {
+    padding: 12px;
+    border-bottom: 1px solid var(--border2);
+    background: var(--s1);
+    vertical-align: top;
+  }
+  .compound-table tr:last-child td { border-bottom: none; }
+  .compound-table tr:hover td { background: var(--s2); }
+
+  .ws-combo { display: flex; gap: 4px; flex-wrap: wrap; }
+  .combo-tag { font-family: var(--mono); font-size: 9px; font-weight: 500; padding: 2px 7px; border-radius: 3px; border: 1px solid; white-space: nowrap; }
+
+  .intel-cell { font-size: 12px; color: var(--t2); line-height: 1.55; }
+  .intel-cell strong { color: var(--t1); font-weight: 600; }
+  .intel-cell .gain { font-size: 11px; color: var(--accent2); font-style: italic; margin-top: 4px; font-family: var(--mono); }
+
+  /* Enabled dot */
+  .dot-on { width: 7px; height: 7px; border-radius: 50%; background: var(--positive); display: inline-block; }
+  .dot-off { width: 7px; height: 7px; border-radius: 50%; background: var(--t3); display: inline-block; }
+
+
+  /* ══════════════════════════════════════════════════
+     SECTION 4 — DATA FLOW
+  ════════════════════════════════════════════════════ */
+
+  .flow-diagram {
+    background: var(--s1);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    margin-bottom: 32px;
+  }
+
+  .flow-header {
+    background: var(--s2);
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--border);
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--t2);
+  }
+
+  .flow-body { padding: 24px 20px; }
+
+  /* Vertical swimlane flow */
+  .flow-lanes {
+    display: grid;
+    grid-template-columns: 120px repeat(4, 1fr);
+    gap: 0;
+  }
+
+  .flow-lane-head {
+    padding: 8px 10px;
+    font-family: var(--mono);
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    text-align: center;
+    border-radius: 5px;
+    margin: 0 4px 16px;
+  }
+
+  .flow-step-label {
+    padding: 8px 10px 8px 0;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--t3);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+  }
+  .flow-step-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  .flow-cell {
+    margin: 0 4px 10px;
+    min-height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .flow-node {
+    background: var(--s2);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    padding: 8px 10px;
+    font-size: 11px;
+    color: var(--t2);
+    text-align: center;
+    line-height: 1.4;
+    width: 100%;
+  }
+  .flow-node.active { color: var(--t1); font-weight: 600; }
+  .flow-node.ai-node { border-style: dashed; }
+  .flow-node.empty { background: transparent; border: none; }
+
+  .flow-arrow-down {
+    display: flex;
+    justify-content: center;
+    padding: 4px 0;
+    color: var(--t3);
+    font-size: 12px;
+    grid-column: 1 / -1;
+  }
+
+
+  /* ══════════════════════════════════════════════════
+     SECTION 5 — AI LAYER
+  ════════════════════════════════════════════════════ */
+
+  .ai-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 32px;
+  }
+
+  .ai-card { background: var(--s1); padding: 18px 20px; }
+  .ai-card-prompt { font-family: var(--mono); font-size: 10px; color: var(--accent2); margin-bottom: 6px; }
+  .ai-card-title { font-size: 13px; font-weight: 700; color: var(--t1); margin-bottom: 5px; }
+  .ai-card-trigger { font-size: 11px; color: var(--t2); margin-bottom: 10px; line-height: 1.4; }
+  .ai-card-context { font-family: var(--mono); font-size: 10px; color: var(--t3); line-height: 1.8; }
+  .ai-card-context span { color: var(--t2); }
+
+  /* Context availability indicators */
+  .ctx-row { display: flex; align-items: center; gap: 6px; padding: 2px 0; }
+  .ctx-name { font-family: var(--mono); font-size: 10px; color: var(--t2); }
+  .ctx-ws { font-family: var(--mono); font-size: 9px; padding: 1px 6px; border-radius: 3px; border: 1px solid; }
+
+
+  /* ══════════════════════════════════════════════════
+     SECTION 6 — WORKSITE ANCHOR
+  ════════════════════════════════════════════════════ */
+
+  .anchor-diagram {
+    background: var(--s1);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 28px;
+    margin-bottom: 32px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Central anchor node */
+  .anchor-centre {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 28px;
+  }
+
+  .anchor-node {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: var(--s2);
+    border: 2px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    margin-bottom: 8px;
+  }
+
+  .anchor-label {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--t2);
+    text-align: center;
+  }
+
+  /* Spoke grid */
+  .spoke-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+  }
+
+  .spoke {
+    background: var(--s2);
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    padding: 12px;
+    position: relative;
+  }
+
+  .spoke-ws-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    position: absolute;
+    top: 10px; right: 10px;
+  }
+
+  .spoke-title { font-size: 12px; font-weight: 700; color: var(--t1); margin-bottom: 3px; }
+  .spoke-items { font-family: var(--mono); font-size: 9px; color: var(--t3); line-height: 1.9; }
+  .spoke-items span { color: var(--t2); }
+
+  /* Connector line visual */
+  .connector-note {
+    text-align: center;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--t3);
+    margin-bottom: 20px;
+    font-style: italic;
+  }
+
+
+  /* ══════════════════════════════════════════════════
+     SECTION 7 — PUSH / INHERIT / OVERRIDE
+  ════════════════════════════════════════════════════ */
+
+  .push-diagram {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+
+  .push-level {
+    background: var(--s1);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .push-level-head {
+    padding: 10px 14px;
+    background: var(--s2);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--mono);
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--t2);
+  }
+
+  .push-level-body { padding: 14px; }
+
+  .push-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 7px 0;
+    border-bottom: 1px solid var(--border2);
+    font-size: 12px;
+    color: var(--t2);
+    line-height: 1.4;
+  }
+  .push-item:last-child { border-bottom: none; }
+  .push-item-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; margin-top: 4px; }
+  .pi-global { background: var(--t2); }
+  .pi-modified { background: var(--caution); }
+  .pi-local { background: var(--positive); }
+  .pi-na { background: var(--t3); }
+
+  .push-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-top: 60px;
+    color: var(--t3);
+    font-size: 20px;
+  }
+
+
+  /* ══════════════════════════════════════════════════
+     SECTION 8 — SCHEMA OVERVIEW
+  ════════════════════════════════════════════════════ */
+
+  .schema-cols { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 28px; }
+  .schema-group { background: var(--s1); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  .schema-group-head { padding: 10px 14px; background: var(--s2); border-bottom: 1px solid var(--border); font-family: var(--mono); font-size: 9px; font-weight: 500; letter-spacing: 1px; text-transform: uppercase; }
+  .schema-group-body { padding: 12px 14px; font-family: var(--mono); font-size: 11px; line-height: 1.9; color: var(--t2); }
+  .schema-entity { color: var(--t1); font-weight: 500; }
+  .schema-ws { font-size: 9px; padding: 1px 5px; border-radius: 3px; border: 1px solid; margin-left: 4px; vertical-align: middle; }
+
+
+  /* ══════════════════════════════════════════════════
+     SECTION 9 — CLIENT CONFIGURATION
+  ════════════════════════════════════════════════════ */
+
+  .config-examples { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 32px; }
+
+  .config-card {
+    background: var(--s1);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+  }
+
+  .config-card-name { font-size: 13px; font-weight: 700; color: var(--t1); margin-bottom: 4px; }
+  .config-card-type { font-family: var(--mono); font-size: 9px; color: var(--t2); margin-bottom: 12px; }
+
+  .config-ws-row { display: flex; align-items: center; gap: 8px; padding: 5px 0; border-bottom: 1px solid var(--border2); font-size: 12px; }
+  .config-ws-row:last-child { border-bottom: none; }
+  .config-ws-name { flex: 1; color: var(--t2); }
+  .config-ws-name.enabled { color: var(--t1); }
+  .toggle-on  { width: 28px; height: 16px; border-radius: 8px; background: var(--positive); position: relative; flex-shrink: 0; }
+  .toggle-on::after { content: ''; width: 12px; height: 12px; border-radius: 50%; background: white; position: absolute; right: 2px; top: 2px; }
+  .toggle-off { width: 28px; height: 16px; border-radius: 8px; background: var(--t3); position: relative; flex-shrink: 0; }
+  .toggle-off::after { content: ''; width: 12px; height: 12px; border-radius: 50%; background: var(--s2); position: absolute; left: 2px; top: 2px; }
+
+
+  /* ══════════════════════════════════════════════════
+     SECTION 10 — ROADMAP
+  ════════════════════════════════════════════════════ */
+
+  .roadmap-timeline { position: relative; padding-left: 24px; margin-bottom: 32px; }
+  .roadmap-timeline::before { content: ''; position: absolute; left: 7px; top: 8px; bottom: 8px; width: 1px; background: var(--border); }
+
+  .rm-item { position: relative; padding: 0 0 28px 24px; }
+  .rm-item::before { content: ''; width: 10px; height: 10px; border-radius: 50%; background: var(--s2); border: 1px solid var(--border); position: absolute; left: -27px; top: 4px; }
+  .rm-item.active::before { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 8px var(--accent2); }
+
+  .rm-version { font-family: var(--mono); font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--accent2); margin-bottom: 3px; }
+  .rm-title { font-size: 14px; font-weight: 700; color: var(--t1); margin-bottom: 5px; }
+  .rm-desc { font-size: 12px; color: var(--t2); line-height: 1.6; margin-bottom: 8px; }
+  .rm-ws-tags { display: flex; gap: 5px; flex-wrap: wrap; }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 24px 80px;
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--t3);
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+</style>
+</head>
+<body>
+
+<!-- ── COVER ── -->
+<div class="cover">
+  <div class="cover-inner">
+    <div class="cover-label">Hiviz · SafetyPlatform · Architecture</div>
+    <h1>Platform<br><strong>Architecture</strong></h1>
+    <div class="cover-sub">Workspace model, data flows, AI layer, compound intelligence</div>
+    <div class="cover-desc">
+      A canonical reference for how the platform fits together. Covers the workspace model — the configurable, composable architecture that allows clients to enable modules as their needs evolve — and how each workspace compounds the intelligence available across the system. The worksite is the anchor. Everything resolves through it.
+    </div>
+    <div class="cover-meta">
+      <div class="cm"><div class="cm-l">Version</div><div class="cm-v">April 2026 · V1–V6 arc</div></div>
+      <div class="cm"><div class="cm-l">Stack</div><div class="cm-v">Next.js · TypeScript · PostgreSQL · Prisma · BullMQ · Anthropic</div></div>
+      <div class="cm"><div class="cm-l">Owner</div><div class="cm-v">Forge Works · Product + Engineering</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── NAV ── -->
+<nav class="nav-bar">
+  <a class="nav-item" href="#platform-layers">Platform layers</a>
+  <a class="nav-item" href="#workspaces">Workspaces</a>
+  <a class="nav-item" href="#compound">Compound intelligence</a>
+  <a class="nav-item" href="#data-flow">Data flow</a>
+  <a class="nav-item" href="#ai-layer">AI layer</a>
+  <a class="nav-item" href="#worksite-anchor">Worksite anchor</a>
+  <a class="nav-item" href="#push-model">Push model</a>
+  <a class="nav-item" href="#schema">Schema overview</a>
+  <a class="nav-item" href="#client-config">Client config</a>
+  <a class="nav-item" href="#roadmap">Roadmap arc</a>
+</nav>
+
+<div class="page">
+
+
+<!-- ══════════════════════════════════════════════════
+     1 — PLATFORM LAYERS
+════════════════════════════════════════════════════ -->
+<div class="sec" id="platform-layers">
+  <div class="sec-label">Architecture overview</div>
+  <div class="sec-title">Platform <strong>layers</strong></div>
+  <div class="sec-intro">The platform is structured in four layers. Infrastructure at the base provides the runtime, storage, and async job execution. The core platform handles the data model, push/inherit/override propagation, notification delivery, and authentication. Workspaces are domain-bounded, configurable modules that clients enable. Intelligence surfaces — dashboards, pipelines, AI outputs — are the user-facing expression of workspace data.</div>
+  <hr class="rule">
+
+  <div class="platform-stack">
+    <div class="stack-header">
+      <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+      Platform layers — bottom to top
+    </div>
+
+    <div class="layer">
+      <div class="layer-tag" style="background:rgba(255,255,255,0.04);color:var(--t2);border:1px solid var(--border);">04 · Intelligence</div>
+      <div class="layer-content">
+        <div class="layer-title">Intelligence surfaces</div>
+        <div class="layer-desc">The user-facing expression of all workspace data. Adapts to enabled workspaces — only surfaces intelligence that is available. Each workspace registers its own components.</div>
+        <div class="layer-items">
+          <div class="layer-item">Worksite dashboard (layered)</div>
+          <div class="layer-item">Insights pipeline (Kanban)</div>
+          <div class="layer-item">Safety manager workbench</div>
+          <div class="layer-item">FW Map® analytics</div>
+          <div class="layer-item">Verification queue (mobile)</div>
+          <div class="layer-item">Document library (mobile)</div>
+          <div class="layer-item">Enquiry response (mobile)</div>
+          <div class="layer-item">Investigation workbench</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="layer" style="background:rgba(200,247,58,0.015);">
+      <div class="layer-tag" style="background:rgba(200,247,58,0.07);color:var(--accent2);border:1px solid rgba(200,247,58,0.15);">03 · AI layer</div>
+      <div class="layer-content">
+        <div class="layer-title">Async intelligence — 10 job types, all context-aware</div>
+        <div class="layer-desc">All AI calls run as BullMQ jobs — never synchronously. Each job queries available workspace context before calling the Anthropic API. The richer the enabled workspace set, the more grounded the output. Prompts versioned in <code style="font-family:var(--mono);font-size:10px;color:var(--accent2);">ai_prompt_config</code>.</div>
+        <div class="layer-items">
+          <div class="layer-item" style="border-color:rgba(200,247,58,0.15);color:var(--accent2);">observation.enrich</div>
+          <div class="layer-item" style="border-color:rgba(200,247,58,0.15);color:var(--accent2);">observation.context_request</div>
+          <div class="layer-item" style="border-color:rgba(200,247,58,0.15);color:var(--accent2);">critical_insight.generate</div>
+          <div class="layer-item" style="border-color:rgba(200,247,58,0.15);color:var(--accent2);">fw_classify</div>
+          <div class="layer-item" style="border-color:rgba(200,247,58,0.15);color:var(--accent2);">toolbox_talk.generate</div>
+          <div class="layer-item" style="border-color:rgba(200,247,58,0.15);color:var(--accent2);">enquiry.generate_questions</div>
+          <div class="layer-item" style="border-color:rgba(200,247,58,0.15);color:var(--accent2);">enquiry.synthesise</div>
+          <div class="layer-item" style="border-color:rgba(200,247,58,0.15);color:var(--accent2);">investigation.assist</div>
+          <div class="layer-item" style="border-color:rgba(200,247,58,0.15);color:var(--accent2);">document.ingest</div>
+          <div class="layer-item" style="border-color:rgba(200,247,58,0.15);color:var(--accent2);">situational_brief.generate</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="layer">
+      <div class="layer-tag" style="background:rgba(91,159,255,0.07);color:var(--obs);border:1px solid var(--obs-border);">02 · Workspaces</div>
+      <div class="layer-content">
+        <div class="layer-title">Domain workspaces — configurable, composable</div>
+        <div class="layer-desc">Each workspace is a bounded domain with its own primary objects, its own maintenance UI, and its own AI context. Enabled at the organisation level. All workspaces share the same data schema namespace, the same worksite_id anchor, and the same push/inherit/override propagation model.</div>
+        <div class="layer-items">
+          <div class="layer-item" style="border-color:var(--obs-border);color:var(--obs);">Field Intelligence · always on</div>
+          <div class="layer-item" style="border-color:var(--inc-border);color:var(--inc);">Incidents · V3</div>
+          <div class="layer-item" style="border-color:var(--risk-border);color:var(--risk);">Risk Assurance · V5</div>
+          <div class="layer-item" style="border-color:var(--ms-border);color:var(--ms);">Management System · V6</div>
+          <div class="layer-item" style="border-color:var(--diag-border);color:var(--diag);">Diagnostic · V4</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="layer">
+      <div class="layer-tag" style="background:rgba(255,255,255,0.03);color:var(--t2);border:1px solid var(--border);">01 · Core platform</div>
+      <div class="layer-content">
+        <div class="layer-title">Core platform — shared by all workspaces</div>
+        <div class="layer-desc">The plumbing every workspace relies on. Not specific to any domain. Built once, leveraged by every workspace that ships after it.</div>
+        <div class="layer-items">
+          <div class="layer-item">Org / worksite / user hierarchy</div>
+          <div class="layer-item">Role-based auth (NextAuth v5)</div>
+          <div class="layer-item">Push/inherit/override engine</div>
+          <div class="layer-item">BullMQ async job queue (Redis)</div>
+          <div class="layer-item">Notification delivery</div>
+          <div class="layer-item">workspace_config (enable flags)</div>
+          <div class="layer-item">PostgreSQL + Prisma ORM</div>
+          <div class="layer-item">S3-compatible file storage</div>
+          <div class="layer-item">Capacitor offline queue</div>
+          <div class="layer-item">ai_prompt_config versioning</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════
+     2 — THE WORKSPACES
+════════════════════════════════════════════════════ -->
+<div class="sec" id="workspaces">
+  <div class="sec-label">The workspace model</div>
+  <div class="sec-title">Five <strong>workspaces</strong></div>
+  <div class="sec-intro">A workspace is a bounded, configurable domain. It has its own primary objects, its own maintenance interface, its own AI jobs, and its own layer on the worksite dashboard. Workspaces are enabled at the organisation level — a client pays for and activates the workspaces relevant to their maturity. The Field Intelligence workspace is always on. All others are optional.</div>
+  <hr class="rule">
+
+  <div class="ws-row">
+    <div class="ws-cell">
+      <div class="ws-cell-tag" style="background:var(--obs-bg);color:var(--obs);border-color:var(--obs-border);">Field Intelligence</div>
+      <div class="ws-cell-name" style="color:var(--obs);">Observations · Insights · Enquiry</div>
+      <div class="ws-cell-version">V1 · Core · <span class="badge-always">Always on</span></div>
+      <div class="ws-cell-desc">The heartbeat. Observation capture (type-agnostic, offline-first), AI enrichment, trend detection, insight pipeline, toolbox talk delivery, enquiry system, corrective actions, visit workflow, atrophy scoring.</div>
+      <div class="ws-cell-objects">
+        Observation · ObservationPhoto<br>
+        CriticalInsight · InsightEndorsement<br>
+        ToolboxTalk · Enquiry · EnquiryQuestion<br>
+        EnquiryResponse · CorrectiveAction<br>
+        VisitPlan · AtrophyScoreLog
+      </div>
+    </div>
+    <div class="ws-cell">
+      <div class="ws-cell-tag" style="background:var(--inc-bg);color:var(--inc);border-color:var(--inc-border);">Incidents</div>
+      <div class="ws-cell-name" style="color:var(--inc);">Reporting · Investigation · Regulatory</div>
+      <div class="ws-cell-version">V3 · <span class="badge-optional">Optional</span></div>
+      <div class="ws-cell-desc">Incident reporting with triage. Opinionated investigation framework — AI-assisted contributing factors, human-confirmed. Regulatory notification workflow. Investigation findings feed the intelligence pipeline directly.</div>
+      <div class="ws-cell-objects">
+        Incident<br>
+        Investigation · InvestigatingContributingFactor<br>
+        RegulatoryReport<br>
+        WitnessEnquiry (via enquiry infrastructure)
+      </div>
+    </div>
+  </div>
+
+  <div class="ws-row">
+    <div class="ws-cell">
+      <div class="ws-cell-tag" style="background:var(--diag-bg);color:var(--diag);border-color:var(--diag-border);">Diagnostic</div>
+      <div class="ws-cell-name" style="color:var(--diag);">Periodic survey · Anonymous · Factor-mapped</div>
+      <div class="ws-cell-version">V4 · <span class="badge-optional">Optional</span></div>
+      <div class="ws-cell-desc">Periodic anonymous surveys targeting the Guide and Enable FW Map factors that field observations structurally cannot reach. Hard anonymisation at data layer. Results update the capacity analytics profile over time.</div>
+      <div class="ws-cell-objects">
+        DiagnosticSurvey (extends Enquiry)<br>
+        SurveyFactorSignal<br>
+        CapacityProfile (time-series per factor)
+      </div>
+    </div>
+    <div class="ws-cell">
+      <div class="ws-cell-tag" style="background:var(--risk-bg);color:var(--risk);border-color:var(--risk-border);">Risk Assurance</div>
+      <div class="ws-cell-name" style="color:var(--risk);">Controls · Verification · Defeating factors</div>
+      <div class="ws-cell-version">V5 · <span class="badge-optional">Optional</span></div>
+      <div class="ws-cell-desc">Global critical control register scoped to work type taxonomy. Push to worksites. Binary verification clockwork. Defeating factor lifecycle. Investigation control attribution. Control health feeds worksite atrophy.</div>
+      <div class="ws-cell-objects">
+        CriticalControl · WorksiteControl<br>
+        ControlVerification (immutable)<br>
+        InvestigationContributingControl<br>
+        DefeatFactor · ControlDefeatInstance
+      </div>
+    </div>
+  </div>
+
+  <div class="ws-row" style="grid-template-columns:1fr;">
+    <div class="ws-cell" style="background:linear-gradient(135deg, var(--ms-bg), var(--s1));">
+      <div class="ws-cell-tag" style="background:var(--ms-bg);color:var(--ms);border-color:var(--ms-border);">Management System</div>
+      <div class="ws-cell-name" style="color:var(--ms);">Documents · Procedures · Standards · SWMS</div>
+      <div class="ws-cell-version">V6 · <span class="badge-optional">Optional</span> · Three phases</div>
+      <div class="ws-cell-desc">The knowledge layer. Author and maintain procedures, standards, SWMS, and regulatory requirements. Push to sites by work type. AI ingestion extracts structured requirements — the platform now knows what was supposed to happen. Investigation AI is grounded in your specific standards. Observation enrichment detects procedure gaps. Enquiry-based document review. Document atrophy signal.</div>
+      <div class="ws-cell-objects">
+        Document · DocumentVersion · WorksiteDocument<br>
+        <span style="color:var(--ms);">DocumentRequirement (AI-extracted · queryable by all AI jobs)</span><br>
+        DocumentReview (uses Enquiry infrastructure)
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════
+     3 — COMPOUND INTELLIGENCE
+════════════════════════════════════════════════════ -->
+<div class="sec" id="compound">
+  <div class="sec-label">The compounding effect</div>
+  <div class="sec-title">Compound <strong>intelligence</strong></div>
+  <div class="sec-intro">Each workspace adds value independently. But the platform's intelligence compounds at the intersections — each additional workspace changes what context is available to every AI job, which changes the quality of every output. This table shows what each workspace combination unlocks that wasn't possible before.</div>
+  <hr class="rule">
+
+  <div style="background:var(--s1);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:28px;">
+    <table class="compound-table">
+      <thead>
+        <tr>
+          <th>Workspaces enabled</th>
+          <th>What the platform gains</th>
+          <th>Key AI output change</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            <div class="ws-combo">
+              <span class="combo-tag" style="background:var(--obs-bg);color:var(--obs);border-color:var(--obs-border);">Observations</span>
+            </div>
+          </td>
+          <td><div class="intel-cell">Baseline. Field observations → enriched with signal type, energy, barrier, FW factor hint → trend detection → insights → talks → actions. The core loop.</div></td>
+          <td><div class="intel-cell">General safety knowledge. FW classification from narrative alone.</div></td>
+        </tr>
+        <tr>
+          <td>
+            <div class="ws-combo">
+              <span class="combo-tag" style="background:var(--obs-bg);color:var(--obs);border-color:var(--obs-border);">Observations</span>
+              <span style="color:var(--t3);">+</span>
+              <span class="combo-tag" style="background:var(--inc-bg);color:var(--inc);border-color:var(--inc-border);">Incidents</span>
+            </div>
+          </td>
+          <td><div class="intel-cell">Incidents feed the intelligence pipeline directly. Investigations produce toolbox narratives. Witness enquiries use the enquiry infrastructure. <strong>Lagging and leading indicators in the same system.</strong></div></td>
+          <td><div class="intel-cell">Investigation AI adds structured contributing factors. FW classification gains incident evidence alongside observation patterns. <div class="gain">Confidence: higher — two signal sources</div></div></td>
+        </tr>
+        <tr>
+          <td>
+            <div class="ws-combo">
+              <span class="combo-tag" style="background:var(--obs-bg);color:var(--obs);border-color:var(--obs-border);">Observations</span>
+              <span style="color:var(--t3);">+</span>
+              <span class="combo-tag" style="background:var(--risk-bg);color:var(--risk);border-color:var(--risk-border);">Risk</span>
+            </div>
+          </td>
+          <td><div class="intel-cell">Verification data is the fourth intelligence stream. <strong>Verification vs observation divergence</strong> becomes a detectable signal. Stop-work warranted/not-called mapped to verification history. Control health feeds atrophy.</div></td>
+          <td><div class="intel-cell">Observation enrichment can cross-reference barrier signals against verification records. Trend detection has structured control failure data alongside free-text observations. <div class="gain">Confidence: higher — structured verification signal</div></div></td>
+        </tr>
+        <tr>
+          <td>
+            <div class="ws-combo">
+              <span class="combo-tag" style="background:var(--obs-bg);color:var(--obs);border-color:var(--obs-border);">Observations</span>
+              <span style="color:var(--t3);">+</span>
+              <span class="combo-tag" style="background:var(--ms-bg);color:var(--ms);border-color:var(--ms-border);">Mgmt System</span>
+            </div>
+          </td>
+          <td><div class="intel-cell"><strong>The question changes.</strong> Not "what happened?" but "what happened versus what was supposed to happen?" Procedure gap detection. Observation enrichment cross-references DocumentRequirement records. Talks reference actual procedure clauses.</div></td>
+          <td><div class="intel-cell">Enrichment output gains <code style="font-family:var(--mono);font-size:10px;">procedure_gap_detected</code> and <code style="font-family:var(--mono);font-size:10px;">requirement_clause</code>. FW classification is grounded in documented standards. <div class="gain">Confidence: significantly higher — grounded evidence</div></div></td>
+        </tr>
+        <tr>
+          <td>
+            <div class="ws-combo">
+              <span class="combo-tag" style="background:var(--inc-bg);color:var(--inc);border-color:var(--inc-border);">Incidents</span>
+              <span style="color:var(--t3);">+</span>
+              <span class="combo-tag" style="background:var(--ms-bg);color:var(--ms);border-color:var(--ms-border);">Mgmt System</span>
+            </div>
+          </td>
+          <td><div class="intel-cell">Investigation contributing factors matched against <strong>specific requirement clauses in the applicable document version active on the incident date.</strong> Version control is the legal instrument. The most defensible investigation record available.</div></td>
+          <td><div class="intel-cell">Investigation.assist receives DocumentRequirement context for the work type and date. Each contributing factor carries a clause reference and obligation level (must/shall/should). <div class="gain">Confidence: highest — specific evidence trail</div></div></td>
+        </tr>
+        <tr>
+          <td>
+            <div class="ws-combo" style="flex-direction:column;gap:3px;">
+              <span style="font-family:var(--mono);font-size:9px;color:var(--accent2);">All five workspaces</span>
+            </div>
+          </td>
+          <td><div class="intel-cell"><strong>Complete triangulation.</strong> The platform knows: what was supposed to happen (management system), what controls should have prevented harm (risk), what people observed (observations), what went wrong (incidents), and whether the system itself is operating as intended (diagnostic). The gap between documented standard and field reality is continuously visible.</div></td>
+          <td><div class="intel-cell">The Forge Works Map® classification becomes longitudinally trackable. Not survey scores — field evidence, incident evidence, verification evidence, and procedural evidence combined. The most precise organisational safety diagnostic available. <div class="gain">The platform a safety consultant would build if they had unlimited time and perfect data collection.</div></div></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════
+     4 — DATA FLOW
+════════════════════════════════════════════════════ -->
+<div class="sec" id="data-flow">
+  <div class="sec-label">How information moves</div>
+  <div class="sec-title">Data <strong>flow</strong></div>
+  <div class="sec-intro">Field capture is the source. AI enrichment runs async. Trend detection and pattern recognition produce insights. Review and approval gates ensure human accountability. Delivery closes the loop back to the field. Workspace context is injected at each AI step — the richer the enabled workspace set, the more grounded the output at every stage.</div>
+  <hr class="rule">
+
+  <div class="flow-diagram">
+    <div class="flow-header">Intelligence loop — observation to corrective action</div>
+    <div class="flow-body">
+
+      <!-- Step labels + workspace columns -->
+      <div style="display:grid;grid-template-columns:130px 1fr 1fr 1fr 1fr;gap:0;margin-bottom:4px;">
+        <div></div>
+        <div style="text-align:center;padding:6px 8px;margin:0 4px;border-radius:5px;font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:0.8px;text-transform:uppercase;background:var(--obs-bg);color:var(--obs);border:1px solid var(--obs-border);">Field Intelligence</div>
+        <div style="text-align:center;padding:6px 8px;margin:0 4px;border-radius:5px;font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:0.8px;text-transform:uppercase;background:var(--ms-bg);color:var(--ms);border:1px solid var(--ms-border);">Mgmt System</div>
+        <div style="text-align:center;padding:6px 8px;margin:0 4px;border-radius:5px;font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:0.8px;text-transform:uppercase;background:var(--risk-bg);color:var(--risk);border:1px solid var(--risk-border);">Risk</div>
+        <div style="text-align:center;padding:6px 8px;margin:0 4px;border-radius:5px;font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:0.8px;text-transform:uppercase;background:var(--inc-bg);color:var(--inc);border:1px solid var(--inc-border);">Incidents</div>
+      </div>
+
+      <!-- Row: Capture -->
+      <div style="display:grid;grid-template-columns:130px 1fr 1fr 1fr 1fr;gap:0;margin-bottom:6px;align-items:start;">
+        <div style="font-family:var(--mono);font-size:9px;color:var(--t3);padding:8px 12px 0 0;text-align:right;white-space:nowrap;">Capture</div>
+        <div style="margin:0 4px;background:var(--s2);border:1px solid var(--border);border-radius:7px;padding:9px 10px;font-size:11px;color:var(--t1);font-weight:600;text-align:center;">Observation<br><span style="font-size:10px;color:var(--t2);font-weight:400;">type-agnostic · offline-first</span></div>
+        <div style="margin:0 4px;background:var(--s2);border:1px solid var(--border);border-radius:7px;padding:9px 10px;font-size:11px;color:var(--t1);font-weight:600;text-align:center;">Document upload<br><span style="font-size:10px;color:var(--t2);font-weight:400;">PDF / authored</span></div>
+        <div style="margin:0 4px;background:var(--s2);border:1px solid var(--border);border-radius:7px;padding:9px 10px;font-size:11px;color:var(--t1);font-weight:600;text-align:center;">Verification<br><span style="font-size:10px;color:var(--t2);font-weight:400;">binary · per shift</span></div>
+        <div style="margin:0 4px;background:var(--s2);border:1px solid var(--border);border-radius:7px;padding:9px 10px;font-size:11px;color:var(--t1);font-weight:600;text-align:center;">Incident report<br><span style="font-size:10px;color:var(--t2);font-weight:400;">triage on create</span></div>
+      </div>
+
+      <div style="display:flex;justify-content:center;padding:4px 0;color:var(--t3);">↓ sync to server · jobs queued ↓</div>
+
+      <!-- Row: AI enrichment -->
+      <div style="display:grid;grid-template-columns:130px 1fr 1fr 1fr 1fr;gap:0;margin-bottom:6px;align-items:start;">
+        <div style="font-family:var(--mono);font-size:9px;color:var(--accent2);padding:8px 12px 0 0;text-align:right;white-space:nowrap;">AI · async</div>
+        <div style="margin:0 4px;background:rgba(200,247,58,0.04);border:1px dashed rgba(200,247,58,0.15);border-radius:7px;padding:9px 10px;font-size:11px;color:var(--accent2);text-align:center;">observation.enrich<br><span style="font-size:10px;color:var(--t2);">signal · energy · barrier<br>+ procedure gap if MS on</span></div>
+        <div style="margin:0 4px;background:rgba(200,247,58,0.04);border:1px dashed rgba(200,247,58,0.15);border-radius:7px;padding:9px 10px;font-size:11px;color:var(--accent2);text-align:center;">document.ingest<br><span style="font-size:10px;color:var(--t2);">extract requirements<br>store as DocumentRequirement</span></div>
+        <div style="margin:0 4px;background:var(--s2);border:1px solid var(--border);border-radius:7px;padding:9px 10px;font-size:11px;color:var(--t2);text-align:center;">not_in_place →<br><span style="font-size:10px;">routes to pipeline</span></div>
+        <div style="margin:0 4px;background:rgba(200,247,58,0.04);border:1px dashed rgba(200,247,58,0.15);border-radius:7px;padding:9px 10px;font-size:11px;color:var(--accent2);text-align:center;">investigation.assist<br><span style="font-size:10px;color:var(--t2);">contributing factors<br>+ clauses if MS on</span></div>
+      </div>
+
+      <div style="display:flex;justify-content:center;padding:4px 0;color:var(--t3);">↓ pattern detection · threshold crossing ↓</div>
+
+      <!-- Row: Pattern / trend -->
+      <div style="display:grid;grid-template-columns:130px 3fr 1fr;gap:0;margin-bottom:6px;align-items:start;">
+        <div style="font-family:var(--mono);font-size:9px;color:var(--t3);padding:8px 12px 0 0;text-align:right;white-space:nowrap;">Pattern</div>
+        <div style="margin:0 4px;background:var(--s2);border:1px solid var(--border);border-radius:7px;padding:10px 14px;font-size:12px;color:var(--t1);font-weight:600;">Trend detection algorithm <span style="font-weight:400;color:var(--t2);">— observations + verification failures + incident contributing factors all feed in. Signal types routed to pool or pipeline direct. Threshold crossing fires critical_insight.generate job.</span></div>
+        <div style="margin:0 4px;background:rgba(200,247,58,0.04);border:1px dashed rgba(200,247,58,0.15);border-radius:7px;padding:9px 10px;font-size:11px;color:var(--accent2);text-align:center;">fw_classify<br><span style="font-size:10px;color:var(--t2);">insight · enquiry · investigation</span></div>
+      </div>
+
+      <div style="display:flex;justify-content:center;padding:4px 0;color:var(--t3);">↓ human review gate ↓</div>
+
+      <!-- Row: Review + delivery -->
+      <div style="display:grid;grid-template-columns:130px 1fr 1fr 1fr;gap:0;margin-bottom:0;align-items:start;">
+        <div style="font-family:var(--mono);font-size:9px;color:var(--t3);padding:8px 12px 0 0;text-align:right;white-space:nowrap;">Review → deliver</div>
+        <div style="margin:0 4px;background:var(--s2);border:1px solid var(--border);border-radius:7px;padding:9px 10px;font-size:11px;color:var(--t1);font-weight:600;text-align:center;">Safety manager approves<br><span style="font-weight:400;color:var(--t2);font-size:10px;">insight · pipeline stage</span></div>
+        <div style="margin:0 4px;background:var(--s2);border:1px solid var(--border);border-radius:7px;padding:9px 10px;font-size:11px;color:var(--t1);font-weight:600;text-align:center;">Toolbox talk · enquiry<br><span style="font-weight:400;color:var(--t2);font-size:10px;">+ document served in context</span></div>
+        <div style="margin:0 4px;background:var(--s2);border:1px solid var(--border);border-radius:7px;padding:9px 10px;font-size:11px;color:var(--t1);font-weight:600;text-align:center;">Corrective actions<br><span style="font-weight:400;color:var(--t2);font-size:10px;">assigned → checked off</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════
+     5 — AI LAYER
+════════════════════════════════════════════════════ -->
+<div class="sec" id="ai-layer">
+  <div class="sec-label">Intelligence engine</div>
+  <div class="sec-title">The <strong>AI layer</strong></div>
+  <div class="sec-intro">Every AI call is an async BullMQ job. No AI runs synchronously in an API route. Each job queries available workspace context before calling the model. The output principle is consistent across all prompts: every AI output is a suggestion with a visible reason — never a recommendation or directive. Prompts are versioned in ai_prompt_config and updated without code deployments.</div>
+  <hr class="rule">
+
+  <div class="ai-grid">
+
+    <div class="ai-card">
+      <div class="ai-card-prompt">observation.enrich</div>
+      <div class="ai-card-title">Observation Enrichment</div>
+      <div class="ai-card-trigger">Fires after every observation syncs to server. Confidence-gated at 0.70 — below threshold triggers context_request job.</div>
+      <div style="margin-top:8px;">
+        <div style="font-family:var(--mono);font-size:9px;color:var(--t3);margin-bottom:6px;letter-spacing:0.8px;text-transform:uppercase;">Context injected if workspace enabled</div>
+        <div class="ctx-row"><div class="dot-on"></div><span class="ctx-name">Work type taxonomy</span></div>
+        <div class="ctx-row"><div class="dot-on"></div><span class="ctx-name">Observation text + photos</span></div>
+        <div class="ctx-row" style="opacity:0.5;"><div class="dot-off"></div><span class="ctx-name">DocumentRequirements</span><span class="ctx-ws" style="background:var(--ms-bg);color:var(--ms);border-color:var(--ms-border);margin-left:4px;">MS ·V6</span></div>
+        <div class="ctx-row" style="opacity:0.5;"><div class="dot-off"></div><span class="ctx-name">Verification history</span><span class="ctx-ws" style="background:var(--risk-bg);color:var(--risk);border-color:var(--risk-border);margin-left:4px;">Risk · V5</span></div>
+      </div>
+    </div>
+
+    <div class="ai-card">
+      <div class="ai-card-prompt">critical_insight.generate</div>
+      <div class="ai-card-title">Critical Insight Draft</div>
+      <div class="ai-card-trigger">Fires when trend threshold crossed. Input: cluster of anonymised enriched observations + verification failures + incident findings.</div>
+      <div style="margin-top:8px;">
+        <div style="font-family:var(--mono);font-size:9px;color:var(--t3);margin-bottom:6px;letter-spacing:0.8px;text-transform:uppercase;">Context injected if workspace enabled</div>
+        <div class="ctx-row"><div class="dot-on"></div><span class="ctx-name">Observation cluster (anonymised)</span></div>
+        <div class="ctx-row" style="opacity:0.5;"><div class="dot-off"></div><span class="ctx-name">Investigation findings</span><span class="ctx-ws" style="background:var(--inc-bg);color:var(--inc);border-color:var(--inc-border);margin-left:4px;">Inc · V3</span></div>
+        <div class="ctx-row" style="opacity:0.5;"><div class="dot-off"></div><span class="ctx-name">Control failure pattern</span><span class="ctx-ws" style="background:var(--risk-bg);color:var(--risk);border-color:var(--risk-border);margin-left:4px;">Risk · V5</span></div>
+        <div class="ctx-row" style="opacity:0.5;"><div class="dot-off"></div><span class="ctx-name">Procedure gap findings</span><span class="ctx-ws" style="background:var(--ms-bg);color:var(--ms);border-color:var(--ms-border);margin-left:4px;">MS · V6</span></div>
+      </div>
+    </div>
+
+    <div class="ai-card">
+      <div class="ai-card-prompt">fw_classify</div>
+      <div class="ai-card-title">FW Map® Classification</div>
+      <div class="ai-card-trigger">Fires after insight approval, investigation close, enquiry summary. 0.70 confidence threshold. Multi-factor parallel arrays. Max 3 factors.</div>
+      <div style="margin-top:8px;">
+        <div style="font-family:var(--mono);font-size:9px;color:var(--t3);margin-bottom:6px;letter-spacing:0.8px;text-transform:uppercase;">Context injected if workspace enabled</div>
+        <div class="ctx-row"><div class="dot-on"></div><span class="ctx-name">Pattern + narrative</span></div>
+        <div class="ctx-row" style="opacity:0.5;"><div class="dot-off"></div><span class="ctx-name">Procedure clause evidence</span><span class="ctx-ws" style="background:var(--ms-bg);color:var(--ms);border-color:var(--ms-border);margin-left:4px;">MS · V6</span></div>
+        <div class="ctx-row" style="opacity:0.5;"><div class="dot-off"></div><span class="ctx-name">Control failure attribution</span><span class="ctx-ws" style="background:var(--risk-bg);color:var(--risk);border-color:var(--risk-border);margin-left:4px;">Risk · V5</span></div>
+        <div class="ctx-row" style="opacity:0.5;"><div class="dot-off"></div><span class="ctx-name">Diagnostic survey signal</span><span class="ctx-ws" style="background:var(--diag-bg);color:var(--diag);border-color:var(--diag-border);margin-left:4px;">Diag · V4</span></div>
+      </div>
+    </div>
+
+    <div class="ai-card">
+      <div class="ai-card-prompt">investigation.assist</div>
+      <div class="ai-card-title">Investigation Assistance</div>
+      <div class="ai-card-trigger">Fires after investigation created (Incidents workspace). Suggests contributing factors, root cause, corrective actions. All stored as ai_suggested_* — human confirms each.</div>
+      <div style="margin-top:8px;">
+        <div style="font-family:var(--mono);font-size:9px;color:var(--t3);margin-bottom:6px;letter-spacing:0.8px;text-transform:uppercase;">Context injected if workspace enabled</div>
+        <div class="ctx-row"><div class="dot-on"></div><span class="ctx-name">Incident description</span></div>
+        <div class="ctx-row" style="opacity:0.5;"><div class="dot-off"></div><span class="ctx-name">DocumentRequirements at incident date</span><span class="ctx-ws" style="background:var(--ms-bg);color:var(--ms);border-color:var(--ms-border);margin-left:4px;">MS · V6</span></div>
+        <div class="ctx-row" style="opacity:0.5;"><div class="dot-off"></div><span class="ctx-name">Verification history pre-incident</span><span class="ctx-ws" style="background:var(--risk-bg);color:var(--risk);border-color:var(--risk-border);margin-left:4px;">Risk · V5</span></div>
+        <div class="ctx-row" style="opacity:0.5;"><div class="dot-off"></div><span class="ctx-name">Recent observations at site</span></div>
+      </div>
+    </div>
+
+    <div class="ai-card">
+      <div class="ai-card-prompt">toolbox_talk.generate</div>
+      <div class="ai-card-title">Toolbox Talk Assembly</div>
+      <div class="ai-card-trigger">Fires after insight approval. Veteran voice — plain English. V2 update: maturity-aware framing from fw_maturity_signals. V6 update: can reference specific procedure clauses.</div>
+      <div style="margin-top:8px;">
+        <div style="font-family:var(--mono);font-size:9px;color:var(--t3);margin-bottom:6px;letter-spacing:0.8px;text-transform:uppercase;">Context injected if workspace enabled</div>
+        <div class="ctx-row"><div class="dot-on"></div><span class="ctx-name">Approved insight narrative</span></div>
+        <div class="ctx-row" style="opacity:0.5;"><div class="dot-off"></div><span class="ctx-name">fw_maturity_signals</span><span class="ctx-ws" style="background:rgba(200,247,58,0.07);color:var(--accent2);border-color:rgba(200,247,58,0.15);margin-left:4px;">V2</span></div>
+        <div class="ctx-row" style="opacity:0.5;"><div class="dot-off"></div><span class="ctx-name">Procedure clause (specific requirement)</span><span class="ctx-ws" style="background:var(--ms-bg);color:var(--ms);border-color:var(--ms-border);margin-left:4px;">MS · V6</span></div>
+      </div>
+    </div>
+
+    <div class="ai-card" style="background:linear-gradient(135deg, rgba(167,139,250,0.04), var(--s1));">
+      <div class="ai-card-prompt">document.ingest</div>
+      <div class="ai-card-title">Document Ingestion</div>
+      <div class="ai-card-trigger">Fires after document upload (Management System workspace). Extracts structured DocumentRequirement records. Non-blocking — document served before ingestion completes.</div>
+      <div style="margin-top:8px;">
+        <div style="font-family:var(--mono);font-size:9px;color:var(--t3);margin-bottom:6px;letter-spacing:0.8px;text-transform:uppercase;">Outputs stored as</div>
+        <div class="ctx-row"><div class="dot-on" style="background:var(--ms);"></div><span class="ctx-name" style="color:var(--ms);">DocumentRequirement records</span></div>
+        <div class="ctx-row"><div class="dot-on" style="background:var(--ms);"></div><span class="ctx-name" style="color:var(--ms);">Clause references + conditions</span></div>
+        <div class="ctx-row"><div class="dot-on" style="background:var(--ms);"></div><span class="ctx-name" style="color:var(--ms);">Obligation levels (must/shall/should)</span></div>
+        <div style="font-family:var(--mono);font-size:9px;color:var(--ms);opacity:0.6;margin-top:4px;">All queryable by every AI job above</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════
+     6 — WORKSITE ANCHOR
+════════════════════════════════════════════════════ -->
+<div class="sec" id="worksite-anchor">
+  <div class="sec-label">The data anchor</div>
+  <div class="sec-title">Everything resolves through <strong>worksite_id</strong></div>
+  <div class="sec-intro">The worksite is the anchor for every object in every workspace. Org hierarchy (org → division → region → worksite) is traversed for scope queries. Intelligence layered on the worksite dashboard adapts to enabled workspaces. A client sees only the layers relevant to their configuration.</div>
+  <hr class="rule">
+
+  <div class="anchor-diagram">
+    <div class="anchor-centre">
+      <div class="anchor-node">🏗️</div>
+      <div class="anchor-label">worksite<br>worksite_id · the anchor</div>
+    </div>
+    <div class="connector-note">All workspace objects resolve through worksite_id · Org hierarchy: org → division → region → worksite</div>
+    <div class="spoke-grid">
+      <div class="spoke">
+        <div class="spoke-ws-dot" style="background:var(--obs);"></div>
+        <div class="spoke-title" style="color:var(--obs);">Field Intelligence</div>
+        <div class="spoke-items">
+          <span>Observation</span><br>
+          <span>CriticalInsight</span><br>
+          <span>ToolboxTalk</span><br>
+          <span>Enquiry</span><br>
+          <span>CorrectiveAction</span><br>
+          <span>VisitPlan</span><br>
+          <span>AtrophyScoreLog</span>
+        </div>
+      </div>
+      <div class="spoke">
+        <div class="spoke-ws-dot" style="background:var(--risk);"></div>
+        <div class="spoke-title" style="color:var(--risk);">Risk Assurance</div>
+        <div class="spoke-items">
+          <span>WorksiteControl</span><br>
+          <span>ControlVerification</span><br>
+          <span>WorksiteRoleSlot</span><br>
+          <span>WorksiteSlotAssignment</span><br>
+          <span>ControlDefeatInstance</span>
+        </div>
+      </div>
+      <div class="spoke">
+        <div class="spoke-ws-dot" style="background:var(--ms);"></div>
+        <div class="spoke-title" style="color:var(--ms);">Management System</div>
+        <div class="spoke-items">
+          <span>WorksiteDocument</span><br>
+          <span>DocumentReview</span><br>
+          <span>DocumentAccessLog</span>
+        </div>
+      </div>
+      <div class="spoke">
+        <div class="spoke-ws-dot" style="background:var(--inc);"></div>
+        <div class="spoke-title" style="color:var(--inc);">Incidents</div>
+        <div class="spoke-items">
+          <span>Incident</span><br>
+          <span>Investigation</span><br>
+          <span>RegulatoryReport</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Worksite dashboard layers -->
+  <div style="background:var(--s1);border:1px solid var(--border);border-radius:12px;overflow:hidden;">
+    <div class="stack-header">Worksite dashboard — layers by enabled workspace</div>
+    <div style="padding:4px 0;">
+      <div style="display:grid;grid-template-columns:160px 1fr;gap:16px;padding:12px 20px;border-bottom:1px solid var(--border2);align-items:center;">
+        <div style="font-family:var(--mono);font-size:9px;padding:3px 8px;border-radius:4px;background:var(--obs-bg);color:var(--obs);border:1px solid var(--obs-border);text-align:center;">Field Intelligence</div>
+        <div style="font-size:12px;color:var(--t2);">Atrophy score · days since last obs · near-miss count · open actions · observation feed · enquiry status · talk delivery</div>
+      </div>
+      <div style="display:grid;grid-template-columns:160px 1fr;gap:16px;padding:12px 20px;border-bottom:1px solid var(--border2);align-items:center;opacity:0.6;">
+        <div style="font-family:var(--mono);font-size:9px;padding:3px 8px;border-radius:4px;background:var(--risk-bg);color:var(--risk);border:1px solid var(--risk-border);text-align:center;">Risk · if enabled</div>
+        <div style="font-size:12px;color:var(--t2);">Control health per work type · verifications today · not-in-place count · defeating factors approaching · overdue verifications</div>
+      </div>
+      <div style="display:grid;grid-template-columns:160px 1fr;gap:16px;padding:12px 20px;border-bottom:1px solid var(--border2);align-items:center;opacity:0.6;">
+        <div style="font-family:var(--mono);font-size:9px;padding:3px 8px;border-radius:4px;background:var(--ms-bg);color:var(--ms);border:1px solid var(--ms-border);text-align:center;">Mgmt System · if enabled</div>
+        <div style="font-size:12px;color:var(--t2);">Document coverage for active work types · procedures pending review · superseded docs not replaced · review enquiry status</div>
+      </div>
+      <div style="display:grid;grid-template-columns:160px 1fr;gap:16px;padding:12px 20px;align-items:center;opacity:0.6;">
+        <div style="font-family:var(--mono);font-size:9px;padding:3px 8px;border-radius:4px;background:var(--inc-bg);color:var(--inc);border:1px solid var(--inc-border);text-align:center;">Incidents · if enabled</div>
+        <div style="font-size:12px;color:var(--t2);">Open investigations · incidents this period · notifiable flags pending · TRIFR contribution</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════
+     7 — PUSH / INHERIT / OVERRIDE
+════════════════════════════════════════════════════ -->
+<div class="sec" id="push-model">
+  <div class="sec-label">Propagation</div>
+  <div class="sec-title">Push · inherit · <strong>override</strong></div>
+  <div class="sec-intro">The push/inherit/override model governs how global standards propagate to sites. The same governance architecture applies across all workspace objects that have global and local variants: controls (Risk workspace), documents (Management System workspace), and in future any other globally-maintained standard. Global retains authority. Local variation is permitted within bounds — stricter only, never weaker.</div>
+  <hr class="rule">
+
+  <div style="display:grid;grid-template-columns:1fr 40px 1fr 40px 1fr;gap:0;align-items:start;margin-bottom:28px;">
+
+    <div class="push-level">
+      <div class="push-level-head">
+        <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+        Global register
+      </div>
+      <div class="push-level-body">
+        <div class="push-item"><div class="push-item-dot pi-global"></div>Fire watch confirmed in position</div>
+        <div class="push-item"><div class="push-item-dot pi-global"></div>PTW signed and present</div>
+        <div class="push-item"><div class="push-item-dot pi-global"></div>Fire extinguisher within 5m</div>
+        <div class="push-item"><div class="push-item-dot pi-global"></div>Hot Work Procedure v2.4</div>
+        <div class="push-item"><div class="push-item-dot pi-global"></div>Confined Space SWMS</div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 0;color:var(--t3);font-size:18px;">→</div>
+
+    <div class="push-level">
+      <div class="push-level-head">
+        <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+        Regional library
+      </div>
+      <div class="push-level-body">
+        <div class="push-item"><div class="push-item-dot pi-global"></div>Fire watch confirmed (inherited)</div>
+        <div class="push-item"><div class="push-item-dot pi-global"></div>PTW signed (inherited)</div>
+        <div class="push-item"><div class="push-item-dot pi-modified"></div>Fire extinguisher within 3m <span style="font-family:var(--mono);font-size:9px;color:var(--caution);">stricter</span></div>
+        <div class="push-item"><div class="push-item-dot pi-local"></div>Regional confined space addendum</div>
+        <div class="push-item"><div class="push-item-dot pi-global"></div>Hot Work Procedure (inherited)</div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 0;color:var(--t3);font-size:18px;">→</div>
+
+    <div class="push-level">
+      <div class="push-level-head">
+        <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+        Worksite active set
+      </div>
+      <div class="push-level-body">
+        <div class="push-item"><div class="push-item-dot pi-global"></div>Fire watch (accepted · global)</div>
+        <div class="push-item"><div class="push-item-dot pi-modified"></div>Fire extinguisher within 2m <span style="font-family:var(--mono);font-size:9px;color:var(--caution);">stricter</span></div>
+        <div class="push-item"><div class="push-item-dot pi-local"></div>Site-specific hot work zone rule</div>
+        <div class="push-item"><div class="push-item-dot pi-na"></div>Confined space SWMS <span style="font-family:var(--mono);font-size:9px;color:var(--t3);">N/A</span></div>
+        <div class="push-item"><div class="push-item-dot" style="background:var(--positive);"></div>Pending review: 1 new control</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:16px;font-size:12px;color:var(--t2);">
+    <div style="display:flex;align-items:center;gap:6px;"><div class="push-item-dot pi-global" style="width:8px;height:8px;"></div>Inherited from global</div>
+    <div style="display:flex;align-items:center;gap:6px;"><div class="push-item-dot pi-modified" style="width:8px;height:8px;"></div>Locally modified (stricter only)</div>
+    <div style="display:flex;align-items:center;gap:6px;"><div class="push-item-dot pi-local" style="width:8px;height:8px;"></div>Locally added</div>
+    <div style="display:flex;align-items:center;gap:6px;"><div class="push-item-dot pi-na" style="width:8px;height:8px;"></div>Not applicable at this site</div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════
+     8 — SCHEMA OVERVIEW
+════════════════════════════════════════════════════ -->
+<div class="sec" id="schema">
+  <div class="sec-label">Data model</div>
+  <div class="sec-title">Schema <strong>overview</strong></div>
+  <div class="sec-intro">All entities live in the <code style="font-family:var(--mono);font-size:12px;">safety_intelligence</code> PostgreSQL schema. Workspace-specific entities are tagged by workspace. The shared entities (Worksite, User, WorkType) are existing platform tables referenced by FK. No workspace owns Worksite — they all anchor to it.</div>
+  <hr class="rule">
+
+  <div class="schema-cols">
+    <div class="schema-group">
+      <div class="schema-group-head" style="color:var(--t2);">Shared · existing platform</div>
+      <div class="schema-group-body">
+        <span class="schema-entity">Worksite</span> · <span class="schema-entity">User</span><br>
+        <span class="schema-entity">WorkType</span><br>
+        <span class="schema-entity">SafetyPractice</span><br>
+        <span style="color:var(--t3);">existing tables · FK refs only</span>
+      </div>
+    </div>
+    <div class="schema-group">
+      <div class="schema-group-head" style="background:var(--obs-bg);color:var(--obs);">Field Intelligence</div>
+      <div class="schema-group-body">
+        <span class="schema-entity">Observation</span><br>
+        <span class="schema-entity">ObservationPhoto</span><br>
+        <span class="schema-entity">CriticalInsight</span><br>
+        <span class="schema-entity">InsightEndorsement</span><br>
+        <span class="schema-entity">ToolboxTalk</span><br>
+        <span class="schema-entity">Enquiry</span><br>
+        <span class="schema-entity">EnquiryQuestion</span><br>
+        <span class="schema-entity">EnquiryResponse</span><br>
+        <span class="schema-entity">CorrectiveAction</span><br>
+        <span class="schema-entity">VisitPlan</span><br>
+        <span class="schema-entity">AtrophyScoreLog</span><br>
+        <span class="schema-entity">AiPromptConfig</span><br>
+        <span class="schema-entity">WorksiteRoleSlot</span><br>
+        <span class="schema-entity">WorksiteSlotAssignment</span>
+      </div>
+    </div>
+    <div class="schema-group">
+      <div class="schema-group-head" style="background:var(--inc-bg);color:var(--inc);">Incidents <span style="font-size:9px;opacity:0.6;">· V3</span></div>
+      <div class="schema-group-body">
+        <span class="schema-entity">Incident</span><br>
+        <span class="schema-entity">Investigation</span><br>
+        <span class="schema-entity">InvestigatingContributingFactor</span><br>
+        <span class="schema-entity">RegulatoryReport</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="schema-cols">
+    <div class="schema-group">
+      <div class="schema-group-head" style="background:var(--diag-bg);color:var(--diag);">Diagnostic <span style="font-size:9px;opacity:0.6;">· V4</span></div>
+      <div class="schema-group-body">
+        <span class="schema-entity">DiagnosticSurvey</span><br>
+        <span class="schema-entity">SurveyFactorSignal</span><br>
+        <span class="schema-entity">CapacityProfile</span><br>
+        <span style="color:var(--t3);">extends Enquiry infrastructure</span>
+      </div>
+    </div>
+    <div class="schema-group">
+      <div class="schema-group-head" style="background:var(--risk-bg);color:var(--risk);">Risk Assurance <span style="font-size:9px;opacity:0.6;">· V5</span></div>
+      <div class="schema-group-body">
+        <span class="schema-entity">CriticalControl</span><br>
+        <span class="schema-entity">WorksiteControl</span><br>
+        <span class="schema-entity">ControlVerification</span> <span style="font-size:9px;color:var(--t3);">immutable</span><br>
+        <span class="schema-entity">InvestigationContributingControl</span><br>
+        <span class="schema-entity">DefeatFactor</span><br>
+        <span class="schema-entity">ControlDefeatInstance</span>
+      </div>
+    </div>
+    <div class="schema-group" style="background:linear-gradient(135deg, rgba(167,139,250,0.04), var(--s1));">
+      <div class="schema-group-head" style="background:var(--ms-bg);color:var(--ms);">Management System <span style="font-size:9px;opacity:0.6;">· V6</span></div>
+      <div class="schema-group-body">
+        <span class="schema-entity">Document</span><br>
+        <span class="schema-entity">DocumentVersion</span> <span style="font-size:9px;color:var(--t3);">immutable</span><br>
+        <span class="schema-entity" style="color:var(--ms);">DocumentRequirement</span> <span style="font-size:9px;color:var(--ms);">AI-extracted</span><br>
+        <span class="schema-entity">WorksiteDocument</span><br>
+        <span class="schema-entity">DocumentReview</span><br>
+        <span class="schema-entity">DocumentAccessLog</span>
+      </div>
+    </div>
+  </div>
+
+  <div style="background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:16px 20px;margin-top:4px;">
+    <div style="font-family:var(--mono);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--t2);margin-bottom:10px;">Key design constraints</div>
+    <div style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--t2);">
+      <div style="display:flex;gap:10px;"><span style="color:var(--accent2);flex-shrink:0;">→</span><span><strong style="color:var(--t1);">ControlVerification and DocumentVersion are immutable on write.</strong> Corrections create new records. This is the integrity guarantee for investigations and regulatory use.</span></div>
+      <div style="display:flex;gap:10px;"><span style="color:var(--accent2);flex-shrink:0;">→</span><span><strong style="color:var(--t1);">DocumentRequirement is versioned.</strong> Linked to DocumentVersion.id — investigation AI can query requirements active on any given date.</span></div>
+      <div style="display:flex;gap:10px;"><span style="color:var(--accent2);flex-shrink:0;">→</span><span><strong style="color:var(--t1);">DiagnosticSurvey has hard anonymisation at data layer.</strong> responder_id is never stored. This is a schema constraint, not a UI setting.</span></div>
+      <div style="display:flex;gap:10px;"><span style="color:var(--accent2);flex-shrink:0;">→</span><span><strong style="color:var(--t1);">fw_factors, fw_confidences, fw_rationales are parallel arrays.</strong> factor[i] has domain[i], confidence[i], rationale[i]. Never scalar fields.</span></div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════
+     9 — CLIENT CONFIGURATION
+════════════════════════════════════════════════════ -->
+<div class="sec" id="client-config">
+  <div class="sec-label">Configuration model</div>
+  <div class="sec-title">Client <strong>workspace configuration</strong></div>
+  <div class="sec-intro">Workspaces are enabled at the organisation level via a <code style="font-family:var(--mono);font-size:12px;">workspace_config</code> table. The platform adapts — navigation, worksite dashboard layers, AI context injection, and analytics views all respond to the enabled workspace set. Three examples showing typical client profiles.</div>
+  <hr class="rule">
+
+  <div class="config-examples">
+    <div class="config-card">
+      <div class="config-card-name">Construction — pilot entry</div>
+      <div class="config-card-type">Single site · 90-day pilot</div>
+      <div class="config-ws-row">
+        <span class="config-ws-name enabled">Field Intelligence</span>
+        <div class="toggle-on"></div>
+      </div>
+      <div class="config-ws-row">
+        <span class="config-ws-name">Incidents</span>
+        <div class="toggle-off"></div>
+      </div>
+      <div class="config-ws-row">
+        <span class="config-ws-name">Diagnostic</span>
+        <div class="toggle-off"></div>
+      </div>
+      <div class="config-ws-row">
+        <span class="config-ws-name">Risk Assurance</span>
+        <div class="toggle-off"></div>
+      </div>
+      <div class="config-ws-row">
+        <span class="config-ws-name">Management System</span>
+        <div class="toggle-off"></div>
+      </div>
+      <div style="margin-top:12px;font-size:11px;color:var(--t3);line-height:1.6;font-family:var(--mono);">Core loop running. Observations → insights → talks. Demonstrates value before broader rollout.</div>
+    </div>
+
+    <div class="config-card">
+      <div class="config-card-name">Mining — annual contract</div>
+      <div class="config-card-type">Multi-site · established customer</div>
+      <div class="config-ws-row">
+        <span class="config-ws-name enabled">Field Intelligence</span>
+        <div class="toggle-on"></div>
+      </div>
+      <div class="config-ws-row">
+        <span class="config-ws-name enabled">Incidents</span>
+        <div class="toggle-on"></div>
+      </div>
+      <div class="config-ws-row">
+        <span class="config-ws-name enabled">Diagnostic</span>
+        <div class="toggle-on"></div>
+      </div>
+      <div class="config-ws-row">
+        <span class="config-ws-name enabled">Risk Assurance</span>
+        <div class="toggle-on"></div>
+      </div>
+      <div class="config-ws-row">
+        <span class="config-ws-name">Management System</span>
+        <div class="toggle-off"></div>
+      </div>
+      <div style="margin-top:12px;font-size:11px;color:var(--t3);line-height:1.6;font-family:var(--mono);">Full intelligence loop. CCM program running. Diagnostic surveys probing Guide/Enable factors. MS Phase 1 in evaluation.</div>
+    </div>
+
+    <div class="config-card" style="background:linear-gradient(135deg, rgba(167,139,250,0.04), var(--s1)); border-color:var(--ms-border);">
+      <div class="config-card-name">Enterprise — full platform</div>
+      <div class="config-card-type">All workspaces · compound intelligence</div>
+      <div class="config-ws-row">
+        <span class="config-ws-name enabled">Field Intelligence</span>
+        <div class="toggle-on"></div>
+      </div>
+      <div class="config-ws-row">
+        <span class="config-ws-name enabled">Incidents</span>
+        <div class="toggle-on"></div>
+      </div>
+      <div class="config-ws-row">
+        <span class="config-ws-name enabled">Diagnostic</span>
+        <div class="toggle-on"></div>
+      </div>
+      <div class="config-ws-row">
+        <span class="config-ws-name enabled">Risk Assurance</span>
+        <div class="toggle-on"></div>
+      </div>
+      <div class="config-ws-row">
+        <span class="config-ws-name enabled" style="color:var(--ms);">Management System</span>
+        <div class="toggle-on"></div>
+      </div>
+      <div style="margin-top:12px;font-size:11px;color:var(--ms);opacity:0.6;line-height:1.6;font-family:var(--mono);">AI knows what was supposed to happen. All five workspace intelligence streams compounding. Complete FW Map diagnostic.</div>
+    </div>
+  </div>
+
+  <div style="background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:18px 20px;font-family:var(--mono);font-size:11px;color:var(--t2);line-height:1.9;">
+    <span style="color:var(--t3);margin-right:12px;letter-spacing:1px;text-transform:uppercase;font-size:9px;">workspace_config schema</span><br><br>
+    <span style="color:var(--accent2);">WorkspaceConfig</span> {<br>
+    &nbsp;&nbsp;<span style="color:var(--t1);">org_id</span>          <span style="color:var(--obs);">String</span><br>
+    &nbsp;&nbsp;<span style="color:var(--t1);">observations_enabled</span>      <span style="color:var(--obs);">Boolean</span>  <span style="color:var(--t3);">@default(true)  // always on</span><br>
+    &nbsp;&nbsp;<span style="color:var(--t1);">incidents_enabled</span>          <span style="color:var(--obs);">Boolean</span>  <span style="color:var(--t3);">@default(false)</span><br>
+    &nbsp;&nbsp;<span style="color:var(--t1);">diagnostic_enabled</span>         <span style="color:var(--obs);">Boolean</span>  <span style="color:var(--t3);">@default(false)</span><br>
+    &nbsp;&nbsp;<span style="color:var(--t1);">risk_assurance_enabled</span>     <span style="color:var(--obs);">Boolean</span>  <span style="color:var(--t3);">@default(false)</span><br>
+    &nbsp;&nbsp;<span style="color:var(--t1);">management_system_enabled</span>  <span style="color:var(--obs);">Boolean</span>  <span style="color:var(--t3);">@default(false)</span><br>
+    &nbsp;&nbsp;<span style="color:var(--t3);">// MS phases — granular enable</span><br>
+    &nbsp;&nbsp;<span style="color:var(--t1);">ms_phase</span>                    <span style="color:var(--obs);">Int</span>      <span style="color:var(--t3);">@default(0)  // 0=off · 1=serving · 2=contextual · 3=ai_ingestion</span><br>
+    }
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════
+     10 — ROADMAP ARC
+════════════════════════════════════════════════════ -->
+<div class="sec" id="roadmap">
+  <div class="sec-label">Build sequence</div>
+  <div class="sec-title">The roadmap <strong>arc</strong></div>
+  <div class="sec-intro">Each version introduces a new workspace or deepens an existing one. The workspace model architecture itself — workspace_config, layer system, AI context injection hooks — should be designed at V3 build time even though only one or two workspaces exist then. Retrofitting it costs significantly more than building it in.</div>
+  <hr class="rule">
+
+  <div class="roadmap-timeline">
+    <div class="rm-item active">
+      <div class="rm-version">V1 → V2</div>
+      <div class="rm-title">Field Intelligence workspace — full depth</div>
+      <div class="rm-desc">V1: core loop (observation → insight → talk → action → visit). Offline-first. Context request loop. Pipeline stages. Worksite role slots. Enquiry (free text). V2: structured enquiry, manual insights, visit briefing pack, FW Map analytics, situational briefs, talk delivery obligations.</div>
+      <div class="rm-ws-tags">
+        <span class="tag" style="background:var(--obs-bg);color:var(--obs);border-color:var(--obs-border);">Field Intelligence · V1</span>
+      </div>
+    </div>
+
+    <div class="rm-item">
+      <div class="rm-version">V3</div>
+      <div class="rm-title">Incidents workspace + workspace architecture decision</div>
+      <div class="rm-desc">Incident reporting, investigation framework, regulatory notification, CoP seeding, board report, enterprise integration. <strong>Critical: design the workspace model architecture at this point.</strong> workspace_config table, worksite dashboard layer system, AI context injection hooks. Management System Phase 1 can ship here — upload, version control, serving by work type.</div>
+      <div class="rm-ws-tags">
+        <span class="tag" style="background:var(--inc-bg);color:var(--inc);border-color:var(--inc-border);">Incidents · V3</span>
+        <span class="tag" style="background:var(--ms-bg);color:var(--ms);border-color:var(--ms-border);">Mgmt System Phase 1 · V3</span>
+      </div>
+    </div>
+
+    <div class="rm-item">
+      <div class="rm-version">V4</div>
+      <div class="rm-title">Diagnostic workspace + Management System Phase 2</div>
+      <div class="rm-desc">Periodic anonymous surveys probing Guide/Enable FW factors. Hard anonymisation at data layer. Results feed capacity analytics. Management System Phase 2: contextual document delivery, enquiry-based review, document atrophy, worksite dashboard layer.</div>
+      <div class="rm-ws-tags">
+        <span class="tag" style="background:var(--diag-bg);color:var(--diag);border-color:var(--diag-border);">Diagnostic · V4</span>
+        <span class="tag" style="background:var(--ms-bg);color:var(--ms);border-color:var(--ms-border);">Mgmt System Phase 2 · V4</span>
+      </div>
+    </div>
+
+    <div class="rm-item">
+      <div class="rm-version">V5</div>
+      <div class="rm-title">Risk Assurance workspace</div>
+      <div class="rm-desc">Global critical control register, push/inherit/override, binary verification clockwork, defeating factors, investigation control attribution. Controls can now reference Management System documents — the two workspaces compound. Control health contributes to worksite atrophy.</div>
+      <div class="rm-ws-tags">
+        <span class="tag" style="background:var(--risk-bg);color:var(--risk);border-color:var(--risk-border);">Risk Assurance · V5</span>
+      </div>
+    </div>
+
+    <div class="rm-item">
+      <div class="rm-version">V6</div>
+      <div class="rm-title">Management System Phase 3 — AI ingestion</div>
+      <div class="rm-desc">AI ingests documents and extracts structured DocumentRequirement records. The platform knows what was supposed to happen. Observation enrichment gains procedure gap detection. Investigation AI grounds contributing factors in requirement clauses with version-controlled attribution. FW Map classification reaches highest achievable precision. All five workspaces compounding at full depth.</div>
+      <div class="rm-ws-tags">
+        <span class="tag" style="background:var(--ms-bg);color:var(--ms);border-color:var(--ms-border);">Mgmt System Phase 3 · V6</span>
+        <span class="tag" style="background:rgba(200,247,58,0.07);color:var(--accent2);border-color:rgba(200,247,58,0.15);">All five workspaces compounding</span>
+      </div>
+    </div>
+  </div>
+
+  <div style="background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:20px 24px;">
+    <div style="font-family:var(--mono);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--accent2);margin-bottom:12px;">The platform a safety consultant would build if they had unlimited time and perfect data collection</div>
+    <div style="font-size:13px;color:var(--t2);line-height:1.75;max-width:680px;">
+      From V1 through V6, every piece of infrastructure compounds. The observation enrichment pattern powers document ingestion. The push/override model powers the control register and the document library identically. The enquiry system powers document review. The async job queue powers every AI call across all workspaces. The worksite_id anchor means every workspace's data is immediately available to every other workspace's AI job without additional infrastructure.<br><br>
+      The product gets smarter with each version not because new capabilities are added, but because each new workspace provides context that makes all the existing capabilities more precise. That's the architecture.
+    </div>
+  </div>
+</div>
+
+</div><!-- end .page -->
+
+<footer>
+  <div>Hiviz · SafetyPlatform · Platform Architecture · April 2026</div>
+  <div>Forge Works · Engineering Reference</div>
+</footer>
+
+</body>
+</html>
