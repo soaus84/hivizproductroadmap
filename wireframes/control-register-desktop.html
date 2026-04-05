@@ -1,0 +1,1425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hiviz — Control Register Desktop</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,300;1,9..144,400&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --status-critical:        #FF3B30;
+    --status-critical-bg:     rgba(255,59,48,0.06);
+    --status-critical-border: rgba(255,59,48,0.2);
+    --status-caution:         #FF9500;
+    --status-caution-bg:      rgba(255,149,0,0.06);
+    --status-caution-border:  rgba(255,149,0,0.18);
+    --status-positive:        #00AB55;
+    --status-positive-bg:     rgba(0,171,85,0.06);
+    --status-positive-border: rgba(0,171,85,0.18);
+    --status-info:            #3B82F6;
+    --status-info-bg:         rgba(59,130,246,0.06);
+    --status-info-border:     rgba(59,130,246,0.18);
+
+    --bg:           #F4F2EE;
+    --surface:      #FFFFFF;
+    --surface-2:    #EDEAE5;
+    --surface-3:    #E5E1DB;
+    --border:       #DDD9D2;
+    --border-mid:   #C6C2BA;
+    --text-primary: #1C1A16;
+    --text-body:    #3A3730;
+    --text-muted:   #78746C;
+    --text-faint:   #ACA89F;
+    --sidebar-bg:   #1C1A16;
+    --sidebar-w:    220px;
+
+    --prevent-accent: #3B82F6;
+    --prevent-light:  rgba(59,130,246,0.07);
+    --prevent-border: rgba(59,130,246,0.15);
+    --mitigate-accent: #D97706;
+    --mitigate-light:  rgba(217,119,6,0.07);
+    --mitigate-border: rgba(217,119,6,0.15);
+    --hazard-accent:   #EF4444;
+    --hazard-light:    rgba(239,68,68,0.06);
+    --hazard-border:   rgba(239,68,68,0.18);
+
+    --sans: 'DM Sans', sans-serif;
+    --display: 'Fraunces', serif;
+    --mono: 'DM Mono', monospace;
+    --r: 10px;
+    --r-sm: 7px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: #0D0C0B;
+    font-family: var(--sans);
+    font-size: 13px;
+    -webkit-font-smoothing: antialiased;
+    padding: 40px 20px 80px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    color: var(--text-primary);
+  }
+
+  /* ── PAGE HEADER ── */
+  .ph {
+    text-align: center;
+    margin-bottom: 52px;
+    max-width: 640px;
+  }
+  .ph-eyebrow { font-family: var(--mono); font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: rgba(255,255,255,0.22); margin-bottom: 12px; }
+  .ph-title { font-family: var(--display); font-size: clamp(30px, 4vw, 44px); color: white; font-weight: 300; line-height: 1.1; letter-spacing: -0.02em; margin-bottom: 10px; }
+  .ph-title strong { font-weight: 700; }
+  .ph-desc { font-size: 13px; color: rgba(255,255,255,0.3); line-height: 1.7; }
+
+  /* ── SCREEN WRAPPER ── */
+  .screen-wrap {
+    width: 100%;
+    max-width: 1200px;
+    margin-bottom: 64px;
+  }
+
+  .screen-label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .sl-num { font-family: var(--mono); font-size: 10px; color: rgba(255,255,255,0.2); }
+  .sl-name { font-family: var(--display); font-size: 18px; font-weight: 300; font-style: italic; color: rgba(255,255,255,0.35); }
+  .sl-line { flex: 1; height: 1px; background: rgba(255,255,255,0.05); }
+  .sl-note { font-family: var(--mono); font-size: 10px; color: rgba(255,255,255,0.15); }
+
+  /* ── APP SHELL ── */
+  .app-shell {
+    background: var(--bg);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.04);
+    display: flex;
+    min-height: 600px;
+  }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    width: var(--sidebar-w);
+    background: var(--sidebar-bg);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    padding: 20px 0;
+  }
+
+  .sidebar-wordmark {
+    font-family: var(--display);
+    font-size: 18px;
+    font-weight: 600;
+    color: white;
+    padding: 0 18px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .wm-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--status-positive); }
+
+  .sidebar-section-label {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.2);
+    padding: 0 18px;
+    margin-bottom: 6px;
+    margin-top: 14px;
+  }
+
+  .sidebar-item {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 8px 18px;
+    font-size: 13px;
+    color: rgba(255,255,255,0.4);
+    cursor: pointer;
+    transition: all 0.1s;
+    border-radius: 0;
+  }
+  .sidebar-item:hover { background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.7); }
+  .sidebar-item.active { background: rgba(255,255,255,0.08); color: white; font-weight: 600; }
+  .sidebar-item .si-icon { font-size: 14px; width: 18px; text-align: center; flex-shrink: 0; }
+
+  .sidebar-badge {
+    margin-left: auto;
+    font-family: var(--mono);
+    font-size: 9px;
+    font-weight: 500;
+    padding: 2px 7px;
+    border-radius: 20px;
+  }
+  .sb-crit { background: var(--status-critical-bg); color: var(--status-critical); }
+  .sb-info { background: rgba(59,130,246,0.15); color: #93C5FD; }
+
+  /* ── MAIN CONTENT ── */
+  .main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+
+  /* Top bar */
+  .top-bar {
+    height: 52px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 24px;
+    gap: 16px;
+    flex-shrink: 0;
+  }
+
+  .top-bar-title { font-size: 15px; font-weight: 700; color: var(--text-primary); flex: 1; }
+  .top-bar-breadcrumb { font-size: 12px; color: var(--text-faint); display: flex; align-items: center; gap: 6px; }
+  .bc-sep { color: var(--text-faint); opacity: 0.4; }
+  .bc-active { color: var(--text-muted); }
+
+  .top-bar-actions { display: flex; gap: 8px; align-items: center; }
+
+  .tb-btn {
+    height: 32px;
+    padding: 0 14px;
+    border-radius: 6px;
+    font-family: var(--sans);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    white-space: nowrap;
+  }
+  .tb-btn-ghost { background: var(--surface-2); color: var(--text-muted); }
+  .tb-btn-primary { background: var(--text-primary); color: white; }
+
+  /* Content area */
+  .content { flex: 1; padding: 20px 24px; overflow: hidden; background: var(--bg); }
+
+  /* ── SHARED COMPONENTS ── */
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); }
+  .chip { font-family: var(--mono); font-size: 9px; font-weight: 500; padding: 2px 8px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px; letter-spacing: 0.2px; }
+  .chip-neutral  { background: var(--surface-2); color: var(--text-faint); }
+  .chip-critical { background: var(--status-critical-bg); color: var(--status-critical); }
+  .chip-caution  { background: var(--status-caution-bg); color: var(--status-caution); }
+  .chip-positive { background: var(--status-positive-bg); color: var(--status-positive); }
+  .chip-info     { background: var(--status-info-bg); color: var(--status-info); }
+  .chip-prevent  { background: rgba(59,130,246,0.08); color: #3B82F6; }
+  .chip-mitigate { background: rgba(217,119,6,0.08); color: #D97706; }
+
+  .sdot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .sdot-ok   { background: var(--status-positive); }
+  .sdot-warn { background: var(--status-caution); }
+  .sdot-crit { background: var(--status-critical); }
+  .sdot-impl { background: var(--status-info); }
+  .sdot-dim  { background: var(--text-faint); }
+
+  .section-heading {
+    font-family: var(--mono);
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    margin-bottom: 10px;
+    margin-top: 4px;
+  }
+
+  /* ════════════════════════════════════════════
+     SCREEN 1 — REGISTER TABLE
+  ════════════════════════════════════════════ */
+
+  .alert-strip {
+    background: var(--status-critical-bg);
+    border: 1px solid var(--status-critical-border);
+    border-radius: var(--r);
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    font-size: 13px;
+    color: var(--status-critical);
+  }
+  .as-icon { font-size: 16px; flex-shrink: 0; }
+  .as-text { flex: 1; line-height: 1.4; }
+  .as-text strong { font-weight: 700; }
+  .as-action { font-size: 12px; font-weight: 600; text-decoration: underline; cursor: pointer; white-space: nowrap; color: var(--status-critical); }
+
+  /* Register table */
+  .register-table { width: 100%; border-collapse: collapse; }
+  .register-table th {
+    text-align: left;
+    font-family: var(--mono);
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    white-space: nowrap;
+  }
+  .register-table td {
+    padding: 12px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    vertical-align: middle;
+  }
+  .register-table tr:last-child td { border-bottom: none; }
+  .register-table tr:hover td { background: var(--surface-2); cursor: pointer; }
+
+  .rt-name { font-size: 14px; font-weight: 700; color: var(--text-primary); margin-bottom: 2px; }
+  .rt-meta { font-size: 11px; color: var(--text-muted); }
+
+  /* Health bar in table */
+  .hbar { display: flex; gap: 2px; height: 6px; }
+  .hbar-seg { flex: 1; border-radius: 2px; }
+
+  /* Stat cells */
+  .stat-cell { text-align: center; }
+  .stat-n { font-size: 18px; font-weight: 800; color: var(--text-primary); line-height: 1; }
+  .stat-l { font-size: 10px; color: var(--text-faint); margin-top: 2px; }
+  .stat-n.is-crit { color: var(--status-critical); }
+
+  /* ════════════════════════════════════════════
+     SCREEN 2 — BOWTIE FULL WIDTH
+  ════════════════════════════════════════════ */
+
+  /* Full-width bowtie — no sidebar */
+  .bowtie-shell {
+    background: var(--bg);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.04);
+    min-height: 600px;
+  }
+
+  .bowtie-topbar {
+    background: var(--sidebar-bg);
+    padding: 16px 28px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .bt-back { display: flex; align-items: center; gap: 8px; font-size: 13px; color: rgba(255,255,255,0.4); cursor: pointer; }
+  .bt-back:hover { color: rgba(255,255,255,0.7); }
+  .bt-sep { color: rgba(255,255,255,0.15); }
+  .bt-title { font-size: 16px; font-weight: 700; color: white; }
+  .bt-meta { font-size: 12px; color: rgba(255,255,255,0.35); margin-left: 4px; }
+
+  .bowtie-canvas {
+    padding: 24px 28px;
+    background: var(--bg);
+  }
+
+  /* Three-column bowtie layout */
+  .bowtie-layout {
+    display: grid;
+    grid-template-columns: 1fr 200px 1fr;
+    gap: 16px;
+    align-items: start;
+    margin-bottom: 20px;
+  }
+
+  .bowtie-col {}
+
+  .bt-col-head {
+    font-family: var(--mono);
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 7px 14px;
+    border-radius: 6px;
+    text-align: center;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .bt-col-head-prev { background: var(--prevent-light); color: var(--prevent-accent); border: 1px solid var(--prevent-border); }
+  .bt-col-head-mit  { background: var(--mitigate-light); color: var(--mitigate-accent); border: 1px solid var(--mitigate-border); }
+
+  /* Centre: hazard node */
+  .hazard-node {
+    background: var(--hazard-light);
+    border: 1.5px solid var(--hazard-border);
+    border-radius: var(--r);
+    padding: 16px;
+    text-align: center;
+    margin-top: 38px;
+  }
+
+  .hn-icon { font-size: 28px; margin-bottom: 8px; }
+  .hn-label { font-family: var(--mono); font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: var(--status-critical); opacity: 0.7; margin-bottom: 5px; }
+  .hn-name { font-size: 13px; font-weight: 700; color: var(--text-primary); line-height: 1.35; }
+
+  /* Connector lines */
+  .bt-connector {
+    display: flex;
+    align-items: center;
+    margin: 0 -16px;
+    margin-top: 56px;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  /* Control card in bowtie */
+  .bt-ctrl {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-sm);
+    padding: 11px 13px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: box-shadow 0.1s;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .bt-ctrl:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+  .bt-ctrl.is-crit { border-color: var(--status-critical-border); background: var(--status-critical-bg); }
+  .bt-ctrl.is-warn { border-color: var(--status-caution-border); }
+  .bt-ctrl.is-impl { border-color: var(--status-info-border); }
+
+  .bt-ctrl-body { flex: 1; min-width: 0; }
+  .bt-ctrl-name { font-size: 12px; font-weight: 700; color: var(--text-primary); line-height: 1.35; margin-bottom: 5px; }
+  .bt-ctrl-row { display: flex; align-items: center; gap: 8px; justify-content: space-between; }
+  .bt-ctrl-chips { display: flex; gap: 4px; flex-wrap: wrap; }
+
+  /* Site bar */
+  .site-bar { display: flex; align-items: center; gap: 8px; margin-top: 5px; }
+  .site-track { flex: 1; height: 3px; background: var(--surface-2); border-radius: 2px; overflow: hidden; min-width: 60px; }
+  .site-fill { height: 100%; border-radius: 2px; background: var(--status-positive); }
+  .site-fill.is-fail { background: var(--status-critical); }
+  .site-count { font-family: var(--mono); font-size: 10px; color: var(--text-faint); white-space: nowrap; }
+  .site-count.is-fail { color: var(--status-critical); }
+
+  .bt-df-flag {
+    background: var(--status-caution-bg);
+    border: 1px solid var(--status-caution-border);
+    border-radius: 4px;
+    padding: 3px 8px;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--status-caution);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 4px;
+  }
+
+  .bt-add-btn { width: 100%; padding: 8px; background: transparent; border: 1px dashed var(--border); border-radius: var(--r-sm); font-family: var(--sans); font-size: 12px; color: var(--text-faint); cursor: pointer; text-align: center; }
+  .bt-add-btn:hover { background: var(--surface); }
+
+  /* Second bowtie row  */
+  .bowtie-more { display: flex; gap: 10px; margin-top: 8px; }
+  .bt-hazard-summary {
+    flex: 1;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-sm);
+    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+  }
+  .bt-hazard-summary:hover { background: var(--surface-2); }
+  .bhs-icon { width: 30px; height: 30px; border-radius: 50%; background: var(--hazard-light); border: 1px solid var(--hazard-border); display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+  .bhs-name { font-size: 13px; font-weight: 700; color: var(--text-primary); }
+  .bhs-meta { font-size: 11px; color: var(--text-muted); }
+
+
+  /* ════════════════════════════════════════════
+     SCREEN 3 — CONTROL DETAIL (master-detail)
+  ════════════════════════════════════════════ */
+
+  /* Split layout */
+  .master-detail {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 0;
+    flex: 1;
+    min-height: 560px;
+  }
+
+  .master-panel {
+    border-right: 1px solid var(--border);
+    padding: 16px;
+    overflow: hidden;
+    background: var(--surface);
+  }
+
+  .detail-panel {
+    padding: 24px;
+    overflow: hidden;
+    background: var(--bg);
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  /* Master list items */
+  .master-item {
+    padding: 11px 12px;
+    border-radius: var(--r-sm);
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    cursor: pointer;
+    border: 1.5px solid transparent;
+    margin-bottom: 5px;
+  }
+  .master-item:hover { background: var(--surface-2); }
+  .master-item.active { background: var(--bg); border-color: var(--border); }
+  .mi-body { flex: 1; min-width: 0; }
+  .mi-name { font-size: 12px; font-weight: 700; color: var(--text-primary); line-height: 1.35; margin-bottom: 3px; }
+  .mi-chips { display: flex; gap: 4px; flex-wrap: wrap; }
+
+  /* Detail header */
+  .detail-header {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    padding: 18px 20px;
+    margin-bottom: 14px;
+  }
+
+  .dh-type-row { display: flex; gap: 6px; align-items: center; margin-bottom: 8px; }
+  .dh-name { font-family: var(--display); font-size: 20px; font-weight: 400; color: var(--text-primary); line-height: 1.3; margin-bottom: 10px; }
+
+  /* Lifecycle track */
+  .lifecycle-track {
+    display: flex;
+    gap: 2px;
+    margin-top: 12px;
+  }
+  .lc-s {
+    flex: 1;
+    padding: 6px 8px;
+    text-align: center;
+    border-radius: 4px;
+    font-family: var(--mono);
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+    background: var(--surface-2);
+    color: var(--text-faint);
+    border: 1px solid transparent;
+  }
+  .lc-s.lc-active-ok   { background: var(--status-positive-bg); border-color: var(--status-positive-border); color: var(--status-positive); }
+  .lc-s.lc-active-impl { background: var(--status-info-bg); border-color: var(--status-info-border); color: var(--status-info); }
+  .lc-s.lc-active-crit { background: var(--status-critical-bg); border-color: var(--status-critical-border); color: var(--status-critical); }
+
+  /* Two-col detail grid */
+  .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+  .detail-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 14px 16px; }
+  .db-label { font-family: var(--mono); font-size: 9px; font-weight: 500; letter-spacing: 1px; text-transform: uppercase; color: var(--text-faint); margin-bottom: 8px; }
+  .db-content { font-size: 13px; color: var(--text-body); line-height: 1.6; }
+
+  /* Defeating factor */
+  .df-box {
+    background: var(--status-caution-bg);
+    border: 1px solid var(--status-caution-border);
+    border-radius: var(--r);
+    padding: 14px 16px;
+    margin-bottom: 14px;
+  }
+  .df-head { font-size: 13px; font-weight: 700; color: var(--status-caution); margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
+  .df-body { font-size: 13px; color: var(--text-body); line-height: 1.6; margin-bottom: 8px; }
+  .df-expiry { font-family: var(--mono); font-size: 11px; color: var(--status-caution); }
+
+  /* Site table */
+  .site-table { width: 100%; border-collapse: collapse; }
+  .site-table th { font-family: var(--mono); font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: var(--text-faint); padding: 6px 10px; border-bottom: 1px solid var(--border); text-align: left; background: var(--surface); }
+  .site-table td { padding: 9px 10px; border-bottom: 1px solid var(--border); font-size: 12px; background: var(--surface); }
+  .site-table tr:last-child td { border-bottom: none; }
+  .st-name { font-weight: 600; color: var(--text-primary); }
+  .st-meta { color: var(--text-muted); font-size: 11px; margin-top: 1px; }
+
+
+  /* ════════════════════════════════════════════
+     SCREEN 4 — SITE ACCEPTANCE
+  ════════════════════════════════════════════ */
+
+  .accept-layout {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 20px;
+    flex: 1;
+  }
+
+  .accept-main {}
+  .accept-sidebar {}
+
+  .pending-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    overflow: hidden;
+    margin-bottom: 12px;
+  }
+
+  .pc-header { padding: 14px 18px; border-bottom: 1px solid var(--border); }
+  .pc-source { font-family: var(--mono); font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: var(--text-faint); margin-bottom: 5px; display: flex; align-items: center; gap: 8px; }
+  .pc-name { font-family: var(--display); font-size: 18px; font-weight: 400; color: var(--text-primary); line-height: 1.3; margin-bottom: 6px; }
+  .pc-desc { font-size: 13px; color: var(--text-body); line-height: 1.6; margin-bottom: 10px; }
+  .pc-consequence { background: var(--status-critical-bg); border: 1px solid var(--status-critical-border); border-radius: 6px; padding: 8px 12px; font-size: 12px; color: var(--text-body); line-height: 1.5; display: flex; gap: 8px; align-items: flex-start; }
+
+  .pc-meta-row { display: flex; gap: 24px; padding: 10px 18px; background: var(--surface-2); border-bottom: 1px solid var(--border); }
+  .pc-meta-item { }
+  .pc-meta-label { font-family: var(--mono); font-size: 9px; letter-spacing: 0.8px; text-transform: uppercase; color: var(--text-faint); margin-bottom: 3px; }
+  .pc-meta-val { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+
+  .pc-actions { padding: 14px 18px; display: flex; gap: 10px; align-items: center; }
+
+  .btn-accept { height: 38px; padding: 0 20px; border-radius: var(--r-sm); background: var(--status-positive); border: none; color: white; font-family: var(--sans); font-size: 13px; font-weight: 700; cursor: pointer; }
+  .btn-modify { height: 38px; padding: 0 16px; border-radius: var(--r-sm); background: var(--surface-2); border: 1px solid var(--border); color: var(--text-muted); font-family: var(--sans); font-size: 13px; font-weight: 600; cursor: pointer; }
+  .btn-reject { height: 38px; padding: 0 16px; border-radius: var(--r-sm); background: var(--status-critical-bg); border: 1px solid var(--status-critical-border); color: var(--status-critical); font-family: var(--sans); font-size: 13px; font-weight: 600; cursor: pointer; }
+  .pc-actions-note { font-size: 11px; color: var(--text-faint); font-style: italic; margin-left: auto; }
+
+  /* Accepted controls sidebar */
+  .accept-sidebar-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; }
+  .asc-header { padding: 12px 14px; border-bottom: 1px solid var(--border); font-weight: 700; font-size: 13px; }
+  .asc-item { padding: 10px 14px; border-bottom: 1px solid var(--border); display: flex; gap: 10px; align-items: center; }
+  .asc-item:last-child { border-bottom: none; }
+  .asc-item.is-modified { background: var(--status-caution-bg); }
+  .asc-body { flex: 1; min-width: 0; }
+  .asc-name { font-size: 12px; font-weight: 600; color: var(--text-primary); line-height: 1.3; margin-bottom: 2px; }
+  .asc-sub { font-size: 10px; color: var(--text-faint); font-family: var(--mono); }
+
+
+  /* ════════════════════════════════════════════
+     SCREEN 5 — ALERT TABLE
+  ════════════════════════════════════════════ */
+
+  .alert-layout { display: grid; grid-template-columns: 1fr 300px; gap: 20px; align-items: start; }
+
+  .alert-hero-row {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .alert-stat-card {
+    flex: 1;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .alert-stat-card.is-crit { border-color: var(--status-critical-border); background: var(--status-critical-bg); }
+  .asc-num { font-size: 32px; font-weight: 800; line-height: 1; }
+  .asc-num.is-crit { color: var(--status-critical); }
+  .asc-num.is-ok   { color: var(--status-positive); }
+  .asc-num.is-dim  { color: var(--text-faint); }
+  .asc-label { font-size: 12px; color: var(--text-muted); line-height: 1.4; margin-top: 2px; }
+  .asc-label strong { color: var(--text-body); }
+
+  /* Alert table */
+  .alert-table { width: 100%; border-collapse: collapse; }
+  .alert-table th { font-family: var(--mono); font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: var(--text-faint); padding: 8px 14px; border-bottom: 1px solid var(--border); text-align: left; background: var(--surface); white-space: nowrap; }
+  .alert-table td { padding: 12px 14px; border-bottom: 1px solid var(--border); background: var(--surface); vertical-align: middle; }
+  .alert-table tr:last-child td { border-bottom: none; }
+  .alert-table tr.is-crit td { background: var(--status-critical-bg); }
+  .alert-table tr.is-resolved td { opacity: 0.5; }
+  .at-site { font-size: 13px; font-weight: 700; color: var(--text-primary); }
+  .at-detail { font-size: 11px; color: var(--text-muted); margin-top: 2px; line-height: 1.4; }
+  .at-time { font-family: var(--mono); font-size: 10px; color: var(--text-faint); }
+
+  /* Insight panel */
+  .insight-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    overflow: hidden;
+  }
+
+  .ip-header { padding: 12px 16px; border-bottom: 1px solid var(--border); font-size: 13px; font-weight: 700; }
+  .ip-body { padding: 14px 16px; display: flex; flex-direction: column; gap: 12px; }
+  .ip-note { font-size: 12px; color: var(--text-body); line-height: 1.6; padding: 10px 12px; border-radius: var(--r-sm); }
+  .ip-note.is-crit { background: var(--status-critical-bg); border: 1px solid var(--status-critical-border); color: var(--text-body); }
+  .ip-note.is-info { background: var(--surface-2); border: 1px solid var(--border); }
+  .ip-note strong { color: var(--text-primary); font-weight: 700; }
+
+  .ip-push-btn { width: 100%; height: 40px; border-radius: var(--r-sm); background: var(--text-primary); border: none; color: white; font-family: var(--sans); font-size: 13px; font-weight: 700; cursor: pointer; }
+
+  /* ── DIVIDERS ── */
+  .screen-divider { width: 100%; max-width: 1200px; height: 1px; background: rgba(255,255,255,0.05); margin-bottom: 64px; }
+</style>
+</head>
+<body>
+
+<!-- PAGE HEADER -->
+<div class="ph">
+  <div class="ph-eyebrow">Hiviz · V5 · Control Register · Desktop</div>
+  <div class="ph-title"><strong>Control Register</strong><br>desktop responsive</div>
+  <div class="ph-desc">The same five screens — register, bowtie, control detail, site acceptance, alert — at desktop scale. Same status token discipline throughout.</div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════
+     SCREEN 1 — REGISTER TABLE
+══════════════════════════════════════════════ -->
+<div class="screen-wrap">
+  <div class="screen-label">
+    <span class="sl-num">01</span>
+    <span class="sl-name">Work type register</span>
+    <div class="sl-line"></div>
+    <span class="sl-note">sidebar + table view</span>
+  </div>
+
+  <div class="app-shell">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="sidebar-wordmark"><div class="wm-dot"></div>Hiviz</div>
+      <div class="sidebar-section-label">Intelligence</div>
+      <div class="sidebar-item"><span class="si-icon">💡</span>Pipeline</div>
+      <div class="sidebar-item"><span class="si-icon">📋</span>Enquiries</div>
+      <div class="sidebar-item"><span class="si-icon">✅</span>Actions</div>
+      <div class="sidebar-section-label">Risk</div>
+      <div class="sidebar-item active"><span class="si-icon">🛡️</span>Control Register <span class="sidebar-badge sb-crit">3</span></div>
+      <div class="sidebar-item"><span class="si-icon">📊</span>Verifications</div>
+      <div class="sidebar-section-label">Analytics</div>
+      <div class="sidebar-item"><span class="si-icon">🗺️</span>FW Map</div>
+      <div class="sidebar-item"><span class="si-icon">📈</span>Leading Indicators</div>
+    </div>
+
+    <!-- Main -->
+    <div class="main">
+      <div class="top-bar">
+        <div class="top-bar-breadcrumb">
+          <span>Risk</span><span class="bc-sep">›</span><span class="bc-active">Control Register</span>
+        </div>
+        <div class="top-bar-title"></div>
+        <div class="top-bar-actions">
+          <button class="tb-btn tb-btn-ghost">Filter</button>
+          <button class="tb-btn tb-btn-primary">+ Work type</button>
+        </div>
+      </div>
+
+      <div class="content">
+        <!-- Alert strip earns critical -->
+        <div class="alert-strip">
+          <div class="as-icon">⚠️</div>
+          <div class="as-text"><strong>3 sites reporting controls not in place</strong> across 2 work types — Hot Work (2 sites) and Work at Height (1 site). Needs attention today.</div>
+          <div class="as-action">View alerts →</div>
+        </div>
+
+        <table class="register-table">
+          <thead>
+            <tr>
+              <th>Work type</th>
+              <th>Controls</th>
+              <th>Active sites</th>
+              <th>Not in place</th>
+              <th>Health</th>
+              <th>Pending review</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <div style="display:flex;align-items:center;gap:10px;">
+                  <span style="font-size:20px;">🔥</span>
+                  <div>
+                    <div class="rt-name">Hot Work</div>
+                    <div class="rt-meta">3 hazards · 8 controls</div>
+                  </div>
+                </div>
+              </td>
+              <td><div class="stat-cell"><div class="stat-n">8</div><div class="stat-l">controls</div></div></td>
+              <td><div class="stat-cell"><div class="stat-n">14</div><div class="stat-l">sites</div></div></td>
+              <td><div class="stat-cell"><div class="stat-n is-crit">2</div><div class="stat-l">sites</div></div></td>
+              <td style="min-width:140px;">
+                <div class="hbar">
+                  <div class="hbar-seg" style="background:var(--status-positive);"></div>
+                  <div class="hbar-seg" style="background:var(--status-positive);"></div>
+                  <div class="hbar-seg" style="background:var(--status-positive);"></div>
+                  <div class="hbar-seg" style="background:var(--status-positive);"></div>
+                  <div class="hbar-seg" style="background:var(--status-positive);"></div>
+                  <div class="hbar-seg" style="background:var(--status-positive);"></div>
+                  <div class="hbar-seg" style="background:var(--status-critical);"></div>
+                  <div class="hbar-seg" style="background:var(--status-critical);"></div>
+                </div>
+                <div style="font-family:var(--mono);font-size:9px;color:var(--text-faint);margin-top:4px;">6 of 8 controls healthy</div>
+              </td>
+              <td><span class="chip chip-neutral">0 pending</span></td>
+              <td style="color:var(--text-faint);font-size:14px;text-align:right;cursor:pointer;">›</td>
+            </tr>
+            <tr>
+              <td>
+                <div style="display:flex;align-items:center;gap:10px;">
+                  <span style="font-size:20px;">🏗️</span>
+                  <div>
+                    <div class="rt-name">Work at Height</div>
+                    <div class="rt-meta">2 hazards · 6 controls</div>
+                  </div>
+                </div>
+              </td>
+              <td><div class="stat-cell"><div class="stat-n">6</div></div></td>
+              <td><div class="stat-cell"><div class="stat-n">9</div></div></td>
+              <td><div class="stat-cell"><div class="stat-n" style="color:var(--text-faint);">0</div></div></td>
+              <td>
+                <div class="hbar">
+                  <div class="hbar-seg" style="background:var(--status-positive);"></div>
+                  <div class="hbar-seg" style="background:var(--status-positive);"></div>
+                  <div class="hbar-seg" style="background:var(--status-positive);"></div>
+                  <div class="hbar-seg" style="background:var(--status-positive);"></div>
+                  <div class="hbar-seg" style="background:var(--status-positive);"></div>
+                  <div class="hbar-seg" style="background:var(--status-info);"></div>
+                </div>
+                <div style="font-family:var(--mono);font-size:9px;color:var(--text-faint);margin-top:4px;">1 implementing</div>
+              </td>
+              <td><span class="chip chip-caution">1 pending</span></td>
+              <td style="color:var(--text-faint);font-size:14px;text-align:right;cursor:pointer;">›</td>
+            </tr>
+            <tr>
+              <td>
+                <div style="display:flex;align-items:center;gap:10px;">
+                  <span style="font-size:20px;">🚛</span>
+                  <div>
+                    <div class="rt-name">Heavy Vehicle</div>
+                    <div class="rt-meta">2 hazards · 7 controls</div>
+                  </div>
+                </div>
+              </td>
+              <td><div class="stat-cell"><div class="stat-n">7</div></div></td>
+              <td><div class="stat-cell"><div class="stat-n">12</div></div></td>
+              <td><div class="stat-cell"><div class="stat-n" style="color:var(--text-faint);">0</div></div></td>
+              <td>
+                <div class="hbar">
+                  <div class="hbar-seg" style="background:var(--status-positive);"></div>
+                  <div class="hbar-seg" style="background:var(--status-positive);"></div>
+                  <div class="hbar-seg" style="background:var(--status-positive);"></div>
+                  <div class="hbar-seg" style="background:var(--status-positive);"></div>
+                  <div class="hbar-seg" style="background:var(--status-positive);"></div>
+                  <div class="hbar-seg" style="background:var(--status-positive);"></div>
+                  <div class="hbar-seg" style="background:var(--status-positive);"></div>
+                </div>
+                <div style="font-family:var(--mono);font-size:9px;color:var(--text-faint);margin-top:4px;">All clear</div>
+              </td>
+              <td><span class="chip chip-neutral">0 pending</span></td>
+              <td style="color:var(--text-faint);font-size:14px;text-align:right;cursor:pointer;">›</td>
+            </tr>
+            <tr style="opacity:0.55;">
+              <td>
+                <div style="display:flex;align-items:center;gap:10px;">
+                  <span style="font-size:20px;">⚡</span>
+                  <div>
+                    <div class="rt-name">Electrical Isolation</div>
+                    <div class="rt-meta">1 hazard · 5 controls</div>
+                  </div>
+                </div>
+              </td>
+              <td><div class="stat-cell"><div class="stat-n">5</div></div></td>
+              <td><div class="stat-cell"><div class="stat-n">4</div></div></td>
+              <td><div class="stat-cell"><div class="stat-n" style="color:var(--text-faint);">0</div></div></td>
+              <td>
+                <div class="hbar">
+                  <div class="hbar-seg" style="background:var(--status-positive);"></div>
+                  <div class="hbar-seg" style="background:var(--status-positive);"></div>
+                  <div class="hbar-seg" style="background:var(--status-positive);"></div>
+                  <div class="hbar-seg" style="background:var(--status-positive);"></div>
+                  <div class="hbar-seg" style="background:var(--status-positive);"></div>
+                </div>
+              </td>
+              <td><span class="chip chip-neutral">0 pending</span></td>
+              <td style="color:var(--text-faint);font-size:14px;text-align:right;cursor:pointer;">›</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="screen-divider"></div>
+
+
+<!-- ══════════════════════════════════════════════
+     SCREEN 2 — BOWTIE FULL WIDTH
+══════════════════════════════════════════════ -->
+<div class="screen-wrap">
+  <div class="screen-label">
+    <span class="sl-num">02</span>
+    <span class="sl-name">The bowtie</span>
+    <div class="sl-line"></div>
+    <span class="sl-note">full width — prevention | hazard | mitigation</span>
+  </div>
+
+  <div class="bowtie-shell">
+    <div class="bowtie-topbar">
+      <div class="bt-back">← Register</div>
+      <div class="bt-sep">›</div>
+      <div class="bt-title">Hot Work</div>
+      <div class="bt-meta">8 controls · 3 hazards · 14 active sites</div>
+      <div style="margin-left:auto;display:flex;gap:8px;">
+        <button class="tb-btn tb-btn-ghost" style="font-size:12px;height:30px;padding:0 12px;">+ Hazard</button>
+        <button class="tb-btn tb-btn-primary" style="font-size:12px;height:30px;padding:0 12px;background:rgba(255,255,255,0.1);">Push to sites</button>
+      </div>
+    </div>
+
+    <div class="bowtie-canvas">
+
+      <!-- HAZARD 1 — Full bowtie displayed -->
+      <div style="font-family:var(--mono);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-faint);margin-bottom:12px;">Hazard 1 of 3</div>
+
+      <div class="bowtie-layout">
+
+        <!-- PREVENTION column -->
+        <div class="bowtie-col">
+          <div class="bt-col-head bt-col-head-prev">
+            <span>◀</span> Prevention controls
+          </div>
+
+          <div class="bt-ctrl">
+            <div class="sdot sdot-ok" style="margin-top:3px;flex-shrink:0;"></div>
+            <div class="bt-ctrl-body">
+              <div class="bt-ctrl-name">Hot work permit signed and physically present at work location</div>
+              <div class="bt-ctrl-row">
+                <div class="bt-ctrl-chips">
+                  <span class="chip chip-neutral">Shift start</span>
+                  <span class="chip chip-positive">Active</span>
+                </div>
+              </div>
+              <div class="site-bar"><div class="site-track"><div class="site-fill" style="width:100%;"></div></div><div class="site-count">14/14 sites</div></div>
+            </div>
+          </div>
+
+          <div class="bt-ctrl is-crit">
+            <div class="sdot sdot-crit" style="margin-top:3px;flex-shrink:0;"></div>
+            <div class="bt-ctrl-body">
+              <div class="bt-ctrl-name">Fire watch confirmed in position before work commences</div>
+              <div class="bt-ctrl-row">
+                <div class="bt-ctrl-chips">
+                  <span class="chip chip-neutral">Shift start</span>
+                  <span class="chip chip-critical">2 not in place</span>
+                </div>
+              </div>
+              <div class="site-bar"><div class="site-track"><div class="site-fill is-fail" style="width:14%;"></div></div><div class="site-count is-fail">2/14 sites flagged</div></div>
+            </div>
+          </div>
+
+          <div class="bt-ctrl">
+            <div class="sdot sdot-ok" style="margin-top:3px;flex-shrink:0;"></div>
+            <div class="bt-ctrl-body">
+              <div class="bt-ctrl-name">Hot work area clear of flammables within 5m radius</div>
+              <div class="bt-ctrl-row">
+                <div class="bt-ctrl-chips">
+                  <span class="chip chip-neutral">Before ignition</span>
+                  <span class="chip chip-positive">Active</span>
+                </div>
+              </div>
+              <div class="site-bar"><div class="site-track"><div class="site-fill" style="width:100%;"></div></div><div class="site-count">14/14 sites</div></div>
+            </div>
+          </div>
+
+          <button class="bt-add-btn">+ Prevention control</button>
+        </div>
+
+        <!-- HAZARD NODE — centre -->
+        <div>
+          <div style="display:flex;justify-content:center;margin-bottom:12px;">
+            <span class="chip chip-critical" style="font-size:9px;">Unwanted event</span>
+          </div>
+          <div class="hazard-node">
+            <div class="hn-icon">🔥</div>
+            <div class="hn-label">Uncontrolled fire</div>
+            <div class="hn-name">Hot work ignition in uncontrolled environment</div>
+          </div>
+        </div>
+
+        <!-- MITIGATION column -->
+        <div class="bowtie-col">
+          <div class="bt-col-head bt-col-head-mit">
+            Mitigation controls <span>▶</span>
+          </div>
+
+          <div class="bt-ctrl">
+            <div class="sdot sdot-ok" style="margin-top:3px;flex-shrink:0;"></div>
+            <div class="bt-ctrl-body">
+              <div class="bt-ctrl-name">Fire extinguisher accessible within 5m of work location</div>
+              <div class="bt-ctrl-row">
+                <div class="bt-ctrl-chips">
+                  <span class="chip chip-neutral">Daily</span>
+                  <span class="chip chip-positive">Active</span>
+                </div>
+              </div>
+              <div class="site-bar"><div class="site-track"><div class="site-fill" style="width:100%;"></div></div><div class="site-count">14/14 sites</div></div>
+            </div>
+          </div>
+
+          <div class="bt-ctrl is-warn">
+            <div class="sdot sdot-warn" style="margin-top:3px;flex-shrink:0;"></div>
+            <div class="bt-ctrl-body">
+              <div class="bt-ctrl-name">Fire blanket rated for welding temperature (min 550°C)</div>
+              <div class="bt-ctrl-row">
+                <div class="bt-ctrl-chips">
+                  <span class="chip chip-neutral">Daily</span>
+                </div>
+              </div>
+              <div class="bt-df-flag">⏱ Defeating factor — service due in 23 days</div>
+              <div class="site-bar" style="margin-top:6px;"><div class="site-track"><div class="site-fill" style="width:86%;"></div></div><div class="site-count">12/14 sites</div></div>
+            </div>
+          </div>
+
+          <button class="bt-add-btn">+ Mitigation control</button>
+        </div>
+      </div>
+
+      <!-- Collapsed hazards row -->
+      <div style="border-top:1px solid var(--border);padding-top:16px;">
+        <div style="font-family:var(--mono);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-faint);margin-bottom:10px;">Other hazards — tap to expand</div>
+        <div class="bowtie-more">
+          <div class="bt-hazard-summary">
+            <div class="bhs-icon">💥</div>
+            <div><div class="bhs-name">Flash-back / explosion</div><div class="bhs-meta">3 controls · all in place</div></div>
+            <div class="sdot sdot-ok" style="margin-left:auto;"></div>
+            <span style="color:var(--text-faint);margin-left:8px;">›</span>
+          </div>
+          <div class="bt-hazard-summary">
+            <div class="bhs-icon">🫁</div>
+            <div><div class="bhs-name">Toxic fume inhalation</div><div class="bhs-meta">2 controls · 1 implementing</div></div>
+            <div class="sdot sdot-impl" style="margin-left:auto;"></div>
+            <span style="color:var(--text-faint);margin-left:8px;">›</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="screen-divider"></div>
+
+
+<!-- ══════════════════════════════════════════════
+     SCREEN 3 — CONTROL DETAIL (master-detail)
+══════════════════════════════════════════════ -->
+<div class="screen-wrap">
+  <div class="screen-label">
+    <span class="sl-num">03</span>
+    <span class="sl-name">Control detail</span>
+    <div class="sl-line"></div>
+    <span class="sl-note">master-detail — list left, full spec right</span>
+  </div>
+
+  <div class="app-shell">
+    <div class="sidebar">
+      <div class="sidebar-wordmark"><div class="wm-dot"></div>Hiviz</div>
+      <div class="sidebar-section-label">Risk</div>
+      <div class="sidebar-item active"><span class="si-icon">🛡️</span>Control Register</div>
+      <div class="sidebar-item"><span class="si-icon">📊</span>Verifications</div>
+    </div>
+
+    <div class="main">
+      <div class="top-bar">
+        <div class="top-bar-breadcrumb">
+          <span>Register</span><span class="bc-sep">›</span>
+          <span>Hot Work</span><span class="bc-sep">›</span>
+          <span class="bc-active">Fire blanket</span>
+        </div>
+        <div class="top-bar-title"></div>
+        <div class="top-bar-actions">
+          <button class="tb-btn tb-btn-ghost">History</button>
+          <button class="tb-btn tb-btn-primary">Edit control</button>
+        </div>
+      </div>
+
+      <div class="master-detail">
+        <!-- Master list -->
+        <div class="master-panel">
+          <div class="section-heading" style="padding:0 2px;margin-bottom:10px;">Hot Work controls</div>
+
+          <div class="master-item">
+            <div class="sdot sdot-ok" style="margin-top:3px;"></div>
+            <div class="mi-body">
+              <div class="mi-name">PTW signed and present</div>
+              <div class="mi-chips"><span class="chip chip-prevent" style="font-size:9px;">Prevention</span></div>
+            </div>
+          </div>
+          <div class="master-item">
+            <div class="sdot sdot-crit" style="margin-top:3px;"></div>
+            <div class="mi-body">
+              <div class="mi-name">Fire watch confirmed in position</div>
+              <div class="mi-chips"><span class="chip chip-prevent" style="font-size:9px;">Prevention</span><span class="chip chip-critical" style="font-size:9px;">2 sites</span></div>
+            </div>
+          </div>
+          <div class="master-item">
+            <div class="sdot sdot-ok" style="margin-top:3px;"></div>
+            <div class="mi-body">
+              <div class="mi-name">Area clear of flammables within 5m</div>
+              <div class="mi-chips"><span class="chip chip-prevent" style="font-size:9px;">Prevention</span></div>
+            </div>
+          </div>
+          <div class="master-item active">
+            <div class="sdot sdot-warn" style="margin-top:3px;"></div>
+            <div class="mi-body">
+              <div class="mi-name">Fire blanket rated for welding temperature</div>
+              <div class="mi-chips"><span class="chip chip-mitigate" style="font-size:9px;">Mitigation</span><span class="chip chip-caution" style="font-size:9px;">Defeating</span></div>
+            </div>
+          </div>
+          <div class="master-item">
+            <div class="sdot sdot-ok" style="margin-top:3px;"></div>
+            <div class="mi-body">
+              <div class="mi-name">Fire extinguisher accessible within 5m</div>
+              <div class="mi-chips"><span class="chip chip-mitigate" style="font-size:9px;">Mitigation</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Detail panel -->
+        <div class="detail-panel">
+          <div class="detail-header">
+            <div class="dh-type-row">
+              <span class="chip chip-mitigate">Mitigation</span>
+              <span class="chip chip-caution">Defeating factor active</span>
+              <span class="chip chip-neutral">Daily</span>
+            </div>
+            <div class="dh-name">Fire blanket rated for welding temperature (min 550°C)</div>
+            <div class="lifecycle-track">
+              <div class="lc-s">implementing</div>
+              <div class="lc-s lc-active-ok">active</div>
+              <div class="lc-s">not required</div>
+              <div class="lc-s">superseded</div>
+            </div>
+          </div>
+
+          <!-- Defeating factor — earns caution -->
+          <div class="df-box">
+            <div class="df-head">⏱ Defeating factor — service life approaching</div>
+            <div class="df-body">Fire blankets degrade under UV exposure and repeated heat cycles. Rated service life is 24 months from manufacture date. Control effectiveness is compromised when blanket is beyond service date or visibly damaged.</div>
+            <div class="df-expiry">Service expiry threshold: 23 days · 14 sites due · Clockwork alert fires at 30-day mark</div>
+          </div>
+
+          <div class="detail-grid">
+            <div class="detail-box">
+              <div class="db-label">Verification prompt</div>
+              <div class="db-content">"Is the fire blanket present at the work location, rated for welding temperatures (min 550°C), and undamaged? Check manufacture date tag."</div>
+            </div>
+            <div class="detail-box">
+              <div class="db-label">Failure consequence</div>
+              <div class="db-content" style="background:var(--status-critical-bg);border-radius:6px;padding:8px;border:1px solid var(--status-critical-border);">Inability to suppress early-stage fire from hot work ignition before escalation to uncontrolled fire.</div>
+            </div>
+          </div>
+
+          <!-- Site table -->
+          <div class="detail-box" style="padding:0;overflow:hidden;margin-bottom:0;">
+            <div style="padding:12px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+              <div style="font-family:var(--mono);font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--text-faint);">Site distribution — 14 active sites</div>
+              <span class="chip chip-neutral">14 active</span>
+            </div>
+            <table class="site-table">
+              <thead>
+                <tr><th>Site</th><th>Status</th><th>Last verified</th><th>Notes</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><div class="st-name">Northgate Open Cut</div></td>
+                  <td><span class="chip chip-positive">Active</span></td>
+                  <td><span style="font-family:var(--mono);font-size:11px;color:var(--text-faint);">Today 07:52</span></td>
+                  <td><span style="font-size:11px;color:var(--text-faint);">—</span></td>
+                </tr>
+                <tr>
+                  <td><div class="st-name">Iron Ore West</div></td>
+                  <td><span class="chip chip-caution">Defeating: 23d</span></td>
+                  <td><span style="font-family:var(--mono);font-size:11px;color:var(--text-faint);">Yesterday</span></td>
+                  <td><span style="font-size:11px;color:var(--status-caution);">Replacement scheduled next week</span></td>
+                </tr>
+                <tr>
+                  <td><div class="st-name">Sylvania Underground</div></td>
+                  <td><span class="chip chip-positive">Active</span></td>
+                  <td><span style="font-family:var(--mono);font-size:11px;color:var(--text-faint);">Today 06:30</span></td>
+                  <td><span style="font-size:11px;color:var(--text-faint);">—</span></td>
+                </tr>
+                <tr>
+                  <td><div class="st-name">Bremer Yard</div></td>
+                  <td><span class="chip chip-info">Implementing</span></td>
+                  <td><span style="font-family:var(--mono);font-size:11px;color:var(--text-faint);">Not started</span></td>
+                  <td><span style="font-size:11px;color:var(--status-info);">Blankets ordered — ETA 3 days</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="screen-divider"></div>
+
+
+<!-- ══════════════════════════════════════════════
+     SCREEN 4 — SITE ACCEPTANCE
+══════════════════════════════════════════════ -->
+<div class="screen-wrap">
+  <div class="screen-label">
+    <span class="sl-num">04</span>
+    <span class="sl-name">Site acceptance</span>
+    <div class="sl-line"></div>
+    <span class="sl-note">worksite manager — pending controls to review</span>
+  </div>
+
+  <div class="app-shell">
+    <div class="sidebar">
+      <div class="sidebar-wordmark"><div class="wm-dot"></div>Hiviz</div>
+      <div class="sidebar-section-label">Northgate Open Cut</div>
+      <div class="sidebar-item"><span class="si-icon">🏠</span>Site overview</div>
+      <div class="sidebar-item active"><span class="si-icon">🛡️</span>Controls <span class="sidebar-badge sb-info">2 new</span></div>
+      <div class="sidebar-item"><span class="si-icon">✅</span>Verifications</div>
+      <div class="sidebar-item"><span class="si-icon">📋</span>Talk delivery</div>
+    </div>
+
+    <div class="main">
+      <div class="top-bar">
+        <div class="top-bar-breadcrumb">
+          <span>Northgate Open Cut</span><span class="bc-sep">›</span><span class="bc-active">Pending controls</span>
+        </div>
+        <div class="top-bar-title"></div>
+        <div class="top-bar-actions">
+          <span style="font-size:12px;color:var(--text-muted);">2 controls awaiting review</span>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="accept-layout">
+          <div class="accept-main">
+            <!-- Pending control 1 -->
+            <div class="pending-card">
+              <div class="pc-header">
+                <div class="pc-source">
+                  <span>Global register</span>
+                  <span>·</span>
+                  <span>Hot Work</span>
+                  <span>·</span>
+                  <span>Pushed today</span>
+                  <span class="chip chip-info" style="font-size:9px;margin-left:4px;">New</span>
+                </div>
+                <div class="pc-name">Atmospheric monitoring in place before and during hot work in confined areas</div>
+                <div class="pc-desc">Continuous gas detection required when hot work is conducted within 6m of any confined space entry point or in enclosed areas with restricted ventilation.</div>
+                <div class="pc-consequence">
+                  <span>⚠️</span>
+                  <span>Failure consequence: exposure to toxic or flammable atmosphere without detection capability — risk of explosion or asphyxiation</span>
+                </div>
+              </div>
+              <div class="pc-meta-row">
+                <div class="pc-meta-item"><div class="pc-meta-label">Verification</div><div class="pc-meta-val">Shift start + event triggered</div></div>
+                <div class="pc-meta-item"><div class="pc-meta-label">Category</div><div class="pc-meta-val">Prevention</div></div>
+                <div class="pc-meta-item"><div class="pc-meta-label">Hazard</div><div class="pc-meta-val">Toxic fume inhalation</div></div>
+                <div class="pc-meta-item"><div class="pc-meta-label">Applies to</div><div class="pc-meta-val">This site — Hot Work near CSE</div></div>
+              </div>
+              <div class="pc-actions">
+                <button class="btn-accept">✓ Accept — apply global standard</button>
+                <button class="btn-modify">Modify — apply stricter local version</button>
+                <button class="btn-reject">Mark not required</button>
+                <div class="pc-actions-note">Decision logged with reason</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Accepted controls sidebar -->
+          <div class="accept-sidebar">
+            <div class="accept-sidebar-card">
+              <div class="asc-header">Accepted controls — Hot Work</div>
+              <div class="asc-item">
+                <div class="sdot sdot-ok"></div>
+                <div class="asc-body">
+                  <div class="asc-name">PTW signed and present at work location</div>
+                  <div class="asc-sub">Accepted 14 Mar · Global standard</div>
+                </div>
+                <span class="chip chip-positive" style="font-size:9px;">Active</span>
+              </div>
+              <div class="asc-item">
+                <div class="sdot sdot-ok"></div>
+                <div class="asc-body">
+                  <div class="asc-name">Fire watch confirmed in position</div>
+                  <div class="asc-sub">Accepted 14 Mar · Global standard</div>
+                </div>
+                <span class="chip chip-positive" style="font-size:9px;">Active</span>
+              </div>
+              <div class="asc-item is-modified">
+                <div class="sdot sdot-warn"></div>
+                <div class="asc-body">
+                  <div class="asc-name">Fire extinguisher accessible within 5m</div>
+                  <div class="asc-sub" style="color:var(--status-caution);">Local: within 3m (stricter)</div>
+                </div>
+                <span class="chip chip-caution" style="font-size:9px;">Modified</span>
+              </div>
+              <div class="asc-item">
+                <div class="sdot sdot-ok"></div>
+                <div class="asc-body">
+                  <div class="asc-name">Fire blanket rated for welding temperature</div>
+                  <div class="asc-sub">Accepted 14 Mar · Global standard</div>
+                </div>
+                <span class="chip chip-positive" style="font-size:9px;">Active</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="screen-divider"></div>
+
+
+<!-- ══════════════════════════════════════════════
+     SCREEN 5 — ALERT TABLE
+══════════════════════════════════════════════ -->
+<div class="screen-wrap">
+  <div class="screen-label">
+    <span class="sl-num">05</span>
+    <span class="sl-name">Cross-site alert</span>
+    <div class="sl-line"></div>
+    <span class="sl-note">safety manager — not-in-place across all sites</span>
+  </div>
+
+  <div class="app-shell">
+    <div class="sidebar">
+      <div class="sidebar-wordmark"><div class="wm-dot"></div>Hiviz</div>
+      <div class="sidebar-section-label">Risk</div>
+      <div class="sidebar-item active"><span class="si-icon">🛡️</span>Control Register <span class="sidebar-badge sb-crit">3</span></div>
+      <div class="sidebar-item"><span class="si-icon">📊</span>Verifications</div>
+    </div>
+
+    <div class="main">
+      <div class="top-bar">
+        <div class="top-bar-breadcrumb">
+          <span>Register</span><span class="bc-sep">›</span>
+          <span>Hot Work</span><span class="bc-sep">›</span>
+          <span class="bc-active">Fire watch confirmed in position</span>
+        </div>
+        <div class="top-bar-title"></div>
+        <div class="top-bar-actions">
+          <button class="tb-btn tb-btn-ghost">Export</button>
+          <button class="tb-btn tb-btn-primary">Push reminder</button>
+        </div>
+      </div>
+
+      <div class="content">
+        <!-- Stat row -->
+        <div class="alert-hero-row">
+          <div class="alert-stat-card is-crit">
+            <div class="asc-num is-crit">2</div>
+            <div><div class="asc-label"><strong>Sites not in place</strong></div><div class="asc-label">Control not verified this shift</div></div>
+          </div>
+          <div class="alert-stat-card">
+            <div class="asc-num is-ok">1</div>
+            <div><div class="asc-label"><strong>Resolved today</strong></div><div class="asc-label">Work held, control re-verified</div></div>
+          </div>
+          <div class="alert-stat-card">
+            <div class="asc-num is-dim">11</div>
+            <div><div class="asc-label"><strong>Sites in place</strong></div><div class="asc-label">Verified this shift</div></div>
+          </div>
+          <div class="alert-stat-card">
+            <div class="asc-num is-dim">14</div>
+            <div><div class="asc-label"><strong>Total active sites</strong></div><div class="asc-label">For this control</div></div>
+          </div>
+        </div>
+
+        <div class="alert-layout">
+          <div>
+            <table class="alert-table">
+              <thead>
+                <tr>
+                  <th>Site</th>
+                  <th>Status</th>
+                  <th>Detail</th>
+                  <th>Reported by</th>
+                  <th>Time</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- Not in place rows earn critical -->
+                <tr class="is-crit">
+                  <td><div class="at-site">Iron Ore West</div></td>
+                  <td><span class="chip chip-critical">Not in place</span></td>
+                  <td><div class="at-detail">Crew was preparing to commence hot work. Work hold recommended and issued.</div></td>
+                  <td><div style="font-size:12px;color:var(--text-body);">Aaron Reyes</div></td>
+                  <td><div class="at-time">7:52 · 1h 13m ago</div></td>
+                  <td style="text-align:right;cursor:pointer;color:var(--text-faint);">›</td>
+                </tr>
+                <tr class="is-crit">
+                  <td><div class="at-site">Bremer Yard</div></td>
+                  <td><span class="chip chip-critical">Not verified</span></td>
+                  <td><div class="at-detail">No verifier assigned to this slot. Schedule cannot run without a nominated verifier.</div></td>
+                  <td><div style="font-size:12px;color:var(--text-muted);">System</div></td>
+                  <td><div class="at-time">Overdue since 6:00</div></td>
+                  <td style="text-align:right;cursor:pointer;color:var(--text-faint);">›</td>
+                </tr>
+                <!-- Resolved — muted, positive status -->
+                <tr class="is-resolved">
+                  <td><div class="at-site">Northgate Open Cut</div></td>
+                  <td><span class="chip chip-positive">Resolved</span></td>
+                  <td><div class="at-detail">Permit retrieved, fire watch position re-confirmed. Work resumed at 08:14.</div></td>
+                  <td><div style="font-size:12px;color:var(--text-body);">Jake Morrow</div></td>
+                  <td><div class="at-time">Resolved 8:14</div></td>
+                  <td style="text-align:right;cursor:pointer;color:var(--text-faint);">›</td>
+                </tr>
+                <!-- Normal verified rows -->
+                <tr>
+                  <td><div class="at-site">Sylvania Underground</div></td>
+                  <td><span class="chip chip-positive">In place</span></td>
+                  <td><div class="at-detail">Verified shift start</div></td>
+                  <td><div style="font-size:12px;color:var(--text-muted);">Maria Santos</div></td>
+                  <td><div class="at-time">6:30</div></td>
+                  <td></td>
+                </tr>
+                <tr style="opacity:0.5;">
+                  <td><div class="at-site">Ravensthorpe</div></td>
+                  <td><span class="chip chip-positive">In place</span></td>
+                  <td><div class="at-detail">Verified shift start</div></td>
+                  <td><div style="font-size:12px;color:var(--text-muted);">T. Walsh</div></td>
+                  <td><div class="at-time">7:00</div></td>
+                  <td></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Insight panel -->
+          <div class="insight-panel">
+            <div class="ip-header">Safety manager insights</div>
+            <div class="ip-body">
+              <div class="ip-note is-crit">
+                <strong>Bremer Yard — structural issue.</strong> No control_verifier is assigned to the site. This isn't a one-off failure — the schedule cannot run without a nominated verifier. Assign one in site settings or the problem recurs every shift.
+              </div>
+              <div class="ip-note is-info">
+                Iron Ore West resolved within 22 minutes of flagging — the work hold mechanism worked. Consider this a near-miss for the process, not just the control.
+              </div>
+              <div class="ip-note is-info">
+                Fire watch non-compliance has appeared 3 times in 30 days across different sites. This pattern may warrant a critical insight — consider triggering one from the intelligence pipeline.
+              </div>
+              <button class="ip-push-btn">Push reminder to Bremer Yard</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

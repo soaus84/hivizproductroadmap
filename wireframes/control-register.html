@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hiviz — Control Register</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,300;1,9..144,400&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /*
+    STATUS TOKEN SYSTEM — same discipline as other experiments
+    Colour only where it carries status information.
+  */
+  :root {
+    --status-critical:        #FF3B30;
+    --status-critical-bg:     rgba(255,59,48,0.06);
+    --status-critical-border: rgba(255,59,48,0.22);
+    --status-caution:         #FF9500;
+    --status-caution-bg:      rgba(255,149,0,0.06);
+    --status-caution-border:  rgba(255,149,0,0.2);
+    --status-positive:        #00AB55;
+    --status-positive-bg:     rgba(0,171,85,0.06);
+    --status-positive-border: rgba(0,171,85,0.2);
+    --status-info:            #3B82F6;
+    --status-info-bg:         rgba(59,130,246,0.06);
+    --status-info-border:     rgba(59,130,246,0.2);
+
+    --bg:           #F5F3EF;
+    --surface:      #FFFFFF;
+    --surface-2:    #EFECEA;
+    --surface-3:    #E8E5E1;
+    --border:       #DDD9D3;
+    --border-mid:   #C8C4BC;
+    --text-primary: #1C1A17;
+    --text-body:    #3A3731;
+    --text-muted:   #7A756E;
+    --text-faint:   #ABA69F;
+    --app-dark:     #1C1A17;
+
+    --prevent-tint: rgba(59,130,246,0.04);
+    --prevent-border: rgba(59,130,246,0.15);
+    --mitigate-tint: rgba(245,158,11,0.04);
+    --mitigate-border: rgba(245,158,11,0.15);
+    --hazard-tint: rgba(255,59,48,0.04);
+    --hazard-border: rgba(255,59,48,0.18);
+
+    --sans: 'DM Sans', sans-serif;
+    --display: 'Fraunces', serif;
+    --mono: 'DM Mono', monospace;
+    --phone-w: 358px;
+    --r: 14px;
+    --r-sm: 10px;
+    --r-xs: 7px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #111110;
+    font-family: var(--sans);
+    padding: 52px 16px 80px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+  }
+
+  /* ── PAGE HEADER ── */
+  .ph { text-align: center; margin-bottom: 56px; max-width: 560px; }
+  .ph-eyebrow { font-family: var(--mono); font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: rgba(255,255,255,0.22); margin-bottom: 12px; }
+  .ph-title { font-family: var(--display); font-size: clamp(32px, 5vw, 46px); color: white; line-height: 1.1; letter-spacing: -0.02em; margin-bottom: 10px; font-weight: 300; }
+  .ph-title strong { font-weight: 600; }
+  .ph-desc { font-size: 13px; color: rgba(255,255,255,0.3); line-height: 1.7; }
+
+  .concept-note {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 8px;
+    padding: 14px 18px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.25);
+    line-height: 1.65;
+    max-width: 680px;
+    margin-bottom: 52px;
+    text-align: left;
+  }
+  .concept-note strong { color: rgba(255,255,255,0.45); }
+
+  /* ── SCREEN LAYOUT ── */
+  .screen-row { display: flex; gap: 16px; align-items: flex-start; justify-content: center; flex-wrap: wrap; margin-bottom: 64px; width: 100%; max-width: 1200px; }
+  .scene { display: flex; flex-direction: column; align-items: center; }
+  .cap { font-family: var(--mono); font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; color: rgba(255,255,255,0.15); text-align: center; margin-top: 10px; }
+  .row-label {
+    font-family: var(--display);
+    font-size: 18px;
+    font-weight: 300;
+    font-style: italic;
+    color: rgba(255,255,255,0.25);
+    width: 100%;
+    max-width: 1200px;
+    margin-bottom: 20px;
+    padding-left: 4px;
+  }
+
+  .arr { display: flex; align-items: center; padding-top: 110px; }
+  .arr-l { width: 14px; height: 1px; background: rgba(255,255,255,0.08); }
+  .arr-c { color: rgba(255,255,255,0.12); font-size: 12px; }
+
+  /* ── PHONE SHELL ── */
+  .phone {
+    width: var(--phone-w);
+    border-radius: 40px;
+    overflow: hidden;
+    box-shadow: 0 28px 72px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.04);
+    display: flex;
+    flex-direction: column;
+    background: var(--bg);
+    flex-shrink: 0;
+  }
+
+  /* ── STATUS BAR ── */
+  .sb { height: 48px; padding: 0 20px 9px; display: flex; align-items: flex-end; justify-content: space-between; flex-shrink: 0; }
+  .sb-dark { background: var(--app-dark); }
+  .sb-light { background: var(--bg); }
+  .sb-t { font-size: 15px; font-weight: 700; }
+  .sb-dark .sb-t { color: white; }
+  .sb-light .sb-t { color: var(--text-primary); }
+
+  /* ── APP CHROME ── */
+  .ah { background: var(--app-dark); padding: 10px 18px 16px; flex-shrink: 0; }
+  .ah-row { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
+  .ah-back { width: 28px; height: 28px; border-radius: 7px; background: rgba(255,255,255,0.08); border: none; color: white; font-size: 13px; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
+  .ah-title { font-size: 15px; font-weight: 700; color: white; flex: 1; line-height: 1.2; }
+  .ah-sub { font-size: 11px; color: rgba(255,255,255,0.35); }
+  .ah-meta { font-family: var(--mono); font-size: 10px; color: rgba(255,255,255,0.25); }
+
+  /* ── COMMON ── */
+  .body { background: var(--bg); flex: 1; padding: 13px; display: flex; flex-direction: column; gap: 9px; overflow: hidden; }
+  .sl { font-family: var(--mono); font-size: 9px; font-weight: 500; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-faint); padding: 2px 0; margin-top: 4px; }
+
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-sm); }
+  .card-p { padding: 12px 14px; }
+
+  .chip { font-family: var(--mono); font-size: 9px; font-weight: 500; padding: 2px 8px; border-radius: 4px; letter-spacing: 0.3px; display: inline-flex; align-items: center; gap: 4px; }
+  .chip-neutral  { background: var(--surface-2); color: var(--text-faint); }
+  .chip-critical { background: var(--status-critical-bg); color: var(--status-critical); }
+  .chip-caution  { background: var(--status-caution-bg); color: var(--status-caution); }
+  .chip-positive { background: var(--status-positive-bg); color: var(--status-positive); }
+  .chip-info     { background: var(--status-info-bg); color: var(--status-info); }
+  .chip-prevent  { background: rgba(59,130,246,0.08); color: #3B82F6; }
+  .chip-mitigate { background: rgba(245,158,11,0.08); color: #D97706; }
+
+  /* Status dot */
+  .sdot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .sdot-ok { background: var(--status-positive); }
+  .sdot-warn { background: var(--status-caution); }
+  .sdot-crit { background: var(--status-critical); }
+  .sdot-impl { background: var(--status-info); }
+  .sdot-neutral { background: var(--text-faint); }
+
+  .btn-primary { width: 100%; height: 48px; border-radius: var(--r-sm); background: var(--app-dark); color: white; border: none; font-family: var(--sans); font-size: 14px; font-weight: 700; cursor: pointer; }
+
+
+  /* ════════════════════════════════════════════
+     SCREEN 1 — WORK TYPE REGISTER
+  ════════════════════════════════════════════ */
+
+  .wt-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-sm);
+    padding: 13px;
+    display: flex;
+    gap: 11px;
+    align-items: flex-start;
+    cursor: pointer;
+  }
+
+  .wt-icon { width: 38px; height: 38px; border-radius: var(--r-xs); background: var(--surface-2); display: flex; align-items: center; justify-content: center; font-size: 19px; flex-shrink: 0; }
+  .wt-body { flex: 1; min-width: 0; }
+  .wt-name { font-size: 14px; font-weight: 700; color: var(--text-primary); margin-bottom: 3px; }
+  .wt-counts { font-size: 11px; color: var(--text-muted); margin-bottom: 7px; }
+  .wt-chips { display: flex; gap: 5px; flex-wrap: wrap; }
+
+  /* Health bar — neutral track, status fill only when relevant */
+  .health-bar { height: 3px; background: var(--surface-2); border-radius: 2px; margin-top: 8px; overflow: hidden; display: flex; gap: 1px; }
+  .hb-seg { height: 100%; border-radius: 1px; flex: 1; }
+
+  .wt-arrow { color: var(--text-faint); font-size: 14px; margin-top: 10px; }
+
+  /* Alert banner — earns critical colour */
+  .alert-banner {
+    background: var(--status-critical-bg);
+    border: 1px solid var(--status-critical-border);
+    border-radius: var(--r-sm);
+    padding: 10px 13px;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    font-size: 12px;
+    color: var(--status-critical);
+    line-height: 1.45;
+  }
+
+  .alert-banner strong { font-weight: 700; }
+
+
+  /* ════════════════════════════════════════════
+     SCREEN 2 — BOWTIE VIEW
+  ════════════════════════════════════════════ */
+
+  /* The bowtie: prevention | hazard | mitigation */
+  .bowtie-wrapper { padding: 12px 13px; }
+
+  .hazard-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 14px;
+    padding: 10px 12px;
+    background: var(--hazard-tint);
+    border: 1px solid var(--hazard-border);
+    border-radius: var(--r-sm);
+  }
+
+  .hazard-icon-ring {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: var(--status-critical-bg);
+    border: 1.5px solid var(--status-critical-border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px;
+    flex-shrink: 0;
+  }
+
+  .hazard-label { font-family: var(--mono); font-size: 9px; font-weight: 500; letter-spacing: 1px; text-transform: uppercase; color: var(--status-critical); opacity: 0.7; margin-bottom: 2px; }
+  .hazard-name { font-size: 13px; font-weight: 700; color: var(--text-primary); line-height: 1.3; }
+
+  /* Bowtie two-column layout */
+  .bowtie-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+  .bowtie-col {}
+  .bowtie-col-head {
+    font-family: var(--mono);
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 7px;
+    padding: 5px 10px;
+    border-radius: var(--r-xs);
+    text-align: center;
+  }
+
+  .bch-prevent { background: var(--prevent-tint); color: #3B82F6; border: 1px solid var(--prevent-border); }
+  .bch-mitigate { background: var(--mitigate-tint); color: #D97706; border: 1px solid var(--mitigate-border); }
+
+  .ctrl-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-xs);
+    padding: 9px 10px;
+    margin-bottom: 6px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .ctrl-item-top { display: flex; align-items: flex-start; gap: 7px; }
+  .ctrl-item-name { font-size: 12px; font-weight: 600; color: var(--text-primary); line-height: 1.35; flex: 1; }
+  .ctrl-item-chips { display: flex; gap: 4px; flex-wrap: wrap; }
+
+  /* Site health summary under each control */
+  .ctrl-sites { display: flex; align-items: center; gap: 6px; }
+  .ctrl-site-bar { flex: 1; height: 3px; background: var(--surface-2); border-radius: 2px; overflow: hidden; position: relative; }
+  .ctrl-site-fill { height: 100%; border-radius: 2px; background: var(--status-positive); }
+  .ctrl-site-fill.has-issue { background: var(--status-critical); }
+  .ctrl-sites-label { font-family: var(--mono); font-size: 9px; color: var(--text-faint); white-space: nowrap; }
+
+  /* Defeating factor warning — earns caution colour */
+  .defeating-flag {
+    background: var(--status-caution-bg);
+    border: 1px solid var(--status-caution-border);
+    border-radius: 5px;
+    padding: 4px 8px;
+    font-size: 10px;
+    color: var(--status-caution);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-weight: 600;
+  }
+
+  .add-ctrl-btn {
+    width: 100%;
+    padding: 9px;
+    background: transparent;
+    border: 1px dashed var(--border);
+    border-radius: var(--r-xs);
+    font-family: var(--sans);
+    font-size: 12px;
+    color: var(--text-faint);
+    cursor: pointer;
+    text-align: center;
+  }
+
+
+  /* ════════════════════════════════════════════
+     SCREEN 3 — CONTROL DETAIL
+  ════════════════════════════════════════════ */
+
+  .ctrl-detail-header { background: var(--app-dark); padding: 12px 18px 18px; }
+
+  .ctrl-detail-type-row { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; }
+  .ctrl-detail-name { font-family: var(--display); font-size: 18px; font-weight: 400; color: white; line-height: 1.3; }
+
+  .detail-section { padding: 13px; border-bottom: 1px solid var(--border); }
+  .detail-section:last-child { border-bottom: none; }
+  .detail-label { font-family: var(--mono); font-size: 9px; font-weight: 500; letter-spacing: 1.2px; text-transform: uppercase; color: var(--text-faint); margin-bottom: 6px; }
+  .detail-text { font-size: 13px; color: var(--text-body); line-height: 1.6; }
+
+  /* Lifecycle steps */
+  .lifecycle-row { display: flex; gap: 0; }
+  .lc-step { flex: 1; text-align: center; padding: 7px 4px; border: 1px solid var(--border); background: var(--surface); font-family: var(--mono); font-size: 9px; font-weight: 500; letter-spacing: 0.3px; color: var(--text-faint); }
+  .lc-step:first-child { border-radius: var(--r-xs) 0 0 var(--r-xs); }
+  .lc-step:last-child { border-radius: 0 var(--r-xs) var(--r-xs) 0; }
+  .lc-step + .lc-step { border-left: none; }
+
+  /* Active lifecycle step earns its colour based on what step it is */
+  .lc-step.active-impl { background: var(--status-info-bg); border-color: var(--status-info-border); color: var(--status-info); }
+  .lc-step.active-ok { background: var(--status-positive-bg); border-color: var(--status-positive-border); color: var(--status-positive); }
+  .lc-step.active-crit { background: var(--status-critical-bg); border-color: var(--status-critical-border); color: var(--status-critical); }
+
+  /* Site distribution list */
+  .site-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+  .site-row:last-child { border-bottom: none; }
+  .site-name { font-size: 12px; font-weight: 600; color: var(--text-primary); flex: 1; }
+  .site-status { font-family: var(--mono); font-size: 10px; font-weight: 500; }
+
+  /* Defeating factors */
+  .defeating-card {
+    background: var(--status-caution-bg);
+    border: 1px solid var(--status-caution-border);
+    border-radius: var(--r-sm);
+    padding: 12px 13px;
+    margin: 0 13px;
+    margin-bottom: 9px;
+  }
+
+  .df-head { font-size: 12px; font-weight: 700; color: var(--status-caution); margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
+  .df-desc { font-size: 12px; color: var(--text-body); line-height: 1.5; margin-bottom: 8px; }
+  .df-expires { font-family: var(--mono); font-size: 10px; color: var(--status-caution); }
+  .df-note { font-size: 11px; color: var(--text-muted); font-style: italic; margin-top: 5px; line-height: 1.4; }
+
+
+  /* ════════════════════════════════════════════
+     SCREEN 4 — SITE ACCEPTANCE (Worksite manager)
+  ════════════════════════════════════════════ */
+
+  .accept-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-sm);
+    overflow: hidden;
+  }
+
+  .accept-card-head {
+    padding: 12px 13px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .accept-card-source { font-family: var(--mono); font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: var(--text-faint); margin-bottom: 4px; }
+  .accept-card-name { font-size: 14px; font-weight: 700; color: var(--text-primary); line-height: 1.3; margin-bottom: 5px; }
+  .accept-card-desc { font-size: 12px; color: var(--text-muted); line-height: 1.5; margin-bottom: 8px; }
+
+  .accept-card-consequence {
+    background: var(--status-critical-bg);
+    border-radius: 6px;
+    padding: 7px 10px;
+    font-size: 11px;
+    color: var(--status-critical);
+    line-height: 1.4;
+    display: flex;
+    gap: 6px;
+    align-items: flex-start;
+  }
+
+  .accept-card-freq { display: flex; align-items: center; gap: 7px; padding: 9px 13px; background: var(--surface-2); font-size: 12px; color: var(--text-muted); }
+  .freq-badge { font-family: var(--mono); font-size: 10px; font-weight: 500; background: var(--surface); border: 1px solid var(--border); padding: 2px 8px; border-radius: 4px; color: var(--text-body); }
+
+  .accept-btns { display: flex; gap: 8px; padding: 11px 13px; }
+
+  .btn-accept {
+    flex: 2;
+    height: 42px;
+    border-radius: var(--r-xs);
+    background: var(--status-positive);
+    border: none;
+    color: white;
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .btn-modify {
+    flex: 1;
+    height: 42px;
+    border-radius: var(--r-xs);
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    font-family: var(--sans);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .btn-reject {
+    flex: 1;
+    height: 42px;
+    border-radius: var(--r-xs);
+    background: var(--status-critical-bg);
+    border: 1px solid var(--status-critical-border);
+    color: var(--status-critical);
+    font-family: var(--sans);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  /* Already-accepted controls in list */
+  .accepted-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 13px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-sm);
+  }
+
+  .accepted-row.modified { border-color: var(--status-caution-border); background: var(--status-caution-bg); }
+
+  /* ════════════════════════════════════════════
+     SCREEN 5 — ALERT / NOT IN PLACE
+  ════════════════════════════════════════════ */
+
+  .nip-header-bar {
+    background: var(--app-dark);
+    padding: 10px 18px 16px;
+  }
+
+  .nip-count-hero {
+    background: var(--status-critical-bg);
+    border: 1px solid var(--status-critical-border);
+    border-radius: var(--r-sm);
+    padding: 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .nip-big-num { font-size: 36px; font-weight: 800; color: var(--status-critical); line-height: 1; }
+  .nip-hero-label { font-size: 13px; font-weight: 700; color: var(--status-critical); margin-bottom: 2px; }
+  .nip-hero-sub { font-size: 11px; color: rgba(255,59,48,0.5); }
+
+  .nip-site-row {
+    background: var(--surface);
+    border: 1px solid var(--status-critical-border);
+    background: var(--status-critical-bg);
+    border-radius: var(--r-sm);
+    padding: 12px 13px;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+
+  .nip-site-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--status-critical); flex-shrink: 0; margin-top: 3px; }
+  .nip-site-name { font-size: 13px; font-weight: 700; color: var(--text-primary); margin-bottom: 2px; }
+  .nip-site-detail { font-size: 11px; color: var(--text-muted); line-height: 1.4; }
+  .nip-site-time { font-family: var(--mono); font-size: 10px; color: var(--status-critical); opacity: 0.7; margin-top: 4px; }
+
+  .nip-note-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-sm);
+    padding: 10px 13px;
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.5;
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+  }
+
+  .push-btn {
+    width: 100%;
+    height: 48px;
+    border-radius: var(--r-sm);
+    background: var(--app-dark);
+    border: none;
+    color: white;
+    font-family: var(--sans);
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 2px;
+  }
+
+  /* ── SECTION BREAKS ── */
+  .section-break {
+    width: 100%;
+    max-width: 1200px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 52px;
+  }
+  .sb-line { flex: 1; height: 1px; background: rgba(255,255,255,0.05); }
+  .sb-label { font-family: var(--display); font-size: 15px; font-weight: 300; font-style: italic; color: rgba(255,255,255,0.2); white-space: nowrap; }
+</style>
+</head>
+<body>
+
+<!-- PAGE HEADER -->
+<div class="ph">
+  <div class="ph-eyebrow">Hiviz · V5 · Control Register · Experiment</div>
+  <div class="ph-title">The <strong>bowtie</strong><br>made manageable</div>
+  <div class="ph-desc">Work type → hazard → prevention controls → mitigation controls. Lifecycle, defeating factors, push/accept. Five screens showing how this could work.</div>
+</div>
+
+<div class="concept-note">
+  <strong>Design considerations captured here:</strong>
+  Prevention controls (left of bowtie — stop it happening) are visually distinguished from mitigation controls (right of bowtie — limit consequences). The hazard/unwanted event sits at the centre. Lifecycle states: <strong>implementing → active → not required → superseded</strong>. Defeating factors: time-limited conditions that erode a control's effectiveness (UV degradation of a barrier, rated anchor approaching service life) — these demand scheduled clockwork, not just one-off verification. Site distribution bar gives instant health signal per control. Push/accept model lets global propagate with local accountability.
+</div>
+
+
+<!-- ════════════════════════════════════════════════════
+     ROW 1: Work Type Register + Bowtie View
+════════════════════════════════════════════════════ -->
+<div class="row-label">1 — The register and the bowtie</div>
+
+<div class="screen-row">
+
+  <!-- SCREEN 1: WORK TYPE REGISTER -->
+  <div class="scene">
+    <div class="phone" style="min-height:680px;">
+      <div class="sb sb-dark"><span class="sb-t" style="color:white;">9:00</span></div>
+      <div class="ah">
+        <div class="ah-row">
+          <div class="ah-title">Control Register</div>
+          <div class="ah-meta">Global</div>
+        </div>
+        <div class="ah-sub">Work types with critical controls</div>
+      </div>
+
+      <div class="body">
+        <!-- System-level alert — earns critical colour because it's actionable and urgent -->
+        <div class="alert-banner">
+          <span style="font-size:16px;flex-shrink:0;">⚠️</span>
+          <div>
+            <strong>3 sites reporting controls not in place</strong> across 2 work types. Needs attention today.
+          </div>
+        </div>
+
+        <div class="sl" style="margin-top:2px;">High risk work types</div>
+
+        <!-- Work type cards — neutral, status appears via dots and chips only -->
+        <div class="wt-card">
+          <div class="wt-icon">🔥</div>
+          <div class="wt-body">
+            <div class="wt-name">Hot Work</div>
+            <div class="wt-counts">8 controls across 3 hazards · 14 active sites</div>
+            <div class="wt-chips">
+              <span class="chip chip-critical">2 not in place</span>
+              <span class="chip chip-neutral">6 active sites</span>
+            </div>
+            <!-- Health bar: each segment = one control. Colour = status. -->
+            <div class="health-bar" style="margin-top:9px;">
+              <div class="hb-seg" style="background:var(--status-positive);"></div>
+              <div class="hb-seg" style="background:var(--status-positive);"></div>
+              <div class="hb-seg" style="background:var(--status-positive);"></div>
+              <div class="hb-seg" style="background:var(--status-positive);"></div>
+              <div class="hb-seg" style="background:var(--status-positive);"></div>
+              <div class="hb-seg" style="background:var(--status-positive);"></div>
+              <div class="hb-seg" style="background:var(--status-critical);"></div>
+              <div class="hb-seg" style="background:var(--status-critical);"></div>
+            </div>
+          </div>
+          <div class="wt-arrow">›</div>
+        </div>
+
+        <div class="wt-card">
+          <div class="wt-icon">🏗️</div>
+          <div class="wt-body">
+            <div class="wt-name">Work at Height</div>
+            <div class="wt-counts">6 controls across 2 hazards · 9 active sites</div>
+            <div class="wt-chips">
+              <span class="chip chip-caution">1 implementing</span>
+              <span class="chip chip-positive">All in place</span>
+            </div>
+            <div class="health-bar" style="margin-top:9px;">
+              <div class="hb-seg" style="background:var(--status-positive);"></div>
+              <div class="hb-seg" style="background:var(--status-positive);"></div>
+              <div class="hb-seg" style="background:var(--status-positive);"></div>
+              <div class="hb-seg" style="background:var(--status-positive);"></div>
+              <div class="hb-seg" style="background:var(--status-positive);"></div>
+              <div class="hb-seg" style="background:var(--status-info);"></div>
+            </div>
+          </div>
+          <div class="wt-arrow">›</div>
+        </div>
+
+        <div class="wt-card">
+          <div class="wt-icon">🚛</div>
+          <div class="wt-body">
+            <div class="wt-name">Heavy Vehicle</div>
+            <div class="wt-counts">7 controls across 2 hazards · 12 active sites</div>
+            <div class="wt-chips">
+              <span class="chip chip-positive">All in place</span>
+            </div>
+            <div class="health-bar" style="margin-top:9px;">
+              <div class="hb-seg" style="background:var(--status-positive);"></div>
+              <div class="hb-seg" style="background:var(--status-positive);"></div>
+              <div class="hb-seg" style="background:var(--status-positive);"></div>
+              <div class="hb-seg" style="background:var(--status-positive);"></div>
+              <div class="hb-seg" style="background:var(--status-positive);"></div>
+              <div class="hb-seg" style="background:var(--status-positive);"></div>
+              <div class="hb-seg" style="background:var(--status-positive);"></div>
+            </div>
+          </div>
+          <div class="wt-arrow">›</div>
+        </div>
+
+        <div class="wt-card" style="opacity:0.55;">
+          <div class="wt-icon">⚡</div>
+          <div class="wt-body">
+            <div class="wt-name">Electrical Isolation</div>
+            <div class="wt-counts">5 controls · 4 active sites</div>
+            <div class="wt-chips">
+              <span class="chip chip-neutral">All clear</span>
+            </div>
+          </div>
+          <div class="wt-arrow">›</div>
+        </div>
+      </div>
+    </div>
+    <div class="cap">1 · work type register</div>
+  </div>
+
+  <div class="arr"><div class="arr-l"></div><div class="arr-c">›</div><div class="arr-l"></div></div>
+
+  <!-- SCREEN 2: BOWTIE VIEW -->
+  <div class="scene">
+    <div class="phone" style="min-height:680px;">
+      <div class="sb sb-dark"><span class="sb-t" style="color:white;">9:01</span></div>
+      <div class="ah">
+        <div class="ah-row">
+          <div class="ah-back">←</div>
+          <div class="ah-title">Hot Work</div>
+        </div>
+        <div class="ah-sub">8 controls · 3 hazards · 14 sites</div>
+      </div>
+
+      <!-- Scrollable bowtie body -->
+      <div style="background:var(--bg);flex:1;overflow:hidden;padding:12px;">
+
+        <!-- Hazard 1 — with its controls either side -->
+        <div style="margin-bottom:12px;">
+          <div class="hazard-row">
+            <div class="hazard-icon-ring">🔥</div>
+            <div>
+              <div class="hazard-label">Unwanted event</div>
+              <div class="hazard-name">Uncontrolled fire — hot work ignition</div>
+            </div>
+          </div>
+
+          <div class="bowtie-cols">
+            <!-- PREVENTION column -->
+            <div class="bowtie-col">
+              <div class="bowtie-col-head bch-prevent">Prevention</div>
+
+              <div class="ctrl-item">
+                <div class="ctrl-item-top">
+                  <div class="sdot sdot-ok" style="margin-top:3px;"></div>
+                  <div class="ctrl-item-name">PTW signed and present at work location</div>
+                </div>
+                <div class="ctrl-item-chips">
+                  <span class="chip chip-neutral" style="font-size:9px;">Shift start</span>
+                </div>
+                <div class="ctrl-sites">
+                  <div class="ctrl-site-bar"><div class="ctrl-site-fill" style="width:100%;"></div></div>
+                  <div class="ctrl-sites-label">14/14</div>
+                </div>
+              </div>
+
+              <div class="ctrl-item" style="border-color:var(--status-critical-border);background:var(--status-critical-bg);">
+                <div class="ctrl-item-top">
+                  <div class="sdot sdot-crit" style="margin-top:3px;"></div>
+                  <div class="ctrl-item-name">Fire watch confirmed in position</div>
+                </div>
+                <div class="ctrl-item-chips">
+                  <span class="chip chip-neutral" style="font-size:9px;">Shift start</span>
+                </div>
+                <!-- Bar shows not-in-place sites in red -->
+                <div class="ctrl-sites">
+                  <div class="ctrl-site-bar">
+                    <div class="ctrl-site-fill has-issue" style="width:14%;"></div>
+                  </div>
+                  <div class="ctrl-sites-label" style="color:var(--status-critical);">2/14</div>
+                </div>
+              </div>
+
+              <button class="add-ctrl-btn">+ Prevention</button>
+            </div>
+
+            <!-- MITIGATION column -->
+            <div class="bowtie-col">
+              <div class="bowtie-col-head bch-mitigate">Mitigation</div>
+
+              <div class="ctrl-item">
+                <div class="ctrl-item-top">
+                  <div class="sdot sdot-ok" style="margin-top:3px;"></div>
+                  <div class="ctrl-item-name">Fire extinguisher accessible within 5m</div>
+                </div>
+                <div class="ctrl-item-chips">
+                  <span class="chip chip-neutral" style="font-size:9px;">Daily</span>
+                </div>
+                <div class="ctrl-sites">
+                  <div class="ctrl-site-bar"><div class="ctrl-site-fill" style="width:100%;"></div></div>
+                  <div class="ctrl-sites-label">14/14</div>
+                </div>
+              </div>
+
+              <div class="ctrl-item">
+                <div class="ctrl-item-top">
+                  <div class="sdot sdot-warn" style="margin-top:3px;"></div>
+                  <div class="ctrl-item-name">Fire blanket rated for welding temperature</div>
+                </div>
+                <!-- Defeating factor warning earns caution -->
+                <div class="defeating-flag">
+                  ⏱ Service due in 23d
+                </div>
+                <div class="ctrl-sites">
+                  <div class="ctrl-site-bar"><div class="ctrl-site-fill" style="width:86%;"></div></div>
+                  <div class="ctrl-sites-label">12/14</div>
+                </div>
+              </div>
+
+              <button class="add-ctrl-btn">+ Mitigation</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Hazard 2 — collapsed summary only -->
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);padding:11px 13px;margin-bottom:8px;display:flex;align-items:center;gap:10px;cursor:pointer;">
+          <div class="hazard-icon-ring" style="width:26px;height:26px;font-size:13px;">💥</div>
+          <div style="flex:1;">
+            <div style="font-size:12px;font-weight:700;color:var(--text-primary);">Flash-back / explosion</div>
+            <div style="font-size:11px;color:var(--text-muted);">3 controls · all in place</div>
+          </div>
+          <div class="sdot sdot-ok"></div>
+          <div style="color:var(--text-faint);font-size:13px;">›</div>
+        </div>
+
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);padding:11px 13px;display:flex;align-items:center;gap:10px;cursor:pointer;">
+          <div class="hazard-icon-ring" style="width:26px;height:26px;font-size:13px;">🫁</div>
+          <div style="flex:1;">
+            <div style="font-size:12px;font-weight:700;color:var(--text-primary);">Toxic fume inhalation</div>
+            <div style="font-size:11px;color:var(--text-muted);">2 controls · 1 implementing</div>
+          </div>
+          <div class="sdot sdot-impl"></div>
+          <div style="color:var(--text-faint);font-size:13px;">›</div>
+        </div>
+
+      </div>
+    </div>
+    <div class="cap">2 · bowtie — hazard + controls</div>
+  </div>
+
+</div>
+
+
+<!-- ════════════════════════════════════════════════════
+     ROW 2: Control Detail + Site Acceptance
+════════════════════════════════════════════════════ -->
+<div class="section-break"><div class="sb-line"></div><div class="sb-label">control detail & site acceptance</div><div class="sb-line"></div></div>
+
+<div class="screen-row">
+
+  <!-- SCREEN 3: CONTROL DETAIL -->
+  <div class="scene">
+    <div class="phone" style="min-height:680px;">
+      <div class="sb sb-dark"><span class="sb-t" style="color:white;">9:02</span></div>
+      <div class="ctrl-detail-header">
+        <div class="ah-row">
+          <div class="ah-back">←</div>
+          <div style="flex:1;"></div>
+        </div>
+        <div class="ctrl-detail-type-row">
+          <span class="chip chip-mitigate">Mitigation</span>
+          <span class="chip chip-caution">Defeating factor</span>
+        </div>
+        <div class="ctrl-detail-name">Fire blanket rated for welding temperature</div>
+      </div>
+
+      <div style="background:var(--bg);flex:1;overflow:hidden;display:flex;flex-direction:column;gap:0;">
+
+        <!-- Lifecycle — active step earns its colour -->
+        <div class="detail-section">
+          <div class="detail-label">Lifecycle</div>
+          <div class="lifecycle-row">
+            <div class="lc-step">implementing</div>
+            <div class="lc-step active-ok">active</div>
+            <div class="lc-step">not required</div>
+            <div class="lc-step">superseded</div>
+          </div>
+        </div>
+
+        <!-- Verification prompt -->
+        <div class="detail-section">
+          <div class="detail-label">Verification prompt</div>
+          <div class="detail-text">"Is the fire blanket present at the work location, rated for welding temperatures (min 550°C), and undamaged?"</div>
+        </div>
+
+        <!-- Defeating factor — earns caution treatment -->
+        <div class="defeating-card">
+          <div class="df-head">⏱ Defeating factor active</div>
+          <div class="df-desc">Fire blankets degrade under UV and repeated heat exposure. Rated service life: 24 months from manufacture date.</div>
+          <div class="df-expires">Service expiry: 23 days (14 sites due)</div>
+          <div class="df-note">Clockwork will alert verifier when within 30 days of service date. Control moves to status: degraded if not replaced.</div>
+        </div>
+
+        <!-- Site distribution -->
+        <div class="detail-section">
+          <div class="detail-label">Site status — 14 active sites</div>
+          <div class="site-row">
+            <div class="sdot sdot-ok"></div>
+            <div class="site-name">Northgate Open Cut</div>
+            <span class="chip chip-positive" style="font-size:9px;">Active</span>
+          </div>
+          <div class="site-row">
+            <div class="sdot sdot-ok"></div>
+            <div class="site-name">Sylvania Underground</div>
+            <span class="chip chip-positive" style="font-size:9px;">Active</span>
+          </div>
+          <div class="site-row">
+            <div class="sdot sdot-warn"></div>
+            <div class="site-name">Iron Ore West</div>
+            <span class="chip chip-caution" style="font-size:9px;">Defeating: 23d</span>
+          </div>
+          <div class="site-row">
+            <div class="sdot sdot-impl"></div>
+            <div class="site-name">Bremer Yard</div>
+            <span class="chip chip-info" style="font-size:9px;">Implementing</span>
+          </div>
+          <div style="font-size:11px;color:var(--text-faint);font-style:italic;font-family:var(--mono);padding-top:6px;">+10 more sites · all active</div>
+        </div>
+
+        <!-- Consequence -->
+        <div class="detail-section">
+          <div class="detail-label">Failure consequence</div>
+          <div style="background:var(--status-critical-bg);border:1px solid var(--status-critical-border);border-radius:6px;padding:8px 11px;font-size:12px;color:var(--text-body);line-height:1.5;">
+            Uncontrolled fire spread from hot work ignition. Inability to suppress early-stage fire before escalation.
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <div class="cap">3 · control detail + defeating factor</div>
+  </div>
+
+  <div class="arr"><div class="arr-l"></div><div class="arr-c">›</div><div class="arr-l"></div></div>
+
+  <!-- SCREEN 4: SITE ACCEPTANCE -->
+  <div class="scene">
+    <div class="phone" style="min-height:680px;">
+      <div class="sb sb-dark"><span class="sb-t" style="color:white;">9:15</span></div>
+      <div class="ah">
+        <div class="ah-row">
+          <div class="ah-back">←</div>
+          <div class="ah-title">Pending Controls</div>
+          <span class="chip chip-caution" style="font-size:10px;">2 new</span>
+        </div>
+        <div class="ah-sub">Northgate Open Cut · Hot Work register</div>
+      </div>
+
+      <div class="body">
+        <div class="sl">Review and accept</div>
+
+        <!-- Control pushed from global register — needs acceptance -->
+        <div class="accept-card">
+          <div class="accept-card-head">
+            <div class="accept-card-source">Global register · pushed today</div>
+            <div class="accept-card-name">Atmospheric monitoring in place before and during hot work in confined areas</div>
+            <div class="accept-card-desc">Continuous gas detection required when hot work is conducted within 6m of any confined space entry point or in enclosed areas with restricted ventilation.</div>
+            <div class="accept-card-consequence">
+              <span>⚠️</span>
+              <span>Failure: exposure to toxic or flammable atmosphere without detection capability</span>
+            </div>
+          </div>
+          <div class="accept-card-freq">
+            <span style="font-size:12px;color:var(--text-muted);">Verification:</span>
+            <span class="freq-badge">Shift start</span>
+            <span style="font-size:11px;color:var(--text-faint);">+ event triggered</span>
+          </div>
+          <div class="accept-btns">
+            <button class="btn-accept">✓ Accept</button>
+            <button class="btn-modify">Modify</button>
+            <button class="btn-reject">Reject</button>
+          </div>
+        </div>
+
+        <div class="sl" style="margin-top:2px;">Already accepted — this site</div>
+
+        <!-- Previously accepted controls — neutral, status only if relevant -->
+        <div class="accepted-row">
+          <div class="sdot sdot-ok"></div>
+          <div style="flex:1;">
+            <div style="font-size:12px;font-weight:600;color:var(--text-primary);">PTW signed and present at work location</div>
+            <div style="font-size:10px;color:var(--text-faint);font-family:var(--mono);">Accepted 14 Mar · Global standard</div>
+          </div>
+          <span class="chip chip-positive" style="font-size:9px;">Active</span>
+        </div>
+
+        <div class="accepted-row">
+          <div class="sdot sdot-ok"></div>
+          <div style="flex:1;">
+            <div style="font-size:12px;font-weight:600;color:var(--text-primary);">Fire watch confirmed in position</div>
+            <div style="font-size:10px;color:var(--text-faint);font-family:var(--mono);">Accepted 14 Mar · Global standard</div>
+          </div>
+          <span class="chip chip-positive" style="font-size:9px;">Active</span>
+        </div>
+
+        <!-- Locally modified — earns caution because it diverges from global -->
+        <div class="accepted-row modified">
+          <div class="sdot sdot-warn"></div>
+          <div style="flex:1;">
+            <div style="font-size:12px;font-weight:600;color:var(--text-primary);">Fire extinguisher accessible within 5m</div>
+            <div style="font-size:10px;color:var(--status-caution);font-family:var(--mono);">Local: within 3m (stricter) · Modified</div>
+          </div>
+          <span class="chip chip-caution" style="font-size:9px;">Modified</span>
+        </div>
+      </div>
+    </div>
+    <div class="cap">4 · site acceptance — push model</div>
+  </div>
+
+</div>
+
+
+<!-- ════════════════════════════════════════════════════
+     ROW 3: Alert View (not-in-place across sites)
+════════════════════════════════════════════════════ -->
+<div class="section-break"><div class="sb-line"></div><div class="sb-label">safety manager alert view</div><div class="sb-line"></div></div>
+
+<div class="screen-row">
+
+  <!-- SCREEN 5: ALERT — NOT IN PLACE ACROSS SITES -->
+  <div class="scene">
+    <div class="phone" style="min-height:580px;">
+      <div class="sb sb-dark"><span class="sb-t" style="color:white;">9:05</span></div>
+      <div class="nip-header-bar">
+        <div class="ah-row">
+          <div class="ah-back">←</div>
+          <div class="ah-title">Fire watch confirmed in position</div>
+        </div>
+        <div class="ah-sub">Hot Work · Prevention control · Shift start</div>
+      </div>
+
+      <div class="body">
+        <!-- Critical hero count -->
+        <div class="nip-count-hero">
+          <div class="nip-big-num">2</div>
+          <div>
+            <div class="nip-hero-label">Sites not in place</div>
+            <div class="nip-hero-sub">Control not verified this shift</div>
+          </div>
+        </div>
+
+        <div class="sl">Flagged this shift</div>
+
+        <!-- Site rows — earn critical treatment because the control is absent -->
+        <div class="nip-site-row">
+          <div class="nip-site-dot"></div>
+          <div style="flex:1;">
+            <div class="nip-site-name">Iron Ore West</div>
+            <div class="nip-site-detail">Flagged by Aaron Reyes at shift start. Crew was preparing to commence hot work. Work hold recommended.</div>
+            <div class="nip-site-time">Reported 7:52 · 1hr 13m ago</div>
+          </div>
+        </div>
+
+        <div class="nip-site-row">
+          <div class="nip-site-dot"></div>
+          <div style="flex:1;">
+            <div class="nip-site-name">Bremer Yard</div>
+            <div class="nip-site-detail">Not verified — verifier slot unassigned for today's shift. No supervisor nominated as fallback.</div>
+            <div class="nip-site-time">Overdue since 6:00 shift start</div>
+          </div>
+        </div>
+
+        <!-- Structural note — neutral, informational -->
+        <div class="nip-note-card">
+          <span style="font-size:15px;flex-shrink:0;">💡</span>
+          <span>Bremer Yard has no control_verifier assigned. The schedule can't run. Assign a verifier or set a fallback supervisor in site settings.</span>
+        </div>
+
+        <div class="sl">Resolved this shift</div>
+
+        <div style="background:var(--surface);border:1px solid var(--status-positive-border);border-radius:var(--r-sm);padding:11px 13px;display:flex;align-items:center;gap:10px;opacity:0.7;">
+          <div class="sdot sdot-ok"></div>
+          <div style="flex:1;">
+            <div style="font-size:12px;font-weight:600;color:var(--text-primary);">Northgate Open Cut</div>
+            <div style="font-size:11px;color:var(--text-muted);">Work held, permit retrieved, re-verified. Resolved 8:14.</div>
+          </div>
+          <span class="chip chip-positive" style="font-size:9px;">Resolved</span>
+        </div>
+
+        <button class="push-btn">Push reminder to Bremer Yard</button>
+      </div>
+    </div>
+    <div class="cap">5 · not-in-place alert — cross-site</div>
+  </div>
+
+  <!-- DEFEATING FACTOR LIFECYCLE NOTE -->
+  <div class="scene" style="max-width:300px;padding-top:20px;">
+    <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:24px;font-size:13px;color:rgba(255,255,255,0.3);line-height:1.75;">
+
+      <div style="font-family:var(--mono);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.2);margin-bottom:14px;">Lifecycle states</div>
+
+      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:24px;">
+        <div style="display:flex;align-items:flex-start;gap:10px;"><div class="sdot sdot-impl" style="margin-top:3px;flex-shrink:0;"></div><div><span style="color:rgba(255,255,255,0.55);font-weight:600;">Implementing</span><br>Being rolled out to sites. Verification schedule not yet active.</div></div>
+        <div style="display:flex;align-items:flex-start;gap:10px;"><div class="sdot sdot-ok" style="margin-top:3px;flex-shrink:0;"></div><div><span style="color:rgba(255,255,255,0.55);font-weight:600;">Active</span><br>Full clockwork running. Verifications scheduled and tracked.</div></div>
+        <div style="display:flex;align-items:flex-start;gap:10px;"><div class="sdot sdot-warn" style="margin-top:3px;flex-shrink:0;"></div><div><span style="color:rgba(255,149,0,0.7);font-weight:600;">Active — defeating factor</span><br>Control exists but a time-limited condition is eroding effectiveness. Clockwork demands attention before expiry.</div></div>
+        <div style="display:flex;align-items:flex-start;gap:10px;"><div class="sdot sdot-neutral" style="margin-top:3px;flex-shrink:0;"></div><div><span style="color:rgba(255,255,255,0.55);font-weight:600;">Not required</span><br>Valid at this site. Work type may not be active, or condition doesn't apply.</div></div>
+        <div style="display:flex;align-items:flex-start;gap:10px;"><div class="sdot sdot-neutral" style="margin-top:3px;flex-shrink:0;opacity:0.5;"></div><div><span style="color:rgba(255,255,255,0.4);font-weight:600;">Superseded</span><br>Replaced by a newer version of the control. History preserved.</div></div>
+      </div>
+
+      <div style="font-family:var(--mono);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.2);margin-bottom:12px;">Defeating factors — MVP note</div>
+      <div style="font-size:12px;color:rgba(255,255,255,0.25);line-height:1.7;">
+        Not required in MVP — but the schema needs to carry the concept from the start.<br><br>
+        A defeating factor is a condition that erodes a control's effectiveness over time or under specific circumstances: anchor rated life, UV degradation, calibration drift, filter saturation.<br><br>
+        The clockwork becomes meaningfully different when it tracks <strong style="color:rgba(255,255,255,0.4);">whether the control is effective</strong> — not just whether it is present.
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>
