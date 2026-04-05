@@ -1,0 +1,1212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hiviz — Platform Sitemap</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:       #0B0C0A;
+    --s1:       #111210;
+    --s2:       #181917;
+    --s3:       #1E2019;
+    --border:   #252722;
+    --border2:  #1C1E1A;
+    --t1: #E0DDD5;
+    --t2: #6A6860;
+    --t3: #313330;
+
+    /* Workspace colours */
+    --obs:   #5B9FFF; --obs-bg: rgba(91,159,255,0.08);  --obs-b: rgba(91,159,255,0.2);
+    --inc:   #F87171; --inc-bg: rgba(248,113,113,0.08); --inc-b: rgba(248,113,113,0.2);
+    --diag:  #34D399; --diag-bg:rgba(52,211,153,0.08);  --diag-b:rgba(52,211,153,0.2);
+    --risk:  #FB923C; --risk-bg:rgba(251,146,60,0.08);  --risk-b:rgba(251,146,60,0.2);
+    --ms:    #A78BFA; --ms-bg:  rgba(167,139,250,0.08); --ms-b:  rgba(167,139,250,0.2);
+    --core:  #94A3B8; --core-bg:rgba(148,163,184,0.06); --core-b:rgba(148,163,184,0.15);
+
+    /* Pattern colours */
+    --p-list:      #64748B;
+    --p-detail:    #0EA5E9;
+    --p-form:      #8B5CF6;
+    --p-pipeline:  #F59E0B;
+    --p-dashboard: #10B981;
+    --p-wizard:    #EC4899;
+    --p-table:     #6366F1;
+    --p-kanban:    #F97316;
+    --p-map:       #14B8A6;
+
+    /* Device */
+    --mobile:  #86EFAC;
+    --desktop: #93C5FD;
+    --both:    #FDE68A;
+
+    --mono: 'DM Mono', monospace;
+    --sans: 'DM Sans', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--t1);
+    font-family: var(--sans);
+    font-size: 13px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    padding: 32px 32px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 24px;
+    flex-wrap: wrap;
+    position: sticky;
+    top: 0;
+    background: rgba(11,12,10,0.96);
+    backdrop-filter: blur(12px);
+    z-index: 200;
+  }
+
+  .header-left {}
+  .header-title {
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--t1);
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .header-sub { font-size: 11px; color: var(--t2); }
+
+  .header-controls {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  /* Filter buttons */
+  .filter-group { display: flex; gap: 4px; align-items: center; }
+  .filter-label { font-family: var(--mono); font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: var(--t3); margin-right: 4px; }
+
+  .filter-btn {
+    font-family: var(--mono);
+    font-size: 10px;
+    padding: 3px 9px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    background: var(--s1);
+    color: var(--t2);
+    cursor: pointer;
+    transition: all 0.1s;
+    white-space: nowrap;
+  }
+  .filter-btn:hover { color: var(--t1); border-color: var(--t2); }
+  .filter-btn.active { color: var(--t1); background: var(--s2); border-color: var(--t2); }
+  .filter-btn.all { background: var(--s2); color: var(--t1); border-color: var(--border); }
+
+  /* Legend */
+  .legend { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; padding: 8px 32px; border-bottom: 1px solid var(--border2); background: var(--bg); }
+  .legend-section { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+  .legend-sep { width: 1px; height: 16px; background: var(--border); }
+
+  .leg { display: flex; align-items: center; gap: 5px; font-family: var(--mono); font-size: 9px; color: var(--t2); white-space: nowrap; }
+  .leg-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+  .leg-circle { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+  /* ── BODY ── */
+  .body { padding: 20px 32px 60px; }
+
+  /* ── WORKSPACE BLOCK ── */
+  .ws-block {
+    margin-bottom: 36px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .ws-block[data-ws="core"]  .ws-head { background: var(--core-bg); border-bottom-color: var(--core-b); }
+  .ws-block[data-ws="obs"]   .ws-head { background: var(--obs-bg);  border-bottom-color: var(--obs-b);  }
+  .ws-block[data-ws="inc"]   .ws-head { background: var(--inc-bg);  border-bottom-color: var(--inc-b);  }
+  .ws-block[data-ws="diag"]  .ws-head { background: var(--diag-bg); border-bottom-color: var(--diag-b); }
+  .ws-block[data-ws="risk"]  .ws-head { background: var(--risk-bg); border-bottom-color: var(--risk-b); }
+  .ws-block[data-ws="ms"]    .ws-head { background: var(--ms-bg);   border-bottom-color: var(--ms-b);   }
+
+  .ws-head {
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .ws-head-icon { font-size: 18px; flex-shrink: 0; }
+  .ws-head-name { font-size: 14px; font-weight: 700; flex: 1; }
+  .ws-head-count { font-family: var(--mono); font-size: 10px; color: var(--t2); }
+  .ws-head-toggle { color: var(--t2); font-size: 12px; transition: transform 0.2s; }
+  .ws-block.collapsed .ws-head-toggle { transform: rotate(-90deg); }
+
+  .ws-version-tag {
+    font-family: var(--mono);
+    font-size: 9px;
+    font-weight: 500;
+    padding: 2px 8px;
+    border-radius: 3px;
+    border: 1px solid;
+    letter-spacing: 0.3px;
+  }
+
+  /* ── SECTION ── */
+  .ws-body { background: var(--s1); }
+  .ws-block.collapsed .ws-body { display: none; }
+
+  .ws-section {
+    border-bottom: 1px solid var(--border2);
+  }
+  .ws-section:last-child { border-bottom: none; }
+
+  .ws-section-head {
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--s2);
+    border-bottom: 1px solid var(--border2);
+  }
+
+  .ws-section-label {
+    font-family: var(--mono);
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--t2);
+    flex: 1;
+  }
+
+  .device-tag {
+    font-family: var(--mono);
+    font-size: 9px;
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-weight: 500;
+  }
+
+  /* ── VIEW ROWS ── */
+  .views-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1px;
+    background: var(--border2);
+  }
+
+  .view-card {
+    background: var(--s1);
+    padding: 12px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    transition: background 0.1s;
+    cursor: default;
+    position: relative;
+  }
+
+  .view-card:hover { background: var(--s2); }
+
+  .view-card.dim { opacity: 0.35; }
+
+  /* Left workspace colour bar */
+  .view-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+  }
+
+  .ws-block[data-ws="core"] .view-card::before  { background: var(--core); }
+  .ws-block[data-ws="obs"]  .view-card::before  { background: var(--obs);  }
+  .ws-block[data-ws="inc"]  .view-card::before  { background: var(--inc);  }
+  .ws-block[data-ws="diag"] .view-card::before  { background: var(--diag); }
+  .ws-block[data-ws="risk"] .view-card::before  { background: var(--risk); }
+  .ws-block[data-ws="ms"]   .view-card::before  { background: var(--ms);   }
+
+  .view-card-top {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .view-name { font-size: 13px; font-weight: 700; color: var(--t1); flex: 1; line-height: 1.3; }
+  .view-version { font-family: var(--mono); font-size: 9px; font-weight: 500; padding: 2px 6px; border-radius: 3px; border: 1px solid; flex-shrink: 0; align-self: flex-start; }
+
+  .view-route {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--t3);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .view-desc { font-size: 11px; color: var(--t2); line-height: 1.5; }
+
+  .view-tags { display: flex; gap: 4px; flex-wrap: wrap; align-items: center; }
+
+  .view-pattern {
+    font-family: var(--mono);
+    font-size: 9px;
+    font-weight: 500;
+    padding: 2px 7px;
+    border-radius: 3px;
+    letter-spacing: 0.2px;
+  }
+
+  .view-device {
+    font-family: var(--mono);
+    font-size: 9px;
+    padding: 2px 7px;
+    border-radius: 3px;
+    font-weight: 500;
+  }
+
+  .child-indicator {
+    font-family: var(--mono);
+    font-size: 9px;
+    color: var(--t3);
+    padding-left: 2px;
+  }
+
+  /* View card depth indentation */
+  .view-card.depth-1 { padding-left: 28px; }
+  .view-card.depth-2 { padding-left: 44px; }
+  .view-card.depth-1 .view-card::before,
+  .view-card.depth-2 .view-card::before { display: none; }
+
+  /* ── PATTERNS ── */
+  .p-list      { background:rgba(100,116,139,0.12); color:var(--p-list); }
+  .p-detail    { background:rgba(14,165,233,0.1);   color:var(--p-detail); }
+  .p-form      { background:rgba(139,92,246,0.1);   color:var(--p-form); }
+  .p-pipeline  { background:rgba(245,158,11,0.1);   color:var(--p-pipeline); }
+  .p-dashboard { background:rgba(16,185,129,0.1);   color:var(--p-dashboard); }
+  .p-wizard    { background:rgba(236,72,153,0.1);   color:var(--p-wizard); }
+  .p-table     { background:rgba(99,102,241,0.1);   color:var(--p-table); }
+  .p-kanban    { background:rgba(249,115,22,0.1);   color:var(--p-kanban); }
+  .p-modal     { background:rgba(148,163,184,0.1);  color:#94A3B8; }
+  .p-map       { background:rgba(20,184,166,0.1);   color:var(--p-map); }
+
+  .d-mobile  { background:rgba(134,239,172,0.08); color:var(--mobile); }
+  .d-desktop { background:rgba(147,197,253,0.08); color:var(--desktop); }
+  .d-both    { background:rgba(253,230,138,0.08); color:var(--both); }
+
+  /* ── SUMMARY ROW ── */
+  .summary-bar {
+    display: flex;
+    gap: 0;
+    background: var(--s2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+  }
+
+  .sum-cell {
+    flex: 1;
+    min-width: 100px;
+    padding: 14px 16px;
+    border-right: 1px solid var(--border2);
+    text-align: center;
+  }
+  .sum-cell:last-child { border-right: none; }
+  .sum-n { font-size: 24px; font-weight: 800; color: var(--t1); line-height: 1; margin-bottom: 3px; }
+  .sum-l { font-family: var(--mono); font-size: 9px; color: var(--t3); letter-spacing: 0.5px; text-transform: uppercase; }
+
+  /* ── ROUTE HIERARCHY TREE ── */
+  .route-tree-section { margin-bottom: 32px; }
+  .rts-title {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--t2);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .rts-title::after { content: ''; flex: 1; height: 1px; background: var(--border2); }
+
+  .route-item {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    padding: 3px 0;
+    font-family: var(--mono);
+    font-size: 11px;
+  }
+
+  .route-indent { color: var(--t3); flex-shrink: 0; }
+  .route-segment { }
+  .route-path { color: var(--t2); }
+  .route-path .seg { color: var(--t1); }
+  .route-path .param { color: var(--p-detail); }
+  .route-view-name { color: var(--t3); font-size: 10px; margin-left: 8px; }
+  .route-tags { display: flex; gap: 3px; margin-left: 8px; }
+
+  /* ── PATTERN USAGE SECTION ── */
+  .pattern-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 28px;
+  }
+
+  .pattern-card {
+    background: var(--s1);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px;
+  }
+
+  .pc-head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .pc-badge { font-family: var(--mono); font-size: 10px; font-weight: 500; padding: 3px 9px; border-radius: 4px; }
+  .pc-count { font-family: var(--mono); font-size: 10px; color: var(--t3); margin-left: auto; }
+  .pc-desc { font-size: 12px; color: var(--t2); line-height: 1.55; margin-bottom: 8px; }
+  .pc-examples { font-family: var(--mono); font-size: 10px; color: var(--t3); line-height: 1.8; }
+
+  @media (max-width: 768px) {
+    .header { padding: 20px 16px 16px; }
+    .legend { padding: 8px 16px; }
+    .body { padding: 16px 16px 48px; }
+    .pattern-grid { grid-template-columns: 1fr 1fr; }
+    .views-grid { grid-template-columns: 1fr; }
+    .summary-bar { flex-wrap: wrap; }
+    .sum-cell { min-width: 80px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-left">
+    <div class="header-title">
+      <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      Hiviz · Platform Sitemap
+    </div>
+    <div class="header-sub">All views · routes · patterns · versions · device targets</div>
+  </div>
+  <div class="header-controls">
+    <div class="filter-group">
+      <span class="filter-label">Workspace</span>
+      <button class="filter-btn all active" onclick="filterWs('all')">All</button>
+      <button class="filter-btn" onclick="filterWs('core')" style="color:var(--core);border-color:var(--core-b);">Core</button>
+      <button class="filter-btn" onclick="filterWs('obs')"  style="color:var(--obs);border-color:var(--obs-b);">Field Intel</button>
+      <button class="filter-btn" onclick="filterWs('inc')"  style="color:var(--inc);border-color:var(--inc-b);">Incidents</button>
+      <button class="filter-btn" onclick="filterWs('diag')" style="color:var(--diag);border-color:var(--diag-b);">Diagnostic</button>
+      <button class="filter-btn" onclick="filterWs('risk')" style="color:var(--risk);border-color:var(--risk-b);">Risk</button>
+      <button class="filter-btn" onclick="filterWs('ms')"   style="color:var(--ms);border-color:var(--ms-b);">Mgmt System</button>
+    </div>
+    <div class="filter-group" style="margin-left:8px;">
+      <span class="filter-label">Version</span>
+      <button class="filter-btn" onclick="filterVersion('v1')">V1</button>
+      <button class="filter-btn" onclick="filterVersion('v2')">V2</button>
+      <button class="filter-btn" onclick="filterVersion('v3')">V3</button>
+      <button class="filter-btn" onclick="filterVersion('v4')">V4</button>
+      <button class="filter-btn" onclick="filterVersion('v5')">V5</button>
+      <button class="filter-btn" onclick="filterVersion('v6')">V6</button>
+    </div>
+    <div class="filter-group" style="margin-left:8px;">
+      <span class="filter-label">Device</span>
+      <button class="filter-btn" onclick="filterDevice('mobile')" style="color:var(--mobile);">Mobile</button>
+      <button class="filter-btn" onclick="filterDevice('desktop')" style="color:var(--desktop);">Desktop</button>
+    </div>
+    <button class="filter-btn" onclick="expandAll()" style="margin-left:8px;">Expand all</button>
+    <button class="filter-btn" onclick="collapseAll()">Collapse all</button>
+  </div>
+</div>
+
+<!-- LEGEND -->
+<div class="legend">
+  <div class="legend-section">
+    <span class="filter-label" style="margin-right:2px;">Pattern</span>
+    <div class="leg"><div class="leg-dot p-dashboard" style="border-radius:2px;"></div>Dashboard</div>
+    <div class="leg"><div class="leg-dot p-list"      style="border-radius:2px;"></div>List</div>
+    <div class="leg"><div class="leg-dot p-detail"    style="border-radius:2px;"></div>Detail</div>
+    <div class="leg"><div class="leg-dot p-form"      style="border-radius:2px;"></div>Form</div>
+    <div class="leg"><div class="leg-dot p-wizard"    style="border-radius:2px;"></div>Wizard</div>
+    <div class="leg"><div class="leg-dot p-kanban"    style="border-radius:2px;"></div>Kanban</div>
+    <div class="leg"><div class="leg-dot p-table"     style="border-radius:2px;"></div>Table</div>
+    <div class="leg"><div class="leg-dot p-pipeline"  style="border-radius:2px;"></div>Pipeline</div>
+    <div class="leg"><div class="leg-dot p-modal"     style="border-radius:2px;"></div>Modal</div>
+    <div class="leg"><div class="leg-dot p-map"       style="border-radius:2px;"></div>Map / Diagram</div>
+  </div>
+  <div class="legend-sep"></div>
+  <div class="legend-section">
+    <span class="filter-label" style="margin-right:2px;">Device</span>
+    <div class="leg"><div class="leg-circle" style="background:var(--mobile);"></div>Mobile</div>
+    <div class="leg"><div class="leg-circle" style="background:var(--desktop);"></div>Desktop</div>
+    <div class="leg"><div class="leg-circle" style="background:var(--both);"></div>Both</div>
+  </div>
+</div>
+
+<!-- BODY -->
+<div class="body">
+
+<!-- SUMMARY BAR -->
+<div class="summary-bar">
+  <div class="sum-cell"><div class="sum-n">67</div><div class="sum-l">Total views</div></div>
+  <div class="sum-cell"><div class="sum-n">5</div><div class="sum-l">Workspaces</div></div>
+  <div class="sum-cell"><div class="sum-n">24</div><div class="sum-l">V1 views</div></div>
+  <div class="sum-cell"><div class="sum-n">38</div><div class="sum-l">Mobile views</div></div>
+  <div class="sum-cell"><div class="sum-n">29</div><div class="sum-l">Desktop views</div></div>
+  <div class="sum-cell"><div class="sum-n">10</div><div class="sum-l">View patterns</div></div>
+  <div class="sum-cell"><div class="sum-n">3</div><div class="sum-l">Shared layouts</div></div>
+</div>
+
+
+<!-- ════════════════════════════
+     CORE / GLOBAL
+════════════════════════════ -->
+<div class="ws-block" data-ws="core" id="ws-core">
+  <div class="ws-head" onclick="toggleWs('core')">
+    <div class="ws-head-icon">🏗️</div>
+    <div class="ws-head-name" style="color:var(--core);">Core Platform</div>
+    <span class="ws-version-tag" style="background:var(--core-bg);color:var(--core);border-color:var(--core-b);">Always on</span>
+    <div class="ws-head-count">Auth · Org model · Navigation · Worksite dashboard</div>
+    <div class="ws-head-toggle">▾</div>
+  </div>
+  <div class="ws-body">
+
+    <!-- Auth -->
+    <div class="ws-section">
+      <div class="ws-section-head">
+        <div class="ws-section-label">Authentication</div>
+        <span class="device-tag d-both">Both</span>
+      </div>
+      <div class="views-grid">
+        <div class="view-card" data-ws="core" data-version="v1" data-device="both">
+          <div class="view-card-top"><div class="view-name">Login</div><span class="view-version" style="background:var(--core-bg);color:var(--core);border-color:var(--core-b);">V1</span></div>
+          <div class="view-route">/login</div>
+          <div class="view-desc">Email + password. Role-based redirect on success. V3: SSO/SAML entry point added.</div>
+          <div class="view-tags"><span class="view-pattern p-form">Form</span><span class="view-device d-both">Both</span></div>
+        </div>
+        <div class="view-card" data-ws="core" data-version="v1" data-device="both">
+          <div class="view-card-top"><div class="view-name">Accept invite / set password</div><span class="view-version" style="background:var(--core-bg);color:var(--core);border-color:var(--core-b);">V1</span></div>
+          <div class="view-route">/invite/[token]</div>
+          <div class="view-desc">First login flow for new users added by org admin. Sets password and confirms role.</div>
+          <div class="view-tags"><span class="view-pattern p-form">Form</span><span class="view-device d-both">Both</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Worksite Dashboard -->
+    <div class="ws-section">
+      <div class="ws-section-head">
+        <div class="ws-section-label">Worksite dashboard — layered by enabled workspaces</div>
+        <span class="device-tag d-both">Both</span>
+      </div>
+      <div class="views-grid">
+        <div class="view-card" data-ws="core" data-version="v1" data-device="both">
+          <div class="view-card-top"><div class="view-name">Worksite dashboard</div><span class="view-version" style="background:var(--core-bg);color:var(--core);border-color:var(--core-b);">V1</span></div>
+          <div class="view-route">/sites/[site_id]</div>
+          <div class="view-desc">Central hub. Layers by enabled workspace: atrophy (always) + control health (Risk) + document coverage (MS) + investigation status (Incidents). Adapts to workspace_config.</div>
+          <div class="view-tags"><span class="view-pattern p-dashboard">Dashboard</span><span class="view-device d-both">Both</span></div>
+        </div>
+        <div class="view-card" data-ws="core" data-version="v1" data-device="desktop">
+          <div class="view-card-top"><div class="view-name">Sites list / org overview</div><span class="view-version" style="background:var(--core-bg);color:var(--core);border-color:var(--core-b);">V1</span></div>
+          <div class="view-route">/sites</div>
+          <div class="view-desc">All sites in user's scope. Ranked by atrophy. Per-site status row. Workspace health columns shown if workspace enabled.</div>
+          <div class="view-tags"><span class="view-pattern p-list">List</span><span class="view-device d-desktop">Desktop</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Settings -->
+    <div class="ws-section">
+      <div class="ws-section-head">
+        <div class="ws-section-label">Organisation settings</div>
+        <span class="device-tag d-desktop">Desktop</span>
+      </div>
+      <div class="views-grid">
+        <div class="view-card" data-ws="core" data-version="v1" data-device="desktop">
+          <div class="view-card-top"><div class="view-name">Workspace configuration</div><span class="view-version" style="background:var(--core-bg);color:var(--core);border-color:var(--core-b);">V1</span></div>
+          <div class="view-route">/settings/workspaces</div>
+          <div class="view-desc">Enable / disable workspaces per client. Management System phase selector (1/2/3). Toggle flags per workspace. Requires org admin role.</div>
+          <div class="view-tags"><span class="view-pattern p-form">Form</span><span class="view-device d-desktop">Desktop</span></div>
+        </div>
+        <div class="view-card" data-ws="core" data-version="v1" data-device="desktop">
+          <div class="view-card-top"><div class="view-name">Users and roles</div><span class="view-version" style="background:var(--core-bg);color:var(--core);border-color:var(--core-b);">V1</span></div>
+          <div class="view-route">/settings/users</div>
+          <div class="view-desc">Invite users, assign roles. Worksite role slot assignments. Deactivate users.</div>
+          <div class="view-tags"><span class="view-pattern p-table">Table</span><span class="view-device d-desktop">Desktop</span></div>
+        </div>
+        <div class="view-card" data-ws="core" data-version="v1" data-device="desktop">
+          <div class="view-card-top"><div class="view-name">Worksite settings</div><span class="view-version" style="background:var(--core-bg);color:var(--core);border-color:var(--core-b);">V1</span></div>
+          <div class="view-route">/sites/[site_id]/settings</div>
+          <div class="view-desc">Site name, region assignment. Role slot assignments (supervisor, manager, safety_professional, control_verifier). Active work types.</div>
+          <div class="view-tags"><span class="view-pattern p-form">Form</span><span class="view-device d-desktop">Desktop</span></div>
+        </div>
+        <div class="view-card" data-ws="core" data-version="v3" data-device="desktop">
+          <div class="view-card-top"><div class="view-name">SSO / SAML configuration</div><span class="view-version" style="background:var(--inc-bg);color:var(--inc);border-color:var(--inc-b);">V3</span></div>
+          <div class="view-route">/settings/sso</div>
+          <div class="view-desc">Enterprise SSO setup. IdP configuration, role mapping from IdP groups.</div>
+          <div class="view-tags"><span class="view-pattern p-form">Form</span><span class="view-device d-desktop">Desktop</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════
+     FIELD INTELLIGENCE
+════════════════════════════ -->
+<div class="ws-block" data-ws="obs" id="ws-obs">
+  <div class="ws-head" onclick="toggleWs('obs')">
+    <div class="ws-head-icon">👁️</div>
+    <div class="ws-head-name" style="color:var(--obs);">Field Intelligence</div>
+    <span class="ws-version-tag" style="background:var(--obs-bg);color:var(--obs);border-color:var(--obs-b);">V1 → V2</span>
+    <div class="ws-head-count">Observation · Insight · Talk · Enquiry · Action · Visit · Analytics</div>
+    <div class="ws-head-toggle">▾</div>
+  </div>
+  <div class="ws-body">
+
+    <!-- Supervisor mobile -->
+    <div class="ws-section">
+      <div class="ws-section-head">
+        <div class="ws-section-label">Supervisor — mobile-primary</div>
+        <span class="device-tag d-mobile">Mobile</span>
+      </div>
+      <div class="views-grid">
+        <div class="view-card" data-ws="obs" data-version="v1" data-device="mobile">
+          <div class="view-card-top"><div class="view-name">Supervisor home</div><span class="view-version" style="background:var(--obs-bg);color:var(--obs);border-color:var(--obs-b);">V1</span></div>
+          <div class="view-route">/home</div>
+          <div class="view-desc">Primary action surface. Talk ready card, pending actions, open enquiries, recent observations. Context-aware — surfaces most urgent item first.</div>
+          <div class="view-tags"><span class="view-pattern p-dashboard">Dashboard</span><span class="view-device d-mobile">Mobile</span></div>
+        </div>
+        <div class="view-card" data-ws="obs" data-version="v1" data-device="mobile">
+          <div class="view-card-top"><div class="view-name">Capture — FAB / full page</div><span class="view-version" style="background:var(--obs-bg);color:var(--obs);border-color:var(--obs-b);">V1</span></div>
+          <div class="view-route">/capture</div>
+          <div class="view-desc">Type-agnostic. Free text what was observed. Work type selector. Stop-work toggle (context-dependent). Photo upload. Offline-first — queues locally on submit.</div>
+          <div class="view-tags"><span class="view-pattern p-form">Form</span><span class="view-device d-mobile">Mobile</span></div>
+        </div>
+        <div class="view-card" data-ws="obs" data-version="v1" data-device="mobile">
+          <div class="view-card-top"><div class="view-name">Observation records</div><span class="view-version" style="background:var(--obs-bg);color:var(--obs);border-color:var(--obs-b);">V1</span></div>
+          <div class="view-route">/records</div>
+          <div class="view-desc">Supervisor's own observation history. Enrichment status indicators. Tap to view AI enrichment output — signal type, energy, barrier, rationale.</div>
+          <div class="view-tags"><span class="view-pattern p-list">List</span><span class="view-device d-mobile">Mobile</span></div>
+        </div>
+        <div class="view-card" data-ws="obs" data-version="v1" data-device="mobile">
+          <div class="view-card-top"><div class="view-name">Observation detail</div><span class="view-version" style="background:var(--obs-bg);color:var(--obs);border-color:var(--obs-b);">V1</span></div>
+          <div class="view-route">/records/[obs_id]</div>
+          <div class="view-desc">Full observation text. AI enrichment output with confidence scores and rationale. Sync and enrichment status lifecycle visible.</div>
+          <div class="view-tags"><span class="view-pattern p-detail">Detail</span><span class="view-device d-mobile">Mobile</span></div>
+        </div>
+        <div class="view-card" data-ws="obs" data-version="v1" data-device="mobile">
+          <div class="view-card-top"><div class="view-name">Talk delivery</div><span class="view-version" style="background:var(--obs-bg);color:var(--obs);border-color:var(--obs-b);">V1</span></div>
+          <div class="view-route">/talk/[talk_id]</div>
+          <div class="view-desc">Full talk content. Hazard intro, main content, key actions, discussion questions. Crew count stepper. Deliver button — records delivered_at, attendee_count. KISS pattern.</div>
+          <div class="view-tags"><span class="view-pattern p-detail">Detail</span><span class="view-device d-mobile">Mobile</span></div>
+        </div>
+        <div class="view-card" data-ws="obs" data-version="v1" data-device="mobile">
+          <div class="view-card-top"><div class="view-name">Enquiry response</div><span class="view-version" style="background:var(--obs-bg);color:var(--obs);border-color:var(--obs-b);">V1</span></div>
+          <div class="view-route">/enquiry/[enquiry_id]/respond</div>
+          <div class="view-desc">One question at a time — same pattern as verification. Progress bar. Free text (V1) or structured options (V2). Context pill. Submit confirmation with "what happens next."</div>
+          <div class="view-tags"><span class="view-pattern p-wizard">Wizard</span><span class="view-device d-mobile">Mobile</span></div>
+        </div>
+        <div class="view-card" data-ws="obs" data-version="v1" data-device="mobile">
+          <div class="view-card-top"><div class="view-name">Actions list</div><span class="view-version" style="background:var(--obs-bg);color:var(--obs);border-color:var(--obs-b);">V1</span></div>
+          <div class="view-route">/actions</div>
+          <div class="view-desc">Assigned corrective actions. Overdue earns critical colour. Tap circle to complete — inline note panel drops in (optional). Source attribution visible per action. All-clear state.</div>
+          <div class="view-tags"><span class="view-pattern p-list">List</span><span class="view-device d-mobile">Mobile</span></div>
+        </div>
+        <div class="view-card" data-ws="obs" data-version="v1" data-device="mobile">
+          <div class="view-card-top"><div class="view-name">Context question response</div><span class="view-version" style="background:var(--obs-bg);color:var(--obs);border-color:var(--obs-b);">V1</span></div>
+          <div class="view-route">/capture/[obs_id]/context</div>
+          <div class="view-desc">Fires when enrichment confidence &lt;0.70. Single targeted follow-up question. Answer triggers re-enrichment. Minimal — one question, one input, submit.</div>
+          <div class="view-tags"><span class="view-pattern p-form">Form</span><span class="view-device d-mobile">Mobile</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Manager mobile -->
+    <div class="ws-section">
+      <div class="ws-section-head">
+        <div class="ws-section-label">Manager — mobile-primary</div>
+        <span class="device-tag d-mobile">Mobile</span>
+      </div>
+      <div class="views-grid">
+        <div class="view-card" data-ws="obs" data-version="v1" data-device="mobile">
+          <div class="view-card-top"><div class="view-name">Manager home / sites overview</div><span class="view-version" style="background:var(--obs-bg);color:var(--obs);border-color:var(--obs-b);">V1</span></div>
+          <div class="view-route">/manager/home</div>
+          <div class="view-desc">Sites ranked by atrophy. Per-site colour-coded status. Plan Visit CTA per site. Workspace health badges if enabled (Risk, MS).</div>
+          <div class="view-tags"><span class="view-pattern p-list">List</span><span class="view-device d-mobile">Mobile</span></div>
+        </div>
+        <div class="view-card" data-ws="obs" data-version="v1" data-device="mobile">
+          <div class="view-card-top"><div class="view-name">Plan a visit — wizard</div><span class="view-version" style="background:var(--obs-bg);color:var(--obs);border-color:var(--obs-b);">V1</span></div>
+          <div class="view-route">/visits/new</div>
+          <div class="view-desc">3-step: Site → Date → Focus topics. AI-recommended topics with source badges (trend / investigation / AI). Creates visit_plan record.</div>
+          <div class="view-tags"><span class="view-pattern p-wizard">Wizard</span><span class="view-device d-mobile">Mobile</span></div>
+        </div>
+        <div class="view-card" data-ws="obs" data-version="v1" data-device="mobile">
+          <div class="view-card-top"><div class="view-name">Active visit</div><span class="view-version" style="background:var(--obs-bg);color:var(--obs);border-color:var(--obs-b);">V1</span></div>
+          <div class="view-route">/visits/[visit_id]/active</div>
+          <div class="view-desc">Focus prompts above observation capture. Observations tagged to visit_id. Progress through selected topics. Close visit summary.</div>
+          <div class="view-tags"><span class="view-pattern p-form">Form</span><span class="view-device d-mobile">Mobile</span></div>
+        </div>
+        <div class="view-card" data-ws="obs" data-version="v2" data-device="mobile">
+          <div class="view-card-top"><div class="view-name">Visit briefing pack</div><span class="view-version" style="background:var(--obs-bg);color:var(--obs);border-color:var(--obs-b);">V2</span></div>
+          <div class="view-route">/visits/[visit_id]/briefing</div>
+          <div class="view-desc">Pre-visit: read-only — headline, site reading, focus areas, open actions, FW signal, active insights. Active visit: focus areas become capture prompts, other sections collapse. Two-state transition on Start Visit.</div>
+          <div class="view-tags"><span class="view-pattern p-detail">Detail</span><span class="view-device d-mobile">Mobile</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Safety manager desktop -->
+    <div class="ws-section">
+      <div class="ws-section-head">
+        <div class="ws-section-label">Safety manager — desktop-primary</div>
+        <span class="device-tag d-desktop">Desktop</span>
+      </div>
+      <div class="views-grid">
+        <div class="view-card" data-ws="obs" data-version="v1" data-device="desktop">
+          <div class="view-card-top"><div class="view-name">Insights pipeline — Kanban</div><span class="view-version" style="background:var(--obs-bg);color:var(--obs);border-color:var(--obs-b);">V1</span></div>
+          <div class="view-route">/workbench/insights</div>
+          <div class="view-desc">Four columns: Prioritise → Learn → Improve → Resolved. Cards show source, work type, FW factor tags. pipeline_stage written on move. Detail panel slides in on card tap.</div>
+          <div class="view-tags"><span class="view-pattern p-kanban">Kanban</span><span class="view-device d-desktop">Desktop</span></div>
+        </div>
+        <div class="view-card" data-ws="obs" data-version="v1" data-device="desktop">
+          <div class="view-card-top"><div class="view-name">Insight detail panel</div><span class="view-version" style="background:var(--obs-bg);color:var(--obs);border-color:var(--obs-b);">V1</span></div>
+          <div class="view-route">/workbench/insights/[insight_id]</div>
+          <div class="view-desc">State-based — content adapts to pipeline_stage. Source observations. FW classification with rationale inline. Endorsement count. Stage controls. Approve / Edit / Reject.</div>
+          <div class="view-tags"><span class="view-pattern p-detail">Detail</span><span class="view-device d-desktop">Desktop</span></div>
+        </div>
+        <div class="view-card" data-ws="obs" data-version="v1" data-device="desktop">
+          <div class="view-card-top"><div class="view-name">Enquiry builder</div><span class="view-version" style="background:var(--obs-bg);color:var(--obs);border-color:var(--obs-b);">V1</span></div>
+          <div class="view-route">/workbench/enquiries/[enquiry_id]/build</div>
+          <div class="view-desc">AI-generated questions from insight. Editable question cards. V1: free text only. V2: question type badges, structured response options, per-question targeting. Dispatch action locks question set.</div>
+          <div class="view-tags"><span class="view-pattern p-form">Form</span><span class="view-device d-desktop">Desktop</span></div>
+        </div>
+        <div class="view-card" data-ws="obs" data-version="v1" data-device="desktop">
+          <div class="view-card-top"><div class="view-name">Enquiry results</div><span class="view-version" style="background:var(--obs-bg);color:var(--obs);border-color:var(--obs-b);">V1</span></div>
+          <div class="view-route">/workbench/enquiries/[enquiry_id]/results</div>
+          <div class="view-desc">Response rate. AI synthesis findings with signal icons. V2: bar charts per structured question. Response feed. Generate corrective actions. Summary narrative on close.</div>
+          <div class="view-tags"><span class="view-pattern p-dashboard">Dashboard</span><span class="view-device d-desktop">Desktop</span></div>
+        </div>
+        <div class="view-card" data-ws="obs" data-version="v1" data-device="desktop">
+          <div class="view-card-top"><div class="view-name">Action tracker</div><span class="view-version" style="background:var(--obs-bg);color:var(--obs);border-color:var(--obs-b);">V1</span></div>
+          <div class="view-route">/workbench/actions</div>
+          <div class="view-desc">All open actions across scope. Grouped: overdue / due this week / upcoming. Completion rate %. Create action batch from insight or enquiry. Status filter.</div>
+          <div class="view-tags"><span class="view-pattern p-table">Table</span><span class="view-device d-desktop">Desktop</span></div>
+        </div>
+        <div class="view-card" data-ws="obs" data-version="v2" data-device="desktop">
+          <div class="view-card-top"><div class="view-name">Manual insight creation</div><span class="view-version" style="background:var(--obs-bg);color:var(--obs);border-color:var(--obs-b);">V2</span></div>
+          <div class="view-route">/workbench/insights/new</div>
+          <div class="view-desc">Source type selector first (Manual / External alert / External investigation). Conditional metadata fields. AI structuring assist — synchronous call. Creator = reviewer, clears to toolbox immediately on save.</div>
+          <div class="view-tags"><span class="view-pattern p-form">Form</span><span class="view-device d-desktop">Desktop</span></div>
+        </div>
+        <div class="view-card" data-ws="obs" data-version="v2" data-device="desktop">
+          <div class="view-card-top"><div class="view-name">Situational brief — review</div><span class="view-version" style="background:var(--obs-bg);color:var(--obs);border-color:var(--obs-b);">V2</span></div>
+          <div class="view-route">/workbench/briefs/[brief_id]</div>
+          <div class="view-desc">Auto-generated after insight approval or investigation close. Four editable sections. FW factor tags with rationale inline. Scope selector. Approve &amp; Distribute action.</div>
+          <div class="view-tags"><span class="view-pattern p-detail">Detail</span><span class="view-device d-desktop">Desktop</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Analytics -->
+    <div class="ws-section">
+      <div class="ws-section-head">
+        <div class="ws-section-label">Analytics — desktop-primary</div>
+        <span class="device-tag d-desktop">Desktop</span>
+      </div>
+      <div class="views-grid">
+        <div class="view-card" data-ws="obs" data-version="v1" data-device="desktop">
+          <div class="view-card-top"><div class="view-name">Pipeline health</div><span class="view-version" style="background:var(--obs-bg);color:var(--obs);border-color:var(--obs-b);">V1</span></div>
+          <div class="view-route">/analytics/pipeline</div>
+          <div class="view-desc">Funnel: observations → enriched → insights → approved → talks → delivered → crew reached. Conversion rates. Latency table. Corrective action close rate.</div>
+          <div class="view-tags"><span class="view-pattern p-dashboard">Dashboard</span><span class="view-device d-desktop">Desktop</span></div>
+        </div>
+        <div class="view-card" data-ws="obs" data-version="v1" data-device="desktop">
+          <div class="view-card-top"><div class="view-name">Atrophy heatmap</div><span class="view-version" style="background:var(--obs-bg);color:var(--obs);border-color:var(--obs-b);">V1</span></div>
+          <div class="view-route">/analytics/atrophy</div>
+          <div class="view-desc">Sites × weeks grid. Cell colour = activity level. Click site row to navigate to worksite dashboard. Leading indicator: sites going quiet.</div>
+          <div class="view-tags"><span class="view-pattern p-map">Map / Diagram</span><span class="view-device d-desktop">Desktop</span></div>
+        </div>
+        <div class="view-card" data-ws="obs" data-version="v2" data-device="desktop">
+          <div class="view-card-top"><div class="view-name">FW Map® capacity view</div><span class="view-version" style="background:var(--obs-bg);color:var(--obs);border-color:var(--obs-b);">V2</span></div>
+          <div class="view-route">/analytics/fw-capacity</div>
+          <div class="view-desc">Domain distribution (Guide/Enable/Execute). 15-factor detail table with maturity signals and trend arrows. Factor drill-down. Requires ≥5 classified findings. Building state shown below threshold.</div>
+          <div class="view-tags"><span class="view-pattern p-dashboard">Dashboard</span><span class="view-device d-desktop">Desktop</span></div>
+        </div>
+        <div class="view-card" data-ws="obs" data-version="v2" data-device="desktop">
+          <div class="view-card-top"><div class="view-name">FW factor drill-down</div><span class="view-version" style="background:var(--obs-bg);color:var(--obs);border-color:var(--obs-b);">V2</span></div>
+          <div class="view-route">/analytics/fw-capacity/[factor]</div>
+          <div class="view-desc">All insights and investigations tagged to this factor. Each showing: title, date, fw_confidence, fw_rationale inline. Source type breakdown. Maturity trend chart.</div>
+          <div class="view-tags"><span class="view-pattern p-detail">Detail</span><span class="view-device d-desktop">Desktop</span></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ════════════════════════════
+     INCIDENTS
+════════════════════════════ -->
+<div class="ws-block" data-ws="inc" id="ws-inc">
+  <div class="ws-head" onclick="toggleWs('inc')">
+    <div class="ws-head-icon">🚨</div>
+    <div class="ws-head-name" style="color:var(--inc);">Incidents</div>
+    <span class="ws-version-tag" style="background:var(--inc-bg);color:var(--inc);border-color:var(--inc-b);">V3 · Optional</span>
+    <div class="ws-head-count">Report · Investigate · Regulatory · CoP</div>
+    <div class="ws-head-toggle">▾</div>
+  </div>
+  <div class="ws-body">
+    <div class="ws-section">
+      <div class="ws-section-head">
+        <div class="ws-section-label">Capture — mobile</div>
+        <span class="device-tag d-mobile">Mobile</span>
+      </div>
+      <div class="views-grid">
+        <div class="view-card" data-ws="inc" data-version="v3" data-device="mobile">
+          <div class="view-card-top"><div class="view-name">Report an incident</div><span class="view-version" style="background:var(--inc-bg);color:var(--inc);border-color:var(--inc-b);">V3</span></div>
+          <div class="view-route">/capture/incident</div>
+          <div class="view-desc">Incident type selector. Occurred at datetime. Injury classification chain (conditional). Body part / nature / mechanism (conditional). Notifiable triage runs on submit. Schema ready in V1 — UI ships V3.</div>
+          <div class="view-tags"><span class="view-pattern p-form">Form</span><span class="view-device d-mobile">Mobile</span></div>
+        </div>
+        <div class="view-card" data-ws="inc" data-version="v3" data-device="desktop">
+          <div class="view-card-top"><div class="view-name">Incident list</div><span class="view-version" style="background:var(--inc-bg);color:var(--inc);border-color:var(--inc-b);">V3</span></div>
+          <div class="view-route">/workbench/incidents</div>
+          <div class="view-desc">All incidents in scope. Filter by type, status, notifiable flag. Open investigation CTA. Regulatory notification status column.</div>
+          <div class="view-tags"><span class="view-pattern p-table">Table</span><span class="view-device d-desktop">Desktop</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="ws-section">
+      <div class="ws-section-head">
+        <div class="ws-section-label">Investigation workbench — desktop</div>
+        <span class="device-tag d-desktop">Desktop</span>
+      </div>
+      <div class="views-grid">
+        <div class="view-card" data-ws="inc" data-version="v3" data-device="desktop">
+          <div class="view-card-top"><div class="view-name">Investigation detail</div><span class="view-version" style="background:var(--inc-bg);color:var(--inc);border-color:var(--inc-b);">V3</span></div>
+          <div class="view-route">/workbench/investigations/[inv_id]</div>
+          <div class="view-desc">AI-suggested contributing factors with rationale inline (ai_suggested_* pattern). Human confirms each. Root cause, corrective actions. Toolbox narrative on close. Contributing controls shown if Risk workspace enabled. Documents retrieved if MS workspace enabled.</div>
+          <div class="view-tags"><span class="view-pattern p-detail">Detail</span><span class="view-device d-desktop">Desktop</span></div>
+        </div>
+        <div class="view-card" data-ws="inc" data-version="v3" data-device="desktop">
+          <div class="view-card-top"><div class="view-name">Witness enquiry</div><span class="view-version" style="background:var(--inc-bg);color:var(--inc);border-color:var(--inc-b);">V3</span></div>
+          <div class="view-route">/workbench/investigations/[inv_id]/enquiry</div>
+          <div class="view-desc">Uses enquiry infrastructure. Named individuals or site scope. AI pre-populates interview questions from investigation assist output. Legal hold blocks dispatch.</div>
+          <div class="view-tags"><span class="view-pattern p-form">Form</span><span class="view-device d-desktop">Desktop</span></div>
+        </div>
+        <div class="view-card" data-ws="inc" data-version="v3" data-device="desktop">
+          <div class="view-card-top"><div class="view-name">Regulatory notification</div><span class="view-version" style="background:var(--inc-bg);color:var(--inc);border-color:var(--inc-b);">V3</span></div>
+          <div class="view-route">/workbench/incidents/[incident_id]/regulatory</div>
+          <div class="view-desc">Notifiable flag review. Pre-populated from incident data. Jurisdiction-specific format (WHS / RIDDOR / OSHA). Confirm or dismiss. Export package.</div>
+          <div class="view-tags"><span class="view-pattern p-form">Form</span><span class="view-device d-desktop">Desktop</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════
+     DIAGNOSTIC
+════════════════════════════ -->
+<div class="ws-block" data-ws="diag" id="ws-diag">
+  <div class="ws-head" onclick="toggleWs('diag')">
+    <div class="ws-head-icon">🔬</div>
+    <div class="ws-head-name" style="color:var(--diag);">Diagnostic</div>
+    <span class="ws-version-tag" style="background:var(--diag-bg);color:var(--diag);border-color:var(--diag-b);">V4 · Optional</span>
+    <div class="ws-head-count">Periodic survey · Anonymous · Factor-mapped</div>
+    <div class="ws-head-toggle">▾</div>
+  </div>
+  <div class="ws-body">
+    <div class="ws-section">
+      <div class="ws-section-head">
+        <div class="ws-section-label">Survey management — desktop</div>
+        <span class="device-tag d-desktop">Desktop</span>
+      </div>
+      <div class="views-grid">
+        <div class="view-card" data-ws="diag" data-version="v4" data-device="desktop">
+          <div class="view-card-top"><div class="view-name">Survey builder</div><span class="view-version" style="background:var(--diag-bg);color:var(--diag);border-color:var(--diag-b);">V4</span></div>
+          <div class="view-route">/workbench/surveys/new</div>
+          <div class="view-desc">Factor target selector (which of the 15 FW factors to probe). Target role selector. AI generates questions per factor per role. Safety manager reviews before dispatch. Cadence configuration.</div>
+          <div class="view-tags"><span class="view-pattern p-wizard">Wizard</span><span class="view-device d-desktop">Desktop</span></div>
+        </div>
+        <div class="view-card" data-ws="diag" data-version="v4" data-device="desktop">
+          <div class="view-card-top"><div class="view-name">Survey results</div><span class="view-version" style="background:var(--diag-bg);color:var(--diag);border-color:var(--diag-b);">V4</span></div>
+          <div class="view-route">/workbench/surveys/[survey_id]/results</div>
+          <div class="view-desc">Factor maturity signal output. Trend vs previous survey periods. AI identifies Critical Insight candidates from signal. Blind spot coverage map — which factors are data-poor.</div>
+          <div class="view-tags"><span class="view-pattern p-dashboard">Dashboard</span><span class="view-device d-desktop">Desktop</span></div>
+        </div>
+        <div class="view-card" data-ws="diag" data-version="v4" data-device="desktop">
+          <div class="view-card-top"><div class="view-name">Capacity profile — longitudinal</div><span class="view-version" style="background:var(--diag-bg);color:var(--diag);border-color:var(--diag-b);">V4</span></div>
+          <div class="view-route">/analytics/capacity-profile</div>
+          <div class="view-desc">All 15 FW factors over time. Survey signal vs field intelligence signal, source-badged separately. Is Senior Leadership moving from Compliant toward Leading? Factor maturity trend per period.</div>
+          <div class="view-tags"><span class="view-pattern p-dashboard">Dashboard</span><span class="view-device d-desktop">Desktop</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="ws-section">
+      <div class="ws-section-head">
+        <div class="ws-section-label">Respondent — mobile</div>
+        <span class="device-tag d-mobile">Mobile</span>
+      </div>
+      <div class="views-grid">
+        <div class="view-card" data-ws="diag" data-version="v4" data-device="mobile">
+          <div class="view-card-top"><div class="view-name">Survey response</div><span class="view-version" style="background:var(--diag-bg);color:var(--diag);border-color:var(--diag-b);">V4</span></div>
+          <div class="view-route">/survey/[survey_id]/respond</div>
+          <div class="view-desc">Reuses enquiry response UX exactly. Anonymisation notice shown upfront — no name stored. One question at a time. Anonymous submission. No "what happens next" that identifies respondent.</div>
+          <div class="view-tags"><span class="view-pattern p-wizard">Wizard</span><span class="view-device d-mobile">Mobile</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════
+     RISK ASSURANCE
+════════════════════════════ -->
+<div class="ws-block" data-ws="risk" id="ws-risk">
+  <div class="ws-head" onclick="toggleWs('risk')">
+    <div class="ws-head-icon">🛡️</div>
+    <div class="ws-head-name" style="color:var(--risk);">Risk Assurance</div>
+    <span class="ws-version-tag" style="background:var(--risk-bg);color:var(--risk);border-color:var(--risk-b);">V5 · Optional</span>
+    <div class="ws-head-count">Controls register · Bowtie · Verification · Alerts</div>
+    <div class="ws-head-toggle">▾</div>
+  </div>
+  <div class="ws-body">
+    <div class="ws-section">
+      <div class="ws-section-head">
+        <div class="ws-section-label">Register management — desktop</div>
+        <span class="device-tag d-desktop">Desktop</span>
+      </div>
+      <div class="views-grid">
+        <div class="view-card" data-ws="risk" data-version="v5" data-device="desktop">
+          <div class="view-card-top"><div class="view-name">Work type register</div><span class="view-version" style="background:var(--risk-bg);color:var(--risk);border-color:var(--risk-b);">V5</span></div>
+          <div class="view-route">/risk/register</div>
+          <div class="view-desc">Table: all work types with critical controls. Columns: control count, active sites, not-in-place count, health bar (per-control status), pending review. Alert strip if any not-in-place.</div>
+          <div class="view-tags"><span class="view-pattern p-table">Table</span><span class="view-device d-desktop">Desktop</span></div>
+        </div>
+        <div class="view-card" data-ws="risk" data-version="v5" data-device="desktop">
+          <div class="view-card-top"><div class="view-name">Bowtie — work type detail</div><span class="view-version" style="background:var(--risk-bg);color:var(--risk);border-color:var(--risk-b);">V5</span></div>
+          <div class="view-route">/risk/register/[work_type_id]</div>
+          <div class="view-desc">Three-column: prevention ← hazard node → mitigation. Per-control site distribution bar. Status dots. Defeating factor warnings inline. Collapsed hazards expand on tap. Full width — no sidebar.</div>
+          <div class="view-tags"><span class="view-pattern p-map">Map / Diagram</span><span class="view-device d-desktop">Desktop</span></div>
+        </div>
+        <div class="view-card" data-ws="risk" data-version="v5" data-device="desktop">
+          <div class="view-card-top"><div class="view-name">Control detail — master-detail</div><span class="view-version" style="background:var(--risk-bg);color:var(--risk);border-color:var(--risk-b);">V5</span></div>
+          <div class="view-route">/risk/register/[work_type_id]/controls/[control_id]</div>
+          <div class="view-desc">Left: controls list for work type. Right: full spec — lifecycle track, verification prompt, defeating factor card (if active), site distribution table. Links to MS document if Management System enabled.</div>
+          <div class="view-tags"><span class="view-pattern p-detail">Detail</span><span class="view-device d-desktop">Desktop</span></div>
+        </div>
+        <div class="view-card" data-ws="risk" data-version="v5" data-device="desktop">
+          <div class="view-card-top"><div class="view-name">Not-in-place alert</div><span class="view-version" style="background:var(--risk-bg);color:var(--risk);border-color:var(--risk-b);">V5</span></div>
+          <div class="view-route">/risk/alerts/[control_id]</div>
+          <div class="view-desc">Cross-site view for one control. Stat row (not-in-place / resolved / in-place / total). Table of site statuses — critical rows earn red wash. Insight panel: structural issues called out. Push reminder action.</div>
+          <div class="view-tags"><span class="view-pattern p-dashboard">Dashboard</span><span class="view-device d-desktop">Desktop</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="ws-section">
+      <div class="ws-section-head">
+        <div class="ws-section-label">Verification — mobile (verifier / supervisor)</div>
+        <span class="device-tag d-mobile">Mobile</span>
+      </div>
+      <div class="views-grid">
+        <div class="view-card" data-ws="risk" data-version="v5" data-device="mobile">
+          <div class="view-card-top"><div class="view-name">Verification queue</div><span class="view-version" style="background:var(--risk-bg);color:var(--risk);border-color:var(--risk-b);">V5</span></div>
+          <div class="view-route">/verify</div>
+          <div class="view-desc">Overdue (critical colour) + due this shift. Cross-site verifiers see all assigned sites' items, site-labelled. Hero count: X due / Y overdue. Start session CTA.</div>
+          <div class="view-tags"><span class="view-pattern p-list">List</span><span class="view-device d-mobile">Mobile</span></div>
+        </div>
+        <div class="view-card" data-ws="risk" data-version="v5" data-device="mobile">
+          <div class="view-card-top"><div class="view-name">Active verification</div><span class="view-version" style="background:var(--risk-bg);color:var(--risk);border-color:var(--risk-b);">V5</span></div>
+          <div class="view-route">/verify/session/[session_id]</div>
+          <div class="view-desc">One control at a time. Verification prompt large. Three giant responses: ✓ In Place / ✕ Not In Place / — Not Applicable. Progress bar. Default state = all good, friction only for Not In Place.</div>
+          <div class="view-tags"><span class="view-pattern p-wizard">Wizard</span><span class="view-device d-mobile">Mobile</span></div>
+        </div>
+        <div class="view-card" data-ws="risk" data-version="v5" data-device="mobile">
+          <div class="view-card-top"><div class="view-name">Not In Place — detail</div><span class="view-version" style="background:var(--risk-bg);color:var(--risk);border-color:var(--risk-b);">V5</span></div>
+          <div class="view-route">/verify/session/[session_id]/nip</div>
+          <div class="view-desc">Mandatory note field. Optional photo. Notification preview (who gets alerted). Submit triggers immediate notification + work hold recommendation. Status-critical colour throughout.</div>
+          <div class="view-tags"><span class="view-pattern p-form">Form</span><span class="view-device d-mobile">Mobile</span></div>
+        </div>
+        <div class="view-card" data-ws="risk" data-version="v5" data-device="mobile">
+          <div class="view-card-top"><div class="view-name">Session complete</div><span class="view-version" style="background:var(--risk-bg);color:var(--risk);border-color:var(--risk-b);">V5</span></div>
+          <div class="view-route">/verify/session/[session_id]/complete</div>
+          <div class="view-desc">All clear: full green screen with stats. Issues found: summary table, who notified, next steps. Two distinct states — same route, state-driven content.</div>
+          <div class="view-tags"><span class="view-pattern p-detail">Detail</span><span class="view-device d-mobile">Mobile</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="ws-section">
+      <div class="ws-section-head">
+        <div class="ws-section-label">Site acceptance — worksite manager</div>
+        <span class="device-tag d-both">Both</span>
+      </div>
+      <div class="views-grid">
+        <div class="view-card" data-ws="risk" data-version="v5" data-device="both">
+          <div class="view-card-top"><div class="view-name">Pending controls</div><span class="view-version" style="background:var(--risk-bg);color:var(--risk);border-color:var(--risk-b);">V5</span></div>
+          <div class="view-route">/sites/[site_id]/controls/pending</div>
+          <div class="view-desc">Controls pushed from global register awaiting site review. Full spec per card: name, description, consequence, verification frequency. Accept / Modify (stricter) / Mark not required. Accepted controls list alongside.</div>
+          <div class="view-tags"><span class="view-pattern p-list">List</span><span class="view-device d-both">Both</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════
+     MANAGEMENT SYSTEM
+════════════════════════════ -->
+<div class="ws-block" data-ws="ms" id="ws-ms">
+  <div class="ws-head" onclick="toggleWs('ms')">
+    <div class="ws-head-icon">📚</div>
+    <div class="ws-head-name" style="color:var(--ms);">Management System</div>
+    <span class="ws-version-tag" style="background:var(--ms-bg);color:var(--ms);border-color:var(--ms-b);">V6 · 3 phases</span>
+    <div class="ws-head-count">Library · Authoring · Document detail · Review · Site delivery</div>
+    <div class="ws-head-toggle">▾</div>
+  </div>
+  <div class="ws-body">
+    <div class="ws-section">
+      <div class="ws-section-head">
+        <div class="ws-section-label">Document library — desktop</div>
+        <span class="device-tag d-desktop">Desktop</span>
+      </div>
+      <div class="views-grid">
+        <div class="view-card" data-ws="ms" data-version="v6" data-device="desktop">
+          <div class="view-card-top"><div class="view-name">Document library</div><span class="view-version" style="background:var(--ms-bg);color:var(--ms);border-color:var(--ms-b);">V6·P1</span></div>
+          <div class="view-route">/management-system/library</div>
+          <div class="view-desc">All documents in register. Filter by work type, document type, review status, AI ingestion status. Health bar per work type — document coverage. Alert strip for overdue reviews.</div>
+          <div class="view-tags"><span class="view-pattern p-table">Table</span><span class="view-device d-desktop">Desktop</span></div>
+        </div>
+        <div class="view-card" data-ws="ms" data-version="v6" data-device="desktop">
+          <div class="view-card-top"><div class="view-name">Document detail — master-detail</div><span class="view-version" style="background:var(--ms-bg);color:var(--ms);border-color:var(--ms-b);">V6·P1</span></div>
+          <div class="view-route">/management-system/library/[doc_id]</div>
+          <div class="view-desc">Left: document list. Right: full spec — version history, lifecycle, AI ingestion status, extracted requirements (P3), site distribution table, linked controls (if Risk enabled), linked observations and incidents.</div>
+          <div class="view-tags"><span class="view-pattern p-detail">Detail</span><span class="view-device d-desktop">Desktop</span></div>
+        </div>
+        <div class="view-card" data-ws="ms" data-version="v6" data-device="desktop">
+          <div class="view-card-top"><div class="view-name">Upload / author document</div><span class="view-version" style="background:var(--ms-bg);color:var(--ms);border-color:var(--ms-b);">V6·P1</span></div>
+          <div class="view-route">/management-system/library/new</div>
+          <div class="view-desc">Document type. Work type mapping (multi-select). Scope (global / regional / site). Upload PDF or author inline. Version number and change summary. Approval workflow. Queues document.ingest on publish.</div>
+          <div class="view-tags"><span class="view-pattern p-form">Form</span><span class="view-device d-desktop">Desktop</span></div>
+        </div>
+        <div class="view-card" data-ws="ms" data-version="v6" data-device="desktop">
+          <div class="view-card-top"><div class="view-name">Document atrophy dashboard</div><span class="view-version" style="background:var(--ms-bg);color:var(--ms);border-color:var(--ms-b);">V6·P2</span></div>
+          <div class="view-route">/management-system/atrophy</div>
+          <div class="view-desc">Documents ranked by atrophy score. Review overdue, linked incidents, observation gaps, field access rate. Trigger review enquiry directly from view. Analogous to worksite atrophy heatmap.</div>
+          <div class="view-tags"><span class="view-pattern p-table">Table</span><span class="view-device d-desktop">Desktop</span></div>
+        </div>
+        <div class="view-card" data-ws="ms" data-version="v6" data-device="desktop">
+          <div class="view-card-top"><div class="view-name">Document review — results</div><span class="view-version" style="background:var(--ms-bg);color:var(--ms);border-color:var(--ms-b);">V6·P2</span></div>
+          <div class="view-route">/management-system/reviews/[review_id]</div>
+          <div class="view-desc">Reuses enquiry results view. Response rate, synthesis findings, recommended changes. Approve current version / mark for revision. Audit trail for regulatory purposes.</div>
+          <div class="view-tags"><span class="view-pattern p-dashboard">Dashboard</span><span class="view-device d-desktop">Desktop</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="ws-section">
+      <div class="ws-section-head">
+        <div class="ws-section-label">Site acceptance &amp; field access — worksite manager + supervisor</div>
+        <span class="device-tag d-both">Both</span>
+      </div>
+      <div class="views-grid">
+        <div class="view-card" data-ws="ms" data-version="v6" data-device="both">
+          <div class="view-card-top"><div class="view-name">Pending documents</div><span class="view-version" style="background:var(--ms-bg);color:var(--ms);border-color:var(--ms-b);">V6·P1</span></div>
+          <div class="view-route">/sites/[site_id]/documents/pending</div>
+          <div class="view-desc">Documents pushed from global/regional register awaiting site review. Same Accept / Modify / Not applicable pattern as pending controls. Parallel governance model.</div>
+          <div class="view-tags"><span class="view-pattern p-list">List</span><span class="view-device d-both">Both</span></div>
+        </div>
+        <div class="view-card" data-ws="ms" data-version="v6" data-device="mobile">
+          <div class="view-card-top"><div class="view-name">Document — field access</div><span class="view-version" style="background:var(--ms-bg);color:var(--ms);border-color:var(--ms-b);">V6·P2</span></div>
+          <div class="view-route">/documents/[doc_id]</div>
+          <div class="view-desc">Mobile-optimised read view. P2: AI-summarised key points surfaced for this work type before job starts. Full document accessible. P3: relevant requirement clauses highlighted contextually during capture.</div>
+          <div class="view-tags"><span class="view-pattern p-detail">Detail</span><span class="view-device d-mobile">Mobile</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- PATTERN USAGE SECTION -->
+<div style="margin-top:36px;">
+  <div style="font-family:var(--mono);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--t2);margin-bottom:16px;display:flex;align-items:center;gap:12px;">
+    View patterns in use
+    <div style="flex:1;height:1px;background:var(--border2);"></div>
+  </div>
+
+  <div class="pattern-grid">
+    <div class="pattern-card">
+      <div class="pc-head"><span class="pc-badge p-dashboard">Dashboard</span><span class="pc-count">8 views</span></div>
+      <div class="pc-desc">Multi-source data assembled for a specific role and context. Adapts to enabled workspaces — layers visible based on workspace_config.</div>
+      <div class="pc-examples">Supervisor home · Worksite dashboard · Enquiry results · Analytics · Survey results · Capacity profile · Alert view</div>
+    </div>
+    <div class="pattern-card">
+      <div class="pc-head"><span class="pc-badge p-list">List</span><span class="pc-count">9 views</span></div>
+      <div class="pc-desc">Scrollable list of items with status-driven styling. Overdue earns critical colour. Tap to navigate to detail or trigger action.</div>
+      <div class="pc-examples">Observation records · Actions · Sites · Incidents · Pending controls · Pending docs · Verification queue · Manager home</div>
+    </div>
+    <div class="pattern-card">
+      <div class="pc-head"><span class="pc-badge p-detail">Detail</span><span class="pc-count">11 views</span></div>
+      <div class="pc-desc">Full specification of a single entity. Often master-detail on desktop (list left, detail right). AI rationale always inline. State-based content in some views.</div>
+      <div class="pc-examples">Observation detail · Insight panel · Investigation · Control detail · Document detail · Talk delivery · Visit briefing · Session complete</div>
+    </div>
+    <div class="pattern-card">
+      <div class="pc-head"><span class="pc-badge p-form">Form</span><span class="pc-count">11 views</span></div>
+      <div class="pc-desc">Data capture or configuration. Mobile forms optimised for one-thumb use. Desktop forms use full-width layouts. Always-optional AI assist where available.</div>
+      <div class="pc-examples">Capture · Incident report · Not In Place · Login · Settings · Document upload · Enquiry builder · Regulatory notification</div>
+    </div>
+    <div class="pattern-card">
+      <div class="pc-head"><span class="pc-badge p-wizard">Wizard</span><span class="pc-count">7 views</span></div>
+      <div class="pc-desc">Multi-step progressive forms. One thing at a time. Progress indicator top right. Back navigation always available. Used where sequence matters.</div>
+      <div class="pc-examples">Plan a visit · Enquiry response · Active verification · Survey response · Context question · Survey builder</div>
+    </div>
+    <div class="pattern-card">
+      <div class="pc-head"><span class="pc-badge p-kanban">Kanban</span><span class="pc-count">1 view</span></div>
+      <div class="pc-desc">Four-column pipeline. pipeline_stage is an explicit DB column — written on card move. No derived state. Detail panel slides in on tap without navigation.</div>
+      <div class="pc-examples">Insights pipeline (Prioritise → Learn → Improve → Resolved)</div>
+    </div>
+    <div class="pattern-card">
+      <div class="pc-head"><span class="pc-badge p-table">Table</span><span class="pc-count">7 views</span></div>
+      <div class="pc-desc">Desktop-primary data tables. Inline status chips. Health bars as table cells. Filter + sort. Click row to navigate. Status columns show workspace health.</div>
+      <div class="pc-examples">Register table · Users · Action tracker · Document library · Atrophy dashboard · Incident list</div>
+    </div>
+    <div class="pattern-card">
+      <div class="pc-head"><span class="pc-badge p-map">Map / Diagram</span><span class="pc-count">3 views</span></div>
+      <div class="pc-desc">Spatial information display. Bowtie is the primary example — three-column with hazard at centre. Atrophy heatmap is grid-based. Both use status colour discipline strictly.</div>
+      <div class="pc-examples">Bowtie · Atrophy heatmap · Capacity profile (factor grid)</div>
+    </div>
+    <div class="pattern-card">
+      <div class="pc-head"><span class="pc-badge p-pipeline" style="background:rgba(245,158,11,0.1);color:#F59E0B;">Pipeline</span><span class="pc-count">Used in 4 flows</span></div>
+      <div class="pc-desc">The core intelligence loop as a sequential pipeline. Observation → Enrich → Trend → Insight → Approve → Talk → Deliver → Action. Visible in analytics, not a view itself.</div>
+      <div class="pc-examples">Pipeline health analytics · AI flow diagram · Workbench queue ordering</div>
+    </div>
+    <div class="pattern-card">
+      <div class="pc-head"><span class="pc-badge p-modal" style="background:rgba(148,163,184,0.1);color:#94A3B8;">Modal</span><span class="pc-count">Used throughout</span></div>
+      <div class="pc-desc">Overlays for confirmations, quick actions, and compact detail. Never used for multi-step flows — those are wizards. Closed on backdrop tap.</div>
+      <div class="pc-examples">Confirm completion · Deliver talk confirmation · Accept/reject control · Add question</div>
+    </div>
+  </div>
+</div>
+
+</div><!-- end .body -->
+
+<script>
+  // Toggle workspace blocks
+  function toggleWs(ws) {
+    const block = document.getElementById('ws-' + ws);
+    block.classList.toggle('collapsed');
+  }
+
+  function expandAll() {
+    document.querySelectorAll('.ws-block').forEach(b => b.classList.remove('collapsed'));
+  }
+
+  function collapseAll() {
+    document.querySelectorAll('.ws-block').forEach(b => b.classList.add('collapsed'));
+  }
+
+  // Filter by workspace
+  let activeWsFilter = 'all';
+  let activeVersionFilter = null;
+  let activeDeviceFilter = null;
+
+  function filterWs(ws) {
+    activeWsFilter = ws;
+    applyFilters();
+    // Update button states
+    document.querySelectorAll('[onclick^="filterWs"]').forEach(b => b.classList.remove('active'));
+    event.target.classList.add('active');
+  }
+
+  function filterVersion(v) {
+    if (activeVersionFilter === v) {
+      activeVersionFilter = null;
+      event.target.classList.remove('active');
+    } else {
+      activeVersionFilter = v;
+      document.querySelectorAll('[onclick^="filterVersion"]').forEach(b => b.classList.remove('active'));
+      event.target.classList.add('active');
+    }
+    applyFilters();
+  }
+
+  function filterDevice(d) {
+    if (activeDeviceFilter === d) {
+      activeDeviceFilter = null;
+      event.target.classList.remove('active');
+    } else {
+      activeDeviceFilter = d;
+      document.querySelectorAll('[onclick^="filterDevice"]').forEach(b => b.classList.remove('active'));
+      event.target.classList.add('active');
+    }
+    applyFilters();
+  }
+
+  function applyFilters() {
+    const blocks = document.querySelectorAll('.ws-block');
+    blocks.forEach(block => {
+      const ws = block.dataset.ws;
+      const wsMatch = activeWsFilter === 'all' || ws === activeWsFilter;
+
+      if (!wsMatch) {
+        block.style.display = 'none';
+        return;
+      }
+      block.style.display = '';
+      block.classList.remove('collapsed');
+
+      // Filter individual view cards
+      const cards = block.querySelectorAll('.view-card');
+      cards.forEach(card => {
+        const cardVersion = card.dataset.version;
+        const cardDevice = card.dataset.device;
+
+        const versionMatch = !activeVersionFilter ||
+          cardVersion === activeVersionFilter ||
+          (cardVersion && cardVersion.startsWith(activeVersionFilter.replace('v','')));
+
+        // Simple version check
+        const vMatch = !activeVersionFilter || matchVersion(cardVersion, activeVersionFilter);
+        const dMatch = !activeDeviceFilter || cardDevice === activeDeviceFilter || cardDevice === 'both';
+
+        if (vMatch && dMatch) {
+          card.classList.remove('dim');
+        } else {
+          card.classList.add('dim');
+        }
+      });
+    });
+  }
+
+  function matchVersion(cardVersion, filter) {
+    if (!cardVersion || !filter) return true;
+    // 'v1' should match cards with data-version="v1"
+    // 'v6' should match 'v6' (phases stored as v6)
+    return cardVersion === filter || cardVersion.startsWith(filter);
+  }
+</script>
+</body>
+</html>
