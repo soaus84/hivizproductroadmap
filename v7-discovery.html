@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>V7 — Communities Workspace</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,300;1,9..144,400&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0C0D0B;
+    --surface: #131410;
+    --surface-2: #1A1C17;
+    --surface-3: #21241E;
+    --border: #282B23;
+    --border-light: #1E2119;
+    --accent: #C8F73A;
+    --accent-dim: #7A9A22;
+    --accent-glow: rgba(200,247,58,0.06);
+    --text: #E8E4DC;
+    --text-dim: #7A7870;
+    --text-muted: #3A3B36;
+
+    /* Workspace colours */
+    --obs-color:   #6B9EFF;  --obs-bg: rgba(107,158,255,0.07);   --obs-border: rgba(107,158,255,0.2);
+    --risk-color:  #FF8C42;  --risk-bg: rgba(255,140,66,0.07);   --risk-border: rgba(255,140,66,0.2);
+    --ms-color:    #A78BFA;  --ms-bg: rgba(167,139,250,0.07);    --ms-border: rgba(167,139,250,0.2);
+    --inc-color:   #F87171;  --inc-bg: rgba(248,113,113,0.07);   --inc-border: rgba(248,113,113,0.2);
+    --cop-color:   #34D399;  --cop-bg: rgba(52,211,153,0.07);    --cop-border: rgba(52,211,153,0.2);
+
+    --status-critical:        #FF3B30;
+    --status-critical-bg:     rgba(255,59,48,0.07);
+    --status-caution:         #FF9500;
+    --status-caution-bg:      rgba(255,149,0,0.07);
+    --status-positive:        #00AB55;
+    --status-positive-bg:     rgba(0,171,85,0.07);
+
+    --mono: 'DM Mono', monospace;
+    --sans: 'DM Sans', sans-serif;
+    --display: 'Fraunces', serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 14px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    padding: 0;
+  }
+
+  /* ── COVER ── */
+  .cover {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 80px 72px;
+    position: relative;
+    overflow: hidden;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .cover-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--border-light) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border-light) 1px, transparent 1px);
+    background-size: 48px 48px;
+    opacity: 0.4;
+  }
+
+  /* Community-specific cover decoration */
+  .cover-glow {
+    position: absolute;
+    top: -200px;
+    right: -100px;
+    width: 700px;
+    height: 700px;
+    background: radial-gradient(circle, rgba(52,211,153,0.06) 0%, transparent 65%);
+    pointer-events: none;
+  }
+
+  .cover-gradient {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 65%;
+    background: linear-gradient(to top, var(--bg) 0%, transparent 100%);
+  }
+
+  .cover-content { position: relative; z-index: 1; max-width: 840px; }
+
+  .cover-eyebrow {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--cop-color);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    opacity: 0.7;
+  }
+
+  .cover-eyebrow::before { content: ''; width: 32px; height: 1px; background: var(--cop-color); opacity: 0.5; }
+
+  .cover-title {
+    font-family: var(--display);
+    font-size: clamp(40px, 7vw, 72px);
+    font-weight: 300;
+    color: var(--text);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    margin-bottom: 10px;
+  }
+
+  .cover-title strong { font-weight: 700; color: var(--cop-color); }
+
+  .cover-subtitle {
+    font-family: var(--display);
+    font-size: clamp(18px, 2.5vw, 26px);
+    font-weight: 300;
+    font-style: italic;
+    color: var(--text-dim);
+    margin-bottom: 36px;
+    max-width: 700px;
+    line-height: 1.4;
+  }
+
+  .cover-desc {
+    font-size: 15px;
+    color: var(--text-dim);
+    max-width: 620px;
+    line-height: 1.75;
+    border-left: 2px solid var(--cop-border);
+    padding-left: 20px;
+    margin-bottom: 48px;
+  }
+
+  .cover-meta { display: flex; gap: 32px; flex-wrap: wrap; }
+  .cm-item { }
+  .cm-label { font-family: var(--mono); font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px; }
+  .cm-value { font-size: 13px; color: var(--text-dim); font-weight: 500; }
+
+  /* ── NAV ── */
+  .sticky-nav {
+    position: sticky;
+    top: 0;
+    background: rgba(12,13,11,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 72px;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    overflow-x: auto;
+  }
+  .sticky-nav::-webkit-scrollbar { display: none; }
+  .nav-item { font-family: var(--mono); font-size: 10px; letter-spacing: 0.5px; text-transform: uppercase; color: var(--text-muted); text-decoration: none; padding: 14px 12px; white-space: nowrap; transition: color 0.12s; }
+  .nav-item:hover { color: var(--text-dim); }
+  .nav-item.active { color: var(--cop-color); }
+
+  /* ── PAGE BODY ── */
+  .page { max-width: 900px; margin: 0 auto; padding: 0 72px 80px; }
+
+  /* ── SECTION ── */
+  .section { margin-top: 72px; scroll-margin-top: 52px; }
+  .section-label { font-family: var(--mono); font-size: 9px; letter-spacing: 2.5px; text-transform: uppercase; color: var(--cop-color); opacity: 0.6; margin-bottom: 8px; }
+  .section-title { font-family: var(--display); font-size: clamp(24px, 3vw, 32px); font-weight: 300; color: var(--text); letter-spacing: -0.02em; margin-bottom: 6px; line-height: 1.2; }
+  .section-title strong { font-weight: 600; }
+  .section-intro { font-size: 14px; color: var(--text-dim); max-width: 680px; line-height: 1.75; margin-bottom: 28px; }
+  hr.rule { border: none; border-top: 1px solid var(--border); margin-bottom: 28px; }
+
+  /* ── PHILOSOPHY BLOCK ── */
+  .philosophy {
+    background: var(--cop-bg);
+    border: 1px solid var(--cop-border);
+    border-radius: 12px;
+    padding: 28px 32px;
+    margin-bottom: 36px;
+    position: relative;
+    overflow: hidden;
+  }
+  .philosophy::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--cop-color);
+    opacity: 0.4;
+  }
+  .philosophy-quote {
+    font-family: var(--display);
+    font-size: clamp(18px, 2.5vw, 22px);
+    font-weight: 300;
+    font-style: italic;
+    color: var(--text);
+    line-height: 1.5;
+    margin-bottom: 16px;
+  }
+  .philosophy-quote strong { font-weight: 600; font-style: normal; color: var(--cop-color); }
+  .philosophy-note { font-size: 13px; color: var(--text-dim); line-height: 1.65; }
+
+  /* ── COMMUNITY CLASS CARDS ── */
+  .class-grid { display: flex; flex-direction: column; gap: 1px; background: var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 36px; }
+  .class-card { background: var(--surface); padding: 0; }
+  .class-header { padding: 18px 22px; display: flex; align-items: flex-start; gap: 14px; border-bottom: 1px solid var(--border-light); }
+  .class-icon { font-size: 22px; flex-shrink: 0; margin-top: 2px; }
+  .class-meta { flex: 1; }
+  .class-tag { font-family: var(--mono); font-size: 9px; font-weight: 500; letter-spacing: 1px; text-transform: uppercase; padding: 2px 9px; border-radius: 4px; display: inline-block; margin-bottom: 6px; border: 1px solid; }
+  .class-name { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+  .class-desc { font-size: 13px; color: var(--text-dim); line-height: 1.6; }
+  .class-body { padding: 16px 22px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  .class-attr { }
+  .class-attr-label { font-family: var(--mono); font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px; }
+  .class-attr-value { font-size: 12px; color: var(--text-dim); line-height: 1.55; }
+
+  /* ── MEMBERSHIP MODEL ── */
+  .membership-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 36px; }
+  .mem-card { background: var(--surface); padding: 22px; }
+  .mem-title { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
+  .mem-badge { font-family: var(--mono); font-size: 9px; padding: 2px 8px; border-radius: 4px; font-weight: 400; }
+  .mem-desc { font-size: 13px; color: var(--text-dim); line-height: 1.65; margin-bottom: 14px; }
+  .mem-examples { display: flex; flex-direction: column; gap: 6px; }
+  .mem-ex { font-size: 12px; color: var(--text-dim); padding: 7px 10px; background: var(--surface-2); border-radius: 6px; border-left: 2px solid var(--border); line-height: 1.5; }
+  .mem-ex strong { color: var(--text); font-weight: 600; }
+
+  /* ── DISCUSSION TYPES ── */
+  .discussion-list { display: flex; flex-direction: column; gap: 14px; margin-bottom: 36px; }
+  .disc-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  .disc-head { padding: 14px 18px; background: var(--surface-2); border-bottom: 1px solid var(--border-light); display: flex; align-items: center; gap: 12px; }
+  .disc-type-tag { font-family: var(--mono); font-size: 9px; font-weight: 500; letter-spacing: 1px; text-transform: uppercase; padding: 2px 9px; border-radius: 4px; border: 1px solid; flex-shrink: 0; }
+  .disc-title { font-size: 14px; font-weight: 700; color: var(--text); }
+  .disc-body { padding: 16px 18px; }
+  .disc-desc { font-size: 13px; color: var(--text-dim); line-height: 1.65; margin-bottom: 12px; }
+  .disc-example {
+    background: var(--surface-3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin-bottom: 12px;
+  }
+  .disc-example-label { font-family: var(--mono); font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; }
+  .disc-example-text { font-size: 13px; color: var(--text); line-height: 1.65; font-style: italic; }
+  .disc-example-text strong { font-style: normal; color: var(--cop-color); font-weight: 600; }
+  .disc-note { font-size: 12px; color: var(--text-muted); font-style: italic; line-height: 1.5; }
+
+  /* ── AI FRAMING PRINCIPLE ── */
+  .ai-framing {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 36px;
+  }
+  .af-header { background: var(--surface-2); padding: 14px 20px; border-bottom: 1px solid var(--border); font-family: var(--mono); font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: var(--text-dim); display: flex; align-items: center; gap: 8px; }
+  .af-grid { display: grid; grid-template-columns: 1fr 1fr; border-bottom: 1px solid var(--border-light); }
+  .af-grid:last-of-type { border-bottom: none; }
+  .af-cell { padding: 16px 20px; }
+  .af-cell + .af-cell { border-left: 1px solid var(--border-light); }
+  .af-cell-label { font-family: var(--mono); font-size: 9px; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px; }
+  .af-cell-label.bad { color: var(--status-critical); opacity: 0.7; }
+  .af-cell-label.good { color: var(--status-positive); opacity: 0.7; }
+  .af-text { font-size: 13px; line-height: 1.65; }
+  .af-text.bad { color: var(--text-dim); }
+  .af-text.good { color: var(--text); }
+  .af-rationale { padding: 14px 20px; background: var(--accent-glow); border-top: 1px solid var(--border); font-size: 12px; color: var(--accent-dim); line-height: 1.6; font-style: italic; }
+
+  /* ── CROSS-POST FLOW ── */
+  .crosspost {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 36px;
+  }
+  .cp-header { background: var(--surface-2); padding: 14px 20px; border-bottom: 1px solid var(--border); font-family: var(--mono); font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: var(--text-dim); }
+  .cp-body { padding: 20px; }
+  .cp-flow { display: flex; align-items: center; gap: 0; flex-wrap: wrap; row-gap: 8px; margin-bottom: 16px; }
+  .cp-node { font-size: 12px; font-weight: 500; padding: 8px 14px; border-radius: 6px; }
+  .cp-node.regional { background: rgba(107,158,255,0.1); color: #6B9EFF; border: 1px solid rgba(107,158,255,0.25); }
+  .cp-node.work { background: var(--cop-bg); color: var(--cop-color); border: 1px solid var(--cop-border); }
+  .cp-node.practice { background: rgba(167,139,250,0.1); color: #A78BFA; border: 1px solid rgba(167,139,250,0.25); }
+  .cp-node.prompt { background: var(--surface-3); color: var(--text-dim); border: 1px solid var(--border); font-style: italic; }
+  .cp-arrow { color: var(--text-muted); padding: 0 10px; font-size: 14px; }
+  .cp-rules { display: flex; flex-direction: column; gap: 8px; }
+  .cp-rule { font-size: 13px; color: var(--text-dim); padding: 9px 12px; background: var(--surface-2); border-radius: 6px; display: flex; align-items: flex-start; gap: 10px; line-height: 1.5; }
+  .cp-rule-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--cop-color); opacity: 0.5; flex-shrink: 0; margin-top: 6px; }
+
+  /* ── WORKING GROUPS ── */
+  .wg-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 36px; }
+  .wg-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 20px; }
+  .wg-icon { font-size: 20px; margin-bottom: 10px; }
+  .wg-title { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+  .wg-body { font-size: 13px; color: var(--text-dim); line-height: 1.65; }
+  .wg-meta-label { font-family: var(--mono); font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: var(--text-muted); margin-top: 12px; margin-bottom: 6px; }
+  .wg-meta-list { display: flex; flex-direction: column; gap: 4px; }
+  .wg-meta-item { font-size: 12px; color: var(--text-dim); padding: 5px 10px; background: var(--surface-2); border-radius: 5px; line-height: 1.5; }
+
+  /* ── WORKING GROUP META ENTITY ── */
+  .entity-diagram {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 36px;
+  }
+  .ed-header { background: var(--surface-2); padding: 14px 20px; border-bottom: 1px solid var(--border); font-family: var(--mono); font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: var(--text-dim); }
+  .ed-body { padding: 20px; font-family: var(--mono); font-size: 12px; line-height: 1.9; }
+
+  .ec { color: var(--text-muted); }
+  .ek { color: #7BB3FF; }
+  .et { color: #B8A4FF; }
+  .ef { color: var(--text); }
+  .ev { color: #7FD4A0; }
+  .ee { color: #F5C842; }
+  .en { color: var(--cop-color); font-weight: 500; }
+
+  /* ── INTELLIGENCE LOOP ── */
+  .intel-loop {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 36px;
+  }
+  .il-header { background: var(--surface-2); padding: 14px 20px; border-bottom: 1px solid var(--border); font-family: var(--mono); font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: var(--text-dim); }
+  .il-row { display: grid; grid-template-columns: 220px 1fr; border-bottom: 1px solid var(--border-light); }
+  .il-row:last-child { border-bottom: none; }
+  .il-direction { padding: 16px 20px; font-size: 13px; font-weight: 700; color: var(--text); display: flex; align-items: center; gap: 10px; border-right: 1px solid var(--border-light); }
+  .il-arrow-badge { font-family: var(--mono); font-size: 11px; padding: 3px 8px; border-radius: 4px; font-weight: 400; }
+  .il-inbound { background: var(--cop-bg); color: var(--cop-color); }
+  .il-outbound { background: rgba(107,158,255,0.1); color: #6B9EFF; }
+  .il-events { padding: 16px 20px; display: flex; flex-direction: column; gap: 6px; }
+  .il-event { font-size: 13px; color: var(--text-dim); display: flex; align-items: flex-start; gap: 8px; line-height: 1.5; }
+  .il-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--text-muted); flex-shrink: 0; margin-top: 7px; }
+
+  /* ── DISCOVERY QUESTIONS ── */
+  .dq-list { display: flex; flex-direction: column; gap: 14px; margin-bottom: 36px; }
+  .dq-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  .dq-head { padding: 14px 18px; background: var(--surface-2); border-bottom: 1px solid var(--border-light); display: flex; gap: 12px; align-items: flex-start; }
+  .dq-num { font-family: var(--mono); font-size: 10px; font-weight: 500; color: var(--cop-color); background: var(--cop-bg); padding: 3px 8px; border-radius: 4px; flex-shrink: 0; border: 1px solid var(--cop-border); }
+  .dq-title { font-size: 14px; font-weight: 600; line-height: 1.4; color: var(--text); }
+  .dq-body { padding: 16px 18px; }
+  .dq-context { font-size: 13px; color: var(--text-dim); line-height: 1.65; margin-bottom: 14px; }
+  .dq-options { display: flex; flex-direction: column; gap: 7px; }
+  .dq-opt { display: flex; gap: 10px; align-items: flex-start; font-size: 12px; color: var(--text-dim); padding: 8px 12px; border: 1px solid var(--border-light); border-radius: 6px; line-height: 1.5; }
+  .dq-opt-letter { font-family: var(--mono); font-size: 10px; font-weight: 700; color: var(--cop-color); background: var(--cop-bg); width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+  .dq-consult { background: var(--surface-2); border-radius: 6px; padding: 10px 12px; font-size: 12px; color: var(--text-muted); margin-top: 12px; font-style: italic; line-height: 1.5; }
+
+  /* ── ROADMAP ARC ── */
+  .arc { display: flex; gap: 1px; background: var(--border); border-radius: 10px; overflow: hidden; margin-bottom: 36px; }
+  .arc-v { flex: 1; background: var(--surface); padding: 16px; }
+  .arc-v.focus { background: var(--surface-3); }
+  .arc-v.primary { background: linear-gradient(135deg, var(--cop-bg) 0%, var(--surface-3) 100%); border: 1px solid var(--cop-border); border-radius: 0; }
+  .arc-label { font-family: var(--mono); font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px; }
+  .arc-name { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+  .arc-note { font-size: 11px; color: var(--text-dim); line-height: 1.45; }
+
+  /* ── HEALTH SIGNALS ── */
+  .signals-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 36px; }
+  .signal-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 18px; }
+  .signal-icon { font-size: 22px; margin-bottom: 10px; }
+  .signal-title { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+  .signal-desc { font-size: 12px; color: var(--text-dim); line-height: 1.6; }
+  .signal-formula { font-family: var(--mono); font-size: 11px; color: var(--cop-color); opacity: 0.7; margin-top: 8px; }
+
+  /* ── IRONY NOTE ── */
+  .irony-note {
+    background: var(--surface-3);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin-bottom: 36px;
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+  }
+  .irony-icon { font-size: 22px; flex-shrink: 0; opacity: 0.7; }
+  .irony-body { }
+  .irony-label { font-family: var(--mono); font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px; }
+  .irony-text { font-size: 13px; color: var(--text-dim); line-height: 1.7; }
+  .irony-text strong { color: var(--cop-color); font-weight: 600; }
+
+  /* ── FOOTER ── */
+  footer { border-top: 1px solid var(--border-light); padding: 24px 72px; display: flex; justify-content: space-between; font-family: var(--mono); font-size: 10px; color: var(--text-muted); flex-wrap: wrap; gap: 8px; }
+</style>
+</head>
+<body>
+
+<!-- COVER -->
+<div class="cover">
+  <div class="cover-grid"></div>
+  <div class="cover-glow"></div>
+  <div class="cover-gradient"></div>
+  <div class="cover-content">
+    <div class="cover-eyebrow">Hiviz · SafetyPlatform · Discovery</div>
+    <div class="cover-title">V7 — <strong>Communities</strong><br>Workspace</div>
+    <div class="cover-subtitle">Where the safety function learns, shares, reacts, and contributes — in one place, without silos.</div>
+    <div class="cover-desc">
+      Communities is a native workspace within Hiviz. Not an integration with Slack or Viva Engage — those platforms are for everything else. Hiviz is for operationally significant content only. If your Hiviz to-do list is empty, you have made good on your duty. CoP is the living context around that duty.
+    </div>
+    <div class="cover-meta">
+      <div class="cm-item"><div class="cm-label">Status</div><div class="cm-value">Discovery — pre-design</div></div>
+      <div class="cm-item"><div class="cm-label">Version</div><div class="cm-value">V7 (may be phased earlier)</div></div>
+      <div class="cm-item"><div class="cm-label">Date</div><div class="cm-value">April 2026</div></div>
+      <div class="cm-item"><div class="cm-label">Owner</div><div class="cm-value">Forge Works · Product</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav class="sticky-nav">
+  <a class="nav-item" href="#philosophy">Philosophy</a>
+  <a class="nav-item" href="#community-classes">Community classes</a>
+  <a class="nav-item" href="#membership">Membership model</a>
+  <a class="nav-item" href="#discussions">Discussion types</a>
+  <a class="nav-item" href="#ai-framing">AI framing</a>
+  <a class="nav-item" href="#crosspost">Cross-posting</a>
+  <a class="nav-item" href="#working-groups">Working groups</a>
+  <a class="nav-item" href="#intelligence">Intelligence loop</a>
+  <a class="nav-item" href="#health">CoP health signals</a>
+  <a class="nav-item" href="#discovery">Discovery questions</a>
+  <a class="nav-item" href="#placement">Placement</a>
+</nav>
+
+<div class="page">
+
+<!-- PHILOSOPHY -->
+<div class="section" id="philosophy">
+  <div class="section-label">Foundation</div>
+  <div class="section-title"><strong>Why native?</strong> Why now?</div>
+  <div class="section-intro">Every design decision in the Communities workspace flows from a single product philosophy. Get this wrong and CoP becomes another chat tool. Get it right and it becomes the connective tissue of a learning organisation.</div>
+  <hr class="rule">
+
+  <div class="philosophy">
+    <div class="philosophy-quote">"Slack is for what people want for lunch on Friday.<br><strong>Hiviz is operationally significant content only.</strong>"</div>
+    <div class="philosophy-note">
+      The Communities workspace is native to Hiviz — not an integration, not an adapter, not a posting mechanism that pipes content to an external platform. It lives inside the same product where supervisors log observations, managers plan visits, and safety managers review insights. The conversation happens in the same context as the work. That's the distinction that matters.<br><br>
+      Communities is also not an obligation system. It sits adjacent to the duty list — the toolbox talks, the enquiries, the corrective actions. Duty is what you must do. CoP is where you go when you want to learn, contribute, or understand more. One reinforces the other without conflating them.
+    </div>
+  </div>
+
+  <div class="irony-note">
+    <div class="irony-icon">⚡</div>
+    <div class="irony-body">
+      <div class="irony-label">The productive irony</div>
+      <div class="irony-text">
+        The Forge Works Map® factor <strong>communications_coordination</strong> describes how well information flows and how coordinated teams are across a site and organisation. It's one of the most frequently underperforming factors in field intelligence. The Communities workspace is, quite literally, a vehicle for improving that factor — a platform designed to surface coordination failures is itself an instrument of better coordination. That connection should be explicit in how CoP is positioned and measured.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- COMMUNITY CLASSES -->
+<div class="section" id="community-classes">
+  <div class="section-label">Architecture</div>
+  <div class="section-title">Four <strong>community classes</strong></div>
+  <div class="section-intro">Four classes of community, each with different membership rules, scope logic, and purpose. All four coexist and interact. Users may belong to communities across multiple classes simultaneously.</div>
+  <hr class="rule">
+
+  <div class="class-grid">
+
+    <!-- Organisational -->
+    <div class="class-card">
+      <div class="class-header">
+        <div class="class-icon">🏢</div>
+        <div class="class-meta">
+          <div class="class-tag" style="color:#6B9EFF; border-color:rgba(107,158,255,0.3); background:rgba(107,158,255,0.07);">Organisational</div>
+          <div class="class-name">Scoped to the hierarchy</div>
+          <div class="class-desc">Communities that follow the org structure — company-wide, divisional, regional. Vertical and authority-aware. A company-wide systemic insight about senior leadership behaviour gets discussed here. A division manager posting here reaches their division.</div>
+        </div>
+      </div>
+      <div class="class-body">
+        <div class="class-attr">
+          <div class="class-attr-label">Membership</div>
+          <div class="class-attr-value">Automatic — derived from role and worksite hierarchy. A regional safety manager is a member of their region and all parent organisational communities.</div>
+        </div>
+        <div class="class-attr">
+          <div class="class-attr-label">Scope</div>
+          <div class="class-attr-value">Bounded by the org unit. Content in a divisional community is visible to that division and above, not below unless explicitly shared.</div>
+        </div>
+        <div class="class-attr">
+          <div class="class-attr-label">Primary use</div>
+          <div class="class-attr-value">Systemic insights, leadership-level patterns, company-wide initiatives, cross-division coordination. Not operational detail.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Practice -->
+    <div class="class-card">
+      <div class="class-header">
+        <div class="class-icon">🎯</div>
+        <div class="class-meta">
+          <div class="class-tag" style="color:#A78BFA; border-color:rgba(167,139,250,0.3); background:rgba(167,139,250,0.07);">Practice</div>
+          <div class="class-name">Scoped to safety practice</div>
+          <div class="class-desc">Communities that follow the safety practice taxonomy — PTW, confined space entry, traffic management. Cross-divisional and flat. A safety professional anywhere in the organisation who works in confined space entry sees the same community as their peers in every region. No walls.</div>
+        </div>
+      </div>
+      <div class="class-body">
+        <div class="class-attr">
+          <div class="class-attr-label">Membership</div>
+          <div class="class-attr-value">Automatic affiliation via practice relevance at the user's worksite. A global confined space expert is affiliated regardless of region. Subscription controls notification preferences.</div>
+        </div>
+        <div class="class-attr">
+          <div class="class-attr-label">Scope</div>
+          <div class="class-attr-value">Flat — cross-divisional, cross-regional, global. The practice community is the same community for everyone. Silo-free by architecture.</div>
+        </div>
+        <div class="class-attr">
+          <div class="class-attr-label">Primary use</div>
+          <div class="class-attr-value">Practice-specific learning, procedure gaps, shared field experience, investigation learnings relevant to the practice.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Work type -->
+    <div class="class-card">
+      <div class="class-header">
+        <div class="class-icon">⚙️</div>
+        <div class="class-meta">
+          <div class="class-tag" style="color:#34D399; border-color:rgba(52,211,153,0.3); background:rgba(52,211,153,0.07);">Work type</div>
+          <div class="class-name">Scoped to high-risk work taxonomy</div>
+          <div class="class-desc">Communities that follow the work type taxonomy — hot work, heavy vehicle operations, work at height, blasting. Cross-divisional and flat. The same logic as practice communities, but rooted in the work being done rather than the safety function managing it.</div>
+        </div>
+      </div>
+      <div class="class-body">
+        <div class="class-attr">
+          <div class="class-attr-label">Membership</div>
+          <div class="class-attr-value">Automatic affiliation based on active work types at the user's worksite. A hot work supervisor in Region A and Region C are in the same Hot Work community.</div>
+        </div>
+        <div class="class-attr">
+          <div class="class-attr-label">Scope</div>
+          <div class="class-attr-value">Flat — cross-divisional, cross-regional. A regional manager's insight about hot work is visible to the entire hot work community globally.</div>
+        </div>
+        <div class="class-attr">
+          <div class="class-attr-label">Primary use</div>
+          <div class="class-attr-value">Work-type-specific field experience, critical control discussions, incident investigation learnings seeded from the intelligence pipeline.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Working groups -->
+    <div class="class-card">
+      <div class="class-header">
+        <div class="class-icon">🔬</div>
+        <div class="class-meta">
+          <div class="class-tag" style="color:#F5C842; border-color:rgba(245,200,66,0.3); background:rgba(245,200,66,0.07);">Working group</div>
+          <div class="class-name">Time-bounded, purpose-specific</div>
+          <div class="class-desc">Communities stood up around a specific problem or objective, with a defined lifecycle and an expected output. Not a permanent community — a focused, working space. When the output is produced the working group closes and its record is preserved, not deleted.</div>
+        </div>
+      </div>
+      <div class="class-body">
+        <div class="class-attr">
+          <div class="class-attr-label">Membership</div>
+          <div class="class-attr-value">Invite-only. Created by safety manager or above. Members join by invitation, not affiliation. Membership can span roles, regions, and divisions deliberately.</div>
+        </div>
+        <div class="class-attr">
+          <div class="class-attr-label">Scope</div>
+          <div class="class-attr-value">Defined at creation — a working group can be local (one site) or global. Scope is intentional, not automatic. The creator decides who needs to be in the room.</div>
+        </div>
+        <div class="class-attr">
+          <div class="class-attr-label">Primary use</div>
+          <div class="class-attr-value">Procedure reviews, post-incident collaborative analysis, standard development, cross-regional coordination on a specific problem. Produces outputs that re-enter the platform.</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MEMBERSHIP MODEL -->
+<div class="section" id="membership">
+  <div class="section-label">Access model</div>
+  <div class="section-title">Affiliation <strong>vs</strong> subscription</div>
+  <div class="section-intro">Two distinct concepts that are often conflated. Affiliation is automatic — it determines what communities a user belongs to based on their context. Subscription is user-controlled — it determines how and when the community reaches them.</div>
+  <hr class="rule">
+
+  <div class="membership-grid">
+    <div class="mem-card">
+      <div class="mem-title">
+        Affiliation
+        <span class="mem-badge" style="background:var(--surface-2); color:var(--text-muted); border: 1px solid var(--border);">Automatic</span>
+      </div>
+      <div class="mem-desc">Derived automatically from the user's role, worksite, active work types, and safety practices. Affiliation determines which communities are <em>available</em> to a user — what they can see and participate in. It cannot be manually removed, only updated when the underlying context changes.</div>
+      <div class="mem-examples">
+        <div class="mem-ex"><strong>Organisational:</strong> A regional safety manager is affiliated with their region and all parent org communities automatically on account creation.</div>
+        <div class="mem-ex"><strong>Work type:</strong> A supervisor at a site where hot work and WAH are active is affiliated with both the Hot Work and Work at Height communities — with no manual setup required.</div>
+        <div class="mem-ex"><strong>Practice:</strong> A safety professional whose role includes PTW is affiliated with the PTW community globally, regardless of which region they're in.</div>
+      </div>
+    </div>
+    <div class="mem-card">
+      <div class="mem-title">
+        Subscription
+        <span class="mem-badge" style="background:var(--cop-bg); color:var(--cop-color); border: 1px solid var(--cop-border);">User-controlled</span>
+      </div>
+      <div class="mem-desc">User-managed preferences within their affiliated communities. Subscription controls notification frequency, digest delivery, and what appears in the user's CoP feed. A supervisor might be affiliated with five work type communities but only subscribe to active notifications from two. Affiliation doesn't create noise — subscription does.</div>
+      <div class="mem-examples">
+        <div class="mem-ex"><strong>Active subscription:</strong> Immediate notification on new discussions, appears prominently in CoP feed. Appropriate for communities where the user actively contributes.</div>
+        <div class="mem-ex"><strong>Digest subscription:</strong> Weekly summary of top discussions. Appropriate for communities relevant but not primary to the user's day-to-day.</div>
+        <div class="mem-ex"><strong>Affiliated but unsubscribed:</strong> Community is accessible, user can participate, but no proactive notifications. Nothing is missed — it's there when they go looking.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DISCUSSIONS -->
+<div class="section" id="discussions">
+  <div class="section-label">Content model</div>
+  <div class="section-title">Three <strong>discussion types</strong></div>
+  <div class="section-intro">Not every discussion starts the same way. The platform generates some from workflow events; practitioners initiate others directly. The type determines how AI frames the discussion and which community it targets.</div>
+  <hr class="rule">
+
+  <div class="discussion-list">
+
+    <!-- AI-Generated -->
+    <div class="disc-card">
+      <div class="disc-head">
+        <div class="disc-type-tag" style="color:var(--cop-color); border-color:var(--cop-border); background:var(--cop-bg);">AI-Generated</div>
+        <div class="disc-title">Workflow-triggered discussions</div>
+      </div>
+      <div class="disc-body">
+        <div class="disc-desc">When a workflow event occurs — a critical insight is approved, an investigation closes, an enquiry returns a significant finding, an atrophy pattern emerges — the platform generates a discussion seeded to the relevant community. The safety manager reviews and approves before it appears. The key design constraint: AI doesn't summarise the event and ask for comment. It reframes the event as the best possible prompt for meaningful practitioner discussion. See <a href="#ai-framing" style="color:var(--cop-color);">AI framing principles</a> below.</div>
+        <div class="disc-example">
+          <div class="disc-example-label">Example — critical insight about spotter management in hot work</div>
+          <div class="disc-example-text">Not: <em>"A critical insight has been identified about spotter positioning in hot work contexts. What do you think?"</em><br><br>But: <strong>"Spotter handovers are breaking down at shift changes — three near-misses in 28 days say the same thing across different sites. What actually happens at your site when the spotter changes over? Is it covered in your PTW?"</strong></div>
+        </div>
+        <div class="disc-note">The opening question is the most important element — it must be specific enough that an experienced practitioner finds it worth answering. The test: would a supervisor with 15 years experience read this and think "actually, I have something to say here"?</div>
+      </div>
+    </div>
+
+    <!-- Practitioner-Initiated -->
+    <div class="disc-card">
+      <div class="disc-head">
+        <div class="disc-type-tag" style="color:#6B9EFF; border-color:rgba(107,158,255,0.3); background:rgba(107,158,255,0.08);">Practitioner</div>
+        <div class="disc-title">Practitioner-initiated discussions</div>
+      </div>
+      <div class="disc-body">
+        <div class="disc-desc">Any affiliated user can start a discussion in a community they belong to. A supervisor who has seen something in the field. A regional manager with a cross-site question. A safety professional who wants field perspectives on a proposed change. Practitioner-initiated discussions are unfiltered — they enter the community directly, without AI generation or safety manager review. Moderation happens reactively, not proactively.</div>
+        <div class="disc-example">
+          <div class="disc-example-label">Example — supervisor in Hot Work community</div>
+          <div class="disc-example-text"><strong>"We changed our fire watch positioning last month after a near-miss — watcher was too close to the work and couldn't see both sides. Has anyone else moved to a split-watch setup for confined-area hot work? How do you manage the coverage overlap?"</strong></div>
+        </div>
+        <div class="disc-note">Practitioner-initiated discussions that generate high engagement or surface a previously undetected pattern can be elevated into the intelligence pipeline — with safety manager review as the gate. The community is a signal source, not just a destination.</div>
+      </div>
+    </div>
+
+    <!-- Cross-posted -->
+    <div class="disc-card">
+      <div class="disc-head">
+        <div class="disc-type-tag" style="color:#F5C842; border-color:rgba(245,200,66,0.3); background:rgba(245,200,66,0.08);">Cross-posted</div>
+        <div class="disc-title">Cross-posted discussions</div>
+      </div>
+      <div class="disc-body">
+        <div class="disc-desc">A discussion that lives in one community but is also visible in another. Cross-posting is how organisational and work/practice communities stay connected without becoming the same thing. A regional manager's discussion about hot work stays in their regional community for local context — and optionally reaches the global Hot Work community for broader input. Same thread. Same responses. No duplication of effort. See <a href="#crosspost" style="color:var(--cop-color);">Cross-posting mechanics</a> below.</div>
+        <div class="disc-example">
+          <div class="disc-example-label">Example — regional discussion elevated to work type community</div>
+          <div class="disc-example-text"><strong>Before posting:</strong> "Hot work is currently active across 4 other regions. Would you like to also post this to the Hot Work community? Your regional context will be preserved — it will appear as a regional cross-post."</div>
+        </div>
+        <div class="disc-note">Cross-posted discussions show their origin community clearly. Responses from both communities feed the same thread. The Hot Work community sees where the discussion came from. The regional community sees that it has reached beyond its boundaries.</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- AI FRAMING -->
+<div class="section" id="ai-framing">
+  <div class="section-label">Design principle</div>
+  <div class="section-title">AI <strong>framing</strong>, not AI <strong>announcing</strong></div>
+  <div class="section-intro">The quality of a discussion is almost entirely determined by the quality of the opening question. The AI's job is not to summarise what happened — practitioners can read the source. Its job is to reframe the event as the most meaningful prompt possible for the specific audience receiving it.</div>
+  <hr class="rule">
+
+  <div class="ai-framing">
+    <div class="af-header">
+      <span>⚖️</span> What good framing looks like — compared
+    </div>
+
+    <div class="af-grid">
+      <div class="af-cell">
+        <div class="af-cell-label bad">❌ Announcement framing</div>
+        <div class="af-text bad">A Critical Insight has been generated regarding spotter management in hot work operations following 3 near-miss observations across 4 sites in the past 28 days. This insight has been approved for sharing. Please review and share your thoughts or experiences.</div>
+      </div>
+      <div class="af-cell">
+        <div class="af-cell-label good">✓ Discussion framing</div>
+        <div class="af-text good">Spotter handovers are breaking down at shift changes — the same breakdown, three times in four weeks, across sites that don't share a crew. When does your PTW actually confirm the spotter knows their boundaries, and what happens to that confirmation when the spotter walks off?</div>
+      </div>
+    </div>
+
+    <div class="af-grid">
+      <div class="af-cell">
+        <div class="af-cell-label bad">❌ Generic prompt</div>
+        <div class="af-text bad">An investigation into a lost-time injury at Site X has been closed and cleared for sharing. The root cause was identified as inadequate hot work PTW process. What are your experiences with PTW for hot work at your sites?</div>
+      </div>
+      <div class="af-cell">
+        <div class="af-cell-label good">✓ Specific tension</div>
+        <div class="af-text good">A site's fire watch was positioned for compliance, not coverage — close enough to sign the PTW, too far to see both sides of the work face. What does your PTW actually say about fire watch positioning, and does anyone check it's followed rather than just completed?</div>
+      </div>
+    </div>
+
+    <div class="af-grid">
+      <div class="af-cell">
+        <div class="af-cell-label bad">❌ Atrophy announcement</div>
+        <div class="af-text bad">This confined space entry procedure has not been reviewed in 18 months. Three near-misses related to this procedure have been logged in this period. How could this procedure be improved?</div>
+      </div>
+      <div class="af-cell">
+        <div class="af-cell-label good">✓ Practitioner context</div>
+        <div class="af-text good">This procedure hasn't changed in 18 months but the work around it has — three near-misses say there's a gap between what it describes and what's actually happening at the work face. What does this procedure get wrong about how confined space entry actually runs on your sites?</div>
+      </div>
+    </div>
+
+    <div class="af-rationale">The AI job <code>cop_discussion.generate</code> receives the workflow event plus the community context — who these people are, what they know, what work they do. The prompt instructs the model to act as a practitioner asking another practitioner a question they'd genuinely want to answer. The output is a thread_body (3–5 sentences of context) and an opening_question (one specific, tension-surfacing question). The question is the deliverable. The body is support material.</div>
+  </div>
+</div>
+
+<!-- CROSS-POSTING -->
+<div class="section" id="crosspost">
+  <div class="section-label">Mechanics</div>
+  <div class="section-title">Cross-posting <strong>without silos</strong></div>
+  <div class="section-intro">The mechanism by which a discussion in one community reaches another. Cross-posting is how the platform dissolves the walls between organisational and practice/work communities without collapsing them into one thing.</div>
+  <hr class="rule">
+
+  <div class="crosspost">
+    <div class="cp-header">Cross-post flow — regional discussion elevated to work type community</div>
+    <div class="cp-body">
+      <div class="cp-flow">
+        <div class="cp-node regional">Regional Manager<br><small style="font-weight:400; opacity:0.7;">North Region</small></div>
+        <div class="cp-arrow">→</div>
+        <div class="cp-node prompt">Creates discussion<br>about hot work in<br>Regional Community</div>
+        <div class="cp-arrow">→</div>
+        <div class="cp-node work">Platform prompt:<br>"Hot work active in<br>4 other regions →<br>cross-post?"</div>
+        <div class="cp-arrow">→</div>
+        <div class="cp-node practice">Appears in Hot Work<br>Community globally<br>as regional cross-post</div>
+      </div>
+      <div class="cp-rules">
+        <div class="cp-rule"><div class="cp-rule-dot"></div>Cross-posting is always optional and always prompted, never automatic. The creator sees who will additionally receive the discussion before confirming.</div>
+        <div class="cp-rule"><div class="cp-rule-dot"></div>A cross-posted discussion shows its origin community clearly — "from North Region Community" — so the broader audience understands the local context.</div>
+        <div class="cp-rule"><div class="cp-rule-dot"></div>Responses from both communities feed the same thread. A Hot Work practitioner in South Region responding to a cross-posted discussion appears alongside the original regional responses. No bifurcated conversations.</div>
+        <div class="cp-rule"><div class="cp-rule-dot"></div>The platform checks active work types and practices before suggesting cross-post targets. Only relevant communities are suggested — not all communities.</div>
+        <div class="cp-rule"><div class="cp-rule-dot"></div>Elevated reach: if a cross-posted discussion in a work type community generates high cross-regional engagement, the platform can suggest elevating it to an organisational community with safety manager approval.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- WORKING GROUPS -->
+<div class="section" id="working-groups">
+  <div class="section-label">Focused work</div>
+  <div class="section-title">Working groups — <strong>time-bounded, output-oriented</strong></div>
+  <div class="section-intro">A fourth community class for focused collaborative work. Working groups are not permanent. They are stood up around a problem or objective, do the work, produce an output, and close. The record is preserved — the space is not.</div>
+  <hr class="rule">
+
+  <div class="wg-layout">
+    <div class="wg-card">
+      <div class="wg-icon">🎯</div>
+      <div class="wg-title">Purpose and objective</div>
+      <div class="wg-body">Every working group is created with a stated purpose. Not just a name — a clear objective, a reason for existing, and an expected output. This metadata is visible to all members and to safety managers. It answers: why does this group exist, what will it produce, and when should it be done?</div>
+      <div class="wg-meta-label">Required on creation</div>
+      <div class="wg-meta-list">
+        <div class="wg-meta-item"><strong>Objective:</strong> Plain-language statement of what the group will achieve</div>
+        <div class="wg-meta-item"><strong>Expected output:</strong> What the group will produce — procedure amendment, recommendation, report, register change</div>
+        <div class="wg-meta-item"><strong>Target close date:</strong> When the group expects to produce its output</div>
+        <div class="wg-meta-item"><strong>Output destination:</strong> Where the output goes — MS workspace, control register, community post, insight pipeline</div>
+      </div>
+    </div>
+    <div class="wg-card">
+      <div class="wg-icon">👥</div>
+      <div class="wg-title">Membership and scope</div>
+      <div class="wg-body">Invite-only. The creator decides who needs to be in the room. A working group can span roles, regions, and divisions deliberately — a confined space working group might include a supervisor from each region, a safety professional, and an external expert. No automatic affiliation applies. Members join by invitation only.</div>
+      <div class="wg-meta-label">Membership properties</div>
+      <div class="wg-meta-list">
+        <div class="wg-meta-item">Creator: safety manager or above</div>
+        <div class="wg-meta-item">Members: any Hiviz user, any role, any region</div>
+        <div class="wg-meta-item">Visibility: members + the creator's manager level</div>
+        <div class="wg-meta-item">Observers: safety managers can observe without participating</div>
+      </div>
+    </div>
+    <div class="wg-card">
+      <div class="wg-icon">📋</div>
+      <div class="wg-title">Lifecycle</div>
+      <div class="wg-body">Working groups have a clear lifecycle. They are not open-ended. When the output is produced, the group closes — the record is preserved and the output is promoted to wherever it belongs in the platform. A working group that produces a procedure amendment submits it to the Management System workspace for review. A working group that produces a recommended control change submits it to the control register governance workflow.</div>
+      <div class="wg-meta-label">Status lifecycle</div>
+      <div class="wg-meta-list">
+        <div class="wg-meta-item"><strong>active:</strong> Working group is open, members can post and contribute</div>
+        <div class="wg-meta-item"><strong>output_pending:</strong> Work is done, output awaiting formal promotion</div>
+        <div class="wg-meta-item"><strong>closed:</strong> Output promoted, group archived and read-only</div>
+        <div class="wg-meta-item"><strong>extended:</strong> Target date passed, explicitly extended with reason</div>
+      </div>
+    </div>
+    <div class="wg-card">
+      <div class="wg-icon">🔗</div>
+      <div class="wg-title">Outputs and re-entry</div>
+      <div class="wg-body">A working group's output doesn't disappear into a thread — it re-enters the platform. The connection between CoP and the rest of Hiviz runs through the working group output pipeline. This is how communities produce change, not just commentary.</div>
+      <div class="wg-meta-label">Output destinations</div>
+      <div class="wg-meta-list">
+        <div class="wg-meta-item">Procedure amendment → Management System workspace (Document review)</div>
+        <div class="wg-meta-item">Control recommendation → Risk Assurance register governance</div>
+        <div class="wg-meta-item">Field insight → Intelligence pipeline (Critical Insight candidate)</div>
+        <div class="wg-meta-item">Community post → Published to practice or work community on close</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Working Group data entity -->
+  <div class="entity-diagram">
+    <div class="ed-header">Working group — key fields (Prisma schema, relevant only)</div>
+    <div class="ed-body">
+<span class="ec">// Core identity</span>
+<span class="ef">id</span>                    <span class="et">UUID</span>         <span class="ec">// primary key</span>
+<span class="ef">name</span>                  <span class="et">String</span>       <span class="ec">// short label e.g. "Confined Space PTW Review 2026"</span>
+<span class="ef">created_by_id</span>         <span class="et">UUID</span>         <span class="ec">// FK users — safety manager or above</span>
+<span class="ef">status</span>                <span class="et">WorkingGroupStatus</span>  <span class="ec">// active | output_pending | closed | extended</span>
+
+<span class="ec">// Purpose and objectives — the WHY this group exists</span>
+<span class="ef">objective</span>             <span class="et">String</span>       <span class="ec">// plain-language statement of what the group will achieve</span>
+<span class="ef">expected_output</span>       <span class="et">String</span>       <span class="ec">// what will be produced — procedure amendment, recommendation, etc.</span>
+<span class="ef">output_destination</span>    <span class="et">OutputDestination</span>   <span class="ec">// ms_workspace | control_register | insight_pipeline | community_post</span>
+<span class="ef">background_context</span>    <span class="et">String?</span>      <span class="ec">// optional — what triggered this, any relevant prior events</span>
+
+<span class="ec">// Taxonomy context (what this group is about)</span>
+<span class="ef">work_type_ids</span>         <span class="et">UUID[]</span>       <span class="ec">// relevant work types if applicable</span>
+<span class="ef">practice_ids</span>          <span class="et">UUID[]</span>       <span class="ec">// relevant safety practices if applicable</span>
+<span class="ef">related_insight_ids</span>   <span class="et">UUID[]</span>       <span class="ec">// critical insights that triggered or relate to this group</span>
+<span class="ef">related_investigation_ids</span> <span class="et">UUID[]</span>   <span class="ec">// investigations that informed this group's creation</span>
+
+<span class="ec">// Lifecycle</span>
+<span class="ef">target_close_date</span>     <span class="et">DateTime</span>     <span class="ec">// when the group expects to produce its output</span>
+<span class="ef">opened_at</span>             <span class="et">DateTime</span>
+<span class="ef">closed_at</span>             <span class="et">DateTime?</span>
+<span class="ef">extended_reason</span>       <span class="et">String?</span>      <span class="ec">// if status = extended, why</span>
+
+<span class="ec">// Output record</span>
+<span class="ef">output_summary</span>        <span class="et">String?</span>      <span class="ec">// what was produced — plain text</span>
+<span class="ef">output_ref_id</span>         <span class="et">UUID?</span>        <span class="ec">// FK to the destination entity (doc, control, insight) when promoted</span>
+<span class="ef">output_promoted_at</span>    <span class="et">DateTime?</span>
+<span class="ef">output_promoted_by</span>    <span class="et">UUID?</span>        <span class="ec">// FK users</span>
+    </div>
+  </div>
+</div>
+
+<!-- INTELLIGENCE LOOP -->
+<div class="section" id="intelligence">
+  <div class="section-label">Platform connections</div>
+  <div class="section-title">The <strong>reciprocal</strong> intelligence loop</div>
+  <div class="section-intro">CoP is not a one-way broadcast channel. The intelligence pipeline feeds the community — and the community feeds back into the pipeline. The platform doesn't just distribute learning; it listens for it.</div>
+  <hr class="rule">
+
+  <div class="intel-loop">
+    <div class="il-header">Intelligence flow — inbound and outbound</div>
+
+    <div class="il-row">
+      <div class="il-direction">
+        <div class="il-arrow-badge il-outbound">Platform → CoP</div>
+      </div>
+      <div class="il-events">
+        <div class="il-event"><div class="il-dot"></div><strong>Critical Insight approved</strong> → AI-generated discussion seeded to relevant practice or work type community. Safety manager reviews before posting.</div>
+        <div class="il-event"><div class="il-dot"></div><strong>Investigation closed and cleared</strong> → AI-generated discussion seeded to relevant work type community, anonymised, with investigation outcome as framing context.</div>
+        <div class="il-event"><div class="il-dot"></div><strong>Enquiry results completed</strong> → AI-generated discussion seeded with synthesis findings as framing. "The enquiry found X — does this match what you're seeing?"</div>
+        <div class="il-event"><div class="il-dot"></div><strong>Document atrophy threshold crossed</strong> → AI-generated discussion seeded to relevant practice community: "This procedure hasn't changed but the work around it has — how could it be improved?"</div>
+        <div class="il-event"><div class="il-dot"></div><strong>Company-wide systemic insight</strong> → AI-generated discussion seeded to relevant organisational community at the approved scope level.</div>
+      </div>
+    </div>
+
+    <div class="il-row">
+      <div class="il-direction">
+        <div class="il-arrow-badge il-inbound">CoP → Platform</div>
+      </div>
+      <div class="il-events">
+        <div class="il-event"><div class="il-dot"></div><strong>High-engagement discussion</strong> → Surfaced to safety manager as a potential Critical Insight candidate. Safety manager reviews — if confirmed, enters intelligence pipeline with <code>trigger_source: cop_discussion</code>.</div>
+        <div class="il-event"><div class="il-dot"></div><strong>Practitioner-initiated discussion with cross-regional reach</strong> → Prompted for elevation to broader organisational community with safety manager approval.</div>
+        <div class="il-event"><div class="il-dot"></div><strong>Working group output</strong> → Promoted directly to destination (MS workspace, control register, insight pipeline) on group close.</div>
+        <div class="il-event"><div class="il-dot"></div><strong>Community response patterns</strong> → Aggregated engagement data contributes to CoP health signals and, over time, to the FW Map communications_coordination factor signal.</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- HEALTH SIGNALS -->
+<div class="section" id="health">
+  <div class="section-label">Platform metrics</div>
+  <div class="section-title">CoP <strong>health signals</strong></div>
+  <div class="section-intro">Community engagement is not just a usage metric — it's a signal about the organisation's learning capacity. These signals feed the analytics layer and, at sufficient volume, contribute to FW Map factor positions.</div>
+  <hr class="rule">
+
+  <div class="signals-grid">
+    <div class="signal-card">
+      <div class="signal-icon">💬</div>
+      <div class="signal-title">Thread engagement rate</div>
+      <div class="signal-desc">Of AI-generated and practitioner-initiated discussions, what proportion receive at least one substantive response within 7 days? Measures whether the platform is generating content worth engaging with.</div>
+      <div class="signal-formula">responses_with_substance / total_discussions</div>
+    </div>
+    <div class="signal-card">
+      <div class="signal-icon">✍️</div>
+      <div class="signal-title">Practitioner contribution rate</div>
+      <div class="signal-desc">What proportion of discussions are practitioner-initiated vs AI-generated? A community dominated entirely by AI-seeded discussions is a broadcast channel. The goal is active practitioner participation, not just AI output delivery.</div>
+      <div class="signal-formula">practitioner_initiated / total_discussions</div>
+    </div>
+    <div class="signal-card">
+      <div class="signal-icon">🌍</div>
+      <div class="signal-title">Cross-community reach</div>
+      <div class="signal-desc">How many discussions in work type and practice communities draw responses from practitioners across multiple regions or divisions? Measures the platform's effectiveness at breaking down silos — a direct signal for communications_coordination.</div>
+      <div class="signal-formula">cross_region_discussions / total_work_practice_discussions</div>
+    </div>
+    <div class="signal-card">
+      <div class="signal-icon">🔬</div>
+      <div class="signal-title">Working group completion rate</div>
+      <div class="signal-desc">Of working groups created, what proportion close with an output promoted to the platform within their target date? Measures whether the working group mechanism is producing change or just activity.</div>
+      <div class="signal-formula">closed_with_output_on_time / total_closed</div>
+    </div>
+    <div class="signal-card">
+      <div class="signal-icon">⬆️</div>
+      <div class="signal-title">Community-to-pipeline rate</div>
+      <div class="signal-desc">How often does a community discussion surface as a Critical Insight candidate that the safety manager confirms into the pipeline? Measures whether CoP is genuinely contributing to the intelligence loop, not just consuming from it.</div>
+      <div class="signal-formula">confirmed_insight_candidates / total_surfaced</div>
+    </div>
+    <div class="signal-card">
+      <div class="signal-icon">📊</div>
+      <div class="signal-title">FW Map contribution</div>
+      <div class="signal-desc">At sufficient volume, cross-community reach and engagement patterns contribute to the communications_coordination and learning_development factor signals in the FW Map capacity profile — sourced from CoP behaviour, not just field observation.</div>
+      <div class="signal-formula">feeds: fw_map analytics layer</div>
+    </div>
+  </div>
+</div>
+
+<!-- DISCOVERY QUESTIONS -->
+<div class="section" id="discovery">
+  <div class="section-label">Open questions</div>
+  <div class="section-title">Discovery <strong>questions</strong></div>
+  <div class="section-intro">Questions to work through with product and safety experts before V7 is designed. Not decisions — discussion starters.</div>
+  <hr class="rule">
+
+  <div class="dq-list">
+
+    <div class="dq-card">
+      <div class="dq-head">
+        <div class="dq-num">01</div>
+        <div class="dq-title">Moderation model — who owns community quality?</div>
+      </div>
+      <div class="dq-body">
+        <div class="dq-context">AI-generated discussions are reviewed before posting. Practitioner-initiated discussions are not. Over time, a CoP with hundreds of active practitioners across multiple organisations will produce content that needs moderation — not just spam, but off-topic posts, inaccurate information, or discussions that shouldn't be public at the scope they were posted to.</div>
+        <div class="dq-options">
+          <div class="dq-opt"><div class="dq-opt-letter">A</div>Safety managers as community moderators — they already own the intelligence gate and have the most contextual authority. Adds responsibility but aligns with their existing role.</div>
+          <div class="dq-opt"><div class="dq-opt-letter">B</div>Designated community stewards — a separate role, potentially a respected practitioner rather than a manager. Less hierarchical, more community-native. Could be self-nominated or appointed.</div>
+          <div class="dq-opt"><div class="dq-opt-letter">C</div>AI-flagged, human-confirmed — AI monitors for off-topic, potentially sensitive, or scope-inappropriate content and flags for human review. No proactive moderation role required.</div>
+          <div class="dq-opt"><div class="dq-opt-letter">D</div>Reactive only — any member can flag a post, flagged posts are reviewed by the community creator or safety manager. Moderation is event-driven, not role-based.</div>
+        </div>
+        <div class="dq-consult">Consult: What is the expected volume of practitioner-initiated discussions per week at a mid-sized client (e.g. 500 supervisors, 20 sites)? Moderation model depends heavily on volume.</div>
+      </div>
+    </div>
+
+    <div class="dq-card">
+      <div class="dq-head">
+        <div class="dq-num">02</div>
+        <div class="dq-title">Cross-org communities — the long-term question</div>
+      </div>
+      <div class="dq-body">
+        <div class="dq-context">If Hiviz runs across multiple independent organisations, the work type and practice communities become very interesting. A hot work community could contain practitioners from a construction contractor, a mining company, and an infrastructure operator — all contributing to the same discussion. Insights anonymised, organisations unnamed, field experience genuinely pooled across the industry.</div>
+        <div class="dq-options">
+          <div class="dq-opt"><div class="dq-opt-letter">A</div>Opt-in cross-org communities — organisations choose to participate in shared work type or practice communities. Their practitioners appear as "[Organisation type] practitioner" not by name or company. Forge Works curates the cross-org layer.</div>
+          <div class="dq-opt"><div class="dq-opt-letter">B</div>Forge Works-facilitated communities — Forge Works hosts cross-org communities entirely outside individual org workspaces. Hiviz users can be invited to participate but it's a distinct layer.</div>
+          <div class="dq-opt"><div class="dq-opt-letter">C</div>Not in scope — focus on single-org value first. Cross-org communities are a commercial and architectural decision that requires a separate roadmap conversation.</div>
+        </div>
+        <div class="dq-consult">Consult: This is a significant commercial and data governance decision. Cross-org communities are a potential network effect moat — the platform becomes more valuable the more organisations use it. But data sensitivity in safety intelligence is high. Not for V7 scoping, but the architecture shouldn't preclude it.</div>
+      </div>
+    </div>
+
+    <div class="dq-card">
+      <div class="dq-head">
+        <div class="dq-num">03</div>
+        <div class="dq-title">Practitioner-initiated discussions — approval gate or not?</div>
+      </div>
+      <div class="dq-body">
+        <div class="dq-context">AI-generated discussions require safety manager review before posting. Practitioner-initiated discussions, if also gated, remove the spontaneity that makes practitioner CoP valuable. But an ungated community in a safety context can surface sensitive content — ongoing investigations, disputed incidents, regulatory commentary.</div>
+        <div class="dq-options">
+          <div class="dq-opt"><div class="dq-opt-letter">A</div>No gate for practitioner posts — fully open within affiliated communities. Moderation is reactive. The community is trusted to be professional because it's operationally significant content only and the audience is curated by affiliation.</div>
+          <div class="dq-opt"><div class="dq-opt-letter">B</div>Soft gate — AI scans before posting, flags potential issues (mentions of named individuals, reference to ongoing investigations, regulatory content) for rapid safety manager review. Non-flagged posts go live immediately.</div>
+          <div class="dq-opt"><div class="dq-opt-letter">C</div>Community-class gate — organisational communities require review (higher stakes), practice and work communities are open (practitioners talking to practitioners). Different rules for different contexts.</div>
+        </div>
+        <div class="dq-consult">Consult: What is the legal exposure if a practitioner posts about an ongoing investigation in a community that another org entity can see? The answer shapes the moderation model significantly.</div>
+      </div>
+    </div>
+
+    <div class="dq-card">
+      <div class="dq-head">
+        <div class="dq-num">04</div>
+        <div class="dq-title">Working groups — who can create them?</div>
+      </div>
+      <div class="dq-body">
+        <div class="dq-context">The current design limits working group creation to safety managers or above. This reflects the working group's connection to platform outputs — procedure amendments, control register changes, insight pipeline entries. But restricting creation too narrowly could prevent valuable practitioner-led working groups from forming.</div>
+        <div class="dq-options">
+          <div class="dq-opt"><div class="dq-opt-letter">A</div>Safety manager or above only — maintains the connection to platform governance. Working groups produce outputs that re-enter formal systems, so formal ownership is appropriate.</div>
+          <div class="dq-opt"><div class="dq-opt-letter">B</div>Any user can propose a working group — safety manager approves before it opens. Surfaces practitioner-driven need without bypassing oversight.</div>
+          <div class="dq-opt"><div class="dq-opt-letter">C</div>Any user can create a working group with community output only — no platform integration. Working groups that want to submit to the MS workspace or control register require safety manager sponsorship to unlock that pathway.</div>
+        </div>
+        <div class="dq-consult">Consult: Are there cases where supervisors or field practitioners would benefit from their own working groups, independent of safety manager initiation? Think post-incident crew-level reviews, pre-shutdown coordination groups, or cross-site knowledge transfer for a specific job type.</div>
+      </div>
+    </div>
+
+    <div class="dq-card">
+      <div class="dq-head">
+        <div class="dq-num">05</div>
+        <div class="dq-title">CoP and the Hiviz duty list — how close is too close?</div>
+      </div>
+      <div class="dq-body">
+        <div class="dq-context">The platform philosophy is clear: CoP is contextual and voluntary, the duty list is obligatory. But workflow-generated discussions blur this slightly — they land in CoP as a result of actions the safety manager took in the duty system. There's a risk users begin to feel the CoP is another obligation layer rather than a genuinely open space.</div>
+        <div class="dq-options">
+          <div class="dq-opt"><div class="dq-opt-letter">A</div>CoP notifications are always separate from duty notifications — different notification channel, different visual treatment, clearly never a compliance item. The UI enforces the distinction.</div>
+          <div class="dq-opt"><div class="dq-opt-letter">B</div>Contribution to CoP is never tracked, reported on, or surfaced as a metric per individual — only aggregate community health is visible, not individual participation rates. Engagement cannot become a management target.</div>
+          <div class="dq-opt"><div class="dq-opt-letter">C</div>Both A and B are design constraints, not just preferences — built into the data model. No individual CoP participation data is surfaced to managers. This is architectural, not just a UI convention.</div>
+        </div>
+        <div class="dq-consult">Consult: This is a cultural and trust question as much as a design question. If practitioners feel their CoP participation is being monitored by management, the quality of discussion will drop immediately. The platform's value depends on practitioners being genuinely willing to share what they know and have experienced.</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- PLACEMENT -->
+<div class="section" id="placement">
+  <div class="section-label">Roadmap</div>
+  <div class="section-title">Where <strong>Communities</strong> fits</div>
+  <div class="section-intro">Communities is designated V7 — the last of the named workspaces. But the foundational elements (community data model, affiliation logic, discussion infrastructure) have low dependencies and could be accelerated if commercial validation supports it. The AI framing work connects directly to the existing prompt library and is additive, not disruptive.</div>
+  <hr class="rule">
+
+  <div class="arc">
+    <div class="arc-v">
+      <div class="arc-label">V1–V2</div>
+      <div class="arc-name">Field Intelligence</div>
+      <div class="arc-note">Core loop. Observations, insights, talks, actions, visits.</div>
+    </div>
+    <div class="arc-v">
+      <div class="arc-label">V3</div>
+      <div class="arc-name">Incidents + MS Phase 1</div>
+      <div class="arc-note">Incident module, investigation framework, document serving.</div>
+    </div>
+    <div class="arc-v">
+      <div class="arc-label">V4</div>
+      <div class="arc-name">Diagnostic</div>
+      <div class="arc-note">Anonymous surveys, capacity profile, document atrophy.</div>
+    </div>
+    <div class="arc-v">
+      <div class="arc-label">V5</div>
+      <div class="arc-name">Risk Assurance</div>
+      <div class="arc-note">Critical controls, verification clockwork, defeating factors.</div>
+    </div>
+    <div class="arc-v">
+      <div class="arc-label">V6</div>
+      <div class="arc-name">MS Phase 3</div>
+      <div class="arc-note">AI ingestion, DocumentRequirement, grounded intelligence.</div>
+    </div>
+    <div class="arc-v primary">
+      <div class="arc-label">V7 — This document</div>
+      <div class="arc-name">Communities</div>
+      <div class="arc-note">Native CoP workspace. Four community classes. Affiliation model. AI-framed discussions. Working groups. Reciprocal intelligence loop.</div>
+    </div>
+  </div>
+
+  <div class="philosophy" style="margin-top: 0;">
+    <div class="philosophy-quote">The platform can be brought forward. <strong>The community data model has low dependencies.</strong></div>
+    <div class="philosophy-note">
+      The affiliation model (work type, practice, org hierarchy) is derived from data that already exists in V1. The discussion infrastructure (community, discussion, response) is a new set of tables but does not require any other workspace to be live first. The AI framing work connects to the existing <code>cop_thread.generate</code> job already specced in the AI prompt library (Prompt 11). The only hard dependency is having meaningful workflow events to seed from — which means at least V1 needs to be live and generating insights before community discussions have something to say.<br><br>
+      Working groups, cross-posting, and the reciprocal intelligence loop can follow as V7 depth. The community infrastructure itself could ship as early as V3 if commercial validation supports it — giving the platform a social layer at the point where enterprise customers are being acquired and team-level adoption is the conversion challenge.
+    </div>
+  </div>
+</div>
+
+</div>
+
+<footer>
+  <div>Hiviz · SafetyPlatform · V7 Communities Workspace Discovery · April 2026</div>
+  <div>Forge Works · Product · Confidential</div>
+</footer>
+
+</body>
+</html>

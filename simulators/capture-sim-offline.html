@@ -1,0 +1,2149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Capture Sim — Hiviz</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F4F6F8;
+    --surface: #FFFFFF;
+    --border: #E5E8EB;
+    --text-primary: #1C252E;
+    --text-secondary: #637381;
+    --text-disabled: #919EAB;
+    --primary: #00AB55;
+    --primary-light: #D1FAE5;
+    --primary-dark: #007B40;
+    --error: #FF5630;
+    --error-light: #FFE9E5;
+    --warning: #FFAB00;
+    --warning-light: #FFF3CD;
+    --info: #006C9C;
+    --info-light: #E0F4FF;
+    --purple: #7635DC;
+    --purple-light: #EFE6FF;
+    --hiviz-dark: #1C252E;
+    --radius: 16px;
+    --radius-sm: 10px;
+    --shadow-card: 0 1px 3px rgba(0,0,0,0.08);
+    --shadow-elevated: 0 8px 32px rgba(0,0,0,0.16);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #0e0f0d;
+    color: var(--text-primary);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 32px 16px;
+  }
+
+  /* Page header */
+  .page-header {
+    text-align: center;
+    margin-bottom: 20px;
+    color: white;
+    width: 100%;
+    max-width: 390px;
+  }
+
+  .page-logo {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #d4a843;
+    margin-bottom: 6px;
+  }
+
+  .page-title {
+    font-size: 20px;
+    font-weight: 800;
+    margin-bottom: 6px;
+  }
+
+  .page-sub {
+    font-size: 12px;
+    color: rgba(255,255,255,0.4);
+    line-height: 1.5;
+  }
+
+  .exp-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: rgba(212,168,67,0.15);
+    border: 1px solid rgba(212,168,67,0.3);
+    border-radius: 20px;
+    padding: 3px 10px;
+    font-size: 10px;
+    font-weight: 600;
+    color: #d4a843;
+    margin-bottom: 10px;
+  }
+
+  /* Mode toggle — 2x2 grid on mobile */
+  .mode-toggle-wrap {
+    width: 100%;
+    max-width: 390px;
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 10px;
+    padding: 3px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+    margin-top: 14px;
+  }
+
+  /* Phone shell */
+  .phone-shell {
+    width: 100%;
+    max-width: 390px;
+    background: var(--surface);
+    border-radius: 32px;
+    overflow: hidden;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.08);
+    display: flex;
+    flex-direction: column;
+    min-height: 680px;
+    position: relative;
+  }
+
+  /* Status bar */
+  .status-bar {
+    height: 44px;
+    background: var(--hiviz-dark);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    flex-shrink: 0;
+  }
+
+  .status-time { font-size: 15px; font-weight: 700; color: white; }
+  .status-right { display: flex; align-items: center; gap: 6px; color: white; }
+
+  /* App header */
+  .app-header {
+    background: var(--hiviz-dark);
+    padding: 12px 20px 16px;
+    flex-shrink: 0;
+  }
+
+  .app-header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 4px;
+  }
+
+  .app-logo {
+    font-size: 16px;
+    font-weight: 800;
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .logo-dot { width: 7px; height: 7px; background: var(--primary); border-radius: 50%; }
+
+  .app-site {
+    font-size: 11px;
+    color: rgba(255,255,255,0.4);
+  }
+
+  /* Landing — choose type */
+  .landing {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    gap: 12px;
+  }
+
+  .landing-prompt {
+    font-size: 17px;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 8px;
+  }
+
+  .landing-sub {
+    font-size: 13px;
+    color: var(--text-secondary);
+    text-align: center;
+    line-height: 1.5;
+    margin-bottom: 16px;
+  }
+
+  .type-btn {
+    width: 100%;
+    padding: 18px 20px;
+    border-radius: var(--radius);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    transition: all 0.15s;
+    text-align: left;
+  }
+
+  .type-btn:active { transform: scale(0.98); }
+
+  .type-btn-obs {
+    background: var(--hiviz-dark);
+    color: white;
+  }
+
+  .type-btn-inc {
+    background: var(--error-light);
+    color: var(--error);
+    border: 1.5px solid var(--error);
+  }
+
+  .type-icon {
+    width: 44px; height: 44px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    font-size: 20px;
+  }
+
+  .type-label { font-size: 16px; font-weight: 700; }
+  .type-desc { font-size: 12px; opacity: 0.6; margin-top: 2px; }
+
+  /* Chat interface */
+  .chat-view {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    display: none;
+  }
+
+  .chat-header {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+
+  .chat-back {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    color: var(--text-secondary);
+    border: none;
+    background: transparent;
+  }
+
+  .chat-back:hover { background: var(--bg); }
+
+  .chat-type-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .chat-type-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+  }
+
+  .chat-header-sub {
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin-left: auto;
+  }
+
+  /* Messages */
+  .messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background: var(--bg);
+  }
+
+  .messages::-webkit-scrollbar { display: none; }
+
+  .msg {
+    display: flex;
+    flex-direction: column;
+    max-width: 82%;
+    animation: msgIn 0.2s ease;
+  }
+
+  @keyframes msgIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .msg-hiviz { align-self: flex-start; }
+  .msg-user { align-self: flex-end; }
+
+  .msg-bubble {
+    padding: 10px 14px;
+    border-radius: 16px;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .msg-hiviz .msg-bubble {
+    background: var(--surface);
+    color: var(--text-primary);
+    border-bottom-left-radius: 4px;
+    box-shadow: var(--shadow-card);
+  }
+
+  .msg-user .msg-bubble {
+    background: var(--hiviz-dark);
+    color: white;
+    border-bottom-right-radius: 4px;
+  }
+
+  .msg-sender {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--text-disabled);
+    margin-bottom: 3px;
+    padding: 0 4px;
+  }
+
+  .msg-hiviz .msg-sender { color: var(--primary); }
+
+  /* Quick reply chips */
+  .quick-replies {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 0 4px;
+    margin-top: 4px;
+  }
+
+  .qr-chip {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 20px;
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all 0.12s;
+    white-space: nowrap;
+  }
+
+  .qr-chip:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-light); }
+  .qr-chip:active { transform: scale(0.97); }
+
+  /* Typing indicator */
+  .typing-indicator {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 10px 14px;
+    background: var(--surface);
+    border-radius: 16px;
+    border-bottom-left-radius: 4px;
+    width: fit-content;
+    box-shadow: var(--shadow-card);
+  }
+
+  .typing-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--text-disabled);
+    animation: typingBounce 1.2s infinite;
+  }
+
+  .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes typingBounce {
+    0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+    30% { transform: translateY(-4px); opacity: 1; }
+  }
+
+  /* Input area */
+  .input-area {
+    padding: 10px 12px;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    display: flex;
+    gap: 8px;
+    align-items: flex-end;
+    flex-shrink: 0;
+  }
+
+  .input-field {
+    flex: 1;
+    min-height: 40px;
+    max-height: 100px;
+    border: 1.5px solid var(--border);
+    border-radius: 20px;
+    padding: 9px 14px;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    color: var(--text-primary);
+    resize: none;
+    outline: none;
+    overflow-y: auto;
+    line-height: 1.4;
+    transition: border-color 0.15s;
+  }
+
+  .input-field:focus { border-color: var(--primary); }
+  .input-field::placeholder { color: var(--text-disabled); }
+
+  .send-btn {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: var(--hiviz-dark);
+    border: none;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    color: white;
+    flex-shrink: 0;
+    transition: all 0.15s;
+  }
+
+  .send-btn:hover { background: var(--primary); }
+  .send-btn:disabled { background: var(--border); cursor: default; }
+
+  /* Photo button */
+  .photo-attach-btn {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: transparent;
+    border: 1.5px solid var(--border);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-secondary);
+    flex-shrink: 0;
+    transition: all 0.15s;
+  }
+  .photo-attach-btn:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-light); }
+
+  /* Photo preview in chat */
+  .photo-preview-msg {
+    align-self: flex-end;
+    max-width: 82%;
+    animation: msgIn 0.2s ease;
+  }
+
+  .photo-thumb {
+    border-radius: 12px;
+    border-bottom-right-radius: 4px;
+    overflow: hidden;
+    max-width: 220px;
+    position: relative;
+    cursor: pointer;
+  }
+
+  .photo-thumb img {
+    width: 100%;
+    display: block;
+    object-fit: cover;
+    max-height: 160px;
+  }
+
+  .photo-thumb-caption {
+    font-size: 10px;
+    color: rgba(255,255,255,0.6);
+    background: rgba(0,0,0,0.5);
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    padding: 4px 8px;
+  }
+
+  /* Lightbox */
+  .photo-lightbox {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .photo-lightbox img {
+    max-width: 100%;
+    max-height: 100%;
+    border-radius: 8px;
+    object-fit: contain;
+  }
+
+  .photo-lightbox-close {
+    position: absolute;
+    top: 16px; right: 16px;
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.15);
+    border: none;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    color: white;
+  }
+
+  /* Photo preview strip above input */
+  .photo-strip {
+    display: none;
+    padding: 8px 12px 0;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .photo-strip.has-photos { display: flex; }
+
+  .photo-strip-thumb {
+    width: 52px; height: 52px;
+    border-radius: 8px;
+    overflow: hidden;
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  .photo-strip-thumb img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+  }
+
+  .photo-strip-remove {
+    position: absolute;
+    top: 2px; right: 2px;
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.65);
+    border: none;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    color: white;
+    font-size: 9px;
+    line-height: 1;
+  }
+
+  /* Hidden file input */
+  #photoFileInput { display: none; }
+
+  /* Summary card */
+  .summary-card {
+    background: var(--primary-light);
+    border: 1.5px solid var(--primary);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    margin-top: 4px;
+  }
+
+  .summary-title {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--primary-dark);
+    margin-bottom: 8px;
+  }
+
+  .summary-row {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 5px;
+    font-size: 12px;
+  }
+
+  .summary-key {
+    color: var(--primary-dark);
+    font-weight: 600;
+    min-width: 90px;
+    flex-shrink: 0;
+  }
+
+  .summary-val { color: var(--hiviz-dark); line-height: 1.4; }
+
+  .api-note {
+    margin-top: 32px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    padding: 14px 16px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.4);
+    max-width: 390px;
+    line-height: 1.6;
+    text-align: center;
+  }
+
+  .api-key-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+  }
+
+  .api-key-input {
+    flex: 1;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 12px;
+    color: white;
+    font-family: 'Inter', sans-serif;
+    outline: none;
+  }
+
+  .api-key-input::placeholder { color: rgba(255,255,255,0.25); }
+  .api-key-input:focus { border-color: rgba(212,168,67,0.5); }
+
+  .api-key-btn {
+    background: #d4a843;
+    color: #0e0f0d;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .api-key-btn:hover { background: #e0b84f; }
+
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  @keyframes spin { to{transform:rotate(360deg)} }
+  .spinner { animation: spin 1s linear infinite; }
+
+  .conn-banner {
+    padding: 8px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    flex-shrink: 0;
+    line-height: 1.4;
+  }
+
+  .conn-banner.api-down {
+    background: #FFF3CD;
+    color: #92400e;
+    border-bottom: 1px solid #f59e0b;
+  }
+
+  .conn-banner.offline {
+    background: #FFE9E5;
+    color: #9A1B08;
+    border-bottom: 1px solid #FF5630;
+  }
+
+  .queue-item {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 8px;
+    padding: 9px 12px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.6);
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+  }
+
+  .queue-item-status {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+
+  .status-pending { background: rgba(255,171,0,0.2); color: #FFAB00; }
+  .status-syncing { background: rgba(0,108,156,0.2); color: #5BC4F5; }
+  .status-enriching { background: rgba(118,53,220,0.2); color: #B88EF7; }
+  .status-done { background: rgba(0,171,85,0.2); color: #00AB55; }
+  .status-saved { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.4); }
+
+  .mode-toggle-btn {
+    padding: 8px 10px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    color: rgba(255,255,255,0.4);
+    text-align: center;
+    line-height: 1.4;
+    transition: all 0.15s;
+    font-family: 'Inter', sans-serif;
+    width: 100%;
+  }
+
+  .mode-toggle-btn.active {
+    background: rgba(255,255,255,0.12);
+    color: white;
+    border-radius: 8px;
+  }
+
+  /* Fallback form */
+  .fallback-view {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    display: none;
+  }
+
+  .fallback-banner {
+    background: var(--warning-light);
+    border-bottom: 1px solid var(--warning);
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: #92400e;
+    flex-shrink: 0;
+  }
+
+  .fallback-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    background: var(--bg);
+  }
+
+  .fallback-body::-webkit-scrollbar { display: none; }
+
+  .form-section { margin-bottom: 16px; }
+  .form-label-fb {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+    display: block;
+  }
+
+  .fb-textarea {
+    width: 100%;
+    min-height: 90px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    color: var(--text-primary);
+    resize: none;
+    outline: none;
+    background: var(--surface);
+    transition: border-color 0.15s;
+  }
+
+  .fb-textarea:focus { border-color: var(--primary); }
+  .fb-textarea::placeholder { color: var(--text-disabled); }
+
+  .wt-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+
+  .wt-chip {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 9px 10px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.12s;
+  }
+
+  .wt-chip:hover { border-color: var(--primary); }
+  .wt-chip.selected { border-color: var(--primary); background: var(--primary-light); color: var(--primary-dark); }
+
+  .fb-toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--surface);
+    border-radius: var(--radius-sm);
+    padding: 11px 14px;
+    border: 1.5px solid var(--border);
+  }
+
+  .fb-toggle-label { font-size: 13px; font-weight: 600; }
+  .fb-toggle { width: 42px; height: 24px; border-radius: 12px; background: var(--border); cursor: pointer; position: relative; transition: background 0.2s; }
+  .fb-toggle.on { background: var(--primary); }
+  .fb-toggle-thumb { position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: white; transition: transform 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+  .fb-toggle.on .fb-toggle-thumb { transform: translateX(18px); }
+
+  .fb-hint {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--purple-light);
+    border-radius: var(--radius-sm);
+    padding: 8px 10px;
+    font-size: 11px;
+    color: var(--purple);
+    margin-top: 12px;
+  }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="page-logo">Hiviz · Experiment</div>
+  <div class="exp-badge">
+    <svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2v-4M9 21H5a2 2 0 0 1-2-2v-4m0 0h18"/></svg>
+    Conversational Capture — Live AI
+  </div>
+  <div class="page-title">What if logging felt like a conversation?</div>
+  <div class="page-sub">Real AI back-and-forth gets the story out naturally. No forms. Just tell Hiviz what you saw.</div>
+
+  <!-- Mode toggle -->
+  <div class="mode-toggle-wrap">
+    <button class="mode-toggle-btn active" id="modeA" onclick="setMode('split')">
+      Split entry<br><span style="font-size:10px;opacity:0.6;">Obs / Incident</span>
+    </button>
+    <button class="mode-toggle-btn" id="modeB" onclick="setMode('single')">
+      Single entry ✦<br><span style="font-size:10px;opacity:0.6;">AI routes it</span>
+    </button>
+    <button class="mode-toggle-btn" id="modeC" onclick="setMode('api_down')">
+      API unavailable<br><span style="font-size:10px;opacity:0.6;">Enrich later</span>
+    </button>
+    <button class="mode-toggle-btn" id="modeD" onclick="setMode('offline')">
+      Offline<br><span style="font-size:10px;opacity:0.6;">Sync on reconnect</span>
+    </button>
+  </div>
+  <div style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:8px;width:100%;max-width:390px;text-align:center;" id="modeDesc">
+    Two entry points — person decides upfront what they're logging
+  </div>
+</div>
+
+<!-- Phone shell -->
+<div class="phone-shell">
+
+  <div class="status-bar">
+    <div class="status-time">9:41</div>
+    <div class="status-right">
+      <svg width="15" height="11" viewBox="0 0 16 12" fill="currentColor"><rect x="0" y="3" width="3" height="9" rx="1" opacity="0.4"/><rect x="4.5" y="2" width="3" height="10" rx="1" opacity="0.6"/><rect x="9" y="0" width="3" height="12" rx="1" opacity="0.8"/><rect x="13.5" y="0" width="2.5" height="12" rx="1"/></svg>
+      <svg width="22" height="11" viewBox="0 0 24 12" fill="currentColor"><rect x="0.5" y="0.5" width="21" height="11" rx="2.5" stroke="currentColor" stroke-opacity="0.35" fill="none"/><rect x="22" y="3.5" width="2" height="5" rx="1" fill="currentColor" opacity="0.4"/><rect x="2" y="2" width="14" height="8" rx="1.5"/></svg>
+    </div>
+  </div>
+
+  <div class="app-header">
+    <div class="app-header-row">
+      <div class="app-logo"><div class="logo-dot"></div>Hiviz</div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="rgba(255,255,255,0.4)" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/></svg>
+        <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#7635DC,#00AB55);font-size:10px;font-weight:700;color:white;display:flex;align-items:center;justify-content:center;">MR</div>
+      </div>
+    </div>
+    <div class="app-site">📍 Northgate Open Cut · Iron Ore West</div>
+  </div>
+
+  <!-- LANDING -->
+  <div class="landing" id="landing">
+    <!-- Split mode (default) -->
+    <div id="splitLanding">
+      <div class="landing-prompt">What do you want to log?</div>
+      <div class="landing-sub">Tell Hiviz what happened in your own words — it'll ask the right questions to get what it needs.</div>
+      <button class="type-btn type-btn-obs" onclick="startChat('observation')">
+        <div class="type-icon" style="background:rgba(255,255,255,0.1);">👁</div>
+        <div>
+          <div class="type-label">Log an Observation</div>
+          <div class="type-desc">Something you saw — safe, concerning, or a near-miss</div>
+        </div>
+      </button>
+      <button class="type-btn type-btn-inc" onclick="startChat('incident')">
+        <div class="type-icon" style="background:rgba(255,86,48,0.15);">⚠️</div>
+        <div>
+          <div class="type-label" style="color:var(--error);">Report an Incident</div>
+          <div class="type-desc" style="color:var(--error);opacity:0.7;">Injury, near-miss, property damage, or environmental</div>
+        </div>
+      </button>
+    </div>
+
+    <!-- Single entry mode -->
+    <div id="singleLanding" style="display:none;width:100%;">
+      <div class="landing-prompt">What happened?</div>
+      <div class="landing-sub" style="margin-bottom:20px;">Describe what you saw or what happened. Hiviz will figure out the rest.</div>
+      <button class="type-btn type-btn-obs" onclick="startChat('auto')" style="background:var(--hiviz-dark);padding:20px;">
+        <div class="type-icon" style="background:rgba(255,255,255,0.1);font-size:22px;">💬</div>
+        <div>
+          <div class="type-label">Tell Hiviz what happened</div>
+          <div class="type-desc" style="opacity:0.6;">Observation or incident — AI will route it correctly</div>
+        </div>
+      </button>
+      <div style="margin-top:12px;background:rgba(118,53,220,0.12);border:1px solid rgba(118,53,220,0.25);border-radius:10px;padding:10px 12px;font-size:11px;color:rgba(255,255,255,0.5);line-height:1.6;">
+        ✦ After you describe what happened, Hiviz will show you what it captured — including which pipeline it's routing to and why.
+      </div>
+    </div>
+  </div>
+
+  <!-- CHAT VIEW -->
+  <div class="chat-view" id="chatView">
+    <div class="chat-header">
+      <button class="chat-back" onclick="resetChat()">
+        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <div class="chat-type-badge" id="chatTypeBadge"></div>
+      <div class="chat-header-sub" id="chatHeaderSub">Hiviz is listening</div>
+    </div>
+
+    <div class="messages" id="messages"></div>
+
+    <!-- Hidden file input -->
+    <input type="file" id="photoFileInput" accept="image/*" multiple onchange="handlePhotoSelect(this)" />
+
+    <!-- Photo preview strip -->
+    <div class="photo-strip" id="photoStrip"></div>
+
+    <div class="input-area">
+      <button class="photo-attach-btn" onclick="document.getElementById('photoFileInput').click()" title="Attach photo">
+        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+      </button>
+      <textarea
+        class="input-field"
+        id="inputField"
+        placeholder="Type your message..."
+        rows="1"
+        onkeydown="handleKey(event)"
+        oninput="autoResize(this)"
+      ></textarea>
+      <button class="send-btn" id="sendBtn" onclick="sendMessage()">
+        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- FALLBACK FORM VIEW -->
+  <div class="fallback-view" id="fallbackView">
+    <div class="fallback-banner">
+      <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      <span><strong>AI unavailable</strong> — using standard form. Enrichment will run when connection restores.</span>
+      <button onclick="retryChat()" style="margin-left:auto;background:transparent;border:1px solid #d97706;border-radius:5px;padding:3px 8px;font-size:11px;font-weight:600;color:#92400e;cursor:pointer;font-family:Inter,sans-serif;">Retry AI</button>
+    </div>
+
+    <div class="fallback-body">
+      <div class="form-section">
+        <label class="form-label-fb">What work type?</label>
+        <div class="wt-grid">
+          <div class="wt-chip" onclick="toggleWT(this)">Heavy Vehicle</div>
+          <div class="wt-chip" onclick="toggleWT(this)">Working at Height</div>
+          <div class="wt-chip" onclick="toggleWT(this)">Hot Work</div>
+          <div class="wt-chip" onclick="toggleWT(this)">Confined Space</div>
+          <div class="wt-chip" onclick="toggleWT(this)">Electrical</div>
+          <div class="wt-chip" onclick="toggleWT(this)">Blasting</div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <label class="form-label-fb">What did you observe?</label>
+        <textarea class="fb-textarea" id="fbTextarea" placeholder="Describe what you saw. Be specific."></textarea>
+      </div>
+
+      <div class="form-section">
+        <div class="fb-toggle-row">
+          <div class="fb-toggle-label">Did you stop the work?</div>
+          <div class="fb-toggle" id="fbToggle" onclick="this.classList.toggle('on')">
+            <div class="fb-toggle-thumb"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="fb-hint">
+        <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+        AI enrichment will classify signal type, energy, and Forge Works factor once connection restores — no action needed.
+      </div>
+    </div>
+
+    <div style="padding:10px 12px;background:white;border-top:1px solid var(--border);flex-shrink:0;">
+      <button onclick="submitFallback()" style="width:100%;height:44px;border-radius:22px;background:var(--hiviz-dark);color:white;border:none;font-size:14px;font-weight:700;cursor:pointer;font-family:Inter,sans-serif;">
+        Submit Observation
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<!-- Offline queue panel -->
+<div id="offlinePanel" style="display:none;width:100%;max-width:390px;margin-top:0;background:#1a1b18;border:1px solid #2a2b26;border-radius:0 0 20px 20px;overflow:hidden;">
+  <div style="padding:10px 16px;border-bottom:1px solid #2a2b26;display:flex;align-items:center;gap:8px;">
+    <div style="width:8px;height:8px;border-radius:50%;background:#FF5630;flex-shrink:0;animation:blink 1.5s infinite;"></div>
+    <span style="font-size:12px;font-weight:600;color:rgba(255,255,255,0.5);">Offline queue</span>
+    <span style="font-size:11px;color:rgba(255,255,255,0.25);margin-left:auto;" id="queueCount">0 pending</span>
+    <button onclick="simulateReconnect()" id="reconnectBtn" style="display:none;background:#00AB55;color:white;border:none;border-radius:5px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;font-family:Inter,sans-serif;">Simulate reconnect →</button>
+  </div>
+  <div id="queueList" style="padding:8px;display:flex;flex-direction:column;gap:6px;max-height:200px;overflow-y:auto;"></div>
+</div>
+
+<!-- API Key -->
+<div class="api-note" style="width:100%;max-width:390px;">
+  <div>This experiment calls the Anthropic API directly. Add your API key to experience the real conversation — it stays in your browser only.</div>
+  <div class="api-key-row">
+    <input type="password" class="api-key-input" id="apiKeyInput" placeholder="sk-ant-..." />
+    <button class="api-key-btn" onclick="saveApiKey()">Save</button>
+  </div>
+  <div style="margin-top:8px;font-size:11px;" id="apiKeyStatus"></div>
+</div>
+
+<script>
+let captureType = null;
+let conversationHistory = [];
+let apiKey = localStorage.getItem('hiviz_api_key') || '';
+let captureData = {};
+let isComplete = false;
+let pendingPhotos = []; // [{dataUrl, base64, mediaType, name}]
+let attachedPhotos = []; // photos submitted with the conversation
+
+// Restore API key display
+if (apiKey) {
+  document.getElementById('apiKeyInput').value = apiKey;
+  document.getElementById('apiKeyStatus').textContent = '✓ API key saved';
+  document.getElementById('apiKeyStatus').style.color = '#00AB55';
+}
+
+function saveApiKey() {
+  const key = document.getElementById('apiKeyInput').value.trim();
+  if (!key.startsWith('sk-ant-')) {
+    document.getElementById('apiKeyStatus').textContent = 'Looks wrong — should start with sk-ant-';
+    document.getElementById('apiKeyStatus').style.color = '#FF5630';
+    return;
+  }
+  apiKey = key;
+  localStorage.setItem('hiviz_api_key', key);
+  document.getElementById('apiKeyStatus').textContent = '✓ Saved — start a conversation';
+  document.getElementById('apiKeyStatus').style.color = '#00AB55';
+}
+
+// ── SYSTEM PROMPTS ────────────────────────────────────────────────────────────
+
+const AUTO_SYSTEM = `You are Hiviz, a friendly safety intelligence assistant for a construction and mining safety platform. Someone on site is logging something that happened — they have not specified whether it's an observation or an incident yet.
+
+Your job is to have a short natural conversation to understand what happened, then determine whether this is an observation or a reportable incident.
+
+CRITICAL RULES:
+- Always respond in whatever language the user writes in. Summary JSON fields must always be in English.
+- One question at a time. Short messages. Plain language. No jargon.
+- Do NOT ask them to categorise it — that's your job, not theirs.
+- Start with "What happened?" and listen. Ask follow-ups only to get what you need.
+- The key routing question: did anyone or anything get hurt, or was harm only potential?
+  - Harm occurred (injury, property damage, environmental event) → incident
+  - Harm was only potential (near-miss, unsafe condition, barrier failure) → observation
+- If the first message makes the routing obvious, don't ask unnecessary questions.
+- Assess confidence as you go. Summarise as soon as you have enough — could be after 1 exchange.
+- Maximum 4 exchanges before summarising.
+
+ROUTING LOGIC:
+- observation → signal_type: positive_performance, weak_signal, at_risk_condition, unwanted_energy_event, barrier_failure
+- incident → incident_type: near-miss (very close call), injury, property-damage, environmental
+
+If truly ambiguous (e.g. "near-miss" where no harm occurred but it was extremely close), route as observation with signal_type = unwanted_energy_event, and note it in routing_rationale.
+
+SUMMARY — when you have enough, produce wrapped in <summary> tags, then a natural confirmation line:
+
+<summary>
+{
+  "routed_to": "observation|incident",
+  "routing_rationale": "1 sentence — why this was routed as observation vs incident",
+  "what_happened": "...",
+  "work_type": "...",
+  "signal_type": "positive_performance|weak_signal|at_risk_condition|unwanted_energy_event|barrier_failure|null",
+  "incident_type": "near-miss|injury|property-damage|environmental|null",
+  "injury_classification": "none|first_aid|medical_treatment|restricted_work|lost_time|fatality",
+  "people_involved_count": 0,
+  "stop_work_relevant": true,
+  "stop_work_called": true,
+  "energy_type": "kinetic|gravitational|electrical|thermal|chemical|pressure|none",
+  "barrier_assessment": "barrier_absent|barrier_failed|barrier_degraded|barrier_held|none",
+  "fw_factor_hint": "...",
+  "confidence": "high|medium|low"
+}
+</summary>
+
+- Never mention JSON, field names, or routing logic to the user.
+- The site is Northgate Open Cut. Be warm, human, direct.`;
+
+const OBSERVATION_SYSTEM = `You are Hiviz, a friendly safety intelligence assistant for a construction and mining safety platform. A supervisor or manager is logging a field observation from their phone.
+
+Your job is to have a short, natural conversation to get the key information — like asking a knowledgeable colleague, not filling out a form.
+
+CRITICAL RULES:
+- Always respond in whatever language the user writes in. If they switch language mid-conversation, follow them. The summary JSON fields must always be in English regardless of conversation language.
+- One question at a time. Never ask multiple questions in one message.
+- Keep messages short — this is a phone conversation, not a report.
+- Be warm and direct. Plain language only. No safety jargon.
+- No bullet points or lists in your messages.
+
+INFORMATION GATHERING:
+- Start by asking what they saw.
+- You need: what happened, what work was being done, whether anyone was exposed, whether action was taken.
+- Assess confidence as you go. If the very first message gives you enough — a clear description, obvious work type, clear signal — summarise immediately. Don't ask questions you don't need.
+- If after 1-2 messages you have high confidence on all key fields, go straight to summary.
+- Maximum 4 exchanges before summarising regardless of confidence — never drag it out.
+- If one specific thing is unclear and matters, ask one targeted question. Otherwise summarise with what you have and note confidence.
+
+SUMMARY:
+When you have enough — which may be after just 1 or 2 messages — produce the structured summary wrapped in <summary> tags, then on a new line say something natural like "Got it — anything to add before I submit this?"
+
+<summary>
+{
+  "what_was_observed": "...",
+  "work_type": "...",
+  "signal_type": "positive_performance|weak_signal|at_risk_condition|unwanted_energy_event|barrier_failure",
+  "involved_role": "...",
+  "stop_work_called": true|false,
+  "immediate_action_taken": "...",
+  "energy_type": "kinetic|gravitational|electrical|thermal|chemical|pressure|none",
+  "fw_factor_hint": "...",
+  "confidence": "high|medium|low"
+}
+</summary>
+
+- Never mention the JSON or field names to the user.
+- The site is Northgate Open Cut. The observer is Marcus Reyes, a supervisor.`;
+
+const INCIDENT_SYSTEM = `You are Hiviz, a friendly safety intelligence assistant for a construction and mining safety platform. Someone is reporting an incident from their phone.
+
+Your job is to have a short, natural conversation to get the key information — calm, clear, efficient. The person may be stressed or shaken.
+
+CRITICAL RULES:
+- Always respond in whatever language the user writes in. Summary JSON fields must always be in English.
+- One question at a time. Never ask multiple questions in one message.
+- Keep messages short and calm. Plain language only.
+- If someone reports an injury, acknowledge it warmly before asking the next question.
+- Never ask for information you can reasonably infer.
+
+INFORMATION GATHERING:
+- Start by acknowledging and asking what happened.
+- You need: what type of event, when, whether anyone was injured and how seriously, what work was happening, and what immediate actions were taken.
+- If the first message makes the situation clear, summarise after 2-3 follow-ups maximum.
+- For clear near-misses with no injury, summarise faster. For injuries, take one extra exchange to get severity right.
+- Maximum 5 exchanges before summarising.
+
+SUMMARY:
+When you have enough, produce the structured summary wrapped in <summary> tags, then say something human like "I've captured that. Is there anything else important before this is submitted?"
+
+<summary>
+{
+  "incident_type": "near-miss|injury|property-damage|environmental",
+  "description": "...",
+  "occurred_at": "...",
+  "work_type": "...",
+  "injury_classification": "none|first_aid|medical_treatment|restricted_work|lost_time|fatality",
+  "people_involved_count": 0,
+  "immediate_action_taken": "...",
+  "notifiable_flag": true|false,
+  "energy_type": "kinetic|gravitational|electrical|thermal|chemical|pressure|none"
+}
+</summary>
+
+- Never mention the JSON or field names.
+- The site is Northgate Open Cut.`;
+
+// ── CHAT LOGIC ────────────────────────────────────────────────────────────────
+
+function startChat(type) {
+  if (!apiKey) {
+    alert('Add your Anthropic API key below the phone first.');
+    return;
+  }
+
+  // In api_down or offline modes, show basic form instead of chat
+  if (currentMode === 'api_down' || currentMode === 'offline') {
+    showBasicForm(type);
+    return;
+  }
+
+  captureType = type;
+  conversationHistory = [];
+  captureData = {};
+  isComplete = false;
+
+  document.getElementById('landing').style.display = 'none';
+  document.getElementById('chatView').style.display = 'flex';
+  document.getElementById('messages').innerHTML = '';
+
+  const badge = document.getElementById('chatTypeBadge');
+  if (type === 'observation') {
+    badge.innerHTML = `<div class="chat-type-dot" style="background:#1C252E;"></div><span style="font-size:13px;font-weight:700;">Observation</span>`;
+  } else if (type === 'incident') {
+    badge.innerHTML = `<div class="chat-type-dot" style="background:var(--error);"></div><span style="font-size:13px;font-weight:700;color:var(--error);">Incident Report</span>`;
+  } else {
+    badge.innerHTML = `<div class="chat-type-dot" style="background:var(--purple);"></div><span style="font-size:13px;font-weight:700;color:var(--purple);">Hiviz ✦</span>`;
+  }
+
+  // Opening message from Hiviz
+  const openingMsg = type === 'observation'
+    ? "Hey Marcus — what did you see out there?"
+    : type === 'incident'
+    ? "Thanks for flagging this. What happened?"
+    : "Hey Marcus — what happened?";
+
+  addMessage('hiviz', openingMsg);
+  conversationHistory.push({ role: 'assistant', content: openingMsg });
+
+  document.getElementById('inputField').focus();
+}
+
+let currentMode = 'split';
+
+function setMode(mode) {
+  currentMode = mode;
+  ['modeA','modeB','modeC','modeD'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.remove('active');
+  });
+  const modeMap = { split:'modeA', single:'modeB', api_down:'modeC', offline:'modeD' };
+  const activeEl = document.getElementById(modeMap[mode]);
+  if (activeEl) activeEl.classList.add('active');
+
+  const modeDesc = document.getElementById('modeDesc');
+  const offlinePanel = document.getElementById('offlinePanel');
+
+  // Reset to landing
+  resetChat();
+
+  if (mode === 'single') {
+    document.getElementById('splitLanding').style.display = 'none';
+    document.getElementById('singleLanding').style.display = 'block';
+    modeDesc.textContent = 'One entry point — AI determines observation or incident from description';
+    offlinePanel.style.display = 'none';
+  } else if (mode === 'api_down') {
+    document.getElementById('splitLanding').style.display = 'flex';
+    document.getElementById('singleLanding').style.display = 'none';
+    modeDesc.textContent = 'API unreachable — observations saved immediately, enrichment queued for retry';
+    offlinePanel.style.display = 'none';
+    // Show api-down landing
+    showApiDownLanding();
+  } else if (mode === 'offline') {
+    document.getElementById('splitLanding').style.display = 'flex';
+    document.getElementById('singleLanding').style.display = 'none';
+    modeDesc.textContent = 'No network — saved locally, submitted and enriched on reconnect';
+    offlinePanel.style.display = 'block';
+    renderQueue();
+    showOfflineLanding();
+  } else {
+    document.getElementById('splitLanding').style.display = 'flex';
+    document.getElementById('singleLanding').style.display = 'none';
+    modeDesc.textContent = "Two entry points — person decides upfront what they're logging";
+    offlinePanel.style.display = 'none';
+  }
+}
+
+function showApiDownLanding() {
+  const landing = document.getElementById('landing');
+  // Remove any existing banner
+  const existing = landing.querySelector('.conn-banner');
+  if (existing) existing.remove();
+  const banner = document.createElement('div');
+  banner.className = 'conn-banner api-down';
+  banner.innerHTML = `
+    <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+    <span>AI unavailable — using basic form. Enrichment will run when it reconnects.</span>
+  `;
+  landing.insertBefore(banner, landing.firstChild);
+}
+
+function showOfflineLanding() {
+  const landing = document.getElementById('landing');
+  const existing = landing.querySelector('.conn-banner');
+  if (existing) existing.remove();
+  const banner = document.createElement('div');
+  banner.className = 'conn-banner offline';
+  banner.innerHTML = `
+    <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><line x1="1" y1="1" x2="23" y2="23"/><path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/><path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/><path d="M10.71 5.05A16 16 0 0 1 22.56 9"/><path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>
+    <span>No connection — saved locally. Will sync and enrich when back online.</span>
+  `;
+  landing.insertBefore(banner, landing.firstChild);
+}
+
+function resetChat() {
+  captureType = null;
+  conversationHistory = [];
+  pendingPhotos = [];
+  attachedPhotos = [];
+  renderPhotoStrip();
+  document.getElementById('landing').style.display = 'flex';
+  document.getElementById('chatView').style.display = 'none';
+  document.getElementById('fallbackView').style.display = 'none';
+  document.getElementById('chatHeaderSub').textContent = 'Hiviz is listening';
+  // Restore mode banners
+  if (currentMode === 'api_down') showApiDownLanding();
+  if (currentMode === 'offline') showOfflineLanding();
+}
+
+function showBasicForm(type) {
+  document.getElementById('landing').style.display = 'none';
+  document.getElementById('chatView').style.display = 'none';
+  document.getElementById('fallbackView').style.display = 'flex';
+
+  // Update banner based on mode
+  const banner = document.querySelector('.fallback-banner');
+  if (banner) {
+    if (currentMode === 'offline') {
+      banner.style.background = '#FFE9E5';
+      banner.style.borderBottomColor = '#FF5630';
+      banner.querySelector('span').innerHTML = `<strong>No connection</strong> — saved locally. Will submit and enrich when back online.`;
+      banner.querySelector('button').textContent = 'Back';
+      banner.querySelector('button').onclick = resetChat;
+    } else {
+      banner.style.background = '#FFF3CD';
+      banner.style.borderBottomColor = '#f59e0b';
+      banner.querySelector('span').innerHTML = `<strong>AI unavailable</strong> — basic form. Enrichment will run automatically when connection restores.`;
+      banner.querySelector('button').textContent = 'Back';
+      banner.querySelector('button').onclick = resetChat;
+    }
+  }
+}
+
+function addMessage(sender, text, quickReplies) {
+  const msgs = document.getElementById('messages');
+
+  const msgEl = document.createElement('div');
+  msgEl.className = `msg msg-${sender}`;
+
+  if (sender === 'hiviz') {
+    // Check for summary JSON
+    if (text.includes('<summary>')) {
+      const jsonMatch = text.match(/<summary>([\s\S]*?)<\/summary>/);
+      const narrativeText = text.replace(/<summary>[\s\S]*?<\/summary>/, '').trim();
+
+      if (jsonMatch) {
+        try {
+          const data = JSON.parse(jsonMatch[1].trim());
+          captureData = data;
+
+          // Show the narrative part as a bubble
+          if (narrativeText) {
+            const bubble = document.createElement('div');
+            bubble.innerHTML = `<div class="msg-sender">Hiviz</div><div class="msg-bubble">${escapeHtml(narrativeText)}</div>`;
+            bubble.className = 'msg msg-hiviz';
+            bubble.style.animation = 'msgIn 0.2s ease';
+            msgs.appendChild(bubble);
+          }
+
+          // Show summary card
+          msgEl.innerHTML = buildSummaryCard(data);
+          msgEl.style.maxWidth = '100%';
+
+          // Show submit button after a moment
+          setTimeout(() => showSubmitBar(), 400);
+
+        } catch(e) {
+          msgEl.innerHTML = `<div class="msg-sender">Hiviz</div><div class="msg-bubble">${escapeHtml(text)}</div>`;
+        }
+      }
+    } else {
+      msgEl.innerHTML = `<div class="msg-sender">Hiviz</div><div class="msg-bubble">${escapeHtml(text)}</div>`;
+    }
+  } else {
+    msgEl.innerHTML = `<div class="msg-sender" style="text-align:right;">You</div><div class="msg-bubble">${escapeHtml(text)}</div>`;
+  }
+
+  // Add quick replies if provided
+  if (quickReplies && quickReplies.length) {
+    const qrRow = document.createElement('div');
+    qrRow.className = 'quick-replies';
+    quickReplies.forEach(qr => {
+      const chip = document.createElement('div');
+      chip.className = 'qr-chip';
+      chip.textContent = qr;
+      chip.onclick = () => {
+        if (qr === 'Switch to form') {
+          qrRow.remove();
+          showFallback(captureType);
+          return;
+        }
+        document.getElementById('inputField').value = qr;
+        qrRow.remove();
+        sendMessage();
+      };
+      qrRow.appendChild(chip);
+    });
+    msgEl.appendChild(qrRow);
+  }
+
+  msgs.appendChild(msgEl);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function buildSummaryCard(data) {
+  const isAuto = captureType === 'auto';
+  const isObs = captureType === 'observation' || (isAuto && data.routed_to === 'observation');
+  const routeColor = isObs ? 'var(--primary)' : 'var(--error)';
+  const routeLabel = isObs ? 'Observation' : 'Incident Report';
+
+  const rows = isObs ? [
+    { k: 'What observed', v: data.what_was_observed || data.what_happened },
+    { k: 'Work type', v: data.work_type },
+    { k: 'Signal type', v: (data.signal_type || '').replace(/_/g, ' ') || null },
+    { k: 'Energy', v: (data.energy_type && data.energy_type !== 'none') ? data.energy_type : null },
+    { k: 'Barrier state', v: (data.barrier_assessment && data.barrier_assessment !== 'none') ? data.barrier_assessment?.replace(/_/g, ' ') : null },
+    { k: 'FW factor hint', v: data.fw_factor_hint },
+    { k: 'Stop work', v: data.stop_work_relevant ? (data.stop_work_called ? 'Yes — called' : 'No') : null },
+  ] : [
+    { k: 'Incident type', v: (data.incident_type || '').replace(/-/g, ' ') },
+    { k: 'What happened', v: data.description || data.what_happened },
+    { k: 'Work type', v: data.work_type },
+    { k: 'Injury', v: (data.injury_classification || 'none').replace(/_/g, ' ') },
+    { k: 'People involved', v: data.people_involved_count || null },
+    { k: 'Energy', v: (data.energy_type && data.energy_type !== 'none') ? data.energy_type : null },
+  ];
+
+  const routingBlock = isAuto ? `
+    <div style="display:flex;align-items:center;gap:8px;background:rgba(0,0,0,0.04);border-radius:7px;padding:8px 10px;margin-bottom:10px;">
+      <div style="width:8px;height:8px;border-radius:50%;background:${routeColor};flex-shrink:0;"></div>
+      <div>
+        <div style="font-size:11px;font-weight:700;color:${routeColor};">Routed → ${routeLabel}</div>
+        <div style="font-size:11px;color:var(--text-secondary);margin-top:1px;">${data.routing_rationale || ''}</div>
+      </div>
+    </div>` : '';
+
+  return `
+    <div class="summary-card">
+      <div class="summary-title">✓ Captured — ready to submit</div>
+      ${routingBlock}
+      ${rows.filter(r => r.v !== null && r.v !== undefined && r.v !== '').map(r => `
+        <div class="summary-row">
+          <div class="summary-key">${r.k}</div>
+          <div class="summary-val">${r.v}</div>
+        </div>
+      `).join('')}
+      <div style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(0,171,85,0.2);font-size:11px;color:var(--primary-dark);font-style:italic;">
+        Tap Submit to see the full AI enrichment — signal classification, energy type, Forge Works factor, and barrier assessment.
+      </div>
+    </div>
+  `;
+}
+
+function addTypingIndicator() {
+  const msgs = document.getElementById('messages');
+  const el = document.createElement('div');
+  el.id = 'typingIndicator';
+  el.className = 'msg msg-hiviz';
+  el.innerHTML = `
+    <div class="msg-sender">Hiviz</div>
+    <div class="typing-indicator">
+      <div class="typing-dot"></div>
+      <div class="typing-dot"></div>
+      <div class="typing-dot"></div>
+    </div>
+  `;
+  msgs.appendChild(el);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function removeTypingIndicator() {
+  const el = document.getElementById('typingIndicator');
+  if (el) el.remove();
+}
+
+// ── PHOTO HANDLING ────────────────────────────────────────────────────────
+
+function handlePhotoSelect(input) {
+  const files = Array.from(input.files);
+  if (!files.length) return;
+
+  files.forEach(file => {
+    if (!file.type.startsWith('image/')) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const dataUrl = e.target.result;
+      const base64 = dataUrl.split(',')[1];
+      const mediaType = file.type || 'image/jpeg';
+      pendingPhotos.push({ dataUrl, base64, mediaType, name: file.name });
+      renderPhotoStrip();
+    };
+    reader.readAsDataURL(file);
+  });
+  input.value = ''; // reset so same file can be reselected
+}
+
+function renderPhotoStrip() {
+  const strip = document.getElementById('photoStrip');
+  strip.innerHTML = '';
+  if (pendingPhotos.length === 0) {
+    strip.classList.remove('has-photos');
+    return;
+  }
+  strip.classList.add('has-photos');
+  pendingPhotos.forEach((p, i) => {
+    const thumb = document.createElement('div');
+    thumb.className = 'photo-strip-thumb';
+    thumb.innerHTML = `
+      <img src="${p.dataUrl}" alt="photo ${i+1}" />
+      <button class="photo-strip-remove" onclick="removePhoto(${i})">✕</button>
+    `;
+    strip.appendChild(thumb);
+  });
+}
+
+function removePhoto(index) {
+  pendingPhotos.splice(index, 1);
+  renderPhotoStrip();
+}
+
+function openLightbox(src) {
+  const lb = document.createElement('div');
+  lb.className = 'photo-lightbox';
+  lb.onclick = () => lb.remove();
+  lb.innerHTML = `
+    <img src="${src}" />
+    <button class="photo-lightbox-close" onclick="this.parentElement.remove()">
+      <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+  `;
+  document.body.appendChild(lb);
+}
+
+function addPhotoMessage(photos) {
+  const msgs = document.getElementById('messages');
+  const wrap = document.createElement('div');
+  wrap.className = 'photo-preview-msg';
+  wrap.innerHTML = `<div class="msg-sender" style="text-align:right;">You · ${photos.length} photo${photos.length>1?'s':''}</div>`;
+
+  const row = document.createElement('div');
+  row.style.cssText = 'display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;';
+
+  photos.forEach((p, i) => {
+    const thumb = document.createElement('div');
+    thumb.className = 'photo-thumb';
+    thumb.onclick = () => openLightbox(p.dataUrl);
+    thumb.innerHTML = `
+      <img src="${p.dataUrl}" alt="photo ${i+1}" />
+      <div class="photo-thumb-caption">📷 Photo ${i+1}</div>
+    `;
+    row.appendChild(thumb);
+  });
+
+  wrap.appendChild(row);
+  msgs.appendChild(wrap);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+async function sendMessage() {
+  const input = document.getElementById('inputField');
+  const text = input.value.trim();
+  const hasPhotos = pendingPhotos.length > 0;
+
+  if (!text && !hasPhotos) return;
+  if (!apiKey) return;
+
+  input.value = '';
+  autoResize(input);
+
+  // Show photos in chat first
+  const photosToSend = [...pendingPhotos];
+  if (hasPhotos) {
+    addPhotoMessage(photosToSend);
+    attachedPhotos.push(...photosToSend);
+    pendingPhotos = [];
+    renderPhotoStrip();
+  }
+
+  // Build user message content — multimodal if photos present
+  let userContent;
+  if (hasPhotos && text) {
+    userContent = [
+      ...photosToSend.map(p => ({
+        type: 'image',
+        source: { type: 'base64', media_type: p.mediaType, data: p.base64 }
+      })),
+      { type: 'text', text: text }
+    ];
+  } else if (hasPhotos) {
+    userContent = [
+      ...photosToSend.map(p => ({
+        type: 'image',
+        source: { type: 'base64', media_type: p.mediaType, data: p.base64 }
+      })),
+      { type: 'text', text: 'I have attached a photo of what I observed.' }
+    ];
+  } else {
+    userContent = text;
+  }
+
+  if (text) addMessage('user', text);
+  conversationHistory.push({ role: 'user', content: userContent });
+
+  addTypingIndicator();
+  document.getElementById('sendBtn').disabled = true;
+  document.getElementById('chatHeaderSub').textContent = 'Hiviz is thinking...';
+
+  try {
+    const systemPrompt = captureType === 'auto' ? AUTO_SYSTEM : (captureType === 'observation' ? OBSERVATION_SYSTEM : INCIDENT_SYSTEM);
+
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 600,
+        system: systemPrompt,
+        messages: conversationHistory
+      })
+    });
+
+    if (!response.ok) {
+      const err = await response.json();
+      throw new Error(err.error?.message || 'API error');
+    }
+
+    const data = await response.json();
+    const replyText = data.content[0].text;
+
+    removeTypingIndicator();
+    document.getElementById('sendBtn').disabled = false;
+    document.getElementById('chatHeaderSub').textContent = 'Hiviz is listening';
+
+    conversationHistory.push({ role: 'assistant', content: replyText });
+
+    // Determine if we should show quick replies
+    let quickReplies = null;
+    if (replyText.toLowerCase().includes('work') && !replyText.includes('<summary>')) {
+      const workTypes = ['Heavy Vehicle', 'Working at Height', 'Hot Work', 'Confined Space', 'Electrical', 'Blasting'];
+      // Only show if explicitly asking about work type
+      if (replyText.toLowerCase().includes('what work') || replyText.toLowerCase().includes('type of work') || replyText.toLowerCase().includes('working on')) {
+        quickReplies = workTypes.slice(0, 4);
+      }
+    }
+
+    if (replyText.toLowerCase().includes('anyone hurt') || replyText.toLowerCase().includes('was anyone injured') || replyText.toLowerCase().includes('anyone injured')) {
+      quickReplies = ['No injuries', 'First aid needed', 'Medical treatment', 'Lost time injury'];
+    }
+
+    if (replyText.toLowerCase().includes('stop the work') || replyText.toLowerCase().includes('stop work')) {
+      quickReplies = ['Yes, I stopped the work', 'No, work continued', 'Work was already stopped'];
+    }
+
+    addMessage('hiviz', replyText, quickReplies);
+
+    // If summary was captured, disable further input after one more exchange
+    if (replyText.includes('<summary>')) {
+      isComplete = true;
+      input.placeholder = 'Add anything else, or leave blank to submit...';
+    }
+
+  } catch (err) {
+    removeTypingIndicator();
+    document.getElementById('sendBtn').disabled = false;
+    document.getElementById('chatHeaderSub').textContent = 'Hiviz is listening';
+
+    if (err.message.includes('401') || err.message.includes('authentication')) {
+      addMessage('hiviz', 'Your API key doesn\'t seem right — check it below and try again.');
+    } else if (err.message.includes('CORS') || err.message.includes('fetch')) {
+      addMessage('hiviz', 'Having trouble connecting. Make sure your API key is saved correctly.');
+    } else {
+      addMessage('hiviz', `Something went wrong: ${err.message}`);
+    }
+  }
+}
+
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
+}
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 100) + 'px';
+}
+
+function showSubmitBar() {
+  const existing = document.getElementById('submitBar');
+  if (existing) return;
+  const inputArea = document.querySelector('.input-area');
+  const bar = document.createElement('div');
+  bar.id = 'submitBar';
+  bar.style.cssText = 'padding:10px 12px;background:white;border-top:1px solid var(--border);display:flex;gap:8px;flex-shrink:0;animation:msgIn 0.2s ease;';
+  bar.innerHTML = `
+    <button onclick="submitCapture()" style="flex:1;height:44px;border-radius:22px;background:var(--primary);color:white;border:none;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;font-family:Inter,sans-serif;">
+      <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>
+      Submit ${captureType === 'observation' ? 'Observation' : 'Incident Report'}
+    </button>
+    <button onclick="bar.remove()" style="height:44px;padding:0 14px;border-radius:22px;background:transparent;color:var(--text-secondary);border:1.5px solid var(--border);font-size:13px;font-weight:600;cursor:pointer;font-family:Inter,sans-serif;">Add more</button>
+  `;
+  inputArea.parentNode.insertBefore(bar, inputArea);
+}
+
+async function submitCapture() {
+  const bar = document.getElementById('submitBar');
+  if (bar) bar.remove();
+  document.querySelector('.input-area').style.display = 'none';
+  document.getElementById('chatHeaderSub').textContent = 'Submitting...';
+
+  const msgs = document.getElementById('messages');
+
+  // Step 1 — Submitted confirmation
+  const conf = document.createElement('div');
+  conf.style.cssText = 'background:var(--hiviz-dark);border-radius:14px;padding:14px 16px;margin:8px 0;animation:msgIn 0.3s ease;display:flex;align-items:center;gap:10px;';
+  conf.innerHTML = `
+    <div style="width:32px;height:32px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+      <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+    <div>
+      <div style="font-size:13px;font-weight:700;color:white;">${captureType === 'incident' ? 'Incident reported' : 'Observation submitted'}</div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.5);margin-top:1px;">Running AI enrichment...</div>
+    </div>
+  `;
+  msgs.appendChild(conf);
+  msgs.scrollTop = msgs.scrollHeight;
+
+  // Step 2 — Run enrichment call
+  await runEnrichment(msgs);
+}
+
+async function runEnrichment(msgs) {
+  document.getElementById('chatHeaderSub').textContent = 'Enriching...';
+
+  // Show enrichment typing indicator
+  const enrichTyping = document.createElement('div');
+  enrichTyping.id = 'enrichTyping';
+  enrichTyping.className = 'msg msg-hiviz';
+  enrichTyping.innerHTML = `
+    <div class="msg-sender" style="color:var(--purple);">AI Enrichment</div>
+    <div class="typing-indicator">
+      <div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>
+    </div>
+  `;
+  msgs.appendChild(enrichTyping);
+  msgs.scrollTop = msgs.scrollHeight;
+
+  const observationText = captureData.what_was_observed || captureData.what_happened || '';
+  const workType = captureData.work_type || 'unknown';
+
+  const enrichPrompt = `You are an AI enrichment engine for a safety platform. Analyse this observation and return a structured enrichment JSON.
+
+Observation: "${observationText}"
+Work type: ${workType}
+Initial capture data: ${JSON.stringify(captureData, null, 2)}
+
+Return ONLY valid JSON, no preamble:
+{
+  "signal_type": "positive_performance|weak_signal|at_risk_condition|unwanted_energy_event|barrier_failure",
+  "signal_type_confidence": 0.0,
+  "signal_type_rationale": "1 sentence why",
+  "energy_type": "kinetic|gravitational|electrical|thermal|chemical|pressure|noise_vibration|none",
+  "energy_type_confidence": 0.0,
+  "energy_type_rationale": "1 sentence why",
+  "energy_release_potential": "catastrophic|high|moderate|low|none",
+  "barrier_assessment": "barrier_absent|barrier_failed|barrier_degraded|barrier_held|none",
+  "barrier_assessment_rationale": "1 sentence why",
+  "fw_factor": "management_systems|operational_management|frontline_workers|communications_coordination|work_understanding|monitoring_metrics|goal_conflict_tradeoffs|learning_development|resource_allocation|decision_making|contractor_management|senior_leadership|strategy|risk_management|safety_organisation|null",
+  "fw_domain": "guide|enable|execute|null",
+  "fw_maturity_signal": "compliant|leading|resilient|null",
+  "fw_confidence": 0.0,
+  "fw_rationale": "1 sentence why this factor",
+  "context_questions_needed": false,
+  "context_question": "if needed, one targeted question to improve confidence — else null"
+}`;
+
+  // Build enrichment message — include any submitted photos
+  let enrichContent;
+  if (attachedPhotos.length > 0) {
+    enrichContent = [
+      ...attachedPhotos.map(p => ({
+        type: 'image',
+        source: { type: 'base64', media_type: p.mediaType, data: p.base64 }
+      })),
+      { type: 'text', text: enrichPrompt + '\n\nNote: ' + attachedPhotos.length + ' photo(s) attached. Use them to inform your classification — assess the physical context, hazards visible, work type, and any barrier states visible in the images.' }
+    ];
+  } else {
+    enrichContent = enrichPrompt;
+  }
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 800,
+        messages: [{ role: 'user', content: enrichContent }]
+      })
+    });
+
+    const data = await response.json();
+    const raw = data.content[0].text.replace(/```json|```/g, '').trim();
+    const enriched = JSON.parse(raw);
+
+    document.getElementById('enrichTyping')?.remove();
+    document.getElementById('chatHeaderSub').textContent = 'Enrichment complete ✓';
+
+    showEnrichmentCard(msgs, enriched);
+
+  } catch(e) {
+    document.getElementById('enrichTyping')?.remove();
+    document.getElementById('chatHeaderSub').textContent = 'Enrichment failed';
+
+    const errEl = document.createElement('div');
+    errEl.className = 'msg msg-hiviz';
+    errEl.innerHTML = `<div class="msg-sender" style="color:var(--purple);">AI Enrichment</div><div class="msg-bubble" style="font-size:12px;color:var(--text-secondary);">Enrichment couldn't run right now — will retry when connection restores. The observation has been saved.</div>`;
+    msgs.appendChild(errEl);
+    msgs.scrollTop = msgs.scrollHeight;
+    showRestartOption(msgs);
+  }
+}
+
+function showEnrichmentCard(msgs, e) {
+  const confColor = (c) => c >= 0.7 ? 'var(--primary)' : c >= 0.5 ? 'var(--warning)' : 'var(--error)';
+  const confLabel = (c) => c >= 0.7 ? '✓ confident' : c >= 0.5 ? '~ moderate' : '? low';
+
+  const card = document.createElement('div');
+  card.style.cssText = 'animation:msgIn 0.3s ease;';
+  card.innerHTML = `
+    <div style="background:var(--surface);border:1.5px solid var(--purple);border-radius:14px;overflow:hidden;margin:4px 0;">
+      <div style="background:var(--purple);padding:8px 14px;display:flex;align-items:center;gap:7px;">
+        <div style="width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,0.6);animation:pulse 2s infinite;"></div>
+        <span style="font-size:11px;font-weight:700;color:white;letter-spacing:0.5px;">AI ENRICHMENT COMPLETE</span>
+      </div>
+      <div style="padding:12px 14px;display:flex;flex-direction:column;gap:8px;">
+
+        <!-- Signal type -->
+        <div style="background:var(--bg);border-radius:8px;padding:9px 10px;">
+          <div style="font-size:9px;font-weight:700;color:var(--text-secondary);letter-spacing:1px;margin-bottom:4px;">SIGNAL TYPE</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+            <span style="font-size:13px;font-weight:700;">${(e.signal_type || '').replace(/_/g,' ')}</span>
+            <span style="font-size:10px;font-weight:600;color:${confColor(e.signal_type_confidence)};">${confLabel(e.signal_type_confidence)} ${(e.signal_type_confidence*100).toFixed(0)}%</span>
+          </div>
+          <div style="font-size:11px;color:var(--text-secondary);font-style:italic;margin-top:4px;">${e.signal_type_rationale || ''}</div>
+        </div>
+
+        <!-- Energy -->
+        ${e.energy_type && e.energy_type !== 'none' ? `
+        <div style="background:var(--bg);border-radius:8px;padding:9px 10px;">
+          <div style="font-size:9px;font-weight:700;color:var(--text-secondary);letter-spacing:1px;margin-bottom:4px;">ENERGY</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;">
+            <span style="font-size:13px;font-weight:700;">${e.energy_type}</span>
+            <span style="font-size:10px;background:var(--warning-light);color:#B76E00;padding:2px 7px;border-radius:5px;font-weight:600;">${e.energy_release_potential} potential</span>
+            <span style="font-size:10px;background:var(--error-light);color:var(--error);padding:2px 7px;border-radius:5px;font-weight:600;">${(e.barrier_assessment||'').replace(/_/g,' ')}</span>
+          </div>
+          <div style="font-size:11px;color:var(--text-secondary);font-style:italic;margin-top:4px;">${e.barrier_assessment_rationale || ''}</div>
+        </div>` : ''}
+
+        <!-- FW Factor -->
+        ${e.fw_factor && e.fw_factor !== 'null' && e.fw_confidence >= 0.7 ? `
+        <div style="background:var(--purple-light);border-radius:8px;padding:9px 10px;">
+          <div style="font-size:9px;font-weight:700;color:var(--purple);letter-spacing:1px;margin-bottom:4px;">FORGE WORKS MAP® FACTOR</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;">
+            <span style="font-size:13px;font-weight:700;color:var(--purple);">${(e.fw_factor||'').replace(/_/g,' ')}</span>
+            <span style="font-size:10px;background:rgba(118,53,220,0.15);color:var(--purple);padding:2px 7px;border-radius:5px;font-weight:600;">${e.fw_domain?.toUpperCase() || ''} · ${e.fw_maturity_signal || ''}</span>
+            <span style="font-size:10px;color:var(--primary);font-weight:600;">${(e.fw_confidence*100).toFixed(0)}% ✓</span>
+          </div>
+          <div style="font-size:11px;color:var(--purple);font-style:italic;margin-top:4px;">${e.fw_rationale || ''}</div>
+        </div>` : `
+        <div style="background:var(--bg);border-radius:8px;padding:9px 10px;">
+          <div style="font-size:9px;font-weight:700;color:var(--text-secondary);letter-spacing:1px;margin-bottom:4px;">FORGE WORKS MAP®</div>
+          <div style="font-size:12px;color:var(--text-secondary);">${e.fw_confidence >= 0.5 ? `Possible: ${(e.fw_factor||'').replace(/_/g,' ')} — confidence below threshold (${(e.fw_confidence*100).toFixed(0)}%)` : 'Insufficient context for factor classification'}</div>
+        </div>`}
+
+        <!-- Context question if needed -->
+        ${e.context_questions_needed && e.context_question ? `
+        <div style="background:var(--info-light);border-radius:8px;padding:9px 10px;border:1px solid rgba(0,108,156,0.2);">
+          <div style="font-size:9px;font-weight:700;color:var(--info);letter-spacing:1px;margin-bottom:4px;">FOLLOW-UP QUESTION</div>
+          <div style="font-size:12px;color:var(--info);">${e.context_question}</div>
+          <div style="font-size:10px;color:var(--text-secondary);margin-top:3px;">A follow-up notification would be sent to the observer.</div>
+        </div>` : ''}
+
+      </div>
+    </div>
+  `;
+  msgs.appendChild(card);
+  msgs.scrollTop = msgs.scrollHeight;
+  showRestartOption(msgs);
+}
+
+function showRestartOption(msgs) {
+  setTimeout(() => {
+    const restart = document.createElement('div');
+    restart.style.cssText = 'text-align:center;padding:16px;';
+    restart.innerHTML = `<button onclick="resetChat()" style="background:transparent;border:1.5px solid var(--border);border-radius:20px;padding:8px 20px;font-size:13px;font-weight:600;color:var(--text-secondary);cursor:pointer;font-family:Inter,sans-serif;">Log another</button>`;
+    msgs.appendChild(restart);
+    msgs.scrollTop = msgs.scrollHeight;
+  }, 600);
+}
+
+// ── OFFLINE QUEUE ────────────────────────────────────────────────────────────
+let offlineQueue = JSON.parse(localStorage.getItem('hiviz_offline_queue') || '[]');
+
+function saveToQueue(obs) {
+  const item = {
+    id: Date.now(),
+    text: obs.text || obs.what_was_observed || obs.what_happened || '',
+    work_type: obs.work_type || '',
+    stop_work: obs.stop_work_called || false,
+    photos: (obs.photos || []).length,
+    timestamp: new Date().toLocaleTimeString(),
+    site: 'Northgate Open Cut',
+    status: 'pending',
+    captureData: obs
+  };
+  offlineQueue.push(item);
+  localStorage.setItem('hiviz_offline_queue', JSON.stringify(offlineQueue));
+  renderQueue();
+  return item;
+}
+
+function renderQueue() {
+  const list = document.getElementById('queueList');
+  const count = document.getElementById('queueCount');
+  const reconnectBtn = document.getElementById('reconnectBtn');
+  if (!list) return;
+
+  const pending = offlineQueue.filter(i => i.status === 'pending');
+  count.textContent = `${offlineQueue.length} pending`;
+  reconnectBtn.style.display = offlineQueue.length > 0 ? 'block' : 'none';
+
+  list.innerHTML = '';
+  [...offlineQueue].reverse().forEach(item => {
+    const el = document.createElement('div');
+    el.className = 'queue-item';
+    el.id = `qi-${item.id}`;
+    el.innerHTML = `
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:11px;color:rgba(255,255,255,0.7);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${item.text || 'Observation'}</div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:2px;">${item.site} · ${item.timestamp}${item.photos > 0 ? ` · 📷 ${item.photos}` : ''}</div>
+      </div>
+      <span class="queue-item-status status-${item.status}">${item.status}</span>
+    `;
+    list.appendChild(el);
+  });
+}
+
+async function simulateReconnect() {
+  const btn = document.getElementById('reconnectBtn');
+  btn.disabled = true;
+  btn.textContent = 'Syncing...';
+
+  for (const item of offlineQueue) {
+    if (item.status !== 'pending') continue;
+
+    // Step 1 — Syncing
+    item.status = 'syncing';
+    renderQueue();
+    await sleep(600);
+
+    // Step 2 — Enriching (if API key available)
+    item.status = 'enriching';
+    renderQueue();
+
+    if (apiKey) {
+      try {
+        const enrichPrompt = `You are an AI enrichment engine for a safety platform. Analyse this observation and return ONLY valid JSON:
+Observation: "${item.text}"
+Work type: ${item.work_type || 'unknown'}
+{"signal_type":"positive_performance|weak_signal|at_risk_condition|unwanted_energy_event|barrier_failure","signal_type_confidence":0.0,"signal_type_rationale":"one sentence","energy_type":"kinetic|gravitational|electrical|thermal|chemical|pressure|noise_vibration|none","energy_release_potential":"catastrophic|high|moderate|low|none","barrier_assessment":"barrier_absent|barrier_failed|barrier_degraded|barrier_held|none","fw_factor":"management_systems|operational_management|frontline_workers|communications_coordination|work_understanding|monitoring_metrics|goal_conflict_tradeoffs|learning_development|resource_allocation|decision_making|contractor_management|senior_leadership|strategy|risk_management|safety_organisation|null","fw_confidence":0.0,"fw_rationale":"one sentence"}`;
+
+        const res = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': apiKey,
+            'anthropic-version': '2023-06-01',
+            'anthropic-dangerous-direct-browser-access': 'true'
+          },
+          body: JSON.stringify({
+            model: 'claude-sonnet-4-20250514',
+            max_tokens: 400,
+            messages: [{ role: 'user', content: enrichPrompt }]
+          })
+        });
+        const data = await res.json();
+        const raw = data.content[0].text.replace(/```json|```/g,'').trim();
+        item.enrichment = JSON.parse(raw);
+      } catch(e) {
+        // enrichment failed — observation still synced
+      }
+    }
+
+    await sleep(400);
+    item.status = 'done';
+    renderQueue();
+    await sleep(200);
+  }
+
+  // All done — update count
+  document.getElementById('queueCount').textContent = `${offlineQueue.length} synced ✓`;
+  btn.textContent = 'All synced ✓';
+  btn.style.background = '#00AB55';
+
+  // Show enrichment results if we got them
+  const enriched = offlineQueue.filter(i => i.enrichment);
+  if (enriched.length > 0) {
+    showQueueEnrichmentResults(enriched);
+  }
+
+  // Clear queue after showing results
+  setTimeout(() => {
+    offlineQueue = [];
+    localStorage.setItem('hiviz_offline_queue', JSON.stringify(offlineQueue));
+    renderQueue();
+    btn.disabled = false;
+    btn.textContent = 'Simulate reconnect →';
+    btn.style.background = '#00AB55';
+    document.getElementById('queueCount').textContent = '0 pending';
+    document.getElementById('reconnectBtn').style.display = 'none';
+  }, 3000);
+}
+
+function showQueueEnrichmentResults(items) {
+  const panel = document.getElementById('offlinePanel');
+  const resultsDiv = document.createElement('div');
+  resultsDiv.style.cssText = 'padding:12px;border-top:1px solid #2a2b26;';
+  resultsDiv.innerHTML = `<div style="font-size:10px;font-weight:700;letter-spacing:1px;color:rgba(255,255,255,0.3);margin-bottom:8px;">ENRICHMENT RESULTS</div>`;
+
+  items.forEach(item => {
+    const e = item.enrichment;
+    const card = document.createElement('div');
+    card.style.cssText = 'background:rgba(118,53,220,0.1);border:1px solid rgba(118,53,220,0.2);border-radius:8px;padding:10px;margin-bottom:6px;font-size:11px;';
+    card.innerHTML = `
+      <div style="color:rgba(255,255,255,0.5);margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${item.text}</div>
+      <div style="display:flex;gap:5px;flex-wrap:wrap;">
+        <span style="background:rgba(255,86,48,0.2);color:#FF5630;padding:2px 7px;border-radius:4px;font-weight:600;">${(e.signal_type||'').replace(/_/g,' ')}</span>
+        ${e.energy_type && e.energy_type!=='none' ? `<span style="background:rgba(255,171,0,0.2);color:#FFAB00;padding:2px 7px;border-radius:4px;font-weight:600;">${e.energy_type}</span>` : ''}
+        ${e.fw_factor && e.fw_factor!=='null' && e.fw_confidence>=0.7 ? `<span style="background:rgba(118,53,220,0.2);color:#B88EF7;padding:2px 7px;border-radius:4px;font-weight:600;">${(e.fw_factor||'').replace(/_/g,' ')}</span>` : ''}
+        <span style="background:rgba(0,171,85,0.15);color:#00AB55;padding:2px 7px;border-radius:4px;font-weight:600;">enriched ✓</span>
+      </div>
+      ${e.fw_rationale ? `<div style="color:rgba(255,255,255,0.3);font-style:italic;margin-top:5px;">${e.fw_rationale}</div>` : ''}
+    `;
+    resultsDiv.appendChild(card);
+  });
+
+  panel.appendChild(resultsDiv);
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// ── API-DOWN FORM SUBMISSION ──────────────────────────────────────────────────
+function submitApiDownForm(obs) {
+  const msgs = document.getElementById('messages');
+  document.querySelector('.input-area').style.display = 'none';
+
+  const pendingId = `obs_${Date.now()}`;
+
+  const conf = document.createElement('div');
+  conf.style.cssText = 'animation:msgIn 0.3s ease;';
+  conf.innerHTML = `
+    <div style="background:#FFF3CD;border:1.5px solid #f59e0b;border-radius:14px;padding:14px 16px;margin:6px 0;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+        <div style="width:28px;height:28px;border-radius:50%;background:#FFAB00;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div>
+          <div style="font-size:13px;font-weight:700;color:#92400e;">Observation saved</div>
+          <div style="font-size:11px;color:#b45309;">Enrichment queued — will run when AI is available</div>
+        </div>
+      </div>
+      <div style="background:rgba(0,0,0,0.06);border-radius:8px;padding:8px 10px;font-size:11px;color:#92400e;">
+        <div style="font-weight:600;margin-bottom:3px;">What happens next:</div>
+        <div>1. Observation record created — reference ${pendingId}</div>
+        <div>2. enrichment_status = pending</div>
+        <div>3. Enrichment worker retries on a 5-minute schedule</div>
+        <div>4. Signal type, energy, Forge Works factor added on success</div>
+      </div>
+      <div id="retryBtn_${pendingId}" style="margin-top:8px;">
+        <button onclick="retryEnrichment('${pendingId}', ${JSON.stringify(obs).replace(/'/g,"\'")})" style="background:#FFAB00;color:white;border:none;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:Inter,sans-serif;display:flex;align-items:center;gap:6px;">
+          <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.96"/></svg>
+          Retry enrichment now
+        </button>
+      </div>
+    </div>
+  `;
+  msgs.appendChild(conf);
+  msgs.scrollTop = msgs.scrollHeight;
+  showRestartOption(msgs);
+}
+
+async function retryEnrichment(id, obs) {
+  const btn = document.getElementById(`retryBtn_${id}`);
+  if (btn) btn.innerHTML = `<div style="display:flex;align-items:center;gap:6px;font-size:12px;color:#92400e;"><svg class="spinner" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.96"/></svg>Running enrichment...</div>`;
+
+  if (!apiKey) {
+    if (btn) btn.innerHTML = `<div style="font-size:11px;color:#92400e;">Add API key below to run enrichment</div>`;
+    return;
+  }
+
+  try {
+    const enrichPrompt = `You are an AI enrichment engine for a safety platform. Analyse this observation and return ONLY valid JSON:
+Observation: "${obs.text || ''}"
+Work type: ${obs.work_type || 'unknown'}
+{"signal_type":"positive_performance|weak_signal|at_risk_condition|unwanted_energy_event|barrier_failure","signal_type_confidence":0.0,"signal_type_rationale":"one sentence","energy_type":"kinetic|gravitational|electrical|thermal|chemical|pressure|noise_vibration|none","energy_release_potential":"catastrophic|high|moderate|low|none","barrier_assessment":"barrier_absent|barrier_failed|barrier_degraded|barrier_held|none","fw_factor":"management_systems|operational_management|frontline_workers|communications_coordination|work_understanding|monitoring_metrics|goal_conflict_tradeoffs|learning_development|resource_allocation|decision_making|contractor_management|senior_leadership|strategy|risk_management|safety_organisation|null","fw_confidence":0.0,"fw_rationale":"one sentence"}`;
+
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 400,
+        messages: [{ role: 'user', content: enrichPrompt }]
+      })
+    });
+
+    const data = await res.json();
+    const raw = data.content[0].text.replace(/```json|```/g,'').trim();
+    const e = JSON.parse(raw);
+
+    if (btn) btn.innerHTML = `
+      <div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center;">
+        <span style="font-size:10px;font-weight:700;color:#00AB55;">Enrichment complete ✓</span>
+        <span style="background:rgba(255,86,48,0.15);color:#FF5630;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:600;">${(e.signal_type||'').replace(/_/g,' ')}</span>
+        ${e.energy_type && e.energy_type!=='none' ? `<span style="background:rgba(255,171,0,0.15);color:#FFAB00;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:600;">${e.energy_type}</span>` : ''}
+        ${e.fw_factor && e.fw_factor!=='null' ? `<span style="background:rgba(118,53,220,0.15);color:#B88EF7;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:600;">${(e.fw_factor||'').replace(/_/g,' ')}</span>` : ''}
+      </div>
+      <div style="font-size:10px;color:#92400e;font-style:italic;margin-top:4px;">${e.fw_rationale || e.signal_type_rationale || ''}</div>
+    `;
+  } catch(e) {
+    if (btn) btn.innerHTML = `<div style="font-size:11px;color:#92400e;">Enrichment failed — will retry automatically</div>`;
+  }
+}
+
+function escapeHtml(text) {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/\n/g, '<br>');
+}
+</script>
+</body>
+</html>
