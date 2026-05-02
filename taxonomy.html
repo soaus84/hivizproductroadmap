@@ -7,508 +7,106 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #0e0f0d;
-    --surface: #141512;
-    --surface2: #1a1b18;
-    --border: #2a2b26;
-    --border-light: #1e1f1b;
-    --accent: #d4a843;
-    --accent-dim: #9b7a2e;
-    --text-primary: #e8e6df;
-    --text-secondary: #8a887f;
-    --text-muted: #4a4840;
-    --green: #00AB55;
-    --green-dim: #007B40;
-    --green-bg: rgba(0,171,85,0.1);
-    --red: #FF5630;
-    --red-bg: rgba(255,86,48,0.1);
-    --amber: #FFAB00;
-    --amber-bg: rgba(255,171,0,0.1);
-    --blue: #006C9C;
-    --blue-bg: rgba(0,108,156,0.1);
-    --purple: #7635DC;
-    --purple-bg: rgba(118,53,220,0.1);
+    --bg: #0e0f0d; --surface: #141512; --surface2: #1a1b18;
+    --border: #2a2b26; --border-light: #1e1f1b;
+    --accent: #d4a843; --accent-dim: #9b7a2e;
+    --text-primary: #e8e6df; --text-secondary: #8a887f; --text-muted: #4a4840;
+    --green: #00AB55; --green-dim: #007B40; --green-bg: rgba(0,171,85,0.1);
+    --red: #FF5630; --red-bg: rgba(255,86,48,0.1);
+    --amber: #FFAB00; --amber-bg: rgba(255,171,0,0.1);
+    --blue: #006C9C; --blue-bg: rgba(0,108,156,0.1);
+    --purple: #7635DC; --purple-bg: rgba(118,53,220,0.1);
     --radius: 8px;
   }
-
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html { scroll-behavior: smooth; }
-
-  body {
-    font-family: 'Inter', sans-serif;
-    background: var(--bg);
-    color: var(--text-primary);
-    min-height: 100vh;
-    font-size: 13px;
-    line-height: 1.6;
-  }
-
-  /* ── LAYOUT ── */
+  body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text-primary); min-height: 100vh; font-size: 13px; line-height: 1.6; }
   .container { max-width: 1100px; margin: 0 auto; padding: 0 32px; }
-
-  header {
-    padding: 56px 0 40px;
-    border-bottom: 1px solid var(--border);
-    margin-bottom: 48px;
-  }
-
+  header { padding: 56px 0 40px; border-bottom: 1px solid var(--border); margin-bottom: 48px; }
   .wordmark { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 22px; color: var(--accent); margin-bottom: 8px; }
   .page-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 28px; color: var(--text-primary); margin-bottom: 8px; }
   .page-desc { font-size: 14px; color: var(--text-secondary); max-width: 600px; line-height: 1.7; }
-
-  /* ── NAV ── */
-  .sticky-nav {
-    position: sticky;
-    top: 0;
-    background: rgba(14,15,13,0.95);
-    backdrop-filter: blur(8px);
-    border-bottom: 1px solid var(--border);
-    padding: 12px 0;
-    z-index: 100;
-  }
-
+  .sticky-nav { position: sticky; top: 0; background: rgba(14,15,13,0.95); backdrop-filter: blur(8px); border-bottom: 1px solid var(--border); padding: 12px 0; z-index: 100; }
   .nav-inner { display: flex; gap: 4px; flex-wrap: wrap; align-items: center; }
-
-  .nav-link {
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.05em;
-    color: var(--text-muted);
-    text-decoration: none;
-    padding: 5px 10px;
-    border-radius: 5px;
-    transition: all 0.12s;
-    border: 1px solid transparent;
-  }
-
+  .nav-link { font-size: 11px; font-weight: 600; letter-spacing: 0.05em; color: var(--text-muted); text-decoration: none; padding: 5px 10px; border-radius: 5px; transition: all 0.12s; border: 1px solid transparent; }
   .nav-link:hover { color: var(--text-secondary); background: var(--surface2); }
   .nav-link.active { color: var(--accent); border-color: var(--accent-dim); background: rgba(212,168,67,0.08); }
-
-  /* ── SECTIONS ── */
-  .taxonomy-section {
-    margin-bottom: 56px;
-    scroll-margin-top: 60px;
-  }
-
-  .section-header {
-    display: flex;
-    align-items: baseline;
-    gap: 12px;
-    margin-bottom: 4px;
-  }
-
-  .section-eyebrow {
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    color: var(--text-muted);
-  }
-
-  .section-title {
-    font-family: 'Syne', sans-serif;
-    font-size: 18px;
-    font-weight: 700;
-    color: var(--text-primary);
-    margin-bottom: 4px;
-  }
-
-  .section-desc {
-    font-size: 13px;
-    color: var(--text-secondary);
-    margin-bottom: 20px;
-    max-width: 680px;
-    line-height: 1.6;
-  }
-
+  .taxonomy-section { margin-bottom: 56px; scroll-margin-top: 60px; }
+  .section-eyebrow { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-muted); }
+  .section-title { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
+  .section-desc { font-size: 13px; color: var(--text-secondary); margin-bottom: 20px; max-width: 680px; line-height: 1.6; }
   .section-rule { height: 1px; background: var(--border-light); margin-bottom: 20px; }
-
-  /* ── VALUE CARDS ── */
-  .values-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-
-  .value-card {
-    background: var(--surface);
-    border: 1px solid var(--border-light);
-    border-radius: var(--radius);
-    padding: 14px 16px;
-    display: grid;
-    grid-template-columns: 200px 1fr auto;
-    gap: 16px;
-    align-items: start;
-    transition: border-color 0.12s;
-  }
-
+  .values-grid { display: flex; flex-direction: column; gap: 6px; }
+  .value-card { background: var(--surface); border: 1px solid var(--border-light); border-radius: var(--radius); padding: 14px 16px; display: grid; grid-template-columns: 200px 1fr auto; gap: 16px; align-items: start; transition: border-color 0.12s; }
   .value-card:hover { border-color: var(--border); }
-
-  .value-card.highlight {
-    border-color: var(--accent);
-    background: rgba(212,168,67,0.06);
-  }
-
-  .value-name {
-    font-family: 'DM Mono', monospace;
-    font-size: 12px;
-    font-weight: 500;
-    color: var(--text-primary);
-    padding-top: 1px;
-  }
-
-  .value-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.3px;
-    padding: 3px 8px;
-    border-radius: 4px;
-    margin-top: 5px;
-  }
-
-  .value-body { }
+  .value-card.highlight { border-color: var(--accent); background: rgba(212,168,67,0.06); }
+  .value-name { font-family: 'DM Mono', monospace; font-size: 12px; font-weight: 500; color: var(--text-primary); padding-top: 1px; }
+  .value-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 10px; font-weight: 700; letter-spacing: 0.3px; padding: 3px 8px; border-radius: 4px; margin-top: 5px; }
   .value-label { font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 3px; }
   .value-desc { font-size: 12px; color: var(--text-secondary); line-height: 1.55; margin-bottom: 6px; }
   .value-example { font-size: 11px; color: var(--text-muted); font-style: italic; }
   .value-example strong { color: var(--text-secondary); font-style: normal; }
-
   .value-meta { display: flex; flex-direction: column; gap: 4px; align-items: flex-end; }
-  .meta-chip {
-    font-size: 10px;
-    font-weight: 600;
-    padding: 2px 8px;
-    border-radius: 10px;
-    white-space: nowrap;
-  }
-
-  /* ── FW MAP GRID ── */
-  .fw-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 1px;
-    background: var(--border);
-    border-radius: var(--radius);
-    overflow: hidden;
-    margin-bottom: 16px;
-  }
-
-  .fw-domain-header {
-    background: var(--surface2);
-    padding: 10px 14px;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    color: var(--text-secondary);
-    text-align: center;
-  }
-
-  .fw-cell {
-    background: var(--surface);
-    padding: 12px 14px;
-    cursor: pointer;
-    transition: background 0.12s;
-    border: 2px solid transparent;
-  }
-
+  .meta-chip { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 10px; white-space: nowrap; }
+  .fw-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1px; background: var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 16px; }
+  .fw-domain-header { background: var(--surface2); padding: 10px 14px; font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text-secondary); text-align: center; }
+  .fw-cell { background: var(--surface); padding: 12px 14px; cursor: pointer; transition: background 0.12s; border: 2px solid transparent; }
   .fw-cell:hover { background: var(--surface2); }
   .fw-cell.highlight { border-color: var(--accent); background: rgba(212,168,67,0.06); }
-
-  .fw-factor-key {
-    font-family: 'DM Mono', monospace;
-    font-size: 10px;
-    color: var(--text-muted);
-    margin-bottom: 3px;
-  }
-
+  .fw-factor-key { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text-muted); margin-bottom: 3px; }
   .fw-factor-label { font-size: 12px; font-weight: 600; color: var(--text-primary); margin-bottom: 3px; }
   .fw-factor-desc { font-size: 11px; color: var(--text-secondary); line-height: 1.4; }
-
-  /* ── MATURITY ROW ── */
-  .maturity-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 8px;
-    margin-bottom: 16px;
-  }
-
-  .maturity-card {
-    background: var(--surface);
-    border: 1px solid var(--border-light);
-    border-radius: var(--radius);
-    padding: 14px;
-  }
-
+  .maturity-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+  .maturity-card { background: var(--surface); border: 1px solid var(--border-light); border-radius: var(--radius); padding: 14px; }
   .maturity-name { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text-muted); margin-bottom: 4px; }
   .maturity-label { font-size: 14px; font-weight: 700; margin-bottom: 6px; }
   .maturity-desc { font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
-
-  /* ── LIVE DEMO ── */
-  .demo-section {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    overflow: hidden;
-    margin-bottom: 56px;
-  }
-
-  .demo-header {
-    background: var(--surface2);
-    padding: 16px 20px;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-  }
-
+  .demo-section { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 56px; }
+  .demo-header { background: var(--surface2); padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 12px; }
   .demo-title { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; }
   .demo-desc { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
-
-  .api-key-mini {
-    display: flex;
-    gap: 6px;
-    align-items: center;
-  }
-
-  .api-key-mini input {
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 6px 10px;
-    font-size: 11px;
-    color: var(--text-primary);
-    font-family: 'DM Mono', monospace;
-    outline: none;
-    width: 200px;
-  }
-
+  .api-key-mini { display: flex; gap: 6px; align-items: center; }
+  .api-key-mini input { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 6px 10px; font-size: 11px; color: var(--text-primary); font-family: 'DM Mono', monospace; outline: none; width: 200px; }
   .api-key-mini input:focus { border-color: var(--accent-dim); }
   .api-key-mini input::placeholder { color: var(--text-muted); }
-
-  .api-key-mini button {
-    background: var(--accent);
-    color: var(--bg);
-    border: none;
-    border-radius: 6px;
-    padding: 6px 12px;
-    font-size: 11px;
-    font-weight: 700;
-    cursor: pointer;
-    font-family: 'Inter', sans-serif;
-  }
-
+  .api-key-mini button { background: var(--accent); color: var(--bg); border: none; border-radius: 6px; padding: 6px 12px; font-size: 11px; font-weight: 700; cursor: pointer; font-family: 'Inter', sans-serif; }
   .demo-body { padding: 20px; }
-
-  .obs-presets {
-    display: flex;
-    gap: 6px;
-    flex-wrap: wrap;
-    margin-bottom: 12px;
-  }
-
-  .preset-chip {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 5px;
-    padding: 5px 10px;
-    font-size: 11px;
-    font-weight: 500;
-    color: var(--text-secondary);
-    cursor: pointer;
-    transition: all 0.12s;
-    font-family: 'DM Mono', monospace;
-  }
-
+  .obs-presets { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+  .preset-chip { background: var(--surface2); border: 1px solid var(--border); border-radius: 5px; padding: 5px 10px; font-size: 11px; font-weight: 500; color: var(--text-secondary); cursor: pointer; transition: all 0.12s; font-family: 'DM Mono', monospace; }
   .preset-chip:hover { border-color: var(--accent-dim); color: var(--accent); }
   .preset-chip.active { border-color: var(--accent); color: var(--accent); background: rgba(212,168,67,0.08); }
-
-  .obs-input-area {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 16px;
-  }
-
-  .obs-textarea {
-    flex: 1;
-    min-height: 80px;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 10px 12px;
-    font-family: 'Inter', sans-serif;
-    font-size: 13px;
-    color: var(--text-primary);
-    resize: vertical;
-    outline: none;
-    transition: border-color 0.12s;
-    line-height: 1.5;
-  }
-
+  .obs-input-area { display: flex; gap: 10px; margin-bottom: 16px; }
+  .obs-textarea { flex: 1; min-height: 80px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; font-family: 'Inter', sans-serif; font-size: 13px; color: var(--text-primary); resize: vertical; outline: none; transition: border-color 0.12s; line-height: 1.5; }
   .obs-textarea:focus { border-color: var(--accent-dim); }
   .obs-textarea::placeholder { color: var(--text-muted); }
-
-  .classify-btn {
-    background: var(--accent);
-    color: var(--bg);
-    border: none;
-    border-radius: 8px;
-    padding: 0 20px;
-    font-size: 13px;
-    font-weight: 700;
-    cursor: pointer;
-    font-family: 'Inter', sans-serif;
-    white-space: nowrap;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    transition: all 0.12s;
-    align-self: flex-start;
-    height: 38px;
-    margin-top: 0;
-  }
-
+  .classify-btn { background: var(--accent); color: var(--bg); border: none; border-radius: 8px; padding: 0 20px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: 'Inter', sans-serif; white-space: nowrap; display: flex; align-items: center; gap: 6px; transition: all 0.12s; align-self: flex-start; height: 38px; }
   .classify-btn:hover { background: #e0b84f; }
   .classify-btn:disabled { background: var(--surface2); color: var(--text-muted); cursor: default; }
-
-  /* Results */
-  .results-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 8px;
-  }
-
-  .result-card {
-    background: var(--bg);
-    border: 1px solid var(--border-light);
-    border-radius: 8px;
-    padding: 12px;
-    opacity: 0.4;
-    transition: all 0.2s;
-  }
-
-  .result-card.populated {
-    opacity: 1;
-    border-color: var(--border);
-  }
-
+  .results-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px; }
+  .result-card { background: var(--bg); border: 1px solid var(--border-light); border-radius: 8px; padding: 12px; opacity: 0.4; transition: all 0.2s; }
+  .result-card.populated { opacity: 1; border-color: var(--border); }
   .result-card.high-conf { border-color: var(--green-dim); }
   .result-card.mid-conf { border-color: var(--accent-dim); }
   .result-card.low-conf { border-color: var(--red); opacity: 0.7; }
-
-  .result-dimension {
-    font-size: 9px;
-    font-weight: 700;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    margin-bottom: 5px;
-  }
-
-  .result-value {
-    font-family: 'DM Mono', monospace;
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--text-primary);
-    margin-bottom: 4px;
-  }
-
-  .result-conf {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    margin-bottom: 5px;
-  }
-
-  .conf-bar-track {
-    flex: 1;
-    height: 3px;
-    background: var(--border);
-    border-radius: 2px;
-    overflow: hidden;
-  }
-
-  .conf-bar-fill {
-    height: 100%;
-    border-radius: 2px;
-    background: var(--green);
-    transition: width 0.4s ease;
-  }
-
-  .conf-pct {
-    font-size: 10px;
-    font-weight: 700;
-    color: var(--text-muted);
-    min-width: 30px;
-    text-align: right;
-  }
-
-  .result-rationale {
-    font-size: 11px;
-    color: var(--text-secondary);
-    font-style: italic;
-    line-height: 1.45;
-  }
-
-  .loading-state {
-    display: none;
-    align-items: center;
-    gap: 8px;
-    padding: 12px 0;
-    font-size: 12px;
-    color: var(--text-secondary);
-  }
-
-  .loading-dot {
-    width: 6px; height: 6px;
-    border-radius: 50%;
-    background: var(--accent);
-    animation: ldot 1.2s infinite;
-  }
+  .result-dimension { font-size: 9px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 5px; }
+  .result-value { font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 500; color: var(--text-primary); margin-bottom: 4px; }
+  .result-conf { display: flex; align-items: center; gap: 6px; margin-bottom: 5px; }
+  .conf-bar-track { flex: 1; height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; }
+  .conf-bar-fill { height: 100%; border-radius: 2px; background: var(--green); transition: width 0.4s ease; }
+  .conf-pct { font-size: 10px; font-weight: 700; color: var(--text-muted); min-width: 30px; text-align: right; }
+  .result-rationale { font-size: 11px; color: var(--text-secondary); font-style: italic; line-height: 1.45; }
+  .loading-state { display: none; align-items: center; gap: 8px; padding: 12px 0; font-size: 12px; color: var(--text-secondary); }
+  .loading-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); animation: ldot 1.2s infinite; }
   .loading-dot:nth-child(2) { animation-delay: 0.2s; }
   .loading-dot:nth-child(3) { animation-delay: 0.4s; }
   @keyframes ldot { 0%,60%,100%{opacity:0.2;transform:scale(0.8)} 30%{opacity:1;transform:scale(1)} }
-
-  .error-msg {
-    display: none;
-    background: var(--red-bg);
-    border: 1px solid rgba(255,86,48,0.3);
-    border-radius: 6px;
-    padding: 10px 12px;
-    font-size: 12px;
-    color: var(--red);
-    margin-top: 8px;
-  }
-
-  /* Colour helpers */
-  .c-green { color: var(--green); }
-  .c-amber { color: var(--amber); }
-  .c-red { color: var(--red); }
-  .c-blue { color: var(--blue); }
-  .c-purple { color: var(--purple); }
-  .c-muted { color: var(--text-muted); }
-
-  .bg-green { background: var(--green-bg); color: var(--green); }
-  .bg-amber { background: var(--amber-bg); color: var(--amber); }
-  .bg-red { background: var(--red-bg); color: var(--red); }
-  .bg-blue { background: var(--blue-bg); color: var(--blue); }
-  .bg-purple { background: var(--purple-bg); color: var(--purple); }
-
-  footer {
-    border-top: 1px solid var(--border-light);
-    padding: 24px 0 40px;
-    font-size: 11px;
-    color: var(--text-muted);
-    display: flex;
-    justify-content: space-between;
-  }
+  .error-msg { display: none; background: var(--red-bg); border: 1px solid rgba(255,86,48,0.3); border-radius: 6px; padding: 10px 12px; font-size: 12px; color: var(--red); margin-top: 8px; }
+  .c-green{color:var(--green)} .c-amber{color:var(--amber)} .c-red{color:var(--red)} .c-blue{color:var(--blue)} .c-purple{color:var(--purple)} .c-muted{color:var(--text-muted)}
+  .bg-green{background:var(--green-bg);color:var(--green)} .bg-amber{background:var(--amber-bg);color:var(--amber)} .bg-red{background:var(--red-bg);color:var(--red)} .bg-blue{background:var(--blue-bg);color:var(--blue)} .bg-purple{background:var(--purple-bg);color:var(--purple)}
+  footer { border-top: 1px solid var(--border-light); padding: 24px 0 40px; font-size: 11px; color: var(--text-muted); display: flex; justify-content: space-between; }
 </style>
 </head>
 <body>
-
 <div class="container">
 <header>
   <div class="wordmark">Hiviz</div>
@@ -516,7 +114,6 @@
   <div class="page-desc">Every classification dimension used by the AI enrichment engine. Review all possible values, their definitions, and examples. Use the live classifier at the bottom to see how a real observation is classified against these taxonomies.</div>
 </header>
 </div>
-
 <div class="sticky-nav">
   <div class="container">
     <div class="nav-inner">
@@ -534,208 +131,64 @@
     </div>
   </div>
 </div>
-
 <div class="container" style="padding-top:40px;">
-
-<!-- ── SIGNAL TYPE ── -->
+<!-- SIGNAL TYPE -->
 <div class="taxonomy-section" id="signal-type">
   <div class="section-eyebrow">Observation taxonomy</div>
   <div class="section-title">Signal Type</div>
   <div class="section-desc">AI-determined from observation text and work type context. This is the primary routing field — it determines whether an observation goes to the pool for trend detection or directly to the pipeline. Confidence threshold: 0.70.</div>
   <div class="section-rule"></div>
   <div class="values-grid">
-
     <div class="value-card" id="sig-barrier_failure">
-      <div>
-        <div class="value-name">barrier_failure</div>
-        <div class="value-badge bg-red">→ Pipeline direct</div>
-      </div>
-      <div class="value-body">
-        <div class="value-label">Barrier Failure</div>
-        <div class="value-desc">A control that should have prevented harm was absent, bypassed, or failed to function. One event is enough — no threshold required. High severity.</div>
-        <div class="value-example"><strong>Examples:</strong> Excavator reversed without confirmed spotter. Lockout tag removed before isolation confirmed. Guard removed from conveyor during operation.</div>
-      </div>
-      <div class="value-meta">
-        <span class="meta-chip bg-red">High priority</span>
-        <span class="meta-chip" style="background:var(--surface2);color:var(--text-secondary);">Single event</span>
-      </div>
+      <div><div class="value-name">barrier_failure</div><div class="value-badge bg-red">→ Pipeline direct</div></div>
+      <div class="value-body"><div class="value-label">Barrier Failure</div><div class="value-desc">A control that should have prevented harm was absent, bypassed, or failed to function. One event is enough — no threshold required. High severity.</div><div class="value-example"><strong>Examples:</strong> Excavator reversed without confirmed spotter. Lockout tag removed before isolation confirmed. Guard removed from conveyor during operation.</div></div>
+      <div class="value-meta"><span class="meta-chip bg-red">High priority</span><span class="meta-chip" style="background:var(--surface2);color:var(--text-secondary);">Single event</span></div>
     </div>
-
     <div class="value-card" id="sig-unwanted_energy_event">
-      <div>
-        <div class="value-name">unwanted_energy_event</div>
-        <div class="value-badge bg-red">→ Pipeline direct</div>
-      </div>
-      <div class="value-body">
-        <div class="value-label">Unwanted Energy Event</div>
-        <div class="value-desc">Uncontrolled release of energy that had the potential to cause harm. The barrier may have held but the energy was released in an unintended way.</div>
-        <div class="value-example"><strong>Examples:</strong> Dropped object from height — no injury but landed in work area. Truck rolled slightly before brakes engaged. Hydraulic line sprayed fluid under pressure.</div>
-      </div>
-      <div class="value-meta">
-        <span class="meta-chip bg-red">High priority</span>
-        <span class="meta-chip" style="background:var(--surface2);color:var(--text-secondary);">Single event</span>
-      </div>
+      <div><div class="value-name">unwanted_energy_event</div><div class="value-badge bg-red">→ Pipeline direct</div></div>
+      <div class="value-body"><div class="value-label">Unwanted Energy Event</div><div class="value-desc">Uncontrolled release of energy that had the potential to cause harm. The barrier may have held but the energy was released in an unintended way.</div><div class="value-example"><strong>Examples:</strong> Dropped object from height — no injury but landed in work area. Truck rolled slightly before brakes engaged. Hydraulic line sprayed fluid under pressure.</div></div>
+      <div class="value-meta"><span class="meta-chip bg-red">High priority</span><span class="meta-chip" style="background:var(--surface2);color:var(--text-secondary);">Single event</span></div>
     </div>
-
     <div class="value-card" id="sig-at_risk_condition">
-      <div>
-        <div class="value-name">at_risk_condition</div>
-        <div class="value-badge bg-amber">→ Pool</div>
-      </div>
-      <div class="value-body">
-        <div class="value-label">At-Risk Condition</div>
-        <div class="value-desc">A physical condition or behaviour that increases the probability of harm. The barrier hasn't failed yet but conditions are deteriorating.</div>
-        <div class="value-example"><strong>Examples:</strong> Berm height below standard on haul road. Operator skipping steps in pre-start check. Permit signed before physical hazard check completed.</div>
-      </div>
-      <div class="value-meta">
-        <span class="meta-chip bg-amber">Pooled</span>
-        <span class="meta-chip" style="background:var(--surface2);color:var(--text-secondary);">Trend detection</span>
-      </div>
+      <div><div class="value-name">at_risk_condition</div><div class="value-badge bg-amber">→ Pool</div></div>
+      <div class="value-body"><div class="value-label">At-Risk Condition</div><div class="value-desc">A physical condition or behaviour that increases the probability of harm. The barrier hasn't failed yet but conditions are deteriorating.</div><div class="value-example"><strong>Examples:</strong> Berm height below standard on haul road. Operator skipping steps in pre-start check. Permit signed before physical hazard check completed.</div></div>
+      <div class="value-meta"><span class="meta-chip bg-amber">Pooled</span><span class="meta-chip" style="background:var(--surface2);color:var(--text-secondary);">Trend detection</span></div>
     </div>
-
     <div class="value-card" id="sig-weak_signal">
-      <div>
-        <div class="value-name">weak_signal</div>
-        <div class="value-badge bg-amber">→ Pool</div>
-      </div>
-      <div class="value-body">
-        <div class="value-label">Weak Signal</div>
-        <div class="value-desc">An observation that hints at a systemic issue but doesn't constitute a condition or event on its own. Valuable in aggregation — a pattern of weak signals across a site is meaningful.</div>
-        <div class="value-example"><strong>Examples:</strong> Supervisor seemed uncertain about procedure. Crew appeared fatigued at shift start. Communication between operators was unclear but no incident occurred.</div>
-      </div>
-      <div class="value-meta">
-        <span class="meta-chip bg-amber">Pooled</span>
-        <span class="meta-chip" style="background:var(--surface2);color:var(--text-secondary);">Trend detection</span>
-      </div>
+      <div><div class="value-name">weak_signal</div><div class="value-badge bg-amber">→ Pool</div></div>
+      <div class="value-body"><div class="value-label">Weak Signal</div><div class="value-desc">An observation that hints at a systemic issue but doesn't constitute a condition or event on its own. Valuable in aggregation — a pattern of weak signals across a site is meaningful.</div><div class="value-example"><strong>Examples:</strong> Supervisor seemed uncertain about procedure. Crew appeared fatigued at shift start. Communication between operators was unclear but no incident occurred.</div></div>
+      <div class="value-meta"><span class="meta-chip bg-amber">Pooled</span><span class="meta-chip" style="background:var(--surface2);color:var(--text-secondary);">Trend detection</span></div>
     </div>
-
     <div class="value-card" id="sig-positive_performance">
-      <div>
-        <div class="value-name">positive_performance</div>
-        <div class="value-badge bg-green">→ Pool</div>
-      </div>
-      <div class="value-body">
-        <div class="value-label">Positive Performance</div>
-        <div class="value-desc">Observed behaviour or condition that demonstrates safety practice being done well. Feeds into Resilient maturity signal and can surface in toolbox talks as positive reinforcement.</div>
-        <div class="value-example"><strong>Examples:</strong> Crew voluntarily waited for replacement spotter — didn't pressure to proceed. Supervisor spotted berm issue and actioned before work started. LOTO buddy-check completed correctly without prompting.</div>
-      </div>
-      <div class="value-meta">
-        <span class="meta-chip bg-green">Analytics</span>
-        <span class="meta-chip" style="background:var(--surface2);color:var(--text-secondary);">Resilient signal</span>
-      </div>
+      <div><div class="value-name">positive_performance</div><div class="value-badge bg-green">→ Pool</div></div>
+      <div class="value-body"><div class="value-label">Positive Performance</div><div class="value-desc">Observed behaviour or condition that demonstrates safety practice being done well. Feeds into Resilient maturity signal and can surface in toolbox talks as positive reinforcement.</div><div class="value-example"><strong>Examples:</strong> Crew voluntarily waited for replacement spotter — didn't pressure to proceed. Supervisor spotted berm issue and actioned before work started. LOTO buddy-check completed correctly without prompting.</div></div>
+      <div class="value-meta"><span class="meta-chip bg-green">Analytics</span><span class="meta-chip" style="background:var(--surface2);color:var(--text-secondary);">Resilient signal</span></div>
     </div>
-
     <div class="value-card" id="sig-emerging_pattern">
-      <div>
-        <div class="value-name">emerging_pattern</div>
-        <div class="value-badge" style="background:var(--purple-bg);color:var(--purple);">→ Pipeline direct</div>
-      </div>
-      <div class="value-body">
-        <div class="value-label">Emerging Pattern</div>
-        <div class="value-desc">AI-only signal type. Generated when an observation in context of recent site history constitutes a recognisable pattern — not assigned from a single observation, fired by the trend algorithm.</div>
-        <div class="value-example"><strong>Note:</strong> This signal type is never assigned directly by observation enrichment. It is the output of the trend detection pipeline when a threshold is crossed.</div>
-      </div>
-      <div class="value-meta">
-        <span class="meta-chip" style="background:var(--purple-bg);color:var(--purple);">AI-only</span>
-        <span class="meta-chip" style="background:var(--surface2);color:var(--text-secondary);">System generated</span>
-      </div>
+      <div><div class="value-name">emerging_pattern</div><div class="value-badge" style="background:var(--purple-bg);color:var(--purple);">→ Pipeline direct</div></div>
+      <div class="value-body"><div class="value-label">Emerging Pattern</div><div class="value-desc">AI-only signal type. Generated when an observation in context of recent site history constitutes a recognisable pattern — not assigned from a single observation, fired by the trend algorithm.</div><div class="value-example"><strong>Note:</strong> This signal type is never assigned directly by observation enrichment. It is the output of the trend detection pipeline when a threshold is crossed.</div></div>
+      <div class="value-meta"><span class="meta-chip" style="background:var(--purple-bg);color:var(--purple);">AI-only</span><span class="meta-chip" style="background:var(--surface2);color:var(--text-secondary);">System generated</span></div>
     </div>
-
   </div>
 </div>
-
-<!-- ── ENERGY TYPE ── -->
+<!-- ENERGY TYPE -->
 <div class="taxonomy-section" id="energy-type">
   <div class="section-eyebrow">Observation taxonomy</div>
   <div class="section-title">Energy Type</div>
   <div class="section-desc">The type of physical energy that was present or released. Used to classify the nature of the hazard and drive control verification in V5. AI-determined at confidence ≥ 0.70.</div>
   <div class="section-rule"></div>
   <div class="values-grid">
-
-    <div class="value-card">
-      <div><div class="value-name">kinetic</div></div>
-      <div class="value-body">
-        <div class="value-label">Kinetic Energy</div>
-        <div class="value-desc">Energy of moving objects. The most common energy type in mining and construction — vehicles, falling objects, moving machinery, projectiles.</div>
-        <div class="value-example"><strong>Examples:</strong> Moving vehicle, dropped tools, flying debris, conveyor belt, rotating equipment.</div>
-      </div>
-      <div class="value-meta"><span class="meta-chip bg-red">High frequency</span></div>
-    </div>
-
-    <div class="value-card">
-      <div><div class="value-name">gravitational</div></div>
-      <div class="value-body">
-        <div class="value-label">Gravitational Potential Energy</div>
-        <div class="value-desc">Energy from height and mass. Stored in elevated objects, people working at height, steep terrain, unstable structures.</div>
-        <div class="value-example"><strong>Examples:</strong> Working at height, suspended loads, unstable berm, excavation walls, stockpile slopes.</div>
-      </div>
-      <div class="value-meta"><span class="meta-chip bg-red">High frequency</span></div>
-    </div>
-
-    <div class="value-card">
-      <div><div class="value-name">electrical</div></div>
-      <div class="value-body">
-        <div class="value-label">Electrical Energy</div>
-        <div class="value-desc">Energy from electrical systems. Includes both direct electrocution risk and secondary hazards (fire, arc flash).</div>
-        <div class="value-example"><strong>Examples:</strong> Cable strike, exposed wiring, working near live equipment, inadequate isolation, arc flash risk.</div>
-      </div>
-      <div class="value-meta"><span class="meta-chip bg-red">Catastrophic risk</span></div>
-    </div>
-
-    <div class="value-card">
-      <div><div class="value-name">thermal</div></div>
-      <div class="value-body">
-        <div class="value-label">Thermal Energy</div>
-        <div class="value-desc">Heat energy — both extreme heat and cold. Includes environmental heat, fire, molten materials, cryogenic substances.</div>
-        <div class="value-example"><strong>Examples:</strong> Hot work without PPE, heat stress, molten metal exposure, fire near flammables, cryogenic spill.</div>
-      </div>
-      <div class="value-meta"><span class="meta-chip bg-amber">Moderate frequency</span></div>
-    </div>
-
-    <div class="value-card">
-      <div><div class="value-name">chemical</div></div>
-      <div class="value-body">
-        <div class="value-label">Chemical Energy</div>
-        <div class="value-desc">Energy released through chemical reactions. Includes toxic exposure, flammable substances, reactive materials, and biological hazards.</div>
-        <div class="value-example"><strong>Examples:</strong> Reagent spill, fuel leak, explosive precursor exposure, silica dust, asbestos.</div>
-      </div>
-      <div class="value-meta"><span class="meta-chip bg-amber">Context-dependent</span></div>
-    </div>
-
-    <div class="value-card">
-      <div><div class="value-name">pressure</div></div>
-      <div class="value-body">
-        <div class="value-label">Pressure Energy</div>
-        <div class="value-desc">Stored energy in pressurised systems. Sudden release can cause high-velocity projectiles, structural failure, or blast.</div>
-        <div class="value-example"><strong>Examples:</strong> Hydraulic line failure, tyre blow-out, pressurised vessel fault, pneumatic line disconnection.</div>
-      </div>
-      <div class="value-meta"><span class="meta-chip bg-amber">Moderate frequency</span></div>
-    </div>
-
-    <div class="value-card">
-      <div><div class="value-name">noise_vibration</div></div>
-      <div class="value-body">
-        <div class="value-label">Noise / Vibration</div>
-        <div class="value-desc">Acoustic and mechanical vibration energy. Primary occupational health risk — hearing loss, hand-arm vibration, whole-body vibration.</div>
-        <div class="value-example"><strong>Examples:</strong> Sustained heavy equipment exposure without hearing protection, excessive vibration from tools.</div>
-      </div>
-      <div class="value-meta"><span class="meta-chip" style="background:var(--surface2);color:var(--text-secondary);">OHS focus</span></div>
-    </div>
-
-    <div class="value-card">
-      <div><div class="value-name">none</div></div>
-      <div class="value-body">
-        <div class="value-label">No Energy Hazard</div>
-        <div class="value-desc">The observation does not involve a physical energy type — typically systemic, procedural, or behavioural observations where the concern is organisational rather than physical.</div>
-        <div class="value-example"><strong>Examples:</strong> Documentation gap, communication failure, positive practice observation, investigation process concern.</div>
-      </div>
-      <div class="value-meta"><span class="meta-chip" style="background:var(--surface2);color:var(--text-secondary);">No physical hazard</span></div>
-    </div>
-
+    <div class="value-card"><div><div class="value-name">kinetic</div></div><div class="value-body"><div class="value-label">Kinetic Energy</div><div class="value-desc">Energy of moving objects. The most common energy type in mining and construction — vehicles, falling objects, moving machinery, projectiles.</div><div class="value-example"><strong>Examples:</strong> Moving vehicle, dropped tools, flying debris, conveyor belt, rotating equipment.</div></div><div class="value-meta"><span class="meta-chip bg-red">High frequency</span></div></div>
+    <div class="value-card"><div><div class="value-name">gravitational</div></div><div class="value-body"><div class="value-label">Gravitational Potential Energy</div><div class="value-desc">Energy from height and mass. Stored in elevated objects, people working at height, steep terrain, unstable structures.</div><div class="value-example"><strong>Examples:</strong> Working at height, suspended loads, unstable berm, excavation walls, stockpile slopes.</div></div><div class="value-meta"><span class="meta-chip bg-red">High frequency</span></div></div>
+    <div class="value-card"><div><div class="value-name">electrical</div></div><div class="value-body"><div class="value-label">Electrical Energy</div><div class="value-desc">Energy from electrical systems. Includes both direct electrocution risk and secondary hazards (fire, arc flash).</div><div class="value-example"><strong>Examples:</strong> Cable strike, exposed wiring, working near live equipment, inadequate isolation, arc flash risk.</div></div><div class="value-meta"><span class="meta-chip bg-red">Catastrophic risk</span></div></div>
+    <div class="value-card"><div><div class="value-name">thermal</div></div><div class="value-body"><div class="value-label">Thermal Energy</div><div class="value-desc">Heat energy — both extreme heat and cold. Includes environmental heat, fire, molten materials, cryogenic substances.</div><div class="value-example"><strong>Examples:</strong> Hot work without PPE, heat stress, molten metal exposure, fire near flammables, cryogenic spill.</div></div><div class="value-meta"><span class="meta-chip bg-amber">Moderate frequency</span></div></div>
+    <div class="value-card"><div><div class="value-name">chemical</div></div><div class="value-body"><div class="value-label">Chemical Energy</div><div class="value-desc">Energy released through chemical reactions. Includes toxic exposure, flammable substances, reactive materials, and biological hazards.</div><div class="value-example"><strong>Examples:</strong> Reagent spill, fuel leak, explosive precursor exposure, silica dust, asbestos.</div></div><div class="value-meta"><span class="meta-chip bg-amber">Context-dependent</span></div></div>
+    <div class="value-card"><div><div class="value-name">pressure</div></div><div class="value-body"><div class="value-label">Pressure Energy</div><div class="value-desc">Stored energy in pressurised systems. Sudden release can cause high-velocity projectiles, structural failure, or blast.</div><div class="value-example"><strong>Examples:</strong> Hydraulic line failure, tyre blow-out, pressurised vessel fault, pneumatic line disconnection.</div></div><div class="value-meta"><span class="meta-chip bg-amber">Moderate frequency</span></div></div>
+    <div class="value-card"><div><div class="value-name">noise_vibration</div></div><div class="value-body"><div class="value-label">Noise / Vibration</div><div class="value-desc">Acoustic and mechanical vibration energy. Primary occupational health risk — hearing loss, hand-arm vibration, whole-body vibration.</div><div class="value-example"><strong>Examples:</strong> Sustained heavy equipment exposure without hearing protection, excessive vibration from tools.</div></div><div class="value-meta"><span class="meta-chip" style="background:var(--surface2);color:var(--text-secondary);">OHS focus</span></div></div>
+    <div class="value-card"><div><div class="value-name">none</div></div><div class="value-body"><div class="value-label">No Energy Hazard</div><div class="value-desc">The observation does not involve a physical energy type — typically systemic, procedural, or behavioural observations where the concern is organisational rather than physical.</div><div class="value-example"><strong>Examples:</strong> Documentation gap, communication failure, positive practice observation, investigation process concern.</div></div><div class="value-meta"><span class="meta-chip" style="background:var(--surface2);color:var(--text-secondary);">No physical hazard</span></div></div>
   </div>
 </div>
-
-<!-- ── ENERGY RELEASE ── -->
+<!-- ENERGY RELEASE -->
 <div class="taxonomy-section" id="energy-release">
   <div class="section-eyebrow">Observation taxonomy</div>
   <div class="section-title">Energy Release Potential</div>
@@ -749,8 +202,7 @@
     <div class="value-card"><div><div class="value-name">none</div></div><div class="value-body"><div class="value-label">None</div><div class="value-desc">No physical energy present — observation is entirely systemic, procedural, or behavioural.</div></div><div class="value-meta"><span class="meta-chip" style="background:var(--surface2);color:var(--text-secondary);">N/A</span></div></div>
   </div>
 </div>
-
-<!-- ── BARRIER ASSESSMENT ── -->
+<!-- BARRIER -->
 <div class="taxonomy-section" id="barrier">
   <div class="section-eyebrow">Observation taxonomy</div>
   <div class="section-title">Barrier Assessment</div>
@@ -764,150 +216,62 @@
     <div class="value-card"><div><div class="value-name">none</div></div><div class="value-body"><div class="value-label">No Barrier Applicable</div><div class="value-desc">The observation doesn't involve an assessable control — typically systemic or behavioural observations where the concern isn't a specific physical barrier.</div></div><div class="value-meta"><span class="meta-chip" style="background:var(--surface2);color:var(--text-secondary);">N/A</span></div></div>
   </div>
 </div>
-
-<!-- ── FORGE WORKS MAP ── -->
+<!-- FW MAP -->
 <div class="taxonomy-section" id="fw-map">
   <div class="section-eyebrow">Organisational taxonomy — Forge Works Map®</div>
   <div class="section-title">15-Factor Capacity Framework</div>
   <div class="section-desc">The Forge Works Map® classifies observations, insights, and investigations by their organisational capacity dimension — the structural reason this event occurred. Factors are assessed at confidence ≥ 0.70. Multiple factors may apply (max 3, stored as parallel arrays). Each factor has its own rationale field. Never shown to supervisors — used by safety managers and in analytics.</div>
   <div class="section-rule"></div>
-
   <div class="fw-grid">
     <div class="fw-domain-header c-blue">GUIDE</div>
     <div class="fw-domain-header c-amber">ENABLE</div>
     <div class="fw-domain-header c-green">EXECUTE</div>
-
-    <!-- Row 1 -->
-    <div class="fw-cell" id="fw-strategy">
-      <div class="fw-factor-key">strategy</div>
-      <div class="fw-factor-label">Strategy</div>
-      <div class="fw-factor-desc">How safety is positioned in organisational decisions and long-term planning.</div>
-    </div>
-    <div class="fw-cell" id="fw-management_systems">
-      <div class="fw-factor-key">management_systems</div>
-      <div class="fw-factor-label">Management Systems</div>
-      <div class="fw-factor-desc">Whether procedures, standards, and systems are fit for purpose and cover the scenarios encountered.</div>
-    </div>
-    <div class="fw-cell" id="fw-frontline_workers">
-      <div class="fw-factor-key">frontline_workers</div>
-      <div class="fw-factor-label">Frontline Workers</div>
-      <div class="fw-factor-desc">Capability, knowledge, and empowerment of the people doing the work.</div>
-    </div>
-
-    <!-- Row 2 -->
-    <div class="fw-cell" id="fw-risk_management">
-      <div class="fw-factor-key">risk_management</div>
-      <div class="fw-factor-label">Risk Management</div>
-      <div class="fw-factor-desc">How risks are identified, assessed, and controlled — both proactively and reactively.</div>
-    </div>
-    <div class="fw-cell" id="fw-operational_management">
-      <div class="fw-factor-key">operational_management</div>
-      <div class="fw-factor-label">Operational Management</div>
-      <div class="fw-factor-desc">Supervisor and manager behaviour — visibility, decision quality, and enforcement of standards.</div>
-    </div>
-    <div class="fw-cell" id="fw-communications_coordination">
-      <div class="fw-factor-key">communications_coordination</div>
-      <div class="fw-factor-label">Communications &amp; Coordination</div>
-      <div class="fw-factor-desc">Quality of information exchange and coordination between people and teams in the work context.</div>
-    </div>
-
-    <!-- Row 3 -->
-    <div class="fw-cell" id="fw-senior_leadership">
-      <div class="fw-factor-key">senior_leadership</div>
-      <div class="fw-factor-label">Senior Leadership</div>
-      <div class="fw-factor-desc">Visible commitment and behaviour of senior leaders — what they prioritise and signal.</div>
-    </div>
-    <div class="fw-cell" id="fw-resource_allocation">
-      <div class="fw-factor-key">resource_allocation</div>
-      <div class="fw-factor-label">Resource Allocation</div>
-      <div class="fw-factor-desc">Whether adequate people, time, equipment, and budget are available for safe work.</div>
-    </div>
-    <div class="fw-cell" id="fw-work_understanding">
-      <div class="fw-factor-key">work_understanding</div>
-      <div class="fw-factor-label">Work Understanding</div>
-      <div class="fw-factor-desc">The gap between how work is designed (Work as Imagined) and how it is actually done (Work as Done).</div>
-    </div>
-
-    <!-- Row 4 -->
-    <div class="fw-cell" id="fw-safety_organisation">
-      <div class="fw-factor-key">safety_organisation</div>
-      <div class="fw-factor-label">Safety Organisation</div>
-      <div class="fw-factor-desc">The structure, capability, and independence of the safety function within the organisation.</div>
-    </div>
-    <div class="fw-cell" id="fw-learning_development">
-      <div class="fw-factor-key">learning_development</div>
-      <div class="fw-factor-label">Learning &amp; Development</div>
-      <div class="fw-factor-desc">How training, competency assessment, and lesson learning are applied in practice.</div>
-    </div>
-    <div class="fw-cell" id="fw-goal_conflict">
-      <div class="fw-factor-key">goal_conflict_tradeoffs</div>
-      <div class="fw-factor-label">Goal Conflict &amp; Tradeoffs</div>
-      <div class="fw-factor-desc">Pressure to prioritise production, schedule, or cost over safety — and how those conflicts are resolved.</div>
-    </div>
-
-    <!-- Row 5 -->
-    <div class="fw-cell" id="fw-monitoring">
-      <div class="fw-factor-key">monitoring_metrics</div>
-      <div class="fw-factor-label">Monitoring &amp; Metrics</div>
-      <div class="fw-factor-desc">Whether performance data is collected, meaningful, and used to drive improvement.</div>
-    </div>
-    <div class="fw-cell" id="fw-contractor_management">
-      <div class="fw-factor-key">contractor_management</div>
-      <div class="fw-factor-label">Contractor Management</div>
-      <div class="fw-factor-desc">How contractors are selected, inducted, supervised, and held to the same standards as direct employees.</div>
-    </div>
-    <div class="fw-cell" id="fw-decision_making">
-      <div class="fw-factor-key">decision_making</div>
-      <div class="fw-factor-label">Decision Making</div>
-      <div class="fw-factor-desc">Quality of decisions under pressure — including stop-work authority, risk assessment in the moment, and escalation.</div>
-    </div>
+    <div class="fw-cell" id="fw-strategy"><div class="fw-factor-key">strategy</div><div class="fw-factor-label">Strategy</div><div class="fw-factor-desc">How safety is positioned in organisational decisions and long-term planning.</div></div>
+    <div class="fw-cell" id="fw-management_systems"><div class="fw-factor-key">management_systems</div><div class="fw-factor-label">Management Systems</div><div class="fw-factor-desc">Whether procedures, standards, and systems are fit for purpose and cover the scenarios encountered.</div></div>
+    <div class="fw-cell" id="fw-frontline_workers"><div class="fw-factor-key">frontline_workers</div><div class="fw-factor-label">Frontline Workers</div><div class="fw-factor-desc">Capability, knowledge, and empowerment of the people doing the work.</div></div>
+    <div class="fw-cell" id="fw-risk_management"><div class="fw-factor-key">risk_management</div><div class="fw-factor-label">Risk Management</div><div class="fw-factor-desc">How risks are identified, assessed, and controlled — both proactively and reactively.</div></div>
+    <div class="fw-cell" id="fw-operational_management"><div class="fw-factor-key">operational_management</div><div class="fw-factor-label">Operational Management</div><div class="fw-factor-desc">Supervisor and manager behaviour — visibility, decision quality, and enforcement of standards.</div></div>
+    <div class="fw-cell" id="fw-communications_coordination"><div class="fw-factor-key">communications_coordination</div><div class="fw-factor-label">Communications &amp; Coordination</div><div class="fw-factor-desc">Quality of information exchange and coordination between people and teams in the work context.</div></div>
+    <div class="fw-cell" id="fw-senior_leadership"><div class="fw-factor-key">senior_leadership</div><div class="fw-factor-label">Senior Leadership</div><div class="fw-factor-desc">Visible commitment and behaviour of senior leaders — what they prioritise and signal.</div></div>
+    <div class="fw-cell" id="fw-resource_allocation"><div class="fw-factor-key">resource_allocation</div><div class="fw-factor-label">Resource Allocation</div><div class="fw-factor-desc">Whether adequate people, time, equipment, and budget are available for safe work.</div></div>
+    <div class="fw-cell" id="fw-work_understanding"><div class="fw-factor-key">work_understanding</div><div class="fw-factor-label">Work Understanding</div><div class="fw-factor-desc">The gap between how work is designed (Work as Imagined) and how it is actually done (Work as Done).</div></div>
+    <div class="fw-cell" id="fw-safety_organisation"><div class="fw-factor-key">safety_organisation</div><div class="fw-factor-label">Safety Organisation</div><div class="fw-factor-desc">The structure, capability, and independence of the safety function within the organisation.</div></div>
+    <div class="fw-cell" id="fw-learning_development"><div class="fw-factor-key">learning_development</div><div class="fw-factor-label">Learning &amp; Development</div><div class="fw-factor-desc">How training, competency assessment, and lesson learning are applied in practice.</div></div>
+    <div class="fw-cell" id="fw-goal_conflict"><div class="fw-factor-key">goal_conflict_tradeoffs</div><div class="fw-factor-label">Goal Conflict &amp; Tradeoffs</div><div class="fw-factor-desc">Pressure to prioritise production, schedule, or cost over safety — and how those conflicts are resolved.</div></div>
+    <div class="fw-cell" id="fw-monitoring"><div class="fw-factor-key">monitoring_metrics</div><div class="fw-factor-label">Monitoring &amp; Metrics</div><div class="fw-factor-desc">Whether performance data is collected, meaningful, and used to drive improvement.</div></div>
+    <div class="fw-cell" id="fw-contractor_management"><div class="fw-factor-key">contractor_management</div><div class="fw-factor-label">Contractor Management</div><div class="fw-factor-desc">How contractors are selected, inducted, supervised, and held to the same standards as direct employees.</div></div>
+    <div class="fw-cell" id="fw-decision_making"><div class="fw-factor-key">decision_making</div><div class="fw-factor-label">Decision Making</div><div class="fw-factor-desc">Quality of decisions under pressure — including stop-work authority, risk assessment in the moment, and escalation.</div></div>
   </div>
-
   <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:14px 16px;font-size:12px;color:var(--text-secondary);line-height:1.6;">
     <strong style="color:var(--text-primary);">Multi-factor classification:</strong> All 15 factors are assessed independently. Any factor meeting the 0.70 confidence threshold is stored — up to 3 maximum per observation or insight. Stored as parallel arrays: <code style="font-family:'DM Mono',monospace;font-size:11px;color:var(--accent);">fw_factors[], fw_domains[], fw_maturity_signals[], fw_confidences[], fw_rationales[]</code>. "It's not this or that, it's this and that" — the threshold is the defence against over-classification.
   </div>
 </div>
-
-<!-- ── MATURITY SIGNAL ── -->
+<!-- MATURITY SIGNAL -->
 <div class="taxonomy-section" id="fw-maturity">
   <div class="section-eyebrow">Organisational taxonomy — Forge Works Map®</div>
   <div class="section-title">Maturity Signal</div>
   <div class="section-desc">For each classified Forge Works factor, the AI also signals the apparent maturity level of that factor based on the observation evidence. This is a signal — not a score. It accumulates over time into a capacity profile.</div>
   <div class="section-rule"></div>
   <div class="maturity-grid">
-    <div class="maturity-card">
-      <div class="maturity-name">compliant</div>
-      <div class="maturity-label c-amber">Compliant</div>
-      <div class="maturity-desc">The system or practice exists and is formally in place, but may not reflect how work is actually done. Rules are followed when observed but may not be internalised. The gap between Work as Imagined and Work as Done is present.</div>
-    </div>
-    <div class="maturity-card">
-      <div class="maturity-name">leading</div>
-      <div class="maturity-label c-blue">Leading</div>
-      <div class="maturity-desc">Proactive safety behaviour beyond compliance. People are thinking ahead, identifying risks before they materialise, and driving improvement without being prompted. Systems are well-understood and consistently applied.</div>
-    </div>
-    <div class="maturity-card">
-      <div class="maturity-name">resilient</div>
-      <div class="maturity-label c-green">Resilient</div>
-      <div class="maturity-desc">The system adapts and recovers well under pressure. Safety is maintained even when conditions are difficult, resources are constrained, or unexpected events occur. The organisation learns and improves from its experience.</div>
-    </div>
+    <div class="maturity-card"><div class="maturity-name">compliant</div><div class="maturity-label c-amber">Compliant</div><div class="maturity-desc">The system or practice exists and is formally in place, but may not reflect how work is actually done. Rules are followed when observed but may not be internalised. The gap between Work as Imagined and Work as Done is present.</div></div>
+    <div class="maturity-card"><div class="maturity-name">leading</div><div class="maturity-label c-blue">Leading</div><div class="maturity-desc">Proactive safety behaviour beyond compliance. People are thinking ahead, identifying risks before they materialise, and driving improvement without being prompted. Systems are well-understood and consistently applied.</div></div>
+    <div class="maturity-card"><div class="maturity-name">resilient</div><div class="maturity-label c-green">Resilient</div><div class="maturity-desc">The system adapts and recovers well under pressure. Safety is maintained even when conditions are difficult, resources are constrained, or unexpected events occur. The organisation learns and improves from its experience.</div></div>
   </div>
 </div>
-
-<!-- ── INCIDENT TYPE ── -->
+<!-- INCIDENT TYPE -->
 <div class="taxonomy-section" id="incident-type">
   <div class="section-eyebrow">Incident taxonomy</div>
   <div class="section-title">Incident Type</div>
   <div class="section-desc">The category of reportable event. Determines pipeline routing — all incident types enter the incident pipeline for triage. Minor incidents may also feed the observation pool for periodic trending.</div>
   <div class="section-rule"></div>
   <div class="values-grid">
-    <div class="value-card"><div><div class="value-name">near-miss</div></div><div class="value-body"><div class="value-label">Near-Miss</div><div class="value-desc">An event where harm was only potential — no injury or damage occurred, but the conditions for harm were present. The distinction from a barrier_failure observation: the person reporting an incident chose to categorise it as an incident, OR the AI routed it as one due to the proximity and severity of the potential harm.</div><div class="value-example"><strong>Examples:</strong> Vehicle nearly struck a worker who stepped into the path. Overhead load swung close to a person. Explosive misfire that didn't detonate.</div></div><div class="value-meta"><span class="meta-chip bg-amber">No harm</span></div></div>
+    <div class="value-card"><div><div class="value-name">near-miss</div></div><div class="value-body"><div class="value-label">Near-Miss</div><div class="value-desc">An event where harm was only potential — no injury or damage occurred, but the conditions for harm were present.</div><div class="value-example"><strong>Examples:</strong> Vehicle nearly struck a worker who stepped into the path. Overhead load swung close to a person. Explosive misfire that didn't detonate.</div></div><div class="value-meta"><span class="meta-chip bg-amber">No harm</span></div></div>
     <div class="value-card"><div><div class="value-name">injury</div></div><div class="value-body"><div class="value-label">Injury</div><div class="value-desc">Physical harm occurred to a person. Severity is classified separately via injury_classification. All injuries enter the incident pipeline regardless of severity.</div><div class="value-example"><strong>Examples:</strong> Cut requiring stitches, fractured bone, strain, heat illness, chemical burn, hearing damage.</div></div><div class="value-meta"><span class="meta-chip bg-red">Harm occurred</span></div></div>
-    <div class="value-card"><div><div class="value-name">property-damage</div></div><div class="value-body"><div class="value-label">Property Damage</div><div class="value-desc">Damage to equipment, infrastructure, or property without injury. May still be significant — a damaged vehicle or structural failure can be costly and indicate systemic issues.</div><div class="value-example"><strong>Examples:</strong> Equipment collision, fire damage, structural failure, vehicle rollover without injury.</div></div><div class="value-meta"><span class="meta-chip" style="background:var(--surface2);color:var(--text-secondary);">No injury</span></div></div>
+    <div class="value-card"><div><div class="value-name">property-damage</div></div><div class="value-body"><div class="value-label">Property Damage</div><div class="value-desc">Damage to equipment, infrastructure, or property without injury.</div><div class="value-example"><strong>Examples:</strong> Equipment collision, fire damage, structural failure, vehicle rollover without injury.</div></div><div class="value-meta"><span class="meta-chip" style="background:var(--surface2);color:var(--text-secondary);">No injury</span></div></div>
     <div class="value-card"><div><div class="value-name">environmental</div></div><div class="value-body"><div class="value-label">Environmental Event</div><div class="value-desc">A release or event with environmental impact — spill, contamination, emission, or damage to surrounding environment. May have regulatory notification requirements.</div><div class="value-example"><strong>Examples:</strong> Chemical spill reaching waterway, dust emission exceeding limits, tailings breach, fuel leak into soil.</div></div><div class="value-meta"><span class="meta-chip" style="background:var(--purple-bg);color:var(--purple);">May be notifiable</span></div></div>
   </div>
 </div>
-
-<!-- ── INJURY CLASSIFICATION ── -->
+<!-- INJURY -->
 <div class="taxonomy-section" id="injury">
   <div class="section-eyebrow">Incident taxonomy</div>
   <div class="section-title">Injury Classification</div>
@@ -916,14 +280,13 @@
   <div class="values-grid">
     <div class="value-card"><div><div class="value-name">none</div></div><div class="value-body"><div class="value-label">No Injury</div><div class="value-desc">Incident occurred but no physical harm resulted. Used for near-misses, property damage, and environmental incidents.</div></div><div class="value-meta"><span class="meta-chip bg-green">No harm</span></div></div>
     <div class="value-card"><div><div class="value-name">first_aid</div></div><div class="value-body"><div class="value-label">First Aid</div><div class="value-desc">Minor injury requiring only first aid treatment — no professional medical treatment, no lost time, no work restriction.</div><div class="value-example"><strong>Examples:</strong> Small cut cleaned and bandaged on site, minor bruise, splinter removal.</div></div><div class="value-meta"><span class="meta-chip bg-green">Minor</span></div></div>
-    <div class="value-card"><div><div class="value-name">medical_treatment</div></div><div class="value-body"><div class="value-label">Medical Treatment Case</div><div class="value-desc">Injury requiring professional medical treatment beyond first aid, but worker can return to normal duties. Includes doctor visits, stitches, medication.</div></div><div class="value-meta"><span class="meta-chip bg-amber">Medical</span></div></div>
+    <div class="value-card"><div><div class="value-name">medical_treatment</div></div><div class="value-body"><div class="value-label">Medical Treatment Case</div><div class="value-desc">Injury requiring professional medical treatment beyond first aid, but worker can return to normal duties.</div></div><div class="value-meta"><span class="meta-chip bg-amber">Medical</span></div></div>
     <div class="value-card"><div><div class="value-name">restricted_work</div></div><div class="value-body"><div class="value-label">Restricted Work Case</div><div class="value-desc">Injury that prevents the worker from performing their full normal duties — modified work or light duties required. Worker is still at work.</div></div><div class="value-meta"><span class="meta-chip bg-amber">Modified duties</span></div></div>
     <div class="value-card"><div><div class="value-name">lost_time</div></div><div class="value-body"><div class="value-label">Lost Time Injury</div><div class="value-desc">Injury that results in the worker being unable to work at all — full lost time from the shift or beyond. LTI is a statutory notifiable event in most jurisdictions.</div></div><div class="value-meta"><span class="meta-chip bg-red">Notifiable</span></div></div>
     <div class="value-card"><div><div class="value-name">fatality</div></div><div class="value-body"><div class="value-label">Fatality</div><div class="value-desc">Death of a worker or member of the public resulting from the incident. Always notifiable. Immediately triggers investigation and regulatory engagement.</div></div><div class="value-meta"><span class="meta-chip bg-red">Always notifiable</span></div></div>
   </div>
 </div>
-
-<!-- ── INVOLVED ROLE ── -->
+<!-- INVOLVED ROLE -->
 <div class="taxonomy-section" id="involved-role">
   <div class="section-eyebrow">Observation taxonomy</div>
   <div class="section-title">Involved Role</div>
@@ -936,12 +299,11 @@
     <div class="value-card"><div><div class="value-name">visitor</div></div><div class="value-body"><div class="value-label">Visitor</div><div class="value-desc">Person on site who is not employed in any capacity — regulator, client, member of public, or uninducted visitor.</div></div></div>
   </div>
 </div>
-
-<!-- ── WORK TYPE ── -->
+<!-- WORK TYPE -->
 <div class="taxonomy-section" id="work-type">
   <div class="section-eyebrow">Observation taxonomy</div>
   <div class="section-title">Work Type</div>
-  <div class="section-desc">The physical task or work category the observation is about. Selected by the supervisor at capture (the physical context they know) — this is the "what were you doing?" dimension. Combined with the observation description, it forms the diagnostic pair that drives precise AI classification. Optional but strongly encouraged for physical task observations.</div>
+  <div class="section-desc">The physical task or work category the observation is about. Selected by the supervisor at capture — this is the "what were you doing?" dimension. Combined with the observation description, it forms the diagnostic pair that drives precise AI classification.</div>
   <div class="section-rule"></div>
   <div class="values-grid">
     <div class="value-card"><div><div class="value-name">heavy_vehicle</div></div><div class="value-body"><div class="value-label">Heavy Vehicle Operation</div><div class="value-desc">Operation of haul trucks, excavators, dozers, graders, and other heavy mobile plant. The highest-frequency work type in mining — kinetic and gravitational energy dominant.</div></div></div>
@@ -958,20 +320,18 @@
     <div class="value-card"><div><div class="value-name">general_site</div></div><div class="value-body"><div class="value-label">General Site Activity</div><div class="value-desc">Observations about site conditions, housekeeping, access, signage, or general behaviours not specific to a work task. Also used for systemic and procedural observations.</div></div></div>
   </div>
 </div>
-
-<!-- ── LIVE CLASSIFIER ── -->
+<!-- LIVE CLASSIFIER -->
 <div id="live" style="scroll-margin-top:60px;">
   <div style="margin-bottom:16px;">
     <div class="section-eyebrow">Live demonstration</div>
     <div class="section-title">Live Classifier</div>
     <div class="section-desc">Enter a real observation description and see the AI classify it across all taxonomies in real time. Selected classifications highlight in the taxonomy reference above. Use the preset observations or write your own.</div>
   </div>
-
   <div class="demo-section">
     <div class="demo-header">
       <div>
         <div class="demo-title">AI Enrichment — Live</div>
-        <div class="demo-desc">Results validate against the taxonomy above — highlighted fields show the selected value in context</div>
+        <div class="demo-desc">Blueprint-enriched FW Map® classifier · up to 3 factors with confidence and rationale</div>
       </div>
       <div class="api-key-mini">
         <input type="password" id="apiKey" placeholder="sk-ant-..." />
@@ -979,9 +339,7 @@
         <span style="font-size:11px;color:var(--text-muted);" id="keyStatus"></span>
       </div>
     </div>
-
     <div class="demo-body">
-
       <div style="font-size:11px;font-weight:600;color:var(--text-muted);letter-spacing:0.5px;text-transform:uppercase;margin-bottom:8px;">Preset observations</div>
       <div class="obs-presets">
         <div class="preset-chip" onclick="setPreset(this, 'excavator_reversal')">Excavator reversal — no spotter</div>
@@ -991,7 +349,6 @@
         <div class="preset-chip" onclick="setPreset(this, 'comms_spotter')">Spotter comms breakdown</div>
         <div class="preset-chip" onclick="setPreset(this, 'cable_strike')">Cable strike near-miss</div>
       </div>
-
       <div class="obs-input-area">
         <textarea class="obs-textarea" id="obsText" placeholder="Describe the observation in plain language — exactly as a supervisor would log it..."></textarea>
         <button class="classify-btn" id="classifyBtn" onclick="classify()">
@@ -999,36 +356,27 @@
           Classify
         </button>
       </div>
-
       <div class="loading-state" id="loadingState">
         <div class="loading-dot"></div><div class="loading-dot"></div><div class="loading-dot"></div>
         <span>Running enrichment...</span>
       </div>
-
       <div class="error-msg" id="errorMsg"></div>
-
       <div class="results-grid" id="resultsGrid">
         <div class="result-card" id="res-signal_type"><div class="result-dimension">Signal Type</div><div class="result-value c-muted">—</div></div>
         <div class="result-card" id="res-energy_type"><div class="result-dimension">Energy Type</div><div class="result-value c-muted">—</div></div>
         <div class="result-card" id="res-energy_release"><div class="result-dimension">Release Potential</div><div class="result-value c-muted">—</div></div>
         <div class="result-card" id="res-barrier"><div class="result-dimension">Barrier Assessment</div><div class="result-value c-muted">—</div></div>
-        <div class="result-card" id="res-fw_factor"><div class="result-dimension">FW Map® Factor</div><div class="result-value c-muted">—</div></div>
-        <div class="result-card" id="res-fw_domain"><div class="result-dimension">FW Domain</div><div class="result-value c-muted">—</div></div>
-        <div class="result-card" id="res-fw_maturity"><div class="result-dimension">Maturity Signal</div><div class="result-value c-muted">—</div></div>
+        <div class="result-card" id="res-fw_factor" style="grid-column: span 2;"><div class="result-dimension">FW Map® Classification</div><div class="result-value c-muted">—</div></div>
         <div class="result-card" id="res-routing"><div class="result-dimension">Pipeline Routing</div><div class="result-value c-muted">—</div></div>
       </div>
-
     </div>
   </div>
 </div>
-
 <footer>
-  <div>Hiviz — Classification Taxonomy Reference · April 2026</div>
+  <div>Hiviz — Classification Taxonomy Reference · v0.2 Blueprint-enriched · May 2026</div>
   <div>Forge Works · Confidential</div>
 </footer>
-
-</div><!-- /container -->
-
+</div>
 <script>
 const PRESETS = {
   excavator_reversal: "Excavator on level 3 bench reversed without a confirmed spotter in position. Spotter had moved to speak with another operator and didn't notify the driver before the machine moved. Reversed about 4 metres before I called a stop. Work type: Heavy Vehicle.",
@@ -1040,10 +388,7 @@ const PRESETS = {
 };
 
 let apiKey = localStorage.getItem('hiviz_tax_api_key') || '';
-if (apiKey) {
-  document.getElementById('apiKey').value = apiKey;
-  document.getElementById('keyStatus').textContent = '✓';
-}
+if (apiKey) { document.getElementById('apiKey').value = apiKey; document.getElementById('keyStatus').textContent = '✓'; }
 
 function saveKey() {
   const k = document.getElementById('apiKey').value.trim();
@@ -1063,64 +408,37 @@ function clearHighlights() {
   document.querySelectorAll('.value-card.highlight, .fw-cell.highlight').forEach(el => el.classList.remove('highlight'));
   document.querySelectorAll('.result-card').forEach(el => {
     el.classList.remove('populated','high-conf','mid-conf','low-conf');
-    el.querySelector('.result-value').className = 'result-value c-muted';
-    el.querySelector('.result-value').textContent = '—';
-    const rat = el.querySelector('.result-rationale');
-    if (rat) rat.remove();
-    const bar = el.querySelector('.result-conf');
-    if (bar) bar.remove();
+    el.style.display = '';
+    const valEl = el.querySelector('.result-value');
+    valEl.className = 'result-value c-muted';
+    valEl.textContent = '—';
+    ['result-rationale','result-conf'].forEach(cls => { const e = el.querySelector('.'+cls); if(e) e.remove(); });
   });
 }
 
 function populateResult(id, value, confidence, rationale) {
-  const card = document.getElementById(`res-${id}`);
+  const card = document.getElementById('res-'+id);
   if (!card) return;
-
   card.classList.add('populated');
   if (confidence >= 0.7) card.classList.add('high-conf');
   else if (confidence >= 0.5) card.classList.add('mid-conf');
   else if (confidence > 0) card.classList.add('low-conf');
-
   const valEl = card.querySelector('.result-value');
   valEl.textContent = value || '—';
   valEl.className = 'result-value';
-
   if (confidence > 0) {
     const confEl = document.createElement('div');
     confEl.className = 'result-conf';
-    confEl.innerHTML = `
-      <div class="conf-bar-track"><div class="conf-bar-fill" style="width:${confidence*100}%;background:${confidence>=0.7?'var(--green)':confidence>=0.5?'var(--amber)':'var(--red)'}"></div></div>
-      <div class="conf-pct">${(confidence*100).toFixed(0)}%</div>
-    `;
+    confEl.innerHTML = '<div class="conf-bar-track"><div class="conf-bar-fill" style="width:'+Math.round(confidence*100)+'%;background:'+(confidence>=0.7?'var(--green)':confidence>=0.5?'var(--amber)':'var(--red)')+'"></div></div><div class="conf-pct">'+Math.round(confidence*100)+'%</div>';
     card.appendChild(confEl);
   }
-
-  if (rationale) {
-    const rat = document.createElement('div');
-    rat.className = 'result-rationale';
-    rat.textContent = rationale;
-    card.appendChild(rat);
-  }
+  if (rationale) { const rat = document.createElement('div'); rat.className = 'result-rationale'; rat.textContent = rationale; card.appendChild(rat); }
 }
 
 function highlightTaxonomy(field, value) {
-  // Signal type
-  if (field === 'signal_type' && value) {
-    const el = document.getElementById(`sig-${value}`);
-    if (el) { el.classList.add('highlight'); el.scrollIntoView({behavior:'smooth',block:'nearest'}); }
-  }
-  // FW factor
-  if (field === 'fw_factor' && value) {
-    const el = document.getElementById(`fw-${value}`);
-    if (el) el.classList.add('highlight');
-  }
-  // Barrier
-  if (field === 'barrier') {
-    const cards = document.querySelectorAll('#barrier .value-card');
-    cards.forEach(c => {
-      if (c.querySelector('.value-name')?.textContent === value) c.classList.add('highlight');
-    });
-  }
+  if (field === 'signal_type' && value) { const el = document.getElementById('sig-'+value); if (el) { el.classList.add('highlight'); el.scrollIntoView({behavior:'smooth',block:'nearest'}); } }
+  if (field === 'fw_factor' && value) { const el = document.getElementById('fw-'+value); if (el) el.classList.add('highlight'); }
+  if (field === 'barrier') { document.querySelectorAll('#barrier .value-card').forEach(c => { if (c.querySelector('.value-name')?.textContent === value) c.classList.add('highlight'); }); }
 }
 
 const FW_REFERENCE = `
@@ -1314,57 +632,67 @@ async function classify() {
   const obs = document.getElementById('obsText').value.trim();
   if (!obs) { alert('Enter an observation first.'); return; }
   if (!apiKey) { alert('Add your API key first.'); return; }
-
   clearHighlights();
   document.getElementById('loadingState').style.display = 'flex';
   document.getElementById('errorMsg').style.display = 'none';
   document.getElementById('classifyBtn').disabled = true;
-
   try {
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true'
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1200,
-        system: ENRICH_SYSTEM,
-        messages: [{ role: 'user', content: ENRICH_PROMPT(obs) }]
-      })
+      headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1200, system: ENRICH_SYSTEM, messages: [{ role: 'user', content: ENRICH_PROMPT(obs) }] })
     });
-
-    if (!res.ok) {
-      const err = await res.json();
-      throw new Error(err.error?.message || `API error ${res.status}`);
-    }
-
+    if (!res.ok) { const err = await res.json(); throw new Error(err.error?.message || 'API error '+res.status); }
     const data = await res.json();
-    const raw = data.content[0].text.replace(/```json|```/g, '').trim();
+    const raw = data.content[0].text.replace(/```json|```/g,'').trim();
     const result = JSON.parse(raw);
-
     document.getElementById('loadingState').style.display = 'none';
     document.getElementById('classifyBtn').disabled = false;
 
-    // Populate result cards
     populateResult('signal_type', result.signal_type?.replace(/_/g,' '), result.signal_type_confidence, result.signal_type_rationale);
     populateResult('energy_type', result.energy_type, result.energy_type_confidence, null);
     populateResult('energy_release', result.energy_release_potential, null, null);
     populateResult('barrier', result.barrier_assessment?.replace(/_/g,' '), result.barrier_confidence, result.barrier_rationale);
-    populateResult('fw_factor', result.fw_factor?.replace(/_/g,' '), result.fw_confidence, result.fw_rationale);
-    populateResult('fw_domain', result.fw_domain?.toUpperCase(), null, null);
-    populateResult('fw_maturity', result.fw_maturity_signal, null, null);
     populateResult('routing', result.pipeline_routing?.replace(/_/g,' '), null, result.routing_rationale);
 
-    // Highlight in taxonomy
-    highlightTaxonomy('signal_type', result.signal_type);
-    highlightTaxonomy('fw_factor', result.fw_factor);
-    highlightTaxonomy('barrier', result.barrier_assessment);
+    // FW Map® — render classifications array
+    const fwCard = document.getElementById('res-fw_factor');
+    fwCard.classList.add('populated');
+    const fwValEl = fwCard.querySelector('.result-value');
+    fwValEl.textContent = '';
+    fwValEl.className = 'result-value';
 
-    // Scroll results into view
+    if (result.fw_classifications && result.fw_classifications.length > 0) {
+      result.fw_classifications.forEach((cls, i) => {
+        const factorEl = document.createElement('div');
+        factorEl.style.cssText = i > 0 ? 'margin-top:10px;padding-top:10px;border-top:1px solid var(--border-light);' : '';
+        const confColor = cls.fw_confidence >= 0.7 ? 'var(--green)' : cls.fw_confidence >= 0.5 ? 'var(--amber)' : 'var(--red)';
+        factorEl.innerHTML =
+          '<div style="font-family:\'DM Mono\',monospace;font-size:12px;font-weight:500;color:var(--text-primary);">' + cls.fw_factor?.replace(/_/g,' ') + '</div>' +
+          '<div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:3px;">' + cls.fw_domain?.toUpperCase() + ' · ' + cls.fw_maturity_signal + '</div>' +
+          '<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">' +
+            '<div style="flex:1;height:3px;background:var(--border);border-radius:2px;overflow:hidden;">' +
+              '<div style="height:100%;width:' + Math.round(cls.fw_confidence*100) + '%;border-radius:2px;background:' + confColor + '"></div>' +
+            '</div>' +
+            '<div style="font-size:10px;font-weight:700;color:var(--text-muted);">' + Math.round(cls.fw_confidence*100) + '%</div>' +
+          '</div>' +
+          '<div style="font-size:11px;color:var(--text-secondary);font-style:italic;line-height:1.45;">' + cls.fw_rationale + '</div>';
+        fwValEl.appendChild(factorEl);
+        highlightTaxonomy('fw_factor', cls.fw_factor);
+      });
+      if (result.fw_classification_basis) {
+        const basisEl = document.createElement('div');
+        basisEl.style.cssText = 'margin-top:8px;padding-top:8px;border-top:1px solid var(--border-light);font-size:10px;color:var(--text-muted);font-style:italic;';
+        basisEl.textContent = result.fw_classification_basis;
+        fwValEl.appendChild(basisEl);
+      }
+    } else {
+      fwValEl.textContent = result.fw_attempted === false ? 'Input too thin to classify' : 'No factor met 0.70 threshold';
+      fwValEl.className = 'result-value c-muted';
+    }
+
+    highlightTaxonomy('signal_type', result.signal_type);
+    highlightTaxonomy('barrier', result.barrier_assessment);
     document.getElementById('resultsGrid').scrollIntoView({behavior:'smooth', block:'nearest'});
 
   } catch(e) {
@@ -1372,19 +700,16 @@ async function classify() {
     document.getElementById('classifyBtn').disabled = false;
     const errEl = document.getElementById('errorMsg');
     errEl.style.display = 'block';
-    errEl.textContent = `Error: ${e.message}`;
+    errEl.textContent = 'Error: ' + e.message;
   }
 }
 
-// Nav highlight on scroll
 const sections = document.querySelectorAll('.taxonomy-section, #live');
 const navLinks = document.querySelectorAll('.nav-link');
 window.addEventListener('scroll', () => {
   let current = '';
   sections.forEach(s => { if (window.scrollY >= s.offsetTop - 80) current = s.id; });
-  navLinks.forEach(l => {
-    l.classList.toggle('active', l.getAttribute('href') === `#${current}`);
-  });
+  navLinks.forEach(l => { l.classList.toggle('active', l.getAttribute('href') === '#'+current); });
 });
 </script>
 </body>
