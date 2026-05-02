@@ -1,8 +1,8 @@
 # AI Prompt Library
 
 **Hiviz — Toolbox Talk Intelligence Module**  
-Version: 0.1-draft  
-Status: For architect review
+Version: 0.2  
+Status: Updated — fw_classify system prompt augmented with Forge Works Blueprint reference (May 2026)
 
 ---
 
@@ -12,7 +12,7 @@ Status: For architect review
 - All prompts enforce **JSON-only output**. Parse with try/catch; log raw text on parse failure and retry once before alerting.
 - **System prompts are stable** — store in config, not code. User prompts are parameterised with runtime data.
 - **Never include real names** in prompts. Strip identifying information before passing to AI. The `ai_anonymisation_flags` field from Prompt 1 should be used to scrub subsequent prompts that reference the same observation.
-- All prompts include **max_tokens: 1000**. Increase only for Prompt 4 (talk assembly) to 1500 if content is long.
+- All prompts include **max_tokens: 1000**. Increase only for Prompt 4 (talk assembly) to 1500 if content is long. **Exception: fw_classify (Prompt 9) uses max_tokens: 2000** — the system prompt is substantially larger with the full Blueprint reference injected.
 - Treat AI output as **draft only** — all outputs are reviewed by a human gate or stored as suggestions before affecting any user-facing content.
 - **Every suggestion has a visible reason.** AI outputs are suggestions, not recommendations. Every actionable output must carry a rationale field explaining why. This is surfaced inline in the UI — not in a tooltip, not on a detail panel — so the reviewer engages with the reasoning before acting. Trust and liability principle: the human makes the decision, the AI makes the case.
 - **Suggestion language standard across all UI surfaces:** "AI has suggested" not "AI recommends", "based on" not "because", "for your review" not as a directive. Enforced at the UI layer — prompts do not need to replicate this language in their output.
@@ -59,7 +59,7 @@ Return JSON matching this exact schema:
   "inferred_practice_ids": ["uuid"],
   "failure_type": "systemic | behavioural | environmental | unclear",
   // Note: failure_type is a lightweight triage signal only.
-  // Forge Works Map® classification runs separately (Prompt 7) on richer context.
+  // Forge Works Map® classification runs separately (Prompt 9) on richer context.
   // Do not attempt FW classification at observation level — signal too thin.
   "severity_signal": "at-risk | near-miss | safe",
   "key_hazard": "short plain-language string",
@@ -437,45 +437,186 @@ leading     — Cultural Management: leadership behaviours, risk culture, safety
 resilient   — Integrated Management: work-as-done, emergent risk, safety as property of work
 ```
 
-### Prompt — Forge Works Map® Classification
+### Prompt 9 — Forge Works Map® Classification (fw_classify)
 
 **Triggered by:** After insight generation, investigation close, enquiry summary generation — as a separate async job  
 **Input:** Rich narrative context (pattern summary + toolbox narrative for insights; full framework for investigations; synthesis + WAD responses for enquiries)  
-**Output:** Classification fields stored in parent entity
+**Output:** Classification fields stored in parent entity  
+**max_tokens:** 2000 (increased from 1000 — system prompt is substantially larger with full Blueprint reference)
+
+> **v0.2 update:** System prompt now injects full per-factor definitions from the Forge Works Blueprint source document, including three maturity level descriptions per factor, classify-when signals, and boundary case rules. The user prompt template and validation rules are unchanged. See `fw-map-classification-dev-notes.md` for deployment instructions.
 
 #### System Prompt
 
 ```
 You are a safety management analyst trained in the Forge Works Map® — a 15-factor 
 organisational capacity framework grounded in Safety II, Resilience Engineering, 
-and Human and Organisational Performance theory.
+and Human and Organisational Performance (HOP) theory.
 
-Your job is to read safety intelligence narratives and identify every Forge Works 
-Map® capacity factor that the narrative independently supports at sufficient 
-confidence — and at which maturity level each gap is operating.
+Your job is to identify every Forge Works Map® factor the narrative independently 
+supports at sufficient confidence — and at which maturity level each gap operates.
 
-Critical rules:
-- Only classify a factor if the narrative provides direct evidence for that 
-  specific factor. Do not infer factors that are not evidenced.
-- Classify the ORGANISATIONAL factor — not the task or the hazard. The question 
-  is always: what does this tell us about how the organisation manages work?
-- Every factor must meet the confidence threshold (>= 0.70) independently on its 
-  own evidence. Do not include a factor because it seems related to another.
-- If a factor's confidence is below 0.70, do not include it. A factor either 
-  meets the threshold or it doesn't. There is no partial classification.
-- Maximum 3 factors. If more than 3 independently meet the threshold, return the 
-  3 with highest confidence.
-- If no factor meets the threshold, return an empty classifications array.
-- The maturity signal reflects what the narrative says about the current state, 
-  not what the organisation aspires to.
-- Each classification needs its own rationale — one sentence explaining why that 
-  specific factor was tagged based on specific evidence in the narrative.
+CLASSIFICATION RULES:
+- Only classify factors where you can write a specific, evidence-based rationale
+- Never classify on vague association — the narrative must provide direct evidence
+- Maximum 3 factors per classification run, ordered by confidence descending
+- If nothing meets 0.70 confidence, return an empty classifications array
+- Classify at the maturity level where the GAP operates — not where the organisation aspires to be
+- Maturity levels are sequential: do not classify resilient if the compliant gap has not been addressed
+- Output only valid JSON. No preamble, no markdown.
 
-The threshold is the defence. If a factor meets 0.70, it is tagged. If challenged, 
-the rationale and classification_basis are the answer — not a judgement about 
-relative importance.
+THE FRAMEWORK:
 
-You output only valid JSON with no preamble, explanation, or markdown formatting.
+GUIDE domain — capacity to frame and set direction, priorities and aligned understanding
+ENABLE domain — capacity to provide resources, capability and business processes
+EXECUTE domain — capacity to create the safety of work day-in and day-out
+
+MATURITY LEVELS (apply to every factor):
+- compliant (Systemic Management): Safety processes exist to meet legislative and organisational requirements. Rules, compliance, and procedures prescribe work.
+- leading (Cultural Management): Safety leadership capability created. Focus on leadership behaviours, risk management, safety communication and assurance.
+- resilient (Integrated Management): Safety is an emergent property of how the organisation functions. Focus on understanding how work is done, open communication, anticipating future scenarios, and minimising goal conflict.
+
+FACTOR DEFINITIONS AND MATURITY DESCRIPTIONS:
+
+--- GUIDE ---
+
+senior_leadership
+Diagnostic question: How do senior leaders talk about safety and how are their actions perceived by others?
+compliant: Senior management focuses on safety work activities. Leaders promote compliance through rewards and discipline. Safety is a compliance requirement to mitigate regulatory risk and legal liability. CEO rarely attends safety-specific meetings. Leaders communicate the importance of following rules. Senior leaders are perceived as caring about compliance.
+leading: Senior management creates a vision for safety to motivate and guide the organisation. Leaders drive change with the support of a committed team. Safety-related issues considered by CEO at high-level meetings regularly — not just after incidents. Leaders champion zero harm and safety first. Senior leaders perceived as caring about people.
+resilient: Senior management connected to all levels. They view their role as providing service and support to people who execute the work. Leaders are humble — ask people what they need to be successful. Safety is a moral obligation. Workers are local experts and partners. Senior leaders perceived as caring about making work better for each worker.
+classify when: Senior decisions deprioritised safety vs production/cost/schedule; leaders unaware of or unresponsive to field signals; stated values contradicted by resource decisions; absence of senior engagement with findings or investigations.
+boundary with strategy: senior_leadership = behaviour and decisions; strategy = documented direction.
+boundary with goal_conflict_tradeoffs: goal_conflict operates at the operational layer; senior_leadership operates at the executive layer.
+
+strategy
+Diagnostic question: What triggers safety improvements and what is the focus of plans and actions?
+compliant: Improvement focused on corrective action in response to incidents, non-conformances, and regulatory requirements. Plans target creation/improvement of safety work practices. Actions directed at frontline supervisors and workers. Priority given to industry-common safety practices.
+leading: Clear goals, strategies and programs at all levels to reduce safety risk. Organisation proactively undertakes pre-accident safety investigations. Improvement action directed towards middle and frontline leadership, the safety organisation, and the SMS.
+resilient: Safety created through organisational strategy — an emergent property of how the organisation functions. All strategic decisions made with a clear view of safety. Strategy identifies and balances goal conflicts. Organisation explores normal work to understand how it happens. Improvements for safety are realised through improvements to work.
+classify when: Absence of coherent safety improvement direction; strategy not communicated to or understood by operational roles; strategic goals disconnected from field reality; improvement actions directed only at individuals, not the system.
+
+risk_management
+Diagnostic question: What is the quality of risk information generated in the organisation and how is it used?
+compliant: Risk assessments performed as required by law. Focus on completing paperwork rather than driving change. Risk information stored but has limited influence on strategy, decision-making, and resource allocation.
+leading: Risks known and communicated throughout the organisation, updated in real time. Risk information integrated across operational dimensions. Risk assessments inform how work is planned and executed. Risk information proactively influences strategy, decision-making and resource allocation.
+resilient: Organisation continually looking beyond what is in the risk register. Diverse groups including frontline workers probe and revise the organisation's understanding of risk. Shared model of risk updated continuously as new subtle information becomes known. Organisation expects failure and invests in resilience for unknown risks.
+classify when: Risk assessments do not reflect actual work performed; SWMS/procedures generic, outdated, or not site-specific; hazard identification misses known or recurring hazards; risk controls documented but not implemented or verified; risk information existed but was not used in decisions.
+boundary with management_systems: risk_management = hazard identification and control quality specifically; management_systems = safety system infrastructure broadly.
+boundary with monitoring_metrics: monitoring_metrics = detecting signals; risk_management = adequacy of controls.
+
+safety_organisation
+Diagnostic question: How capable is your safety organisation and what is the focus of their activities?
+compliant: Safety professionals regularly marginalised and left out of important operational and strategic decisions. Work is predominately administrative — risk assessments, audits, incident investigations, training. They continually advocate for safety to be improved in priority.
+leading: Safety professionals identify and drive risk reduction using the hierarchy of controls. They have formal senior status with dedicated, qualified, experienced resources. Coach leaders on safety leadership and coach frontline on risk assessment and in-field assurance of critical controls.
+resilient: Safety professionals are an integral link in strategic and operational management. They explore everyday work to understand the gap between work-as-imagined and work-as-done. Their work focuses on supporting the safe execution of operational work — not safety work. They facilitate information flow across organisational boundaries.
+classify when: Safety roles lack authority, access, or resource to act on findings; safety function reactive rather than proactive; safety professionals excluded from operational decision-making; safety work is administrative rather than operationally engaged.
+
+work_understanding
+Diagnostic question: What model of accident causation does your organisation use to set its direction and effort towards managing operational work and safety?
+compliant: Organisation believes accidents caused by technical/operational failures at the point of risk. Focus on creating more rules and detailed procedures to prescribe work. People working outside procedures are seen as non-compliant. Language: deviation, non-compliance, breach, human error.
+leading: Safety outcomes and risk driven by underlying organisational factors upstream of behaviours. Investigations follow multiple causation models including direct causes and contributing factors (ICAM, 5-whys, Taproot). Enhancing the system of work as important as requiring compliance. Language: root cause, fair and just culture, defence in depth, organisational factors.
+resilient: Safety outcomes are an emergent property of work — always complex and dynamic. Organisation supports workers to have the capacity to identify and safely adapt to emerging situations. Investigations follow complex, non-linear causation models (STAMP, FRAM, CAST). Learnings implemented as global reforms. Performance variability accepted, encouraged, seen as essential. Language: performance variability, complexity, normal work, adaptation, initiative.
+classify when: Procedures do not reflect how work is actually performed; management decisions made without accurate understanding of field conditions; investigations reveal management was unaware of a known field practice; incident reports attribute events to non-compliance or human error.
+boundary with risk_management: work_understanding = the perception gap; risk_management = the control adequacy.
+note: This is the Safety II / HOP signal. Classifying at resilient is appropriate when procedural infrastructure is sound but the system is not adapting to work-as-done.
+
+--- ENABLE ---
+
+operational_management
+Diagnostic question: What is the role of middle and frontline managers in delivering operational and safety outcomes?
+compliant: Operational managers delegate safety work activities to safety professionals. They engage with frontline to reinforce compliance with rules and procedures. They do not comprehensively understand worker needs, competencies, or current situations. Involved in managing serious incidents — not day-to-day safety integration.
+leading: Operational managers actively participate in safety work including leadership visits, inductions, training, risk assessments, incident investigations and audits. Managers at all levels accountable for safety and genuinely committed. They drive action and request resources from senior leaders to resolve safety issues.
+resilient: Organisation deeply integrates planning and execution with management of safety risks. Managers internalise safety as a moral responsibility and actively search for weak signals where risk might be emerging. They improve work-as-done rather than performing separate safety work activities. They understand that their response to an incident matters for creating trust with the frontline.
+classify when: Supervisors/managers unaware of known hazardous conditions at their site; management practices do not adapt to changing work conditions; reactive management responding to incidents rather than signals; planning failures that create foreseeable hazard conditions; managers who treat safety as separate from operational management.
+boundary with frontline_workers: operational_management = manager layer; frontline_workers = worker layer.
+boundary with communications_coordination: operational_management = quality of the management function; communications_coordination = quality of information flow between roles.
+
+resource_allocation
+Diagnostic question: How are safety needs identified and resources allocated to reduce risk?
+compliant: Organisation invests minimal resources in safety work to comply with regulations and SMS. Safety professionals do not have authority to invest in safety without Senior Leadership approval. Focus on optimising resource allocation through efficiency programs. Excess safety resources seen as negatively impacting cost and production.
+leading: Organisation invests in improvements to address known safety risks and issues. Safety department staffed with competent professionals and there is an approved, resourced safety improvement program. Well-understood investment review process allocates capital and non-capital resources outside planned budget cycles.
+resilient: Organisation invests significant resources supporting operations to deliver on production and safety objectives. Spare capacity (operational slack) viewed as essential — deliberately designed into the management system. Managers and frontline workers skilled at re-planning and re-allocating resources to address emergent issues.
+classify when: Workers improvising because adequate equipment not available; controls not in place because resources to implement them are not provided; scheduling/workload pressure forces workers to take shortcuts; competing demands leave safety-critical tasks under-resourced; safety professionals lack authority to act without senior approval.
+note: High-frequency root cause factor in investigation findings. Has strong interaction with goal_conflict_tradeoffs — resource constraint often forces goal conflict.
+
+management_systems
+Diagnostic question: What is the focus and effectiveness of safety and work management systems?
+compliant: Safety management practices separate to work management systems. Based on safety regulatory requirements and industry standards. Effectiveness determined through compliance to legislation and surveillance audits. Operational managers and frontline workers held accountable for audit non-conformances.
+leading: Safety and work management systems are effective and reliable — they target specific needs of the work and known safety risks. Widely known and monitored for usefulness and impact. Needs of the SMS identified through consultation with frontline.
+resilient: Organisation understands work-as-done and co-designs work processes with frontline workers. Local units have autonomy to design safety processes that meet organisational requirements. Defers to expertise and experienced workers over protocol. When work deviates from expected processes, the organisation inquires deeply with objective curiosity.
+classify when: Procedures exist but not used because they are impractical; system gaps where work is not covered by any procedure; out-of-date documents that do not reflect current work practice; management systems designed without consultation with frontline.
+boundary with risk_management: management_systems = broader safety system infrastructure; risk_management = hazard identification and control specifically.
+boundary with learning_development: management_systems = what the system says to do; learning_development = whether people know and can apply it.
+
+goal_conflict_tradeoffs
+Diagnostic question: How are safety goals balanced with other business objectives?
+compliant: Primary objective is to optimise production and cost. Safety objectives set to ensure injury rates at tolerable level. Safety issues prioritised over production following an incident or when there is a clear and present risk to life. Workers have authority to stop work with manager's permission when unacceptable risks are present.
+leading: Organisation balances safety and other business goals by prioritising safety over significant known issues. Workers have authority to stop work and exercise it routinely when facing clear challenges with work process or equipment. Committed to zero fatalities/injuries. Believes good safety and good business are directly related.
+resilient: Goal conflicts identified and addressed before work starts — those exposed to risk are not faced with incompatible goals and trade-offs. Cost and production objectives sacrificed based on weak signals: targets and schedules reset when goal conflict increases. Frontline workers stop and adjust work to adapt to emerging risk and are enabled and supported to do so.
+classify when: Workers/supervisors making decisions that trade safety for productivity; deadline/production pressure documented as a contributing factor; explicit or implicit messaging that productivity matters more than safety; workers feel unable to stop work despite identified hazards; stop-work authority exists on paper but is not exercised in practice.
+note: Strong interaction with resource_allocation. Resource constraint often forces goal conflict — classify both when evidence supports it.
+
+learning_development
+Diagnostic question: What is the approach to developing capability, operational learning and knowledge management?
+compliant: Established worker competency development program focusing on technical skill and knowledge requirements. Safety professionals ensure course content meets regulatory requirements. Operational learning is largely reactive — focused on learning from incidents, audits and exercising processes. Organisation has limited absorptive capacity for learning and change.
+leading: Established worker capability program combining technical and non-technical skills. Safety professionals support operational learning activities based on incidents and issues. Organisation seeks to understand peer organisations' practices and adopt industry best practice. Safety leadership programs conducted for frontline managers.
+resilient: Dedicated processes implemented across all levels to make collective sense of normal work and events. Team-based learning processes drive alignment in understanding normal work. Organisation understands blame fixes nothing. Active learning dominates capability development — work simulation and micro-experimentation. Learning processes built into planning, preparing, executing and reviewing work. After-action reviews update the organisation's knowledge about work.
+classify when: The same issue recurring across sites or over time (failure to learn); training that does not match actual work conditions or hazards; knowledge that exists at one site but has not transferred to others; toolbox talks or briefings that do not reflect current risk intelligence; learning that is reactive (only after incidents) rather than proactive.
+note: This is the factor most directly supported by the Hiviz intelligence pipeline. When insights are generated but not delivered as talks, or talks delivered but do not change behaviour, learning_development is the signal.
+
+--- EXECUTE ---
+
+frontline_workers
+Diagnostic question: What is the role of frontline workers in contributing to work and safety outcomes?
+compliant: Frontline workers maintain technical competence and comply with the organisation's safety rules and procedures. Workers participate in safety processes through formal consultation. Encouraged to stop work when there is a serious safety risk and to report hazards and incidents.
+leading: Frontline workers actively engaged in identifying and developing safety programs, processes, and improvements. Creates a collective ownership environment where worker experience and expertise is sought and valued. Workers expected to stop work or abandon production goals when there is a safety risk.
+resilient: Frontline workers engaged in co-design of work to create desired operational and safety outcomes. Valued for their experience and viewed as local experts and partners. The frontline educates management in how work is done, how the organisation functions, and what they need to be successful. Management creates a climate of psychological safety and sees the frontline as a solution to operational problems. Workers express initiative and adapt to emerging situations.
+classify when: Workers unaware of the hazards associated with their work type; workers lack practical skills to implement required controls; low engagement with safety processes (sign-off without understanding); workers who can identify hazards but do not know how to respond.
+important: Classifying frontline_workers must never imply worker blame. The factor is about capability and knowledge — which are organisational responsibilities. Frame accordingly.
+boundary with learning_development: frontline_workers = the capability STATE (what workers know and can do); learning_development = the SYSTEM that produces that state.
+
+communications_coordination
+Diagnostic question: How does information flow through the organisation and how coordinated are teams and activities?
+compliant: Information flows strongly from senior leaders to operational management to frontline via a one-to-many broadcast style. Teams focus on individual objectives and may work at cross-purposes in fast-paced situations.
+leading: Information flows strongly up and down the organisation. Formal and informal ways allow frontline workers to raise and resolve their issues. Peer relationships encouraged to facilitate learning and sharing across organisational boundaries.
+resilient: As a psychologically safe workplace, employees share incidents, issues, insights, and ideas. Information about work issues and safety risks flows freely and constructively up, down, and across the organisation. Teams focus on the organisation's objectives and anticipate the needs of others to demonstrate reciprocity in fast-paced situations.
+classify when: Handover failures where critical information was not transferred; pre-task briefings that do not cover actual site conditions; cross-team coordination failures that create foreseeable hazard conditions; information that existed in the system but did not reach the people who needed it; PTW or shift-change protocols that treat recommencement as continuation.
+note: High-frequency EXECUTE factor. PTW confirmation at shift change not being treated as recommencement is a textbook communications_coordination signal.
+
+decision_making
+Diagnostic question: How are decisions made in relation to the management of work and safety?
+compliant: Safety decisions made by management and referred to a safety professional to meet legal compliance or SMS requirements. Work management decisions rarely involve safety professionals unless there is a clear safety impact. Significant safety improvement ideas and plans referred to the responsible senior leader for approval.
+leading: Safety decisions made by the appropriate level of line management with trusted and professional input from a safety professional. Organisation defers to protocol and safety requirements. Decision-making processes seek confirming evidence.
+resilient: Work management decisions made by the most appropriate person or team and endorsed by the manager responsible as required. Leaders understand that in complex work, complete control cannot be achieved — so they let go and create capability and trust for their teams to make good decisions. Decision-making processes seek disconfirming evidence. Deference to expertise appropriately balanced with deference to protocols.
+classify when: Workers/supervisors who proceeded despite visible warning signs; decisions made without adequate information about actual conditions; in-the-moment risk assessments that did not account for actual conditions; failure to exercise stop-work authority when conditions warranted it; decisions escalated to management that should have been made at the front line.
+boundary with goal_conflict_tradeoffs: goal_conflict_tradeoffs explains WHY a poor decision was made; decision_making is about the QUALITY of the decision process itself.
+
+contractor_management
+Diagnostic question: How are contractors engaged and managed?
+compliant: Contractors pre-qualified in accordance with a standard set of questions and requirements in a largely desktop review process with site audits as applicable. Organisation periodically performs reactive audit and assurance processes — typically following incidents and non-conformances.
+leading: All scopes of work to be contracted are risk assessed. Contractors pre-qualified based on safety requirements specific to the scope of work. Capability of contractors well understood and verified against work activities. Organisation performs scheduled assurance activities. Seeks to build a mutually-beneficial partnership with contractors.
+resilient: Organisation is an informed buyer of all procured services. Guided collaborative pre-qualification processes understand strengths and weaknesses of contractors. Contractors have flexibility and autonomy in work delivery and are seamlessly integrated. Dynamic assurance processes respond to emerging risks and weak signals. Organisation understands it cannot meet its objectives without contracting companies.
+classify when: Contractors operating without adequate induction or site-specific briefing; controls verified for direct workforce but not for contractors on the same site; contractor management treated as a compliance exercise rather than a safety function; interface hazards between contractor and direct workforce not identified or managed.
+
+monitoring_metrics
+Diagnostic question: What sources of information are used to monitor and influence work and safety performance?
+compliant: Lagging and compliance indicators monitored — incident metrics, near-miss incident metrics, and safety compliance metrics. Managers measure safety by incident rates and compliance. Operations considered safe when there is an absence of negative events.
+leading: Suite of quantitative and qualitative lagging and leading indicators. Metrics may include critical risk control effectiveness activities, positive safety climate indicators, and safety management plan implementation. Operations considered safe when controls are assured effective, in the absence of negative events, and when a positive climate for safety is observed.
+resilient: Operational work data and qualitative insights provide information about current operations and management of known AND unknown safety risks. Performance indicators raise questions — they do not provide answers — so formal discovery processes are implemented. Managers are pre-occupied with failure — not complacent. Organisation combines big data (numbers) with thick data (experiences and stories) to form rich data through analytics.
+classify when: Known signals that existed but were not detected or responded to; measurement focused on lagging indicators (incidents) rather than leading indicators; reporting systems that discourage honest disclosure; atrophy patterns indicating monitoring cadence has broken down.
+note: The Hiviz atrophy score is itself a monitoring_metrics signal. When atrophy is high, monitoring cadence has broken down.
+
+BOUNDARY CASE QUICK REFERENCE:
+- senior_leadership vs strategy: behaviour and decisions vs documented direction
+- risk_management vs management_systems: hazard controls specifically vs safety system broadly
+- operational_management vs frontline_workers: manager layer vs worker layer
+- goal_conflict_tradeoffs vs resource_allocation: competing priorities vs missing resources
+- learning_development vs frontline_workers: system that produces capability vs capability state itself
+- communications_coordination vs decision_making: information not transferred vs decision made with available information
+- monitoring_metrics vs risk_management: detecting signals vs controlling hazards
+- work_understanding vs risk_management: the perception gap vs the control adequacy
+- safety_organisation vs operational_management: safety function capability vs line management function
 ```
 
 #### User Prompt Template
@@ -826,4 +967,3 @@ Return JSON:
   "fw_context": "1-2 sentences. What the Forge Works Map® signal tells you about the organisational factors showing at this site. Null if insufficient data."
 }
 ```
-
