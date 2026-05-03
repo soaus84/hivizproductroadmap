@@ -29,6 +29,8 @@
     --tag-sim-text: #d8936a;
     --tag-exp: #2a1e0e;
     --tag-exp-text: #d4a843;
+    --tag-ms: #1a3d2a;
+    --tag-ms-text: #34d399;
   }
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -69,6 +71,8 @@
   nav a:hover { color: var(--text-secondary); border-color: var(--border); background: var(--bg-hover); }
   nav a.exp-nav { border-color: rgba(212,168,67,0.2); color: var(--accent-dim); }
   nav a.exp-nav:hover { color: var(--accent); border-color: var(--accent-dim); background: rgba(212,168,67,0.04); }
+  nav a.ms-nav { border-color: rgba(16,185,129,0.25); color: rgba(52,211,153,0.6); }
+  nav a.ms-nav:hover { color: #34d399; border-color: rgba(16,185,129,0.5); background: rgba(16,185,129,0.04); }
 
   .section { margin-bottom: 52px; animation: fadeUp 0.4s ease both; }
   .section:nth-child(1) { animation-delay: 0.05s; }
@@ -82,6 +86,7 @@
   .section:nth-child(9) { animation-delay: 0.45s; }
   .section:nth-child(10) { animation-delay: 0.50s; }
   .section:nth-child(11) { animation-delay: 0.55s; }
+  .section:nth-child(12) { animation-delay: 0.60s; }
 
   @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
@@ -92,6 +97,9 @@
 
   .section.experiment { border: 1px solid rgba(212,168,67,0.1); border-radius: 4px; padding: 16px 16px 8px; background: rgba(212,168,67,0.02); margin: 0 -16px 52px; }
   .section.experiment .section-rule { background: rgba(212,168,67,0.12); }
+  .section.ms-section { border: 1px solid rgba(16,185,129,0.12); border-radius: 4px; padding: 16px 16px 8px; background: rgba(16,185,129,0.02); margin: 0 -16px 52px; }
+  .section.ms-section .section-title { color: #34d399; }
+  .section.ms-section .section-rule { background: rgba(16,185,129,0.15); }
 
   .file-list { list-style: none; }
   .file-item { display: flex; align-items: baseline; gap: 0; padding: 9px 12px; margin: 0 -12px; border-radius: 3px; transition: background 0.12s ease; border-bottom: 1px solid transparent; }
@@ -108,9 +116,12 @@
   .tag-ts   { background: var(--tag-ts);   color: var(--tag-ts-text);   }
   .tag-sim  { background: var(--tag-sim);  color: var(--tag-sim-text);  }
   .tag-exp  { background: var(--tag-exp);  color: var(--tag-exp-text);  }
+  .tag-ms   { background: var(--tag-ms);   color: var(--tag-ms-text);   }
 
   .file-item.exp-item .file-link { color: rgba(212,168,67,0.6); }
   .file-item.exp-item:hover .file-link { color: var(--accent); }
+  .file-item.ms-item .file-link { color: rgba(52,211,153,0.6); }
+  .file-item.ms-item:hover .file-link { color: #34d399; }
 
   footer { border-top: 1px solid var(--border-light); padding: 32px 0 48px; margin-top: 24px; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
   .footer-left { font-size: 11px; color: var(--text-muted); letter-spacing: 0.04em; }
@@ -125,6 +136,7 @@
     nav { gap: 4px; }
     footer { flex-direction: column; align-items: flex-start; gap: 8px; }
     .section.experiment { margin: 0 0 52px; }
+    .section.ms-section { margin: 0 0 52px; }
   }
 </style>
 </head>
@@ -146,6 +158,7 @@
     <a href="#wireframes">Wireframes</a>
     <a href="#product-docs">Product Docs</a>
     <a href="#simulators">Simulators</a>
+    <a href="#ms-sim" class="ms-nav">Mgmt System ✦</a>
     <a href="#specs">Tech Specs</a>
     <a href="#devpack">V1 Devpack</a>
     <a href="#claude-code">Claude Code</a>
@@ -208,8 +221,25 @@
     <ul class="file-list">
       <li class="file-item"><span class="file-tag tag-sim">sim</span><a href="simulators/workflow-sim.html" class="file-link">workflow-sim.html</a><span class="file-dot"></span><span class="file-desc">End-to-end workflow simulator — 3 scenarios</span></li>
       <li class="file-item"><span class="file-tag tag-sim">sim</span><a href="simulators/enquiry-sim.html" class="file-link">enquiry-sim.html</a><span class="file-dot"></span><span class="file-desc">Enquiry pipeline simulator — 3 scenarios</span></li>
-      <li class="file-item"><span class="file-tag tag-sim">sim</span><a href="simulators/capture-sim.html" class="file-link">capture-sim.html</a><span class="file-dot"></span><span class="file-desc">Chat Capture sim</span></li>
+      <li class="file-item"><span class="file-tag tag-sim">sim</span><a href="simulators/capture-sim.html" class="file-link">capture-sim.html</a><span class="file-dot"></span><span class="file-desc">Chat Capture sim — Blueprint-enriched FW Map® classifier</span></li>
       <li class="file-item"><span class="file-tag tag-sim">sim</span><a href="simulators/capture-sim-offline.html" class="file-link">capture-sim-offline.html</a><span class="file-dot"></span><span class="file-desc">Chat Capture sim — 4 states including offline &amp; API unavailable</span></li>
+    </ul>
+  </section>
+
+  <!-- ── MANAGEMENT SYSTEM SIM ── -->
+  <section class="section ms-section" id="ms-sim">
+    <div class="section-header">
+      <span class="section-title">Management System ✦</span>
+      <span class="section-note">V6 — document ingestion simulator</span>
+    </div>
+    <div class="section-rule"></div>
+    <ul class="file-list">
+      <li class="file-item ms-item">
+        <span class="file-tag tag-ms">sim</span>
+        <a href="simulators/ms-sim.html" class="file-link">ms-sim.html</a>
+        <span class="file-dot"></span>
+        <span class="file-desc">Document ingestion — extract requirements, field view, toolbox talk, review</span>
+      </li>
     </ul>
   </section>
 
@@ -218,7 +248,7 @@
     <div class="section-rule"></div>
     <ul class="file-list">
       <li class="file-item"><span class="file-tag tag-md">md</span><a href="specs/01-data-model-api-spec.md" class="file-link">01-data-model-api-spec.md</a><span class="file-dot"></span><span class="file-desc">Data model &amp; API spec</span></li>
-      <li class="file-item"><span class="file-tag tag-md">md</span><a href="specs/02-ai-prompt-library.md" class="file-link">02-ai-prompt-library.md</a><span class="file-dot"></span><span class="file-desc">AI prompt library — 12 prompts</span></li>
+      <li class="file-item"><span class="file-tag tag-md">md</span><a href="specs/02-ai-prompt-library.md" class="file-link">02-ai-prompt-library.md</a><span class="file-dot"></span><span class="file-desc">AI prompt library — 12 prompts · Blueprint-enriched FW classifier</span></li>
       <li class="file-item"><span class="file-tag tag-md">md</span><a href="specs/03-system-architecture.md" class="file-link">03-system-architecture.md</a><span class="file-dot"></span><span class="file-desc">System architecture</span></li>
       <li class="file-item"><span class="file-tag tag-md">md</span><a href="specs/04-integration-logic-rules.md" class="file-link">04-integration-logic-rules.md</a><span class="file-dot"></span><span class="file-desc">Integration &amp; logic rules</span></li>
       <li class="file-item"><span class="file-tag tag-md">md</span><a href="specs/05-view-information-spec.md" class="file-link">05-view-information-spec.md</a><span class="file-dot"></span><span class="file-desc">View information spec</span></li>
@@ -228,7 +258,7 @@
       <li class="file-item"><span class="file-tag tag-html">html</span><a href="architecture/platform-architecture.html" class="file-link">architecture/platform-architecture.html</a><span class="file-dot"></span><span class="file-desc">Connected, modular workspaces</span></li>
       <li class="file-item"><span class="file-tag tag-html">html</span><a href="architecture/sitemap.html" class="file-link">architecture/sitemap.html</a><span class="file-dot"></span><span class="file-desc">Sitemap, views, patterns etc</span></li>
       <li class="file-item"><span class="file-tag tag-html">html</span><a href="v6-discovery.html" class="file-link">v6-discovery.html</a><span class="file-dot"></span><span class="file-desc">v6 Management systems discovery</span></li>
-      <li class="file-item"><span class="file-tag tag-html">html</span><a href="v7-discovery.html" class="file-link">v7-discovery.html</a><span class="file-dot"></span><span class="file-desc">v6 Communities</span></li>
+      <li class="file-item"><span class="file-tag tag-html">html</span><a href="v7-discovery.html" class="file-link">v7-discovery.html</a><span class="file-dot"></span><span class="file-desc">v7 Communities</span></li>
     </ul>
   </section>
 
@@ -275,7 +305,7 @@
     <div class="section-rule"></div>
     <ul class="file-list">
       <li class="file-item"><span class="file-tag tag-html">html</span><a href="prompt-lab.html" class="file-link">prompt-lab.html</a><span class="file-dot"></span><span class="file-desc">Interactive prompt editor — tune, run, validate &amp; copy</span></li>
-      <li class="file-item"><span class="file-tag tag-html">html</span><a href="taxonomy.html" class="file-link">taxonomy.html</a><span class="file-dot"></span><span class="file-desc">Classification taxonomy reference with live AI classifier</span></li>
+      <li class="file-item"><span class="file-tag tag-html">html</span><a href="taxonomy.html" class="file-link">taxonomy.html</a><span class="file-dot"></span><span class="file-desc">Classification taxonomy reference — Blueprint-enriched live classifier</span></li>
     </ul>
   </section>
 
@@ -303,7 +333,7 @@
   </section>
 
   <footer>
-    <div class="footer-left"><strong>Hiviz — Hiviz</strong> &nbsp;·&nbsp; Design resource snapshot, April 2026</div>
+    <div class="footer-left"><strong>Hiviz — Hiviz</strong> &nbsp;·&nbsp; Design resource snapshot, May 2026</div>
     <div class="footer-right">scaffolding, not shipping</div>
   </footer>
 

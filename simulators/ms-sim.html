@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hiviz — Management System Simulator</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --bg: #0a0b0d; --s1: #13141a; --s2: #1a1b23; --s3: #1e1f28;
+  --border: #252630; --text: #dde1eb; --muted: #5a5d6e; --bright: #e8ecf8;
+  --mono: 'IBM Plex Mono', monospace; --sans: 'IBM Plex Sans', sans-serif;
+  --ms: #10b981; --ms-dim: rgba(16,185,129,0.1); --ms-border: rgba(16,185,129,0.28); --ms-text: #34d399;
+  --plum: #7635DC; --plum-dim: rgba(118,53,220,0.1); --plum-border: rgba(118,53,220,0.3); --plum-text: #a78bfa;
+  --amber: #d97706; --amber-dim: rgba(217,119,6,0.1); --amber-border: rgba(217,119,6,0.28); --amber-text: #fbbf24;
+  --teal: #0891b2; --teal-dim: rgba(8,145,178,0.1); --teal-border: rgba(8,145,178,0.28); --teal-text: #22d3ee;
+  --red: #dc2626; --red-dim: rgba(220,38,38,0.1); --red-border: rgba(220,38,38,0.28); --red-text: #f87171;
+  --green: #059669; --green-dim: rgba(5,150,105,0.1); --green-border: rgba(5,150,105,0.28); --green-text: #34d399;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg); color: var(--text);
+  font-family: var(--sans); font-size: 13px; line-height: 1.6; min-height: 100vh;
+}
+
+body::before {
+  content: ''; position: fixed; inset: 0;
+  background-image: linear-gradient(rgba(16,185,129,0.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(16,185,129,0.018) 1px, transparent 1px);
+  background-size: 40px 40px; pointer-events: none; z-index: 0;
+}
+
+/* ── HEADER ── */
+.header {
+  position: relative; z-index: 10; padding: 16px 28px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  background: rgba(10,11,13,0.95); backdrop-filter: blur(10px);
+}
+.logo { display: flex; align-items: center; gap: 10px; }
+.logo-mark { width: 28px; height: 28px; background: var(--ms); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 11px; font-weight: 700; color: #0a0b0d; }
+.logo-name { font-family: var(--mono); font-size: 12px; font-weight: 700; color: var(--bright); }
+.logo-sub { font-family: var(--mono); font-size: 10px; color: var(--muted); }
+.header-right { display: flex; align-items: center; gap: 16px; }
+.api-key-wrap { display: flex; gap: 6px; align-items: center; }
+.api-key-input { background: var(--s2); border: 1px solid var(--border); border-radius: 5px; padding: 5px 10px; font-family: var(--mono); font-size: 11px; color: var(--text); outline: none; width: 190px; }
+.api-key-input:focus { border-color: var(--ms-border); }
+.api-key-input::placeholder { color: var(--muted); }
+.api-key-btn { background: var(--ms); color: #0a0b0d; border: none; border-radius: 5px; padding: 5px 12px; font-family: var(--mono); font-size: 10px; font-weight: 700; cursor: pointer; }
+.api-key-status { font-family: var(--mono); font-size: 10px; color: var(--ms-text); }
+
+/* ── LAYOUT ── */
+.main { position: relative; z-index: 1; display: grid; grid-template-columns: 280px 1fr; height: calc(100vh - 57px); }
+
+/* ── LEFT PANEL ── */
+.left { border-right: 1px solid var(--border); overflow-y: auto; padding: 20px 16px; background: rgba(19,20,26,0.6); display: flex; flex-direction: column; gap: 16px; }
+.left::-webkit-scrollbar { width: 3px; } .left::-webkit-scrollbar-thumb { background: var(--border); }
+.panel-label { font-family: var(--mono); font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+
+/* ── EXEMPLAR DOCS ── */
+.doc-card {
+  background: var(--s2); border: 1px solid var(--border); border-radius: 8px; padding: 12px 13px;
+  cursor: pointer; transition: all 0.18s; position: relative; overflow: hidden;
+}
+.doc-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; border-radius: 3px 0 0 3px; }
+.doc-card.type-procedure::before { background: var(--ms); }
+.doc-card.type-standard::before { background: var(--teal); }
+.doc-card.type-swms::before { background: var(--amber); }
+.doc-card:hover { background: var(--s3); transform: translateX(2px); }
+.doc-card.active { border-color: var(--ms-border); background: var(--ms-dim); }
+.doc-title { font-size: 12px; font-weight: 600; color: var(--bright); margin-bottom: 3px; }
+.doc-meta { display: flex; gap: 5px; align-items: center; flex-wrap: wrap; margin-top: 6px; }
+.doc-tag { font-family: var(--mono); font-size: 9px; padding: 1px 6px; border-radius: 3px; }
+.tag-procedure { background: var(--ms-dim); color: var(--ms-text); border: 1px solid var(--ms-border); }
+.tag-standard  { background: var(--teal-dim); color: var(--teal-text); border: 1px solid var(--teal-border); }
+.tag-swms      { background: var(--amber-dim); color: var(--amber-text); border: 1px solid var(--amber-border); }
+.tag-wt        { background: var(--s3); color: var(--muted); border: 1px solid var(--border); }
+
+.upload-zone {
+  border: 1px dashed var(--border); border-radius: 8px; padding: 16px;
+  text-align: center; cursor: pointer; transition: all 0.18s;
+  background: transparent;
+}
+.upload-zone:hover, .upload-zone.drag-over { border-color: var(--ms-border); background: var(--ms-dim); }
+.upload-zone input { display: none; }
+.upload-label { font-size: 11px; color: var(--muted); line-height: 1.6; }
+.upload-label strong { color: var(--ms-text); display: block; margin-bottom: 4px; font-family: var(--mono); font-size: 10px; letter-spacing: 0.5px; }
+
+.run-btn {
+  width: 100%; background: var(--ms); color: #0a0b0d; border: none; border-radius: 6px; padding: 10px;
+  font-family: var(--mono); font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+  cursor: pointer; transition: all 0.18s; display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.run-btn:hover:not(:disabled) { background: #0ea472; transform: translateY(-1px); }
+.run-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+/* ── RIGHT CANVAS ── */
+.canvas { overflow-y: auto; padding: 24px 28px; display: flex; flex-direction: column; gap: 20px; }
+.canvas::-webkit-scrollbar { width: 4px; } .canvas::-webkit-scrollbar-thumb { background: var(--border); }
+
+.empty { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 12px; }
+.empty-icon { font-size: 48px; opacity: 0.2; }
+.empty-text { font-size: 13px; color: var(--muted); text-align: center; max-width: 300px; line-height: 1.7; }
+
+/* ── VIEW TABS ── */
+.view-tabs {
+  display: flex; gap: 2px; background: var(--s1); border: 1px solid var(--border);
+  border-radius: 8px; padding: 3px; width: fit-content;
+}
+.view-tab {
+  font-family: var(--mono); font-size: 10px; font-weight: 600; letter-spacing: 0.5px;
+  padding: 5px 14px; border-radius: 5px; cursor: pointer; transition: all 0.15s;
+  color: var(--muted); border: none; background: transparent;
+}
+.view-tab.active { background: var(--ms); color: #0a0b0d; }
+.view-tab:hover:not(.active) { color: var(--ms-text); }
+
+/* ── DOC HEADER CARD ── */
+.doc-header-card {
+  background: var(--s1); border: 1px solid var(--ms-border); border-radius: 10px; overflow: hidden;
+}
+.doc-header-top {
+  background: var(--ms); padding: 12px 18px; display: flex; align-items: center; justify-content: space-between;
+}
+.doc-header-title { font-size: 14px; font-weight: 700; color: #0a0b0d; }
+.doc-header-badge { background: rgba(0,0,0,0.2); color: #0a0b0d; border-radius: 4px; padding: 2px 8px; font-family: var(--mono); font-size: 10px; font-weight: 700; }
+.doc-header-body { padding: 14px 18px; display: flex; gap: 24px; flex-wrap: wrap; }
+.doc-meta-item { display: flex; flex-direction: column; gap: 2px; }
+.doc-meta-key { font-family: var(--mono); font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); }
+.doc-meta-val { font-size: 12px; color: var(--bright); font-weight: 500; }
+
+/* ── REQUIREMENT CARDS ── */
+.req-grid { display: flex; flex-direction: column; gap: 8px; }
+
+.req-card {
+  background: var(--s1); border: 1px solid var(--border); border-radius: 8px; overflow: hidden;
+  transition: all 0.18s;
+}
+.req-card:hover { border-color: var(--ms-border); }
+.req-card.checked { border-color: var(--green-border); background: var(--green-dim); opacity: 0.8; }
+.req-card.flagged { border-color: var(--red-border); }
+
+.req-card-head {
+  padding: 10px 14px; display: flex; align-items: center; gap: 10px; cursor: pointer;
+  border-bottom: 1px solid transparent; transition: border-color 0.15s;
+}
+.req-card.expanded .req-card-head { border-bottom-color: var(--border); }
+
+.req-obligation {
+  font-family: var(--mono); font-size: 9px; font-weight: 700; padding: 2px 7px;
+  border-radius: 3px; flex-shrink: 0; text-transform: uppercase; letter-spacing: 0.5px;
+}
+.ob-shall  { background: var(--red-dim);   color: var(--red-text);   border: 1px solid var(--red-border); }
+.ob-must   { background: var(--red-dim);   color: var(--red-text);   border: 1px solid var(--red-border); }
+.ob-should { background: var(--amber-dim); color: var(--amber-text); border: 1px solid var(--amber-border); }
+.ob-may    { background: var(--s2);        color: var(--muted);      border: 1px solid var(--border); }
+
+.req-text { flex: 1; font-size: 13px; color: var(--bright); line-height: 1.5; font-weight: 500; }
+.req-text.checked-text { text-decoration: line-through; color: var(--muted); }
+
+.req-clause { font-family: var(--mono); font-size: 10px; color: var(--muted); flex-shrink: 0; }
+
+.req-expand-icon { color: var(--muted); flex-shrink: 0; transition: transform 0.2s; font-size: 10px; }
+.req-card.expanded .req-expand-icon { transform: rotate(180deg); }
+
+.req-card-body { padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; }
+
+.req-detail-row { display: flex; gap: 8px; align-items: flex-start; }
+.req-detail-key { font-family: var(--mono); font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); min-width: 110px; flex-shrink: 0; padding-top: 1px; }
+.req-detail-val { font-size: 12px; color: var(--text); line-height: 1.55; }
+
+.req-actions { display: flex; gap: 8px; align-items: center; padding-top: 4px; border-top: 1px solid var(--border); }
+.req-action-btn {
+  display: flex; align-items: center; gap: 5px; padding: 5px 12px; border-radius: 4px;
+  font-family: var(--mono); font-size: 10px; font-weight: 600; cursor: pointer; border: none;
+  transition: all 0.15s;
+}
+.btn-check { background: var(--green-dim); color: var(--green-text); border: 1px solid var(--green-border); }
+.btn-check:hover { background: var(--green); color: white; }
+.btn-flag  { background: var(--red-dim);   color: var(--red-text);   border: 1px solid var(--red-border); }
+.btn-flag:hover  { background: var(--red);   color: white; }
+.btn-thumb-up   { background: var(--ms-dim);   color: var(--ms-text);   border: 1px solid var(--ms-border); }
+.btn-thumb-down { background: var(--amber-dim); color: var(--amber-text); border: 1px solid var(--amber-border); }
+.btn-thumb-up:hover   { background: var(--ms); color: #0a0b0d; }
+.btn-thumb-down:hover { background: var(--amber); color: #0a0b0d; }
+.btn-active-check { background: var(--green); color: white; border: 1px solid var(--green); }
+.btn-active-down  { background: var(--amber); color: #0a0b0d; border: 1px solid var(--amber); }
+.btn-active-up    { background: var(--ms); color: #0a0b0d; border: 1px solid var(--ms); }
+
+/* ── CHECKLIST PROGRESS ── */
+.progress-bar-wrap { background: var(--s1); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; display: flex; align-items: center; gap: 16px; }
+.progress-track { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+.progress-fill { height: 100%; background: var(--ms); border-radius: 3px; transition: width 0.4s ease; }
+.progress-label { font-family: var(--mono); font-size: 11px; color: var(--muted); white-space: nowrap; }
+.progress-label strong { color: var(--ms-text); }
+
+/* ── SECTION LABELS ── */
+.section-divider { display: flex; align-items: center; gap: 10px; }
+.section-divider-line { flex: 1; height: 1px; background: var(--border); }
+.section-divider-label { font-family: var(--mono); font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); }
+
+/* ── OBSERVATION INTEGRATION ── */
+.obs-integration-card {
+  background: var(--plum-dim); border: 1px solid var(--plum-border); border-radius: 10px; overflow: hidden;
+}
+.obs-int-head { background: var(--plum); padding: 10px 16px; display: flex; align-items: center; gap: 8px; }
+.obs-int-pulse { width: 7px; height: 7px; border-radius: 50%; background: rgba(255,255,255,0.7); animation: pulse 2s infinite; }
+.obs-int-label { font-family: var(--mono); font-size: 10px; font-weight: 700; color: white; letter-spacing: 0.5px; }
+.obs-int-body { padding: 14px 16px; }
+.obs-bubble { background: var(--s1); border: 1px solid var(--border); border-radius: 8px; padding: 10px 13px; margin-bottom: 10px; font-size: 12.5px; color: var(--text); line-height: 1.6; font-style: italic; }
+.obs-match { display: flex; gap: 10px; align-items: flex-start; background: var(--s2); border-radius: 6px; padding: 10px 12px; }
+.obs-match-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+.obs-match-text { font-size: 12px; color: var(--text); line-height: 1.55; }
+.obs-match-text strong { color: var(--plum-text); }
+
+/* ── REVIEW STATE ── */
+.review-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.review-stat { background: var(--s2); border: 1px solid var(--border); border-radius: 6px; padding: 10px 12px; text-align: center; }
+.review-stat-num { font-family: var(--mono); font-size: 20px; font-weight: 700; }
+.review-stat-label { font-size: 10px; color: var(--muted); margin-top: 2px; }
+.review-feedback { background: var(--s2); border: 1px solid var(--border); border-radius: 6px; padding: 8px 11px; margin-top: 6px; }
+.review-feedback-clause { font-family: var(--mono); font-size: 10px; color: var(--muted); margin-bottom: 4px; }
+.review-feedback-text { font-size: 12px; color: var(--text); line-height: 1.5; font-style: italic; }
+
+/* ── LOADING ── */
+.loading { display: flex; align-items: center; gap: 10px; padding: 20px; color: var(--muted); font-style: italic; font-size: 12px; }
+.spinner { width: 14px; height: 14px; border: 2px solid var(--border); border-top-color: var(--ms); border-radius: 50%; animation: spin 0.7s linear infinite; flex-shrink: 0; }
+
+/* ── TOOLBOX VIEW ── */
+.talk-card { background: var(--s1); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-bottom: 8px; }
+.talk-req-head { padding: 10px 14px; display: flex; align-items: center; gap: 10px; }
+.talk-discussion { padding: 10px 14px; border-top: 1px solid var(--border); background: var(--s2); }
+.talk-discussion-label { font-family: var(--mono); font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: var(--plum-text); margin-bottom: 5px; }
+.talk-discussion-q { font-size: 12px; color: var(--text); line-height: 1.55; font-style: italic; }
+
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.3} }
+@keyframes fadeIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:none} }
+.fade-in { animation: fadeIn 0.3s ease forwards; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">
+    <div class="logo-mark">MS</div>
+    <div>
+      <div class="logo-name">Hiviz</div>
+      <div class="logo-sub">Management System · Document Ingestion Simulator</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="api-key-wrap">
+      <input type="password" class="api-key-input" id="apiKey" placeholder="sk-ant-api key..." />
+      <button class="api-key-btn" onclick="saveKey()">Save</button>
+      <span class="api-key-status" id="keyStatus"></span>
+    </div>
+  </div>
+</div>
+
+<div class="main">
+  <!-- LEFT PANEL -->
+  <div class="left">
+    <div>
+      <div class="panel-label">Exemplar Documents</div>
+      <div style="display:flex;flex-direction:column;gap:7px;">
+        <div class="doc-card type-procedure" id="doc-hotwork" onclick="selectDoc('hotwork')">
+          <div class="doc-title">Hot Work Permit Procedure</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:3px;line-height:1.5;">PTW requirements, fire watch, area clearance and post-work inspection for cutting, welding and grinding operations.</div>
+          <div class="doc-meta">
+            <span class="doc-tag tag-procedure">Procedure</span>
+            <span class="doc-tag tag-wt">Hot Work</span>
+            <span class="doc-tag tag-wt">v3.1</span>
+          </div>
+        </div>
+        <div class="doc-card type-standard" id="doc-spotter" onclick="selectDoc('spotter')">
+          <div class="doc-title">Heavy Vehicle Spotter Standard</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:3px;line-height:1.5;">Mandatory requirements for spotter assignment, positioning, communications and handover during all heavy vehicle reversing operations.</div>
+          <div class="doc-meta">
+            <span class="doc-tag tag-standard">Standard</span>
+            <span class="doc-tag tag-wt">Heavy Vehicle</span>
+            <span class="doc-tag tag-wt">v1.4</span>
+          </div>
+        </div>
+        <div class="doc-card type-swms" id="doc-wah" onclick="selectDoc('wah')">
+          <div class="doc-title">Working at Height SWMS</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:3px;line-height:1.5;">Safe Work Method Statement for all work at height — scaffold, ladders, elevated platforms. Covers harness management, rescue procedures and pre-start requirements.</div>
+          <div class="doc-meta">
+            <span class="doc-tag tag-swms">SWMS</span>
+            <span class="doc-tag tag-wt">Working at Height</span>
+            <span class="doc-tag tag-wt">v2.0</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="panel-label">Upload Your Own</div>
+      <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
+        <input type="file" id="fileInput" accept=".pdf,.doc,.docx,.txt" onchange="handleFileSelect(event)" />
+        <div class="upload-label">
+          <strong>↑ PDF or Word doc</strong>
+          Procedure, standard, SWMS, or site rule — AI will extract and structure the requirements
+        </div>
+      </div>
+      <div id="uploadedFileName" style="font-family:var(--mono);font-size:10px;color:var(--ms-text);margin-top:6px;display:none;padding:4px 8px;background:var(--ms-dim);border-radius:4px;border:1px solid var(--ms-border);"></div>
+    </div>
+
+    <div id="runWrap" style="display:none;">
+      <button class="run-btn" id="runBtn" onclick="runIngestion()">
+        <span>⚙</span> Run AI Ingestion
+      </button>
+    </div>
+  </div>
+
+  <!-- CANVAS -->
+  <div class="canvas" id="canvas">
+    <div class="empty">
+      <div class="empty-icon">📋</div>
+      <div class="empty-text">Select an exemplar document or upload your own to see how AI ingestion extracts structured requirements for field use.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+
+// ── API KEY ──────────────────────────────────────────────────────────────────
+let apiKey = localStorage.getItem('hiviz_ms_api_key') || '';
+if (apiKey) {
+  document.getElementById('apiKey').value = apiKey;
+  document.getElementById('keyStatus').textContent = '✓';
+}
+function saveKey() {
+  const k = document.getElementById('apiKey').value.trim();
+  if (!k) return;
+  apiKey = k;
+  localStorage.setItem('hiviz_ms_api_key', k);
+  document.getElementById('keyStatus').textContent = '✓ saved';
+}
+
+// ── STATE ────────────────────────────────────────────────────────────────────
+let currentDoc = null;
+let uploadedFile = null;
+let extractedRequirements = [];
+let currentView = 'library';
+let checkStates = {};   // req index → true/false
+let reviewStates = {};  // req index → 'up'/'down'
+let reviewFeedback = {}; // req index → string
+let flagStates = {};    // req index → true/false
+let expandStates = {};  // req index → true/false
+
+// ── EXEMPLAR DOCUMENTS ───────────────────────────────────────────────────────
+const EXEMPLAR_DOCS = {
+  hotwork: {
+    title: 'Hot Work Permit Procedure',
+    type: 'Procedure',
+    typeClass: 'tag-procedure',
+    workType: 'Hot Work',
+    version: '3.1',
+    code: 'HWP-001',
+    owner: 'Safety Manager',
+    reviewDate: 'Mar 2027',
+    summary: 'Defines the requirements for obtaining, completing, and maintaining a hot work permit before any cutting, welding, or grinding operations. Specifies permit content, signatories, site placement, and fire watch requirements.',
+    relatedSim: 'workflow-sim — Scenario 2 (Incident: WAH / hot work near-miss)',
+    requirements: [
+      { text: 'A hot work permit shall be obtained and signed by the Site Supervisor before any cutting, welding, grinding or open flame work commences.', obligation: 'shall', clause: '3.1', condition: 'Before ignition', verification: 'Signed PTW sighted at worksite before work commences', discussion: 'What specific hot work tasks on today\'s job require a PTW — and have all of them been permitted before anyone picks up a tool?' },
+      { text: 'The fire watch area shall be defined on the permit and shall cover all areas where sparks, slag, or heat transfer could reach combustible materials — including below-deck and through structural gaps.', obligation: 'shall', clause: '3.2', condition: 'During permit completion', verification: 'Fire watch boundary marked on permit sketch, below-deck areas explicitly noted', discussion: 'Has anyone walked the actual fire watch boundary today — not just the plan? Where are the gaps that the permit might not cover?' },
+      { text: 'A dedicated fire watch person shall be assigned and positioned within the defined fire watch area for the duration of hot work and for a minimum of 30 minutes after work ceases.', obligation: 'shall', clause: '3.3', condition: 'During and after hot work', verification: 'Fire watch name recorded on permit, position confirmed before ignition, 30-min post-work sign-off', discussion: 'Who is the fire watch today, and do they know they cannot leave the area — even after the work stops?' },
+      { text: 'Adjacent combustible materials shall be removed or protected with fire-resistant barriers before hot work begins. Protection shall extend at least 10 metres from the work area or to the nearest structural boundary.', obligation: 'shall', clause: '3.4', condition: 'Before ignition', verification: 'Pre-start inspection completed, combustibles removed or protected, distance verified', discussion: 'What\'s within 10 metres of today\'s hot work that could catch — has it been moved or covered?' },
+      { text: 'A fire extinguisher rated for the fire risk present shall be positioned within 3 metres of the hot work operation and confirmed serviceable before work commences.', obligation: 'shall', clause: '3.5', condition: 'Before ignition', verification: 'Extinguisher type, location and service tag confirmed on permit', discussion: null },
+      { text: 'Hot work permits should be re-assessed and re-issued when the scope of work changes, when conditions in the hot work area change, or after any unplanned work stoppage exceeding 2 hours.', obligation: 'should', clause: '3.6', condition: 'When conditions change', verification: 'New permit issued, old permit cancelled with note', discussion: 'If the job changes today — different location, different task — does everyone know a new permit is needed, not just an extension of the old one?' },
+      { text: 'Post-work inspection of the hot work area and all fire watch zones shall be conducted by the fire watch person at 30 minutes, 1 hour, and 2 hours after work ceases.', obligation: 'shall', clause: '4.1', condition: 'After hot work completion', verification: 'Post-work inspection times and sign-offs recorded on permit back page', discussion: null },
+      { text: 'The completed permit shall be retained on site for a minimum of 3 months after work completion and shall be available for review by safety personnel on request.', obligation: 'shall', clause: '5.1', condition: 'After permit closure', verification: 'Permit filed in site PTW register', discussion: null }
+    ]
+  },
+  spotter: {
+    title: 'Heavy Vehicle Spotter Standard',
+    type: 'Standard',
+    typeClass: 'tag-standard',
+    workType: 'Heavy Vehicle',
+    version: '1.4',
+    code: 'HVS-003',
+    owner: 'Operations Manager',
+    reviewDate: 'Jun 2026',
+    summary: 'Mandatory requirements for spotter assignment, positioning, communication, and handover during all heavy vehicle reversing and blind-zone operations. This standard addresses the systemic gap identified in six near-misses across four sites in Q1.',
+    relatedSim: 'workflow-sim — Scenario 1 (Near-miss: spotter absence pattern)',
+    requirements: [
+      { text: 'A designated spotter shall be assigned before any heavy vehicle reversing operation commences. The spotter assignment shall be made during the pre-task brief and recorded.', obligation: 'shall', clause: '2.1', condition: 'Before reversing commences', verification: 'Spotter name recorded in pre-start checklist', discussion: 'Was a spotter actually assigned in today\'s pre-start brief — by name, not by assumption?' },
+      { text: 'The designated spotter shall be physically positioned within the operator\'s line of sight before the vehicle moves, and shall maintain continuous visual contact with the operator throughout the reversing operation.', obligation: 'shall', clause: '2.2', condition: 'During reversing operation', verification: 'Operator confirms eye contact with spotter before movement', discussion: 'What does "line of sight" actually mean in today\'s operating conditions — has anyone walked the reversing path to confirm it?' },
+      { text: 'Spotter-to-operator communication shall use a pre-agreed signalling system confirmed before work commences. Radio communication shall be used when visual signals are not reliable due to distance, dust, or light conditions.', obligation: 'shall', clause: '2.3', condition: 'Before and during reversing', verification: 'Communication method confirmed in pre-start, radio channel agreed if applicable', discussion: 'If the dust is up or the light is poor today, is everyone on the same radio channel — and has it been tested?' },
+      { text: 'If the designated spotter needs to leave their position for any reason during an operation, the spotter shall notify the operator before moving, and the operation shall cease until a replacement spotter is confirmed in position.', obligation: 'shall', clause: '2.4', condition: 'During reversing operation', verification: 'Operation ceases; new spotter name recorded before recommencement', discussion: 'This is the requirement that failed in six of our near-misses. What happens on your site when the spotter needs to step away?' },
+      { text: 'Spotter responsibility shall not be informally transferred. A spotter handover shall be completed face-to-face, with both spotters present, before the outgoing spotter leaves position.', obligation: 'shall', clause: '2.5', condition: 'When spotter handover is required', verification: 'Both spotters present at handover; operator notified of handover before it occurs', discussion: 'Has anyone on this crew done an informal spotter handover — just assuming the next person picked it up?' },
+      { text: 'The Supervisor should verify spotter positioning at least once per operating hour and after any work interruption exceeding 15 minutes.', obligation: 'should', clause: '3.1', condition: 'During ongoing operations', verification: 'Supervisor observation logged in site diary or digital system', discussion: null },
+      { text: 'Any spotter absence or communication failure shall be reported to the Supervisor immediately and recorded as a safety observation in the Hiviz system.', obligation: 'shall', clause: '3.2', condition: 'When gap occurs', verification: 'Observation logged within 4 hours of event', discussion: 'When was the last time someone logged a spotter gap — and if it never happens, is that because the system is working or because gaps aren\'t being reported?' }
+    ]
+  },
+  wah: {
+    title: 'Working at Height SWMS',
+    type: 'SWMS',
+    typeClass: 'tag-swms',
+    workType: 'Working at Height',
+    version: '2.0',
+    code: 'WAH-SWMS-002',
+    owner: 'Safety Manager',
+    reviewDate: 'Sep 2026',
+    summary: 'Safe Work Method Statement for all work performed at height — scaffold, ladders, elevated platforms, and roof work. Covers pre-task requirements, harness management, fall prevention, and rescue procedures.',
+    relatedSim: 'workflow-sim — Scenario 2 (Incident: harness snag, scaffold descent, fractured wrist)',
+    requirements: [
+      { text: 'A pre-task risk assessment shall be conducted before any work at height commences, identifying fall hazards, energy sources, and access/egress routes. The assessment shall be reviewed by all crew before work starts.', obligation: 'shall', clause: '2.1', condition: 'Before work commences', verification: 'Pre-task risk assessment signed by all crew members', discussion: 'Who led the risk assessment for today\'s WAH task — and did it cover the actual route people will use, not just the intended route?' },
+      { text: 'All workers performing work at height shall be fitted with a correctly adjusted full-body harness inspected by the wearer before use. Harness inspection shall include: stitching integrity, buckle function, D-ring integrity, and snap hook housing condition.', obligation: 'shall', clause: '2.2', condition: 'Before ascending', verification: 'Harness inspection completed; snap hook housing specifically confirmed', discussion: 'Has everyone physically checked their snap hook housing today — not just the harness body?' },
+      { text: 'A harness self-rescue procedure shall be communicated to all workers before any ladder or scaffold work commences. Workers shall know how to signal for help if their harness becomes snagged or caught during descent.', obligation: 'shall', clause: '2.3', condition: 'Before ascending', verification: 'Self-rescue procedure verbally confirmed with all crew; signal method agreed', discussion: 'This is the requirement that was missing in INC-0091. Does everyone on the crew know what to do if their harness gets caught — specifically not to unclip?' },
+      { text: 'Anchor points shall be selected and confirmed as structurally adequate by the Supervisor before lanyard connection. Anchor point selection shall not be delegated to the worker alone.', obligation: 'shall', clause: '2.4', condition: 'Before ascending', verification: 'Anchor point confirmed by Supervisor and recorded on pre-task form', discussion: null },
+      { text: 'Workers shall maintain three points of contact when ascending or descending ladders. Tools and equipment shall be secured in a bag or hoisted separately — not carried by hand during ascent or descent.', obligation: 'shall', clause: '3.1', condition: 'During ascent and descent', verification: 'Pre-task brief covers three-point contact and tool management', discussion: 'How are tools being managed on today\'s job — is anyone planning to carry something up a ladder by hand?' },
+      { text: 'Exclusion zones shall be established below all work at height areas. The exclusion zone shall extend at minimum 1.5 times the working height from the base of the structure.', obligation: 'shall', clause: '3.2', condition: 'Before work commences', verification: 'Exclusion zone marked and barriered; minimum radius calculated and confirmed', discussion: null },
+      { text: 'If a worker becomes suspended in a harness, a rescue shall be initiated within 10 minutes. Suspension trauma is a medical emergency — do not leave a suspended worker unattended.', obligation: 'shall', clause: '4.1', condition: 'If suspension occurs', verification: 'Rescue plan confirmed in pre-task brief; rescuer identified by name', discussion: 'If someone gets stuck in their harness today — who is the rescue person, and have they confirmed they know the procedure?' },
+      { text: 'All work at height incidents, near-misses, and harness-related events shall be reported to the Supervisor immediately and logged in the safety system within 4 hours.', obligation: 'shall', clause: '5.1', condition: 'After any event', verification: 'Report submitted within 4 hours; observation record created', discussion: null }
+    ]
+  }
+};
+
+// ── DOCUMENT SELECTION ───────────────────────────────────────────────────────
+function selectDoc(key) {
+  currentDoc = { key, data: EXEMPLAR_DOCS[key], isExemplar: true };
+  uploadedFile = null;
+  document.getElementById('uploadedFileName').style.display = 'none';
+  document.querySelectorAll('.doc-card').forEach(c => c.classList.remove('active'));
+  document.getElementById('doc-' + key).classList.add('active');
+  document.getElementById('runWrap').style.display = 'block';
+  showDocReady();
+}
+
+function showDocReady() {
+  const d = currentDoc.data;
+  const canvas = document.getElementById('canvas');
+  canvas.innerHTML = `
+    <div class="fade-in" style="background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:16px 18px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+        <span class="doc-tag ${d.typeClass}">${d.type}</span>
+        <span style="font-family:var(--mono);font-size:10px;color:var(--muted);">${d.code} · v${d.version}</span>
+      </div>
+      <div style="font-size:15px;font-weight:700;color:var(--bright);margin-bottom:6px;">${d.title}</div>
+      <div style="font-size:12px;color:var(--muted);line-height:1.65;max-width:640px;">${d.summary}</div>
+      <div style="margin-top:10px;font-family:var(--mono);font-size:10px;color:var(--teal-text);background:var(--teal-dim);border:1px solid var(--teal-border);border-radius:4px;padding:4px 9px;display:inline-block;">↗ Related: ${d.relatedSim}</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;color:var(--muted);font-size:12px;">
+      <div class="spinner"></div>
+      Ready to ingest — press Run AI Ingestion to extract structured requirements
+    </div>`;
+}
+
+// ── FILE UPLOAD ──────────────────────────────────────────────────────────────
+function handleDragOver(e) { e.preventDefault(); document.getElementById('uploadZone').classList.add('drag-over'); }
+function handleDragLeave(e) { document.getElementById('uploadZone').classList.remove('drag-over'); }
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('uploadZone').classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (file) processUploadedFile(file);
+}
+function handleFileSelect(e) { if (e.target.files[0]) processUploadedFile(e.target.files[0]); }
+
+function processUploadedFile(file) {
+  uploadedFile = file;
+  currentDoc = { key: 'uploaded', data: null, isExemplar: false, file };
+  document.querySelectorAll('.doc-card').forEach(c => c.classList.remove('active'));
+  const fnEl = document.getElementById('uploadedFileName');
+  fnEl.textContent = '📄 ' + file.name + ' (' + (file.size/1024).toFixed(0) + ' KB)';
+  fnEl.style.display = 'block';
+  document.getElementById('runWrap').style.display = 'block';
+  document.getElementById('canvas').innerHTML = `
+    <div class="fade-in" style="background:var(--s1);border:1px solid var(--ms-border);border-radius:10px;padding:16px 18px;">
+      <div style="font-size:14px;font-weight:700;color:var(--bright);margin-bottom:4px;">${file.name}</div>
+      <div style="font-size:12px;color:var(--muted);">${(file.size/1024).toFixed(0)} KB · Ready to ingest</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;color:var(--muted);font-size:12px;">
+      <div class="spinner"></div>
+      Press Run AI Ingestion to extract requirements from your document
+    </div>`;
+}
+
+// ── AI INGESTION ─────────────────────────────────────────────────────────────
+async function runIngestion() {
+  if (!apiKey) { alert('Add your Anthropic API key first.'); return; }
+
+  checkStates = {}; reviewStates = {}; reviewFeedback = {}; flagStates = {}; expandStates = {};
+
+  const btn = document.getElementById('runBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spinner" style="border-top-color:#0a0b0d;border-color:rgba(0,0,0,0.2);"></div> Ingesting...';
+
+  // Show ingestion pipeline steps
+  const canvas = document.getElementById('canvas');
+  canvas.innerHTML = buildIngestionPipeline();
+
+  await delay(600); highlightStep(1);
+  await delay(1200); highlightStep(2);
+  await delay(1000); highlightStep(3);
+
+  try {
+    let requirements;
+
+    if (currentDoc.isExemplar) {
+      // Use exemplar data — still pass through AI to show real extraction
+      requirements = await extractWithAI(
+        currentDoc.data.title,
+        currentDoc.data.type,
+        currentDoc.data.summary,
+        currentDoc.data.requirements.map(r => r.text).join('\n\n')
+      );
+    } else {
+      // Real file upload — read and send to AI
+      const fileText = await readFileAsText(uploadedFile);
+      requirements = await extractWithAI(
+        uploadedFile.name,
+        'uploaded document',
+        null,
+        fileText
+      );
+    }
+
+    extractedRequirements = requirements;
+    highlightStep(4);
+    await delay(800);
+    highlightStep(5);
+    await delay(600);
+
+    renderResults(requirements);
+
+  } catch(e) {
+    canvas.innerHTML = `<div style="background:var(--red-dim);border:1px solid var(--red-border);border-radius:8px;padding:14px 16px;color:var(--red-text);font-size:12px;">
+      Error during ingestion: ${e.message}. Check your API key and try again.
+    </div>`;
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = '<span>↺</span> Re-ingest';
+}
+
+function buildIngestionPipeline() {
+  const steps = [
+    { n:'01', label:'Document uploaded', desc:'PDF or authored content stored. Document available immediately — ingestion non-blocking.' },
+    { n:'02', label:'Ingestion queued', desc:'document.ingest BullMQ job created. Same queue infrastructure as observation.enrich.' },
+    { n:'03', label:'AI extraction', desc:'AI reads document and extracts: summary, document type, work type signals, key requirements with clause references, condition triggers, obligation levels (shall/must/should).' },
+    { n:'04', label:'Requirements stored', desc:'DocumentRequirement records created — each structured, queryable, linked to version for point-in-time queries.' },
+    { n:'05', label:'Knowledge available', desc:'All AI prompts can now query requirements for this work type. Observation enrichment, insight generation, investigation assist, and talk generation all benefit immediately.' }
+  ];
+  return `<div style="font-family:var(--mono);font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:12px;">AI Ingestion Pipeline</div>` +
+    steps.map((s,i) => `
+      <div id="pipe-step-${i+1}" style="display:flex;gap:12px;padding:12px 14px;background:var(--s1);border:1px solid var(--border);border-radius:8px;margin-bottom:6px;transition:all 0.3s;">
+        <div style="font-family:var(--mono);font-size:13px;font-weight:700;color:var(--muted);min-width:24px;">${s.n}</div>
+        <div>
+          <div style="font-size:13px;font-weight:600;color:var(--bright);margin-bottom:3px;">${s.label}</div>
+          <div style="font-size:11.5px;color:var(--muted);line-height:1.5;">${s.desc}</div>
+        </div>
+      </div>`).join('');
+}
+
+function highlightStep(n) {
+  const el = document.getElementById('pipe-step-' + n);
+  if (!el) return;
+  el.style.borderColor = 'var(--ms-border)';
+  el.style.background = 'var(--ms-dim)';
+  el.querySelector('div > div:first-child').style.color = 'var(--ms-text)';
+  el.querySelector('div').style.color = 'var(--ms-text)';
+}
+
+async function extractWithAI(docTitle, docType, summary, content) {
+  const systemPrompt = `You are an AI document ingestion engine for a safety management platform. Your job is to read safety documents and extract structured requirements.
+
+For each distinct requirement, control, or obligation in the document, extract:
+- requirement_text: the requirement rewritten in clear, plain language (not quoted verbatim — simplified for field use)
+- obligation: "shall" | "must" | "should" | "may" (extract from the original language)
+- clause_reference: the section or clause number if present, otherwise infer a logical reference
+- condition: when this requirement applies (e.g. "Before ignition", "During descent", "When conditions change") — null if always applicable
+- verification_signal: what field evidence would confirm this requirement is met — one concrete, observable thing
+- discussion_prompt: one open question a supervisor could ask their crew about this requirement during a toolbox talk — or null if not suitable for discussion
+
+Return ONLY a valid JSON array of requirement objects. No preamble, no markdown.
+Return at minimum 4 and maximum 12 requirements — select the most safety-critical ones.
+Requirements must be independently meaningful — not sub-steps of the same requirement.`;
+
+  const userPrompt = `Document: "${docTitle}"
+Type: ${docType}
+${summary ? 'Summary: ' + summary + '\n' : ''}
+Content:
+${content.substring(0, 8000)}
+
+Extract the key safety requirements from this document as a JSON array matching this schema:
+[{
+  "text": "plain language requirement",
+  "obligation": "shall|must|should|may",
+  "clause": "3.1",
+  "condition": "Before work commences|null",
+  "verification": "Observable field evidence",
+  "discussion": "Toolbox talk question|null"
+}]`;
+
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 2000,
+      system: systemPrompt,
+      messages: [{ role: 'user', content: userPrompt }]
+    })
+  });
+
+  if (!response.ok) { const e = await response.json(); throw new Error(e.error?.message || 'API error ' + response.status); }
+  const data = await response.json();
+  const raw = data.content[0].text.replace(/```json|```/g, '').trim();
+  return JSON.parse(raw);
+}
+
+async function readFileAsText(file) {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = e => resolve(e.target.result);
+    reader.readAsText(file);
+  });
+}
+
+// ── RENDER RESULTS ───────────────────────────────────────────────────────────
+function renderResults(reqs) {
+  const d = currentDoc.isExemplar ? currentDoc.data : { title: uploadedFile.name, type: 'Document', typeClass: 'tag-standard', workType: 'General', version: '1.0', code: 'DOC', owner: '—', reviewDate: '—', summary: 'Uploaded document' };
+
+  const canvas = document.getElementById('canvas');
+  canvas.innerHTML = `
+    <!-- View tabs -->
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+      <div class="view-tabs" id="viewTabs">
+        <button class="view-tab active" onclick="switchView('library')">📚 Library</button>
+        <button class="view-tab" onclick="switchView('field')">👷 Field / Worker</button>
+        <button class="view-tab" onclick="switchView('toolbox')">🎙 Toolbox Talk</button>
+        <button class="view-tab" onclick="switchView('review')">✋ Review</button>
+      </div>
+      <div style="font-family:var(--mono);font-size:10px;color:var(--ms-text);">
+        ${reqs.length} requirements extracted · ${reqs.filter(r=>r.obligation==='shall'||r.obligation==='must').length} mandatory
+      </div>
+    </div>
+
+    <!-- Content area -->
+    <div id="viewContent"></div>`;
+
+  currentView = 'library';
+  renderView('library', reqs, d);
+}
+
+function switchView(v) {
+  currentView = v;
+  document.querySelectorAll('.view-tab').forEach(t => t.classList.remove('active'));
+  event.target.classList.add('active');
+  const d = currentDoc.isExemplar ? currentDoc.data : { title: uploadedFile?.name || 'Document', type: 'Document', typeClass: 'tag-standard', workType: 'General', version: '1.0', code: 'DOC', owner: '—', reviewDate: '—', summary: '' };
+  renderView(v, extractedRequirements, d);
+}
+
+function renderView(view, reqs, d) {
+  const container = document.getElementById('viewContent');
+  if (!container) return;
+
+  if (view === 'library') container.innerHTML = renderLibraryView(reqs, d);
+  else if (view === 'field') container.innerHTML = renderFieldView(reqs, d);
+  else if (view === 'toolbox') container.innerHTML = renderToolboxView(reqs, d);
+  else if (view === 'review') container.innerHTML = renderReviewView(reqs, d);
+}
+
+// ── LIBRARY VIEW ─────────────────────────────────────────────────────────────
+function renderLibraryView(reqs, d) {
+  const shallCount = reqs.filter(r => r.obligation === 'shall' || r.obligation === 'must').length;
+  const shouldCount = reqs.filter(r => r.obligation === 'should').length;
+  const mayCount = reqs.filter(r => r.obligation === 'may').length;
+
+  return `
+    <!-- Doc header -->
+    <div class="doc-header-card fade-in">
+      <div class="doc-header-top">
+        <div class="doc-header-title">${d.title}</div>
+        <div class="doc-header-badge">${d.type} · v${d.version}</div>
+      </div>
+      <div class="doc-header-body">
+        <div class="doc-meta-item"><div class="doc-meta-key">Code</div><div class="doc-meta-val">${d.code}</div></div>
+        <div class="doc-meta-item"><div class="doc-meta-key">Work Type</div><div class="doc-meta-val">${d.workType}</div></div>
+        <div class="doc-meta-item"><div class="doc-meta-key">Owner</div><div class="doc-meta-val">${d.owner}</div></div>
+        <div class="doc-meta-item"><div class="doc-meta-key">Review</div><div class="doc-meta-val">${d.reviewDate}</div></div>
+        <div class="doc-meta-item"><div class="doc-meta-key">Requirements</div><div class="doc-meta-val">${reqs.length} extracted · ${shallCount} mandatory</div></div>
+        <div class="doc-meta-item"><div class="doc-meta-key">AI Ingestion</div><div class="doc-meta-val" style="color:var(--ms-text);">✓ Complete</div></div>
+      </div>
+    </div>
+
+    <!-- Obligation summary -->
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <div style="background:var(--red-dim);border:1px solid var(--red-border);border-radius:6px;padding:6px 12px;display:flex;align-items:center;gap:6px;">
+        <span style="font-family:var(--mono);font-size:10px;font-weight:700;color:var(--red-text);">SHALL / MUST</span>
+        <span style="font-family:var(--mono);font-size:13px;font-weight:700;color:var(--bright);">${shallCount}</span>
+      </div>
+      <div style="background:var(--amber-dim);border:1px solid var(--amber-border);border-radius:6px;padding:6px 12px;display:flex;align-items:center;gap:6px;">
+        <span style="font-family:var(--mono);font-size:10px;font-weight:700;color:var(--amber-text);">SHOULD</span>
+        <span style="font-family:var(--mono);font-size:13px;font-weight:700;color:var(--bright);">${shouldCount}</span>
+      </div>
+      <div style="background:var(--s2);border:1px solid var(--border);border-radius:6px;padding:6px 12px;display:flex;align-items:center;gap:6px;">
+        <span style="font-family:var(--mono);font-size:10px;font-weight:700;color:var(--muted);">MAY</span>
+        <span style="font-family:var(--mono);font-size:13px;font-weight:700;color:var(--bright);">${mayCount}</span>
+      </div>
+    </div>
+
+    <!-- Requirements -->
+    <div class="section-divider"><div class="section-divider-line"></div><div class="section-divider-label">Extracted Requirements — DocumentRequirement records</div><div class="section-divider-line"></div></div>
+    <div class="req-grid">
+      ${reqs.map((r, i) => reqCard(r, i, 'library')).join('')}
+    </div>
+
+    <!-- Observation integration -->
+    <div class="section-divider"><div class="section-divider-line"></div><div class="section-divider-label">Observation Integration — how requirements ground AI prompts</div><div class="section-divider-line"></div></div>
+    ${renderObsIntegration(reqs, d)}`;
+}
+
+function reqCard(r, i, mode) {
+  const obClass = (r.obligation === 'shall' || r.obligation === 'must') ? 'ob-shall' : r.obligation === 'should' ? 'ob-should' : 'ob-may';
+  const isChecked = checkStates[i];
+  const isFlagged = flagStates[i];
+  const isExpanded = expandStates[i];
+  const reviewState = reviewStates[i];
+
+  let cardClass = 'req-card';
+  if (isChecked) cardClass += ' checked';
+  if (isFlagged) cardClass += ' flagged';
+  if (isExpanded) cardClass += ' expanded';
+
+  const actionButtons = mode === 'field'
+    ? `<button class="req-action-btn ${isChecked ? 'btn-active-check' : 'btn-check'}" onclick="toggleCheck(${i})">${isChecked ? '✓ Done' : '○ Mark done'}</button>
+       <button class="req-action-btn ${isFlagged ? 'btn-flag' : 'btn-flag'}" onclick="toggleFlag(${i})" style="${isFlagged ? 'background:var(--red);color:white;' : ''}">${isFlagged ? '⚑ Flagged' : '⚑ Flag issue'}</button>`
+    : mode === 'review'
+    ? `<button class="req-action-btn ${reviewState === 'up' ? 'btn-active-up' : 'btn-thumb-up'}" onclick="setReview(${i},'up')">👍 Matches practice</button>
+       <button class="req-action-btn ${reviewState === 'down' ? 'btn-active-down' : 'btn-thumb-down'}" onclick="setReview(${i},'down')">👎 Doesn't match</button>
+       ${reviewState === 'down' ? `<input id="fb-${i}" style="flex:1;background:var(--s3);border:1px solid var(--red-border);border-radius:4px;padding:4px 8px;font-family:var(--sans);font-size:11px;color:var(--text);outline:none;" placeholder="What doesn't match? (optional)" oninput="setFeedback(${i},this.value)" value="${reviewFeedback[i]||''}" />` : ''}` 
+    : '';
+
+  return `<div class="${cardClass}" id="req-${i}">
+    <div class="req-card-head" onclick="toggleExpand(${i})">
+      <span class="req-obligation ${obClass}">${r.obligation||'shall'}</span>
+      <span class="req-text${isChecked ? ' checked-text' : ''}">${r.text}</span>
+      <span class="req-clause">${r.clause||'—'}</span>
+      <span class="req-expand-icon">▾</span>
+    </div>
+    ${isExpanded ? `<div class="req-card-body">
+      ${r.condition ? `<div class="req-detail-row"><div class="req-detail-key">Condition</div><div class="req-detail-val">${r.condition}</div></div>` : ''}
+      ${r.verification ? `<div class="req-detail-row"><div class="req-detail-key">Verify by</div><div class="req-detail-val" style="color:var(--ms-text);">${r.verification}</div></div>` : ''}
+      ${actionButtons ? `<div class="req-actions">${actionButtons}</div>` : ''}
+    </div>` : ''}
+  </div>`;
+}
+
+function renderObsIntegration(reqs, d) {
+  const mandatoryReqs = reqs.filter(r => r.obligation === 'shall' || r.obligation === 'must');
+  const exampleReq = mandatoryReqs[0] || reqs[0];
+  if (!exampleReq) return '';
+
+  return `<div class="obs-integration-card fade-in">
+    <div class="obs-int-head">
+      <div class="obs-int-pulse"></div>
+      <span class="obs-int-label">Observation Prompt Integration — how this document grounds field AI</span>
+    </div>
+    <div class="obs-int-body">
+      <div style="font-size:11.5px;color:var(--muted);margin-bottom:10px;line-height:1.6;">
+        Once ingested, DocumentRequirement records become queryable context for every AI call. An observation about a ${d.workType} task will automatically have relevant requirements injected into the enrichment prompt — turning a generic signal into a procedure-specific gap.
+      </div>
+      <div class="obs-bubble">
+        "Crew started ${d.workType.toLowerCase()} work — noticed the pre-task brief didn't cover all the requirements from what I expected to see."
+      </div>
+      <div class="obs-match">
+        <div class="obs-match-icon">⚡</div>
+        <div class="obs-match-text">
+          AI enrichment detects potential gap against <strong>${d.code} clause ${exampleReq.clause}</strong>: "<em>${exampleReq.text.substring(0, 100)}${exampleReq.text.length > 100 ? '...' : ''}</em>"
+          <br><br>
+          <strong>fw_factor suggestion:</strong> management_systems [enable · compliant] — procedure exists but content gap detected at point of work.
+          <br>
+          <strong>barrier_assessment:</strong> barrier_degraded — requirement present in document but not evidenced in field practice.
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ── FIELD VIEW ────────────────────────────────────────────────────────────────
+function renderFieldView(reqs, d) {
+  const checked = Object.values(checkStates).filter(Boolean).length;
+  const pct = reqs.length > 0 ? Math.round((checked / reqs.length) * 100) : 0;
+  const shallReqs = reqs.filter(r => r.obligation === 'shall' || r.obligation === 'must');
+  const shouldReqs = reqs.filter(r => r.obligation === 'should');
+
+  return `
+    <div style="background:var(--s1);border:1px solid var(--border);border-radius:8px;padding:12px 14px;margin-bottom:2px;">
+      <div style="font-size:11px;color:var(--muted);margin-bottom:3px;font-family:var(--mono);text-transform:uppercase;letter-spacing:1px;">Work Type</div>
+      <div style="font-size:14px;font-weight:700;color:var(--bright);">${d.workType}</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:2px;">${d.title} · ${d.code} v${d.version}</div>
+    </div>
+
+    <div class="progress-bar-wrap">
+      <div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>
+      <div class="progress-label"><strong>${checked}</strong> of ${reqs.length} confirmed</div>
+      ${pct === 100 ? '<span style="font-family:var(--mono);font-size:10px;color:var(--ms-text);background:var(--ms-dim);border:1px solid var(--ms-border);padding:2px 8px;border-radius:3px;">✓ ALL COMPLETE</span>' : ''}
+    </div>
+
+    ${shallReqs.length > 0 ? `
+    <div class="section-divider"><div class="section-divider-line"></div><div class="section-divider-label">Mandatory — shall / must</div><div class="section-divider-line"></div></div>
+    <div class="req-grid">${shallReqs.map(r => reqCard(r, reqs.indexOf(r), 'field')).join('')}</div>` : ''}
+
+    ${shouldReqs.length > 0 ? `
+    <div class="section-divider"><div class="section-divider-line"></div><div class="section-divider-label">Recommended — should</div><div class="section-divider-line"></div></div>
+    <div class="req-grid">${shouldReqs.map(r => reqCard(r, reqs.indexOf(r), 'field')).join('')}</div>` : ''}
+
+    ${Object.values(flagStates).some(Boolean) ? `
+    <div class="section-divider"><div class="section-divider-line"></div><div class="section-divider-label">Flagged Issues</div><div class="section-divider-line"></div></div>
+    <div style="background:var(--red-dim);border:1px solid var(--red-border);border-radius:8px;padding:12px 14px;font-size:12px;color:var(--red-text);">
+      ${Object.entries(flagStates).filter(([k,v])=>v).map(([k]) => `<div>⚑ ${reqs[k]?.text?.substring(0,80)}...</div>`).join('')}
+      <div style="margin-top:8px;font-size:11px;color:var(--muted);">Flagged requirements will generate an observation record on submission.</div>
+    </div>` : ''}`;
+}
+
+// ── TOOLBOX VIEW ─────────────────────────────────────────────────────────────
+function renderToolboxView(reqs, d) {
+  const discussionReqs = reqs.filter(r => r.discussion);
+  return `
+    <div style="background:var(--plum-dim);border:1px solid var(--plum-border);border-radius:8px;padding:14px 16px;margin-bottom:4px;">
+      <div style="font-family:var(--mono);font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--plum-text);margin-bottom:6px;">Toolbox Talk · ${d.workType}</div>
+      <div style="font-size:14px;font-weight:700;color:var(--bright);margin-bottom:4px;">${d.title}</div>
+      <div style="font-size:11.5px;color:var(--muted);line-height:1.6;">${d.summary}</div>
+    </div>
+
+    <div class="section-divider"><div class="section-divider-line"></div><div class="section-divider-label">Requirements · read aloud + discuss</div><div class="section-divider-line"></div></div>
+
+    ${reqs.map((r,i) => {
+      const obClass = (r.obligation === 'shall' || r.obligation === 'must') ? 'ob-shall' : r.obligation === 'should' ? 'ob-should' : 'ob-may';
+      return `<div class="talk-card fade-in">
+        <div class="talk-req-head">
+          <span class="req-obligation ${obClass}">${r.obligation||'shall'}</span>
+          <span style="flex:1;font-size:13px;color:var(--bright);font-weight:500;line-height:1.5;">${r.text}</span>
+          <span style="font-family:var(--mono);font-size:10px;color:var(--muted);">${r.clause||'—'}</span>
+        </div>
+        ${r.discussion ? `<div class="talk-discussion">
+          <div class="talk-discussion-label">💬 Discussion prompt</div>
+          <div class="talk-discussion-q">${r.discussion}</div>
+        </div>` : ''}
+      </div>`;
+    }).join('')}
+
+    <div style="background:var(--s1);border:1px solid var(--border);border-radius:8px;padding:12px 14px;margin-top:4px;">
+      <div style="font-family:var(--mono);font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">Delivery Record</div>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+        <div style="font-size:12px;color:var(--muted);">${discussionReqs.length} discussion prompts · ${reqs.length} requirements covered</div>
+        <button style="background:var(--ms);color:#0a0b0d;border:none;border-radius:4px;padding:6px 14px;font-family:var(--mono);font-size:10px;font-weight:700;cursor:pointer;">Mark Talk Delivered</button>
+      </div>
+    </div>`;
+}
+
+// ── REVIEW VIEW ───────────────────────────────────────────────────────────────
+function renderReviewView(reqs, d) {
+  const upCount = Object.values(reviewStates).filter(v=>v==='up').length;
+  const downCount = Object.values(reviewStates).filter(v=>v==='down').length;
+  const total = reqs.length;
+
+  return `
+    <div style="background:var(--s1);border:1px solid var(--border);border-radius:8px;padding:14px 16px;">
+      <div style="font-family:var(--mono);font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;">Procedure Review — does this document reflect how work is actually done?</div>
+      <div style="font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:12px;">Review each requirement against your real-world practice. Thumbs up = this matches how we work. Thumbs down = there's a gap between the document and reality. Add a note if you want to explain what doesn't match. This review feeds directly into the document owner's improvement workflow.</div>
+      <div class="review-stats">
+        <div class="review-stat"><div class="review-stat-num" style="color:var(--ms-text);">${upCount}</div><div class="review-stat-label">Match practice</div></div>
+        <div class="review-stat"><div class="review-stat-num" style="color:var(--red-text);">${downCount}</div><div class="review-stat-label">Don't match</div></div>
+        <div class="review-stat"><div class="review-stat-num" style="color:var(--muted);">${total - upCount - downCount}</div><div class="review-stat-label">Not reviewed</div></div>
+      </div>
+    </div>
+
+    <div class="section-divider"><div class="section-divider-line"></div><div class="section-divider-label">Review each requirement</div><div class="section-divider-line"></div></div>
+    <div class="req-grid">${reqs.map((r,i) => reqCard(r, i, 'review')).join('')}</div>
+
+    ${downCount > 0 ? `
+    <div class="section-divider"><div class="section-divider-line"></div><div class="section-divider-label">Gaps identified — feeds to document owner</div><div class="section-divider-line"></div></div>
+    <div style="display:flex;flex-direction:column;gap:6px;">
+      ${Object.entries(reviewStates).filter(([k,v])=>v==='down').map(([k]) => `
+        <div class="review-feedback">
+          <div class="review-feedback-clause">${reqs[k]?.clause||'—'} — ${reqs[k]?.text?.substring(0,60)}...</div>
+          <div class="review-feedback-text">${reviewFeedback[k] || 'No additional notes provided.'}</div>
+        </div>`).join('')}
+    </div>` : ''}`;
+}
+
+// ── INTERACTION HANDLERS ──────────────────────────────────────────────────────
+function toggleExpand(i) {
+  expandStates[i] = !expandStates[i];
+  rerenderView();
+}
+function toggleCheck(i) {
+  checkStates[i] = !checkStates[i];
+  rerenderView();
+}
+function toggleFlag(i) {
+  flagStates[i] = !flagStates[i];
+  rerenderView();
+}
+function setReview(i, val) {
+  reviewStates[i] = reviewStates[i] === val ? null : val;
+  rerenderView();
+}
+function setFeedback(i, val) {
+  reviewFeedback[i] = val;
+  // Don't rerender on typing — just store
+}
+
+function rerenderView() {
+  const d = currentDoc?.isExemplar ? currentDoc.data : { title: uploadedFile?.name || 'Document', type: 'Document', typeClass: 'tag-standard', workType: 'General', version: '1.0', code: 'DOC', owner: '—', reviewDate: '—', summary: '' };
+  renderView(currentView, extractedRequirements, d);
+}
+
+function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// Init key status
+if (apiKey) document.getElementById('keyStatus').textContent = '✓';
+</script>
+</body>
+</html>
