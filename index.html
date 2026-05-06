@@ -147,43 +147,33 @@
     <div class="wordmark">
       <span class="wordmark-hiviz">Hiviz</span>
       <span class="wordmark-sep">/</span>
-      <span class="wordmark-product">Hiviz <span class="version-tag">V1</span></span>
+      <span class="wordmark-product">SafetyPlatform <span class="version-tag">V1</span></span>
     </div>
-    <p class="header-desc">Working design resource for Hiviz V1. Contains scaffolded specs, interactive product docs, simulators, and build scaffolding. Nothing here is final production code — it's the thinking and structure behind what gets built.</p>
+    <p class="header-desc">Working design resource for Hiviz SafetyPlatform. Contains consolidated specs, interactive product docs, simulators, and build scaffolding. Nothing here is final production code — it's the thinking and structure behind what gets built.</p>
   </header>
 
   <nav>
     <a href="#overview">Overview</a>
-    <a href="#mvp-scope">MVP Scope</a>
     <a href="#wireframes">Wireframes</a>
     <a href="#product-docs">Product Docs</a>
     <a href="#simulators">Simulators</a>
     <a href="#ms-sim" class="ms-nav">Mgmt System ✦</a>
     <a href="#specs">Tech Specs</a>
-    <a href="#devpack">V1 Devpack</a>
     <a href="#claude-code">Claude Code</a>
-    <a href="#v2-devpack">V2 Devpack</a>
     <a href="#prompt-lab">Prompt Lab</a>
     <a href="#ux-experiments" class="exp-nav">UX Experiments ✦</a>
   </nav>
 
+  <!-- ── OVERVIEW ── -->
   <section class="section" id="overview">
     <div class="section-header"><span class="section-title">Overview</span></div>
     <div class="section-rule"></div>
     <ul class="file-list">
       <li class="file-item"><span class="file-tag tag-md">md</span><a href="README.md" class="file-link">README.md</a><span class="file-dot"></span><span class="file-desc">Project overview</span></li>
-      <li class="file-item"><span class="file-tag tag-md">md</span><a href="ROADMAP.md" class="file-link">ROADMAP.md</a><span class="file-dot"></span><span class="file-desc">Full product roadmap (V1–V5)</span></li>
     </ul>
   </section>
 
-  <section class="section" id="mvp-scope">
-    <div class="section-header"><span class="section-title">MVP Scope</span></div>
-    <div class="section-rule"></div>
-    <ul class="file-list">
-      <li class="file-item"><span class="file-tag tag-html">html</span><a href="mvp-scope.html" class="file-link">mvp-scope.html</a><span class="file-dot"></span><span class="file-desc">Interactive MVP scope &amp; epic breakdown</span></li>
-    </ul>
-  </section>
-
+  <!-- ── WIREFRAMES ── -->
   <section class="section" id="wireframes">
     <div class="section-header"><span class="section-title">UX Wireframes</span><span class="section-note">clickable — mockup &amp; wireframe toggle</span></div>
     <div class="section-rule"></div>
@@ -199,6 +189,7 @@
     </ul>
   </section>
 
+  <!-- ── PRODUCT DOCS ── -->
   <section class="section" id="product-docs">
     <div class="section-header"><span class="section-title">Product Docs</span><span class="section-note">interactive — open in browser</span></div>
     <div class="section-rule"></div>
@@ -215,6 +206,7 @@
     </ul>
   </section>
 
+  <!-- ── SIMULATORS ── -->
   <section class="section" id="simulators">
     <div class="section-header"><span class="section-title">Simulators</span><span class="section-note">interactive — open in browser</span></div>
     <div class="section-rule"></div>
@@ -243,43 +235,25 @@
     </ul>
   </section>
 
+  <!-- ── TECH SPECS ── -->
   <section class="section" id="specs">
-    <div class="section-header"><span class="section-title">Technical Specs</span><span class="section-note">markdown</span></div>
+    <div class="section-header"><span class="section-title">Technical Specs</span><span class="section-note">consolidated — SPEC.md is source of truth</span></div>
     <div class="section-rule"></div>
     <ul class="file-list">
-      <li class="file-item"><span class="file-tag tag-md">md</span><a href="specs/01-data-model-api-spec.md" class="file-link">01-data-model-api-spec.md</a><span class="file-dot"></span><span class="file-desc">Data model &amp; API spec</span></li>
-      <li class="file-item"><span class="file-tag tag-md">md</span><a href="specs/02-ai-prompt-library.md" class="file-link">02-ai-prompt-library.md</a><span class="file-dot"></span><span class="file-desc">AI prompt library — 12 prompts · Blueprint-enriched FW classifier</span></li>
-      <li class="file-item"><span class="file-tag tag-md">md</span><a href="specs/03-system-architecture.md" class="file-link">03-system-architecture.md</a><span class="file-dot"></span><span class="file-desc">System architecture</span></li>
-      <li class="file-item"><span class="file-tag tag-md">md</span><a href="specs/04-integration-logic-rules.md" class="file-link">04-integration-logic-rules.md</a><span class="file-dot"></span><span class="file-desc">Integration &amp; logic rules</span></li>
-      <li class="file-item"><span class="file-tag tag-md">md</span><a href="specs/05-view-information-spec.md" class="file-link">05-view-information-spec.md</a><span class="file-dot"></span><span class="file-desc">View information spec</span></li>
-      <li class="file-item"><span class="file-tag tag-md">md</span><a href="specs/06-notification-events.md" class="file-link">06-notification-events.md</a><span class="file-dot"></span><span class="file-desc">Notification events — 30 events</span></li>
-      <li class="file-item"><span class="file-tag tag-md">md</span><a href="specs/07-enquiry-module-spec.md" class="file-link">07-enquiry-module-spec.md</a><span class="file-dot"></span><span class="file-desc">Enquiry module spec</span></li>
-      <li class="file-item"><span class="file-tag tag-html">html</span><a href="specs/08-offline-architecture.html" class="file-link">08-offline-architecture.html</a><span class="file-dot"></span><span class="file-desc">Offline architecture diagram — dev reference</span></li>
+      <li class="file-item"><span class="file-tag tag-md">md</span><a href="HOW-TO-READ-THIS.md" class="file-link">HOW-TO-READ-THIS.md</a><span class="file-dot"></span><span class="file-desc">Start here — document map, key concepts, dev rules</span></li>
+      <li class="file-item"><span class="file-tag tag-md">md</span><a href="SPEC.md" class="file-link">SPEC.md</a><span class="file-dot"></span><span class="file-desc">Data model, API, algorithms, logic rules, notifications, enquiry module</span></li>
+      <li class="file-item"><span class="file-tag tag-md">md</span><a href="prompts.md" class="file-link">prompts.md</a><span class="file-dot"></span><span class="file-desc">AI prompt library — 13 prompts · Blueprint-enriched FW classifier</span></li>
+      <li class="file-item"><span class="file-tag tag-md">md</span><a href="specs/05-view-information-spec.md" class="file-link">specs/05-view-information-spec.md</a><span class="file-dot"></span><span class="file-desc">View information spec — UI surfaces, flows, component behaviour</span></li>
+      <li class="file-item"><span class="file-tag tag-html">html</span><a href="specs/08-offline-architecture.html" class="file-link">specs/08-offline-architecture.html</a><span class="file-dot"></span><span class="file-desc">Offline architecture diagram — dev reference</span></li>
       <li class="file-item"><span class="file-tag tag-html">html</span><a href="architecture/platform-architecture.html" class="file-link">architecture/platform-architecture.html</a><span class="file-dot"></span><span class="file-desc">Connected, modular workspaces</span></li>
-      <li class="file-item"><span class="file-tag tag-html">html</span><a href="architecture/sitemap.html" class="file-link">architecture/sitemap.html</a><span class="file-dot"></span><span class="file-desc">Sitemap, views, patterns etc</span></li>
-      <li class="file-item"><span class="file-tag tag-html">html</span><a href="v6-discovery.html" class="file-link">v6-discovery.html</a><span class="file-dot"></span><span class="file-desc">v6 Management systems discovery</span></li>
-      <li class="file-item"><span class="file-tag tag-html">html</span><a href="v7-discovery.html" class="file-link">v7-discovery.html</a><span class="file-dot"></span><span class="file-desc">v7 Communities</span></li>
+      <li class="file-item"><span class="file-tag tag-html">html</span><a href="architecture/sitemap.html" class="file-link">architecture/sitemap.html</a><span class="file-dot"></span><span class="file-desc">Sitemap, views, patterns</span></li>
+      <li class="file-item"><span class="file-tag tag-html">html</span><a href="signal-flow.html" class="file-link">signal-flow.html</a><span class="file-dot"></span><span class="file-desc">Intelligence signal flow — pipeline stages, insight classes</span></li>
+      <li class="file-item"><span class="file-tag tag-html">html</span><a href="v6-discovery.html" class="file-link">v6-discovery.html</a><span class="file-dot"></span><span class="file-desc">V6 Management systems discovery</span></li>
+      <li class="file-item"><span class="file-tag tag-html">html</span><a href="v7-discovery.html" class="file-link">v7-discovery.html</a><span class="file-dot"></span><span class="file-desc">V7 Communities discovery</span></li>
     </ul>
   </section>
 
-  <section class="section" id="devpack">
-    <div class="section-header"><span class="section-title">V1 Devpack</span><span class="section-note">scaffolding for developers</span></div>
-    <div class="section-rule"></div>
-    <ul class="file-list">
-      <li class="file-item"><span class="file-tag tag-md">md</span><a href="v1-devpack/README.md" class="file-link">v1-devpack/README.md</a><span class="file-dot"></span><span class="file-desc">Devpack guide — schema, jobs, API, build sequence</span></li>
-      <li class="file-item"><span class="file-tag tag-md">md</span><a href="v1-devpack/01-data-model-api-spec.md" class="file-link">v1-devpack/01-data-model-api-spec.md</a><span class="file-dot"></span><span class="file-desc">Data model copy</span></li>
-      <li class="file-item"><span class="file-tag tag-md">md</span><a href="v1-devpack/02-ai-prompt-library.md" class="file-link">v1-devpack/02-ai-prompt-library.md</a><span class="file-dot"></span><span class="file-desc">Prompt library copy</span></li>
-      <li class="file-item"><span class="file-tag tag-md">md</span><a href="v1-devpack/04-integration-logic-rules.md" class="file-link">v1-devpack/04-integration-logic-rules.md</a><span class="file-dot"></span><span class="file-desc">Logic rules copy</span></li>
-      <li class="file-item"><span class="file-tag tag-md">md</span><a href="v1-devpack/05-view-information-spec.md" class="file-link">v1-devpack/05-view-information-spec.md</a><span class="file-dot"></span><span class="file-desc">View spec copy</span></li>
-      <li class="file-item"><span class="file-tag tag-ts">ts</span><a href="v1-devpack/src/data/mock.ts" class="file-link">src/data/mock.ts</a><span class="file-dot"></span><span class="file-desc">Mock data (TypeScript)</span></li>
-      <li class="file-item"><span class="file-tag tag-ts">tsx</span><a href="v1-devpack/src/pages/supervisor/home.tsx" class="file-link">src/pages/supervisor/home.tsx</a><span class="file-dot"></span><span class="file-desc">Supervisor home scaffold</span></li>
-      <li class="file-item"><span class="file-tag tag-ts">tsx</span><a href="v1-devpack/src/pages/manager/visits.tsx" class="file-link">src/pages/manager/visits.tsx</a><span class="file-dot"></span><span class="file-desc">Manager visits scaffold</span></li>
-      <li class="file-item"><span class="file-tag tag-ts">tsx</span><a href="v1-devpack/src/pages/safety/workbench.tsx" class="file-link">src/pages/safety/workbench.tsx</a><span class="file-dot"></span><span class="file-desc">Safety workbench scaffold</span></li>
-      <li class="file-item"><span class="file-tag tag-ts">tsx</span><a href="v1-devpack/src/pages/safety/enquiry.tsx" class="file-link">src/pages/safety/enquiry.tsx</a><span class="file-dot"></span><span class="file-desc">Enquiry scaffold</span></li>
-      <li class="file-item"><span class="file-tag tag-ts">tsx</span><a href="v1-devpack/src/pages/safety/analytics.tsx" class="file-link">src/pages/safety/analytics.tsx</a><span class="file-dot"></span><span class="file-desc">Analytics scaffold</span></li>
-    </ul>
-  </section>
-
+  <!-- ── CLAUDE CODE ── -->
   <section class="section" id="claude-code">
     <div class="section-header"><span class="section-title">Claude Code Brief</span></div>
     <div class="section-rule"></div>
@@ -289,17 +263,7 @@
     </ul>
   </section>
 
-  <section class="section" id="v2-devpack">
-    <div class="section-header"><span class="section-title">V2 Devpack</span><span class="section-note">light resource — full pack available if needed</span></div>
-    <div class="section-rule"></div>
-    <ul class="file-list">
-      <li class="file-item"><span class="file-tag tag-md">md</span><a href="v2-devpack/README.md" class="file-link">v2-devpack/README.md</a><span class="file-dot"></span><span class="file-desc">V2 devpack guide</span></li>
-      <li class="file-item"><span class="file-tag tag-ts">tsx</span><a href="v2-devpack/src/pages/manager/visit-briefing.tsx" class="file-link">src/pages/manager/visit-briefing.tsx</a><span class="file-dot"></span><span class="file-desc">Manager visit briefing scaffold</span></li>
-      <li class="file-item"><span class="file-tag tag-ts">tsx</span><a href="v2-devpack/src/pages/safety/fw-analytics.tsx" class="file-link">src/pages/safety/fw-analytics.tsx</a><span class="file-dot"></span><span class="file-desc">Forge Works analytics scaffold</span></li>
-      <li class="file-item"><span class="file-tag tag-ts">tsx</span><a href="v2-devpack/src/pages/safety/insight-create.tsx" class="file-link">src/pages/safety/insight-create.tsx</a><span class="file-dot"></span><span class="file-desc">Manual insight creation scaffold</span></li>
-    </ul>
-  </section>
-
+  <!-- ── PROMPT LAB ── -->
   <section class="section" id="prompt-lab">
     <div class="section-header"><span class="section-title">Prompt Lab</span><span class="section-note">live prompt tuning — requires Anthropic API key</span></div>
     <div class="section-rule"></div>
@@ -333,7 +297,7 @@
   </section>
 
   <footer>
-    <div class="footer-left"><strong>Hiviz — Hiviz</strong> &nbsp;·&nbsp; Design resource snapshot, May 2026</div>
+    <div class="footer-left"><strong>Forge Works · Hiviz SafetyPlatform</strong> &nbsp;·&nbsp; Design resource, May 2026</div>
     <div class="footer-right">scaffolding, not shipping</div>
   </footer>
 
