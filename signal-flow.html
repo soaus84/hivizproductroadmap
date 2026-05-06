@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hiviz — Signal Routing & Intelligence Flow</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=Syne:wght@700;800&display=swap');
+
+:root {
+  --bg: #080909;
+  --s1: #0e0f10;
+  --s2: #141516;
+  --border: #1e1f22;
+  --text: #cdd0d6;
+  --muted: #4a4d55;
+  --bright: #eceef2;
+
+  --obs: #0891b2;       /* observation — teal */
+  --obs-dim: rgba(8,145,178,0.08);
+  --obs-border: rgba(8,145,178,0.3);
+
+  --crit-obs: #dc2626;  /* critical observation — red */
+  --crit-dim: rgba(220,38,38,0.08);
+  --crit-border: rgba(220,38,38,0.3);
+
+  --inc: #d97706;       /* incident — amber */
+  --inc-dim: rgba(217,119,6,0.08);
+  --inc-border: rgba(217,119,6,0.3);
+
+  --crit-inc: #9333ea;  /* critical incident — purple */
+  --cinc-dim: rgba(147,51,234,0.08);
+  --cinc-border: rgba(147,51,234,0.3);
+
+  --pool: #374151;
+  --pipeline: #10b981;  /* insight pipeline — green */
+  --pipe-dim: rgba(16,185,129,0.08);
+  --pipe-border: rgba(16,185,129,0.3);
+
+  --action: #f59e0b;   /* immediate action — amber */
+  --action-dim: rgba(245,158,11,0.08);
+
+  --mono: 'IBM Plex Mono', monospace;
+  --display: 'Syne', sans-serif;
+
+  --future: rgba(147,51,234,0.15); /* proposed/future — purple tinted */
+  --future-border: rgba(147,51,234,0.4);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.6;
+  min-height: 100vh;
+  padding: 0 0 80px;
+}
+
+/* Grid background */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.012) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.012) 1px, transparent 1px);
+  background-size: 32px 32px;
+  pointer-events: none; z-index: 0;
+}
+
+.page { position: relative; z-index: 1; max-width: 1200px; margin: 0 auto; padding: 0 32px; }
+
+/* ── HEADER ── */
+.header { padding: 48px 0 40px; border-bottom: 1px solid var(--border); margin-bottom: 48px; }
+.header-kicker { font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
+.header-title { font-family: var(--display); font-size: 28px; font-weight: 800; color: var(--bright); margin-bottom: 8px; }
+.header-desc { font-size: 12px; color: var(--muted); max-width: 600px; line-height: 1.7; }
+
+/* ── LEGEND ── */
+.legend { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 48px; }
+.legend-item { display: flex; align-items: center; gap: 7px; padding: 5px 12px; border-radius: 4px; border: 1px solid var(--border); background: var(--s1); }
+.legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.legend-label { font-size: 10px; letter-spacing: 0.5px; color: var(--text); }
+.legend-future { border-color: var(--future-border); background: var(--future); }
+.legend-future .legend-label { color: #c084fc; }
+
+/* ── FLOW DIAGRAM ── */
+.flow { display: grid; grid-template-columns: 220px 1fr; gap: 0; position: relative; }
+
+/* Entry column */
+.entry-col { display: flex; flex-direction: column; gap: 0; border-right: 1px solid var(--border); padding-right: 24px; }
+.entry-section { margin-bottom: 0; }
+.entry-section-label { font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; padding-top: 16px; }
+
+/* Signal boxes — entry */
+.signal-box {
+  border-radius: 6px; padding: 11px 13px; margin-bottom: 6px;
+  border: 1px solid; position: relative; cursor: default;
+  transition: all 0.2s;
+}
+.signal-box:hover { transform: translateX(2px); }
+
+.sig-obs      { background: var(--obs-dim); border-color: var(--obs-border); }
+.sig-crit-obs { background: var(--crit-dim); border-color: var(--crit-border); }
+.sig-inc      { background: var(--inc-dim); border-color: var(--inc-border); }
+.sig-crit-inc { background: var(--cinc-dim); border-color: var(--cinc-border); }
+.sig-future   { background: var(--future); border-color: var(--future-border); border-style: dashed; }
+.sig-ctrl     { background: rgba(245,158,11,0.06); border-color: rgba(245,158,11,0.3); }
+
+.sig-key { font-size: 9px; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 4px; font-weight: 600; }
+.sig-obs .sig-key      { color: var(--obs); }
+.sig-crit-obs .sig-key { color: var(--crit-obs); }
+.sig-inc .sig-key      { color: var(--inc); }
+.sig-crit-inc .sig-key { color: var(--crit-inc); }
+.sig-future .sig-key   { color: #c084fc; }
+.sig-ctrl .sig-key     { color: var(--action); }
+
+.sig-name { font-size: 12px; font-weight: 600; color: var(--bright); margin-bottom: 3px; }
+.sig-desc { font-size: 10.5px; color: var(--muted); line-height: 1.5; }
+.sig-examples { font-size: 10px; color: var(--muted); margin-top: 5px; font-style: italic; }
+
+.future-pill {
+  display: inline-block; font-size: 9px; font-weight: 600; letter-spacing: 0.5px;
+  background: rgba(147,51,234,0.2); color: #c084fc; border: 1px solid var(--future-border);
+  border-radius: 3px; padding: 1px 6px; margin-bottom: 4px;
+}
+
+/* ── ROUTES COLUMN ── */
+.routes-col { padding-left: 32px; display: flex; flex-direction: column; gap: 24px; }
+
+.route-group { position: relative; }
+.route-group-label { font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; padding-top: 16px; }
+
+/* Route rows */
+.route {
+  display: flex; gap: 0; align-items: stretch; margin-bottom: 8px;
+  position: relative;
+}
+
+.route-source {
+  font-size: 10px; color: var(--muted); min-width: 130px;
+  padding: 8px 12px 8px 0;
+  display: flex; align-items: center;
+  flex-shrink: 0;
+}
+
+.route-arrow {
+  display: flex; align-items: center; padding: 0 10px;
+  color: var(--muted); font-size: 14px; flex-shrink: 0;
+}
+
+.route-dest {
+  flex: 1; border-radius: 6px; padding: 10px 14px;
+  border: 1px solid; position: relative;
+}
+
+/* Destination variants */
+.dest-pool {
+  background: rgba(55,65,81,0.15); border-color: rgba(55,65,81,0.4);
+}
+.dest-pool-label { font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: #6b7280; margin-bottom: 4px; }
+
+.dest-pipeline {
+  background: var(--pipe-dim); border-color: var(--pipe-border);
+}
+.dest-pipeline-label { font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: var(--pipeline); margin-bottom: 4px; font-weight: 600; }
+
+.dest-pipeline-fast {
+  background: rgba(16,185,129,0.12); border-color: var(--pipeline); border-width: 1.5px;
+}
+
+.dest-action {
+  background: var(--action-dim); border-color: rgba(245,158,11,0.35);
+}
+.dest-action-label { font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: var(--action); margin-bottom: 4px; font-weight: 600; }
+
+.dest-critical {
+  background: var(--crit-dim); border-color: var(--crit-border);
+}
+.dest-critical-label { font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: var(--crit-obs); margin-bottom: 4px; font-weight: 600; }
+
+.dest-cinc {
+  background: var(--cinc-dim); border-color: var(--cinc-border);
+}
+.dest-cinc-label { font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: var(--crit-inc); margin-bottom: 4px; font-weight: 600; }
+
+.dest-future {
+  background: var(--future); border-color: var(--future-border); border-style: dashed;
+}
+.dest-future-label { font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: #c084fc; margin-bottom: 4px; font-weight: 600; }
+
+.dest-title { font-size: 12px; font-weight: 600; color: var(--bright); margin-bottom: 3px; }
+.dest-desc { font-size: 10.5px; color: var(--muted); line-height: 1.55; }
+.dest-note { font-size: 10px; color: var(--muted); margin-top: 5px; font-style: italic; }
+
+/* Badges on destinations */
+.dest-badge {
+  display: inline-block; font-size: 9px; font-weight: 700; letter-spacing: 0.5px;
+  padding: 2px 7px; border-radius: 3px; margin-left: 6px; vertical-align: middle;
+}
+.badge-immediate { background: var(--crit-dim); color: var(--crit-obs); border: 1px solid var(--crit-border); }
+.badge-async { background: rgba(55,65,81,0.3); color: #6b7280; }
+.badge-proposed { background: rgba(147,51,234,0.2); color: #c084fc; border: 1px solid var(--future-border); }
+.badge-human { background: rgba(217,119,6,0.15); color: var(--inc); border: 1px solid rgba(217,119,6,0.3); }
+
+/* ── PIPELINE STAGES ── */
+.pipeline-strip {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
+  margin-top: 48px; padding-top: 24px; border-top: 1px solid var(--border);
+}
+.pipe-stage {
+  background: var(--s1); border: 1px solid var(--border); border-radius: 6px; padding: 12px 14px;
+}
+.pipe-stage-label { font-size: 9px; letter-spacing: 2px; text-transform: uppercase; font-weight: 600; margin-bottom: 6px; }
+.pipe-stage-desc { font-size: 10.5px; color: var(--muted); line-height: 1.55; }
+
+/* ── INSIGHT CLASSES ── */
+.insight-classes {
+  display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;
+  margin-top: 24px;
+}
+.insight-class {
+  background: var(--s1); border: 1px solid var(--border); border-radius: 6px; padding: 12px 14px;
+  border-left: 3px solid;
+}
+.ic-standard { border-left-color: var(--pipeline); }
+.ic-cluster  { border-left-color: var(--inc); }
+.ic-critical { border-left-color: var(--crit-obs); border-left-color: var(--future-border); border-left-style: dashed; }
+.ic-label { font-size: 9px; letter-spacing: 1px; text-transform: uppercase; font-weight: 600; margin-bottom: 5px; }
+.ic-standard .ic-label { color: var(--pipeline); }
+.ic-cluster .ic-label  { color: var(--inc); }
+.ic-critical .ic-label { color: #c084fc; }
+.ic-title { font-size: 12px; font-weight: 600; color: var(--bright); margin-bottom: 4px; }
+.ic-desc { font-size: 10.5px; color: var(--muted); line-height: 1.5; }
+
+/* ── DIVIDERS ── */
+.section-divider {
+  display: flex; align-items: center; gap: 12px;
+  margin: 40px 0 24px;
+}
+.sd-line { flex: 1; height: 1px; background: var(--border); }
+.sd-label { font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
+
+/* ── DESIGN NOTE ── */
+.design-note {
+  background: var(--future); border: 1px dashed var(--future-border);
+  border-radius: 8px; padding: 16px 18px; margin-top: 40px;
+}
+.design-note-title { font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: #c084fc; font-weight: 600; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+.design-note-body { font-size: 11.5px; color: var(--text); line-height: 1.7; }
+.design-note-body strong { color: #c084fc; }
+
+/* ── CONNECTOR LINES ── */
+.connector-row { display: flex; align-items: center; gap: 0; margin: 4px 0; }
+.conn-label { font-size: 10px; color: var(--muted); min-width: 130px; padding-right: 12px; }
+.conn-line { flex: 1; height: 1px; background: var(--border); position: relative; }
+.conn-line::after { content: '▶'; position: absolute; right: -8px; top: -7px; font-size: 12px; color: var(--muted); }
+
+@keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+.fade-up { animation: fadeUp 0.4s ease both; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="header fade-up">
+    <div class="header-kicker">Hiviz SafetyPlatform · Architecture Reference</div>
+    <div class="header-title">Signal Routing & Intelligence Flow</div>
+    <div class="header-desc">How observations and incidents are classified, routed, and escalated through the intelligence pipeline. Dashed purple elements are proposed additions — not yet in the V1 spec.</div>
+  </div>
+
+  <!-- LEGEND -->
+  <div class="legend fade-up">
+    <div class="legend-item"><div class="legend-dot" style="background:var(--obs)"></div><span class="legend-label">Standard observation</span></div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--crit-obs)"></div><span class="legend-label">Critical observation</span></div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--inc)"></div><span class="legend-label">Standard incident</span></div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--crit-inc)"></div><span class="legend-label">Critical incident</span></div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--pipeline)"></div><span class="legend-label">Intelligence pipeline</span></div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--action)"></div><span class="legend-label">Immediate action</span></div>
+    <div class="legend-item legend-future"><div class="legend-dot" style="background:#c084fc"></div><span class="legend-label">Proposed — not yet in spec</span></div>
+  </div>
+
+  <!-- MAIN FLOW -->
+  <div class="flow fade-up">
+
+    <!-- LEFT: Entry signals -->
+    <div class="entry-col">
+      <div class="entry-section-label">Standard Observation</div>
+      <div class="signal-box sig-obs">
+        <div class="sig-key">signal_type</div>
+        <div class="sig-name">Positive Performance</div>
+        <div class="sig-desc">Something done well. Resilient maturity signal.</div>
+      </div>
+      <div class="signal-box sig-obs">
+        <div class="sig-key">signal_type</div>
+        <div class="sig-name">Weak Signal</div>
+        <div class="sig-desc">Hints at systemic issue. Valuable in aggregation.</div>
+      </div>
+      <div class="signal-box sig-obs">
+        <div class="sig-key">signal_type</div>
+        <div class="sig-name">At-Risk Condition</div>
+        <div class="sig-desc">Physical condition increasing harm probability.</div>
+      </div>
+
+      <div class="entry-section-label">Critical Observation</div>
+      <div class="signal-box sig-crit-obs">
+        <div class="sig-key">signal_type</div>
+        <div class="sig-name">Unwanted Energy Event</div>
+        <div class="sig-desc">Uncontrolled energy release. Barrier may have held but energy released unintentionally.</div>
+      </div>
+      <div class="signal-box sig-crit-obs">
+        <div class="sig-key">signal_type</div>
+        <div class="sig-name">Barrier Failure</div>
+        <div class="sig-desc">A required control was absent, bypassed, or failed. One event is enough.</div>
+      </div>
+
+      <div class="entry-section-label">Standard Incident</div>
+      <div class="signal-box sig-inc">
+        <div class="sig-key">incident_type</div>
+        <div class="sig-name">Near-Miss</div>
+        <div class="sig-desc">Harm only potential — extremely close call.</div>
+      </div>
+      <div class="signal-box sig-inc">
+        <div class="sig-key">incident_type</div>
+        <div class="sig-name">First Aid / Med Treatment</div>
+        <div class="sig-desc">Injury occurred. injury_classification: first_aid | medical_treatment</div>
+      </div>
+      <div class="signal-box sig-inc">
+        <div class="sig-key">incident_type</div>
+        <div class="sig-name">Property / Environmental</div>
+        <div class="sig-desc">Damage or release — no injury.</div>
+      </div>
+
+      <div class="entry-section-label">Critical Incident</div>
+      <div class="signal-box sig-crit-inc">
+        <div class="sig-key">incident_type · proposed</div>
+        <div class="sig-name">Restricted Work / LTI</div>
+        <div class="sig-desc">Serious injury. injury_classification: restricted_work | lost_time</div>
+      </div>
+      <div class="signal-box sig-crit-inc">
+        <div class="sig-key">incident_type · proposed</div>
+        <div class="sig-name">Fatality / Dangerous Occurrence</div>
+        <div class="sig-desc">Fatal or life-threatening event. notifiable_flag: true. Regulatory clock starts.</div>
+      </div>
+
+      <div class="entry-section-label">Control Verification <span style="font-size:9px;color:var(--muted);">(V5)</span></div>
+      <div class="signal-box sig-ctrl">
+        <div class="sig-key">verification_result</div>
+        <div class="sig-name">Control Not in Place</div>
+        <div class="sig-desc">A required critical control fails verification in the field. Not an observation — an operational gap.</div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Routes -->
+    <div class="routes-col">
+
+      <!-- STANDARD OBSERVATION ROUTES -->
+      <div class="route-group">
+        <div class="route-group-label">Standard observation routing — async enrichment, pool accumulation</div>
+
+        <div class="route">
+          <div class="route-source">positive_performance<br>weak_signal<br>at_risk_condition</div>
+          <div class="route-arrow">→</div>
+          <div class="route-dest dest-pool">
+            <div class="dest-pool-label">Observation Pool <span class="dest-badge badge-async">async</span></div>
+            <div class="dest-title">Trend Detection Algorithm</div>
+            <div class="dest-desc">Accumulates by work_type × org_level × time_window. Fires critical_insight.generate when count crosses threshold. Positive performance feeds FW maturity analytics — not insight generation.</div>
+            <div class="dest-note">→ On threshold: Standard Critical Insight generated → Safety Manager workbench (Prioritise column)</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CRITICAL OBSERVATION ROUTES -->
+      <div class="route-group">
+        <div class="route-group-label">Critical observation routing — pipeline direct, no accumulation required</div>
+
+        <div class="route">
+          <div class="route-source">barrier_failure<br>unwanted_energy_event</div>
+          <div class="route-arrow">→</div>
+          <div class="route-dest dest-pipeline-fast">
+            <div class="dest-pipeline-label">Pipeline Direct <span class="dest-badge badge-immediate">immediate</span></div>
+            <div class="dest-title">Critical Observation → Prioritise column</div>
+            <div class="dest-desc">Bypasses trend detection. Appears immediately in Safety Manager workbench as a single-event Critical Observation card. AI enrichment runs in parallel — card appears before enrichment completes.</div>
+            <div class="dest-note">Current spec: requires human endorsement before action. → Proposed: auto-endorsed if energy_release_potential = catastrophic. Safety Manager notified but endorsement not blocking.</div>
+          </div>
+        </div>
+
+        <div class="route">
+          <div class="route-source" style="color:#c084fc;">barrier_failure<br>+ catastrophic<br>energy<br><span style="font-size:9px;">(proposed)</span></div>
+          <div class="route-arrow">→</div>
+          <div class="route-dest dest-future">
+            <div class="dest-future-label">Proposed: Critical Observation — Pre-Endorsed <span class="dest-badge badge-proposed">proposed</span></div>
+            <div class="dest-title">Immediate notification → Senior Leadership + Safety Manager</div>
+            <div class="dest-desc">A barrier_failure with catastrophic energy release potential doesn't wait for endorsement. Notification fires immediately to Safety Manager AND site manager. Card appears pre-endorsed in workbench. Toolbox talk generation can begin without manual gate.</div>
+            <div class="dest-note">Trigger: barrier_assessment = barrier_failed AND energy_release_potential = catastrophic</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STANDARD INCIDENT ROUTES -->
+      <div class="route-group">
+        <div class="route-group-label">Standard incident routing — investigation pipeline, human gate</div>
+
+        <div class="route">
+          <div class="route-source">near-miss<br>first_aid<br>medical_treatment<br>property_damage<br>environmental</div>
+          <div class="route-arrow">→</div>
+          <div class="route-dest dest-action">
+            <div class="dest-action-label">Incident Triage <span class="dest-badge badge-human">human gate</span></div>
+            <div class="dest-title">Investigation record created → requires_investigation evaluated</div>
+            <div class="dest-desc">injury_classification ≥ medical_treatment OR (near-miss + high-risk work type) → requires_investigation = true. Investigation.assist job queued. Notification to site manager and safety manager. notifiable_flag set by triage logic.</div>
+            <div class="dest-note">→ On investigation close: Cleared for sharing → Toolbox narrative generated → FW Map® classification runs</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CRITICAL INCIDENT ROUTES -->
+      <div class="route-group">
+        <div class="route-group-label">Critical incident routing — proposed severity_class field</div>
+
+        <div class="route">
+          <div class="route-source" style="color:#c084fc;">restricted_work<br>lost_time<br>fatality<br>dangerous_occurrence<br><span style="font-size:9px;">(proposed class)</span></div>
+          <div class="route-arrow">→</div>
+          <div class="route-dest dest-future">
+            <div class="dest-future-label">Proposed: Critical Incident Track <span class="dest-badge badge-proposed">proposed</span></div>
+            <div class="dest-title">severity_class = critical → parallel notification stream</div>
+            <div class="dest-desc">
+              Derives from injury_classification at submission:<br>
+              · first_aid | medical_treatment → severity_class: standard<br>
+              · restricted_work | lost_time → severity_class: serious<br>
+              · fatality | dangerous_occurrence → severity_class: critical<br><br>
+              Critical triggers: immediate notification to senior leadership (not just safety manager), scene lock instruction, regulatory clock start, investigation fast-tracked to open status with 24h first report deadline.
+            </div>
+            <div class="dest-note">Also feeds intelligence pipeline as a solo critical insight — same as a critical observation, no trend accumulation required.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CONTROL VERIFICATION -->
+      <div class="route-group">
+        <div class="route-group-label">Control verification routing — operational action, not intelligence (V5)</div>
+
+        <div class="route">
+          <div class="route-source">control<br>not in place</div>
+          <div class="route-arrow">→</div>
+          <div class="route-dest dest-action">
+            <div class="dest-action-label">Operational Alert <span class="dest-badge badge-immediate">immediate</span></div>
+            <div class="dest-title">Direct to responsible manager — not the intelligence pipeline</div>
+            <div class="dest-desc">A failed control verification is not an observation and not an incident — it's an operational gap that requires immediate action. Routes directly to the manager responsible for that control at that site. They confirm rectification. Only if not rectified within SLA does it escalate to safety manager and enter the intelligence pipeline.</div>
+            <div class="dest-note">→ Rectified: logged as verification event, control assurance record updated. Not rectified within SLA → escalates to insight pipeline as at_risk_condition.</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- PIPELINE STAGES -->
+  <div class="section-divider">
+    <div class="sd-line"></div>
+    <div class="sd-label">Intelligence Pipeline — what happens once a signal enters</div>
+    <div class="sd-line"></div>
+  </div>
+
+  <div class="pipeline-strip fade-up">
+    <div class="pipe-stage" style="border-top: 2px solid #B76E00;">
+      <div class="pipe-stage-label" style="color:#B76E00;">01 — Prioritise</div>
+      <div class="pipe-stage-desc">Safety Manager reviews AI draft. Endorses for action. Critical observations arrive pre-populated with AI narrative. Endorsement adds human weight — or (proposed) auto-endorses for critical signals.</div>
+    </div>
+    <div class="pipe-stage" style="border-top: 2px solid var(--obs);">
+      <div class="pipe-stage-label" style="color:var(--obs);">02 — Learn</div>
+      <div class="pipe-stage-desc">Enquiry dispatched to supervisors. Live synthesis updates as responses arrive. Toolbox talk generated and approved. FW Map® classification runs on insight + investigation. Communities thread seeded.</div>
+    </div>
+    <div class="pipe-stage" style="border-top: 2px solid var(--crit-inc);">
+      <div class="pipe-stage-label" style="color:var(--crit-inc);">03 — Improve</div>
+      <div class="pipe-stage-desc">Corrective actions assigned and tracked. Actions created from enquiry findings. Named lead assigned. Progress visible on insight card and in manager workspace.</div>
+    </div>
+    <div class="pipe-stage" style="border-top: 2px solid var(--pipeline);">
+      <div class="pipe-stage-label" style="color:var(--pipeline);">04 — Resolved</div>
+      <div class="pipe-stage-desc">All actions complete. Endorsers notified. Archived for 45 days. FW Map® classification data persists and feeds capacity analytics. Evidence trail complete.</div>
+    </div>
+  </div>
+
+  <!-- INSIGHT CLASSES -->
+  <div class="section-divider">
+    <div class="sd-line"></div>
+    <div class="sd-label">Insight Classes — how signals generate intelligence</div>
+    <div class="sd-line"></div>
+  </div>
+
+  <div class="insight-classes fade-up">
+    <div class="insight-class ic-standard">
+      <div class="ic-label">Standard Insight</div>
+      <div class="ic-title">Critical Insight — trend threshold crossed</div>
+      <div class="ic-desc">Generated when near-miss count by work_type × org_level × time_window crosses a configurable threshold. Requires safety manager endorsement before moving through pipeline. The normal path.</div>
+    </div>
+    <div class="insight-class ic-cluster">
+      <div class="ic-label">Critical Cluster — proposed naming</div>
+      <div class="ic-title">Pattern Insight — accelerated threshold</div>
+      <div class="ic-desc">Same mechanism as Standard Insight but threshold crossed faster — same signal type, multiple sites, compressed timeframe. Proposed: arrives with higher urgency flag, reduced endorsement friction, pre-populated notification to division manager not just site.</div>
+    </div>
+    <div class="insight-class ic-critical" style="border-left-style:dashed;">
+      <div class="ic-label">✦ Proposed — Solo Critical Insight</div>
+      <div class="ic-title">Single-event Intelligence — no accumulation</div>
+      <div class="ic-desc">Generated by a single critical observation (barrier_failure + catastrophic) or critical incident (severity_class: critical). Bypasses trend detection entirely. Enters pipeline pre-endorsed. This is the gap in the current spec — a near-fatality should generate intelligence immediately, not wait for a trend.</div>
+    </div>
+  </div>
+
+  <!-- DESIGN NOTE -->
+  <div class="design-note fade-up">
+    <div class="design-note-title">
+      <span>✦</span> Design Notes — proposed additions for spec consideration
+    </div>
+    <div class="design-note-body">
+      <strong>severity_class field</strong> — Add to the incident table: <code>severity_class VARCHAR(12) CHECK (severity_class IN ('standard','serious','critical'))</code>. Derived at submission from injury_classification and incident_type. Drives notification tier, investigation SLA, and intelligence routing. No UI change required — set by triage logic.
+      <br><br>
+      <strong>Pre-endorsed critical observations</strong> — A barrier_failure with catastrophic energy release potential currently requires human endorsement before the intelligence pipeline can act. Proposal: auto-endorse when energy_release_potential = catastrophic, with immediate notification to safety manager. The human still reviews — but the pipeline doesn't wait for them. This is the same logic as why emergency services don't wait for approval to respond.
+      <br><br>
+      <strong>Solo Critical Insight</strong> — Currently the intelligence pipeline only generates insights from trend clusters. A single near-fatality, fatality, or dangerous occurrence should generate a solo insight immediately, bypassing trend detection. This requires a new insight trigger type: <code>trigger_source = 'critical_incident' | 'critical_observation'</code> alongside the existing <code>'trend_threshold'</code>.
+      <br><br>
+      <strong>Control verification escalation path</strong> — A failed control check that isn't rectified within SLA is currently undefined in the spec. Proposal: after SLA breach, create an at_risk_condition observation automatically and inject it into the pool. This closes the loop between V5 control verification and the intelligence pipeline without requiring a separate escalation model.
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
