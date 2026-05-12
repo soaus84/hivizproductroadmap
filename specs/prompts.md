@@ -1,1093 +1,134 @@
-# prompts.md — Hiviz AI Prompt Library
+# prompts.md — Hiviz AI Prompt Index
 
-**Forge Works · Hiviz SafetyPlatform**  
-Version: 1.0  
-Status: Consolidated prompt library — supersedes specs/02-ai-prompt-library.md
+**Forge Works · Hiviz SafetyPlatform**
+Version: 2.0 — Index only
+Status: Supersedes v1.0 prompt library
 
-> **Scope of this document:** All AI prompt templates, system prompts, user prompt templates, validation rules, and V2 cascade notes. For data model and API see `SPEC.md`. For view/UI specifications see `views.md`.
-
----
-
-## Table of Contents
-
-1. [Usage Notes](#1-usage-notes)
-2. [Prompt 1 — Observation Enrichment & Classification](#2-prompt-1--observation-enrichment--classification)
-3. [Prompt 2 — Context Request (Low Confidence Follow-up)](#3-prompt-2--context-request-low-confidence-follow-up)
-4. [Prompt 3 — Critical Insight Draft Generation](#4-prompt-3--critical-insight-draft-generation)
-5. [Prompt 4 — Investigation Assistance](#5-prompt-4--investigation-assistance)
-6. [Prompt 5 — Investigation Toolbox Narrative](#6-prompt-5--investigation-toolbox-narrative)
-7. [Prompt 6 — Full Toolbox Talk Assembly](#7-prompt-6--full-toolbox-talk-assembly)
-8. [Prompt 7 — Enquiry Question Generation](#8-prompt-7--enquiry-question-generation)
-9. [Prompt 8 — Enquiry Live Synthesis](#9-prompt-8--enquiry-live-synthesis)
-10. [Prompt 9 — Enquiry Final Summary](#10-prompt-9--enquiry-final-summary)
-11. [Prompt 10 — Forge Works Map® Classification (fw_classify)](#11-prompt-10--forge-works-map-classification-fw_classify)
-12. [Prompt 11 — Situational Brief Generation](#12-prompt-11--situational-brief-generation)
-13. [Prompt 12 — Community of Practice Thread Generation](#13-prompt-12--community-of-practice-thread-generation)
-14. [Prompt 13 — Visit Briefing Pack Generation](#14-prompt-13--visit-briefing-pack-generation)
-15. [Prompt Versioning](#15-prompt-versioning)
+> **This file is an index.** Canonical prompt text, schemas, validation rules, and V2 cascade notes now live in `specs/features/`. If you need to read or modify a prompt, go to the feature file directly. Do not add prompt text to this file.
 
 ---
 
-## 1. Usage Notes
+## How to find a prompt
 
-- All prompts use **`claude-sonnet-4-20250514`** (read from `ai_prompt_config.model` — never hardcoded). Do not use Haiku — safety-critical outputs require highest reliability.
-- All prompts enforce **JSON-only output**. Parse with try/catch; log raw text on parse failure and retry once before alerting.
-- **System prompts are stable** — store in `ai_prompt_config`, not in code. User prompts are parameterised with runtime data.
-- **Never include real names** in prompts. Strip identifying information before passing to AI. The `ai_anonymisation_flags` field from Prompt 1 should be used to scrub subsequent prompts referencing the same observation.
-- All prompts use **max_tokens: 1000** unless noted otherwise. Exceptions: Prompt 6 (talk assembly) uses 1500; Prompt 10 (fw_classify) uses 2000 — system prompt is substantially larger with full Blueprint reference injected.
-- Treat AI output as **draft only** — all outputs are reviewed by a human gate or stored as suggestions before affecting any user-facing content.
-- **Every suggestion has a visible reason.** Every actionable AI output field has a companion rationale field. Rationale is surfaced inline in the UI — not in a tooltip, not on a detail panel. The human makes the decision, the AI makes the case.
-- **Suggestion language standard across all UI surfaces:** "AI has suggested" not "AI recommends", "based on" not "because", "for your review" not as a directive. Enforced at the UI layer — prompts do not need to replicate this language in their output.
-- Photos can be passed to enrichment prompts as base64 image blocks where relevant.
+1. Find the job name in the index below
+2. Follow the pointer to the feature file
+3. Read the canonical prompt in the `CANONICAL-SYSTEM-PROMPT` section for that stage
 
 ---
 
-## 2. Prompt 1 — Observation Enrichment & Classification
+## Prompt Index
 
-**Job:** `observation.enrich`  
-**Triggered:** Immediately after observation creation  
-**Input:** Free-text observation + available taxonomy  
-**Output:** Structured enrichment metadata stored in `observation` AI fields  
-**Human gate:** None — auto-stored as suggestions, never overwrites original text  
-**max_tokens:** 1000
+### Capture prompts (front-end, conversational)
 
-### Signal Type Taxonomy
+| Job | Label | Feature file | Stage |
+|---|---|---|---|
+| `capture.observation` | Observation capture conversation | `specs/features/OBSERVATION-CAPTURE.md` | Stage 1 |
+| `capture.incident` | Incident capture conversation | `specs/features/INCIDENT-CAPTURE.md` | Stage 1 |
+| `capture.auto` | Auto triage conversation | `specs/features/INCIDENT-CAPTURE.md` | Stage 0 |
 
-Only these values are valid for `signal_type`:
+### Observation pipeline (back-end, async)
 
-| Value | Routing | Notes |
-|-------|---------|-------|
-| `positive_performance` | Pool → analytics | Feeds Resilient maturity signal |
-| `weak_signal` | Pool → trend detection | Accumulates toward threshold |
-| `at_risk_condition` | Pool → trend detection | Accumulates toward threshold |
-| `unwanted_energy_event` | **Pipeline direct** | One event sufficient — no threshold |
-| `barrier_failure` | **Pipeline direct** | One event sufficient — no threshold |
+| Job | Label | Feature file | Stage |
+|---|---|---|---|
+| `observation.enrich` | Observation enrichment & classification | `specs/features/OBSERVATION-CAPTURE.md` | Stage 2 |
+| `observation.context_request` | Context request (low-confidence follow-up) | `specs/features/OBSERVATION-CAPTURE.md` | Stage 3 |
 
-Note: `emerging_pattern` is system-generated by the trend algorithm — never assigned by this prompt.
+### Intelligence generation
 
-### System Prompt
+| Job | Label | Feature file | Stage |
+|---|---|---|---|
+| `critical_insight.generate` | Critical insight draft (algorithm trigger) | `specs/features/CRITICAL-INSIGHT.md` | Stage 1 |
+| `critical_insight.generate` | Critical insight draft (solo_critical trigger) | `specs/features/CRITICAL-INSIGHT.md` | Stage 1 |
 
-```
-You are a safety classification assistant for a construction and industrial safety platform.
-Your job is to read field observations written by supervisors and enrich them with structured metadata.
-You never change or rewrite the original text.
-You identify phrases that could identify specific individuals and flag them for anonymisation.
-You output only valid JSON with no preamble, explanation, or markdown formatting.
-You do not hallucinate taxonomy values — only use IDs explicitly provided to you.
-If you are uncertain, reflect that in enrichment_confidence.
-```
+### Investigation pipeline
 
-### User Prompt Template
+| Job | Label | Feature file | Stage |
+|---|---|---|---|
+| `investigation.assist` | Investigation framework assistance | `specs/features/INCIDENT-CAPTURE.md` | Stage 3 |
+| `investigation.generate_narrative` | Investigation toolbox narrative | `specs/features/INVESTIGATION.md` | Stage 3 |
 
-```
-Observation text: "{{what_was_observed}}"
+### Toolbox talk
 
-Work type declared by supervisor: {{work_type_label}}
+| Job | Label | Feature file | Stage |
+|---|---|---|---|
+| `toolbox_talk.generate` | Full toolbox talk assembly | `specs/features/TOOLBOX-TALK.md` | Stage 2 |
 
-Available work type taxonomy:
-{{work_type_taxonomy_json}}
-// format: [{ "id": "uuid", "label": "Hot Work" }, ...]
+### Enquiry
 
-Available safety practice taxonomy:
-{{practice_taxonomy_json}}
-// format: [{ "id": "uuid", "label": "Permit to Work" }, ...]
+| Job | Label | Feature file | Stage |
+|---|---|---|---|
+| `enquiry.generate_questions` | Enquiry question generation (3 trigger variants) | `specs/features/ENQUIRY.md` | Stage 1 |
+| `enquiry.synthesise` | Enquiry live synthesis | `specs/features/ENQUIRY.md` | Stage 3 |
+| `enquiry.summarise` | Enquiry final summary | `specs/features/ENQUIRY.md` | Stage 4 |
 
-Return JSON matching this exact schema:
-{
-  "inferred_work_type_ids": ["uuid"],
-  "inferred_practice_ids": ["uuid"],
-  "signal_type": "positive_performance | weak_signal | at_risk_condition | unwanted_energy_event | barrier_failure",
-  "signal_type_confidence": 0.0,
-  "energy_type": "kinetic | gravitational | electrical | thermal | chemical | pressure | noise_vibration | none",
-  "energy_type_confidence": 0.0,
-  "barrier_assessment": "barrier_absent | barrier_failed | barrier_degraded | barrier_held | none",
-  "failure_type": "systemic | behavioural | environmental | unclear",
-  // failure_type is a lightweight triage signal only.
-  // Forge Works Map® classification runs separately (Prompt 10) on richer context.
-  // Do not attempt FW classification at observation level — signal too thin.
-  "key_hazard": "short plain-language string",
-  "key_hazard_rationale": "1 sentence explaining what in the text identified this hazard",
-  "stop_work_warranted": true | false,
-  "stop_work_warranted_rationale": "1 sentence — why or why not",
-  "anonymisation_flags": ["phrase that could identify a person or specific individual"],
-  "fw_factor_hint": "single FW factor name if strongly suggested — else null",
-  "context_questions_needed": false,
-  "context_question": null,
-  "enrichment_confidence": 0.0
-}
-```
+### FW Map® classification
 
-### Validation Rules
+| Job | Label | Feature file | Stage |
+|---|---|---|---|
+| `fw_classify` | FW classification — insight path | `specs/features/CRITICAL-INSIGHT.md` | Stage 3 |
+| `fw_classify` | FW classification — investigation path | `specs/features/INVESTIGATION.md` | Stage 4 |
+| `fw_classify` | FW classification — enquiry path | `specs/features/ENQUIRY.md` | Stage 5 |
 
-- `signal_type` must be one of the 5 enum values
-- `signal_type_confidence` and `energy_type_confidence` must be 0.0–1.0
-- `enrichment_confidence` must be 0.0–1.0; discard enrichment if < 0.5
-- `inferred_work_type_ids` must only contain IDs present in the provided taxonomy
-- `fw_factor_hint` must be one of the 15 FW factors or null — not a freeform string
-- If `context_questions_needed = true`: queue `observation.context_request` job
-- If `signal_type_confidence >= 0.70` and signal_type is `barrier_failure` or `unwanted_energy_event`: queue pipeline routing immediately after storing
-- Store all fields regardless of confidence — confidence values are stored alongside
+> Note: `fw_classify` uses the same base system prompt across all three paths — defined once in `specs/features/INVESTIGATION.md` Stage 4 (`CANONICAL-FW-CLASSIFY-BASE-SYSTEM-PROMPT`). The full Forge Works Map® Blueprint is injected from `specs/globals/fw-map-blueprint.md` at runtime.
+
+### Output generation
+
+| Job | Label | Feature file | Stage |
+|---|---|---|---|
+| `situational_brief.generate` | Situational brief | `specs/features/SITUATIONAL-BRIEF.md` | Stage 1 |
+| `cop_thread.generate` | Community of practice thread | `specs/features/COMMUNITIES.md` | Stage 1 |
+| `visit_briefing.generate` | Visit briefing pack | `specs/features/VISIT-BRIEFING.md` | Stage 1 |
+
+### Management system
+
+| Job | Label | Feature file | Stage |
+|---|---|---|---|
+| `document.ingest` | Document requirement extraction | `specs/features/MANAGEMENT-SYSTEM-INGESTION.md` | Stage 2 |
 
 ---
 
-## 3. Prompt 2 — Context Request (Low Confidence Follow-up)
+## Global references used across multiple prompts
 
-**Job:** `observation.context_request`  
-**Triggered:** When `enrichment.context_questions_needed = true`  
-**Human gate:** None — single question delivered as push notification
-
-This is not an AI call — the question is already generated by Prompt 1. The job formats it for delivery and sends the notification:
-
-```
-"Hey [first_name] — quick question about the observation you logged.
-[context_question]
-Tap to reply."
-```
-
-When the observer responds, `observation.context_enrich` re-runs Prompt 1 with the original text plus the context response appended.
+| Reference | File | Used by |
+|---|---|---|
+| Forge Works Map® Blueprint | `specs/globals/fw-map-blueprint.md` | `fw_classify`, `cop_thread.generate`, `visit_briefing.generate`, `situational_brief.generate` |
+| Signal type taxonomy | `specs/globals/signal-type-taxonomy.md` | `capture.observation`, `observation.enrich`, `capture.auto` |
+| Energy type taxonomy | `specs/globals/energy-type-taxonomy.md` | All capture and enrichment prompts |
+| Barrier assessment values | `specs/globals/barrier-assessment-values.md` | All capture and enrichment prompts |
+| AI output standards | `specs/globals/ai-output-standards.md` | All prompts |
+| Anonymisation rules | `specs/globals/anonymisation-rules.md` | `observation.enrich` and all downstream prompts that reference observation text |
 
 ---
 
-## 4. Prompt 3 — Critical Insight Draft Generation
+## Prompt versioning
 
-**Job:** `critical_insight.generate`  
-**Triggered:** Trend threshold crossed OR solo_critical incident (see below)  
-**Input:** Clustered enriched observations (anonymised) for trend trigger; single incident record for solo_critical  
-**Output:** Draft CriticalInsight — `cleared_for_toolbox = false`  
-**Human gate:** Safety manager review required  
-**max_tokens:** 1000
-
-### System Prompt
-
-```
-You are a senior safety advisor drafting internal safety intelligence for a construction
-and resource industry platform.
-
-Your writing voice:
-- Direct and plain-spoken — no corporate safety jargon
-- Experienced and measured — not alarmist
-- Focused on systemic causes, never individual blame
-- Written as if speaking to safety managers who are experienced professionals
-
-You do not name individuals, specific dates, or identify specific worksites beyond
-what the org level scope permits.
-
-You output only valid JSON with no preamble, explanation, or markdown formatting.
-```
-
-### User Prompt Template — Trend Threshold (algorithm trigger)
-
-```
-A trend threshold has been crossed.
-
-Trigger source: algorithm
-
-Work type: {{work_type_label}}
-Org level: {{level}} — {{level_name}}
-Time window: {{window_days}} days
-Signal types in cluster: {{signal_type_breakdown_json}}
-// e.g. { "at_risk_condition": 4, "weak_signal": 2 }
-Observation count: {{count}} (threshold: {{threshold}})
-
-Anonymised observation summaries:
-{{observation_summaries_json}}
-// [{ "summary": "...", "signal_type": "at_risk_condition", "energy_type": "kinetic",
-//    "barrier_assessment": "barrier_degraded", "key_from_rationale": "..." }, ...]
-
-Return JSON:
-{
-  "pattern_summary": "2-3 sentences. What the pattern is and why it matters operationally.",
-  "pattern_summary_basis": "1 sentence. Which observations most strongly evidence this pattern.",
-  "likely_systemic_cause": "1 sentence. The underlying condition probably driving this pattern.",
-  "likely_systemic_cause_rationale": "1 sentence. What points to this cause rather than others.",
-  "recommended_action": "1 sentence. The change that would most directly address the cause.",
-  "recommended_action_rationale": "1 sentence. Why this addresses the root cause, not a symptom.",
-  "toolbox_narrative": "4-6 sentences. Written so a supervisor can read it aloud. Plain English. Present tense. No jargon. No blame. Opens with what the crew needs to know today.",
-  "escalate_to_systemic": false,
-  "escalation_rationale": "1 sentence if true, null if false"
-}
-```
-
-### User Prompt Template — Solo Critical (solo_critical trigger)
-
-```
-A critical incident has been reported that warrants immediate intelligence generation
-without waiting for trend accumulation.
-
-Trigger source: solo_critical
-
-Work type: {{work_type_label}}
-Org level: site — {{worksite_name}}
-Incident type: {{incident_type}}
-Severity class: critical
-Injury classification: {{injury_classification}}
-Incident description: {{incident_description}}
-Immediate actions taken: {{immediate_action_taken | "None recorded"}}
-
-This is a single event, not a pattern. Your output should:
-- Frame the intelligence around what this event reveals about systemic conditions
-- Not speculate beyond what the evidence supports
-- Acknowledge it is a single event while being direct about the risk it represents
-- Focus on what other sites need to know and check immediately
-
-Return JSON:
-{
-  "pattern_summary": "2-3 sentences. What this incident reveals about conditions that may exist more broadly. Acknowledge single-event basis without hedging the risk.",
-  "pattern_summary_basis": "1 sentence. Which specific elements of the incident description support this framing.",
-  "likely_systemic_cause": "1 sentence. The underlying condition this incident most likely reflects.",
-  "likely_systemic_cause_rationale": "1 sentence. What in the incident description points to this cause.",
-  "recommended_action": "1 sentence. The most important immediate check or action for other sites.",
-  "recommended_action_rationale": "1 sentence. Why this action directly addresses the likely cause.",
-  "toolbox_narrative": "4-6 sentences. Written for a supervisor to read aloud. Plain English. Present tense. Opens with the reality of what happened and what crews need to know and do today.",
-  "escalate_to_systemic": true,
-  "escalation_rationale": "1 sentence. A critical incident warrants systemic investigation to understand whether the conditions are present elsewhere."
-}
-```
-
-> **Note on solo_critical:** `escalate_to_systemic` defaults to `true` for solo_critical triggers — a critical severity incident is presumed to warrant systemic investigation unless the reviewer actively dismisses it. The human review gate still applies; the reviewer can downgrade the escalation recommendation.
-
----
-
-## 5. Prompt 4 — Investigation Assistance
-
-**Job:** `investigation.assist`  
-**Triggered:** Investigation created (by triage after incident)  
-**Input:** Incident record + investigation context  
-**Output:** AI-suggested framework fields stored in `investigation` AI columns  
-**Human gate:** Investigator confirms each suggestion before it becomes authoritative  
-**max_tokens:** 1000
-
-### System Prompt
-
-```
-You are an expert safety investigator providing structured analytical support for a
-construction and industrial safety investigation.
-
-Your role is to suggest — not determine. The assigned investigator makes all final decisions.
-Every suggestion you provide must include a specific rationale explaining what in the
-incident narrative led to it.
-
-Rules:
-- Do not name individuals. Refer to roles only (operator, supervisor, etc.).
-- Do not speculate beyond what the evidence supports.
-- Contributing factors should be systemic — conditions, not personal failures.
-- Root cause should identify the deepest addressable organisational condition.
-- Corrective actions should address the root cause, not just the immediate cause.
-- Interview questions should help clarify ambiguity — not lead the witness.
-- Output only valid JSON. No preamble, no markdown.
-```
-
-### User Prompt Template
-
-```
-Incident type: {{incident_type}}
-Work type: {{work_type_label}}
-Incident description: {{description}}
-Immediate actions taken: {{immediate_action_taken | "None recorded"}}
-People involved: {{people_involved_count}}
-Injury classification: {{injury_classification | "None"}}
-Mechanism of injury: {{mechanism_of_injury | "N/A"}}
-
-Return JSON:
-{
-  "ai_suggested_contributing_factors": [
-    { "factor": "Plain-language contributing factor", "rationale": "What in the narrative supports this" }
-  ],
-  "ai_suggested_contributing_factors_rationale": "1 sentence — overall basis for this set of factors",
-  "ai_suggested_root_cause": "1 sentence. The deepest addressable organisational condition.",
-  "ai_suggested_root_cause_rationale": "What in the narrative led to this root cause rather than others.",
-  "ai_suggested_corrective_actions": [
-    { "action": "Specific implementable action", "rationale": "How this addresses the root cause" }
-  ],
-  "ai_suggested_interview_questions": [
-    { "question": "Open question for witness", "rationale": "What ambiguity this clarifies" }
-  ]
-}
-```
-
----
-
-## 6. Prompt 5 — Investigation Toolbox Narrative
-
-**Job:** `investigation.generate_narrative`  
-**Triggered:** Investigation closed + `cleared_for_sharing = true` + `legal_hold = false`  
-**Input:** Confirmed investigation framework fields  
-**Output:** Plain-language toolbox narrative stored in `investigation.toolbox_narrative`  
-**Human gate:** None at generation — content was human-confirmed at investigation sign-off. Supervisor can still edit before delivery.  
-**max_tokens:** 1000
-
-### System Prompt
-
-```
-You are a safety communicator translating closed incident investigation findings into
-toolbox talk content for frontline construction and industrial crews.
-
-Your writing voice:
-- That of a veteran site supervisor — someone who has seen things go wrong and wants
-  to make sure it doesn't happen again
-- Present tense — more immediate and direct than past tense
-- Plain English — no acronyms, no corporate safety language
-- Never references names, specific dates, or worksite identifiers
-- Focuses entirely on the systemic cause and what crews can do differently today
-- Does not moralise or lecture — treats crew as experienced professionals
-
-You output only valid JSON with no preamble, explanation, or markdown formatting.
-```
-
-### User Prompt Template
-
-```
-Confirmed investigation findings:
-Work type: {{work_type_label}}
-Immediate cause: {{immediate_cause}}
-Contributing factors: {{contributing_factors_json}}
-Root cause: {{root_cause}}
-Corrective actions: {{corrective_actions_json}}
-Approved sharing scope: {{sharing_scope}}
-
-Generate toolbox content from these findings.
-
-Return JSON:
-{
-  "incident_story": "3-4 sentences. What happened and how. Present tense. No names. No specific dates or locations beyond work type context.",
-  "root_cause_plain": "1-2 sentences. The real reason this happened. Systemic framing, not personal.",
-  "what_we_do_now": [
-    "Action 1 — specific and behaviourally concrete",
-    "Action 2",
-    "Action 3"
-  ],
-  "discussion_questions": [
-    "Question 1 — prompts crew to think about their own work context",
-    "Question 2 — prompts crew to identify gaps in current practice",
-    "Question 3 — prompts crew to name a specific action they can take"
-  ]
-}
-```
-
----
-
-## 7. Prompt 6 — Full Toolbox Talk Assembly
-
-**Job:** `toolbox_talk.generate` (synchronous, user-initiated)  
-**Triggered:** `POST /api/v1/toolbox-talks/generate`  
-**Input:** Algorithm-selected content set (observations, investigation narratives, critical insights)  
-**Output:** Complete structured talk stored in `toolbox_talk.generated_content`  
-**Human gate:** Supervisor reviews before delivery; can add personal notes  
-**max_tokens:** 1500
-
-> **V2 CASCADE — Maturity-aware framing:**
-> In V1 the talk voice is fixed (veteran, plain-spoken, systemic focus).
-> In V2 pass `fw_maturity_signals[]` from the approved insight so the narrative register adapts:
-> - `compliant` → frame around procedure gaps and what the system should specify
-> - `leading` → frame around leadership signals, what managers should be noticing
-> - `resilient` → frame around adaptive capacity and anticipating emergent risk
-
-### System Prompt
-
-```
-You produce toolbox talks for frontline construction and industrial crews.
-
-Voice: a 20-year site veteran — plain English, no corporate speak, no moralising, no filler.
-Assumes the crew are experienced professionals.
-Every sentence earns its place.
-Never reference specific names of individuals.
-Output only valid JSON. No preamble, no markdown.
-```
-
-### User Prompt Template
-
-```
-Worksite: {{worksite_name}}
-Work scheduled today: {{work_type_label}}
-Presenter: {{presenter_first_name}}
-
-Content to draw from:
-{{#each content_items}}
-Type: {{this.type}} ({{this.source_label}})
-Content: {{this.narrative}}
----
-{{/each}}
-
-Return JSON:
-{
-  "hazard_intro": "2-3 sentences. Today's work and the single most important hazard.",
-  "main_content": "6-10 sentences. Cohesive narrative drawing on the content items. Written to be spoken aloud. Present tense.",
-  "key_actions": [
-    "Action 1 — specific, behaviourally concrete",
-    "Action 2",
-    "Action 3",
-    "Action 4"
-  ],
-  "discussion_questions": [
-    "Question 1 — specific to today's work",
-    "Question 2 — prompts reflection on own practice",
-    "Question 3 — identifies a gap the crew can act on today"
-  ],
-  "closing_line": "1 sentence. Something a real supervisor would say. Not a slogan."
-}
-```
-
-### Validation Rules
-
-- `main_content` must be non-empty
-- `key_actions` must have 3–5 items
-- `discussion_questions` must have exactly 3 items
-
----
-
-## 8. Prompt 7 — Enquiry Question Generation
-
-**Job:** `enquiry.generate_questions`  
-**Triggered:** Enquiry created from Critical Insight approval, investigation mid-enquiry, or investigation witness  
-**Input:** Trigger source context  
-**Output:** JSON array of question objects — safety manager reviews before dispatch  
-**Human gate:** Safety manager reviews and can remove, add, or reorder before dispatch  
-**max_tokens:** 1000
-
-> **V2 CASCADE — Factor-aware question types:**
-> In V1 questions are selected based on the insight pattern and cause only.
-> In V2 pass `fw_factors[]`, `fw_domains[]`, and `fw_rationales[]` from the classified insight.
-> Each classified factor drives question type selection:
-> - `management_systems` → Work as Done + Gap Identification
-> - `work_understanding` → Work as Done + Comparative Check
-> - `operational_management` → Likelihood Assessment + Assurance Check
-> - `frontline_workers` → Assurance Check + Prevalence Check
-> - `goal_conflict_tradeoffs` → Likelihood Assessment + Gap Identification
-> - `monitoring_metrics` → Comparative Check + Evidence Request
-
-### System Prompt
-
-```
-You are a safety intelligence analyst generating field enquiry questions for a
-construction and industrial safety platform.
-
-Your role is to generate the minimum set of questions that will give the safety
-manager the clearest possible picture of whether a risk condition exists at
-multiple sites — and what is actually happening in practice.
-
-Rules:
-- Generate 3-6 questions maximum. More questions = lower completion rate.
-- Select question types that build on each other: start with perception
-  (likelihood), then control verification (assurance), then practice
-  (work as done), then gap (identification).
-- Never recommend a Prevalence Check if you are told prevalence data exists.
-- Always include at least one Work as Done question — it captures what
-  no other question type can.
-- Write questions in plain language a site supervisor can answer in 2 minutes.
-- Do not use safety jargon.
-- Each question must have a clear, single answer — no compound questions.
-- Output ONLY valid JSON, no preamble.
-```
-
-### User Prompt Template
-
-```
-Trigger source: {{trigger_source}}
-
-{{#if trigger_source == 'critical_insight'}}
-Insight pattern: {{pattern_summary}}
-Likely systemic cause: {{likely_systemic_cause}}
-Work type: {{work_type_label}}
-Source observation count: {{observation_count}}
-Sample observations (anonymised): {{observation_summaries}}
-Prevalence data available from existing observations: {{prevalence_available}}
-{{/if}}
-
-{{#if trigger_source == 'investigation_mid'}}
-Incident narrative: {{incident_description}}
-Suspected cross-site condition: {{contributing_factors}}
-Work type: {{work_type_label}}
-{{/if}}
-
-{{#if trigger_source == 'investigation_witness'}}
-Incident narrative: {{incident_description}}
-Immediate cause (provisional): {{immediate_cause}}
-Contributing factors (provisional): {{contributing_factors}}
-These questions go to named witnesses — not site-wide.
-{{/if}}
-
-Generate a field enquiry question set. Return JSON array:
-[
-  {
-    "position": 1,
-    "question_type": "likelihood | assurance | prevalence | evidence | work_as_done | gap_identification | comparative",
-    "question_text": "Plain language question",
-    "response_options": ["Option A", "Option B", "Option C"] | null,
-    "allow_photo": true | false,
-    "require_note_if": ["Option B", "Option C"] | null,
-    "ai_rationale": "Why this question, why this position, what it adds",
-    "default_target_scope": "source_sites | region | division",
-    "default_target_role": "supervisor | manager | both"
-  }
-]
-```
-
----
-
-## 9. Prompt 8 — Enquiry Live Synthesis
-
-**Job:** `enquiry.synthesise` — runs after every new response submission  
-**Triggered:** Each time a response is submitted (debounced 30s)  
-**Input:** All responses received so far  
-**Output:** JSON synthesis object stored in `enquiry.ai_synthesis`  
-**Human gate:** None — updates in real time as responses arrive  
-**max_tokens:** 1000
-
-### System Prompt
-
-```
-You are synthesising field responses to a safety enquiry in real time.
-Responses are still arriving — your analysis should reflect what is
-known now, not wait for completeness.
-
-Be direct. Name patterns clearly. Use colour-coded signal language:
-- 🔴 Confirmed risk condition / control not in place
-- 🟠 Likely condition / inconsistent control
-- 🟡 Perceived risk / partial visibility
-- 💡 Actionable insight / convergent suggestion
-
-Do not hedge unnecessarily. If 7 of 9 responses say the control is not
-in place, say that clearly. Output ONLY valid JSON.
-```
-
-### User Prompt Template
-
-```
-Enquiry: {{enquiry_title}}
-Trigger: {{trigger_source}} — {{trigger_context}}
-Responses received: {{response_count}} of {{total_recipients}}
-
-Structured response distributions:
-{{per_question_distributions}}
-
-Free text response excerpts (anonymised by question):
-{{free_text_excerpts}}
-
-Generate a synthesis. Return JSON:
-{
-  "findings": [
-    {
-      "signal": "🔴 | 🟠 | 🟡 | 💡",
-      "text": "Finding in plain language, specific, direct. Reference response counts."
-    }
-  ],
-  "response_count": {{response_count}},
-  "generated_at": "{{now}}"
-}
-```
-
----
-
-## 10. Prompt 9 — Enquiry Final Summary
-
-**Job:** `enquiry.generate_summary` — on close or manual trigger  
-**Triggered:** Enquiry closed OR safety manager manually triggers  
-**Input:** All responses, final synthesis  
-**Output:** JSON stored in `enquiry.summary` + `enquiry.recommended_actions`  
-**Human gate:** Safety manager reviews summary before distribution  
-**max_tokens:** 1000
-
-### System Prompt
-
-```
-You are writing the final summary of a completed safety field enquiry.
-This summary will be read by safety managers, possibly shared with
-division leadership, and used to generate corrective actions and
-toolbox talk content.
-
-Voice: Direct, evidence-based, no hedging. Name what was found.
-Recommended actions must be specific and implementable — not generic
-safety advice. Output ONLY valid JSON.
-```
-
-### User Prompt Template
-
-```
-Enquiry: {{enquiry_title}}
-Trigger: {{trigger_context}}
-Total responses: {{response_count}} of {{total_recipients}}
-Response rate: {{response_rate}}%
-
-Final distributions:
-{{per_question_final_distributions}}
-
-All free text responses (anonymised):
-{{all_free_text_responses}}
-
-AI synthesis at close:
-{{final_synthesis}}
-
-Generate the final summary. Return JSON:
-{
-  "narrative": "3-5 sentences. What was found, across how many sites/responses, what the key condition is, what the field said. Evidence-based, no hedging.",
-  "recommended_actions": [
-    "Specific implementable action 1 — address the primary root cause",
-    "Specific implementable action 2 — address a contributing condition",
-    "Specific implementable action 3 — close the loop with crews"
-  ],
-  "toolbox_narrative": "2-3 sentences suitable for a toolbox talk. Written so a supervisor can say: 'We asked [N] supervisors across [M] sites. Here's what we found. Here's what we're doing.' Crew-facing language.",
-  "escalate_to_systemic": true | false,
-  "escalation_rationale": "If true: why this warrants escalation. If false: null."
-}
-```
-
----
-
-## 11. Prompt 10 — Forge Works Map® Classification (fw_classify)
-
-**Job:** `fw_classify`  
-**Triggered:** After insight approval, investigation close, enquiry summary generation — as a separate async job  
-**NOT applied to:** Individual observations — signal too thin for reliable classification  
-**Input:** Rich narrative context (pattern summary + toolbox narrative for insights; full framework for investigations; synthesis + WAD responses for enquiries)  
-**Output:** Classification fields stored as parallel arrays on the parent entity  
-**Human gate:** None at classification — output displayed alongside content in UI with rationale  
-**max_tokens:** 2000 — system prompt is substantially larger with full Blueprint reference injected
-
-### The 15 Factors
-
-```
-GUIDE (direction & context)
-  1.  senior_leadership          — How do senior leaders talk about and embody safety?
-  2.  strategy                   — What triggers safety improvements?
-  3.  risk_management            — What is the quality of risk information and how is it used?
-  4.  safety_organisation        — How capable is the safety function and what do they focus on?
-  5.  work_understanding         — What model of accident causation drives decisions?
-
-ENABLE (resources & systems)
-  6.  operational_management     — What is the role of middle/frontline managers?
-  7.  resource_allocation        — How are safety resources identified and allocated?
-  8.  management_systems         — How effective and focused are safety management systems?
-  9.  goal_conflict_tradeoffs    — How are safety goals balanced with production/cost?
-  10. learning_development       — How does the organisation develop capability and learn?
-
-EXECUTE (frontline & operations)
-  11. frontline_workers          — What is the role of frontline workers in safety outcomes?
-  12. communications_coordination — How does information flow and how coordinated are teams?
-  13. decision_making            — How are work and safety decisions made?
-  14. contractor_management      — How are contractors engaged and managed?
-  15. monitoring_metrics         — What information is used to monitor safety performance?
-```
-
-### Maturity Levels
-
-```
-compliant   — Systemic Management: rules, compliance, procedures prescribe work
-leading     — Cultural Management: leadership behaviours, risk culture, safety climate
-resilient   — Integrated Management: work-as-done, emergent risk, safety as property of work
-```
-
-### System Prompt
-
-```
-You are a safety management analyst trained in the Forge Works Map® — a 15-factor
-organisational capacity framework grounded in Safety II, Resilience Engineering,
-and Human and Organisational Performance (HOP) theory.
-
-Your job is to identify every Forge Works Map® factor the narrative independently
-supports at sufficient confidence — and at which maturity level each gap operates.
-
-CLASSIFICATION RULES:
-- Only classify factors where you can write a specific, evidence-based rationale
-- Never classify on vague association — the narrative must provide direct evidence
-- Maximum 3 factors per classification run, ordered by confidence descending
-- If nothing meets 0.70 confidence, return an empty classifications array
-- Classify at the maturity level where the GAP operates — not where the organisation aspires to be
-- Maturity levels are sequential: do not classify resilient if the compliant gap has not been addressed
-- Output only valid JSON. No preamble, no markdown.
-
-THE FRAMEWORK:
-
-GUIDE domain — capacity to frame and set direction, priorities and aligned understanding
-ENABLE domain — capacity to provide resources, capability and business processes
-EXECUTE domain — capacity to create the safety of work day-in and day-out
-
-MATURITY LEVELS (apply to every factor):
-- compliant (Systemic Management): Safety processes exist to meet legislative and organisational
-  requirements. Rules, compliance, and procedures prescribe work.
-- leading (Cultural Management): Safety leadership capability created. Focus on leadership
-  behaviours, risk management, safety communication and assurance.
-- resilient (Integrated Management): Safety is an emergent property of how the organisation
-  functions. Focus on understanding how work is done, open communication, anticipating future
-  scenarios, and minimising goal conflict.
-
-[Full per-factor definitions from Forge Works Blueprint are injected at runtime from
-fw-map-classification-dev-notes.md — see deployment instructions. System prompt is
-stored in ai_prompt_config, not hardcoded.]
-```
-
-### User Prompt Template
-
-```
-Source type: {{source_type}}
-// critical_insight | investigation | enquiry_summary
-
-{{#if source_type == 'critical_insight'}}
-Pattern summary: {{pattern_summary}}
-Likely systemic cause: {{likely_systemic_cause}}
-Toolbox narrative: {{toolbox_narrative}}
-Work type: {{work_type_label}}
-Trigger source: {{trigger_source}}
-{{#if trigger_source == 'solo_critical'}}
-Severity class: critical
-Incident type: {{incident_type}}
-Note: This is a single critical incident — not an accumulated trend.
-Weight your classification evidence accordingly.
-{{/if}}
-{{/if}}
-
-{{#if source_type == 'investigation'}}
-Work type: {{work_type_label}}
-Immediate cause: {{immediate_cause}}
-Contributing factors: {{contributing_factors_json}}
-Root cause: {{root_cause}}
-Severity class: {{severity_class}}
-{{/if}}
-
-{{#if source_type == 'enquiry_summary'}}
-Enquiry title: {{enquiry_title}}
-Synthesis findings: {{synthesis_findings_json}}
-Summary narrative: {{summary_narrative}}
-Work as Done responses (anonymised): {{work_as_done_responses}}
-{{/if}}
-
-Classify against the 15 Forge Works Map® factors.
-
-GUIDE: senior_leadership, strategy, risk_management, safety_organisation, work_understanding
-ENABLE: operational_management, resource_allocation, management_systems, goal_conflict_tradeoffs, learning_development
-EXECUTE: frontline_workers, communications_coordination, decision_making, contractor_management, monitoring_metrics
-
-Maturity: compliant | leading | resilient
-
-Return JSON:
-{
-  "classifications": [
-    {
-      "fw_factor": "management_systems",
-      "fw_domain": "guide | enable | execute",
-      "fw_maturity_signal": "compliant | leading | resilient",
-      "fw_confidence": 0.86,
-      "fw_rationale": "1 sentence — why THIS factor based on THIS specific evidence"
-    }
-  ],
-  "fw_classification_basis": "What specific evidence made this narrative classifiable at all",
-  "attempted": true
-}
-
-// classifications is empty array if nothing met 0.70
-// attempted = false if input was too thin to attempt (don't store, don't set fw_classified_at)
-// Max 3 items, ordered by fw_confidence descending
-```
-
-### Validation Rules
-
-- Every factor must have `fw_confidence >= 0.70` — reject any below threshold before storing
-- `fw_factor` must be one of the 15 enumerated values
-- `fw_domain` must be consistent with `fw_factor` — validate the mapping
-- Store as parallel arrays: `fw_factors[i]`, `fw_domains[i]`, `fw_confidences[i]`, `fw_rationales[i]`
-- Never display factor tags without their rationale — rationale is the defence
-- `classifications = []` and `attempted = true` → store empty arrays, set `fw_classified_at` — do not retry
-- `attempted = false` → store nothing, do not set `fw_classified_at` — re-queue when more context available
-
-### Domain-Factor Mapping (for validation)
-
-```typescript
-export const FW_DOMAIN_MAP: Record<string, string> = {
-  senior_leadership: 'guide',
-  strategy: 'guide',
-  risk_management: 'guide',
-  safety_organisation: 'guide',
-  work_understanding: 'guide',
-  operational_management: 'enable',
-  resource_allocation: 'enable',
-  management_systems: 'enable',
-  goal_conflict_tradeoffs: 'enable',
-  learning_development: 'enable',
-  frontline_workers: 'execute',
-  communications_coordination: 'execute',
-  decision_making: 'execute',
-  contractor_management: 'execute',
-  monitoring_metrics: 'execute',
-}
-
-export const FW_CONFIDENCE_THRESHOLD = 0.70
-```
-
-> **V2 CASCADE — severity_class into fw_classify context:**
-> In V1, `severity_class` is stored on the incident but not passed to the fw_classify job.
-> In V2, pass `severity_class` into the user prompt for `critical_insight` classified from
-> `solo_critical` trigger source. A critical severity incident is stronger evidence of a systemic
-> factor than an accumulation of minor near-misses — the classifier should weight accordingly.
-> The conditional block for `solo_critical` in the user prompt template above is the V2 hook;
-> in V1 this block is omitted.
-
----
-
-## 12. Prompt 11 — Situational Brief Generation
-
-**Job:** `situational_brief.generate`  
-**Triggered:** After Critical Insight approval or Investigation close  
-**Input:** Source insight or investigation + FW classification if available  
-**Output:** Draft situational brief — safety manager reviews before distribution  
-**Human gate:** Safety manager approves before distribution — never auto-sent  
-**max_tokens:** 1000
-
-> **V2 CASCADE — Multi-factor fw_factors array:**
-> In V1 this prompt receives fw_factor as a single value (or null).
-> In V2 pass the full fw_factors array with fw_rationales so the `what_it_means`
-> section can name each factor with its rationale:
-> "This pattern reflects gaps in two organisational capacities: Management Systems
-> (the PTW doesn't cover spotter continuity) and Operational Management (visiting
-> managers haven't identified or actioned the absence of a handover protocol)."
-> That framing is what makes the brief useful to a division manager or board.
-
-### System Prompt
-
-```
-You are writing a situational brief for safety managers and divisional leadership.
-This brief replaces the ad-hoc email a safety manager would otherwise write after
-approving an insight or closing an investigation.
-
-Voice:
-- Professional, clear, direct
-- Written for experienced safety managers and operational leaders
-- No jargon, no passive voice
-- Evidence-based — cites what the data shows, not what you suspect
-- References Forge Works Map® classification if available — name the factor, not just the domain
-
-You output only valid JSON. No preamble, no markdown.
-```
-
-### User Prompt Template
-
-```
-Source type: {{trigger_source}}
-// critical_insight | investigation
-
-{{#if trigger_source == 'critical_insight'}}
-Pattern summary: {{pattern_summary}}
-Likely systemic cause: {{likely_systemic_cause}}
-Recommended action: {{recommended_action}}
-Toolbox narrative: {{toolbox_narrative}}
-Source observation count: {{observation_count}}
-Site count: {{source_site_count}}
-Enquiry drafted: {{enquiry_drafted}}
-{{/if}}
-
-{{#if trigger_source == 'investigation'}}
-Work type: {{work_type_label}}
-Incident type: {{incident_type}}
-Immediate cause: {{immediate_cause}}
-Root cause: {{root_cause}}
-Corrective actions: {{corrective_actions_json}}
-Cleared for sharing: {{cleared_for_sharing}}
-{{/if}}
-
-Forge Works Map® classification:
-Factor: {{fw_factor | "Not yet classified"}}
-Domain: {{fw_domain | null}}
-Maturity signal: {{fw_maturity_signal | null}}
-Rationale: {{fw_rationale | null}}
-
-Generate a situational brief. Return JSON:
-{
-  "title": "Plain-language title. Not a safety slogan. What this is about.",
-  "what_happened": "2-3 sentences. The pattern or incident in plain language. What the data shows, not just what one event involved.",
-  "what_it_means": "2-3 sentences. The organisational interpretation. What this tells us about how we manage work. Reference Forge Works Map® factor if classified.",
-  "what_is_being_done": "2-3 sentences. Corrective actions, enquiry launched, toolbox talk generated — what's already in motion.",
-  "key_questions": [
-    "A question for managers to reflect on or investigate at their sites",
-    "A second question — optional, only include if genuinely useful"
-  ]
-}
-```
-
----
-
-## 13. Prompt 12 — Community of Practice Thread Generation
-
-**Job:** `cop_thread.generate`  
-**Triggered:** After Critical Insight approval or Investigation close  
-**Input:** Source insight or investigation + FW classification  
-**Output:** Draft thread — safety manager reviews content and room targeting before seeding  
-**Human gate:** Safety manager approves thread and room selection before seeding to CoP platform  
-**max_tokens:** 1000
-
-### System Prompt
-
-```
-You are generating discussion thread content for a safety community of
-practice — a peer forum where supervisors, managers, and safety
-professionals share experience across sites.
-
-Your threads:
-- Open with the substance, not a preamble or announcement
-- Are conversational and direct — written as a practitioner talking
-  to practitioners, not an organisation broadcasting to employees
-- Ask one genuinely open question that invites real field experience
-- Do not moralize, lecture, or reference compliance
-- Are transparent that they originate from a field intelligence event —
-  this is a feature, not a disclosure
-- Feel like something worth reading and responding to
-
-The thread will be attributed: "Generated from [insight/investigation
-reference], approved by [safety manager name]." Do not include this
-in your output — it is added automatically.
-
-You output only valid JSON with no preamble, explanation, or markdown.
-```
-
-### User Prompt Template
-
-```
-Source type: {{trigger_source}}
-Work type: {{work_type_label}}
-Practice type: {{practice_type_label | null}}
-
-{{#if trigger_source == 'critical_insight'}}
-Pattern: {{pattern_summary}}
-Likely cause: {{likely_systemic_cause}}
-Toolbox narrative: {{toolbox_narrative}}
-Endorsement context: {{endorsement_count}} managers across {{source_site_count}} sites confirmed this pattern
-{{/if}}
-
-{{#if trigger_source == 'investigation'}}
-Incident type: {{incident_type}}
-Plain-language story: {{incident_story}}
-Root cause plain: {{root_cause_plain}}
-What we're doing: {{what_we_do_now_json}}
-{{/if}}
-
-Forge Works Map® factor: {{fw_factor | null}}
-Forge Works Map® domain: {{fw_domain | null}}
-
-Generate a community of practice discussion thread. Return JSON:
-{
-  "thread_title": "A plain-language title that makes a practitioner want to read it. Not a safety slogan.",
-  "thread_body": "3-5 sentences. Open with the substance — what happened or what the pattern shows. Written practitioner-to-practitioner. No announcement tone. No jargon.",
-  "opening_question": "One open question inviting field experience. Specific enough to prompt a real answer. Not rhetorical."
-}
-```
-
----
-
-## 14. Prompt 13 — Visit Briefing Pack Generation
-
-**Job:** `visit_briefing.generate`  
-**Triggered:** Visit plan created OR atrophy alert assigned to a manager  
-**Input:** Site intelligence snapshot — atrophy score, open insights, investigations, actions, last visit  
-**Output:** Structured briefing stored in `visit_briefing` — available immediately on manager's phone  
-**Human gate:** None — briefing is a generated reference, not a published output  
-**max_tokens:** 1000
-
-> **V2 CASCADE — Multi-factor fw_signal context:**
-> In V1 this prompt receives fw_signal as a single factor (or null).
-> In V2 pass the full aggregated `fw_signal_json` — factor frequency across recent
-> site intelligence — so the `fw_context` section can name multiple factors with evidence:
-> "Recent intelligence at this site consistently points to Management Systems and
-> Operational Management gaps — look for [specific observable condition], not just
-> whether controls exist."
-
-### System Prompt
-
-```
-You are generating a pre-visit intelligence briefing for a safety manager visiting
-a construction or industrial worksite.
-
-The briefing has two states:
-1. Pre-visit: a reading document — all sections open, manager absorbs context
-2. Active visit (after Start Visit): focus areas become capture prompts,
-   other sections collapse to quick-reference
-
-Your job is to generate content for the active focus areas section — 2-4 specific
-observation prompts that will make this visit substantive rather than general.
-
-Prompts should be:
-- Based on the intelligence signals provided
-- Specific enough to direct attention to the right conditions
-- Written as things to look for, not things to check off
-
-You output only valid JSON. No preamble, no markdown.
-```
-
-### User Prompt Template
-
-```
-Site: {{worksite_name}}
-Manager: {{manager_first_name}}
-Visit date: {{visit_date}}
-
-Site intelligence snapshot:
-Atrophy score: {{atrophy_score}} ({{atrophy_band}})
-Days since last observation: {{days_since_last_obs}}
-Open investigations: {{open_investigation_count}}
-Near-misses (last 30 days): {{near_miss_30d}}
-Open corrective actions: {{open_action_count}}
-
-Active Critical Insights at this site:
-{{active_insights_json}}
-// [{ insight_id, pattern_summary, work_type, fw_factor, days_since_approved }]
-
-Last visit summary: {{last_visit_summary | "No previous visit recorded"}}
-
-Forge Works Map® signal: {{fw_factor | "Not yet classified for this site"}}
-
-Generate focus areas for this visit. Return JSON:
-{
-  "focus_areas": [
-    {
-      "topic": "Short topic label",
-      "prompt": "What to look for — specific, observable, actionable. 1-2 sentences.",
-      "source": "insight | atrophy | investigation | action",
-      "source_ref": "CI-042 | INV-019 | etc"
-    }
-  ],
-  "fw_context": "1-2 sentences. If FW factors are classified, name what they suggest the manager should look beneath the surface for. Null if no classification available."
-}
-```
-
-### Validation Rules
-
-- `focus_areas` must have 2–4 items
-- `source` must be one of the four enum values
-- `source_ref` must correspond to a real entity ID from the input
-
----
-
-## 15. Prompt Versioning
-
-Store prompt versions in `ai_prompt_config`, not in application code. This allows prompt updates without code deployments and enables A/B testing.
+Prompts are versioned in `ai_prompt_config` (database table). The canonical text in `specs/features/` is the source; `ai_prompt_config` is populated from those files, not the other way around.
 
 ```sql
-CREATE TABLE safety_intelligence.ai_prompt_config (
-  id                   UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  prompt_key           VARCHAR(50) NOT NULL,
-  -- e.g. 'observation.enrich', 'critical_insight.generate', 'fw_classify'
-  version              INTEGER NOT NULL,
-  system_prompt        TEXT NOT NULL,
-  user_prompt_template TEXT NOT NULL,
-  model                VARCHAR(50) NOT NULL DEFAULT 'claude-sonnet-4-20250514',
-  max_tokens           INTEGER NOT NULL DEFAULT 1000,
-  is_active            BOOLEAN NOT NULL DEFAULT false,
-  created_at           TIMESTAMPTZ DEFAULT now(),
-  UNIQUE (prompt_key, version)
-);
+-- Prompt key registry (for ai_prompt_config)
+observation.enrich              max_tokens: 1000
+observation.context_request     (no AI call — notification format only)
+critical_insight.generate       max_tokens: 1000
+investigation.assist            max_tokens: 1000
+investigation.generate_narrative max_tokens: 1000
+toolbox_talk.generate           max_tokens: 1500
+enquiry.generate_questions      max_tokens: 1000
+enquiry.synthesise              max_tokens: 1000
+enquiry.summarise               max_tokens: 1000
+fw_classify                     max_tokens: 2000
+situational_brief.generate      max_tokens: 1000
+cop_thread.generate             max_tokens: 1000
+visit_briefing.generate         max_tokens: 1000
+document.ingest                 max_tokens: 2000
+
+-- Capture prompts (front-end only — not stored in ai_prompt_config)
+capture.observation             max_tokens: 600
+capture.incident                max_tokens: 600
+capture.auto                    max_tokens: 700
 ```
 
-**Prompt keys:**
+Capture prompts (`capture.*`) are front-end conversational prompts used directly in the app. They are not stored in `ai_prompt_config` — they are loaded from feature spec files at runtime by the app and sim loader.
 
-| Key | Prompt | Notes |
-|-----|--------|-------|
-| `observation.enrich` | Prompt 1 | max_tokens: 1000 |
-| `critical_insight.generate` | Prompt 3 | Two templates — branch on `trigger_source` |
-| `investigation.assist` | Prompt 4 | max_tokens: 1000 |
-| `investigation.generate_narrative` | Prompt 5 | max_tokens: 1000 |
-| `toolbox_talk.generate` | Prompt 6 | max_tokens: 1500 |
-| `enquiry.generate_questions` | Prompt 7 | max_tokens: 1000 |
-| `enquiry.synthesise` | Prompt 8 | max_tokens: 1000 |
-| `enquiry.generate_summary` | Prompt 9 | max_tokens: 1000 |
-| `fw_classify` | Prompt 10 | max_tokens: 2000 — Blueprint injected |
-| `situational_brief.generate` | Prompt 11 | max_tokens: 1000 |
-| `cop_thread.generate` | Prompt 12 | max_tokens: 1000 |
-| `visit_briefing.generate` | Prompt 13 | max_tokens: 1000 |
+---
 
-Only one version of each key has `is_active = true` at any time. All AI calls look up the active version from `ai_prompt_config` before executing.
+*Last updated: May 2026 — v2.0 index-only format. Prompt text moved to `specs/features/`. To restore historical prompt text, see git history for prompts.md v1.0.*

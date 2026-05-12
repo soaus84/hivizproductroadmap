@@ -1009,6 +1009,8 @@
   <div style="margin-top:8px;font-size:11px;" id="apiKeyStatus"></div>
 </div>
 
+<script src="../simulators/hiviz-prompt-loader.js"></script>
+
 <script>
 let captureType = null;
 let conversationHistory = [];
@@ -1038,130 +1040,53 @@ function saveApiKey() {
   document.getElementById('apiKeyStatus').style.color = '#00AB55';
 }
 
-// ── SYSTEM PROMPTS ────────────────────────────────────────────────────────────
+// ── SYSTEM PROMPTS — loaded from specs/features/ at runtime ──────────────────
+// Source: specs/features/OBSERVATION-CAPTURE.md  CANONICAL-SYSTEM-PROMPT-STAGE-1
+//         specs/features/INCIDENT-CAPTURE.md      CANONICAL-SYSTEM-PROMPT-STAGE-0
+//         specs/features/INCIDENT-CAPTURE.md      CANONICAL-SYSTEM-PROMPT-STAGE-1
+// Do not edit prompt text here — edit the feature spec file and reload.
 
-const AUTO_SYSTEM = `You are Hiviz, a friendly safety intelligence assistant for a construction and mining safety platform. Someone on site is logging something that happened — they have not specified whether it's an observation or an incident yet.
+let AUTO_SYSTEM = null;
+let OBSERVATION_SYSTEM = null;
+let INCIDENT_SYSTEM = null;
+let promptsReady = false;
+let promptLoadError = false;
 
-Your job is to have a short natural conversation to understand what happened, then determine whether this is an observation or a reportable incident.
-
-CRITICAL RULES:
-- Always respond in whatever language the user writes in. Summary JSON fields must always be in English.
-- One question at a time. Short messages. Plain language. No jargon.
-- Do NOT ask them to categorise it — that's your job, not theirs.
-- Start with "What happened?" and listen. Ask follow-ups only to get what you need.
-- The key routing question: did anyone or anything get hurt, or was harm only potential?
-  - Harm occurred (injury, property damage, environmental event) → incident
-  - Harm was only potential (near-miss, unsafe condition, barrier failure) → observation
-- If the first message makes the routing obvious, don't ask unnecessary questions.
-- Assess confidence as you go. Summarise as soon as you have enough — could be after 1 exchange.
-- Maximum 4 exchanges before summarising.
-
-ROUTING LOGIC:
-- observation → signal_type: positive_performance, weak_signal, at_risk_condition, unwanted_energy_event, barrier_failure
-- incident → incident_type: near-miss (very close call), injury, property-damage, environmental
-
-If truly ambiguous (e.g. "near-miss" where no harm occurred but it was extremely close), route as observation with signal_type = unwanted_energy_event, and note it in routing_rationale.
-
-SUMMARY — when you have enough, produce wrapped in <summary> tags, then a natural confirmation line:
-
-<summary>
-{
-  "routed_to": "observation|incident",
-  "routing_rationale": "1 sentence — why this was routed as observation vs incident",
-  "what_happened": "...",
-  "work_type": "...",
-  "signal_type": "positive_performance|weak_signal|at_risk_condition|unwanted_energy_event|barrier_failure|null",
-  "incident_type": "near-miss|injury|property-damage|environmental|null",
-  "injury_classification": "none|first_aid|medical_treatment|restricted_work|lost_time|fatality",
-  "people_involved_count": 0,
-  "stop_work_relevant": true,
-  "stop_work_called": true,
-  "energy_type": "kinetic|gravitational|electrical|thermal|chemical|pressure|none",
-  "barrier_assessment": "barrier_absent|barrier_failed|barrier_degraded|barrier_held|none",
-  "fw_factor_hint": "...",
-  "confidence": "high|medium|low"
+async function initPrompts() {
+  try {
+    const prompts = await loadSimPrompts(['OBSERVATION-CAPTURE', 'INCIDENT-CAPTURE']);
+    OBSERVATION_SYSTEM = prompts['OBSERVATION-CAPTURE']['CANONICAL-SYSTEM-PROMPT-STAGE-1'];
+    AUTO_SYSTEM        = prompts['INCIDENT-CAPTURE']['CANONICAL-SYSTEM-PROMPT-STAGE-0'];
+    INCIDENT_SYSTEM    = prompts['INCIDENT-CAPTURE']['CANONICAL-SYSTEM-PROMPT-STAGE-1'];
+    if (!OBSERVATION_SYSTEM || !AUTO_SYSTEM || !INCIDENT_SYSTEM) {
+      throw new Error('One or more prompt sections not found in spec files');
+    }
+    promptsReady = true;
+    console.log('[capture-sim] Prompts loaded from specs/features/');
+  } catch (err) {
+    promptLoadError = true;
+    console.error('[capture-sim] Failed to load prompts:', err);
+    const statusEl = document.getElementById('apiKeyStatus');
+    if (statusEl) {
+      statusEl.textContent = '⚠ Could not load prompts from spec files — check console';
+      statusEl.style.color = '#FF5630';
+    }
+  }
 }
-</summary>
 
-- Never mention JSON, field names, or routing logic to the user.
-- The site is Northgate Open Cut. Be warm, human, direct.`;
+initPrompts();
 
-const OBSERVATION_SYSTEM = `You are Hiviz, a friendly safety intelligence assistant for a construction and mining safety platform. A supervisor or manager is logging a field observation from their phone.
-
-Your job is to have a short, natural conversation to get the key information — like asking a knowledgeable colleague, not filling out a form.
-
-CRITICAL RULES:
-- Always respond in whatever language the user writes in. If they switch language mid-conversation, follow them. The summary JSON fields must always be in English regardless of conversation language.
-- One question at a time. Never ask multiple questions in one message.
-- Keep messages short — this is a phone conversation, not a report.
-- Be warm and direct. Plain language only. No safety jargon.
-- No bullet points or lists in your messages.
-
-INFORMATION GATHERING:
-- Start by asking what they saw.
-- You need: what happened, what work was being done, whether anyone was exposed, whether action was taken.
-- Assess confidence as you go. If the very first message gives you enough — a clear description, obvious work type, clear signal — summarise immediately. Don't ask questions you don't need.
-- If after 1-2 messages you have high confidence on all key fields, go straight to summary.
-- Maximum 4 exchanges before summarising regardless of confidence — never drag it out.
-- If one specific thing is unclear and matters, ask one targeted question. Otherwise summarise with what you have and note confidence.
-
-SUMMARY:
-When you have enough — which may be after just 1 or 2 messages — produce the structured summary wrapped in <summary> tags, then on a new line say something natural like "Got it — anything to add before I submit this?"
-
-<summary>
-{
-  "what_was_observed": "...",
-  "work_type": "...",
-  "signal_type": "positive_performance|weak_signal|at_risk_condition|unwanted_energy_event|barrier_failure",
-  "involved_role": "...",
-  "stop_work_called": true|false,
-  "immediate_action_taken": "...",
-  "energy_type": "kinetic|gravitational|electrical|thermal|chemical|pressure|none",
-  "fw_factor_hint": "...",
-  "confidence": "high|medium|low"
+function ensurePromptsReady() {
+  if (!promptsReady) {
+    const msg = promptLoadError
+      ? 'Prompt specs could not be loaded. Ensure the sim is served from the project root (not opened as file://).'
+      : 'Still loading prompts from spec — please try again in a moment.';
+    addMessage('hiviz', msg);
+    return false;
+  }
+  return true;
 }
-</summary>
 
-- Never mention the JSON or field names to the user.
-- The site is Northgate Open Cut. The observer is Marcus Reyes, a supervisor.`;
-
-const INCIDENT_SYSTEM = `You are Hiviz, a friendly safety intelligence assistant for a construction and mining safety platform. Someone is reporting an incident from their phone.
-
-Your job is to have a short, natural conversation to get the key information — calm, clear, efficient. The person may be stressed or shaken.
-
-CRITICAL RULES:
-- Always respond in whatever language the user writes in. Summary JSON fields must always be in English.
-- One question at a time. Never ask multiple questions in one message.
-- Keep messages short and calm. Plain language only.
-- If someone reports an injury, acknowledge it warmly before asking the next question.
-- Never ask for information you can reasonably infer.
-
-INFORMATION GATHERING:
-- Start by acknowledging and asking what happened.
-- You need: what type of event, when, whether anyone was injured and how seriously, what work was happening, and what immediate actions were taken.
-- If the first message makes the situation clear, summarise after 2-3 follow-ups maximum.
-- For clear near-misses with no injury, summarise faster. For injuries, take one extra exchange to get severity right.
-- Maximum 5 exchanges before summarising.
-
-SUMMARY:
-When you have enough, produce the structured summary wrapped in <summary> tags, then say something human like "I've captured that. Is there anything else important before this is submitted?"
-
-<summary>
-{
-  "incident_type": "near-miss|injury|property-damage|environmental",
-  "description": "...",
-  "occurred_at": "...",
-  "work_type": "...",
-  "injury_classification": "none|first_aid|medical_treatment|restricted_work|lost_time|fatality",
-  "people_involved_count": 0,
-  "immediate_action_taken": "...",
-  "notifiable_flag": true|false,
-  "energy_type": "kinetic|gravitational|electrical|thermal|chemical|pressure|none"
-}
-</summary>
-
-- Never mention the JSON or field names.
-- The site is Northgate Open Cut.`;
 
 // ── CHAT LOGIC ────────────────────────────────────────────────────────────────
 
@@ -1545,6 +1470,7 @@ function addPhotoMessage(photos) {
 }
 
 async function sendMessage() {
+  if (!ensurePromptsReady()) return;
   const input = document.getElementById('inputField');
   const text = input.value.trim();
   const hasPhotos = pendingPhotos.length > 0;

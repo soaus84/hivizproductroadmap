@@ -3,112 +3,81 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Hiviz</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<title>Hiviz SafetyPlatform — Design Resource</title>
 <style>
-  :root {
-    --bg: #0e0f0d;
-    --bg-card: #141512;
-    --bg-hover: #1a1b18;
-    --border: #2a2b26;
-    --border-light: #1e1f1b;
-    --accent: #d4a843;
-    --accent-dim: #9b7a2e;
-    --text-primary: #e8e6df;
-    --text-secondary: #8a887f;
-    --text-muted: #4a4840;
-    --tag-html: #2a3d2a;
-    --tag-html-text: #7ab87a;
-    --tag-md: #1e2a3d;
-    --tag-md-text: #6a9fd8;
-    --tag-ts: #2a1e3d;
-    --tag-ts-text: #9b7fd8;
-    --tag-sim: #3d2a1e;
-    --tag-sim-text: #d8936a;
-    --tag-exp: #2a1e0e;
-    --tag-exp-text: #d4a843;
-    --tag-ms: #1a3d2a;
-    --tag-ms-text: #34d399;
-  }
-
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  html { scroll-behavior: smooth; }
-  body {
-    background: var(--bg);
-    color: var(--text-primary);
-    font-family: 'DM Mono', monospace;
-    font-size: 13px;
-    line-height: 1.6;
-    min-height: 100vh;
-    -webkit-font-smoothing: antialiased;
+
+  :root {
+    --bg: #0a0b0d;
+    --surface: #111214;
+    --surface2: #16181b;
+    --border: #1e2025;
+    --border-light: #1a1c20;
+    --text: #e8eaed;
+    --text-secondary: #9aa0a6;
+    --text-muted: #5f6368;
+    --accent: #d4a843;
+    --accent-dim: rgba(212,168,67,0.12);
+
+    --tag-html: rgba(99,102,241,0.15); --tag-html-text: #a5b4fc;
+    --tag-md:   rgba(16,185,129,0.12); --tag-md-text:   #6ee7b7;
+    --tag-ts:   rgba(59,130,246,0.12); --tag-ts-text:   #93c5fd;
+    --tag-sim:  rgba(245,158,11,0.12); --tag-sim-text:  #fcd34d;
+    --tag-exp:  rgba(212,168,67,0.12); --tag-exp-text:  #d4a843;
+    --tag-ms:   rgba(52,211,153,0.12); --tag-ms-text:   #34d399;
+    --tag-glob: rgba(167,139,250,0.15); --tag-glob-text: #c4b5fd;
+    --tag-feat: rgba(251,113,133,0.12); --tag-feat-text: #fda4af;
   }
 
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
-    pointer-events: none;
-    z-index: 0;
-    opacity: 0.4;
-  }
+  html { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 14px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+  body { min-height: 100vh; }
 
-  .container { max-width: 860px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 1; }
+  .container { max-width: 860px; margin: 0 auto; padding: 0 24px; }
 
-  header { padding: 64px 0 48px; border-bottom: 1px solid var(--border); margin-bottom: 56px; }
+  header { padding: 64px 0 48px; border-bottom: 1px solid var(--border); margin-bottom: 40px; }
+  .wordmark { display: flex; align-items: baseline; gap: 6px; margin-bottom: 12px; }
+  .wordmark-hiviz { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; color: var(--text); }
+  .wordmark-sep { font-size: 18px; color: var(--text-muted); }
+  .wordmark-product { font-size: 16px; font-weight: 400; color: var(--text-secondary); }
+  .version-tag { font-size: 10px; font-weight: 600; background: var(--accent-dim); color: var(--accent); padding: 1px 6px; border-radius: 3px; letter-spacing: 0.06em; vertical-align: middle; position: relative; top: -1px; }
+  .header-desc { font-size: 13px; color: var(--text-muted); max-width: 520px; line-height: 1.65; }
 
-  .wordmark { display: flex; align-items: baseline; gap: 10px; margin-bottom: 20px; }
-  .wordmark-hiviz { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 28px; letter-spacing: -0.02em; color: var(--accent); }
-  .wordmark-sep { color: var(--text-muted); font-size: 18px; font-weight: 300; }
-  .wordmark-product { font-family: 'Syne', sans-serif; font-weight: 500; font-size: 18px; letter-spacing: 0.01em; color: var(--text-secondary); }
-  .version-tag { display: inline-block; font-size: 10px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent-dim); border: 1px solid var(--accent-dim); padding: 2px 7px; border-radius: 2px; vertical-align: middle; margin-left: 4px; position: relative; top: -2px; }
-  .header-desc { font-size: 13px; color: var(--text-secondary); line-height: 1.7; max-width: 580px; font-style: italic; border-left: 2px solid var(--border); padding-left: 16px; }
+  nav { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 40px; }
+  nav a { font-size: 11px; font-weight: 500; color: var(--text-secondary); text-decoration: none; padding: 4px 10px; border: 1px solid var(--border); border-radius: 3px; letter-spacing: 0.03em; transition: color 0.15s, border-color 0.15s; }
+  nav a:hover { color: var(--text); border-color: var(--text-muted); }
+  nav a.ms-nav { color: #34d399; border-color: rgba(52,211,153,0.25); }
+  nav a.ms-nav:hover { border-color: #34d399; }
+  nav a.exp-nav { color: var(--accent); border-color: rgba(212,168,67,0.25); }
+  nav a.exp-nav:hover { border-color: var(--accent); }
+  nav a.glob-nav { color: #c4b5fd; border-color: rgba(167,139,250,0.25); }
+  nav a.glob-nav:hover { border-color: #c4b5fd; }
+  nav a.feat-nav { color: #fda4af; border-color: rgba(251,113,133,0.25); }
+  nav a.feat-nav:hover { border-color: #fda4af; }
 
-  nav { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 56px; }
-  nav a { font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-muted); text-decoration: none; padding: 5px 10px; border: 1px solid var(--border-light); border-radius: 2px; transition: all 0.15s ease; }
-  nav a:hover { color: var(--text-secondary); border-color: var(--border); background: var(--bg-hover); }
-  nav a.exp-nav { border-color: rgba(212,168,67,0.2); color: var(--accent-dim); }
-  nav a.exp-nav:hover { color: var(--accent); border-color: var(--accent-dim); background: rgba(212,168,67,0.04); }
-  nav a.ms-nav { border-color: rgba(16,185,129,0.25); color: rgba(52,211,153,0.6); }
-  nav a.ms-nav:hover { color: #34d399; border-color: rgba(16,185,129,0.5); background: rgba(16,185,129,0.04); }
+  .section { margin: 0 0 52px; }
+  .section.experiment { border: 1px solid rgba(212,168,67,0.15); border-radius: 6px; padding: 20px 20px 16px; margin: 0 0 52px; background: rgba(212,168,67,0.03); }
+  .section.ms-section { border: 1px solid rgba(52,211,153,0.15); border-radius: 6px; padding: 20px 20px 16px; margin: 0 0 52px; background: rgba(52,211,153,0.03); }
+  .section.glob-section { border: 1px solid rgba(167,139,250,0.15); border-radius: 6px; padding: 20px 20px 16px; margin: 0 0 52px; background: rgba(167,139,250,0.03); }
+  .section.feat-section { border: 1px solid rgba(251,113,133,0.15); border-radius: 6px; padding: 20px 20px 16px; margin: 0 0 52px; background: rgba(251,113,133,0.03); }
 
-  .section { margin-bottom: 52px; animation: fadeUp 0.4s ease both; }
-  .section:nth-child(1) { animation-delay: 0.05s; }
-  .section:nth-child(2) { animation-delay: 0.10s; }
-  .section:nth-child(3) { animation-delay: 0.15s; }
-  .section:nth-child(4) { animation-delay: 0.20s; }
-  .section:nth-child(5) { animation-delay: 0.25s; }
-  .section:nth-child(6) { animation-delay: 0.30s; }
-  .section:nth-child(7) { animation-delay: 0.35s; }
-  .section:nth-child(8) { animation-delay: 0.40s; }
-  .section:nth-child(9) { animation-delay: 0.45s; }
-  .section:nth-child(10) { animation-delay: 0.50s; }
-  .section:nth-child(11) { animation-delay: 0.55s; }
-  .section:nth-child(12) { animation-delay: 0.60s; }
+  .section-header { display: flex; align-items: baseline; gap: 12px; margin-bottom: 6px; }
+  .section-title { font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-secondary); }
+  .section-note { font-size: 11px; color: var(--text-muted); }
+  .section-intro { font-size: 12px; color: var(--text-muted); line-height: 1.65; margin-bottom: 14px; max-width: 640px; }
+  .section-rule { height: 1px; background: var(--border); margin: 10px 0 14px; }
 
-  @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  .tier-label { display: inline-block; font-size: 9px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; padding: 2px 7px; border-radius: 2px; margin-bottom: 8px; }
+  .tier-glob { background: rgba(167,139,250,0.15); color: #c4b5fd; }
+  .tier-feat { background: rgba(251,113,133,0.12); color: #fda4af; }
+  .tier-plat { background: rgba(16,185,129,0.12); color: #6ee7b7; }
 
-  .section-header { display: flex; align-items: baseline; gap: 12px; margin-bottom: 4px; }
-  .section-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); }
-  .section-note { font-size: 11px; color: var(--text-muted); font-style: italic; }
-  .section-rule { height: 1px; background: var(--border-light); margin-bottom: 16px; }
-
-  .section.experiment { border: 1px solid rgba(212,168,67,0.1); border-radius: 4px; padding: 16px 16px 8px; background: rgba(212,168,67,0.02); margin: 0 -16px 52px; }
-  .section.experiment .section-rule { background: rgba(212,168,67,0.12); }
-  .section.ms-section { border: 1px solid rgba(16,185,129,0.12); border-radius: 4px; padding: 16px 16px 8px; background: rgba(16,185,129,0.02); margin: 0 -16px 52px; }
-  .section.ms-section .section-title { color: #34d399; }
-  .section.ms-section .section-rule { background: rgba(16,185,129,0.15); }
-
-  .file-list { list-style: none; }
-  .file-item { display: flex; align-items: baseline; gap: 0; padding: 9px 12px; margin: 0 -12px; border-radius: 3px; transition: background 0.12s ease; border-bottom: 1px solid transparent; }
-  .file-item:hover { background: var(--bg-hover); border-bottom-color: var(--border-light); }
-  .file-item:hover .file-link { color: var(--text-primary); }
-  .file-link { font-family: 'DM Mono', monospace; font-size: 12.5px; color: var(--text-secondary); text-decoration: none; transition: color 0.12s ease; white-space: nowrap; flex-shrink: 0; }
-  .file-link:hover { color: var(--accent); }
-  .file-dot { flex: 1; margin: 0 10px; border-bottom: 1px dotted var(--text-muted); opacity: 0.25; position: relative; top: -3px; min-width: 20px; }
-  .file-desc { font-size: 12px; color: var(--text-muted); text-align: right; white-space: nowrap; flex-shrink: 0; max-width: 340px; overflow: hidden; text-overflow: ellipsis; }
+  ul.file-list { list-style: none; }
+  .file-item { display: flex; align-items: baseline; gap: 0; padding: 7px 0; border-bottom: 1px solid var(--border-light); font-size: 13px; }
+  .file-item:last-child { border-bottom: none; }
+  .file-link { color: var(--text-secondary); text-decoration: none; font-size: 13px; transition: color 0.12s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .file-link:hover { color: var(--text); }
+  .file-dot { flex: 1; border-bottom: 1px dotted var(--border); margin: 0 10px; position: relative; top: -3px; min-width: 20px; }
+  .file-desc { font-size: 12px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .file-tag { display: inline-block; font-size: 9px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; padding: 1px 5px; border-radius: 2px; margin-right: 8px; vertical-align: middle; position: relative; top: -1px; flex-shrink: 0; }
 
   .tag-html { background: var(--tag-html); color: var(--tag-html-text); }
@@ -117,11 +86,20 @@
   .tag-sim  { background: var(--tag-sim);  color: var(--tag-sim-text);  }
   .tag-exp  { background: var(--tag-exp);  color: var(--tag-exp-text);  }
   .tag-ms   { background: var(--tag-ms);   color: var(--tag-ms-text);   }
+  .tag-glob { background: var(--tag-glob); color: var(--tag-glob-text); }
+  .tag-feat { background: var(--tag-feat); color: var(--tag-feat-text); }
 
   .file-item.exp-item .file-link { color: rgba(212,168,67,0.6); }
   .file-item.exp-item:hover .file-link { color: var(--accent); }
   .file-item.ms-item .file-link { color: rgba(52,211,153,0.6); }
   .file-item.ms-item:hover .file-link { color: #34d399; }
+  .file-item.glob-item .file-link { color: rgba(167,139,250,0.6); }
+  .file-item.glob-item:hover .file-link { color: #c4b5fd; }
+  .file-item.feat-item .file-link { color: rgba(251,113,133,0.6); }
+  .file-item.feat-item:hover .file-link { color: #fda4af; }
+
+  .arch-note { font-size: 11px; color: var(--text-muted); background: var(--surface2); border: 1px solid var(--border); border-radius: 4px; padding: 8px 12px; margin-bottom: 14px; line-height: 1.6; }
+  .arch-note strong { color: var(--text-secondary); font-weight: 600; }
 
   footer { border-top: 1px solid var(--border-light); padding: 32px 0 48px; margin-top: 24px; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
   .footer-left { font-size: 11px; color: var(--text-muted); letter-spacing: 0.04em; }
@@ -137,6 +115,8 @@
     footer { flex-direction: column; align-items: flex-start; gap: 8px; }
     .section.experiment { margin: 0 0 52px; }
     .section.ms-section { margin: 0 0 52px; }
+    .section.glob-section { margin: 0 0 52px; }
+    .section.feat-section { margin: 0 0 52px; }
   }
 </style>
 </head>
@@ -149,18 +129,19 @@
       <span class="wordmark-sep">/</span>
       <span class="wordmark-product">SafetyPlatform <span class="version-tag">V1</span></span>
     </div>
-    <p class="header-desc">Working design resource for Hiviz SafetyPlatform. Contains consolidated specs, interactive product docs, simulators, and build scaffolding. Nothing here is final production code — it's the thinking and structure behind what gets built.</p>
+    <p class="header-desc">Working design resource for Hiviz SafetyPlatform. Specs, simulators, and build scaffolding organised on a DRY documentation model — every prompt and definition has exactly one authoritative home.</p>
   </header>
 
   <nav>
     <a href="#overview">Overview</a>
+    <a href="#globals" class="glob-nav">Globals ✦</a>
+    <a href="#features" class="feat-nav">Features ✦</a>
+    <a href="#platform-specs">Platform Specs</a>
+    <a href="#simulators">Simulators</a>
+    <a href="#prompt-lab">Prompt Lab</a>
     <a href="#wireframes">Wireframes</a>
     <a href="#product-docs">Product Docs</a>
-    <a href="#simulators">Simulators</a>
-    <a href="#ms-sim" class="ms-nav">Mgmt System ✦</a>
-    <a href="#specs">Tech Specs</a>
     <a href="#claude-code">Claude Code</a>
-    <a href="#prompt-lab">Prompt Lab</a>
     <a href="#ux-experiments" class="exp-nav">UX Experiments ✦</a>
   </nav>
 
@@ -169,7 +150,119 @@
     <div class="section-header"><span class="section-title">Overview</span></div>
     <div class="section-rule"></div>
     <ul class="file-list">
-      <li class="file-item"><span class="file-tag tag-md">md</span><a href="README.md" class="file-link">README.md</a><span class="file-dot"></span><span class="file-desc">Project overview</span></li>
+      <li class="file-item"><span class="file-tag tag-md">md</span><a href="README.md" class="file-link">README.md</a><span class="file-dot"></span><span class="file-desc">Project overview and snapshot map</span></li>
+      <li class="file-item"><span class="file-tag tag-md">md</span><a href="specs/HOW-TO-READ-THIS.md" class="file-link">specs/HOW-TO-READ-THIS.md</a><span class="file-dot"></span><span class="file-desc">Start here — documentation architecture, authority rules, navigation guide</span></li>
+      <li class="file-item"><span class="file-tag tag-html">html</span><a href="signal-flow.html" class="file-link">signal-flow.html</a><span class="file-dot"></span><span class="file-desc">Intelligence signal flow — pipeline stages, insight classes</span></li>
+      <li class="file-item"><span class="file-tag tag-html">html</span><a href="architecture/platform-architecture.html" class="file-link">architecture/platform-architecture.html</a><span class="file-dot"></span><span class="file-desc">Connected, modular workspaces — system overview</span></li>
+    </ul>
+  </section>
+
+  <!-- ── GLOBAL REFERENCES ── -->
+  <section class="section glob-section" id="globals">
+    <div class="section-header">
+      <span class="section-title">Global References</span>
+      <span class="section-note">Tier 1 — cross-cutting definitions, not owned by any single feature</span>
+    </div>
+    <div class="section-intro">Taxonomies, classification frameworks, and rules consumed by multiple features. These files contain definitions only — never prompt text. Feature specs reference these by name; they do not copy the content. If a definition appears in more than one place, this folder is the authority.</div>
+    <div class="section-rule"></div>
+    <ul class="file-list">
+      <li class="file-item glob-item"><span class="file-tag tag-glob">glob</span><a href="specs/globals/fw-map-blueprint.md" class="file-link">globals/fw-map-blueprint.md</a><span class="file-dot"></span><span class="file-desc">Forge Works Map® — 15 factors, 3 domains, 3 maturity levels, per-factor classification guidance. Injected at runtime into fw_classify.</span></li>
+      <li class="file-item glob-item"><span class="file-tag tag-glob">glob</span><a href="specs/globals/signal-type-taxonomy.md" class="file-link">globals/signal-type-taxonomy.md</a><span class="file-dot"></span><span class="file-desc">5 signal types (positive_performance → barrier_failure), definitions, and pipeline routing rules</span></li>
+      <li class="file-item glob-item"><span class="file-tag tag-glob">glob</span><a href="specs/globals/energy-type-taxonomy.md" class="file-link">globals/energy-type-taxonomy.md</a><span class="file-dot"></span><span class="file-desc">8 energy types — kinetic through noise_vibration — with definitions</span></li>
+      <li class="file-item glob-item"><span class="file-tag tag-glob">glob</span><a href="specs/globals/barrier-assessment-values.md" class="file-link">globals/barrier-assessment-values.md</a><span class="file-dot"></span><span class="file-desc">5 barrier states (absent → held) — definitions and classification guidance</span></li>
+      <li class="file-item glob-item"><span class="file-tag tag-glob">glob</span><a href="specs/globals/ai-output-standards.md" class="file-link">globals/ai-output-standards.md</a><span class="file-dot"></span><span class="file-desc">JSON-only output rules, rationale standard, suggestion language, confidence thresholds — applies to all prompts</span></li>
+      <li class="file-item glob-item"><span class="file-tag tag-glob">glob</span><a href="specs/globals/anonymisation-rules.md" class="file-link">globals/anonymisation-rules.md</a><span class="file-dot"></span><span class="file-desc">PII handling — what to flag, how to scrub for downstream prompts — applies to all prompts that reference observation text</span></li>
+    </ul>
+  </section>
+
+  <!-- ── FEATURE SPECS ── -->
+  <section class="section feat-section" id="features">
+    <div class="section-header">
+      <span class="section-title">Feature Specs</span>
+      <span class="section-note">Tier 2 — canonical prompt text and complete pipeline specs per feature</span>
+    </div>
+    <div class="section-intro">One file per feature. Each file owns the complete pipeline for that feature in sequential order: capture → API → job → prompt → output → downstream effects. This is where canonical prompt text lives. Simulators and the prompt lab load from here — they do not contain their own copies of any prompt.</div>
+    <div class="arch-note"><strong>DRY rule:</strong> if you need to read or modify a prompt, come here. Do not edit the prompt text in a simulator or the prompt lab — those are consumers, not sources.</div>
+    <div class="section-rule"></div>
+    <ul class="file-list">
+      <li class="file-item feat-item"><span class="file-tag tag-feat">feat</span><a href="specs/features/OBSERVATION-CAPTURE.md" class="file-link">features/OBSERVATION-CAPTURE.md</a><span class="file-dot"></span><span class="file-desc">Capture conversation (P6), enrichment (P1), context request (P2) — used by capture-sim.html and capture-sim-offline.html</span></li>
+      <li class="file-item feat-item"><span class="file-tag tag-feat">feat</span><a href="specs/features/INCIDENT-CAPTURE.md" class="file-link">features/INCIDENT-CAPTURE.md</a><span class="file-dot"></span><span class="file-desc">Incident capture (P7), auto triage (P8) — used by capture-sim.html</span></li>
+      <li class="file-item feat-item"><span class="file-tag tag-feat">feat</span><a href="specs/features/CRITICAL-INSIGHT.md" class="file-link">features/CRITICAL-INSIGHT.md</a><span class="file-dot"></span><span class="file-desc">Insight draft generation (P3), FW classification insight path (P10) — used by workflow-sim.html</span></li>
+      <li class="file-item feat-item"><span class="file-tag tag-feat">feat</span><a href="specs/features/INVESTIGATION.md" class="file-link">features/INVESTIGATION.md</a><span class="file-dot"></span><span class="file-desc">Investigation assist (P4), toolbox narrative (P5), FW classification investigation path (P10) — used by workflow-sim.html</span></li>
+      <li class="file-item feat-item"><span class="file-tag tag-feat">feat</span><a href="specs/features/TOOLBOX-TALK.md" class="file-link">features/TOOLBOX-TALK.md</a><span class="file-dot"></span><span class="file-desc">Full toolbox talk assembly (P6 of talks), content selection algorithm — used by workflow-sim.html</span></li>
+      <li class="file-item feat-item"><span class="file-tag tag-feat">feat</span><a href="specs/features/ENQUIRY.md" class="file-link">features/ENQUIRY.md</a><span class="file-dot"></span><span class="file-desc">Question generation (P7), live synthesis (P8), final summary (P9), FW classification enquiry path (P10) — used by enquiry-sim.html</span></li>
+      <li class="file-item feat-item"><span class="file-tag tag-feat">feat</span><a href="specs/features/MANAGEMENT-SYSTEM-INGESTION.md" class="file-link">features/MANAGEMENT-SYSTEM-INGESTION.md</a><span class="file-dot"></span><span class="file-desc">Document ingestion AI prompt, requirement extraction schema — used by ms-sim.html</span></li>
+      <li class="file-item feat-item"><span class="file-tag tag-feat">feat</span><a href="specs/features/VISIT-BRIEFING.md" class="file-link">features/VISIT-BRIEFING.md</a><span class="file-dot"></span><span class="file-desc">Visit briefing pack generation (P13), focus area prompts — no sim yet</span></li>
+      <li class="file-item feat-item"><span class="file-tag tag-feat">feat</span><a href="specs/features/COMMUNITIES.md" class="file-link">features/COMMUNITIES.md</a><span class="file-dot"></span><span class="file-desc">CoP thread generation (P12), framing rules — no sim yet</span></li>
+      <li class="file-item feat-item"><span class="file-tag tag-feat">feat</span><a href="specs/features/SITUATIONAL-BRIEF.md" class="file-link">features/SITUATIONAL-BRIEF.md</a><span class="file-dot"></span><span class="file-desc">Situational brief generation (P11) — no sim yet</span></li>
+    </ul>
+  </section>
+
+  <!-- ── PLATFORM SPECS ── -->
+  <section class="section" id="platform-specs">
+    <div class="section-header">
+      <span class="section-title">Platform Specs</span>
+      <span class="section-note">Tier 3 — data model, API, architecture</span>
+    </div>
+    <div class="section-intro">Platform-wide documentation. Feature specs reference these for schema and API shape. These files do not contain prompt text — they point to specs/features/ for that.</div>
+    <div class="section-rule"></div>
+    <ul class="file-list">
+      <li class="file-item"><span class="file-tag tag-md">md</span><a href="specs/SPEC.md" class="file-link">specs/SPEC.md</a><span class="file-dot"></span><span class="file-desc">Data model, API, algorithms, logic rules, notifications, enquiry module — source of truth for data and API</span></li>
+      <li class="file-item"><span class="file-tag tag-md">md</span><a href="specs/views.md" class="file-link">specs/views.md</a><span class="file-dot"></span><span class="file-desc">All UI/UX view specifications, screen flows, component behaviour</span></li>
+      <li class="file-item"><span class="file-tag tag-md">md</span><a href="specs/prompts.md" class="file-link">specs/prompts.md</a><span class="file-dot"></span><span class="file-desc">Prompt index only — one-liner per prompt pointing to its feature file. No prompt text lives here.</span></li>
+      <li class="file-item"><span class="file-tag tag-md">md</span><a href="specs/ROADMAP.md" class="file-link">specs/ROADMAP.md</a><span class="file-dot"></span><span class="file-desc">Feature roadmap — what's built, what's next, version sequence</span></li>
+      <li class="file-item"><span class="file-tag tag-html">html</span><a href="specs/08-offline-architecture.html" class="file-link">specs/08-offline-architecture.html</a><span class="file-dot"></span><span class="file-desc">Offline architecture — Capacitor SQLite, sync queue, enrichment retry</span></li>
+      <li class="file-item"><span class="file-tag tag-html">html</span><a href="architecture/sitemap.html" class="file-link">architecture/sitemap.html</a><span class="file-dot"></span><span class="file-desc">Sitemap, routes, view patterns, workspace breakdown</span></li>
+      <li class="file-item"><span class="file-tag tag-html">html</span><a href="v6-discovery.html" class="file-link">v6-discovery.html</a><span class="file-dot"></span><span class="file-desc">V6 Management System workspace discovery</span></li>
+      <li class="file-item"><span class="file-tag tag-html">html</span><a href="v7-discovery.html" class="file-link">v7-discovery.html</a><span class="file-dot"></span><span class="file-desc">V7 Communities workspace discovery</span></li>
+    </ul>
+  </section>
+
+  <!-- ── SIMULATORS ── -->
+  <section class="section" id="simulators">
+    <div class="section-header">
+      <span class="section-title">Simulators</span>
+      <span class="section-note">Test harnesses — load prompts from specs/features/, contain no canonical content</span>
+    </div>
+    <div class="section-intro">Each simulator exercises a feature pipeline end-to-end. Prompts are injected from the relevant feature spec — the sim is the harness, the feature file is the source. Requires an Anthropic API key for live AI calls.</div>
+    <div class="section-rule"></div>
+    <ul class="file-list">
+      <li class="file-item"><span class="file-tag tag-sim">sim</span><a href="simulators/capture-sim.html" class="file-link">capture-sim.html</a><span class="file-dot"></span><span class="file-desc">Capture sim — observation, incident, and auto triage. Prompts from OBSERVATION-CAPTURE.md + INCIDENT-CAPTURE.md</span></li>
+      <li class="file-item"><span class="file-tag tag-sim">sim</span><a href="simulators/capture-sim-offline.html" class="file-link">capture-sim-offline.html</a><span class="file-dot"></span><span class="file-desc">Capture sim — 4 states including offline and API unavailable. Prompt from OBSERVATION-CAPTURE.md</span></li>
+      <li class="file-item"><span class="file-tag tag-sim">sim</span><a href="simulators/enquiry-sim.html" class="file-link">enquiry-sim.html</a><span class="file-dot"></span><span class="file-desc">Enquiry pipeline — 3 scenarios (post-insight, mid-investigation, witness). Prompts from ENQUIRY.md</span></li>
+      <li class="file-item"><span class="file-tag tag-sim">sim</span><a href="simulators/workflow-sim.html" class="file-link">workflow-sim.html</a><span class="file-dot"></span><span class="file-desc">End-to-end intelligence pipeline — 3 scenarios. Prompts from CRITICAL-INSIGHT.md, INVESTIGATION.md, TOOLBOX-TALK.md</span></li>
+    </ul>
+  </section>
+
+  <!-- ── MANAGEMENT SYSTEM SIM ── -->
+  <section class="section ms-section" id="ms-sim">
+    <div class="section-header">
+      <span class="section-title">Management System ✦</span>
+      <span class="section-note">V6 — document ingestion simulator</span>
+    </div>
+    <div class="section-intro">Document ingestion pipeline — upload or use exemplar documents. AI extracts structured requirements, field view, and toolbox talk discussion prompts. Prompt injected from MANAGEMENT-SYSTEM-INGESTION.md.</div>
+    <div class="section-rule"></div>
+    <ul class="file-list">
+      <li class="file-item ms-item">
+        <span class="file-tag tag-ms">sim</span>
+        <a href="simulators/ms-sim.html" class="file-link">ms-sim.html</a>
+        <span class="file-dot"></span>
+        <span class="file-desc">Document ingestion — extract requirements, field view, toolbox talk, review. Prompt from MANAGEMENT-SYSTEM-INGESTION.md</span>
+      </li>
+    </ul>
+  </section>
+
+  <!-- ── PROMPT LAB ── -->
+  <section class="section" id="prompt-lab">
+    <div class="section-header">
+      <span class="section-title">Prompt Lab</span>
+      <span class="section-note">Live prompt tuning — loads from specs/features/, requires Anthropic API key</span>
+    </div>
+    <div class="section-intro">Interactive prompt editor for testing and tuning. Prompts are loaded from the feature spec files — editing here does not update the spec. Copy output back to the feature file after confirming changes. Requires an Anthropic API key.</div>
+    <div class="section-rule"></div>
+    <ul class="file-list">
+      <li class="file-item"><span class="file-tag tag-html">html</span><a href="prompt-lab.html" class="file-link">prompt-lab.html</a><span class="file-dot"></span><span class="file-desc">Interactive prompt editor — tune, run, validate, copy back to feature spec</span></li>
+      <li class="file-item"><span class="file-tag tag-html">html</span><a href="taxonomy.html" class="file-link">taxonomy.html</a><span class="file-dot"></span><span class="file-desc">Classification taxonomy reference — live FW Map® classifier</span></li>
     </ul>
   </section>
 
@@ -178,9 +271,12 @@
     <div class="section-header"><span class="section-title">UX Wireframes</span><span class="section-note">clickable — mockup &amp; wireframe toggle</span></div>
     <div class="section-rule"></div>
     <ul class="file-list">
-      <li class="file-item"><span class="file-tag tag-html">html</span><a href="hiviz-field-standalone.html" class="file-link">hiviz-field-standalone.html</a><span class="file-dot"></span><span class="file-desc">A click-through prototype of the field app</span></li>
+      <li class="file-item"><span class="file-tag tag-html">html</span><a href="wireframes-index.html" class="file-link">wireframes/index.html</a><span class="file-dot"></span><span class="file-desc">Wireframe pack — all 5 flows, mockup/wireframe mode toggle</span></li>
       <li class="file-item"><span class="file-tag tag-html">html</span><a href="wireframes/pipeline.html" class="file-link">wireframes/pipeline.html</a><span class="file-dot"></span><span class="file-desc">Insights pipeline — Kanban + state-based detail panel</span></li>
+      <li class="file-item"><span class="file-tag tag-html">html</span><a href="wireframes/add-observation.html" class="file-link">wireframes/add-observation.html</a><span class="file-dot"></span><span class="file-desc">Add observation — full page + FAB modal</span></li>
       <li class="file-item"><span class="file-tag tag-html">html</span><a href="wireframes/visit-wizard.html" class="file-link">wireframes/visit-wizard.html</a><span class="file-dot"></span><span class="file-desc">Plan a visit — 3-step wizard with Blueprint signals</span></li>
+      <li class="file-item"><span class="file-tag tag-html">html</span><a href="wireframes/my-workspace.html" class="file-link">wireframes/my-workspace.html</a><span class="file-dot"></span><span class="file-desc">My workspace — personal dashboard</span></li>
+      <li class="file-item"><span class="file-tag tag-html">html</span><a href="wireframes/worksite-dashboard.html" class="file-link">wireframes/worksite-dashboard.html</a><span class="file-dot"></span><span class="file-desc">Worksite dashboard</span></li>
       <li class="file-item"><span class="file-tag tag-html">html</span><a href="wireframes/control-register.html" class="file-link">wireframes/control-register.html</a><span class="file-dot"></span><span class="file-desc">Risk mobile ideation</span></li>
       <li class="file-item"><span class="file-tag tag-html">html</span><a href="wireframes/control-register-desktop.html" class="file-link">wireframes/control-register-desktop.html</a><span class="file-dot"></span><span class="file-desc">Risk desktop ideation</span></li>
     </ul>
@@ -203,69 +299,13 @@
     </ul>
   </section>
 
-  <!-- ── SIMULATORS ── -->
-  <section class="section" id="simulators">
-    <div class="section-header"><span class="section-title">Simulators</span><span class="section-note">interactive — open in browser</span></div>
-    <div class="section-rule"></div>
-    <ul class="file-list">
-      <li class="file-item"><span class="file-tag tag-sim">sim</span><a href="simulators/workflow-sim.html" class="file-link">workflow-sim.html</a><span class="file-dot"></span><span class="file-desc">End-to-end workflow simulator — 3 scenarios</span></li>
-      <li class="file-item"><span class="file-tag tag-sim">sim</span><a href="simulators/enquiry-sim.html" class="file-link">enquiry-sim.html</a><span class="file-dot"></span><span class="file-desc">Enquiry pipeline simulator — 3 scenarios</span></li>
-      <li class="file-item"><span class="file-tag tag-sim">sim</span><a href="simulators/capture-sim.html" class="file-link">capture-sim.html</a><span class="file-dot"></span><span class="file-desc">Chat Capture sim — Blueprint-enriched FW Map® classifier</span></li>
-      <li class="file-item"><span class="file-tag tag-sim">sim</span><a href="simulators/capture-sim-offline.html" class="file-link">capture-sim-offline.html</a><span class="file-dot"></span><span class="file-desc">Chat Capture sim — 4 states including offline &amp; API unavailable</span></li>
-    </ul>
-  </section>
-
-  <!-- ── MANAGEMENT SYSTEM SIM ── -->
-  <section class="section ms-section" id="ms-sim">
-    <div class="section-header">
-      <span class="section-title">Management System ✦</span>
-      <span class="section-note">V6 — document ingestion simulator</span>
-    </div>
-    <div class="section-rule"></div>
-    <ul class="file-list">
-      <li class="file-item ms-item">
-        <span class="file-tag tag-ms">sim</span>
-        <a href="simulators/ms-sim.html" class="file-link">ms-sim.html</a>
-        <span class="file-dot"></span>
-        <span class="file-desc">Document ingestion — extract requirements, field view, toolbox talk, review</span>
-      </li>
-    </ul>
-  </section>
-
-  <!-- ── TECH SPECS ── -->
-  <section class="section" id="specs">
-    <div class="section-header"><span class="section-title">Technical Specs</span><span class="section-note">consolidated — SPEC.md is source of truth</span></div>
-    <div class="section-rule"></div>
-    <ul class="file-list">
-      <li class="file-item"><span class="file-tag tag-md">md</span><a href="/specs/HOW-TO-READ-THIS.md" class="file-link">HOW-TO-READ-THIS.md</a><span class="file-dot"></span><span class="file-desc">Start here — document map, key concepts, dev rules</span></li>
-      <li class="file-item"><span class="file-tag tag-md">md</span><a href="/specs/SPEC.md" class="file-link">SPEC.md</a><span class="file-dot"></span><span class="file-desc">Data model, API, algorithms, logic rules, notifications, enquiry module</span></li>
-      <li class="file-item"><span class="file-tag tag-md">md</span><a href="/specs/prompts.md" class="file-link">prompts.md</a><span class="file-dot"></span><span class="file-desc">AI prompt library — 13 prompts · Blueprint-enriched FW classifier</span></li>
-      <li class="file-item"><span class="file-tag tag-html">html</span><a href="specs/08-offline-architecture.html" class="file-link">specs/08-offline-architecture.html</a><span class="file-dot"></span><span class="file-desc">Offline architecture diagram — dev reference</span></li>
-      <li class="file-item"><span class="file-tag tag-html">html</span><a href="architecture/platform-architecture.html" class="file-link">architecture/platform-architecture.html</a><span class="file-dot"></span><span class="file-desc">Connected, modular workspaces</span></li>
-      <li class="file-item"><span class="file-tag tag-html">html</span><a href="architecture/sitemap.html" class="file-link">architecture/sitemap.html</a><span class="file-dot"></span><span class="file-desc">Sitemap, views, patterns</span></li>
-      <li class="file-item"><span class="file-tag tag-html">html</span><a href="signal-flow.html" class="file-link">signal-flow.html</a><span class="file-dot"></span><span class="file-desc">Intelligence signal flow — pipeline stages, insight classes</span></li>
-      <li class="file-item"><span class="file-tag tag-html">html</span><a href="v6-discovery.html" class="file-link">v6-discovery.html</a><span class="file-dot"></span><span class="file-desc">V6 Management systems discovery</span></li>
-      <li class="file-item"><span class="file-tag tag-html">html</span><a href="v7-discovery.html" class="file-link">v7-discovery.html</a><span class="file-dot"></span><span class="file-desc">V7 Communities discovery</span></li>
-    </ul>
-  </section>
-
   <!-- ── CLAUDE CODE ── -->
   <section class="section" id="claude-code">
     <div class="section-header"><span class="section-title">Claude Code Brief</span></div>
     <div class="section-rule"></div>
     <ul class="file-list">
-      <li class="file-item"><span class="file-tag tag-md">md</span><a href="claude-code/BRIEF.md" class="file-link">claude-code/BRIEF.md</a><span class="file-dot"></span><span class="file-desc">Build brief for Claude Code</span></li>
-      <li class="file-item"><span class="file-tag tag-md">md</span><a href="claude-code/claude.md" class="file-link">claude-code/claude.md</a><span class="file-dot"></span><span class="file-desc">Claude Code instructions</span></li>
-    </ul>
-  </section>
-
-  <!-- ── PROMPT LAB ── -->
-  <section class="section" id="prompt-lab">
-    <div class="section-header"><span class="section-title">Prompt Lab</span><span class="section-note">live prompt tuning — requires Anthropic API key</span></div>
-    <div class="section-rule"></div>
-    <ul class="file-list">
-      <li class="file-item"><span class="file-tag tag-html">html</span><a href="prompt-lab.html" class="file-link">prompt-lab.html</a><span class="file-dot"></span><span class="file-desc">Interactive prompt editor — tune, run, validate &amp; copy</span></li>
-      <li class="file-item"><span class="file-tag tag-html">html</span><a href="taxonomy.html" class="file-link">taxonomy.html</a><span class="file-dot"></span><span class="file-desc">Classification taxonomy reference — Blueprint-enriched live classifier</span></li>
+      <li class="file-item"><span class="file-tag tag-md">md</span><a href="claude-code/BRIEF.md" class="file-link">claude-code/BRIEF.md</a><span class="file-dot"></span><span class="file-desc">Functional build brief for Claude Code sessions</span></li>
+      <li class="file-item"><span class="file-tag tag-md">md</span><a href="claude-code/claude.md" class="file-link">claude-code/claude.md</a><span class="file-dot"></span><span class="file-desc">Claude Code instructions — kit rules, authority declarations, build order</span></li>
     </ul>
   </section>
 
@@ -294,7 +334,7 @@
 
   <footer>
     <div class="footer-left"><strong>Forge Works · Hiviz SafetyPlatform</strong> &nbsp;·&nbsp; Design resource, May 2026</div>
-    <div class="footer-right">scaffolding, not shipping</div>
+    <div class="footer-right">DRY docs — one source, no copies</div>
   </footer>
 
 </div>

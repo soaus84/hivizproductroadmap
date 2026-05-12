@@ -325,6 +325,8 @@ body::before {
   </div>
 </div>
 
+<script src="../simulators/hiviz-prompt-loader.js"></script>
+
 <script>
 
 // ── API KEY ──────────────────────────────────────────────────────────────────
@@ -567,20 +569,31 @@ function highlightStep(n) {
   el.querySelector('div').style.color = 'var(--ms-text)';
 }
 
+// ── INGESTION PROMPT — loaded from specs/features/ at runtime ────────────────
+// Source: specs/features/MANAGEMENT-SYSTEM-INGESTION.md  CANONICAL-SYSTEM-PROMPT-STAGE-2
+// Do not edit prompt text here — edit the feature spec file and reload.
+
+let MS_INGEST_SYSTEM = null;
+let msPromptReady = false;
+
+async function initMsPrompt() {
+  try {
+    const prompts = await loadSimPrompts(['MANAGEMENT-SYSTEM-INGESTION']);
+    MS_INGEST_SYSTEM = prompts['MANAGEMENT-SYSTEM-INGESTION']['CANONICAL-SYSTEM-PROMPT-STAGE-2'];
+    if (!MS_INGEST_SYSTEM) throw new Error('CANONICAL-SYSTEM-PROMPT-STAGE-2 not found');
+    msPromptReady = true;
+    console.log('[ms-sim] Ingestion prompt loaded from specs/features/');
+  } catch (err) {
+    console.error('[ms-sim] Failed to load ingestion prompt:', err);
+  }
+}
+
+initMsPrompt();
+
 async function extractWithAI(docTitle, docType, summary, content) {
-  const systemPrompt = `You are an AI document ingestion engine for a safety management platform. Your job is to read safety documents and extract structured requirements.
-
-For each distinct requirement, control, or obligation in the document, extract:
-- requirement_text: the requirement rewritten in clear, plain language (not quoted verbatim — simplified for field use)
-- obligation: "shall" | "must" | "should" | "may" (extract from the original language)
-- clause_reference: the section or clause number if present, otherwise infer a logical reference
-- condition: when this requirement applies (e.g. "Before ignition", "During descent", "When conditions change") — null if always applicable
-- verification_signal: what field evidence would confirm this requirement is met — one concrete, observable thing
-- discussion_prompt: one open question a supervisor could ask their crew about this requirement during a toolbox talk — or null if not suitable for discussion
-
-Return ONLY a valid JSON array of requirement objects. No preamble, no markdown.
-Return at minimum 4 and maximum 12 requirements — select the most safety-critical ones.
-Requirements must be independently meaningful — not sub-steps of the same requirement.`;
+  // Prompt loaded from MANAGEMENT-SYSTEM-INGESTION.md Stage 2
+  const systemPrompt = MS_INGEST_SYSTEM;
+  if (!msPromptReady || !systemPrompt) throw new Error('Ingestion prompt not yet loaded from spec. Ensure the sim is served from the project root.');
 
   const userPrompt = `Document: "${docTitle}"
 Type: ${docType}

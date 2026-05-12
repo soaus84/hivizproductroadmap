@@ -6,6 +6,24 @@ A clickable prototype demonstrating the Hiviz intelligence loop. No database, no
 
 ---
 
+## Documentation Authority — Read This First
+
+This project uses a DRY documentation model. Every prompt and definition has exactly one canonical home.
+
+**For any AI prompt text:** The canonical source is `specs/features/`. Each feature has its own file. Do not copy prompt text into application code — load it from the feature spec or reference it by job name.
+
+**For taxonomy definitions** (signal types, energy types, barrier states, FW Map® factors): The canonical source is `specs/globals/`. Do not redefine these values anywhere else.
+
+**The authority rule:** If prompt text in a simulator, the prompt lab, or application code conflicts with a feature spec file, the feature spec wins. If a taxonomy value in code conflicts with a globals file, the globals file wins.
+
+**Where to start for any AI-related build task:**
+1. `specs/HOW-TO-READ-THIS.md` — documentation architecture overview
+2. `specs/features/[FEATURE-NAME].md` — canonical prompt + pipeline for that feature
+3. `specs/globals/` — taxonomy and cross-cutting rules
+4. `specs/SPEC.md` — data model and API
+
+---
+
 ## Rule 1 — The Kit Is Installed. Use It. Do Not Rebuild It.
 
 The full paid Minimal UI kit is already in this project. It ships React components. **Your job is to import and use those components — not recreate them.**
@@ -115,6 +133,14 @@ If there is any conflict between this file and the kit — the kit wins.
 
 ---
 
+## Rule 10 — One Source of Truth for Prompt Text and Taxonomy
+
+`specs/features/` for all AI prompt text. `specs/globals/` for all taxonomy definitions.
+If there is any conflict between application code and those files — the spec files win.
+Never hardcode prompt text into application code.
+
+---
+
 ## Project Structure
 
 ```
@@ -142,7 +168,7 @@ There is no components/ui/ folder. UI components come from the kit.
 ## What Not to Build
 
 - No login / auth screens
-- No settings screens  
+- No settings screens
 - No animations beyond kit-standard transitions
 - No third-party chart libraries — use the kit's built-in chart components
 - No map components
@@ -154,25 +180,3 @@ There is no components/ui/ folder. UI components come from the kit.
 ## Charts — Use the Kit's Chart Components
 
 The kit ships chart components. Use them when a chart genuinely communicates better than numbers alone.
-
-Screens where charts are appropriate:
-- Enquiry results: assurance response distribution, likelihood distribution — bar or donut
-- Analytics workbench: observation volume over time — area or bar chart
-- Pipeline funnel: conversion stages — bar or funnel chart
-- Atrophy heatmap on analytics — if the kit has a heatmap component, use it
-
-Screens where charts are not needed:
-- Stat cards — large number + delta is cleaner than a chart
-- Queue items — text and chips communicate better
-- Any screen where a single number tells the story
-
-When in doubt: would a chart make this clearer to someone seeing it for the first time?
-If yes — use the kit chart. If the number alone is clear — skip it.
-
----
-
-## How to Handle Ambiguity
-
-1. Does the kit have a component for this? Use it.
-2. Is the screen defined in BRIEF.md? Follow it.
-3. Neither? Ask. Do not invent.

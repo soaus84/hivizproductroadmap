@@ -1,7 +1,7 @@
 # HOW-TO-READ-THIS.md — Hiviz Developer Guide
 
-**Forge Works · Hiviz SafetyPlatform**  
-Version: 1.0
+**Forge Works · Hiviz SafetyPlatform**
+Version: 2.0 — DRY documentation architecture
 
 This document is the starting point for any developer or Claude Code session working on the Hiviz SafetyPlatform. Read this before reading anything else.
 
@@ -38,69 +38,189 @@ The **human review gate** is non-negotiable. No AI output reaches crew without a
 
 ---
 
-## Document Map
+## Documentation Architecture — How This Project Is Organised
+
+This project uses a **DRY (Don't Repeat Yourself) documentation model**. Every piece of information has exactly one authoritative home. Everything else points to it — it does not copy it.
+
+There are three tiers:
+
+```
+specs/globals/          ← Tier 1: Cross-cutting definitions, taxonomies, rules
+specs/features/         ← Tier 2: Feature-by-feature pipeline specs (canonical prompt text lives here)
+specs/ (root)           ← Tier 3: Platform-wide data model, API, architecture
+simulators/             ← Test harnesses — inject prompts from Tier 2, contain no canonical content
+prompt-lab.html         ← Prompt tuning UI — loads prompts from Tier 2, contains no canonical content
+```
+
+### The Rule
+
+> **If prompt text, a taxonomy definition, or a cross-cutting rule exists in more than one place, the copy in `specs/globals/` or `specs/features/` is the authority. Everything else is a reference implementation. If they conflict, the spec wins.**
+
+This is enforced in `claude.md` and applies to all Claude Code sessions.
+
+---
+
+## Tier 1 — Global References `specs/globals/`
+
+Definitions and rules that are not owned by any single feature but consumed by many. Globals contain definitions only — never prompt text.
+
+| File | What it contains | Consumed by |
+|------|-----------------|-------------|
+| `fw-map-blueprint.md` | The 15 Forge Works Map® factors, 3 domains, 3 maturity levels, per-factor classification guidance | `fw_classify` job, `cop_thread.generate`, `visit_briefing.generate`, `situational_brief.generate` |
+| `signal-type-taxonomy.md` | The 5 signal types, their definitions, and pipeline routing rules | Observation capture, enrichment, trend detection |
+| `energy-type-taxonomy.md` | The 8 energy types and their definitions | Observation capture, incident capture, enrichment |
+| `barrier-assessment-values.md` | The 5 barrier assessment states and their meanings | Observation capture, enrichment, insight generation |
+| `ai-output-standards.md` | JSON-only output rules, rationale standard, suggestion language, confidence thresholds | All AI prompts |
+| `anonymisation-rules.md` | PII handling rules — what to flag, how to scrub for downstream prompts | All prompts that reference observation text |
+
+**How globals are used:** A feature spec says *"the `fw_factor_hint` must be one of the 15 factors defined in `globals/fw-map-blueprint.md`"* — it does not copy the list. A sim that needs the signal type taxonomy links to `globals/signal-type-taxonomy.md` — it does not inline the definitions.
+
+The Blueprint (`fw-map-blueprint.md`) is injected in full at runtime into `fw_classify` (Prompt 10). All other consumers reference it for validation only.
+
+---
+
+## Tier 2 — Feature Specs `specs/features/`
+
+One file per feature. Each file owns the **complete pipeline** for that feature in sequential order. This is where canonical prompt text lives. Sims and the prompt lab load from here — they do not contain their own copies.
+
+| File | Feature | Prompts owned | Sim(s) that use it |
+|------|---------|--------------|-------------------|
+| `OBSERVATION-CAPTURE.md` | Observation capture conversation + enrichment + context request | P6 `capture.observation`, P1 `observation.enrich`, P2 `observation.context_request` | `capture-sim.html`, `capture-sim-offline.html` |
+| `INCIDENT-CAPTURE.md` | Incident capture conversation + triage | P7 `capture.incident`, P8 `capture.auto` | `capture-sim.html` |
+| `CRITICAL-INSIGHT.md` | Insight generation, review, FW classification | P3 `critical_insight.generate`, P10 `fw_classify` (insight path) | `workflow-sim.html` |
+| `INVESTIGATION.md` | Investigation assistance, toolbox narrative, FW classification | P4 `investigation.assist`, P5 `investigation.toolbox_narrative`, P10 `fw_classify` (investigation path) | `workflow-sim.html` |
+| `TOOLBOX-TALK.md` | Talk assembly and content selection | P6 `toolbox_talk.assemble` | `workflow-sim.html` |
+| `ENQUIRY.md` | Enquiry question generation, live synthesis, final summary, FW classification | P7 `enquiry.generate`, P8 `enquiry.synthesise`, P9 `enquiry.summarise`, P10 `fw_classify` (enquiry path) | `enquiry-sim.html` |
+| `MANAGEMENT-SYSTEM-INGESTION.md` | Document ingestion, requirement extraction | `document.ingest` AI prompt | `ms-sim.html` |
+| `VISIT-BRIEFING.md` | Visit briefing pack generation, focus area prompts | P13 `visit_briefing.generate` | None yet |
+| `COMMUNITIES.md` | CoP thread generation, framing rules | P12 `cop_thread.generate` | None yet |
+| `SITUATIONAL-BRIEF.md` | Situational brief generation | P11 `situational_brief.generate` | None yet |
+
+### What each feature file contains
+
+Every feature spec follows this structure:
+
+1. **What this feature is** — one paragraph, operational purpose
+2. **Pipeline stages** — ordered. Each stage covers:
+   - Trigger (what starts it)
+   - Input (what data is passed in)
+   - The canonical prompt (system prompt + user prompt template)
+   - Output schema with field-level validation rules
+   - Downstream effects (what jobs or notifications fire next)
+3. **Global references used** — explicit list of which globals apply and how
+4. **Sim reference** — which sim exercises this feature; note that the sim injects its prompt from this file
+5. **V2/V3 cascade notes** — fields captured now that are not yet fully consumed downstream
+
+---
+
+## Tier 3 — Platform Specs `specs/` (root)
+
+Platform-wide documentation that feature specs reference for schema, API, and architecture. These files do not contain prompt text — they point to `specs/features/` for that.
 
 | File | What it contains | When to read it |
 |------|-----------------|-----------------|
-| `SPEC.md` | Data model, API, algorithms, logic rules, notifications, enquiry module | Always — this is the source of truth |
-| `views.md` | UI/UX view specifications, screen flows, component behaviour | When building or understanding any UI surface |
-| `prompts.md` | All AI prompt templates with system prompts and user prompt templates | When working on any AI job or prompt modification |
-| `HOW-TO-READ-THIS.md` | This file | Once, at the start |
-| `ROADMAP.md` | Feature roadmap, what's built, what's next | For prioritisation context |
-| `claude.md` | Claude Code session brief — constraints, conventions, what to build | At the start of every Claude Code session |
+| `SPEC.md` | Data model (full Prisma schema), API endpoints, algorithm engine, logic rules, notification events registry, async job queue, infrastructure | Always — source of truth for data and API |
+| `views.md` | All UI/UX view specifications, screen flows, component behaviour | When building or understanding any UI surface |
+| `prompts.md` | Prompt index only — one-liner per prompt pointing to its feature file. No prompt text. | When you need to find which feature owns a prompt |
+| `HOW-TO-READ-THIS.md` | This file | Once, at the start of every session |
+| `claude.md` | Claude Code session brief — constraints, conventions, authority rules | At the start of every Claude Code session |
 
-**Deleted from repo (content consolidated into SPEC.md):**
-- `specs/01-data-model-api-spec.md` → schema and API now in SPEC.md §3–6
-- `specs/03-system-architecture.md` → diagrams and infra now in SPEC.md §14; algorithm logic in §7
-- `specs/04-integration-logic-rules.md` → logic rules in SPEC.md §8; configuration in §10.3; V2/V3 notes in §16
-- `specs/06-notification-events.md` → full notification registry now in SPEC.md §11
-- `specs/07-enquiry-module-spec.md` → enquiry module now in SPEC.md §9
+### How `prompts.md` works under the new architecture
+
+`prompts.md` is now an **index only**. Each entry looks like:
+
+```
+Prompt 1 — Observation Enrichment (observation.enrich)
+→ Canonical prompt: specs/features/OBSERVATION-CAPTURE.md, Stage 2
+→ Global references: fw-map-blueprint.md (fw_factor_hint validation), signal-type-taxonomy.md, barrier-assessment-values.md, anonymisation-rules.md
+```
+
+Prompt text is not duplicated into `prompts.md`. If you need to read or modify a prompt, go to the feature file directly.
+
+---
+
+## How Simulators Work Under This Architecture
+
+Simulators are **test harnesses**, not sources of truth. Each sim loads its system prompt from the relevant feature spec file at runtime via `fetch()`, rather than containing a hardcoded copy.
+
+```javascript
+// What a sim script block now looks like
+const OBSERVATION_SYSTEM = await fetch('/specs/features/OBSERVATION-CAPTURE.md')
+  .then(r => r.text())
+  .then(md => extractSection(md, 'CANONICAL-SYSTEM-PROMPT'))
+```
+
+This means:
+- Updating the prompt in the feature spec immediately updates what the sim tests
+- The sim never drifts from the spec
+- A comment at the top of each sim identifies its source file
+
+The prompt lab works the same way — each prompt entry loads from the feature file rather than hardcoding text in the JS array.
+
+---
+
+## How to Navigate — What Are You Building?
+
+**A new feature from scratch?**
+Start at the relevant `specs/features/` file. If it doesn't exist yet, create it before writing any code. Read `SPEC.md` §3–6 for the schema and API shape.
+
+**Modifying a prompt?**
+Find it in `prompts.md` (index), follow the pointer to `specs/features/`, edit it there. The sim and prompt lab pick it up automatically.
+
+**Adding a taxonomy value or classification rule?**
+Edit the relevant file in `specs/globals/`. Search for all feature files that reference it and verify the validation rules are still consistent.
+
+**Building a sim or prompt lab entry?**
+The sim is a harness. Write the UI. Point it at the feature file. Do not write prompt text into the sim.
+
+**Checking a data schema or API endpoint?**
+`SPEC.md` §3–6. Always.
+
+**Checking a business rule?**
+`SPEC.md` §8. Rules have identifiers (OBS-01, INC-04, etc.) for PR reference.
+
+**Building the enquiry module?**
+`SPEC.md` §9 for the module spec, `specs/features/ENQUIRY.md` for the prompts.
+
+**Checking notification behaviour?**
+`SPEC.md` §11 (Notification Events Registry, N01–N30).
+
+**Adding an async job?**
+`SPEC.md` §12.
+
+---
+
+## Devpacks
+
+When you're in a Claude Code session building a specific feature, use the relevant devpack rather than navigating all of SPEC.md. Devpacks are scoped extracts — schema, endpoints, algorithms, notifications, and acceptance criteria for one feature only.
+
+See `SPEC.md` §17 for the devpack index.
+
+Current devpacks: `observations`, `incidents`, `intelligence`, `toolbox`, `visits`, `management-systems`, `risk`
+
+> Devpack files do not yet exist. They will be created when each feature enters the build queue. The index in SPEC.md §17 defines their intended scope. Each devpack will reference the relevant `specs/features/` file rather than copying prompt content.
 
 ---
 
 ## Key Concepts
 
 ### safety_intelligence schema
-All new Hiviz tables live in the `safety_intelligence` PostgreSQL schema. Existing platform tables (Organisation, Worksite, WorkType, User, etc.) are in `public` and are referenced via FK only — **never modified**.
+All new Hiviz tables live in the `safety_intelligence` PostgreSQL schema. Existing platform tables (Organisation, Worksite, WorkType, User, etc.) live in the existing schema and are referenced via foreign keys — never modified or duplicated.
 
-### trigger_source
-Almost every entity in Hiviz has a `trigger_source` field. It tells you how the entity was created. This matters for:
-- What fields are populated (algorithm-triggered insights have `source_observation_ids`; manual/external ones have `source_metadata`)
-- What review flow applies (algorithm-triggered insights require human review; manual creation IS review)
-- What notifications fire
-
-### cleared_for_* flags
-There are two sharing gates. Both must be checked before content reaches crew:
-- `cleared_for_sharing` on observations and investigations
-- `cleared_for_toolbox` on critical insights
-
-Neither is inferred. Both must be explicitly set by a human.
-
-### legal_hold
-`investigation.legal_hold = true` is a **hard block** enforced at the SQL query level, not application code. It blocks:
-- The investigation from content selection
-- Any CriticalInsight that references this investigation
-- Any enquiry created from this investigation
-- Notification events N24 and N25
-
-### AI suggestion fields
-Any field prefixed `ai_suggested_` is advisory. The authoritative version of that field (without the prefix) must be set by a human. The UI must make this visually clear. See SPEC.md §1 (Design Principles).
-
-### FW Map® (Forge Works Map®)
-The fw_classify job runs after significant intelligence events and classifies findings against the Forge Works Map® capacity factors. Fields are stored as parallel arrays on each entity:
-```
-fw_factors[]         VARCHAR(40)   — e.g. ['management_systems', 'operational_management']
-fw_domains[]         VARCHAR(10)   — e.g. ['enable', 'enable']
-fw_maturity_signals[] VARCHAR(12)  — e.g. ['compliant', 'leading']
-fw_confidences[]     DECIMAL(3,2)  — e.g. [0.86, 0.73]
-fw_rationales[]      TEXT          — one sentence per factor
-fw_classification_basis TEXT       — overall evidence basis
+### FW Map® field conventions
+```sql
+fw_factors[]         TEXT[]        -- e.g. ['management_systems', 'operational_management']
+fw_domains[]         TEXT[]        -- e.g. ['enable', 'enable']
+fw_maturity_signals[] TEXT[]       -- e.g. ['compliant', 'leading']
+fw_confidences[]     DECIMAL(3,2)  -- e.g. [0.86, 0.73]
+fw_rationales[]      TEXT[]        -- one sentence per factor
+fw_classification_basis TEXT       -- overall evidence basis
 fw_classified_at     TIMESTAMPTZ
 ```
-Arrays are parallel by index. Factor[0] has domain[0], confidence[0], rationale[0]. Only factors that independently meet `fw_confidence >= 0.70` are stored. Maximum 3 per entity.
+Arrays are parallel by index. Only factors that independently meet `fw_confidence >= 0.70` are stored. Maximum 3 per entity. Full factor definitions in `specs/globals/fw-map-blueprint.md`.
 
 ### Atrophy Score
-Calculated per worksite. Rises when no observations are logged. Drives manager visit recommendations and atrophy alerts (N17). Score >70 triggers alert.
+Calculated per worksite. Rises when no observations are logged. Drives manager visit recommendations and atrophy alerts (N17). Score >70 triggers alert. Formula in `SPEC.md` §7.
 
 ---
 
@@ -128,8 +248,8 @@ Worksite
 
 critical_insight ──► situational_brief
 critical_insight ──► cop_thread_seed
-investigation ──► situational_brief
-investigation ──► cop_thread_seed
+investigation    ──► situational_brief
+investigation    ──► cop_thread_seed
 ```
 
 ---
@@ -144,42 +264,8 @@ investigation ──► cop_thread_seed
 6. **Never delete records.** Use status fields (`inactive`, `cancelled`, `archived`). Investigation rejection archives, not deletes.
 7. **Delivery record is final.** Once `delivered_at` is set on a toolbox talk, content is locked.
 8. **Never omit closure notifications.** N05, N12, N13, N21, N28, N29 are the loop-close events that drive re-engagement. Omitting them breaks the product promise.
-
----
-
-## How to Navigate SPEC.md
-
-SPEC.md is long. Don't read it front-to-back. Navigate by what you're building:
-
-**Building a new entity?** Go to §3 (Core Entities) or §4 (Enquiry Entities) or §5 (Output Entities). Each section has the full SQL schema with indexes.
-
-**Building an API endpoint?** Go to §6. All endpoints are listed with request/response shapes.
-
-**Building algorithm logic?** Go to §7 (Algorithm Engine). The pseudocode is definitive — if it's not there, it shouldn't exist.
-
-**Understanding a business rule?** Go to §8 (Logic Rules). Every rule has a code identifier (OBS-01, INC-04, etc.) for easy reference in PRs and discussions.
-
-**Building the enquiry module?** Go to §9. Everything about enquiries — triggers, question types, targeting, AI prompts, legal rules — is in one place.
-
-**Building notification handling?** Go to §11 (Notification Events Registry). Every event has a number (N01–N30), trigger, recipients, channels, tone, timing, and message.
-
-**Adding an async job?** Go to §12. The full job queue is listed with target latencies.
-
-**Worried about what to audit log?** Go to §13.
-
-**Checking infrastructure config?** §14 has the component diagram, Anthropic API details, and DB requirements.
-
----
-
-## Devpacks
-
-When you're in a Claude Code session building a specific feature, use the relevant devpack rather than navigating all of SPEC.md. Devpacks are scoped extracts — schema, endpoints, algorithms, notifications, and acceptance criteria for one feature only.
-
-See SPEC.md §17 for the devpack index.
-
-Current devpacks: `observations`, `incidents`, `intelligence`, `toolbox`, `visits`, `management-systems`, `risk`
-
-> Devpack files do not yet exist. They will be created when each feature enters the build queue. The index in SPEC.md §17 defines their intended scope.
+9. **Never write prompt text into a sim or the prompt lab.** Prompts live in `specs/features/`. Sims and the prompt lab load from there.
+10. **Never copy a global definition into a feature file.** Reference it by name and path. One definition, one location.
 
 ---
 
@@ -209,4 +295,22 @@ Current devpacks: `observations`, `incidents`, `intelligence`, `toolbox`, `visit
 
 ---
 
-*Last updated: May 2026 — reflects V7 Communities architecture and consolidated SPEC.md.*
+## Document Lineage (What Was Superseded)
+
+| Old location | Content now lives in |
+|---|---|
+| `specs/01-data-model-api-spec.md` | `SPEC.md` §3–6 |
+| `specs/02-ai-prompt-library.md` | `specs/features/` (prompt text) + `prompts.md` (index) |
+| `specs/03-system-architecture.md` | `SPEC.md` §14 (infra), §7 (algorithms) |
+| `specs/04-integration-logic-rules.md` | `SPEC.md` §8 (logic), §10.3 (config), §16 (V2/V3) |
+| `specs/06-notification-events.md` | `SPEC.md` §11 |
+| `specs/07-enquiry-module-spec.md` | `SPEC.md` §9 |
+| `specs/fw-map-classification-reference-v1.md` | `specs/globals/fw-map-blueprint.md` |
+| Prompt text in `capture-sim.html` | `specs/features/OBSERVATION-CAPTURE.md`, `INCIDENT-CAPTURE.md` |
+| Prompt text in `capture-sim-offline.html` | `specs/features/OBSERVATION-CAPTURE.md` |
+| Prompt text in `ms-sim.html` | `specs/features/MANAGEMENT-SYSTEM-INGESTION.md` |
+| Prompt text in `prompt-lab.html` | Respective `specs/features/` files |
+
+---
+
+*Last updated: May 2026 — V2.0 DRY documentation architecture. Reflects V7 Communities design.*
