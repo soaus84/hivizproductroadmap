@@ -674,7 +674,7 @@ async function sendMessage() {
     conversationHistory.push({ role:'assistant', content:replyText });
     let quickReplies = null;
     if (replyText.toLowerCase().includes('what work') || replyText.toLowerCase().includes('type of work') || replyText.toLowerCase().includes('working on')) {
-      quickReplies = ['Heavy Vehicle','Working at Height','Hot Work','Confined Space'];
+      quickReplies = HIGH_RISK_WORK.map(x => x.label);
     }
     if (replyText.toLowerCase().includes('anyone hurt') || replyText.toLowerCase().includes('was anyone injured') || replyText.toLowerCase().includes('anyone injured')) {
       quickReplies = ['No injuries','First aid needed','Medical treatment','Lost time injury'];
