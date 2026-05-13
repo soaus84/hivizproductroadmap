@@ -233,57 +233,8 @@ critical_insight.ai_generated_at         TIMESTAMPTZ
 **Input:** Approved insight content + trigger source context
 **Output:** FW Map® classification stored as parallel arrays on the critical insight record
 **Human gate:** None at classification — output displayed alongside insight in workbench UI with rationale
-**Max tokens:** 2000 — full Blueprint reference injected at runtime
 
-### System Prompt
-
-Same base system prompt as investigation and enquiry paths — see `INVESTIGATION.md` Stage 4 `CANONICAL-FW-CLASSIFY-BASE-SYSTEM-PROMPT`. Full content of `globals/fw-map-blueprint.md` injected at runtime.
-
-### User Prompt Template — Insight Path
-
-```
-Source type: critical_insight
-Work type: {{work_type_label}}
-Trigger source: {{trigger_source}}
-Pattern summary: {{pattern_summary}}
-Likely systemic cause: {{likely_systemic_cause}}
-Toolbox narrative: {{toolbox_narrative}}
-
-{{#if trigger_source == 'solo_critical'}}
-Note: This is a single critical incident — not an accumulated trend.
-Severity class: critical
-Incident type: {{incident_type}}
-Weight classification evidence accordingly — a single event can still evidence systemic
-organisational factors when the narrative is specific and the cause chain is clear.
-{{/if}}
-
-Classify against the 15 Forge Works Map® factors.
-
-GUIDE: senior_leadership, strategy, risk_management, safety_organisation, work_understanding
-ENABLE: operational_management, resource_allocation, management_systems, goal_conflict_tradeoffs, learning_development
-EXECUTE: frontline_workers, communications_coordination, decision_making, contractor_management, monitoring_metrics
-
-Maturity: compliant | leading | resilient
-
-Return JSON:
-{
-  "classifications": [
-    {
-      "fw_factor": "factor_name",
-      "fw_domain": "guide|enable|execute",
-      "fw_maturity_signal": "compliant|leading|resilient",
-      "fw_confidence": 0.86,
-      "fw_rationale": "1 sentence — why THIS factor based on THIS specific evidence from the insight"
-    }
-  ],
-  "fw_classification_basis": "1 sentence — what specific evidence in the insight narrative made classification possible",
-  "attempted": true
-}
-```
-
-### Validation Rules
-
-Same as investigation path — see `INVESTIGATION.md` Stage 4 Validation Rules. Domain-factor mapping in `globals/fw-map-blueprint.md`.
+> **Canonical spec:** `globals/fw-classify-job.md` — system prompt, user prompt template (`CANONICAL-FW-CLASSIFY-USER-PROMPT-INSIGHT`), output schema, validation rules, and retry behaviour are all defined there. This section covers triggering, storage fields, and downstream effects specific to the critical insight entity.
 
 ### Storage — parallel arrays on the critical insight record
 

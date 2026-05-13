@@ -286,14 +286,18 @@ function saveApiKey() {
 }
 
 // ── SYSTEM PROMPTS — loaded from specs/features/ at runtime ──────────────────
-// Source: specs/features/OBSERVATION-CAPTURE.md  CANONICAL-SYSTEM-PROMPT-STAGE-1
-//         specs/features/INCIDENT-CAPTURE.md      CANONICAL-SYSTEM-PROMPT-STAGE-0
-//         specs/features/INCIDENT-CAPTURE.md      CANONICAL-SYSTEM-PROMPT-STAGE-1
+// Stage 1 capture prompts:
+//   specs/features/OBSERVATION-CAPTURE.md  CANONICAL-SYSTEM-PROMPT-STAGE-1
+//   specs/features/INCIDENT-CAPTURE.md     CANONICAL-SYSTEM-PROMPT-STAGE-0
+//   specs/features/INCIDENT-CAPTURE.md     CANONICAL-SYSTEM-PROMPT-STAGE-1
+// Stage 2 enrichment prompt:
+//   specs/features/OBSERVATION-CAPTURE.md  CANONICAL-SYSTEM-PROMPT-STAGE-2
 // Do not edit prompt text here — edit the feature spec file and reload.
 
 let AUTO_SYSTEM = null;
 let OBSERVATION_SYSTEM = null;
 let INCIDENT_SYSTEM = null;
+let ENRICH_SYSTEM = null;
 let promptsReady = false;
 let promptLoadError = false;
 
@@ -301,9 +305,10 @@ async function initPrompts() {
   try {
     const prompts = await loadSimPrompts(['OBSERVATION-CAPTURE', 'INCIDENT-CAPTURE']);
     OBSERVATION_SYSTEM = prompts['OBSERVATION-CAPTURE']['CANONICAL-SYSTEM-PROMPT-STAGE-1'];
+    ENRICH_SYSTEM      = prompts['OBSERVATION-CAPTURE']['CANONICAL-SYSTEM-PROMPT-STAGE-2'];
     AUTO_SYSTEM        = prompts['INCIDENT-CAPTURE']['CANONICAL-SYSTEM-PROMPT-STAGE-0'];
     INCIDENT_SYSTEM    = prompts['INCIDENT-CAPTURE']['CANONICAL-SYSTEM-PROMPT-STAGE-1'];
-    if (!OBSERVATION_SYSTEM || !AUTO_SYSTEM || !INCIDENT_SYSTEM) {
+    if (!OBSERVATION_SYSTEM || !ENRICH_SYSTEM || !AUTO_SYSTEM || !INCIDENT_SYSTEM) {
       throw new Error('One or more prompt sections not found in spec files');
     }
     promptsReady = true;
@@ -333,195 +338,51 @@ function ensurePromptsReady() {
 }
 
 
-// ── FW MAP® BLUEPRINT REFERENCE ───────────────────────────────────────────────
+// ── ENRICHMENT USER PROMPT BUILDER ───────────────────────────────────────────
+// Sim-adapted version of the Stage 2 user prompt template from
+// specs/features/OBSERVATION-CAPTURE.md § User Prompt Template.
+// Taxonomy UUID injection (work_type_taxonomy_json, practice_taxonomy_json)
+// is omitted — not available in the browser context. The spec schema is
+// otherwise preserved; inferred_work_type_ids and inferred_practice_ids
+// are excluded from the output request accordingly.
 
-const FW_REFERENCE = `
-FORGE WORKS MAP® — CLASSIFICATION REFERENCE (Forge Works Blueprint source, May 2026)
+function buildEnrichPrompt(data) {
+  const obs      = data.what_was_observed || data.what_happened || data.description || '';
+  const workType = data.work_type || 'not specified';
+  return `Observation text: "${obs}"
 
-FRAMEWORK:
-GUIDE domain — capacity to frame and set direction, priorities and aligned understanding
-ENABLE domain — capacity to provide resources, capability and business processes
-EXECUTE domain — capacity to create the safety of work day-in and day-out
+Work type declared by supervisor: ${workType}
 
-MATURITY LEVELS (sequential — do not classify resilient if compliant gap is not addressed):
-- compliant: Safety processes exist to meet legislative/organisational requirements. Rules, compliance, procedures prescribe work.
-- leading: Safety leadership capability created. Focus on leadership behaviours, risk management, safety communication and assurance.
-- resilient: Safety is an emergent property of how the organisation functions. Focus on understanding how work is done, open communication, anticipating scenarios, minimising goal conflict.
+Capture-stage hints (from conversation — use to initialise confidence, not as final values):
+signal_type_hint: ${data.signal_type || null}
+energy_type_hint: ${data.energy_type || null}
+barrier_hint: ${data.barrier_assessment || null}
+fw_factor_hint: ${data.fw_factor_hint || null}
 
-FACTOR DEFINITIONS:
+[Sim note: taxonomy UUIDs not available in browser — omit inferred_work_type_ids and inferred_practice_ids]
 
-senior_leadership [GUIDE]
-Diagnostic question: How do senior leaders talk about safety and how are their actions perceived by others?
-compliant: Leaders promote compliance through rewards/discipline. Safety = regulatory risk mitigation. CEO rarely attends safety meetings.
-leading: Leaders create a vision for safety. Safety-related issues considered by CEO regularly. Leaders champion zero harm. Leaders perceived as caring about people.
-resilient: Leaders view their role as providing service/support to people who execute work. Safety is a moral obligation. Workers are local experts and partners.
-classify when: Senior decisions deprioritised safety vs production/cost/schedule; leaders unaware of/unresponsive to field signals; stated values contradicted by resource decisions.
-
-strategy [GUIDE]
-Diagnostic question: What triggers safety improvements and what is the focus of plans and actions?
-compliant: Improvement focused on corrective action in response to incidents and regulatory requirements. Actions directed at frontline workers.
-leading: Clear goals, strategies and programs at all levels to reduce safety risk. Improvement action directed towards leadership and safety organisation.
-resilient: Safety created through organisational strategy. All strategic decisions made with a clear view of safety. Improvements for safety realised through improvements to work.
-classify when: Absence of coherent safety improvement direction; improvement actions directed only at individuals, not the system.
-
-risk_management [GUIDE]
-Diagnostic question: What is the quality of risk information generated in the organisation and how is it used?
-compliant: Risk assessments performed as required by law. Focus on completing paperwork. Risk information has limited influence on strategy, decision-making, and resource allocation.
-leading: Risks known and communicated throughout the organisation, updated in real time. Risk assessments inform how work is planned and executed.
-resilient: Organisation continually looking beyond what is in the risk register. Diverse groups probe and revise the organisation's understanding of risk. Expects failure and invests in resilience for unknown risks.
-classify when: Risk assessments do not reflect actual work performed; SWMS/procedures generic, outdated, or not site-specific; risk controls documented but not implemented or verified.
-boundary: vs management_systems — hazard identification/control quality vs safety system infrastructure broadly.
-
-safety_organisation [GUIDE]
-Diagnostic question: How capable is your safety organisation and what is the focus of their activities?
-compliant: Safety professionals regularly marginalised. Work is predominately administrative.
-leading: Safety professionals identify and drive risk reduction using the hierarchy of controls. They have formal senior status.
-resilient: Safety professionals are an integral link in strategic and operational management. They explore everyday work to understand work-as-imagined vs work-as-done.
-classify when: Safety roles lack authority, access, or resource to act on findings; safety function reactive rather than proactive.
-
-work_understanding [GUIDE]
-Diagnostic question: What model of accident causation does your organisation use?
-compliant: Accidents caused by technical/operational failures at point of risk. People working outside procedures are non-compliant. Language: deviation, non-compliance, human error.
-leading: Safety outcomes driven by underlying organisational factors. Investigations follow multiple causation models. Language: root cause, just culture, organisational factors.
-resilient: Safety outcomes are emergent properties of work. Investigations follow complex, non-linear causation models. Performance variability accepted and essential. Language: performance variability, complexity, normal work, adaptation.
-classify when: Procedures do not reflect how work is actually performed; incident reports attribute events to non-compliance or human error.
-boundary: vs risk_management — the perception gap vs the control adequacy.
-
-operational_management [ENABLE]
-Diagnostic question: What is the role of middle and frontline managers in delivering operational and safety outcomes?
-compliant: Managers delegate safety work to safety professionals. Engage with frontline to reinforce compliance. Involved in serious incidents — not day-to-day safety integration.
-leading: Managers actively participate in safety work including leadership visits, inductions, training, risk assessments, investigations.
-resilient: Managers internalise safety as a moral responsibility and actively search for weak signals. They improve work-as-done rather than performing separate safety work activities.
-classify when: Supervisors/managers unaware of known hazardous conditions at their site; reactive management responding to incidents rather than signals; planning failures that create foreseeable hazard conditions.
-boundary: vs frontline_workers — manager layer vs worker layer.
-
-resource_allocation [ENABLE]
-Diagnostic question: How are safety needs identified and resources allocated to reduce risk?
-compliant: Organisation invests minimal resources in safety to comply with regulations. Safety professionals do not have authority to invest in safety without Senior Leadership approval.
-leading: Organisation invests in improvements to address known safety risks and issues. Safety department staffed with competent professionals.
-resilient: Organisation invests significant resources supporting operations. Spare capacity (operational slack) viewed as essential.
-classify when: Workers improvising because adequate equipment not available; scheduling/workload pressure forces shortcuts; competing demands leave safety-critical tasks under-resourced.
-note: High-frequency root cause. Strong interaction with goal_conflict_tradeoffs.
-
-management_systems [ENABLE]
-Diagnostic question: What is the focus and effectiveness of safety and work management systems?
-compliant: Safety management practices separate to work management systems. Effectiveness determined through compliance to legislation and surveillance audits.
-leading: Safety and work management systems are effective and reliable. Needs of the SMS identified through consultation with frontline.
-resilient: Organisation understands work-as-done and co-designs work processes with frontline workers. Defers to expertise and experienced workers over protocol.
-classify when: Procedures exist but not used because they are impractical; system gaps where work is not covered by any procedure; out-of-date documents that do not reflect current work practice.
-boundary: vs risk_management — broader safety system infrastructure vs hazard identification and control specifically.
-
-goal_conflict_tradeoffs [ENABLE]
-Diagnostic question: How are safety goals balanced with other business objectives?
-compliant: Primary objective is to optimise production and cost. Safety issues prioritised over production following an incident. Workers have authority to stop work with manager's permission.
-leading: Organisation balances safety and other business goals by prioritising safety over significant known issues. Workers have authority to stop work and exercise it routinely.
-resilient: Goal conflicts identified and addressed before work starts. Cost and production objectives sacrificed based on weak signals. Frontline workers stop and adjust work to adapt to emerging risk.
-classify when: Workers/supervisors making decisions that trade safety for productivity; deadline/production pressure documented as a contributing factor; stop-work authority exists on paper but is not exercised.
-note: Strong interaction with resource_allocation.
-
-learning_development [ENABLE]
-Diagnostic question: What is the approach to developing capability, operational learning and knowledge management?
-compliant: Operational learning is largely reactive — focused on learning from incidents, audits. Limited absorptive capacity for learning and change.
-leading: Established worker capability program combining technical and non-technical skills. Organisation seeks to understand peer organisations' practices and adopt industry best practice.
-resilient: Dedicated processes across all levels to make collective sense of normal work. Active learning dominates capability development. Learning processes built into planning, preparing, executing and reviewing work.
-classify when: The same issue recurring across sites or over time; training that does not match actual work conditions; toolbox talks/briefings that do not reflect current risk intelligence.
-
-frontline_workers [EXECUTE]
-Diagnostic question: What is the role of frontline workers in contributing to work and safety outcomes?
-compliant: Frontline workers maintain technical competence and comply with the organisation's safety rules and procedures. Encouraged to stop work when there is a serious safety risk.
-leading: Frontline workers actively engaged in identifying and developing safety programs. Creates a collective ownership environment. Workers expected to stop work or abandon production goals when there is a safety risk.
-resilient: Frontline workers engaged in co-design of work. Valued for their experience and viewed as local experts and partners. Management creates a climate of psychological safety.
-classify when: Workers unaware of the hazards associated with their work type; workers lack practical skills to implement required controls; low engagement with safety processes.
-IMPORTANT: classifying frontline_workers must never imply worker blame — the factor is about capability and knowledge, which are organisational responsibilities.
-boundary: vs learning_development — capability STATE (what workers know and can do) vs SYSTEM that produces that state.
-
-communications_coordination [EXECUTE]
-Diagnostic question: How does information flow through the organisation and how coordinated are teams and activities?
-compliant: Information flows strongly from senior leaders to operational management to frontline via a one-to-many broadcast style. Teams focus on individual objectives and may work at cross-purposes.
-leading: Information flows strongly up and down the organisation. Formal and informal ways allow frontline workers to raise and resolve issues.
-resilient: As a psychologically safe workplace, employees share incidents, issues, insights, and ideas. Information about work issues and safety risks flows freely and constructively up, down, and across the organisation.
-classify when: Handover failures where critical information was not transferred; pre-task briefings that do not cover actual site conditions; cross-team coordination failures; PTW or shift-change protocols that treat recommencement as continuation.
-note: PTW confirmation at shift change not being treated as recommencement is a textbook communications_coordination signal.
-
-decision_making [EXECUTE]
-Diagnostic question: How are decisions made in relation to the management of work and safety?
-compliant: Safety decisions made by management and referred to a safety professional to meet legal compliance requirements.
-leading: Safety decisions made by the appropriate level of line management with input from a safety professional. Decision-making processes seek confirming evidence.
-resilient: Work management decisions made by the most appropriate person or team. Leaders let go and create capability and trust for their teams to make good decisions. Decision-making processes seek disconfirming evidence.
-classify when: Workers/supervisors who proceeded despite visible warning signs; failure to exercise stop-work authority when conditions warranted it; decisions escalated to management that should have been made at the front line.
-boundary: vs goal_conflict_tradeoffs — goal_conflict_tradeoffs explains WHY a poor decision was made; decision_making is about the QUALITY of the decision process itself.
-
-contractor_management [EXECUTE]
-Diagnostic question: How are contractors engaged and managed?
-compliant: Contractors pre-qualified in a largely desktop review process. Organisation performs reactive audit and assurance processes — typically following incidents.
-leading: All scopes of work to be contracted are risk assessed. Contractors pre-qualified based on safety requirements specific to the scope of work.
-resilient: Organisation is an informed buyer of all procured services. Contractors have flexibility and autonomy in work delivery and are seamlessly integrated. Dynamic assurance processes respond to emerging risks.
-classify when: Contractors operating without adequate induction or site-specific briefing; controls verified for direct workforce but not for contractors on the same site; contractor management treated as a compliance exercise.
-
-monitoring_metrics [EXECUTE]
-Diagnostic question: What sources of information are used to monitor and influence work and safety performance?
-compliant: Lagging and compliance indicators monitored — incident metrics, near-miss metrics, safety compliance metrics. Operations considered safe when there is an absence of negative events.
-leading: Suite of quantitative and qualitative lagging and leading indicators. Operations considered safe when controls are assured effective and when a positive climate for safety is observed.
-resilient: Operational work data and qualitative insights provide information about current operations and management of known AND unknown safety risks. Performance indicators raise questions — they do not provide answers. Managers are pre-occupied with failure — not complacent.
-classify when: Known signals that existed but were not detected or responded to; measurement focused on lagging indicators rather than leading indicators; reporting systems that discourage honest disclosure; atrophy patterns indicating monitoring cadence has broken down.
-
-BOUNDARY CASE QUICK REFERENCE:
-- senior_leadership vs strategy: behaviour and decisions vs documented direction
-- risk_management vs management_systems: hazard controls specifically vs safety system broadly
-- operational_management vs frontline_workers: manager layer vs worker layer
-- goal_conflict_tradeoffs vs resource_allocation: competing priorities vs missing resources
-- learning_development vs frontline_workers: system that produces capability vs capability state itself
-- communications_coordination vs decision_making: information not transferred vs decision made with available information
-- monitoring_metrics vs risk_management: detecting signals vs controlling hazards
-- work_understanding vs risk_management: the perception gap vs the control adequacy
-- safety_organisation vs operational_management: safety function capability vs line management function
-`;
-
-const ENRICH_SYSTEM = `You are an AI enrichment engine for a construction and industrial safety platform. Analyse this observation and return ONLY valid JSON — no preamble, no markdown, no explanation.
-
-For the FW Map® classification, use the following reference material:
-
-${FW_REFERENCE}
-
-FW Map® classification rules:
-- Only classify factors where you can write a specific, evidence-based rationale
-- Never classify on vague association — the narrative must provide direct evidence
-- Maximum 3 factors, ordered by fw_confidence descending
-- Only include factors where fw_confidence >= 0.70
-- Classify at the maturity level where the GAP operates
-- Maturity levels are sequential — do not classify resilient if the compliant gap is not addressed`;
-
-const ENRICH_PROMPT = (obs, workType, captureJson) => `Observation: "${obs}"
-Work type: ${workType}
-Initial capture data: ${captureJson}
-
-Return ONLY valid JSON, no preamble:
+Return JSON matching this exact schema:
 {
   "signal_type": "positive_performance|weak_signal|at_risk_condition|unwanted_energy_event|barrier_failure",
   "signal_type_confidence": 0.0,
-  "signal_type_rationale": "1 sentence why",
+  "signal_type_rationale": "1 sentence — what in the text identified this signal type",
   "energy_type": "kinetic|gravitational|electrical|thermal|chemical|pressure|noise_vibration|none",
   "energy_type_confidence": 0.0,
-  "energy_type_rationale": "1 sentence why",
-  "energy_release_potential": "catastrophic|high|moderate|low|none",
   "barrier_assessment": "barrier_absent|barrier_failed|barrier_degraded|barrier_held|none",
-  "barrier_assessment_rationale": "1 sentence why",
-  "fw_classifications": [
-    {
-      "fw_factor": "factor_name",
-      "fw_domain": "guide|enable|execute",
-      "fw_maturity_signal": "compliant|leading|resilient",
-      "fw_confidence": 0.0,
-      "fw_rationale": "1 sentence — why THIS factor based on THIS evidence"
-    }
-  ],
-  "fw_classification_basis": "1 sentence — what specific evidence made this narrative classifiable at all",
-  "fw_attempted": true,
+  "barrier_confidence": 0.0,
+  "barrier_rationale": "1 sentence — what in the text identified this barrier state",
+  "failure_type": "systemic|behavioural|environmental|unclear",
+  "key_hazard": "short plain-language string",
+  "key_hazard_rationale": "1 sentence — what in the text identified this hazard",
+  "stop_work_warranted": true,
+  "stop_work_warranted_rationale": "1 sentence — why or why not",
+  "ai_anonymisation_flags": [],
+  "fw_factor_hint": "single FW Map factor name if strongly suggested — else null",
   "context_questions_needed": false,
-  "context_question": "if needed, one targeted question to improve confidence — else null"
+  "context_question": null,
+  "enrichment_confidence": 0.0
+}`;
 }
-
-fw_classifications is an empty array if nothing met 0.70. Max 3 items, ordered by fw_confidence descending.`;
 
 // ── CHAT LOGIC ────────────────────────────────────────────────────────────────
 
@@ -827,53 +688,39 @@ async function submitCapture() {
   const msgs = document.getElementById('messages');
   const conf = document.createElement('div');
   conf.style.cssText = 'background:var(--hiviz-dark);border-radius:14px;padding:14px 16px;margin:8px 0;animation:msgIn 0.3s ease;display:flex;align-items:center;gap:10px;';
-  conf.innerHTML = '<div style="width:32px;height:32px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div><div><div style="font-size:13px;font-weight:700;color:white;">' + (captureType === 'incident' ? 'Incident reported' : 'Observation submitted') + '</div><div style="font-size:11px;color:rgba(255,255,255,0.5);margin-top:1px;">Running Blueprint-enriched AI enrichment...</div></div>';
+  conf.innerHTML = '<div style="width:32px;height:32px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div><div><div style="font-size:13px;font-weight:700;color:white;">' + (captureType === 'incident' ? 'Incident reported' : 'Observation submitted') + '</div><div style="font-size:11px;color:rgba(255,255,255,0.5);margin-top:1px;">Queuing observation.enrich — Stage 2 server-side job...</div></div>';
   msgs.appendChild(conf);
   msgs.scrollTop = msgs.scrollHeight;
   await runEnrichment(msgs);
 }
 
 async function runEnrichment(msgs) {
-  document.getElementById('chatHeaderSub').textContent = 'Enriching...';
+  document.getElementById('chatHeaderSub').textContent = 'Stage 2 — enriching...';
   const enrichTyping = document.createElement('div');
   enrichTyping.id = 'enrichTyping';
   enrichTyping.className = 'msg msg-hiviz';
-  enrichTyping.innerHTML = '<div class="msg-sender" style="color:var(--purple);">AI Enrichment</div><div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>';
+  enrichTyping.innerHTML = '<div class="msg-sender" style="color:var(--purple);">observation.enrich · server-side</div><div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>';
   msgs.appendChild(enrichTyping);
   msgs.scrollTop = msgs.scrollHeight;
 
-  const observationText = captureData.what_was_observed || captureData.what_happened || '';
-  const workType = captureData.work_type || 'unknown';
-
-  let enrichContent;
-  const userPrompt = ENRICH_PROMPT(observationText, workType, JSON.stringify(captureData, null, 2));
-  if (attachedPhotos.length > 0) {
-    enrichContent = [
-      ...attachedPhotos.map(p => ({ type:'image', source:{ type:'base64', media_type:p.mediaType, data:p.base64 } })),
-      { type:'text', text: userPrompt + '\n\nNote: ' + attachedPhotos.length + ' photo(s) attached. Use them to inform your classification — assess the physical context, hazards visible, work type, and any barrier states visible in the images.' }
-    ];
-  } else {
-    enrichContent = userPrompt;
-  }
-
   try {
     const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method:'POST',
-      headers:{ 'Content-Type':'application/json', 'x-api-key':apiKey, 'anthropic-version':'2023-06-01', 'anthropic-dangerous-direct-browser-access':'true' },
-      body: JSON.stringify({ model:'claude-sonnet-4-20250514', max_tokens:1200, system:ENRICH_SYSTEM, messages:[{ role:'user', content:enrichContent }] })
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1000, system: ENRICH_SYSTEM, messages: [{ role: 'user', content: buildEnrichPrompt(captureData) }] })
     });
     const data = await response.json();
     const raw = data.content[0].text.replace(/```json|```/g, '').trim();
     const enriched = JSON.parse(raw);
     document.getElementById('enrichTyping')?.remove();
-    document.getElementById('chatHeaderSub').textContent = 'Enrichment complete ✓';
+    document.getElementById('chatHeaderSub').textContent = 'Stage 2 complete ✓';
     showEnrichmentCard(msgs, enriched);
   } catch(e) {
     document.getElementById('enrichTyping')?.remove();
     document.getElementById('chatHeaderSub').textContent = 'Enrichment failed';
     const errEl = document.createElement('div');
     errEl.className = 'msg msg-hiviz';
-    errEl.innerHTML = '<div class="msg-sender" style="color:var(--purple);">AI Enrichment</div><div class="msg-bubble" style="font-size:12px;color:var(--text-secondary);">Enrichment couldn\'t run right now — will retry when connection restores. The observation has been saved.</div>';
+    errEl.innerHTML = '<div class="msg-sender" style="color:var(--purple);">observation.enrich</div><div class="msg-bubble" style="font-size:12px;color:var(--text-secondary);">Enrichment couldn\'t run right now — will retry when connection restores. The observation has been saved.</div>';
     msgs.appendChild(errEl);
     msgs.scrollTop = msgs.scrollHeight;
     showRestartOption(msgs);
@@ -884,43 +731,18 @@ function showEnrichmentCard(msgs, e) {
   const confColor = (c) => c >= 0.7 ? 'var(--primary)' : c >= 0.5 ? 'var(--warning)' : 'var(--error)';
   const confLabel = (c) => c >= 0.7 ? '✓ confident' : c >= 0.5 ? '~ moderate' : '? low';
 
-  // Build FW classifications block
-  let fwBlock = '';
-  if (e.fw_classifications && e.fw_classifications.length > 0) {
-    const factorsHtml = e.fw_classifications.map((cls, i) => {
-      const cc = confColor(cls.fw_confidence);
-      return '<div style="' + (i > 0 ? 'margin-top:8px;padding-top:8px;border-top:1px solid rgba(118,53,220,0.15);' : '') + '">' +
-        '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:3px;">' +
-          '<span style="font-size:13px;font-weight:700;color:var(--purple);">' + (cls.fw_factor||'').replace(/_/g,' ') + '</span>' +
-          '<span style="font-size:10px;background:rgba(118,53,220,0.15);color:var(--purple);padding:2px 7px;border-radius:5px;font-weight:600;">' + (cls.fw_domain||'').toUpperCase() + ' · ' + (cls.fw_maturity_signal||'') + '</span>' +
-        '</div>' +
-        '<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">' +
-          '<div style="flex:1;height:3px;background:rgba(0,0,0,0.1);border-radius:2px;overflow:hidden;"><div style="height:100%;width:' + Math.round(cls.fw_confidence*100) + '%;border-radius:2px;background:' + cc + '"></div></div>' +
-          '<span style="font-size:10px;color:' + cc + ';font-weight:600;">' + (cls.fw_confidence*100).toFixed(0) + '% ✓</span>' +
-        '</div>' +
-        '<div style="font-size:11px;color:var(--purple);font-style:italic;line-height:1.45;">' + (cls.fw_rationale||'') + '</div>' +
-      '</div>';
-    }).join('');
-    fwBlock = '<div style="background:var(--purple-light);border-radius:8px;padding:9px 10px;">' +
-      '<div style="font-size:9px;font-weight:700;color:var(--purple);letter-spacing:1px;margin-bottom:6px;">FORGE WORKS MAP® CLASSIFICATION</div>' +
-      factorsHtml +
-      (e.fw_classification_basis ? '<div style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(118,53,220,0.15);font-size:10px;color:var(--purple);font-style:italic;">' + e.fw_classification_basis + '</div>' : '') +
-    '</div>';
-  } else {
-    fwBlock = '<div style="background:var(--bg);border-radius:8px;padding:9px 10px;">' +
-      '<div style="font-size:9px;font-weight:700;color:var(--text-secondary);letter-spacing:1px;margin-bottom:4px;">FORGE WORKS MAP®</div>' +
-      '<div style="font-size:12px;color:var(--text-secondary);">' + (e.fw_attempted === false ? 'Input too thin to classify' : 'No factor met 0.70 confidence threshold') + '</div>' +
-    '</div>';
-  }
-
   const card = document.createElement('div');
   card.style.cssText = 'animation:msgIn 0.3s ease;';
-  card.innerHTML = '<div style="background:var(--surface);border:1.5px solid var(--purple);border-radius:14px;overflow:hidden;margin:4px 0;">' +
-    '<div style="background:var(--purple);padding:8px 14px;display:flex;align-items:center;gap:7px;">' +
-      '<div style="width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,0.6);animation:pulse 2s infinite;"></div>' +
-      '<span style="font-size:11px;font-weight:700;color:white;letter-spacing:0.5px;">AI ENRICHMENT COMPLETE · BLUEPRINT-ENRICHED v0.2</span>' +
+  card.innerHTML = '<div style="background:var(--surface);border:1.5px solid var(--primary);border-radius:14px;overflow:hidden;margin:4px 0;">' +
+    '<div style="background:var(--hiviz-dark);padding:8px 14px;display:flex;align-items:center;justify-content:space-between;gap:7px;">' +
+      '<div style="display:flex;align-items:center;gap:7px;">' +
+        '<div style="width:6px;height:6px;border-radius:50%;background:var(--primary);"></div>' +
+        '<span style="font-size:11px;font-weight:700;color:white;letter-spacing:0.5px;">STAGE 2 — observation.enrich</span>' +
+      '</div>' +
+      '<span style="font-size:9px;color:rgba(255,255,255,0.35);font-weight:600;">SERVER-SIDE JOB · SIMULATED</span>' +
     '</div>' +
     '<div style="padding:12px 14px;display:flex;flex-direction:column;gap:8px;">' +
+
       '<div style="background:var(--bg);border-radius:8px;padding:9px 10px;">' +
         '<div style="font-size:9px;font-weight:700;color:var(--text-secondary);letter-spacing:1px;margin-bottom:4px;">SIGNAL TYPE</div>' +
         '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">' +
@@ -929,21 +751,55 @@ function showEnrichmentCard(msgs, e) {
         '</div>' +
         '<div style="font-size:11px;color:var(--text-secondary);font-style:italic;margin-top:4px;">' + (e.signal_type_rationale || '') + '</div>' +
       '</div>' +
-      (e.energy_type && e.energy_type !== 'none' ? '<div style="background:var(--bg);border-radius:8px;padding:9px 10px;">' +
-        '<div style="font-size:9px;font-weight:700;color:var(--text-secondary);letter-spacing:1px;margin-bottom:4px;">ENERGY</div>' +
-        '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;">' +
-          '<span style="font-size:13px;font-weight:700;">' + e.energy_type + '</span>' +
-          '<span style="font-size:10px;background:var(--warning-light);color:#B76E00;padding:2px 7px;border-radius:5px;font-weight:600;">' + (e.energy_release_potential||'') + ' potential</span>' +
-          '<span style="font-size:10px;background:var(--error-light);color:var(--error);padding:2px 7px;border-radius:5px;font-weight:600;">' + (e.barrier_assessment||'').replace(/_/g,' ') + '</span>' +
-        '</div>' +
-        '<div style="font-size:11px;color:var(--text-secondary);font-style:italic;margin-top:4px;">' + (e.barrier_assessment_rationale || '') + '</div>' +
-      '</div>' : '') +
-      fwBlock +
-      (e.context_questions_needed && e.context_question ? '<div style="background:var(--info-light);border-radius:8px;padding:9px 10px;border:1px solid rgba(0,108,156,0.2);">' +
-        '<div style="font-size:9px;font-weight:700;color:var(--info);letter-spacing:1px;margin-bottom:4px;">FOLLOW-UP QUESTION</div>' +
-        '<div style="font-size:12px;color:var(--info);">' + e.context_question + '</div>' +
-        '<div style="font-size:10px;color:var(--text-secondary);margin-top:3px;">A follow-up notification would be sent to the observer.</div>' +
-      '</div>' : '') +
+
+      (e.energy_type && e.energy_type !== 'none' ?
+        '<div style="background:var(--bg);border-radius:8px;padding:9px 10px;">' +
+          '<div style="font-size:9px;font-weight:700;color:var(--text-secondary);letter-spacing:1px;margin-bottom:4px;">ENERGY · BARRIER</div>' +
+          '<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">' +
+            '<span style="font-size:13px;font-weight:700;">' + e.energy_type + '</span>' +
+            (e.barrier_assessment && e.barrier_assessment !== 'none' ? '<span style="font-size:10px;background:var(--error-light);color:var(--error);padding:2px 7px;border-radius:5px;font-weight:600;">' + e.barrier_assessment.replace(/_/g,' ') + '</span>' : '') +
+            '<span style="font-size:10px;font-weight:600;color:' + confColor(e.energy_type_confidence) + ';">' + ((e.energy_type_confidence||0)*100).toFixed(0) + '%</span>' +
+          '</div>' +
+          '<div style="font-size:11px;color:var(--text-secondary);font-style:italic;margin-top:4px;">' + (e.barrier_rationale || '') + '</div>' +
+        '</div>'
+      : '') +
+
+      (e.key_hazard ?
+        '<div style="background:var(--bg);border-radius:8px;padding:9px 10px;">' +
+          '<div style="font-size:9px;font-weight:700;color:var(--text-secondary);letter-spacing:1px;margin-bottom:4px;">KEY HAZARD</div>' +
+          '<div style="font-size:13px;font-weight:700;">' + e.key_hazard + '</div>' +
+          '<div style="font-size:11px;color:var(--text-secondary);font-style:italic;margin-top:4px;">' + (e.key_hazard_rationale || '') + '</div>' +
+        '</div>'
+      : '') +
+
+      (e.stop_work_warranted ?
+        '<div style="background:var(--error-light);border-radius:8px;padding:9px 10px;border:1px solid rgba(255,86,48,0.2);">' +
+          '<div style="font-size:9px;font-weight:700;color:var(--error);letter-spacing:1px;margin-bottom:4px;">STOP WORK WARRANTED</div>' +
+          '<div style="font-size:11px;color:var(--error);">' + (e.stop_work_warranted_rationale || '') + '</div>' +
+        '</div>'
+      : '') +
+
+      (e.fw_factor_hint ?
+        '<div style="background:var(--purple-light);border-radius:8px;padding:9px 10px;">' +
+          '<div style="font-size:9px;font-weight:700;color:var(--purple);letter-spacing:1px;margin-bottom:4px;">FW FACTOR HINT</div>' +
+          '<div style="font-size:13px;font-weight:700;color:var(--purple);">' + e.fw_factor_hint.replace(/_/g,' ') + '</div>' +
+          '<div style="font-size:10px;color:var(--purple);margin-top:4px;opacity:0.7;">Lightweight pointer only — fw_classify runs on richer context in the insight / investigation / enquiry pipeline.</div>' +
+        '</div>'
+      : '') +
+
+      (e.context_questions_needed && e.context_question ?
+        '<div style="background:var(--info-light);border-radius:8px;padding:9px 10px;border:1px solid rgba(0,108,156,0.2);">' +
+          '<div style="font-size:9px;font-weight:700;color:var(--info);letter-spacing:1px;margin-bottom:4px;">CONTEXT REQUEST — observation.context_request</div>' +
+          '<div style="font-size:12px;color:var(--info);">' + e.context_question + '</div>' +
+          '<div style="font-size:10px;color:var(--text-secondary);margin-top:3px;">Stage 3 — a follow-up notification would be queued to the observer.</div>' +
+        '</div>'
+      : '') +
+
+      '<div style="background:var(--bg);border-radius:8px;padding:8px 10px;display:flex;align-items:center;justify-content:space-between;">' +
+        '<div style="font-size:9px;font-weight:700;color:var(--text-secondary);letter-spacing:1px;">ENRICHMENT CONFIDENCE</div>' +
+        '<span style="font-size:12px;font-weight:700;color:' + confColor(e.enrichment_confidence) + ';">' + ((e.enrichment_confidence||0)*100).toFixed(0) + '% — ' + confLabel(e.enrichment_confidence) + '</span>' +
+      '</div>' +
+
     '</div>' +
   '</div>';
   msgs.appendChild(card);
