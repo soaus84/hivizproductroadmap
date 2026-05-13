@@ -4,7 +4,7 @@
 Version: 1.0 — May 2026
 Supersedes: `specs/fw-map-classification-reference-v1.md`
 
-> **Scope:** Authoritative AI classification reference for the Forge Works Map®. This file is injected in full at runtime into the `fw_classify` system prompt (Prompt 10). It is also referenced by `cop_thread.generate`, `situational_brief.generate`, and `visit_briefing.generate` for factor-level framing. Feature specs reference this file by name — they do not copy content from it.
+> **Scope:** Authoritative AI classification reference for the Forge Works Map®. This file is injected in full at runtime into the `fw_classify` system prompt — see `globals/fw-classify-job.md` for the job spec. It is also referenced by `cop_thread.generate`, `situational_brief.generate`, and `visit_briefing.generate` for factor-level framing. Feature specs reference this file by name — they do not copy content from it.
 
 > **Not used for individual observation enrichment.** Signal at observation level is too thin for reliable FW classification. `fw_factor_hint` in the enrichment output is a lightweight forward-reference only — not a classification.
 

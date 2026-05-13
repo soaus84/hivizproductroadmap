@@ -180,106 +180,21 @@ investigation.toolbox_narrative_generated_at  TIMESTAMPTZ
 **Input:** Confirmed investigation framework fields + severity class
 **Output:** FW Map® classification stored as parallel arrays on the investigation record
 **Human gate:** None at classification — output displayed alongside investigation content in the workbench UI with rationale
-**Max tokens:** 2000 — system prompt includes full Blueprint reference injected at runtime
 
-### System Prompt
-
-The system prompt for `fw_classify` is shared across all three classification sources (insights, investigations, enquiries). It is assembled at runtime by injecting the full content of `globals/fw-map-blueprint.md`.
-
-**Pattern:**
-```
-[fw_classify base system prompt]
-+
-[full text of globals/fw-map-blueprint.md injected here]
-```
-
-### CANONICAL-FW-CLASSIFY-BASE-SYSTEM-PROMPT
-
-```
-You are a safety management analyst trained in the Forge Works Map® — a 15-factor
-organisational capacity framework grounded in Safety II, Resilience Engineering,
-and Human and Organisational Performance (HOP) theory.
-
-Your job is to identify every Forge Works Map® factor the narrative independently
-supports at sufficient confidence — and at which maturity level each gap operates.
-
-CLASSIFICATION RULES:
-- Only classify factors where you can write a specific, evidence-based rationale
-- Never classify on vague association — the narrative must provide direct evidence
-- Maximum 3 factors per classification run, ordered by confidence descending
-- If nothing meets 0.70 confidence, return an empty classifications array
-- Classify at the maturity level where the GAP operates — not where the organisation aspires to be
-- Maturity levels are sequential: do not classify resilient if the compliant gap has not been addressed
-- Output only valid JSON. No preamble, no markdown.
-
-[Full per-factor definitions injected from globals/fw-map-blueprint.md at runtime]
-```
-
-### User Prompt Template — Investigation Path
-
-```
-Source type: investigation
-Work type: {{work_type_label}}
-Severity class: {{severity_class}}
-Immediate cause: {{immediate_cause}}
-Contributing factors: {{contributing_factors_json}}
-Root cause: {{root_cause}}
-Corrective actions: {{corrective_actions_json}}
-
-{{#if trigger_source == 'solo_critical'}}
-Note: This investigation stems from a single critical incident — not an accumulated trend.
-Weight your classification evidence accordingly. A single critical event can still evidence
-systemic organisational factors when the narrative is rich enough.
-{{/if}}
-
-Classify against the 15 Forge Works Map® factors.
-
-GUIDE: senior_leadership, strategy, risk_management, safety_organisation, work_understanding
-ENABLE: operational_management, resource_allocation, management_systems, goal_conflict_tradeoffs, learning_development
-EXECUTE: frontline_workers, communications_coordination, decision_making, contractor_management, monitoring_metrics
-
-Maturity: compliant | leading | resilient
-
-Return JSON:
-{
-  "classifications": [
-    {
-      "fw_factor": "factor_name",
-      "fw_domain": "guide|enable|execute",
-      "fw_maturity_signal": "compliant|leading|resilient",
-      "fw_confidence": 0.86,
-      "fw_rationale": "1 sentence — why THIS factor based on THIS specific evidence from the investigation"
-    }
-  ],
-  "fw_classification_basis": "1 sentence — what specific evidence in the investigation narrative made classification possible",
-  "attempted": true
-}
-```
-
-### Validation Rules
-
-- `fw_confidence >= 0.70` required for each classification — reject below-threshold items before storing
-- `fw_factor` must be one of the 15 enumerated values from `globals/fw-map-blueprint.md`
-- `fw_domain` must be consistent with `fw_factor` — validate against the domain-factor mapping in `globals/fw-map-blueprint.md`
-- `classifications = []` + `attempted = true` → store empty arrays, set `fw_classified_at` — do not retry
-- `attempted = false` → store nothing, do not set `fw_classified_at` — re-queue when more context available (rare for closed investigations)
-- Maximum 3 classifications per run, ordered by `fw_confidence` descending
-- Never store a classification without its rationale — rationale is the defence in any review
+> **Canonical spec:** `globals/fw-classify-job.md` — system prompt, user prompt template (`CANONICAL-FW-CLASSIFY-USER-PROMPT-INVESTIGATION`), output schema, validation rules, and retry behaviour are all defined there. This section covers triggering, storage fields, and downstream effects specific to the investigation entity.
 
 ### Storage — parallel arrays on the investigation record
 
 ```sql
 -- Written by fw_classify job
-investigation.fw_factors[]          TEXT[]        -- e.g. ['management_systems', 'operational_management']
-investigation.fw_domains[]          TEXT[]        -- e.g. ['enable', 'enable']
-investigation.fw_maturity_signals[] TEXT[]        -- e.g. ['compliant', 'leading']
-investigation.fw_confidences[]      DECIMAL(3,2)[] -- e.g. [0.86, 0.73]
-investigation.fw_rationales[]       TEXT[]        -- one sentence per factor
+investigation.fw_factors[]          TEXT[]
+investigation.fw_domains[]          TEXT[]
+investigation.fw_maturity_signals[] TEXT[]
+investigation.fw_confidences[]      DECIMAL(3,2)[]
+investigation.fw_rationales[]       TEXT[]
 investigation.fw_classification_basis TEXT
 investigation.fw_classified_at      TIMESTAMPTZ
 ```
-
-Arrays are parallel by index — `fw_factors[0]` matches `fw_domains[0]`, `fw_confidences[0]`, `fw_rationales[0]`.
 
 ### Downstream from FW classification
 

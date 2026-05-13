@@ -357,52 +357,22 @@ The `toolbox_narrative` is stored separately and becomes available to toolbox ta
 **Input:** Summary narrative + Work as Done responses (anonymised) + synthesis findings
 **Output:** FW Map® classification stored as parallel arrays on the enquiry record
 **Human gate:** None — displayed alongside enquiry results in workbench
-**Max tokens:** 2000 — full Blueprint reference injected at runtime
 
-### System Prompt
+> **Canonical spec:** `globals/fw-classify-job.md` — system prompt, user prompt template (`CANONICAL-FW-CLASSIFY-USER-PROMPT-ENQUIRY`), output schema, validation rules, and retry behaviour are all defined there. This section covers triggering, storage fields, and downstream effects specific to the enquiry entity.
 
-Same base system prompt as investigation and insight paths. See `INVESTIGATION.md` Stage 4 `CANONICAL-FW-CLASSIFY-BASE-SYSTEM-PROMPT`. Full content of `globals/fw-map-blueprint.md` injected at runtime.
+**Note on Work as Done responses:** These are the richest signal source for `work_understanding` and `goal_conflict_tradeoffs` classification. Pass them in full (anonymised). See the enquiry path note in `globals/fw-classify-job.md`.
 
-### User Prompt Template — Enquiry Path
+### Storage — parallel arrays on the enquiry record
 
+```sql
+enquiry.fw_factors[]             TEXT[]
+enquiry.fw_domains[]             TEXT[]
+enquiry.fw_maturity_signals[]    TEXT[]
+enquiry.fw_confidences[]         DECIMAL(3,2)[]
+enquiry.fw_rationales[]          TEXT[]
+enquiry.fw_classification_basis  TEXT
+enquiry.fw_classified_at         TIMESTAMPTZ
 ```
-Source type: enquiry_summary
-Work type: {{work_type_label}}
-Trigger source: {{trigger_source}}
-
-Summary narrative: {{summary_narrative}}
-Synthesis findings: {{findings_json}}
-Work as Done responses (anonymised): {{work_as_done_responses_json}}
-
-Classify against the 15 Forge Works Map® factors.
-
-GUIDE: senior_leadership, strategy, risk_management, safety_organisation, work_understanding
-ENABLE: operational_management, resource_allocation, management_systems, goal_conflict_tradeoffs, learning_development
-EXECUTE: frontline_workers, communications_coordination, decision_making, contractor_management, monitoring_metrics
-
-Maturity: compliant | leading | resilient
-
-Return JSON:
-{
-  "classifications": [
-    {
-      "fw_factor": "factor_name",
-      "fw_domain": "guide|enable|execute",
-      "fw_maturity_signal": "compliant|leading|resilient",
-      "fw_confidence": 0.86,
-      "fw_rationale": "1 sentence — why THIS factor based on THIS specific evidence from the enquiry"
-    }
-  ],
-  "fw_classification_basis": "1 sentence — what specific evidence made classification possible",
-  "attempted": true
-}
-```
-
-**Note on Work as Done responses:** These are the richest signal source for `work_understanding` and `goal_conflict_tradeoffs` classification. Pass them in full (anonymised). The Blueprint affinity table in `globals/fw-map-blueprint.md` confirms that enquiry summaries are a strong source for `work_understanding` and `goal_conflict_tradeoffs` classification specifically.
-
-### Validation and storage
-
-Same rules and parallel array storage pattern as investigation and insight paths. See `INVESTIGATION.md` Stage 4.
 
 ---
 

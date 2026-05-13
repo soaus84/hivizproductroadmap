@@ -63,13 +63,13 @@ Status: Supersedes v1.0 prompt library
 
 ### FW Map® classification
 
-| Job | Label | Feature file | Stage |
+| Job | Label | Spec file | Section |
 |---|---|---|---|
-| `fw_classify` | FW classification — insight path | `specs/features/CRITICAL-INSIGHT.md` | Stage 3 |
-| `fw_classify` | FW classification — investigation path | `specs/features/INVESTIGATION.md` | Stage 4 |
-| `fw_classify` | FW classification — enquiry path | `specs/features/ENQUIRY.md` | Stage 5 |
+| `fw_classify` | FW classification — insight path | `specs/globals/fw-classify-job.md` | `CANONICAL-FW-CLASSIFY-USER-PROMPT-INSIGHT` |
+| `fw_classify` | FW classification — investigation path | `specs/globals/fw-classify-job.md` | `CANONICAL-FW-CLASSIFY-USER-PROMPT-INVESTIGATION` |
+| `fw_classify` | FW classification — enquiry path | `specs/globals/fw-classify-job.md` | `CANONICAL-FW-CLASSIFY-USER-PROMPT-ENQUIRY` |
 
-> Note: `fw_classify` uses the same base system prompt across all three paths — defined once in `specs/features/INVESTIGATION.md` Stage 4 (`CANONICAL-FW-CLASSIFY-BASE-SYSTEM-PROMPT`). The full Forge Works Map® Blueprint is injected from `specs/globals/fw-map-blueprint.md` at runtime.
+> `fw_classify` is a shared job. Base system prompt, all three user prompt variants, output schema, validation rules, and triggering conditions are defined in `specs/globals/fw-classify-job.md`. Feature specs reference this file — they do not contain prompt copies. The full Forge Works Map® Blueprint (`specs/globals/fw-map-blueprint.md`) is injected at runtime.
 
 ### Output generation
 
