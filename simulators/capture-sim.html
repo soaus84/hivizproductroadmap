@@ -338,13 +338,46 @@ function ensurePromptsReady() {
 }
 
 
+// ── TAXONOMY — HIGH_RISK_WORK & SAFETY_PRACTICE ───────────────────────────────
+// Example records matching the platform entity shape: { id, label }.
+// In production these are injected at runtime from the database.
+// IDs are stable sim fixtures — do not use in production.
+
+const HIGH_RISK_WORK = [
+  { id: 'hrw-1a2b3c4d-0001', label: 'Heavy Vehicle Operations' },
+  { id: 'hrw-1a2b3c4d-0002', label: 'Working at Height' },
+  { id: 'hrw-1a2b3c4d-0003', label: 'Hot Work' },
+  { id: 'hrw-1a2b3c4d-0004', label: 'Confined Space Entry' },
+  { id: 'hrw-1a2b3c4d-0005', label: 'Electrical Work' },
+  { id: 'hrw-1a2b3c4d-0006', label: 'Blasting / Explosives' },
+  { id: 'hrw-1a2b3c4d-0007', label: 'Crane / Lifting Operations' },
+  { id: 'hrw-1a2b3c4d-0008', label: 'Excavation / Ground Disturbance' },
+  { id: 'hrw-1a2b3c4d-0009', label: 'Isolation / LOTO' },
+  { id: 'hrw-1a2b3c4d-0010', label: 'Pressurised Systems' },
+  { id: 'hrw-1a2b3c4d-0011', label: 'Working Near Water' },
+  { id: 'hrw-1a2b3c4d-0012', label: 'Overhead Power Lines' },
+];
+
+const SAFETY_PRACTICE = [
+  { id: 'sp-2e3f4a5b-0001', label: 'Permit to Work (PTW)' },
+  { id: 'sp-2e3f4a5b-0002', label: 'Safe Work Method Statement (SWMS)' },
+  { id: 'sp-2e3f4a5b-0003', label: 'Job Safety Analysis (JSA)' },
+  { id: 'sp-2e3f4a5b-0004', label: 'Take 5 / Pre-task Check' },
+  { id: 'sp-2e3f4a5b-0005', label: 'Toolbox Talk' },
+  { id: 'sp-2e3f4a5b-0006', label: 'Stop Work Authority' },
+  { id: 'sp-2e3f4a5b-0007', label: 'Lock Out Tag Out (LOTO)' },
+  { id: 'sp-2e3f4a5b-0008', label: 'Last Minute Risk Assessment (LMRA)' },
+  { id: 'sp-2e3f4a5b-0009', label: 'Management of Change (MOC)' },
+  { id: 'sp-2e3f4a5b-0010', label: 'Emergency Response Plan (ERP)' },
+  { id: 'sp-2e3f4a5b-0011', label: 'Fatigue Management' },
+  { id: 'sp-2e3f4a5b-0012', label: 'Safety Observation / Inspection' },
+];
+
 // ── ENRICHMENT USER PROMPT BUILDER ───────────────────────────────────────────
-// Sim-adapted version of the Stage 2 user prompt template from
+// Matches the Stage 2 user prompt template from
 // specs/features/OBSERVATION-CAPTURE.md § User Prompt Template.
-// Taxonomy UUID injection (work_type_taxonomy_json, practice_taxonomy_json)
-// is omitted — not available in the browser context. The spec schema is
-// otherwise preserved; inferred_work_type_ids and inferred_practice_ids
-// are excluded from the output request accordingly.
+// HIGH_RISK_WORK and SAFETY_PRACTICE are injected as the taxonomy arrays;
+// in production these come from the database at runtime.
 
 function buildEnrichPrompt(data) {
   const obs      = data.what_was_observed || data.what_happened || data.description || '';
@@ -353,16 +386,22 @@ function buildEnrichPrompt(data) {
 
 Work type declared by supervisor: ${workType}
 
+Available HIGH_RISK_WORK taxonomy:
+${JSON.stringify(HIGH_RISK_WORK)}
+
+Available SAFETY_PRACTICE taxonomy:
+${JSON.stringify(SAFETY_PRACTICE)}
+
 Capture-stage hints (from conversation — use to initialise confidence, not as final values):
 signal_type_hint: ${data.signal_type || null}
 energy_type_hint: ${data.energy_type || null}
 barrier_hint: ${data.barrier_assessment || null}
 fw_factor_hint: ${data.fw_factor_hint || null}
 
-[Sim note: taxonomy UUIDs not available in browser — omit inferred_work_type_ids and inferred_practice_ids]
-
 Return JSON matching this exact schema:
 {
+  "inferred_high_risk_work_ids": ["hrw-id"],
+  "inferred_safety_practice_ids": ["sp-id"],
   "signal_type": "positive_performance|weak_signal|at_risk_condition|unwanted_energy_event|barrier_failure",
   "signal_type_confidence": 0.0,
   "signal_type_rationale": "1 sentence — what in the text identified this signal type",
@@ -742,6 +781,16 @@ function showEnrichmentCard(msgs, e) {
       '<span style="font-size:9px;color:rgba(255,255,255,0.35);font-weight:600;">SERVER-SIDE JOB · SIMULATED</span>' +
     '</div>' +
     '<div style="padding:12px 14px;display:flex;flex-direction:column;gap:8px;">' +
+
+      (() => {
+        const hwLabels = (e.inferred_high_risk_work_ids || []).map(id => { const m = HIGH_RISK_WORK.find(x => x.id === id); return m ? m.label : id; });
+        const spLabels = (e.inferred_safety_practice_ids || []).map(id => { const m = SAFETY_PRACTICE.find(x => x.id === id); return m ? m.label : id; });
+        const all = [...hwLabels, ...spLabels];
+        return all.length ? '<div style="background:var(--bg);border-radius:8px;padding:9px 10px;">' +
+          '<div style="font-size:9px;font-weight:700;color:var(--text-secondary);letter-spacing:1px;margin-bottom:6px;">INFERRED TAXONOMY</div>' +
+          '<div style="display:flex;flex-wrap:wrap;gap:5px;">' + all.map(l => '<span style="font-size:11px;font-weight:600;background:var(--surface);border:1px solid var(--border);border-radius:5px;padding:2px 8px;">' + l + '</span>').join('') + '</div>' +
+        '</div>' : '';
+      })() +
 
       '<div style="background:var(--bg);border-radius:8px;padding:9px 10px;">' +
         '<div style="font-size:9px;font-weight:700;color:var(--text-secondary);letter-spacing:1px;margin-bottom:4px;">SIGNAL TYPE</div>' +
