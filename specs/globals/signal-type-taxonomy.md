@@ -33,7 +33,7 @@ A required control was absent, bypassed, or failed to function. The system that 
 - Guard removed from conveyor during operation
 - Permit to Work signed without the required pre-task physical hazard check
 
-**Pipeline effect:** `observation.enrich` job queues pipeline routing immediately on completion if `signal_type_confidence >= 0.70`. Does not wait for trend threshold.
+**Pipeline effect:** On `observation.enrich` completion, if `signal_type_confidence >= 0.70`: queues `critical_insight.generate` with `trigger_source = critical_observation`, passing the single enriched observation record as input. Does not wait for trend threshold. Does not require accumulation.
 
 ---
 
@@ -51,7 +51,7 @@ Uncontrolled release of energy that had the potential to cause harm. The barrier
 - Hydraulic line sprayed fluid under pressure
 - Uncontrolled load swing during crane lift
 
-**Pipeline effect:** Same as `barrier_failure` — immediate pipeline routing on confidence threshold.
+**Pipeline effect:** Same as `barrier_failure` — queues `critical_insight.generate` with `trigger_source = critical_observation` on `signal_type_confidence >= 0.70`. Single event, no accumulation required.
 
 ---
 
@@ -107,8 +107,8 @@ Observed behaviour or condition that demonstrates safety practice being done wel
 
 | Signal type | Routing | Threshold | Notes |
 |---|---|---|---|
-| `barrier_failure` | Pipeline direct | Single event | Immediate routing if confidence ≥ 0.70 |
-| `unwanted_energy_event` | Pipeline direct | Single event | Immediate routing if confidence ≥ 0.70 |
+| `barrier_failure` | Pipeline direct | Single event | Queues `critical_insight.generate` (`trigger_source = critical_observation`) if confidence ≥ 0.70 |
+| `unwanted_energy_event` | Pipeline direct | Single event | Queues `critical_insight.generate` (`trigger_source = critical_observation`) if confidence ≥ 0.70 |
 | `at_risk_condition` | Pool | Trend algorithm | Accumulates by work_type × org_level × time_window |
 | `weak_signal` | Pool | Trend algorithm | Same accumulation — lower weight |
 | `positive_performance` | Analytics | N/A | Never routes to pipeline |

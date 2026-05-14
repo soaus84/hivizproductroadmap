@@ -39,6 +39,7 @@ Status: Supersedes v1.0 prompt library
 |---|---|---|---|
 | `critical_insight.generate` | Critical insight draft (algorithm trigger) | `specs/features/CRITICAL-INSIGHT.md` | Stage 1 |
 | `critical_insight.generate` | Critical insight draft (solo_critical trigger) | `specs/features/CRITICAL-INSIGHT.md` | Stage 1 |
+| `critical_insight.generate` | Critical insight draft (critical_observation trigger) | `specs/features/CRITICAL-INSIGHT.md` | Stage 1 |
 
 ### Investigation pipeline
 

@@ -270,7 +270,7 @@ Note: `failure_type` is a lightweight triage signal only. FW Map® classificatio
 
 | Condition | Action |
 |---|---|
-| `signal_type_confidence >= 0.70` AND `signal_type` is `barrier_failure` or `unwanted_energy_event` | Queue pipeline routing immediately — do not wait for trend threshold |
+| `signal_type_confidence >= 0.70` AND `signal_type` is `barrier_failure` or `unwanted_energy_event` | Queue `critical_insight.generate` with `trigger_source = critical_observation` — single observation record as input, no threshold required |
 | `signal_type_confidence >= 0.70` AND `signal_type` is `at_risk_condition` or `weak_signal` | Add to pool — trend detection algorithm runs on schedule |
 | `signal_type` is `positive_performance` | Add to analytics pool only — does not contribute to trend detection |
 | `enrichment_confidence < 0.50` | Queue `observation.context_request` — do not store enrichment fields |
