@@ -28,6 +28,7 @@ Stage 4 — Downstream dispatch      (situational brief, CoP thread seed — see
 |---|---|---|
 | `algorithm` | Trend detection threshold crossed | Cluster of anonymised enriched observations |
 | `solo_critical` | Single critical-severity incident | Single incident record |
+| `critical_observation` | Single `barrier_failure` or `unwanted_energy_event` observation with `signal_type_confidence >= 0.70` | Single enriched observation record |
 | `manual` | Safety manager creates directly | Manager-authored content — Stage 1 skipped |
 | `external_alert` | Regulator / industry body / client alert | External content — Stage 1 skipped |
 | `external_investigation` | Finding from another system | External content — Stage 1 skipped |
@@ -58,7 +59,7 @@ Stage 4 — Downstream dispatch      (situational brief, CoP thread seed — see
 ## Stage 1 — Insight Generation
 
 **Job:** `critical_insight.generate`
-**Triggered:** Trend threshold crossed (algorithm) OR critical incident created (solo_critical)
+**Triggered:** Trend threshold crossed (algorithm) OR critical incident created (solo_critical) OR single critical observation (critical_observation)
 **Input:** Varies by trigger source — see prompt variants below
 **Output:** Draft CriticalInsight with `cleared_for_toolbox = false`
 **Human gate:** Safety manager review required before `cleared_for_toolbox` is set
@@ -157,6 +158,52 @@ Return JSON:
 ```
 
 **Note on `escalate_to_systemic` for solo_critical:** Defaults to `true` — a critical severity incident is presumed to warrant systemic investigation. The human review gate still applies; the reviewer can downgrade to `false` if they disagree.
+
+### User Prompt Template — Critical Observation Trigger
+
+### CANONICAL-USER-PROMPT-STAGE-1-CRITICAL-OBSERVATION
+
+Used when `trigger_source = critical_observation`. Observation text scrubbed per `globals/anonymisation-rules.md` before inclusion.
+
+```
+A single field observation has been classified as a critical signal — one event is sufficient to warrant intelligence generation.
+
+Trigger source: critical_observation
+
+Work type: {{work_type_label}}
+Org level: site — {{worksite_name}}
+Signal type: {{signal_type}}
+Energy type: {{energy_type}}
+Barrier assessment: {{barrier_assessment}}
+Key hazard: {{key_hazard}}
+Key hazard rationale: {{key_hazard_rationale}}
+Stop work warranted (AI): {{stop_work_warranted}}
+Stop work called (observer): {{stop_work_called}}
+Observation: {{what_was_observed}}
+
+This is a single field observation, not a confirmed incident and not an accumulated pattern.
+Your output should:
+- Frame the intelligence around what this observation reveals about control adequacy at this site
+- Be direct about the control failure without speculation beyond what the observation describes
+- Acknowledge the single-observation basis — do not imply a pattern unless one is evidenced
+- Focus on what other crews and sites need to check or know immediately
+- If stop_work_warranted is true and stop_work_called is false, note the divergence as relevant context
+
+Return JSON:
+{
+  "pattern_summary": "2-3 sentences. What this observation reveals about the state of controls for this work type. Acknowledge the single-observation basis without hedging the risk.",
+  "pattern_summary_basis": "1 sentence. Which specific elements of the observation support this framing.",
+  "likely_systemic_cause": "1 sentence. The underlying condition this observation most likely reflects.",
+  "likely_systemic_cause_rationale": "1 sentence. What in the observation points to this cause.",
+  "recommended_action": "1 sentence. The most important immediate check or action for this and other sites.",
+  "recommended_action_rationale": "1 sentence. Why this action directly addresses the likely cause.",
+  "toolbox_narrative": "4-6 sentences. Written for a supervisor to read aloud to their crew. Plain English. Present tense. No jargon. No blame. Opens with what the crew needs to know and check today.",
+  "escalate_to_systemic": false,
+  "escalation_rationale": null
+}
+```
+
+**Note on `escalate_to_systemic` for critical_observation:** Defaults to `false` — a critical observation indicates a control failure, not confirmed harm. The reviewer can escalate to `true` if the observation warrants systemic investigation, but it is not the presumption. Contrast with `solo_critical` (incident) which defaults to `true`.
 
 ### Validation Rules
 
@@ -277,6 +324,8 @@ THEN
 Cooldown is configurable per organisation. Default: 30 days at site level, 14 days at region and above.
 
 Solo_critical bypasses the cooldown — a critical incident always generates an insight regardless of recent history.
+
+Critical_observation bypasses the cooldown — a single critical observation (barrier_failure or unwanted_energy_event) always generates an insight regardless of recent history for that work type.
 
 ---
 
