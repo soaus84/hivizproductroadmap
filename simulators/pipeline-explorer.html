@@ -604,8 +604,8 @@ function renderLeft() {
     left.appendChild(btn);
   }
 
-  // Prompt toggle (only while capture active)
-  if (promptsReady && PROMPTS.captureSystem && S.stages.capture !== 'complete') {
+  // Prompt toggle — always visible after prompts load
+  if (promptsReady && PROMPTS.captureSystem) {
     const wrap = document.createElement('div');
     wrap.className = 'ptog-wrap';
     wrap.appendChild(makePromptToggle('CANONICAL-SYSTEM-PROMPT-STAGE-1', PROMPTS.captureSystem));
