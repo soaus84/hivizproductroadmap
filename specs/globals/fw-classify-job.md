@@ -31,7 +31,7 @@ The Blueprint is injected in full — not summarised or excerpted. This is the o
 
 ---
 
-## CANONICAL-FW-CLASSIFY-BASE-SYSTEM-PROMPT
+### CANONICAL-FW-CLASSIFY-BASE-SYSTEM-PROMPT
 
 ```
 You are a safety management analyst trained in the Forge Works Map® — a 15-factor

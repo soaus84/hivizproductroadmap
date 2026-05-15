@@ -1,0 +1,1294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pipeline Explorer — Hiviz</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #F4F6F8; --surface: #FFFFFF; --border: #E5E8EB;
+  --text-primary: #1C252E; --text-secondary: #637381; --text-disabled: #919EAB;
+  --primary: #00AB55; --primary-light: #D1FAE5; --primary-dark: #007B40;
+  --error: #FF5630; --error-light: #FFE9E5;
+  --warning: #FFAB00;
+  --info: #006C9C; --info-light: #E0F4FF;
+  --purple: #7635DC; --purple-light: #EFE6FF;
+  --gold: #d4a843; --hiviz-dark: #1C252E;
+  --shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body { font-family: 'Inter', sans-serif; background: #0e0f0d; color: var(--text-primary); display: flex; flex-direction: column; }
+
+/* ── Header ───────────────────────────────────────── */
+.hdr { padding: 16px 20px; border-bottom: 1px solid rgba(255,255,255,0.07); display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; flex-shrink: 0; }
+.hdr-left { min-width: 0; }
+.hdr-logo { font-size: 9px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--gold); margin-bottom: 2px; }
+.hdr-title { font-size: 18px; font-weight: 800; color: white; }
+.hdr-sub { font-size: 11px; color: rgba(255,255,255,0.35); margin-top: 2px; line-height: 1.5; max-width: 540px; }
+.legend { display: flex; align-items: center; gap: 12px; margin-top: 8px; flex-wrap: wrap; }
+.leg-item { display: flex; align-items: center; gap: 4px; font-size: 9px; color: rgba(255,255,255,0.3); }
+.leg-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.hdr-right { display: flex; flex-direction: column; gap: 5px; flex-shrink: 0; }
+.api-row { display: flex; gap: 6px; }
+.api-input { background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12); border-radius: 6px; padding: 6px 9px; font-size: 11px; color: white; font-family: 'Inter', sans-serif; outline: none; width: 190px; }
+.api-input:focus { border-color: rgba(212,168,67,0.5); }
+.api-input::placeholder { color: rgba(255,255,255,0.18); }
+.api-btn { background: var(--gold); color: #0e0f0d; border: none; border-radius: 6px; padding: 6px 11px; font-size: 11px; font-weight: 700; cursor: pointer; }
+.api-status { font-size: 10px; color: rgba(255,255,255,0.28); }
+.api-status.ok { color: var(--primary); }
+.api-status.err { color: var(--error); }
+.reset-btn { background: transparent; border: none; color: rgba(255,255,255,0.2); font-size: 10px; cursor: pointer; font-family: 'Inter', sans-serif; text-decoration: underline; text-align: right; }
+.reset-btn:hover { color: rgba(255,255,255,0.45); }
+
+/* ── App layout ───────────────────────────────────── */
+.app { display: flex; flex: 1; min-height: 0; overflow: hidden; }
+
+/* ── Sidebar (pipeline overview) ─────────────────── */
+.sidebar { width: 300px; flex-shrink: 0; background: #141510; border-right: 1px solid rgba(255,255,255,0.07); overflow-y: auto; display: flex; flex-direction: column; }
+.sidebar::-webkit-scrollbar { width: 4px; }
+.sidebar::-webkit-scrollbar-track { background: transparent; }
+.sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+.sb-heading { padding: 12px 14px 8px; font-size: 9px; font-weight: 700; color: rgba(255,255,255,0.25); letter-spacing: 1.5px; flex-shrink: 0; }
+
+/* Sidebar stage card */
+.sb-card { border-left: 2px solid rgba(255,255,255,0.07); margin: 0 14px; padding: 10px 0 10px 12px; cursor: pointer; transition: border-color 0.2s; position: relative; }
+.sb-card:hover { border-left-color: rgba(255,255,255,0.2); }
+.sb-card.active { border-left-color: var(--gold); }
+.sb-card.complete { border-left-color: var(--primary); }
+.sb-card.skipped { opacity: 0.4; }
+.sb-card-hdr { display: flex; align-items: center; gap: 6px; margin-bottom: 7px; }
+.sb-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; border: 1.5px solid rgba(255,255,255,0.15); }
+.sb-card.active  .sb-dot { background: var(--gold); border-color: var(--gold); }
+.sb-card.complete .sb-dot { background: var(--primary); border-color: var(--primary); }
+.sb-card.running .sb-dot { background: var(--gold); border-color: var(--gold); animation: pulse 1.2s infinite; }
+.sb-card.skipped .sb-dot { background: rgba(255,255,255,0.1); }
+.sb-card-label { font-size: 9px; font-weight: 700; color: rgba(255,255,255,0.3); letter-spacing: 0.8px; text-transform: uppercase; }
+.sb-card.active  .sb-card-label { color: var(--gold); }
+.sb-card.complete .sb-card-label { color: rgba(255,255,255,0.5); }
+.sb-job { font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.5); font-family: 'JetBrains Mono', monospace; margin-bottom: 7px; }
+.sb-card.active .sb-job  { color: white; }
+.sb-card.complete .sb-job { color: rgba(255,255,255,0.7); }
+.sb-side { font-size: 8px; font-weight: 700; padding: 1px 5px; border-radius: 3px; margin-left: auto; flex-shrink: 0; }
+.sc-client { background: rgba(0,171,85,0.15); color: #4CAF82; }
+.sc-server { background: rgba(118,53,220,0.15); color: #A07EF5; }
+.sc-system { background: rgba(255,171,0,0.15); color: var(--warning); }
+.sc-human  { background: rgba(0,108,156,0.15); color: #38B6F5; }
+
+/* Sidebar field rows */
+.sb-fields { display: flex; flex-direction: column; gap: 3px; }
+.sb-field { display: flex; gap: 5px; align-items: baseline; }
+.sb-field-key { font-size: 9px; color: rgba(255,255,255,0.22); flex-shrink: 0; min-width: 90px; font-family: 'JetBrains Mono', monospace; }
+.sb-field-val { font-size: 10px; color: rgba(255,255,255,0.35); font-family: 'JetBrains Mono', monospace; line-height: 1.35; word-break: break-all; }
+.sb-field-val.filled { color: rgba(255,255,255,0.75); }
+.sb-field-val.hi-warn { color: #FF8A6A; }
+.sb-field-val.hi-ok   { color: #4CAF82; }
+.sb-field-val.hi-purple { color: #A07EF5; }
+.sb-field-val.hi-gold { color: var(--gold); }
+.sb-empty { font-size: 9px; color: rgba(255,255,255,0.12); font-style: italic; }
+
+/* Arrow connector */
+.sb-arrow { display: flex; align-items: center; padding: 3px 14px 3px 26px; }
+.sb-arrow-line { width: 1px; height: 16px; background: rgba(255,255,255,0.07); margin: 0 auto; }
+
+/* ── Main panel ───────────────────────────────────── */
+.main { flex: 1; overflow-y: auto; background: var(--bg); display: flex; flex-direction: column; }
+.main::-webkit-scrollbar { width: 6px; }
+.main::-webkit-scrollbar-track { background: var(--bg); }
+.main::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+.main-inner { padding: 20px; flex: 1; display: flex; flex-direction: column; gap: 12px; }
+
+/* Stage card (main) */
+.stage-card { background: var(--surface); border-radius: 12px; overflow: hidden; border: 1.5px solid var(--border); }
+.stage-card.active { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(212,168,67,0.06); }
+.stage-card.complete { border-color: rgba(0,171,85,0.25); }
+.stage-card.pending { opacity: 0.38; pointer-events: none; }
+.stage-card.skipped { border-color: rgba(0,0,0,0.06); opacity: 0.55; }
+
+/* Card header */
+.card-hdr { background: var(--hiviz-dark); padding: 9px 13px; display: flex; align-items: center; gap: 8px; }
+.card-num { font-size: 9px; font-weight: 700; color: rgba(255,255,255,0.25); letter-spacing: 1px; }
+.card-job { font-size: 12px; font-weight: 700; color: white; font-family: 'JetBrains Mono', monospace; }
+.card-side { font-size: 8px; font-weight: 700; padding: 2px 6px; border-radius: 3px; flex-shrink: 0; }
+.card-spec { font-size: 9px; color: rgba(255,255,255,0.18); margin-left: auto; font-family: 'JetBrains Mono', monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 240px; }
+.card-status { font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 3px; flex-shrink: 0; }
+.cs-running  { background: rgba(212,168,67,0.2); color: var(--gold); animation: pulse 1.4s infinite; }
+.cs-complete { background: rgba(0,171,85,0.15); color: var(--primary); }
+.cs-skipped  { background: rgba(0,0,0,0.08); color: var(--text-disabled); }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+
+/* Refs strip */
+.refs-strip { padding: 6px 13px; background: #F8F9FA; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+.refs-lbl { font-size: 8px; font-weight: 700; color: var(--text-disabled); letter-spacing: 1px; flex-shrink: 0; }
+.ref-pill { display: inline-flex; align-items: center; gap: 3px; border-radius: 20px; padding: 2px 6px; font-size: 9px; font-weight: 600; border: 1px solid; white-space: nowrap; cursor: help; }
+.rp-connected { background: rgba(0,171,85,0.07); border-color: rgba(0,171,85,0.25); color: var(--primary-dark); }
+.rp-inline    { background: rgba(255,171,0,0.07); border-color: rgba(255,171,0,0.25); color: #92400e; }
+.rp-spec-only { background: rgba(255,86,48,0.05); border-color: rgba(255,86,48,0.18); color: var(--error); }
+.rp-dot { width: 4px; height: 4px; border-radius: 50%; }
+.rp-connected .rp-dot { background: var(--primary); }
+.rp-inline .rp-dot    { background: var(--warning); }
+.rp-spec-only .rp-dot { background: var(--error); }
+
+/* Card body */
+.card-body { padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+
+/* Section label */
+.sec-lbl { font-size: 9px; font-weight: 700; color: var(--text-disabled); letter-spacing: 1px; text-transform: uppercase; display: flex; align-items: center; gap: 6px; margin-bottom: 5px; }
+.sec-line { flex: 1; height: 1px; background: var(--border); }
+
+/* Field grid */
+.fgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+.fi { background: var(--bg); border-radius: 6px; padding: 8px 10px; }
+.fi.fw { grid-column: 1 / -1; }
+.fi.hi-warn   { background: rgba(255,86,48,0.05); border: 1px solid rgba(255,86,48,0.14); }
+.fi.hi-pos    { background: rgba(0,171,85,0.05); border: 1px solid rgba(0,171,85,0.14); }
+.fi.hi-purple { background: rgba(118,53,220,0.05); border: 1px solid rgba(118,53,220,0.14); }
+.fi-lbl { font-size: 8px; font-weight: 700; color: var(--text-disabled); letter-spacing: 1px; margin-bottom: 3px; }
+.fi-val { font-size: 12px; font-weight: 600; color: var(--text-primary); line-height: 1.35; }
+.fi-val.mono { font-family: 'JetBrains Mono', monospace; font-size: 10px; }
+.fi-rat { font-size: 11px; color: var(--text-secondary); font-style: italic; margin-top: 3px; line-height: 1.45; }
+
+/* Confidence badge */
+.cb { display: inline-flex; align-items: center; font-size: 9px; font-weight: 700; padding: 1px 4px; border-radius: 3px; margin-left: 4px; }
+.cb-hi  { background: rgba(0,171,85,0.12); color: var(--primary-dark); }
+.cb-mid { background: rgba(255,171,0,0.12); color: #92400e; }
+.cb-lo  { background: rgba(255,86,48,0.12); color: var(--error); }
+
+/* Chat */
+.chat-wrap { border: 1.5px solid var(--border); border-radius: 8px; overflow: hidden; }
+.chat-msgs { min-height: 160px; max-height: 300px; overflow-y: auto; padding: 10px; background: var(--bg); display: flex; flex-direction: column; gap: 7px; }
+.chat-msgs::-webkit-scrollbar { display: none; }
+.msg { display: flex; flex-direction: column; max-width: 78%; animation: msgIn 0.18s ease; }
+@keyframes msgIn { from{opacity:0;transform:translateY(3px)} to{opacity:1;transform:translateY(0)} }
+.msg-ai   { align-self: flex-start; }
+.msg-user { align-self: flex-end; }
+.msg-bubble { padding: 8px 12px; border-radius: 12px; font-size: 13px; line-height: 1.5; }
+.msg-ai   .msg-bubble { background: white; border-bottom-left-radius: 3px; box-shadow: var(--shadow); }
+.msg-user .msg-bubble { background: var(--hiviz-dark); color: white; border-bottom-right-radius: 3px; }
+.msg-sndr { font-size: 9px; font-weight: 700; letter-spacing: 0.5px; color: var(--text-disabled); margin-bottom: 2px; padding: 0 2px; }
+.msg-ai .msg-sndr { color: var(--primary); }
+.qrs { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 3px; }
+.qr { background: white; border: 1.5px solid var(--border); border-radius: 14px; padding: 4px 9px; font-size: 11px; font-weight: 600; cursor: pointer; white-space: nowrap; transition: all 0.1s; }
+.qr:hover { border-color: var(--primary); color: var(--primary); }
+.typing { display: flex; align-items: center; gap: 3px; padding: 8px 12px; background: white; border-radius: 12px; border-bottom-left-radius: 3px; box-shadow: var(--shadow); width: fit-content; }
+.td { width: 5px; height: 5px; border-radius: 50%; background: var(--text-disabled); animation: bounce 1.2s infinite; }
+.td:nth-child(2){animation-delay:.18s} .td:nth-child(3){animation-delay:.36s}
+@keyframes bounce { 0%,60%,100%{transform:translateY(0);opacity:.35} 30%{transform:translateY(-3px);opacity:1} }
+.chat-ibar { display: flex; gap: 7px; padding: 7px 9px; background: white; border-top: 1px solid var(--border); }
+.chat-inp { flex: 1; border: 1.5px solid var(--border); border-radius: 16px; padding: 7px 12px; font-family: 'Inter', sans-serif; font-size: 13px; outline: none; resize: none; min-height: 34px; max-height: 72px; overflow-y: auto; transition: border-color 0.15s; }
+.chat-inp:focus { border-color: var(--primary); }
+.chat-inp::placeholder { color: var(--text-disabled); }
+.chat-snd { width: 34px; height: 34px; border-radius: 50%; background: var(--hiviz-dark); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; color: white; flex-shrink: 0; }
+.chat-snd:hover { background: var(--primary); }
+.chat-snd:disabled { background: var(--border); cursor: default; }
+
+/* Prompt toggle */
+.ptog { display: flex; align-items: center; gap: 6px; cursor: pointer; padding: 7px 9px; background: var(--bg); border-radius: 6px; border: 1px solid transparent; user-select: none; }
+.ptog:hover { border-color: var(--border); }
+.ptog-lbl { font-size: 10px; font-weight: 600; color: var(--text-secondary); flex: 1; }
+.ptog-ico { font-size: 9px; color: var(--text-disabled); transition: transform 0.18s; }
+.ptog.open .ptog-ico { transform: rotate(180deg); }
+.pblock { background: var(--hiviz-dark); border-radius: 6px; padding: 10px 12px; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: rgba(255,255,255,0.55); line-height: 1.65; white-space: pre-wrap; word-break: break-word; display: none; max-height: 260px; overflow-y: auto; }
+.pblock.open { display: block; }
+
+/* Routing */
+.route-card { border-radius: 7px; padding: 11px 13px; }
+.route-card.direct { background: rgba(255,86,48,0.05); border: 1.5px solid rgba(255,86,48,0.2); }
+.route-card.pool   { background: rgba(0,171,85,0.05); border: 1.5px solid rgba(0,171,85,0.2); }
+.route-title { font-size: 11px; font-weight: 700; margin-bottom: 5px; }
+.route-card.direct .route-title { color: var(--error); }
+.route-card.pool   .route-title { color: var(--primary-dark); }
+.route-rule { font-size: 10px; color: var(--text-secondary); font-family: 'JetBrains Mono', monospace; padding: 5px 7px; background: rgba(0,0,0,0.04); border-radius: 4px; margin-bottom: 5px; line-height: 1.5; }
+.route-out { font-size: 12px; font-weight: 600; color: var(--text-primary); line-height: 1.4; }
+
+/* Review */
+.rev-btns { display: flex; gap: 8px; }
+.rev-btn { flex: 1; padding: 10px; border-radius: 7px; border: none; font-size: 12px; font-weight: 700; cursor: pointer; font-family: 'Inter', sans-serif; }
+.rev-btn:active { transform: scale(0.98); }
+.rev-approve { background: var(--primary); color: white; }
+.rev-approve:hover { background: var(--primary-dark); }
+.rev-reject  { background: var(--error-light); color: var(--error); border: 1.5px solid rgba(255,86,48,0.25); }
+.rev-reject:hover { background: rgba(255,86,48,0.12); }
+
+/* FW factor */
+.fw-f { background: var(--bg); border-radius: 6px; padding: 9px 11px; border-left: 3px solid var(--purple); margin-bottom: 6px; }
+.fw-f-row { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; margin-bottom: 3px; }
+.fw-f-name { font-size: 12px; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+.fw-badge { font-size: 8px; font-weight: 700; padding: 2px 5px; border-radius: 3px; }
+.fw-dom { background: rgba(118,53,220,0.1); color: var(--purple); }
+.mat-compliant { background: rgba(0,108,156,0.1); color: var(--info); }
+.mat-leading   { background: rgba(255,171,0,0.1); color: #92400e; }
+.mat-resilient { background: rgba(0,171,85,0.1); color: var(--primary-dark); }
+
+/* Action button */
+.act-btn { padding: 9px 16px; border-radius: 7px; border: none; font-size: 12px; font-weight: 700; cursor: pointer; font-family: 'Inter', sans-serif; display: inline-flex; align-items: center; gap: 6px; }
+.act-btn:active { transform: scale(0.98); }
+.btn-dark { background: var(--hiviz-dark); color: white; }
+.btn-dark:hover { background: #2d3748; }
+
+/* Notes */
+.info-note { background: var(--info-light); border-radius: 6px; padding: 8px 11px; font-size: 11px; color: var(--info); line-height: 1.5; border: 1px solid rgba(0,108,156,0.14); }
+.warn-note { background: rgba(255,171,0,0.08); border-radius: 6px; padding: 8px 11px; font-size: 11px; color: #92400e; line-height: 1.5; border: 1px solid rgba(255,171,0,0.2); }
+.run-row { display: flex; align-items: center; gap: 9px; padding: 10px 11px; background: var(--bg); border-radius: 6px; }
+.run-lbl { font-size: 11px; color: var(--text-secondary); }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="hdr">
+  <div class="hdr-left">
+    <div class="hdr-logo">Hiviz · Forge Works</div>
+    <div class="hdr-title">Pipeline Explorer</div>
+    <div class="hdr-sub">Observation → Critical Insight. Live AI. All prompts fetched from spec. Left panel shows the full data model — fields fill in real-time as each job runs.</div>
+    <div class="legend">
+      <div class="leg-item"><div class="leg-dot" style="background:var(--primary);"></div>Injected at runtime</div>
+      <div class="leg-item"><div class="leg-dot" style="background:var(--warning);"></div>Values inline in prompt</div>
+      <div class="leg-item"><div class="leg-dot" style="background:var(--error);"></div>Referenced in spec — not yet injected</div>
+    </div>
+  </div>
+  <div class="hdr-right">
+    <div class="api-row">
+      <input type="password" class="api-input" id="apiKeyInput" placeholder="sk-ant-..." />
+      <button class="api-btn" onclick="saveApiKey()">Save</button>
+    </div>
+    <div class="api-status" id="apiStatus">Add API key to run live AI</div>
+    <button class="reset-btn" onclick="resetPipeline()">↺ Reset pipeline</button>
+  </div>
+</div>
+
+<!-- App body -->
+<div class="app">
+
+  <!-- Left: pipeline flowchart -->
+  <div class="sidebar" id="sidebar">
+    <div class="sb-heading">PIPELINE · ALL FIELDS</div>
+  </div>
+
+  <!-- Right: active stage detail -->
+  <div class="main">
+    <div class="main-inner" id="main"></div>
+  </div>
+
+</div>
+
+<script src="../simulators/hiviz-prompt-loader.js"></script>
+<script>
+// ── API KEY ───────────────────────────────────────────────────────────────────
+let apiKey = localStorage.getItem('hiviz_api_key') || '';
+if (apiKey) {
+  document.getElementById('apiKeyInput').value = apiKey;
+  setApiStatus('✓ Key saved', 'ok');
+}
+function saveApiKey() {
+  const v = document.getElementById('apiKeyInput').value.trim();
+  if (!v.startsWith('sk-ant-')) { setApiStatus('Should start with sk-ant-', 'err'); return; }
+  apiKey = v; localStorage.setItem('hiviz_api_key', v); setApiStatus('✓ Key saved', 'ok');
+}
+function setApiStatus(t, cls) {
+  const el = document.getElementById('apiStatus');
+  el.textContent = t; el.className = 'api-status' + (cls ? ' ' + cls : '');
+}
+
+// ── TAXONOMY ──────────────────────────────────────────────────────────────────
+const HIGH_RISK_WORK = [
+  { id: 'hrw-1a2b3c4d-0001', label: 'Heavy Vehicle Operations' },
+  { id: 'hrw-1a2b3c4d-0002', label: 'Working at Height' },
+  { id: 'hrw-1a2b3c4d-0003', label: 'Hot Work' },
+  { id: 'hrw-1a2b3c4d-0004', label: 'Confined Space Entry' },
+  { id: 'hrw-1a2b3c4d-0005', label: 'Electrical Work' },
+  { id: 'hrw-1a2b3c4d-0006', label: 'Blasting / Explosives' },
+  { id: 'hrw-1a2b3c4d-0007', label: 'Crane / Lifting Operations' },
+  { id: 'hrw-1a2b3c4d-0008', label: 'Excavation / Ground Disturbance' },
+  { id: 'hrw-1a2b3c4d-0009', label: 'Isolation / LOTO' },
+  { id: 'hrw-1a2b3c4d-0010', label: 'Pressurised Systems' },
+  { id: 'hrw-1a2b3c4d-0011', label: 'Working Near Water' },
+  { id: 'hrw-1a2b3c4d-0012', label: 'Overhead Power Lines' },
+];
+const SAFETY_PRACTICE = [
+  { id: 'sp-2e3f4a5b-0001', label: 'Permit to Work (PTW)' },
+  { id: 'sp-2e3f4a5b-0002', label: 'Safe Work Method Statement (SWMS)' },
+  { id: 'sp-2e3f4a5b-0003', label: 'Job Safety Analysis (JSA)' },
+  { id: 'sp-2e3f4a5b-0004', label: 'Take 5 / Pre-task Check' },
+  { id: 'sp-2e3f4a5b-0005', label: 'Toolbox Talk' },
+  { id: 'sp-2e3f4a5b-0006', label: 'Stop Work Authority' },
+  { id: 'sp-2e3f4a5b-0007', label: 'Lock Out Tag Out (LOTO)' },
+  { id: 'sp-2e3f4a5b-0008', label: 'Last Minute Risk Assessment (LMRA)' },
+  { id: 'sp-2e3f4a5b-0009', label: 'Management of Change (MOC)' },
+  { id: 'sp-2e3f4a5b-0010', label: 'Emergency Response Plan (ERP)' },
+  { id: 'sp-2e3f4a5b-0011', label: 'Fatigue Management' },
+  { id: 'sp-2e3f4a5b-0012', label: 'Safety Observation / Inspection' },
+];
+
+// ── STAGE DEFINITIONS ────────────────────────────────────────────────────────
+const STAGES = [
+  { id: 'capture',  n:1, label:'Capture',     job:'capture.observation',       side:'CLIENT', spec:'specs/features/OBSERVATION-CAPTURE.md' },
+  { id: 'enrich',   n:2, label:'Enrich',      job:'observation.enrich',        side:'SERVER', spec:'specs/features/OBSERVATION-CAPTURE.md' },
+  { id: 'route',    n:3, label:'Route',       job:'routing decision',          side:'SYSTEM', spec:'specs/globals/signal-type-taxonomy.md' },
+  { id: 'insight',  n:4, label:'Insight Gen', job:'critical_insight.generate', side:'SERVER', spec:'specs/features/CRITICAL-INSIGHT.md' },
+  { id: 'review',   n:5, label:'Review Gate', job:'human review gate',         side:'HUMAN',  spec:'specs/features/CRITICAL-INSIGHT.md' },
+  { id: 'classify', n:6, label:'FW Classify', job:'fw_classify',               side:'SERVER', spec:'specs/globals/fw-classify-job.md' },
+];
+
+const SIDE_CLS = { CLIENT:'sc-client', SERVER:'sc-server', SYSTEM:'sc-system', HUMAN:'sc-human' };
+const CARD_SIDE_CLS = { CLIENT:'badge-client', SERVER:'badge-server', SYSTEM:'badge-system', HUMAN:'badge-human' };
+
+const STAGE_REFS = {
+  capture: [
+    { label:'signal-type-taxonomy.md', cls:'rp-inline',    tip:'Enum values inline in prompt' },
+    { label:'energy-type-taxonomy.md', cls:'rp-inline',    tip:'Enum values inline in prompt' },
+    { label:'barrier-assessment-values.md', cls:'rp-inline', tip:'Enum values inline in prompt' },
+    { label:'ai-output-standards.md', cls:'rp-spec-only',  tip:'Referenced in spec — not injected' },
+    { label:'anonymisation-rules.md', cls:'rp-spec-only',  tip:'Referenced in spec — not injected' },
+    { label:'fw-map-blueprint.md',    cls:'rp-inline',     tip:'15 factor names inline as fw_factor_hint validation' },
+  ],
+  enrich: [
+    { label:'HIGH_RISK_WORK',         cls:'rp-connected',  tip:'Injected at runtime from DB — sim uses fixture array' },
+    { label:'SAFETY_PRACTICE',        cls:'rp-connected',  tip:'Injected at runtime from DB — sim uses fixture array' },
+    { label:'signal-type-taxonomy.md',cls:'rp-inline',     tip:'Enum values inline in prompt' },
+    { label:'energy-type-taxonomy.md',cls:'rp-inline',     tip:'Enum values inline — incl. energy_release_potential' },
+    { label:'barrier-assessment-values.md', cls:'rp-inline', tip:'Enum values inline in prompt' },
+    { label:'ai-output-standards.md', cls:'rp-spec-only',  tip:'Referenced in spec — not injected' },
+    { label:'anonymisation-rules.md', cls:'rp-spec-only',  tip:'Not injected — PII flagging relies on AI output field' },
+  ],
+  route: [],
+  insight: [
+    { label:'ai-output-standards.md',  cls:'rp-spec-only', tip:'Referenced in spec — not injected' },
+    { label:'anonymisation-rules.md',  cls:'rp-spec-only', tip:'Obs text should be scrubbed per spec — not done in sim' },
+    { label:'energy-type-taxonomy.md', cls:'rp-inline',    tip:'energy_release_potential values referenced in prompt note' },
+  ],
+  review: [],
+  classify: [
+    { label:'fw-map-blueprint.md', cls:'rp-connected', tip:'Injected in full at runtime — only prompt in system that receives complete Blueprint' },
+    { label:'ai-output-standards.md', cls:'rp-spec-only', tip:'Referenced in spec — not injected' },
+  ],
+};
+
+// ── PROMPTS ───────────────────────────────────────────────────────────────────
+let PROMPTS = {};
+let promptsReady = false;
+
+async function fetchGlobal(name) {
+  const r = await fetch('/specs/globals/' + name + '.md');
+  if (!r.ok) throw new Error('Could not fetch globals/' + name + '.md — HTTP ' + r.status);
+  const txt = await r.text();
+  if (txt.trim().startsWith('<')) throw new Error('Got HTML for globals/' + name + '.md — not served correctly');
+  return txt;
+}
+
+async function initPrompts() {
+  try {
+    const [featureSpecs, fwClassifyMd, blueprintMd] = await Promise.all([
+      loadSimPrompts(['OBSERVATION-CAPTURE', 'CRITICAL-INSIGHT']),
+      fetchGlobal('fw-classify-job'),
+      fetchGlobal('fw-map-blueprint'),
+    ]);
+    PROMPTS.captureSystem  = featureSpecs['OBSERVATION-CAPTURE']['CANONICAL-SYSTEM-PROMPT-STAGE-1'];
+    PROMPTS.enrichSystem   = featureSpecs['OBSERVATION-CAPTURE']['CANONICAL-SYSTEM-PROMPT-STAGE-2'];
+    PROMPTS.insightSystem  = featureSpecs['CRITICAL-INSIGHT']['CANONICAL-SYSTEM-PROMPT-STAGE-1'];
+    PROMPTS.insightUserTpl = featureSpecs['CRITICAL-INSIGHT']['CANONICAL-USER-PROMPT-STAGE-1-CRITICAL-OBSERVATION'];
+    PROMPTS.fwBaseSystem   = extractSection(fwClassifyMd, 'CANONICAL-FW-CLASSIFY-BASE-SYSTEM-PROMPT');
+    PROMPTS.fwUserTpl      = extractSection(fwClassifyMd, 'CANONICAL-FW-CLASSIFY-USER-PROMPT-INSIGHT');
+    PROMPTS.blueprint      = blueprintMd;
+    if (!PROMPTS.fwBaseSystem) throw new Error('CANONICAL-FW-CLASSIFY-BASE-SYSTEM-PROMPT not found in fw-classify-job.md');
+    const placeholder = '[Full per-factor definitions injected from globals/fw-map-blueprint.md at runtime]';
+    PROMPTS.fwSystem = PROMPTS.fwBaseSystem.replace(placeholder, blueprintMd);
+    promptsReady = true;
+    console.log('[pipeline-explorer] All prompts loaded');
+    renderAll();
+  } catch (err) {
+    console.error('[pipeline-explorer] Prompt load failed:', err);
+    setApiStatus('⚠ Spec load failed — ' + err.message, 'err');
+    promptsReady = false;
+    renderAll();
+  }
+}
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let S = {
+  stages: { capture:'active', enrich:'pending', route:'pending', insight:'pending', review:'pending', classify:'pending' },
+  captureData: null, enrichData: null, routeDecision: null,
+  insightData: null, reviewDecision: null, classifyData: null,
+  chatMsgs: [],    // { sender, text, qrs }
+  chatHistory: [], // for API
+  chatDone: false,
+};
+
+function resetPipeline() {
+  S = {
+    stages: { capture:'active', enrich:'pending', route:'pending', insight:'pending', review:'pending', classify:'pending' },
+    captureData:null, enrichData:null, routeDecision:null,
+    insightData:null, reviewDecision:null, classifyData:null,
+    chatMsgs:[], chatHistory:[], chatDone:false,
+  };
+  renderAll();
+}
+
+// ── RENDER ────────────────────────────────────────────────────────────────────
+function renderAll() {
+  renderSidebar();
+  renderMain();
+}
+
+// ── SIDEBAR ───────────────────────────────────────────────────────────────────
+function renderSidebar() {
+  const sb = document.getElementById('sidebar');
+  sb.innerHTML = '<div class="sb-heading">PIPELINE · ALL FIELDS</div>';
+
+  STAGES.forEach((stage, i) => {
+    const st = S.stages[stage.id];
+    const card = document.createElement('div');
+    card.className = 'sb-card ' + st;
+    card.onclick = () => scrollToStage(stage.id);
+
+    const sideCls = SIDE_CLS[stage.side] || '';
+    card.innerHTML = `
+      <div class="sb-card-hdr">
+        <div class="sb-dot"></div>
+        <div class="sb-card-label">Stage ${stage.n}</div>
+        <div class="sb-side ${sideCls}">${stage.side}</div>
+      </div>
+      <div class="sb-job">${stage.job}</div>
+      <div class="sb-fields" id="sbf-${stage.id}"></div>
+    `;
+    sb.appendChild(card);
+
+    // Populate fields for this stage
+    populateSidebarFields(card.querySelector('#sbf-' + stage.id), stage.id, st);
+
+    // Arrow between stages
+    if (i < STAGES.length - 1) {
+      const arr = document.createElement('div');
+      arr.className = 'sb-arrow';
+      arr.innerHTML = '<div class="sb-arrow-line"></div>';
+      sb.appendChild(arr);
+    }
+  });
+}
+
+function sbField(container, key, value, cls) {
+  const row = document.createElement('div');
+  row.className = 'sb-field';
+  const isFilled = value !== null && value !== undefined && value !== '—';
+  const valCls = isFilled ? 'sb-field-val filled' + (cls ? ' ' + cls : '') : 'sb-field-val';
+  row.innerHTML = `<span class="sb-field-key">${key}</span><span class="${valCls}">${escHtml(String(value || '—'))}</span>`;
+  container.appendChild(row);
+}
+
+function populateSidebarFields(container, stageId, st) {
+  const c = S.captureData;
+  const e = S.enrichData;
+  const ins = S.insightData;
+  const cls = S.classifyData;
+
+  if (stageId === 'capture') {
+    if (!c) {
+      container.innerHTML = '<div class="sb-empty">waiting for capture…</div>';
+      return;
+    }
+    sbField(container, 'what_observed', c.what_was_observed ? truncate(c.what_was_observed, 36) : '—');
+    sbField(container, 'work_type', c.work_type || '—');
+    sbField(container, 'signal_type', c.signal_type ? fmt(c.signal_type) : '—');
+    sbField(container, 'energy_type', c.energy_type ? fmt(c.energy_type) : '—');
+    sbField(container, 'stop_work', c.stop_work_called != null ? String(c.stop_work_called) : '—');
+    sbField(container, 'confidence', c.confidence || '—');
+  }
+
+  else if (stageId === 'enrich') {
+    if (!e || e._error) { container.innerHTML = '<div class="sb-empty">waiting for enrichment…</div>'; return; }
+    const conf = (v) => v != null ? Math.round(v * 100) + '%' : '';
+    sbField(container, 'signal_type', e.signal_type ? fmt(e.signal_type) + ' ' + conf(e.signal_type_confidence) : '—',
+      isPipelineDirect(e) ? 'hi-warn' : '');
+    sbField(container, 'energy_type', e.energy_type ? fmt(e.energy_type) : '—');
+    sbField(container, 'energy_release', e.energy_release_potential || '—',
+      e.energy_release_potential === 'catastrophic' ? 'hi-warn' : '');
+    sbField(container, 'barrier', e.barrier_assessment ? fmt(e.barrier_assessment) + ' ' + conf(e.barrier_confidence) : '—');
+    sbField(container, 'key_hazard', e.key_hazard ? truncate(e.key_hazard, 28) : '—', e.key_hazard ? 'hi-warn' : '');
+    sbField(container, 'stop_warranted', e.stop_work_warranted != null ? String(e.stop_work_warranted) : '—',
+      e.stop_work_warranted ? 'hi-warn' : '');
+    sbField(container, 'failure_type', e.failure_type ? fmt(e.failure_type) : '—');
+    sbField(container, 'fw_hint', e.fw_factor_hint || '—', e.fw_factor_hint ? 'hi-purple' : '');
+    sbField(container, 'enrich_conf', e.enrichment_confidence != null ? Math.round(e.enrichment_confidence * 100) + '%' : '—');
+  }
+
+  else if (stageId === 'route') {
+    if (!S.routeDecision) { container.innerHTML = '<div class="sb-empty">waiting for routing…</div>'; return; }
+    sbField(container, 'decision', S.routeDecision === 'pipeline' ? 'pipeline_direct' : 'pool',
+      S.routeDecision === 'pipeline' ? 'hi-warn' : 'hi-ok');
+    sbField(container, 'trigger_source', S.routeDecision === 'pipeline' ? 'critical_observation' : 'trend_algorithm');
+    sbField(container, 'next_job', S.routeDecision === 'pipeline' ? 'critical_insight.generate' : 'trend_accumulation',
+      S.routeDecision === 'pipeline' ? 'hi-warn' : '');
+  }
+
+  else if (stageId === 'insight') {
+    if (!ins || ins._error) { container.innerHTML = '<div class="sb-empty">waiting for insight gen…</div>'; return; }
+    sbField(container, 'pattern_summary', truncate(ins.pattern_summary || '—', 42));
+    sbField(container, 'systemic_cause', truncate(ins.likely_systemic_cause || '—', 42));
+    sbField(container, 'rec_action', truncate(ins.recommended_action || '—', 42));
+    sbField(container, 'escalate', ins.escalate_to_systemic != null ? String(ins.escalate_to_systemic) : '—');
+    sbField(container, 'cleared_toolbox', 'false (pending review)');
+  }
+
+  else if (stageId === 'review') {
+    if (!S.reviewDecision) { container.innerHTML = '<div class="sb-empty">awaiting manager action…</div>'; return; }
+    sbField(container, 'action', S.reviewDecision, S.reviewDecision === 'approved' ? 'hi-ok' : 'hi-warn');
+    sbField(container, 'cleared_toolbox', S.reviewDecision === 'approved' ? 'true' : 'false',
+      S.reviewDecision === 'approved' ? 'hi-ok' : 'hi-warn');
+  }
+
+  else if (stageId === 'classify') {
+    if (!cls || cls._error) { container.innerHTML = '<div class="sb-empty">waiting for fw_classify…</div>'; return; }
+    const items = cls.classifications || [];
+    if (!items.length) {
+      sbField(container, 'fw_factors', '[] — no factors ≥ 0.70');
+    } else {
+      items.forEach((c, i) => {
+        const conf = Math.round((c.fw_confidence || 0) * 100) + '%';
+        sbField(container, `fw_factor[${i}]`, `${c.fw_factor} · ${c.fw_domain} · ${conf}`, 'hi-purple');
+      });
+    }
+    sbField(container, 'basis', truncate(cls.fw_classification_basis || '—', 42));
+  }
+}
+
+// ── MAIN PANEL ────────────────────────────────────────────────────────────────
+function renderMain() {
+  const main = document.getElementById('main');
+  main.innerHTML = '';
+  STAGES.forEach(stage => {
+    const card = buildMainCard(stage);
+    main.appendChild(card);
+  });
+}
+
+function scrollToStage(id) {
+  const el = document.getElementById('mc-' + id);
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function buildMainCard(stage) {
+  const st = S.stages[stage.id];
+  const card = document.createElement('div');
+  card.className = 'stage-card ' + st;
+  card.id = 'mc-' + stage.id;
+
+  const sideCls = CARD_SIDE_CLS[stage.side] || '';
+  let statusBadge = '';
+  if (st === 'running')  statusBadge = '<span class="card-status cs-running">RUNNING</span>';
+  if (st === 'complete') statusBadge = '<span class="card-status cs-complete">COMPLETE</span>';
+  if (st === 'skipped')  statusBadge = '<span class="card-status cs-skipped">SKIPPED</span>';
+
+  card.innerHTML = `
+    <div class="card-hdr">
+      <span style="font-size:9px;font-weight:700;color:rgba(255,255,255,0.25);letter-spacing:1px;">STAGE ${stage.n}</span>
+      <span style="font-size:12px;font-weight:700;color:white;font-family:'JetBrains Mono',monospace;">${stage.job}</span>
+      <span class="card-side ${sideCls}" style="font-size:8px;font-weight:700;padding:2px 6px;border-radius:3px;">${stage.side}</span>
+      ${statusBadge}
+      <span class="card-spec">${stage.spec}</span>
+    </div>
+    ${buildRefsStrip(stage.id)}
+    <div class="card-body" id="cb-${stage.id}"></div>
+  `;
+
+  const body = card.querySelector('#cb-' + stage.id);
+  if (stage.id === 'capture')  populateCapture(body, st);
+  if (stage.id === 'enrich')   populateEnrich(body, st);
+  if (stage.id === 'route')    populateRoute(body, st);
+  if (stage.id === 'insight')  populateInsight(body, st);
+  if (stage.id === 'review')   populateReview(body, st);
+  if (stage.id === 'classify') populateClassify(body, st);
+  return card;
+}
+
+function buildRefsStrip(stageId) {
+  const refs = STAGE_REFS[stageId];
+  if (!refs || !refs.length) return '';
+  const pills = refs.map(r =>
+    `<span class="ref-pill ${r.cls}" title="${escHtml(r.tip)}"><span class="rp-dot"></span>${escHtml(r.label)}</span>`
+  ).join('');
+  return `<div class="refs-strip"><span class="refs-lbl">REFS</span>${pills}</div>`;
+}
+
+// ── STAGE 1: CAPTURE ──────────────────────────────────────────────────────────
+function populateCapture(body, st) {
+  if (st === 'complete' && S.captureData) {
+    renderCaptureComplete(body);
+    return;
+  }
+  // Prompt status
+  const note = document.createElement('div');
+  note.className = 'info-note';
+  note.textContent = promptsReady
+    ? '✓ System prompt loaded from specs/features/OBSERVATION-CAPTURE.md § CANONICAL-SYSTEM-PROMPT-STAGE-1. Runtime context (site, observer) appended by server.'
+    : '⚠ Spec files not loaded — serve from project root with a local HTTP server (e.g. npx serve).';
+  body.appendChild(note);
+
+  // Chat
+  const chatWrap = document.createElement('div');
+  chatWrap.className = 'chat-wrap';
+  const msgsDiv = document.createElement('div');
+  msgsDiv.className = 'chat-msgs';
+  msgsDiv.id = 'chat-msgs';
+  // Restore existing messages
+  S.chatMsgs.forEach(m => appendMsgEl(msgsDiv, m.sender, m.text, null));
+
+  const ibar = document.createElement('div');
+  ibar.className = 'chat-ibar';
+  ibar.innerHTML = `
+    <textarea class="chat-inp" id="chat-inp" placeholder="Describe what you saw…" rows="1" onkeydown="handleChatKey(event)" oninput="autoresize(this)"></textarea>
+    <button class="chat-snd" id="chat-snd" onclick="sendChat()">
+      <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>
+    </button>
+  `;
+  chatWrap.appendChild(msgsDiv);
+  chatWrap.appendChild(ibar);
+  body.appendChild(chatWrap);
+
+  if (promptsReady && PROMPTS.captureSystem) {
+    body.appendChild(makePromptToggle('View system prompt — CANONICAL-SYSTEM-PROMPT-STAGE-1', PROMPTS.captureSystem));
+  }
+
+  // Open message if no history yet
+  if (S.chatMsgs.length === 0) {
+    setTimeout(() => {
+      const openMsg = "Hey Marcus — what did you see out there?";
+      S.chatMsgs.push({ sender:'ai', text: openMsg });
+      S.chatHistory.push({ role:'assistant', content: openMsg });
+      appendMsgEl(document.getElementById('chat-msgs'), 'ai', openMsg, null);
+    }, 80);
+  }
+}
+
+function renderCaptureComplete(body) {
+  body.innerHTML = '';
+  const d = S.captureData;
+  body.appendChild(secLabel('Captured fields — Stage 1 output'));
+  const grid = document.createElement('div');
+  grid.className = 'fgrid';
+  [
+    { l:'WHAT WAS OBSERVED', v:d.what_was_observed, fw:true },
+    { l:'WORK TYPE', v:d.work_type },
+    { l:'SIGNAL TYPE HINT', v:fmt(d.signal_type), mono:true },
+    { l:'ENERGY TYPE HINT', v:fmt(d.energy_type), mono:true },
+    { l:'BARRIER HINT', v:fmt(d.barrier_assessment), mono:true },
+    { l:'FW FACTOR HINT', v:d.fw_factor_hint||'null', mono:true },
+    { l:'STOP WORK CALLED', v:String(d.stop_work_called||false) },
+    { l:'IMMEDIATE ACTION', v:d.immediate_action_taken||'None recorded' },
+    { l:'CONFIDENCE', v:d.confidence, mono:true },
+  ].forEach(f => {
+    const fi = document.createElement('div');
+    fi.className = 'fi' + (f.fw?' fw':'');
+    fi.innerHTML = `<div class="fi-lbl">${f.l}</div><div class="fi-val${f.mono?' mono':''}">${escHtml(String(f.v||'—'))}</div>`;
+    grid.appendChild(fi);
+  });
+  body.appendChild(grid);
+}
+
+function appendMsgEl(container, sender, text, qrs) {
+  const div = document.createElement('div');
+  div.className = 'msg msg-' + sender;
+  const label = sender === 'ai' ? 'Hiviz' : 'Marcus (observer)';
+  div.innerHTML = `<div class="msg-sndr">${label}</div><div class="msg-bubble">${escHtml(text)}</div>`;
+  if (qrs && qrs.length) {
+    const qrDiv = document.createElement('div');
+    qrDiv.className = 'qrs';
+    qrs.forEach(q => {
+      const chip = document.createElement('span');
+      chip.className = 'qr';
+      chip.textContent = q;
+      chip.onclick = () => {
+        const inp = document.getElementById('chat-inp');
+        if (inp) { inp.value = q; qrDiv.remove(); sendChat(); }
+      };
+      qrDiv.appendChild(chip);
+    });
+    div.appendChild(qrDiv);
+  }
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+}
+
+function addTyping() {
+  const c = document.getElementById('chat-msgs');
+  if (!c) return;
+  const d = document.createElement('div');
+  d.id = 'typing'; d.className = 'msg msg-ai';
+  d.innerHTML = '<div class="msg-sndr">Hiviz</div><div class="typing"><div class="td"></div><div class="td"></div><div class="td"></div></div>';
+  c.appendChild(d); c.scrollTop = c.scrollHeight;
+}
+function removeTyping() { const el = document.getElementById('typing'); if (el) el.remove(); }
+
+async function sendChat() {
+  if (!apiKey) { alert('Add your Anthropic API key first.'); return; }
+  if (!promptsReady) { alert('Spec files not loaded — serve from project root.'); return; }
+  const inp = document.getElementById('chat-inp');
+  const text = inp ? inp.value.trim() : '';
+  if (!text) return;
+  inp.value = ''; autoresize(inp);
+
+  S.chatMsgs.push({ sender:'user', text });
+  S.chatHistory.push({ role:'user', content: text });
+  const msgsEl = document.getElementById('chat-msgs');
+  appendMsgEl(msgsEl, 'user', text, null);
+
+  const sndBtn = document.getElementById('chat-snd');
+  if (sndBtn) sndBtn.disabled = true;
+  addTyping();
+
+  const sys = PROMPTS.captureSystem + '\n\nSite: Northgate Open Cut\nObserver: Marcus, Site Supervisor';
+
+  try {
+    const resp = await callClaude(sys, S.chatHistory, 600);
+    const reply = resp.content[0].text;
+    removeTyping();
+    if (sndBtn) sndBtn.disabled = false;
+    S.chatHistory.push({ role:'assistant', content: reply });
+
+    if (reply.includes('<summary>')) {
+      const match = reply.match(/<summary>([\s\S]*?)<\/summary>/);
+      const narrative = reply.replace(/<summary>[\s\S]*?<\/summary>/, '').trim();
+      if (narrative) {
+        S.chatMsgs.push({ sender:'ai', text: narrative });
+        appendMsgEl(msgsEl, 'ai', narrative, null);
+      }
+      if (match) {
+        try {
+          S.captureData = JSON.parse(match[1].trim());
+          S.chatDone = true;
+          S.chatMsgs.push({ sender:'ai', text:'✓ Captured. Review and submit.' });
+          appendMsgEl(msgsEl, 'ai', '✓ Captured. Review and submit.', null);
+          addSubmitBtn();
+        } catch(e) {
+          S.chatMsgs.push({ sender:'ai', text: reply });
+          appendMsgEl(msgsEl, 'ai', reply, null);
+        }
+      }
+    } else {
+      let qrs = null;
+      if (/what work|type of work|working on/i.test(reply)) qrs = HIGH_RISK_WORK.map(x => x.label).slice(0,6);
+      if (/stop.*work|work.*stop/i.test(reply)) qrs = ['Yes, I stopped the work', 'No, work continued'];
+      if (/anyone hurt|anyone injured/i.test(reply)) qrs = ['No injuries', 'First aid needed', 'Medical treatment'];
+      S.chatMsgs.push({ sender:'ai', text: reply });
+      appendMsgEl(msgsEl, 'ai', reply, qrs);
+    }
+  } catch(err) {
+    removeTyping();
+    if (sndBtn) sndBtn.disabled = false;
+    appendMsgEl(msgsEl, 'ai', 'Error: ' + err.message, null);
+  }
+}
+
+function addSubmitBtn() {
+  const body = document.getElementById('cb-capture');
+  if (!body) return;
+  const row = document.createElement('div');
+  row.style.cssText = 'display:flex;gap:8px;';
+  row.innerHTML = `<button class="act-btn btn-dark" onclick="submitCapture()" style="flex:1;justify-content:center;">
+    <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>
+    Submit → queue observation.enrich
+  </button>`;
+  body.appendChild(row);
+}
+
+function handleChatKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChat(); }
+}
+
+// ── STAGE 2: ENRICH ───────────────────────────────────────────────────────────
+function submitCapture() {
+  S.stages.capture = 'complete';
+  S.stages.enrich  = 'running';
+  renderAll();
+  setTimeout(runEnrichment, 150);
+}
+
+function buildEnrichUserPrompt() {
+  const d = S.captureData;
+  return `Observation text: "${d.what_was_observed || ''}"
+
+Work type declared by supervisor: ${d.work_type || 'not specified'}
+
+Available HIGH_RISK_WORK taxonomy:
+${JSON.stringify(HIGH_RISK_WORK, null, 2)}
+
+Available SAFETY_PRACTICE taxonomy:
+${JSON.stringify(SAFETY_PRACTICE, null, 2)}
+
+Capture-stage hints (from conversation — use to initialise confidence, not as final values):
+signal_type_hint: ${d.signal_type || null}
+energy_type_hint: ${d.energy_type || null}
+barrier_hint: ${d.barrier_assessment || null}
+fw_factor_hint: ${d.fw_factor_hint || null}
+
+Return JSON matching this exact schema:
+{
+  "inferred_high_risk_work_ids": ["hrw-id"],
+  "inferred_safety_practice_ids": ["sp-id"],
+  "signal_type": "positive_performance|weak_signal|at_risk_condition|unwanted_energy_event|barrier_failure",
+  "signal_type_confidence": 0.0,
+  "signal_type_rationale": "1 sentence — what in the text identified this signal type",
+  "energy_type": "kinetic|gravitational|electrical|thermal|chemical|pressure|noise_vibration|none",
+  "energy_type_confidence": 0.0,
+  "energy_release_potential": "catastrophic|high|moderate|low|none",
+  "barrier_assessment": "barrier_absent|barrier_failed|barrier_degraded|barrier_held|none",
+  "barrier_confidence": 0.0,
+  "barrier_rationale": "1 sentence — what in the text identified this barrier state",
+  "failure_type": "systemic|behavioural|environmental|unclear",
+  "key_hazard": "short plain-language string",
+  "key_hazard_rationale": "1 sentence — what in the text identified this hazard",
+  "stop_work_warranted": true,
+  "stop_work_warranted_rationale": "1 sentence — why or why not",
+  "ai_anonymisation_flags": [],
+  "fw_factor_hint": "single FW Map factor name if strongly suggested — else null",
+  "context_questions_needed": false,
+  "context_question": null,
+  "enrichment_confidence": 0.0
+}`;
+}
+
+async function runEnrichment() {
+  try {
+    const resp = await callClaude(PROMPTS.enrichSystem, [{ role:'user', content: buildEnrichUserPrompt() }], 1000);
+    const raw = resp.content[0].text.replace(/```json|```/g,'').trim();
+    S.enrichData = JSON.parse(raw);
+    S.stages.enrich = 'complete';
+    evaluateRoute();
+    renderAll();
+  } catch(err) {
+    S.enrichData = { _error: err.message };
+    S.stages.enrich = 'complete';
+    renderAll();
+  }
+}
+
+function populateEnrich(body, st) {
+  if (st === 'pending') { body.innerHTML = '<div style="font-size:11px;color:var(--text-disabled);">Waiting for Stage 1 to complete.</div>'; return; }
+  if (st === 'running') {
+    body.appendChild(runRow('observation.enrich — server-side BullMQ job — calling AI…'));
+    body.appendChild(noteEl('info', 'Loading system prompt from specs/features/OBSERVATION-CAPTURE.md § CANONICAL-SYSTEM-PROMPT-STAGE-2'));
+    return;
+  }
+  if (!S.enrichData) return;
+  const e = S.enrichData;
+  if (e._error) { body.appendChild(noteEl('warn', 'Enrichment failed: ' + e._error)); return; }
+
+  // Input
+  body.appendChild(secLabel('Inputs'));
+  const inGrid = document.createElement('div');
+  inGrid.className = 'fgrid';
+  const c = S.captureData || {};
+  [
+    { l:'OBSERVATION TEXT', v:c.what_was_observed, fw:true },
+    { l:'WORK TYPE', v:c.work_type },
+    { l:'HIGH_RISK_WORK', v:HIGH_RISK_WORK.length + ' records (runtime)' },
+    { l:'SAFETY_PRACTICE', v:SAFETY_PRACTICE.length + ' records (runtime)' },
+    { l:'SIGNAL HINT', v:fmt(c.signal_type), mono:true },
+    { l:'ENERGY HINT', v:fmt(c.energy_type), mono:true },
+  ].forEach(f => {
+    const fi = document.createElement('div');
+    fi.className = 'fi' + (f.fw?' fw':'');
+    fi.innerHTML = `<div class="fi-lbl">${f.l}</div><div class="fi-val${f.mono?' mono':''}">${escHtml(String(f.v||'—'))}</div>`;
+    inGrid.appendChild(fi);
+  });
+  body.appendChild(inGrid);
+
+  // Taxonomy resolved
+  const hwL = (e.inferred_high_risk_work_ids||[]).map(id=>{const m=HIGH_RISK_WORK.find(x=>x.id===id);return m?m.label:id;});
+  const spL = (e.inferred_safety_practice_ids||[]).map(id=>{const m=SAFETY_PRACTICE.find(x=>x.id===id);return m?m.label:id;});
+  const allTax = [...hwL, ...spL];
+  if (allTax.length) {
+    const taxFi = document.createElement('div');
+    taxFi.className = 'fi fw';
+    taxFi.innerHTML = `<div class="fi-lbl">INFERRED TAXONOMY</div><div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:4px;">${allTax.map(l=>`<span style="font-size:10px;font-weight:600;background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:2px 7px;">${escHtml(l)}</span>`).join('')}</div>`;
+    body.appendChild(taxFi);
+  }
+
+  // Output
+  body.appendChild(secLabel('Enrichment output'));
+  const outGrid = document.createElement('div');
+  outGrid.className = 'fgrid';
+
+  outGrid.appendChild(makeFI('SIGNAL TYPE', `${fmt(e.signal_type)} ${confBadge(e.signal_type_confidence)}`, e.signal_type_rationale, isPipelineDirect(e)?'hi-warn':''));
+  outGrid.appendChild(makeFI('ENERGY TYPE', `${fmt(e.energy_type)} ${confBadge(e.energy_type_confidence)}`, null));
+  if (e.energy_release_potential && e.energy_release_potential !== 'none') {
+    outGrid.appendChild(makeFI('ENERGY RELEASE POTENTIAL', e.energy_release_potential, 'AI-derived from energy type + work type context — not collected in capture', e.energy_release_potential==='catastrophic'?'hi-warn':''));
+  }
+  outGrid.appendChild(makeFI('BARRIER ASSESSMENT', `${fmt(e.barrier_assessment)} ${confBadge(e.barrier_confidence)}`, e.barrier_rationale));
+  if (e.key_hazard) outGrid.appendChild(makeFI('KEY HAZARD', e.key_hazard, e.key_hazard_rationale, 'hi-warn'));
+  if (e.stop_work_warranted) outGrid.appendChild(makeFI('STOP WORK WARRANTED', 'Yes', e.stop_work_warranted_rationale, 'hi-warn'));
+  if (e.failure_type) outGrid.appendChild(makeFI('FAILURE TYPE', fmt(e.failure_type), null));
+  if (e.fw_factor_hint) outGrid.appendChild(makeFI('FW FACTOR HINT', e.fw_factor_hint, 'Lightweight pointer — fw_classify runs separately on richer context', 'hi-purple'));
+  if (e.ai_anonymisation_flags && e.ai_anonymisation_flags.length) outGrid.appendChild(makeFI('PII FLAGS', e.ai_anonymisation_flags.join(', '), 'Phrases flagged for scrubbing before downstream prompts', 'hi-warn'));
+  if (e.context_questions_needed && e.context_question) outGrid.appendChild(makeFI('CONTEXT REQUEST', e.context_question, 'observation.context_request — notification queued to observer (Stage 3)'));
+  outGrid.appendChild(makeFI('ENRICHMENT CONFIDENCE', confBadge(e.enrichment_confidence) + ' ' + Math.round((e.enrichment_confidence||0)*100) + '%', null));
+
+  body.appendChild(outGrid);
+  body.appendChild(makePromptToggle('System prompt — CANONICAL-SYSTEM-PROMPT-STAGE-2', PROMPTS.enrichSystem));
+  body.appendChild(makePromptToggle('User prompt (resolved)', buildEnrichUserPrompt()));
+}
+
+// ── STAGE 3: ROUTE ────────────────────────────────────────────────────────────
+function isPipelineDirect(e) {
+  return e && (e.signal_type==='barrier_failure'||e.signal_type==='unwanted_energy_event') && (e.signal_type_confidence||0)>=0.70;
+}
+
+function evaluateRoute() {
+  if (!S.enrichData || S.enrichData._error) { S.routeDecision = 'error'; return; }
+  S.routeDecision = isPipelineDirect(S.enrichData) ? 'pipeline' : 'pool';
+  S.stages.route = 'complete';
+  if (S.routeDecision === 'pipeline') {
+    S.stages.insight = 'running';
+    setTimeout(runInsightGeneration, 250);
+  } else {
+    S.stages.insight = 'skipped';
+    S.stages.review  = 'skipped';
+    S.stages.classify = 'skipped';
+  }
+}
+
+function populateRoute(body, st) {
+  if (st === 'pending') { body.innerHTML = '<div style="font-size:11px;color:var(--text-disabled);">Waiting for enrichment.</div>'; return; }
+  if (!S.enrichData || !S.routeDecision) return;
+  const e = S.enrichData;
+  const isDirect = S.routeDecision === 'pipeline';
+  const card = document.createElement('div');
+  card.className = 'route-card ' + (isDirect ? 'direct' : 'pool');
+  card.innerHTML = `
+    <div class="route-title">${isDirect ? '⚡ PIPELINE DIRECT — critical_insight.generate queued' : '○ POOL — added to trend accumulation'}</div>
+    <div class="route-rule">signal_type = "${e.signal_type || '—'}"
+signal_type_confidence = ${e.signal_type_confidence || 0}
+Threshold: >= 0.70 AND signal_type IN (barrier_failure, unwanted_energy_event)</div>
+    <div class="route-out">${isDirect
+      ? 'Condition met. Single observation is sufficient — no trend threshold required. Queuing critical_insight.generate with trigger_source = critical_observation. Source: specs/globals/signal-type-taxonomy.md'
+      : 'Condition not met. Observation added to pool. Trend detection algorithm runs on schedule. Pipeline ends here for this observation.'}</div>`;
+  body.appendChild(card);
+  if (!isDirect) {
+    const tip = document.createElement('div');
+    tip.className = 'info-note';
+    tip.style.marginTop = '8px';
+    tip.textContent = 'To see the full pipeline, try an observation that describes a barrier failure or uncontrolled energy event — e.g. "The excavator reversed without a confirmed spotter in position."';
+    body.appendChild(tip);
+  }
+}
+
+// ── STAGE 4: INSIGHT GENERATION ───────────────────────────────────────────────
+function buildInsightUserPrompt() {
+  const e = S.enrichData; const c = S.captureData;
+  let tpl = PROMPTS.insightUserTpl || '';
+  return tpl
+    .replace('{{work_type_label}}', c.work_type||'not specified')
+    .replace('{{worksite_name}}', 'Northgate Open Cut')
+    .replace('{{signal_type}}', e.signal_type||'')
+    .replace('{{energy_type}}', e.energy_type||'')
+    .replace('{{energy_release_potential}}', e.energy_release_potential||'none')
+    .replace('{{barrier_assessment}}', e.barrier_assessment||'')
+    .replace('{{key_hazard}}', e.key_hazard||'')
+    .replace('{{key_hazard_rationale}}', e.key_hazard_rationale||'')
+    .replace('{{stop_work_warranted}}', String(e.stop_work_warranted||false))
+    .replace('{{stop_work_called}}', String(c.stop_work_called||false))
+    .replace('{{what_was_observed}}', c.what_was_observed||'');
+}
+
+async function runInsightGeneration() {
+  try {
+    const resp = await callClaude(PROMPTS.insightSystem, [{ role:'user', content: buildInsightUserPrompt() }], 1000);
+    const raw = resp.content[0].text.replace(/```json|```/g,'').trim();
+    S.insightData = JSON.parse(raw);
+    S.stages.insight = 'complete';
+    S.stages.review  = 'active';
+    renderAll();
+  } catch(err) {
+    S.insightData = { _error: err.message };
+    S.stages.insight = 'complete';
+    S.stages.review  = 'active';
+    renderAll();
+  }
+}
+
+function populateInsight(body, st) {
+  if (st === 'pending' || st === 'skipped') {
+    body.innerHTML = `<div style="font-size:11px;color:var(--text-disabled);">${st==='skipped'?'Not triggered — observation routed to pool.':'Waiting for routing decision.'}</div>`;
+    return;
+  }
+  if (st === 'running') {
+    body.appendChild(runRow('critical_insight.generate (critical_observation trigger) — calling AI…'));
+    body.appendChild(noteEl('info', 'Prompt: CANONICAL-USER-PROMPT-STAGE-1-CRITICAL-OBSERVATION from specs/features/CRITICAL-INSIGHT.md'));
+    return;
+  }
+  if (!S.insightData) return;
+  const ins = S.insightData;
+  if (ins._error) { body.appendChild(noteEl('warn', 'Insight generation failed: ' + ins._error)); return; }
+
+  // Inputs
+  body.appendChild(secLabel('Inputs passed to prompt'));
+  const e = S.enrichData; const c = S.captureData;
+  const inGrid = document.createElement('div');
+  inGrid.className = 'fgrid';
+  [
+    { l:'TRIGGER SOURCE', v:'critical_observation', mono:true },
+    { l:'WORK TYPE', v:c.work_type },
+    { l:'SIGNAL TYPE', v:fmt(e.signal_type), mono:true },
+    { l:'ENERGY TYPE', v:fmt(e.energy_type), mono:true },
+    { l:'ENERGY RELEASE POTENTIAL', v:e.energy_release_potential||'none', mono:true },
+    { l:'BARRIER ASSESSMENT', v:fmt(e.barrier_assessment), mono:true },
+    { l:'KEY HAZARD', v:e.key_hazard },
+    { l:'STOP WORK WARRANTED', v:String(e.stop_work_warranted) },
+    { l:'STOP WORK CALLED', v:String(c.stop_work_called||false) },
+    { l:'OBSERVATION TEXT', v:c.what_was_observed, fw:true },
+  ].forEach(f => {
+    const fi = document.createElement('div');
+    fi.className = 'fi' + (f.fw?' fw':'');
+    fi.innerHTML = `<div class="fi-lbl">${f.l}</div><div class="fi-val${f.mono?' mono':''}">${escHtml(String(f.v||'—'))}</div>`;
+    inGrid.appendChild(fi);
+  });
+  body.appendChild(inGrid);
+
+  // Output
+  body.appendChild(secLabel('AI draft insight — cleared_for_toolbox = false'));
+  const outGrid = document.createElement('div');
+  outGrid.className = 'fgrid';
+  [
+    { l:'PATTERN SUMMARY', v:ins.pattern_summary, fw:true },
+    { l:'PATTERN SUMMARY BASIS', v:ins.pattern_summary_basis, fw:true, rat:true },
+    { l:'LIKELY SYSTEMIC CAUSE', v:ins.likely_systemic_cause, fw:true },
+    { l:'CAUSE RATIONALE', v:ins.likely_systemic_cause_rationale, fw:true, rat:true },
+    { l:'RECOMMENDED ACTION', v:ins.recommended_action, fw:true },
+    { l:'ACTION RATIONALE', v:ins.recommended_action_rationale, fw:true, rat:true },
+    { l:'TOOLBOX NARRATIVE', v:ins.toolbox_narrative, fw:true },
+    { l:'ESCALATE TO SYSTEMIC', v:String(ins.escalate_to_systemic) },
+    { l:'ESCALATION RATIONALE', v:ins.escalation_rationale||'null' },
+  ].forEach(f => {
+    const fi = document.createElement('div');
+    fi.className = 'fi' + (f.fw?' fw':'');
+    fi.innerHTML = `<div class="fi-lbl">${f.l}</div><div class="${f.rat?'fi-rat':'fi-val'}">${escHtml(String(f.v||'—'))}</div>`;
+    outGrid.appendChild(fi);
+  });
+  body.appendChild(outGrid);
+  body.appendChild(makePromptToggle('System prompt — CANONICAL-SYSTEM-PROMPT-STAGE-1', PROMPTS.insightSystem));
+  body.appendChild(makePromptToggle('User prompt (resolved) — CANONICAL-USER-PROMPT-STAGE-1-CRITICAL-OBSERVATION', buildInsightUserPrompt()));
+}
+
+// ── STAGE 5: REVIEW ───────────────────────────────────────────────────────────
+function populateReview(body, st) {
+  if (st === 'pending' || st === 'skipped') {
+    body.innerHTML = `<div style="font-size:11px;color:var(--text-disabled);">${st==='skipped'?'Not triggered.':'Waiting for insight generation.'}</div>`;
+    return;
+  }
+  if (!S.insightData || S.insightData._error) { body.appendChild(noteEl('warn', 'Cannot review — insight generation failed.')); return; }
+
+  if (S.reviewDecision) {
+    const fi = document.createElement('div');
+    fi.className = 'fi fw ' + (S.reviewDecision==='approved'?'hi-pos':'hi-warn');
+    fi.innerHTML = `<div class="fi-lbl">REVIEW DECISION</div><div class="fi-val">${S.reviewDecision==='approved'?'✓ Approved — cleared_for_toolbox = true — fw_classify queued':'✗ Rejected — cleared_for_toolbox remains false — pipeline ends'}</div>`;
+    body.appendChild(fi);
+    return;
+  }
+
+  const ins = S.insightData;
+  body.appendChild(noteEl('info', 'Human gate — safety manager must act before cleared_for_toolbox is set. On approval, fw_classify queues immediately. On rejection, status → archived, no further jobs queue.'));
+
+  // Preview
+  body.appendChild(secLabel('Insight draft for review'));
+  const prev = document.createElement('div');
+  prev.className = 'fgrid';
+  [
+    { l:'PATTERN SUMMARY', v:ins.pattern_summary, fw:true },
+    { l:'LIKELY SYSTEMIC CAUSE', v:ins.likely_systemic_cause, fw:true },
+    { l:'RECOMMENDED ACTION', v:ins.recommended_action, fw:true },
+    { l:'TOOLBOX NARRATIVE', v:ins.toolbox_narrative, fw:true },
+    { l:'ESCALATE TO SYSTEMIC', v:String(ins.escalate_to_systemic) },
+  ].forEach(f => {
+    const fi = document.createElement('div');
+    fi.className = 'fi' + (f.fw?' fw':'');
+    fi.innerHTML = `<div class="fi-lbl">${f.l}</div><div class="fi-val">${escHtml(String(f.v||'—'))}</div>`;
+    prev.appendChild(fi);
+  });
+  body.appendChild(prev);
+
+  const btns = document.createElement('div');
+  btns.className = 'rev-btns';
+  btns.innerHTML = `
+    <button class="rev-btn rev-approve" onclick="handleReview('approved')">Approve — cleared_for_toolbox = true</button>
+    <button class="rev-btn rev-reject"  onclick="handleReview('rejected')">Reject — archive</button>
+  `;
+  body.appendChild(btns);
+}
+
+function handleReview(decision) {
+  S.reviewDecision = decision;
+  S.stages.review = 'complete';
+  if (decision === 'approved') {
+    S.stages.classify = 'running';
+    renderAll();
+    setTimeout(runFWClassify, 200);
+  } else {
+    S.stages.classify = 'skipped';
+    renderAll();
+  }
+}
+
+// ── STAGE 6: FW CLASSIFY ─────────────────────────────────────────────────────
+function buildFWUserPrompt() {
+  const ins = S.insightData; const c = S.captureData;
+  let tpl = PROMPTS.fwUserTpl || '';
+  tpl = tpl
+    .replace('{{work_type_label}}', c.work_type||'not specified')
+    .replace('{{trigger_source}}', 'critical_observation')
+    .replace('{{pattern_summary}}', ins.pattern_summary||'')
+    .replace('{{likely_systemic_cause}}', ins.likely_systemic_cause||'')
+    .replace('{{toolbox_narrative}}', ins.toolbox_narrative||'');
+  tpl = tpl.replace(/\{\{#if trigger_source == 'solo_critical'\}\}[\s\S]*?\{\{\/if\}\}/g, '');
+  return tpl;
+}
+
+async function runFWClassify() {
+  try {
+    const resp = await callClaude(PROMPTS.fwSystem, [{ role:'user', content: buildFWUserPrompt() }], 2000);
+    const raw = resp.content[0].text.replace(/```json|```/g,'').trim();
+    S.classifyData = JSON.parse(raw);
+    S.stages.classify = 'complete';
+    renderAll();
+  } catch(err) {
+    S.classifyData = { _error: err.message };
+    S.stages.classify = 'complete';
+    renderAll();
+  }
+}
+
+function populateClassify(body, st) {
+  if (st === 'pending' || st === 'skipped') {
+    body.innerHTML = `<div style="font-size:11px;color:var(--text-disabled);">${st==='skipped'?'Not triggered.':'Waiting for approval.'}</div>`;
+    return;
+  }
+  if (st === 'running') {
+    body.appendChild(runRow('fw_classify (insight path) — Blueprint injected in full — calling AI…'));
+    body.appendChild(noteEl('info', 'System prompt: CANONICAL-FW-CLASSIFY-BASE-SYSTEM-PROMPT + full specs/globals/fw-map-blueprint.md injected at runtime. This is the only prompt in the system that receives the complete Blueprint.'));
+    return;
+  }
+  if (!S.classifyData) return;
+  const r = S.classifyData;
+  if (r._error) { body.appendChild(noteEl('warn', 'FW classification failed: ' + r._error)); return; }
+
+  // Inputs
+  body.appendChild(secLabel('Inputs'));
+  const ins = S.insightData; const c = S.captureData;
+  const inGrid = document.createElement('div');
+  inGrid.className = 'fgrid';
+  [
+    { l:'SOURCE TYPE', v:'critical_insight', mono:true },
+    { l:'TRIGGER SOURCE', v:'critical_observation', mono:true },
+    { l:'WORK TYPE', v:c.work_type },
+    { l:'fw-map-blueprint.md', v:'✓ Injected in full at runtime', cls:'hi-pos' },
+    { l:'PATTERN SUMMARY', v:ins.pattern_summary, fw:true },
+    { l:'LIKELY SYSTEMIC CAUSE', v:ins.likely_systemic_cause, fw:true },
+  ].forEach(f => {
+    const fi = document.createElement('div');
+    fi.className = 'fi' + (f.fw?' fw':'') + (f.cls?' '+f.cls:'');
+    fi.innerHTML = `<div class="fi-lbl">${f.l}</div><div class="fi-val${f.mono?' mono':''}">${escHtml(String(f.v||'—'))}</div>`;
+    inGrid.appendChild(fi);
+  });
+  body.appendChild(inGrid);
+
+  // Classifications
+  body.appendChild(secLabel('FW Map® classifications'));
+  const items = r.classifications || [];
+  if (!items.length) {
+    body.appendChild(noteEl('info', 'No factors classified at ≥ 0.70 confidence. classifications = [] is a valid result — fw_classified_at set, no retry per spec.'));
+  } else {
+    items.forEach(cl => {
+      const d2 = document.createElement('div');
+      d2.className = 'fw-f';
+      const matCls = {compliant:'mat-compliant',leading:'mat-leading',resilient:'mat-resilient'}[cl.fw_maturity_signal]||'';
+      d2.innerHTML = `
+        <div class="fw-f-row">
+          <span class="fw-f-name">${escHtml(cl.fw_factor||'')}</span>
+          <span class="fw-badge fw-dom">${escHtml(cl.fw_domain||'')}</span>
+          <span class="fw-badge ${matCls}">${escHtml(cl.fw_maturity_signal||'')}</span>
+          ${confBadge(cl.fw_confidence)}
+        </div>
+        <div class="fi-rat">${escHtml(cl.fw_rationale||'')}</div>`;
+      body.appendChild(d2);
+    });
+  }
+  if (r.fw_classification_basis) {
+    const b = document.createElement('div');
+    b.className = 'fi fw';
+    b.innerHTML = `<div class="fi-lbl">CLASSIFICATION BASIS</div><div class="fi-rat">${escHtml(r.fw_classification_basis)}</div>`;
+    body.appendChild(b);
+  }
+  body.appendChild(makePromptToggle('System prompt (Base + full Blueprint — very long)', PROMPTS.fwSystem));
+  body.appendChild(makePromptToggle('User prompt (resolved)', buildFWUserPrompt()));
+}
+
+// ── API ───────────────────────────────────────────────────────────────────────
+async function callClaude(system, messages, maxTokens) {
+  const r = await fetch('https://api.anthropic.com/v1/messages', {
+    method:'POST',
+    headers:{ 'Content-Type':'application/json', 'x-api-key':apiKey, 'anthropic-version':'2023-06-01', 'anthropic-dangerous-direct-browser-access':'true' },
+    body: JSON.stringify({ model:'claude-sonnet-4-20250514', max_tokens:maxTokens, system, messages }),
+  });
+  if (!r.ok) { const err = await r.json(); throw new Error(err.error?.message||'API error '+r.status); }
+  return r.json();
+}
+
+// ── UTILS ─────────────────────────────────────────────────────────────────────
+function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function fmt(s) { return s ? String(s).replace(/_/g,' ') : '—'; }
+function truncate(s, n) { return s && s.length > n ? s.slice(0,n) + '…' : (s||''); }
+function autoresize(el) { el.style.height='auto'; el.style.height=Math.min(el.scrollHeight,72)+'px'; }
+
+function confBadge(c) {
+  if (c==null) return '';
+  const cls = c>=0.7?'cb-hi':c>=0.5?'cb-mid':'cb-lo';
+  return `<span class="cb ${cls}">${Math.round(c*100)}%</span>`;
+}
+
+function makeFI(label, valueHtml, rationale, extraCls) {
+  const fi = document.createElement('div');
+  fi.className = 'fi' + (extraCls?' '+extraCls:'');
+  fi.innerHTML = `<div class="fi-lbl">${label}</div><div class="fi-val">${valueHtml||'—'}</div>${rationale?`<div class="fi-rat">${escHtml(rationale)}</div>`:''}`;
+  return fi;
+}
+
+function secLabel(text) {
+  const d = document.createElement('div');
+  d.className = 'sec-lbl';
+  d.innerHTML = `<span>${text}</span><span class="sec-line"></span>`;
+  return d;
+}
+
+function noteEl(type, text) {
+  const d = document.createElement('div');
+  d.className = type === 'info' ? 'info-note' : 'warn-note';
+  d.textContent = text;
+  return d;
+}
+
+function runRow(text) {
+  const d = document.createElement('div');
+  d.className = 'run-row';
+  d.innerHTML = `<div class="typing"><div class="td"></div><div class="td"></div><div class="td"></div></div><span class="run-lbl">${escHtml(text)}</span>`;
+  return d;
+}
+
+function makePromptToggle(label, promptText) {
+  const wrap = document.createElement('div');
+  let open = false;
+  const tog = document.createElement('div');
+  tog.className = 'ptog';
+  tog.innerHTML = `<svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="var(--text-disabled)" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg><span class="ptog-lbl">View prompt — ${escHtml(label)}</span><span class="ptog-ico">▼</span>`;
+  const block = document.createElement('div');
+  block.className = 'pblock';
+  block.textContent = promptText || '(not loaded)';
+  tog.onclick = () => { open = !open; tog.classList.toggle('open',open); block.classList.toggle('open',open); };
+  wrap.appendChild(tog); wrap.appendChild(block);
+  return wrap;
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+renderAll();       // render immediately with empty state
+initPrompts();     // load prompts async — re-renders on completion
+</script>
+</body>
+</html>
