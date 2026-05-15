@@ -236,6 +236,7 @@ Return JSON matching this exact schema:
   "signal_type_rationale": "1 sentence — what in the text identified this signal type",
   "energy_type": "kinetic|gravitational|electrical|thermal|chemical|pressure|noise_vibration|none",
   "energy_type_confidence": 0.0,
+  "energy_release_potential": "catastrophic|high|moderate|low|none",
   "barrier_assessment": "barrier_absent|barrier_failed|barrier_degraded|barrier_held|none",
   "barrier_confidence": 0.0,
   "barrier_rationale": "1 sentence — what in the text identified this barrier state",
@@ -258,6 +259,7 @@ Note: `failure_type` is a lightweight triage signal only. FW Map® classificatio
 
 - `signal_type` must be one of the 5 enum values from `globals/signal-type-taxonomy.md`
 - `energy_type` must be one of the 8 enum values from `globals/energy-type-taxonomy.md`
+- `energy_release_potential` must be one of `catastrophic|high|moderate|low|none` — see `globals/energy-type-taxonomy.md` §Energy Release Potential. Must be `none` when `energy_type = none`. AI-derived from energy type + work type context — not passed from capture.
 - `barrier_assessment` must be one of the 5 values from `globals/barrier-assessment-values.md`
 - `signal_type_confidence`, `energy_type_confidence`, `barrier_confidence`, `enrichment_confidence` must be 0.0–1.0
 - `enrichment_confidence < 0.5`: do not store enrichment fields — set `enrichment_status = low_confidence`, queue `observation.context_request`
@@ -285,6 +287,7 @@ ai_signal_type_confidence   DECIMAL(3,2)
 ai_signal_type_rationale    TEXT
 ai_energy_type              TEXT
 ai_energy_type_confidence   DECIMAL(3,2)
+ai_energy_release_potential TEXT          -- catastrophic|high|moderate|low|none — AI-derived, not captured
 ai_barrier_assessment       TEXT
 ai_barrier_confidence       DECIMAL(3,2)
 ai_barrier_rationale        TEXT
