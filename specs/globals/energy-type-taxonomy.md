@@ -97,6 +97,32 @@ No identifiable energy type is applicable to this observation. Used for positive
 |---|---|---|
 | Observation capture conversation | `features/OBSERVATION-CAPTURE.md` | `energy_type` field in capture summary |
 | Incident capture conversation | `features/INCIDENT-CAPTURE.md` | `energy_type` field in incident summary |
-| Observation enrichment | `features/OBSERVATION-CAPTURE.md` | Classification field with confidence |
-| Critical insight generation | `features/CRITICAL-INSIGHT.md` | Context for pattern narrative |
+| Observation enrichment | `features/OBSERVATION-CAPTURE.md` | `energy_type` classification + `energy_release_potential` derived assessment |
+| Critical insight generation | `features/CRITICAL-INSIGHT.md` | Both fields passed as context for critical_observation trigger |
 | FW Map® classification | `features/CRITICAL-INSIGHT.md`, `features/INVESTIGATION.md` | Passes to `fw_classify` as context |
+
+---
+
+## Energy Release Potential
+
+`energy_release_potential` is an AI-derived assessment produced by `observation.enrich` alongside `energy_type`. It answers: *if this energy were fully released, how bad could it credibly be?*
+
+**It is not collected during the capture conversation.** The enrichment job derives it from `energy_type` + `work_type` context + observation text. Asking a supervisor to assess severity in a phone capture would introduce jargon and unreliable self-assessment — the AI can derive it from context. The one exception: if the observer uses severity language in their text ("nearly killed him", "could have been fatal"), that provides strong signal the enrichment AI will use naturally via `what_was_observed`.
+
+**When `energy_type = none`:** set `energy_release_potential = none`.
+
+### The 5 Values
+
+| Value | Definition |
+|---|---|
+| `catastrophic` | Fatality or permanent incapacitation. The credible worst case is death. |
+| `high` | Serious injury requiring hospitalisation. Potential for permanent injury. |
+| `moderate` | Medical treatment required. Restricted work or medical treatment case (MTC). |
+| `low` | First aid level injury. Minor harm. |
+| `none` | No physical energy involved — purely systemic, procedural, or behavioural observation. |
+
+### Classification guidance
+
+Assess the credible worst case for the specific energy type and work type context — not the actual outcome of this observation. A near-miss with a reversing excavator (kinetic + heavy vehicle) is `catastrophic` even if no one was hurt. A hydraulic line spray in a low-traffic area may be `high` or `moderate` depending on exposure.
+
+**Do not conflate with actual injury severity.** `energy_release_potential` is about what could happen if control were fully lost — not what did happen.

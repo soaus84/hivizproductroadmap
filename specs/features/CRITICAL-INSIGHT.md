@@ -174,6 +174,7 @@ Work type: {{work_type_label}}
 Org level: site — {{worksite_name}}
 Signal type: {{signal_type}}
 Energy type: {{energy_type}}
+Energy release potential: {{energy_release_potential}}
 Barrier assessment: {{barrier_assessment}}
 Key hazard: {{key_hazard}}
 Key hazard rationale: {{key_hazard_rationale}}
@@ -204,6 +205,8 @@ Return JSON:
 ```
 
 **Note on `escalate_to_systemic` for critical_observation:** Defaults to `false` — a critical observation indicates a control failure, not confirmed harm. The reviewer can escalate to `true` if the observation warrants systemic investigation, but it is not the presumption. Contrast with `solo_critical` (incident) which defaults to `true`.
+
+**Note on `energy_release_potential`:** AI-derived by `observation.enrich` — not collected during capture. Values: `catastrophic|high|moderate|low|none`. See `globals/energy-type-taxonomy.md` §Energy Release Potential for definitions. A `catastrophic` value combined with `barrier_failure` or `unwanted_energy_event` represents the highest-severity critical observation the pipeline can receive.
 
 ### Validation Rules
 
