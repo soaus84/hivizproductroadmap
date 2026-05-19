@@ -29,14 +29,16 @@ Both paths converge at:
 
 ## Global References Used
 
-| Global | File | Used for |
-|---|---|---|
-| Signal type taxonomy | `globals/signal-type-taxonomy.md` | `signal_type` field in auto summary (observation route only) |
-| Energy type taxonomy | `globals/energy-type-taxonomy.md` | `energy_type` field in both summaries |
-| Barrier assessment values | `globals/barrier-assessment-values.md` | `barrier_assessment` field in both summaries |
-| AI output standards | `globals/ai-output-standards.md` | JSON-only, confidence thresholds, rationale standard |
-| Anonymisation rules | `globals/anonymisation-rules.md` | PII flagging in investigation assist prompt |
-| FW Map® Blueprint | `globals/fw-map-blueprint.md` | `fw_factor_hint` validation; investigation `fw_classify` downstream |
+Injection levels differ by stage and are governed by the first-time classification rule. Stage 0 (`capture.auto`) classifies `signal_type` (observation route), `energy_type`, `barrier_assessment`, and `fw_factor_hint` for the first time. Stage 1 (`capture.incident`) classifies `energy_type`, `barrier_assessment`, and `fw_factor_hint` for the first time. Stage 3 (`investigation.assist`) consumes already-classified energy/barrier values from the upstream incident BUT independently emits its own `fw_factor_hint` in the assistance output — that hint is a first-time determination at investigation level. Every first-time determination gets **Summary**. Summary blocks are extracted at runtime — e.g. `extractSection(md, 'SUMMARY-REFERENCE — energy-type-taxonomy')`.
+
+| Global | File | Used for | Injection level |
+|---|---|---|---|
+| Signal type taxonomy | `globals/signal-type-taxonomy.md` | `signal_type` field in auto summary (observation route only) | **Summary** (Stage 0); not used in Stage 1 or Stage 3 |
+| Energy type taxonomy | `globals/energy-type-taxonomy.md` | `energy_type` field in both capture summaries | **Summary** (Stage 0, Stage 1); not used in Stage 3 |
+| Barrier assessment values | `globals/barrier-assessment-values.md` | `barrier_assessment` field in both capture summaries | **Summary** (Stage 0, Stage 1); not used in Stage 3 |
+| AI output standards | `globals/ai-output-standards.md` | JSON-only, confidence thresholds, rationale standard | Spec-only |
+| Anonymisation rules | `globals/anonymisation-rules.md` | PII flagging in investigation assist prompt | Spec-only |
+| FW Map® Blueprint | `globals/fw-map-blueprint.md` | `fw_factor_hint` selection in capture summaries and in `investigation.assist` output — all three are first-time determinations; uses the lightweight `SUMMARY-REFERENCE — fw-map-blueprint` block, not the full per-factor content. Downstream `fw_classify` (investigation path) receives the full Blueprint per `fw-classify-job.md`. | **Summary** (Stage 0, Stage 1, Stage 3) — `fw_factor_hint` is determined for the first time at each |
 
 ---
 

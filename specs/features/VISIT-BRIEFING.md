@@ -22,10 +22,12 @@ Stage 2 — Briefing consumed      (human-driven — mobile app)
 
 ## Global References Used
 
-| Global | File | Used for |
-|---|---|---|
-| AI output standards | `globals/ai-output-standards.md` | JSON-only, max tokens, audit logging |
-| FW Map® Blueprint | `globals/fw-map-blueprint.md` | `fw_factor` validation; V2 multi-factor context |
+Visit briefing generation receives `fw_factor` from upstream site classification and uses the name to phrase `fw_context`. No classification is performed here.
+
+| Global | File | Used for | Injection level |
+|---|---|---|---|
+| AI output standards | `globals/ai-output-standards.md` | JSON-only, max tokens, audit logging | Spec-only |
+| FW Map® Blueprint | `globals/fw-map-blueprint.md` | `fw_factor` validation; V2 multi-factor context | **Enum** — 15 factor names only |
 
 ---
 

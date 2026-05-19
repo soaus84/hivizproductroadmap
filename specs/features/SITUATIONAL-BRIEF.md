@@ -23,11 +23,13 @@ Stage 3 — Distribution        (to sharing scope — human-confirmed)
 
 ## Global References Used
 
-| Global | File | Used for |
-|---|---|---|
-| FW Map® Blueprint | `globals/fw-map-blueprint.md` | Factor-level framing in `what_it_means` |
-| Anonymisation rules | `globals/anonymisation-rules.md` | Source narratives scrubbed before prompt |
-| AI output standards | `globals/ai-output-standards.md` | JSON-only, max tokens, draft status |
+Brief generation receives the FW classification produced upstream (factor, domain, maturity signal, rationale) and references the factor by name in `what_it_means`. No classification is performed here.
+
+| Global | File | Used for | Injection level |
+|---|---|---|---|
+| FW Map® Blueprint | `globals/fw-map-blueprint.md` | Factor-level framing in `what_it_means` — factor name passes through from upstream classification | **Enum** — 15 factor names only |
+| Anonymisation rules | `globals/anonymisation-rules.md` | Source narratives scrubbed before prompt | Spec-only |
+| AI output standards | `globals/ai-output-standards.md` | JSON-only, max tokens, draft status | Spec-only |
 
 ---
 

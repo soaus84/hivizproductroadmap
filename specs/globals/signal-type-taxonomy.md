@@ -17,6 +17,27 @@ Version: 1.0
 
 ---
 
+## SUMMARY-REFERENCE — signal-type-taxonomy
+
+> **Runtime injection block.** Extracted by `extractSection(md, 'SUMMARY-REFERENCE — signal-type-taxonomy')` and injected into prompts that classify `signal_type` independently from raw observation text. One line per value — enough to disambiguate at classification time without copying the full definition. Do not edit this section without re-checking the full definitions below.
+
+```
+Classify signal_type as one of:
+- positive_performance: safe behaviour or effective control observed beyond mere compliance; no hazard present and nothing to correct
+- weak_signal: indirect or contextual indicator of drift — uncertainty, fatigue, unclear communication — no specific control gap yet; valuable only in aggregation
+- at_risk_condition: a specific physical condition or behaviour that increases the probability of harm; the control has not failed yet but conditions are deteriorating or below standard
+- unwanted_energy_event: uncontrolled release of energy occurred or nearly occurred (dropped object, vehicle roll, hydraulic spray); classify here when energy was actually released, even if no harm resulted
+- barrier_failure: a required control was absent, bypassed, or failed to function at the moment of the event; classify on the state of the control, not the outcome
+```
+
+Disambiguation rules:
+- `weak_signal` is early drift, not just "something minor" — if a specific control gap is described, use `at_risk_condition`
+- `at_risk_condition` is an active hazard with no energy release event
+- `barrier_failure` is about the state of the control, not the outcome — pair with `barrier_assessment` for the full picture
+- `unwanted_energy_event` is about actual or near energy release — if both the barrier failed and energy was released, classify as `unwanted_energy_event`
+
+---
+
 ## The 5 Signal Types
 
 ### `barrier_failure`

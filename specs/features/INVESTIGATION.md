@@ -26,12 +26,14 @@ Stage 1 is listed here for completeness but its prompt lives in `INCIDENT-CAPTUR
 
 ## Global References Used
 
-| Global | File | Used for |
-|---|---|---|
-| Anonymisation rules | `globals/anonymisation-rules.md` | Incident text scrubbed before all AI prompts in this feature |
-| AI output standards | `globals/ai-output-standards.md` | JSON-only, rationale standard, draft status, audit logging |
-| FW Map® Blueprint | `globals/fw-map-blueprint.md` | Injected in full into `fw_classify` system prompt at runtime |
-| Energy type taxonomy | `globals/energy-type-taxonomy.md` | Referenced in toolbox narrative context |
+Investigation jobs in this file (`investigation.generate_narrative`, Stage 3; `fw_classify` investigation path, Stage 4) consume already-confirmed framework fields and classified energy/barrier values from the upstream incident — no independent classification happens here. Taxonomy globals are injected at **Enum** level for validation and framing. The Blueprint reaches the pipeline only at Stage 4 (`fw_classify`), which loads it in **Full** per its own job spec.
+
+| Global | File | Used for | Injection level |
+|---|---|---|---|
+| Anonymisation rules | `globals/anonymisation-rules.md` | Incident text scrubbed before all AI prompts in this feature | Spec-only |
+| AI output standards | `globals/ai-output-standards.md` | JSON-only, rationale standard, draft status, audit logging | Spec-only |
+| FW Map® Blueprint | `globals/fw-map-blueprint.md` | Injected in full into `fw_classify` system prompt at runtime (Stage 4) | **Full** (Stage 4 only — via `fw-classify-job.md`) |
+| Energy type taxonomy | `globals/energy-type-taxonomy.md` | Referenced in toolbox narrative context — value passes through from upstream classification | **Enum** (Stage 3) |
 
 ---
 

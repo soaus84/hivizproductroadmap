@@ -23,9 +23,11 @@ Stage 3 — Requirement serving to consumers (query-time, no AI — other featur
 
 ## Global References Used
 
-| Global | File | Used for |
-|---|---|---|
-| AI output standards | `globals/ai-output-standards.md` | JSON-only, token limits, audit logging, retry policy |
+Document ingestion operates on raw document text and emits a new taxonomy (DocumentRequirement records) — it does not classify against signal, energy, barrier, or FW Map® taxonomies.
+
+| Global | File | Used for | Injection level |
+|---|---|---|---|
+| AI output standards | `globals/ai-output-standards.md` | JSON-only, token limits, audit logging, retry policy | Spec-only |
 
 No taxonomy globals — the ingestion prompt works from raw document text. The extracted requirements become the taxonomy for downstream prompts.
 

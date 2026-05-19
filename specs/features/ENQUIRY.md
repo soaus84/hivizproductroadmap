@@ -37,11 +37,13 @@ Stage 5 — FW classification      fw_classify (enquiry path)   (async AI — af
 
 ## Global References Used
 
-| Global | File | Used for |
-|---|---|---|
-| Anonymisation rules | `globals/anonymisation-rules.md` | Observation summaries and incident text scrubbed before Stage 1 |
-| AI output standards | `globals/ai-output-standards.md` | JSON-only, rationale standard, confidence thresholds |
-| FW Map® Blueprint | `globals/fw-map-blueprint.md` | Injected into `fw_classify` at runtime (Stage 5) |
+Enquiry AI stages (question generation, live synthesis, final summary) operate on already-classified insight/investigation context and the responses they elicit. No signal/energy/barrier classification is done by these prompts. The Blueprint reaches the pipeline only at Stage 5 (`fw_classify`), which loads it in **Full** per its own job spec.
+
+| Global | File | Used for | Injection level |
+|---|---|---|---|
+| Anonymisation rules | `globals/anonymisation-rules.md` | Observation summaries and incident text scrubbed before Stage 1 | Spec-only |
+| AI output standards | `globals/ai-output-standards.md` | JSON-only, rationale standard, confidence thresholds | Spec-only |
+| FW Map® Blueprint | `globals/fw-map-blueprint.md` | Injected into `fw_classify` at runtime (Stage 5) | **Full** (Stage 5 only — via `fw-classify-job.md`) |
 
 ---
 

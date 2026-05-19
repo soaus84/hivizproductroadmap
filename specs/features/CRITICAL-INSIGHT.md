@@ -39,13 +39,16 @@ Stage 4 — Downstream dispatch      (situational brief, CoP thread seed — see
 
 ## Global References Used
 
-| Global | File | Used for |
-|---|---|---|
-| Signal type taxonomy | `globals/signal-type-taxonomy.md` | Signal type breakdown in algorithm trigger input |
-| Barrier assessment values | `globals/barrier-assessment-values.md` | Barrier state in observation summaries passed to prompt |
-| AI output standards | `globals/ai-output-standards.md` | JSON-only, rationale standard, draft status, audit logging |
-| Anonymisation rules | `globals/anonymisation-rules.md` | Observation summaries scrubbed before Stage 1 prompt |
-| FW Map® Blueprint | `globals/fw-map-blueprint.md` | Injected in full into `fw_classify` system prompt at runtime |
+Critical insight generation receives already-classified upstream values (cluster signal type breakdown, enriched observation fields, incident severity) and uses them to frame and contextualise the generated narrative — it does not re-classify. Taxonomy globals are therefore injected at **Enum** level for validation and pass-through framing. The Blueprint reaches the pipeline only at Stage 3 (`fw_classify`), which loads it in **Full** per its own job spec — Stage 1 of this file does not receive Blueprint content.
+
+| Global | File | Used for | Injection level |
+|---|---|---|---|
+| Signal type taxonomy | `globals/signal-type-taxonomy.md` | Signal type breakdown in algorithm trigger input — values pass through, no re-classification | **Enum** (Stage 1) |
+| Energy type taxonomy | `globals/energy-type-taxonomy.md` | `energy_type` and `energy_release_potential` values consumed in critical_observation trigger user prompt to frame the toolbox narrative; not re-classified | **Enum** (Stage 1) |
+| Barrier assessment values | `globals/barrier-assessment-values.md` | Barrier state in observation summaries passed to prompt; not re-classified | **Enum** (Stage 1) |
+| AI output standards | `globals/ai-output-standards.md` | JSON-only, rationale standard, draft status, audit logging | Spec-only |
+| Anonymisation rules | `globals/anonymisation-rules.md` | Observation summaries scrubbed before Stage 1 prompt | Spec-only |
+| FW Map® Blueprint | `globals/fw-map-blueprint.md` | Injected in full into `fw_classify` (Stage 3) system prompt at runtime — Stage 1 does not receive Blueprint content | **Full** (Stage 3 only — via `fw-classify-job.md`) |
 
 ---
 

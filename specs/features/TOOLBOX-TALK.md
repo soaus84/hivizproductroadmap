@@ -26,10 +26,12 @@ Post-delivery — Atrophy score update      (algorithm, async)
 
 ## Global References Used
 
-| Global | File | Used for |
-|---|---|---|
-| Anonymisation rules | `globals/anonymisation-rules.md` | Content items scrubbed before assembly prompt |
-| AI output standards | `globals/ai-output-standards.md` | JSON-only, token limits (1500), audit logging |
+Talk assembly operates on pre-classified content (approved insights, closed investigations, enriched observations) and does not independently classify signal, energy, or barrier values. No taxonomy globals are injected into the assembly prompt.
+
+| Global | File | Used for | Injection level |
+|---|---|---|---|
+| Anonymisation rules | `globals/anonymisation-rules.md` | Content items scrubbed before assembly prompt | Spec-only |
+| AI output standards | `globals/ai-output-standards.md` | JSON-only, token limits (1500), audit logging | Spec-only |
 
 No taxonomy globals needed — this prompt operates on pre-classified content, not raw observations.
 

@@ -285,11 +285,18 @@ body::before {
 }
 .rp-dot { width: 4px; height: 4px; border-radius: 50%; flex-shrink: 0; }
 .rp-connected { background: var(--green-dim); border-color: var(--green-border); color: var(--green-text); }
+.rp-summary   { background: var(--teal-dim);  border-color: var(--teal-border);  color: var(--teal-text); }
 .rp-inline    { background: var(--amber-dim); border-color: var(--amber-border); color: var(--amber-text); }
 .rp-spec-only { background: var(--red-dim);   border-color: var(--red-border);   color: var(--red-text); }
 .rp-connected .rp-dot { background: var(--green); }
+.rp-summary   .rp-dot { background: var(--teal); }
 .rp-inline .rp-dot    { background: var(--amber); }
 .rp-spec-only .rp-dot { background: var(--red); }
+.rp-type {
+  font-weight: 700; letter-spacing: 0.5px;
+  padding: 0 3px; margin-right: 3px;
+  border-radius: 2px; background: rgba(0,0,0,0.25);
+}
 
 /* Card body */
 .cbody { padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; }
@@ -387,11 +394,12 @@ body::before {
   <div>
     <div class="hdr-logo">Hiviz · Forge Works</div>
     <div class="hdr-title">Pipeline Explorer</div>
-    <div class="hdr-sub">Observation → Critical Insight. Live AI. All prompts from spec. Left panel: capture conversation. Right: full pipeline filling in real-time.</div>
+    <div class="hdr-sub">Observation → Critical Insight. Live AI. All prompts and reference levels fetched from spec. Per-stage references reflect each feature spec's Global References Used table; injection level follows the governing rule — first-time classification gets Summary, downstream consumption gets Enum.</div>
     <div class="legend">
-      <div class="leg"><div class="leg-dot" style="background:var(--green)"></div>Injected at runtime</div>
-      <div class="leg"><div class="leg-dot" style="background:var(--amber)"></div>Values inline in prompt</div>
-      <div class="leg"><div class="leg-dot" style="background:var(--red)"></div>In spec — not yet injected</div>
+      <div class="leg"><div class="leg-dot" style="background:var(--green)"></div>FULL — entire global injected</div>
+      <div class="leg"><div class="leg-dot" style="background:var(--teal)"></div>SUMMARY — one-liner per value</div>
+      <div class="leg"><div class="leg-dot" style="background:var(--amber)"></div>ENUM — pipe-delimited values</div>
+      <div class="leg"><div class="leg-dot" style="background:var(--red)"></div>SPEC-ONLY — referenced, not injected</div>
     </div>
   </div>
   <div class="hdr-right">
@@ -467,36 +475,128 @@ const STAGES = [
 const NODE_TYPE = { CLIENT:'ai', SERVER:'ai', SYSTEM:'system', HUMAN:'human' };
 const NUM_BADGE = { CLIENT:'sn-ai', SERVER:'sn-ai', SYSTEM:'sn-sys', HUMAN:'sn-hum' };
 
-const STAGE_REFS = {
-  capture: [
-    { label:'signal-type-taxonomy.md',    cls:'rp-inline',    tip:'Enum values inline in prompt' },
-    { label:'energy-type-taxonomy.md',    cls:'rp-inline',    tip:'Enum values inline in prompt' },
-    { label:'barrier-assessment-values.md', cls:'rp-inline', tip:'Enum values inline in prompt' },
-    { label:'ai-output-standards.md',     cls:'rp-spec-only', tip:'Referenced in spec — not injected' },
-    { label:'anonymisation-rules.md',     cls:'rp-spec-only', tip:'Referenced in spec — not injected' },
-    { label:'fw-map-blueprint.md',        cls:'rp-inline',    tip:'15 factor names inline as fw_factor_hint validation' },
-  ],
-  enrich: [
-    { label:'HIGH_RISK_WORK',             cls:'rp-connected', tip:'Injected at runtime from DB — sim uses fixture array' },
-    { label:'SAFETY_PRACTICE',            cls:'rp-connected', tip:'Injected at runtime from DB — sim uses fixture array' },
-    { label:'signal-type-taxonomy.md',    cls:'rp-inline',    tip:'Enum values inline in prompt' },
-    { label:'energy-type-taxonomy.md',    cls:'rp-inline',    tip:'Enum values inline — incl. energy_release_potential' },
-    { label:'barrier-assessment-values.md', cls:'rp-inline', tip:'Enum values inline in prompt' },
-    { label:'ai-output-standards.md',     cls:'rp-spec-only', tip:'Referenced in spec — not injected' },
-    { label:'anonymisation-rules.md',     cls:'rp-spec-only', tip:'Not injected — PII flagging relies on AI output field' },
-  ],
-  route: [],
-  insight: [
-    { label:'ai-output-standards.md',    cls:'rp-spec-only', tip:'Referenced in spec — not injected' },
-    { label:'anonymisation-rules.md',    cls:'rp-spec-only', tip:'Obs text should be scrubbed per spec — not done in sim' },
-    { label:'energy-type-taxonomy.md',   cls:'rp-inline',    tip:'energy_release_potential values referenced in prompt note' },
-  ],
-  review: [],
-  classify: [
-    { label:'fw-map-blueprint.md',       cls:'rp-connected', tip:'Injected in full at runtime — only prompt to receive complete Blueprint' },
-    { label:'ai-output-standards.md',    cls:'rp-spec-only', tip:'Referenced in spec — not injected' },
-  ],
+// Each AI stage on the canvas maps to a (feature spec file, stage label) pair.
+// The stage label is matched against the Injection level cell text in the spec's
+// Global References Used table — rows that mention this stage (or are unconditional)
+// apply here. Non-AI stages (route, review) carry no refs strip.
+const STAGE_SPEC = {
+  capture:  { spec: 'OBSERVATION-CAPTURE', stageLabel: 'Stage 1' },
+  enrich:   { spec: 'OBSERVATION-CAPTURE', stageLabel: 'Stage 2' },
+  insight:  { spec: 'CRITICAL-INSIGHT',    stageLabel: 'Stage 1' },
+  // fw_classify lives in globals/fw-classify-job.md, not in features/. Its
+  // reference profile is canonical and minimal — Full Blueprint + spec-only
+  // standards — so it is sourced directly rather than parsed from a table.
+  classify: { spec: '__fw_classify__',     stageLabel: 'fw_classify' },
 };
+
+// Parsed Global References Used tables, keyed by feature spec basename.
+// Populated by initReferences() at startup from /specs/features/*.md.
+const REFS = { byFeature: {}, ready: false, error: null };
+
+function refTypeClass(type) {
+  switch ((type || '').toUpperCase()) {
+    case 'FULL':      return 'rp-connected';
+    case 'SUMMARY':   return 'rp-summary';
+    case 'ENUM':      return 'rp-inline';
+    case 'SPEC-ONLY': return 'rp-spec-only';
+    default:          return 'rp-spec-only';
+  }
+}
+
+// Pull the first injection-level keyword from a table cell. Cell content is
+// markdown — bold markers and qualifiers are common, e.g.
+// "**Summary** (Stage 1, Stage 2) — fw_factor_hint selected here".
+function parseLevelToken(cell) {
+  if (!cell) return null;
+  const stripped = cell.replace(/\*\*/g, '').trim();
+  const m = stripped.match(/\b(Full|Summary|Enum|Spec-only)\b/i);
+  return m ? m[1].toUpperCase() : null;
+}
+
+// Extract referenced filename. Cell content looks like
+// "`globals/signal-type-taxonomy.md`" — strip backticks and the path prefix.
+function parseFile(cell) {
+  if (!cell) return null;
+  const m = cell.match(/`?([\w./-]+\.md)`?/);
+  if (!m) return null;
+  return m[1].replace(/^.*\//, '');
+}
+
+// Does this row's level cell apply to the named stage? A cell with no explicit
+// stage qualifier applies unconditionally. A cell that explicitly names stages
+// (e.g. "Summary (Stage 1, Stage 2)") applies only if our stage is listed.
+// A cell that says "not used in Stage X" is excluded for that stage.
+function levelAppliesToStage(levelCell, stageLabel) {
+  if (!levelCell) return false;
+  const text = levelCell.replace(/\*\*/g, '');
+  if (new RegExp('not used in [^.;]*\\b' + stageLabel + '\\b', 'i').test(text)) return false;
+  const stageList = text.match(/\(((?:Stage [^)]+))\)/);
+  if (!stageList) return true; // unconditional
+  return new RegExp('\\b' + stageLabel + '\\b').test(stageList[1]);
+}
+
+function parseGlobalRefsTable(md) {
+  const heading = '## Global References Used';
+  const startIdx = md.indexOf(heading);
+  if (startIdx === -1) return [];
+  const rest = md.slice(startIdx + heading.length);
+  const endIdx = rest.indexOf('\n## ');
+  const section = endIdx === -1 ? rest : rest.slice(0, endIdx);
+  const rows = [];
+  for (const line of section.split('\n')) {
+    if (!line.trim().startsWith('|')) continue;
+    if (/^\|\s*-+/.test(line.trim())) continue;
+    const cells = line.split('|').map(c => c.trim());
+    if (cells.length < 5) continue;
+    // cells: [empty, Global name, File, Used for, Injection level, empty?]
+    const label = cells[1];
+    if (!label || /^Global$/i.test(label)) continue;
+    const file = parseFile(cells[2]);
+    const usedFor = cells[3];
+    const levelCell = cells[4];
+    const level = parseLevelToken(levelCell);
+    if (!file || !level) continue;
+    rows.push({ file, label, usedFor, levelCell, level });
+  }
+  return rows;
+}
+
+async function initReferences() {
+  try {
+    const featureNames = ['OBSERVATION-CAPTURE', 'CRITICAL-INSIGHT'];
+    await Promise.all(featureNames.map(async (name) => {
+      const r = await fetch('/specs/features/' + name + '.md');
+      if (!r.ok) throw new Error(name + ' HTTP ' + r.status);
+      const md = await r.text();
+      REFS.byFeature[name] = parseGlobalRefsTable(md);
+    }));
+    REFS.ready = true;
+    console.log('[pipeline-explorer] References loaded — feature specs:', Object.keys(REFS.byFeature).join(', '));
+  } catch (err) {
+    REFS.error = err.message;
+    console.error('[pipeline-explorer] Reference load failed:', err);
+  }
+}
+
+// Return the list of {file, level, usedFor} entries that apply to this stage,
+// drawn from the relevant spec's Global References Used table.
+function getStageRefs(stageId) {
+  const mapping = STAGE_SPEC[stageId];
+  if (!mapping) return null;
+  // fw_classify is canonical and minimal — sourced from the job spec
+  // (fw-classify-job.md), not from a feature-spec Global References Used table.
+  if (mapping.spec === '__fw_classify__') {
+    return [
+      { file: 'fw-map-blueprint.md', level: 'FULL',      usedFor: 'Entire Blueprint injected verbatim into fw_classify system prompt' },
+      { file: 'ai-output-standards.md', level: 'SPEC-ONLY', usedFor: 'JSON-only output discipline, retry policy' },
+    ];
+  }
+  const rows = REFS.byFeature[mapping.spec];
+  if (!rows) return null;
+  return rows
+    .filter(r => levelAppliesToStage(r.levelCell, mapping.stageLabel))
+    .map(r => ({ file: r.file, level: r.level, usedFor: r.usedFor }));
+}
 
 // ── PROMPTS ───────────────────────────────────────────────────────────────────
 let PROMPTS = {};
@@ -516,6 +616,7 @@ async function initPrompts() {
       loadSimPrompts(['OBSERVATION-CAPTURE', 'CRITICAL-INSIGHT']),
       fetchGlobal('fw-classify-job'),
       fetchGlobal('fw-map-blueprint'),
+      initReferences(),
     ]);
     PROMPTS.captureSystem  = featureSpecs['OBSERVATION-CAPTURE']['CANONICAL-SYSTEM-PROMPT-STAGE-1'];
     PROMPTS.enrichSystem   = featureSpecs['OBSERVATION-CAPTURE']['CANONICAL-SYSTEM-PROMPT-STAGE-2'];
@@ -711,12 +812,28 @@ function buildStep(stage) {
 }
 
 function buildRefsStrip(id) {
-  const refs = STAGE_REFS[id];
-  if (!refs || !refs.length) return '';
-  const pills = refs.map(r =>
-    `<span class="ref-pill ${r.cls}" title="${escHtml(r.tip)}"><span class="rp-dot"></span>${escHtml(r.label)}</span>`
-  ).join('');
-  return `<div class="refs-strip"><span class="refs-lbl">REFS</span>${pills}</div>`;
+  const mapping = STAGE_SPEC[id];
+  if (!mapping) return '';
+  const refs = getStageRefs(id);
+
+  let inner;
+  if (refs === null) {
+    inner = `<span style="font-family:var(--mono);font-size:9px;color:var(--muted);">${REFS.error ? 'spec load failed — ' + escHtml(REFS.error) : 'loading references…'}</span>`;
+  } else if (refs.length === 0) {
+    inner = `<span style="font-family:var(--mono);font-size:9px;color:var(--muted);">no globals consumed at ${escHtml(mapping.stageLabel)}</span>`;
+  } else {
+    inner = refs.map(r => {
+      const cls = refTypeClass(r.level);
+      const label = (r.level === 'SPEC-ONLY') ? 'SPEC' : r.level;
+      const tip = r.usedFor ? r.level + ' — ' + r.usedFor : r.level;
+      return `<span class="ref-pill ${cls}" title="${escHtml(tip)}"><span class="rp-dot"></span><span class="rp-type">${label}</span>${escHtml(r.file)}</span>`;
+    }).join('');
+  }
+
+  const sourceTag = mapping.spec === '__fw_classify__'
+    ? 'fw-classify-job.md'
+    : mapping.spec + '.md § ' + mapping.stageLabel;
+  return `<div class="refs-strip"><span class="refs-lbl" title="Source: ${escHtml(sourceTag)}">REFS</span>${inner}</div>`;
 }
 
 // ── STAGE 1: CAPTURE (canvas panel) ───────────────────────────────────────────

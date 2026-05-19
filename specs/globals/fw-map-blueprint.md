@@ -22,6 +22,39 @@ Confidence threshold for classification: **≥ 0.70**. Below this, return empty 
 
 ---
 
+## SUMMARY-REFERENCE — fw-map-blueprint
+
+> **Runtime injection block — lightweight selection aid only.** Extracted by `extractSection(md, 'SUMMARY-REFERENCE — fw-map-blueprint')` and injected into prompts that select `fw_factor_hint` for the first time (observation capture, observation enrichment, incident capture, auto triage, investigation assist). It is deliberately lighter than the full Blueprint: 15 factor names, domain tag, and one sentence each — no maturity-level guidance, no diagnostic questions, no classification rules. The full per-factor content below is reserved for `fw_classify`, which receives the entire file in Full injection.
+
+```
+Select fw_factor_hint as one of these 15 Forge Works Map® factors, or null if no factor is strongly suggested by the observation:
+
+GUIDE (direction & context)
+- senior_leadership (guide): how senior leaders talk about and embody safety, and what their decisions signal about what actually matters
+- strategy (guide): what triggers safety improvements and what the documented direction prioritises
+- risk_management (guide): the quality of risk information and whether it flows into operational decisions
+- safety_organisation (guide): the capability and focus of the safety function — compliance monitor vs system improver
+- work_understanding (guide): the model of accident causation that drives decisions — human error vs system property
+
+ENABLE (resources & systems)
+- operational_management (enable): the role of middle and frontline managers in translating plans into controlled work
+- resource_allocation (enable): how safety resources — time, people, equipment, budget — are identified and allocated
+- management_systems (enable): the documented frameworks, procedures, and standards governing how work is planned and controlled
+- goal_conflict_tradeoffs (enable): how safety goals are balanced against production, cost, and schedule pressure
+- learning_development (enable): how the organisation builds capability and retains learning from experience
+
+EXECUTE (frontline & operations)
+- frontline_workers (execute): the knowledge, capability, and engagement of workers performing the work (never frames as blame)
+- communications_coordination (execute): how information flows between roles, teams, and shifts; how handovers and briefings work
+- decision_making (execute): how operational decisions are made in the moment — rule-following vs informed real-time judgment
+- contractor_management (execute): how contractors are engaged, integrated, and managed alongside direct workforce
+- monitoring_metrics (execute): what is tracked to monitor safety performance and what triggers a response
+```
+
+`fw_factor_hint` is a single lightweight pointer — not a classification. Only set it if the observation strongly suggests one of the 15 factors; otherwise return `null`. Full FW Map® classification runs separately via `fw_classify` on richer pattern-level evidence.
+
+---
+
 ## Framework Structure
 
 ```
