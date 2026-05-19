@@ -23,11 +23,13 @@ Stage 3 — Seeding              (API call to CoP platform — human-confirmed)
 
 ## Global References Used
 
-| Global | File | Used for |
-|---|---|---|
-| FW Map® Blueprint | `globals/fw-map-blueprint.md` | Community framing principles; factor-aware question framing |
-| Anonymisation rules | `globals/anonymisation-rules.md` | Source narratives scrubbed before prompt |
-| AI output standards | `globals/ai-output-standards.md` | JSON-only, max tokens, rationale standard |
+`cop_thread.generate` operates on already-classified upstream content (approved insight or closed investigation, plus FW classification if available) and reframes it as discussion prompts — it does not classify signal, energy, or barrier values. The Blueprint is referenced for framing principles and factor names only.
+
+| Global | File | Used for | Injection level |
+|---|---|---|---|
+| FW Map® Blueprint | `globals/fw-map-blueprint.md` | Community framing principles; factor name pass-through in thread output | **Enum** — 15 factor names only; framing principles referenced via spec |
+| Anonymisation rules | `globals/anonymisation-rules.md` | Source narratives scrubbed before prompt | Spec-only |
+| AI output standards | `globals/ai-output-standards.md` | JSON-only, max tokens, rationale standard | Spec-only |
 
 ---
 

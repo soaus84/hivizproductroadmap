@@ -17,6 +17,32 @@ Version: 1.0
 
 ---
 
+## SUMMARY-REFERENCE — energy-type-taxonomy
+
+> **Runtime injection block.** Extracted by `extractSection(md, 'SUMMARY-REFERENCE — energy-type-taxonomy')` and injected into prompts that classify `energy_type` independently from raw text. One line per value — enough physical context to disambiguate. Do not edit without re-checking the full definitions below.
+
+```
+Classify energy_type as one of:
+- kinetic: energy of motion — moving objects, machinery in motion, vehicles, swinging loads, projectiles
+- gravitational: potential energy from height — falls, dropped objects, collapses of elevated material or excavation walls
+- electrical: shock, arc flash, or fire from electrical sources — both low and high voltage
+- thermal: heat or cold energy — burns from hot surfaces, hot liquids, steam, flame, or cold/cryogenic exposure
+- chemical: hazardous substance exposure, reaction hazards, asphyxiation, toxicity, corrosion
+- pressure: stored energy in pressurised pneumatic, hydraulic, or gas systems — vessels, lines, cylinders
+- noise_vibration: occupational acoustic or vibrational energy — hearing damage, hand-arm or whole-body vibration
+- none: no identifiable energy mechanism — purely procedural, behavioural, or positive-performance observation
+```
+
+Assign the energy type most directly associated with the potential or actual harm mechanism. If multiple energies are present, choose the one with the greatest harm potential. Do not use `none` as a default — only when no energy type genuinely applies.
+
+```
+energy_release_potential: catastrophic|high|moderate|low|none — AI-derived from energy_type + work_type context + observation text; must be none when energy_type = none
+```
+
+`energy_release_potential` describes the credible worst case if control were fully lost — not the actual outcome of this observation.
+
+---
+
 ## The 8 Energy Types
 
 ### `kinetic`

@@ -23,14 +23,16 @@ Stage 3 — Context request        observation.context_request  (conditional, as
 
 ## Global References Used
 
-| Global | File | Used for |
-|---|---|---|
-| Signal type taxonomy | `globals/signal-type-taxonomy.md` | `signal_type` field — 5 values + routing rules |
-| Energy type taxonomy | `globals/energy-type-taxonomy.md` | `energy_type` field — 8 values + definitions |
-| Barrier assessment values | `globals/barrier-assessment-values.md` | `barrier_assessment` field — 5 states + definitions |
-| AI output standards | `globals/ai-output-standards.md` | JSON-only, confidence thresholds, rationale standard, audit logging |
-| Anonymisation rules | `globals/anonymisation-rules.md` | PII flagging in enrichment; scrubbing for all downstream prompts |
-| FW Map® Blueprint | `globals/fw-map-blueprint.md` | `fw_factor_hint` validation — 15 factor names only, not full classification |
+Both stages independently classify `signal_type`, `energy_type`, `barrier_assessment`, and `fw_factor_hint` from raw observation text — each is a first-time determination at this stage. Per the governing rule (first-time classification never gets Enum), all four taxonomy globals are injected at **Summary** level. The Summary blocks are extracted at runtime — e.g. `extractSection(md, 'SUMMARY-REFERENCE — signal-type-taxonomy')`.
+
+| Global | File | Used for | Injection level |
+|---|---|---|---|
+| Signal type taxonomy | `globals/signal-type-taxonomy.md` | `signal_type` field — 5 values + routing rules | **Summary** (Stage 1, Stage 2) |
+| Energy type taxonomy | `globals/energy-type-taxonomy.md` | `energy_type` field — 8 values + definitions; `energy_release_potential` scale used in Stage 2 | **Summary** (Stage 1, Stage 2) |
+| Barrier assessment values | `globals/barrier-assessment-values.md` | `barrier_assessment` field — 5 states + definitions | **Summary** (Stage 1, Stage 2) |
+| AI output standards | `globals/ai-output-standards.md` | JSON-only, confidence thresholds, rationale standard, audit logging | Spec-only |
+| Anonymisation rules | `globals/anonymisation-rules.md` | PII flagging in enrichment; scrubbing for all downstream prompts | Spec-only |
+| FW Map® Blueprint | `globals/fw-map-blueprint.md` | `fw_factor_hint` selection — first-time determination at this stage; uses the lightweight `SUMMARY-REFERENCE — fw-map-blueprint` block, not the full per-factor content | **Summary** (Stage 1, Stage 2) — `fw_factor_hint` is selected for the first time here |
 
 ---
 

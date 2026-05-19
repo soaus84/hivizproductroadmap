@@ -77,6 +77,22 @@ Definitions and rules that are not owned by any single feature but consumed by m
 
 The Blueprint (`fw-map-blueprint.md`) is injected in full at runtime into `fw_classify` (Prompt 10). All other consumers reference it for validation only.
 
+### Global Injection Levels
+
+Three levels of global reference are used across prompts. The governing rule:
+
+> **A value being classified or selected for the FIRST TIME in the pipeline always needs at least Summary level. Enum level is only ever correct downstream — where the value already exists and the job is consuming or passing it through.**
+
+Enum-at-first-classification is not validation — it is an unaided guess. There are no exceptions. If a stage is the point where a field gets its value, that stage gets Summary (or Full, for `fw_classify`).
+
+**Enum** — pipe-delimited values only. Used **only** where a value has been classified upstream and the current job is validating or passing it through. Never used at the point a value is first determined. Example: `signal_type: positive_performance|weak_signal|at_risk_condition|unwanted_energy_event|barrier_failure`.
+
+**Summary** — the `SUMMARY-REFERENCE` section of the global file. One line per value: item label plus a single-sentence description, enough to disambiguate. Used wherever the AI is determining a value for the first time. Extracted at runtime using the same `extractSection()` pattern as canonical prompts — e.g. `extractSection(md, 'SUMMARY-REFERENCE — signal-type-taxonomy')`.
+
+**Full** — the complete global file content. Used only by `fw_classify`, which receives the full `fw-map-blueprint.md` Blueprint. No other job uses full injection.
+
+Each feature spec's **Global References Used** table specifies the injection level per global per stage. When building or modifying a prompt, honour the level specified — and never assign Enum to a stage that is classifying a value for the first time.
+
 ---
 
 ## Tier 2 — Feature Specs `specs/features/`

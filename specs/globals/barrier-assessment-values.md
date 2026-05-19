@@ -19,6 +19,27 @@ The field is assigned by both the capture conversation (as part of the summary J
 
 ---
 
+## SUMMARY-REFERENCE — barrier-assessment-values
+
+> **Runtime injection block.** Extracted by `extractSection(md, 'SUMMARY-REFERENCE — barrier-assessment-values')` and injected into prompts that classify `barrier_assessment` independently from raw text. One line per value — enough to disambiguate the state of the control. Do not edit without re-checking the full definitions below.
+
+```
+Classify barrier_assessment as one of:
+- barrier_absent: the required control was never established — no procedure, no guard, no permit requirement, no supervision model exists; structural absence, not situational
+- barrier_failed: the control existed and should have applied but did not function when required — present but ineffective at the moment of the event
+- barrier_degraded: the control exists and is partially functioning but operating below the required standard — drifting, inconsistent, or sub-standard application
+- barrier_held: the control was tested under genuine pressure and worked as designed; harm was prevented (do not use for routine compliance — use when the barrier was stressed)
+- none: no specific barrier or control is relevant to this observation, or barrier state cannot be assessed from what was described
+```
+
+Disambiguation rules:
+- Distinguish `barrier_absent` from `barrier_failed` by whether the control existed at all — absent is structural, failed is execution
+- `barrier_degraded` is the most common state on well-managed sites — supervisors catching drift before it becomes a failure
+- `barrier_held` requires the control to have been genuinely stressed — not mere compliance with normal conditions
+- Do not use `none` as a default — only when barrier state genuinely cannot be assessed
+
+---
+
 ## The 5 Barrier States
 
 ### `barrier_absent`
