@@ -98,16 +98,16 @@ A stream tagged `core + ms` means "this stream exists in the core platform but p
 
 | Stage | State |
 |---|---|
-| capture.incident | spec-only |
-| capture.auto | spec-only |
-| server triage algorithm | spec-only |
-| investigation.assist | spec-only |
-| investigator workbench (framework completion) | spec-only |
-| investigation close gate | spec-only |
-| investigation.generate_narrative | spec-only |
-| fw_classify (investigation path) | spec-only — runs when invoked |
+| capture.incident | working |
+| capture.auto | spec-only — observation-route variant only; incident-route auto triage exercised here as capture.incident |
+| server triage algorithm | working |
+| investigation.assist | working |
+| investigator workbench (framework completion) | working (sim's close gate stands in for the full workbench) |
+| investigation close gate | working |
+| investigation.generate_narrative | working |
+| fw_classify (investigation path) | working |
 
-**Live Sim:** `simulators/incident-to-investigation.html` — to build
+**Live Sim:** `simulators/incident-to-investigation.html` ✓ working
 
 ---
 
@@ -279,7 +279,7 @@ The Live Sim contract is defined in `HOW-TO-READ-THIS.md §Live Sim Class`.
 | Stream | Live Sim | State |
 |---|---|---|
 | observation-to-insight | `simulators/observation-to-insight.html` | working |
-| incident-to-investigation | `simulators/incident-to-investigation.html` | to build |
+| incident-to-investigation | `simulators/incident-to-investigation.html` | working |
 | insight-to-broadcast | `simulators/insight-to-broadcast.html` | to build |
 | insight-to-pull | `simulators/insight-to-pull.html` | to build |
 | systemic-causes | `simulators/systemic-causes.html` | to build |

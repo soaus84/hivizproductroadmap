@@ -1,0 +1,1454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>incident-to-investigation Live Sim — Hiviz</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --bg:      #0a0b0d;
+  --surface: #13141a;
+  --surface2:#1a1b23;
+  --surface3:#1e1f28;
+  --border:  #252630;
+  --text:    #dde1eb;
+  --muted:   #5a5d6e;
+  --bright:  #e8ecf8;
+  --mono: 'IBM Plex Mono', monospace;
+  --sans: 'IBM Plex Sans', sans-serif;
+  --plum:   #7635DC; --plum-dim:   rgba(118,53,220,0.12); --plum-border:  rgba(118,53,220,0.3);  --plum-text:  #a78bfa;
+  --teal:   #0891b2; --teal-dim:   rgba(8,145,178,0.12);  --teal-border:  rgba(8,145,178,0.28);  --teal-text:  #22d3ee;
+  --amber:  #d97706; --amber-dim:  rgba(217,119,6,0.12);  --amber-border: rgba(217,119,6,0.28);  --amber-text: #fbbf24;
+  --green:  #059669; --green-dim:  rgba(5,150,105,0.12);  --green-border: rgba(5,150,105,0.28);  --green-text: #34d399;
+  --red:    #dc2626; --red-dim:    rgba(220,38,38,0.12);  --red-border:   rgba(220,38,38,0.28);  --red-text:   #f87171;
+  --gold:   #d4a843;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body {
+  background: var(--bg); color: var(--text);
+  font-family: var(--sans); font-size: 13px; line-height: 1.6;
+  display: flex; flex-direction: column;
+}
+body::before {
+  content: ''; position: fixed; inset: 0;
+  background-image:
+    linear-gradient(rgba(118,53,220,0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(118,53,220,0.02) 1px, transparent 1px);
+  background-size: 40px 40px; pointer-events: none; z-index: 0;
+}
+
+/* ── Header ──────────────────────────────────────────────────────── */
+.hdr {
+  position: relative; z-index: 10;
+  padding: 15px 22px 13px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 20px;
+  background: rgba(10,11,13,0.92); backdrop-filter: blur(10px);
+  flex-shrink: 0;
+}
+.hdr-logo { font-family: var(--mono); font-size: 9px; font-weight: 700; letter-spacing: 2px; color: var(--gold); margin-bottom: 2px; }
+.hdr-title { font-family: var(--mono); font-size: 17px; font-weight: 700; color: var(--bright); }
+.hdr-sub { font-size: 11px; color: var(--muted); margin-top: 3px; line-height: 1.5; max-width: 480px; }
+.hdr-meta { display: flex; align-items: center; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
+.state-badge {
+  font-family: var(--mono); font-size: 8.5px; font-weight: 700;
+  letter-spacing: 1px; text-transform: uppercase;
+  padding: 2px 7px; border-radius: 3px;
+}
+.state-working  { background: var(--green-dim); color: var(--green-text); border: 1px solid var(--green-border); }
+.state-dormant  { background: var(--amber-dim); color: var(--amber-text); border: 1px solid var(--amber-border); }
+.state-spec     { background: var(--surface2); color: var(--muted);       border: 1px solid var(--border); }
+.state-broken   { background: var(--red-dim);   color: var(--red-text);   border: 1px solid var(--red-border); }
+.ws-tag {
+  font-family: var(--mono); font-size: 8.5px; font-weight: 600;
+  letter-spacing: 0.5px;
+  padding: 2px 6px; border-radius: 3px;
+  background: var(--plum-dim); color: var(--plum-text);
+  border: 1px solid var(--plum-border);
+}
+.legend { display: flex; gap: 14px; margin-top: 8px; flex-wrap: wrap; }
+.leg { display: flex; align-items: center; gap: 5px; font-family: var(--mono); font-size: 9px; color: var(--muted); letter-spacing: 0.4px; }
+.leg-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.hdr-right { display: flex; flex-direction: column; gap: 5px; flex-shrink: 0; }
+.api-row { display: flex; gap: 6px; }
+.api-input {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 6px;
+  padding: 6px 9px; font-family: var(--mono); font-size: 11px; color: var(--text);
+  outline: none; width: 190px;
+}
+.api-input:focus { border-color: var(--plum-border); }
+.api-input::placeholder { color: var(--muted); }
+.api-btn { background: var(--gold); color: #0a0b0d; border: none; border-radius: 6px; padding: 6px 12px; font-family: var(--mono); font-size: 11px; font-weight: 700; cursor: pointer; }
+.api-status { font-family: var(--mono); font-size: 10px; color: var(--muted); }
+.api-status.ok  { color: var(--green-text); }
+.api-status.err { color: var(--red-text); }
+.reset-btn { background: transparent; border: none; color: var(--muted); font-family: var(--mono); font-size: 10px; cursor: pointer; text-decoration: underline; text-align: right; }
+.reset-btn:hover { color: var(--text); }
+
+/* ── App layout ──────────────────────────────────────────────────── */
+.app { display: flex; flex: 1; min-height: 0; overflow: hidden; position: relative; z-index: 1; }
+
+/* ── Left: chat panel ────────────────────────────────────────────── */
+.left {
+  width: 320px; flex-shrink: 0;
+  border-right: 1px solid var(--border);
+  background: var(--surface);
+  display: flex; flex-direction: column;
+}
+.left-hdr {
+  padding: 11px 14px 10px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.left-stage { font-family: var(--mono); font-size: 8px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--plum-text); margin-bottom: 2px; }
+.left-job   { font-family: var(--mono); font-size: 12px; font-weight: 600; color: var(--bright); }
+.left-spec  { font-family: var(--mono); font-size: 9px; color: var(--muted); margin-top: 1px; }
+.left-status { font-family: var(--mono); font-size: 9px; margin-top: 5px; }
+.left-status.ok   { color: var(--green-text); }
+.left-status.warn { color: var(--amber-text); }
+
+/* Chat messages */
+.chat-msgs {
+  flex: 1; min-height: 0;
+  overflow-y: auto;
+  padding: 11px 11px 6px;
+  display: flex; flex-direction: column; gap: 7px;
+}
+.chat-msgs::-webkit-scrollbar { width: 3px; }
+.chat-msgs::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+.msg { display: flex; flex-direction: column; max-width: 90%; animation: msgIn 0.18s ease; }
+@keyframes msgIn { from{opacity:0;transform:translateY(3px)} to{opacity:1;transform:none} }
+.msg-ai   { align-self: flex-start; }
+.msg-user { align-self: flex-end; }
+.msg-sndr { font-family: var(--mono); font-size: 9px; color: var(--muted); margin-bottom: 3px; }
+.msg-ai .msg-sndr { color: var(--plum-text); }
+.msg-bubble { padding: 8px 11px; border-radius: 10px; font-size: 12.5px; line-height: 1.5; }
+.msg-ai   .msg-bubble { background: var(--surface2); border: 1px solid var(--border); border-bottom-left-radius: 3px; color: var(--bright); }
+.msg-user .msg-bubble { background: var(--plum-dim); border: 1px solid var(--plum-border); border-bottom-right-radius: 3px; color: var(--bright); }
+
+.qrs { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 5px; }
+.qr {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 11px; padding: 3px 9px;
+  font-family: var(--sans); font-size: 11px; cursor: pointer; color: var(--text); transition: all 0.1s;
+}
+.qr:hover { border-color: var(--plum-border); color: var(--plum-text); }
+
+.typing {
+  display: flex; align-items: center; gap: 4px;
+  padding: 8px 11px;
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 10px; border-bottom-left-radius: 3px;
+  width: fit-content;
+}
+.td { width: 5px; height: 5px; border-radius: 50%; background: var(--muted); animation: bounce 1.2s infinite; }
+.td:nth-child(2){animation-delay:.18s} .td:nth-child(3){animation-delay:.36s}
+@keyframes bounce { 0%,60%,100%{transform:translateY(0);opacity:.3} 30%{transform:translateY(-4px);opacity:1} }
+
+/* Capture done */
+.cap-done {
+  margin: 8px 11px 0;
+  background: var(--green-dim); border: 1px solid var(--green-border);
+  border-radius: 6px; padding: 9px 11px; flex-shrink: 0;
+}
+.cap-done-label { font-family: var(--mono); font-size: 8px; color: var(--green-text); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 5px; }
+.cap-done-row { display: grid; grid-template-columns: 80px 1fr; gap: 2px; margin-bottom: 2px; }
+.cap-done-key { font-family: var(--mono); font-size: 9px; color: var(--muted); }
+.cap-done-val { font-family: var(--mono); font-size: 9px; color: var(--text); }
+
+.submit-btn {
+  margin: 7px 11px; flex-shrink: 0;
+  background: var(--plum); color: white;
+  border: none; border-radius: 6px; padding: 9px;
+  font-family: var(--mono); font-size: 10px; font-weight: 700; letter-spacing: 0.5px;
+  cursor: pointer; transition: all 0.15s;
+  display: flex; align-items: center; justify-content: center; gap: 7px;
+}
+.submit-btn:hover { background: #6020CC; transform: translateY(-1px); }
+
+/* Chat input bar */
+.chat-ibar {
+  display: flex; gap: 6px; padding: 7px 10px;
+  border-top: 1px solid var(--border);
+  background: var(--surface); flex-shrink: 0;
+}
+.chat-inp {
+  flex: 1; background: var(--surface2); border: 1px solid var(--border); border-radius: 14px;
+  padding: 7px 12px; font-family: var(--sans); font-size: 13px; color: var(--text);
+  outline: none; resize: none; min-height: 34px; max-height: 72px; overflow-y: auto;
+  transition: border-color 0.15s;
+}
+.chat-inp:focus { border-color: var(--plum-border); }
+.chat-inp::placeholder { color: var(--muted); }
+.chat-snd {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: var(--plum); border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; color: white;
+  flex-shrink: 0; transition: all 0.15s;
+}
+.chat-snd:hover:not(:disabled) { background: #6020CC; }
+.chat-snd:disabled { background: var(--border); cursor: default; }
+
+/* Prompt toggle (left) */
+.ptog-wrap { margin: 0 11px 8px; flex-shrink: 0; }
+.ptog {
+  display: flex; align-items: center; gap: 5px;
+  cursor: pointer; padding: 5px 8px;
+  background: var(--surface2); border: 1px solid var(--border); border-radius: 4px;
+  user-select: none;
+}
+.ptog:hover { border-color: var(--border); background: var(--surface3); }
+.ptog-lbl { font-family: var(--mono); font-size: 9px; color: var(--muted); flex: 1; }
+.ptog-ico { font-family: var(--mono); font-size: 8px; color: var(--muted); transition: transform 0.18s; }
+.ptog.open .ptog-ico { transform: rotate(180deg); }
+.pblock {
+  background: var(--bg); border: 1px solid var(--border); border-top: none;
+  border-radius: 0 0 4px 4px; padding: 8px 10px;
+  font-family: var(--mono); font-size: 9px; color: var(--muted);
+  line-height: 1.6; white-space: pre-wrap; word-break: break-word;
+  display: none; max-height: 200px; overflow-y: auto;
+}
+.pblock.open { display: block; }
+
+/* ── Canvas: pipeline step timeline ──────────────────────────────── */
+.canvas {
+  flex: 1; overflow-y: auto;
+  padding: 28px 36px 48px;
+}
+.canvas::-webkit-scrollbar { width: 4px; }
+.canvas::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+/* Step */
+.step { display: grid; grid-template-columns: 48px 1fr; }
+.step.dim { opacity: 0.45; pointer-events: none; }
+.step.dim-lite { opacity: 0.65; }
+
+/* Spine */
+.spine {
+  position: relative;
+  display: flex; flex-direction: column; align-items: center;
+  padding-top: 12px;
+}
+.spine::after {
+  content: ''; position: absolute;
+  left: 23px; top: 46px; bottom: -26px;
+  width: 1px; background: var(--border);
+}
+.step:last-child .spine::after { display: none; }
+
+/* Node */
+.node {
+  width: 36px; height: 36px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--mono); font-size: 12px; font-weight: 700; color: var(--muted);
+  position: relative; z-index: 1;
+  border: 2px solid var(--border); background: var(--surface);
+  transition: all 0.3s; flex-shrink: 0;
+}
+.node.ai     { border-color: var(--plum);  background: var(--plum-dim);  color: var(--plum-text);  box-shadow: 0 0 14px rgba(118,53,220,0.2); }
+.node.system { border-color: var(--teal);  background: var(--teal-dim);  color: var(--teal-text);  box-shadow: 0 0 12px rgba(8,145,178,0.18); }
+.node.human  { border-color: var(--amber); background: var(--amber-dim); color: var(--amber-text); box-shadow: 0 0 12px rgba(217,119,6,0.18); }
+.node.done   { border-color: var(--green); background: var(--green-dim); color: var(--green-text); box-shadow: 0 0 10px rgba(5,150,105,0.18); }
+.node.pulse  { animation: nPulse 1.8s infinite; }
+@keyframes nPulse { 0%,100%{box-shadow:0 0 14px rgba(118,53,220,0.2)} 50%{box-shadow:0 0 28px rgba(118,53,220,0.5)} }
+.node.human.pulse { animation: nPulseA 1.8s infinite; }
+@keyframes nPulseA { 0%,100%{box-shadow:0 0 12px rgba(217,119,6,0.18)} 50%{box-shadow:0 0 24px rgba(217,119,6,0.45)} }
+
+/* Step content */
+.scontent { padding: 9px 0 28px 18px; }
+
+.shead { display: flex; align-items: center; gap: 7px; margin-bottom: 9px; flex-wrap: wrap; }
+.snum { font-family: var(--mono); font-size: 8px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; padding: 2px 7px; border-radius: 3px; }
+.sn-ai  { background: var(--plum-dim);  color: var(--plum-text);  border: 1px solid var(--plum-border); }
+.sn-sys { background: var(--teal-dim);  color: var(--teal-text);  border: 1px solid var(--teal-border); }
+.sn-hum { background: var(--amber-dim); color: var(--amber-text); border: 1px solid var(--amber-border); }
+.sjob { font-family: var(--mono); font-size: 13px; font-weight: 600; color: var(--bright); }
+.sstat { font-family: var(--mono); font-size: 9px; font-weight: 700; letter-spacing: 1px; }
+.sstat.running { color: var(--amber-text); animation: pulse 1.4s infinite; }
+.sstat.done    { color: var(--green-text); }
+.sstat.skipped { color: var(--muted); }
+.sspec { font-family: var(--mono); font-size: 8.5px; color: var(--muted); margin-left: auto; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 220px; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+/* Step card */
+.scard {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 8px; overflow: hidden;
+}
+.scard.ai     { border-color: var(--plum-border); }
+.scard.system { border-color: var(--teal-border); }
+.scard.human  { border-color: var(--amber-border); }
+.scard.done   { border-color: rgba(5,150,105,0.28); }
+.scard.pending { border-style: dashed; }
+.scard.skipped { border-style: dashed; opacity: 0.6; }
+
+/* Refs strip */
+.refs-strip {
+  padding: 5px 12px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 5px; flex-wrap: wrap;
+  background: rgba(255,255,255,0.01);
+}
+.refs-lbl { font-family: var(--mono); font-size: 8px; font-weight: 700; color: var(--muted); letter-spacing: 1px; flex-shrink: 0; }
+.ref-pill {
+  display: inline-flex; align-items: center; gap: 3px;
+  border-radius: 12px; padding: 1px 6px;
+  font-family: var(--mono); font-size: 8.5px; font-weight: 500;
+  border: 1px solid; white-space: nowrap; cursor: help;
+}
+.rp-dot { width: 4px; height: 4px; border-radius: 50%; flex-shrink: 0; }
+.rp-connected { background: var(--green-dim); border-color: var(--green-border); color: var(--green-text); }
+.rp-summary   { background: var(--teal-dim);  border-color: var(--teal-border);  color: var(--teal-text); }
+.rp-inline    { background: var(--amber-dim); border-color: var(--amber-border); color: var(--amber-text); }
+.rp-spec-only { background: var(--red-dim);   border-color: var(--red-border);   color: var(--red-text); }
+.rp-connected .rp-dot { background: var(--green); }
+.rp-summary   .rp-dot { background: var(--teal); }
+.rp-inline .rp-dot    { background: var(--amber); }
+.rp-spec-only .rp-dot { background: var(--red); }
+.rp-type {
+  font-weight: 700; letter-spacing: 0.5px;
+  padding: 0 3px; margin-right: 3px;
+  border-radius: 2px; background: rgba(0,0,0,0.25);
+}
+.rp-role {
+  font-weight: 600; letter-spacing: 0.3px; font-size: 8px;
+  padding: 0 4px; margin-left: 4px;
+  border-radius: 2px;
+  background: var(--amber-dim); color: var(--amber-text);
+  border: 1px solid var(--amber-border);
+  text-transform: lowercase;
+}
+
+/* Card body */
+.cbody { padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; }
+
+/* Section label */
+.blk-lbl {
+  font-family: var(--mono); font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--muted); display: flex; align-items: center; gap: 8px;
+}
+.blk-lbl::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+/* Field rows */
+.field-row { display: flex; gap: 10px; align-items: flex-start; }
+.field-key { font-family: var(--mono); font-size: 10px; color: var(--muted); min-width: 150px; flex-shrink: 0; line-height: 1.5; }
+.field-val { font-family: var(--mono); font-size: 11px; color: var(--text); line-height: 1.45; flex: 1; }
+.field-val.bright  { color: var(--bright); }
+.field-val.hi-warn { color: var(--red-text); }
+.field-val.hi-ok   { color: var(--green-text); }
+.field-val.hi-plum { color: var(--plum-text); }
+.field-val.hi-teal { color: var(--teal-text); }
+.field-rat { font-size: 11px; color: var(--muted); font-style: italic; padding-left: 10px; border-left: 2px solid var(--border); line-height: 1.5; }
+
+/* Narrative */
+.narrative { border-left: 3px solid var(--plum-border); padding: 6px 12px; color: var(--bright); font-size: 13px; line-height: 1.75; }
+
+/* Pending / waiting text */
+.wait-txt { font-family: var(--mono); font-size: 10px; color: var(--muted); padding: 10px 12px; font-style: italic; }
+
+/* Running row */
+.run-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px; color: var(--muted); font-family: var(--mono); font-size: 10px; font-style: italic;
+}
+.spinner { width: 13px; height: 13px; border: 2px solid var(--border); border-top-color: var(--plum); border-radius: 50%; animation: spin 0.7s linear infinite; flex-shrink: 0; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Notes */
+.note { border-radius: 5px; padding: 7px 10px; font-family: var(--mono); font-size: 9.5px; line-height: 1.55; }
+.note.info  { background: var(--teal-dim);  border: 1px solid var(--teal-border);  color: var(--teal-text); }
+.note.warn  { background: var(--amber-dim); border: 1px solid var(--amber-border); color: var(--amber-text); }
+.note.error { background: var(--red-dim);   border: 1px solid var(--red-border);   color: var(--red-text); }
+
+/* Taxonomy tags */
+.tax-tags { display: flex; flex-wrap: wrap; gap: 4px; }
+.tax-tag { font-family: var(--mono); font-size: 9.5px; padding: 2px 7px; border-radius: 3px; background: var(--surface2); border: 1px solid var(--border); color: var(--text); }
+
+/* Conf badge */
+.cb { display: inline-flex; align-items: center; font-family: var(--mono); font-size: 9px; font-weight: 700; padding: 1px 4px; border-radius: 3px; margin-left: 3px; }
+.cb-hi  { background: var(--green-dim);  color: var(--green-text); border: 1px solid var(--green-border); }
+.cb-mid { background: var(--amber-dim);  color: var(--amber-text); border: 1px solid var(--amber-border); }
+.cb-lo  { background: var(--red-dim);    color: var(--red-text);   border: 1px solid var(--red-border); }
+
+/* Route card */
+.route-c { border-radius: 6px; padding: 11px 13px; }
+.route-c.direct { background: var(--red-dim);   border: 1.5px solid var(--red-border); }
+.route-c.pool   { background: var(--green-dim); border: 1.5px solid var(--green-border); }
+.route-title { font-family: var(--mono); font-size: 11px; font-weight: 700; margin-bottom: 5px; }
+.route-c.direct .route-title { color: var(--red-text); }
+.route-c.pool   .route-title { color: var(--green-text); }
+.route-rule {
+  font-family: var(--mono); font-size: 9.5px; color: var(--muted);
+  background: rgba(0,0,0,0.3); border-radius: 3px; padding: 5px 8px;
+  margin-bottom: 6px; line-height: 1.5; white-space: pre;
+}
+.route-out { font-family: var(--sans); font-size: 12px; color: var(--text); line-height: 1.5; }
+
+/* Review */
+.rev-btns { display: flex; gap: 8px; }
+.rev-btn {
+  flex: 1; padding: 10px; border-radius: 6px; border: none;
+  font-family: var(--mono); font-size: 10px; font-weight: 700; cursor: pointer;
+  letter-spacing: 0.5px; text-transform: uppercase;
+}
+.rev-btn:active { transform: scale(0.98); }
+.rev-approve { background: var(--green); color: white; }
+.rev-approve:hover { background: #047857; }
+.rev-reject { background: var(--red-dim); color: var(--red-text); border: 1px solid var(--red-border); }
+.rev-reject:hover { background: rgba(220,38,38,0.22); }
+
+/* FW factors */
+.fw-f { background: var(--surface2); border-radius: 6px; padding: 9px 11px; border-left: 3px solid var(--plum); }
+.fw-f-row { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; margin-bottom: 4px; }
+.fw-f-name { font-family: var(--mono); font-size: 12px; font-weight: 600; color: var(--bright); }
+.fw-badge { font-family: var(--mono); font-size: 8px; font-weight: 700; padding: 2px 5px; border-radius: 3px; }
+.fw-dom { background: var(--plum-dim); color: var(--plum-text); border: 1px solid var(--plum-border); }
+.mat-compliant { background: var(--teal-dim);  color: var(--teal-text);  border: 1px solid var(--teal-border); }
+.mat-leading   { background: var(--amber-dim); color: var(--amber-text); border: 1px solid var(--amber-border); }
+.mat-resilient { background: var(--green-dim); color: var(--green-text); border: 1px solid var(--green-border); }
+.fw-rat { font-family: var(--sans); font-size: 11px; color: var(--muted); font-style: italic; line-height: 1.5; }
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div>
+    <div class="hdr-logo">Hiviz · Forge Works · Live Sim</div>
+    <div class="hdr-title">incident-to-investigation</div>
+    <div class="hdr-meta">
+      <span class="state-badge state-working" title="Stream state — see MODEL-MAP.md">working</span>
+      <span class="ws-tag" title="Workspaces this stream depends on">core</span>
+    </div>
+    <div class="hdr-sub">Incident capture → triage algorithm → investigation assist → human framework completion → close → toolbox narrative + FW classify. Live AI. Prompts and references fetched from spec at runtime. Two injection rules: Rule 1 — any taxonomy reference injects its SUMMARY-REFERENCE block; Rule 2 — fw_classify gets the full Blueprint. Solo critical incidents bridge into the observation-to-insight stream (handled there). Stream catalogue: <code>specs/MODEL-MAP.md</code>.</div>
+    <div class="legend">
+      <div class="leg"><div class="leg-dot" style="background:var(--green)"></div>FULL — entire global injected (Rule 2)</div>
+      <div class="leg"><div class="leg-dot" style="background:var(--teal)"></div>SUMMARY — SUMMARY-REFERENCE block (Rule 1)</div>
+      <div class="leg"><div class="leg-dot" style="background:var(--red)"></div>BEHAVIOURAL — referenced inline, not injected</div>
+      <div class="leg"><div class="leg-dot" style="background:var(--amber)"></div>Role: first-time vs pass-through</div>
+    </div>
+  </div>
+  <div class="hdr-right">
+    <div class="api-row">
+      <input type="password" class="api-input" id="apiKeyInput" placeholder="sk-ant-…">
+      <button class="api-btn" onclick="saveApiKey()">Save</button>
+    </div>
+    <div class="api-status" id="apiStatus">Add API key to run live AI</div>
+    <button class="reset-btn" onclick="resetPipeline()">↺ Reset pipeline</button>
+  </div>
+</div>
+
+<div class="app">
+  <div class="left" id="left"></div>
+  <div class="canvas" id="canvas"></div>
+</div>
+
+<script src="../simulators/hiviz-prompt-loader.js"></script>
+<script>
+// ── API KEY ───────────────────────────────────────────────────────────────────
+let apiKey = localStorage.getItem('hiviz_api_key') || '';
+if (apiKey) { document.getElementById('apiKeyInput').value = apiKey; setApiStatus('✓ Key saved', 'ok'); }
+function saveApiKey() {
+  const v = document.getElementById('apiKeyInput').value.trim();
+  if (!v.startsWith('sk-ant-')) { setApiStatus('Should start with sk-ant-', 'err'); return; }
+  apiKey = v; localStorage.setItem('hiviz_api_key', v); setApiStatus('✓ Key saved', 'ok');
+}
+function setApiStatus(t, cls) {
+  const el = document.getElementById('apiStatus');
+  el.textContent = t; el.className = 'api-status' + (cls ? ' ' + cls : '');
+}
+
+// ── TAXONOMY ──────────────────────────────────────────────────────────────────
+const HIGH_RISK_WORK = [
+  { id:'hrw-1a2b3c4d-0001', label:'Heavy Vehicle Operations' },
+  { id:'hrw-1a2b3c4d-0002', label:'Working at Height' },
+  { id:'hrw-1a2b3c4d-0003', label:'Hot Work' },
+  { id:'hrw-1a2b3c4d-0004', label:'Confined Space Entry' },
+  { id:'hrw-1a2b3c4d-0005', label:'Electrical Work' },
+  { id:'hrw-1a2b3c4d-0006', label:'Blasting / Explosives' },
+  { id:'hrw-1a2b3c4d-0007', label:'Crane / Lifting Operations' },
+  { id:'hrw-1a2b3c4d-0008', label:'Excavation / Ground Disturbance' },
+  { id:'hrw-1a2b3c4d-0009', label:'Isolation / LOTO' },
+  { id:'hrw-1a2b3c4d-0010', label:'Pressurised Systems' },
+  { id:'hrw-1a2b3c4d-0011', label:'Working Near Water' },
+  { id:'hrw-1a2b3c4d-0012', label:'Overhead Power Lines' },
+];
+const SAFETY_PRACTICE = [
+  { id:'sp-2e3f4a5b-0001', label:'Permit to Work (PTW)' },
+  { id:'sp-2e3f4a5b-0002', label:'Safe Work Method Statement (SWMS)' },
+  { id:'sp-2e3f4a5b-0003', label:'Job Safety Analysis (JSA)' },
+  { id:'sp-2e3f4a5b-0004', label:'Take 5 / Pre-task Check' },
+  { id:'sp-2e3f4a5b-0005', label:'Toolbox Talk' },
+  { id:'sp-2e3f4a5b-0006', label:'Stop Work Authority' },
+  { id:'sp-2e3f4a5b-0007', label:'Lock Out Tag Out (LOTO)' },
+  { id:'sp-2e3f4a5b-0008', label:'Last Minute Risk Assessment (LMRA)' },
+  { id:'sp-2e3f4a5b-0009', label:'Management of Change (MOC)' },
+  { id:'sp-2e3f4a5b-0010', label:'Emergency Response Plan (ERP)' },
+  { id:'sp-2e3f4a5b-0011', label:'Fatigue Management' },
+  { id:'sp-2e3f4a5b-0012', label:'Safety Observation / Inspection' },
+];
+
+// ── STAGE DEFINITIONS ─────────────────────────────────────────────────────────
+const STAGES = [
+  { id:'capture',   n:1, job:'capture.incident',                side:'CLIENT', spec:'INCIDENT-CAPTURE.md' },
+  { id:'triage',    n:2, job:'triage algorithm',                side:'SYSTEM', spec:'INCIDENT-CAPTURE.md' },
+  { id:'assist',    n:3, job:'investigation.assist',            side:'SERVER', spec:'INCIDENT-CAPTURE.md' },
+  { id:'framework', n:4, job:'framework completion + close',    side:'HUMAN',  spec:'INVESTIGATION.md' },
+  { id:'narrative', n:5, job:'investigation.generate_narrative',side:'SERVER', spec:'INVESTIGATION.md' },
+  { id:'classify',  n:6, job:'fw_classify',                     side:'SERVER', spec:'fw-classify-job.md' },
+];
+
+const NODE_TYPE = { CLIENT:'ai', SERVER:'ai', SYSTEM:'system', HUMAN:'human' };
+const NUM_BADGE = { CLIENT:'sn-ai', SERVER:'sn-ai', SYSTEM:'sn-sys', HUMAN:'sn-hum' };
+
+// Each AI stage on the canvas maps to a (feature spec file, stage label) pair.
+// The stage label is matched against the Role cell text in the spec's
+// Global References Used table — rows that mention this stage (or are
+// unconditional) apply here. Non-AI stages (triage, framework) carry no refs
+// strip — triage is server-side JS only and framework is a human-driven gate.
+const STAGE_SPEC = {
+  capture:   { spec: 'INCIDENT-CAPTURE', stageLabel: 'Stage 1' },
+  assist:    { spec: 'INCIDENT-CAPTURE', stageLabel: 'Stage 3' },
+  narrative: { spec: 'INVESTIGATION',    stageLabel: 'Stage 3' },
+  // fw_classify lives in globals/fw-classify-job.md, not in features/. Its
+  // reference profile is canonical and minimal — Full Blueprint + spec-only
+  // standards — so it is sourced directly rather than parsed from a table.
+  classify:  { spec: '__fw_classify__',  stageLabel: 'fw_classify' },
+};
+
+// Parsed Global References Used tables, keyed by feature spec basename.
+// Populated by initReferences() at startup from /specs/features/*.md.
+const REFS = { byFeature: {}, ready: false, error: null };
+
+function refTypeClass(level) {
+  switch ((level || '').toUpperCase()) {
+    case 'FULL':        return 'rp-connected';
+    case 'SUMMARY':     return 'rp-summary';
+    case 'BEHAVIOURAL': return 'rp-spec-only';
+    default:            return 'rp-spec-only';
+  }
+}
+
+// Parse the Role column under the two-rule model. Cell content is markdown,
+// often with stage qualifiers and explanatory notes, e.g.
+// "first-time (Stage 1, Stage 2)" or "Rule 2 — Full (Stage 3 only)" or "behavioural".
+//
+// Returns { role, level } where role is the diagnostic label and level is the
+// injection level derived from the two rules in HOW-TO-READ-THIS.md:
+//   first-time   → level = SUMMARY (Rule 1)
+//   pass-through → level = SUMMARY (Rule 1)
+//   Rule 2 / Full → level = FULL    (Rule 2 — fw_classify only)
+//   behavioural  → level = BEHAVIOURAL (not injected; rule applied inline)
+function parseRoleAndLevel(cell) {
+  if (!cell) return null;
+  const text = cell.replace(/\*\*/g, '');
+  if (/\bRule\s*2\b|\bFull\b/i.test(text))   return { role: 'Rule 2',       level: 'FULL' };
+  if (/\bfirst[-\s]?time\b/i.test(text))     return { role: 'first-time',   level: 'SUMMARY' };
+  if (/\bpass[-\s]?through\b/i.test(text))   return { role: 'pass-through', level: 'SUMMARY' };
+  if (/\bbehavioural\b/i.test(text))         return { role: 'behavioural',  level: 'BEHAVIOURAL' };
+  return null;
+}
+
+// Extract referenced filename. Cell content looks like
+// "`globals/signal-type-taxonomy.md`" — strip backticks and the path prefix.
+function parseFile(cell) {
+  if (!cell) return null;
+  const m = cell.match(/`?([\w./-]+\.md)`?/);
+  if (!m) return null;
+  return m[1].replace(/^.*\//, '');
+}
+
+// Does this row's Role cell apply to the named stage? A cell with no explicit
+// stage qualifier applies unconditionally. A cell that explicitly names stages
+// (e.g. "first-time (Stage 1, Stage 2)") applies only if our stage is listed.
+// A cell that says "not referenced in Stage X" (or "not used in Stage X") is
+// excluded for that stage.
+function levelAppliesToStage(roleCell, stageLabel) {
+  if (!roleCell) return false;
+  const text = roleCell.replace(/\*\*/g, '');
+  if (new RegExp('not (referenced|used) in [^.;|]*\\b' + stageLabel + '\\b', 'i').test(text)) return false;
+  const stageList = text.match(/\(((?:Stage [^)]+))\)/);
+  if (!stageList) return true; // unconditional
+  return new RegExp('\\b' + stageLabel + '\\b').test(stageList[1]);
+}
+
+function parseGlobalRefsTable(md) {
+  const heading = '## Global References Used';
+  const startIdx = md.indexOf(heading);
+  if (startIdx === -1) return [];
+  const rest = md.slice(startIdx + heading.length);
+  const endIdx = rest.indexOf('\n## ');
+  const section = endIdx === -1 ? rest : rest.slice(0, endIdx);
+  const rows = [];
+  for (const line of section.split('\n')) {
+    if (!line.trim().startsWith('|')) continue;
+    if (/^\|\s*-+/.test(line.trim())) continue;
+    const cells = line.split('|').map(c => c.trim());
+    if (cells.length < 5) continue;
+    // cells: [empty, Global name, File, Used for, Role, empty?]
+    const label = cells[1];
+    if (!label || /^Global$/i.test(label)) continue;
+    const file = parseFile(cells[2]);
+    const usedFor = cells[3];
+    const roleCell = cells[4];
+    const parsed = parseRoleAndLevel(roleCell);
+    if (!file || !parsed) continue;
+    rows.push({ file, label, usedFor, roleCell, role: parsed.role, level: parsed.level });
+  }
+  return rows;
+}
+
+async function initReferences() {
+  try {
+    const featureNames = ['INCIDENT-CAPTURE', 'INVESTIGATION'];
+    await Promise.all(featureNames.map(async (name) => {
+      const r = await fetch('/specs/features/' + name + '.md');
+      if (!r.ok) throw new Error(name + ' HTTP ' + r.status);
+      const md = await r.text();
+      REFS.byFeature[name] = parseGlobalRefsTable(md);
+    }));
+    REFS.ready = true;
+    console.log('[incident-to-investigation] References loaded — feature specs:', Object.keys(REFS.byFeature).join(', '));
+  } catch (err) {
+    REFS.error = err.message;
+    console.error('[incident-to-investigation] Reference load failed:', err);
+  }
+}
+
+// Return the list of {file, level, role, usedFor} entries that apply to this
+// stage, drawn from the relevant spec's Global References Used table.
+function getStageRefs(stageId) {
+  const mapping = STAGE_SPEC[stageId];
+  if (!mapping) return null;
+  // fw_classify is canonical and minimal — sourced from the job spec
+  // (fw-classify-job.md), not from a feature-spec Global References Used table.
+  if (mapping.spec === '__fw_classify__') {
+    return [
+      { file: 'fw-map-blueprint.md',    level: 'FULL',        role: 'Rule 2',      usedFor: 'Entire Blueprint injected verbatim into fw_classify system prompt' },
+      { file: 'ai-output-standards.md', level: 'BEHAVIOURAL', role: 'behavioural', usedFor: 'JSON-only output discipline, retry policy — applied inline' },
+    ];
+  }
+  const rows = REFS.byFeature[mapping.spec];
+  if (!rows) return null;
+  return rows
+    .filter(r => levelAppliesToStage(r.roleCell, mapping.stageLabel))
+    .map(r => ({ file: r.file, level: r.level, role: r.role, usedFor: r.usedFor }));
+}
+
+// ── PROMPTS ───────────────────────────────────────────────────────────────────
+let PROMPTS = {};
+let promptsReady = false;
+
+async function fetchGlobal(name) {
+  const r = await fetch('/specs/globals/' + name + '.md');
+  if (!r.ok) throw new Error('Could not fetch globals/' + name + '.md — HTTP ' + r.status);
+  const txt = await r.text();
+  if (txt.trim().startsWith('<')) throw new Error('Got HTML for globals/' + name + '.md — serve from project root');
+  return txt;
+}
+
+async function initPrompts() {
+  try {
+    const [featureSpecs, fwClassifyMd, blueprintMd] = await Promise.all([
+      loadSimPrompts(['INCIDENT-CAPTURE', 'INVESTIGATION']),
+      fetchGlobal('fw-classify-job'),
+      fetchGlobal('fw-map-blueprint'),
+      initReferences(),
+    ]);
+    PROMPTS.captureSystem    = featureSpecs['INCIDENT-CAPTURE']['CANONICAL-SYSTEM-PROMPT-STAGE-1'];
+    PROMPTS.assistSystem     = featureSpecs['INCIDENT-CAPTURE']['CANONICAL-SYSTEM-PROMPT-STAGE-3'];
+    PROMPTS.assistUserTpl    = featureSpecs['INCIDENT-CAPTURE']['CANONICAL-USER-PROMPT-STAGE-3'];
+    PROMPTS.narrativeSystem  = featureSpecs['INVESTIGATION']['CANONICAL-SYSTEM-PROMPT-STAGE-3'];
+    PROMPTS.narrativeUserTpl = featureSpecs['INVESTIGATION']['CANONICAL-USER-PROMPT-STAGE-3'];
+    if (!PROMPTS.captureSystem)    throw new Error('CANONICAL-SYSTEM-PROMPT-STAGE-1 not found in INCIDENT-CAPTURE.md');
+    if (!PROMPTS.assistSystem)     throw new Error('CANONICAL-SYSTEM-PROMPT-STAGE-3 not found in INCIDENT-CAPTURE.md');
+    if (!PROMPTS.assistUserTpl)    throw new Error('CANONICAL-USER-PROMPT-STAGE-3 not found in INCIDENT-CAPTURE.md');
+    if (!PROMPTS.narrativeSystem)  throw new Error('CANONICAL-SYSTEM-PROMPT-STAGE-3 not found in INVESTIGATION.md');
+    if (!PROMPTS.narrativeUserTpl) throw new Error('CANONICAL-USER-PROMPT-STAGE-3 not found in INVESTIGATION.md');
+    PROMPTS.fwBaseSystem = extractSection(fwClassifyMd, 'CANONICAL-FW-CLASSIFY-BASE-SYSTEM-PROMPT');
+    PROMPTS.fwUserTpl    = extractSection(fwClassifyMd, 'CANONICAL-FW-CLASSIFY-USER-PROMPT-INVESTIGATION');
+    PROMPTS.blueprint    = blueprintMd;
+    if (!PROMPTS.fwBaseSystem) throw new Error('CANONICAL-FW-CLASSIFY-BASE-SYSTEM-PROMPT not found in fw-classify-job.md');
+    if (!PROMPTS.fwUserTpl)    throw new Error('CANONICAL-FW-CLASSIFY-USER-PROMPT-INVESTIGATION not found in fw-classify-job.md');
+    const placeholder = '[Full per-factor definitions injected from globals/fw-map-blueprint.md at runtime]';
+    PROMPTS.fwSystem = PROMPTS.fwBaseSystem.replace(placeholder, blueprintMd);
+    promptsReady = true;
+    console.log('[incident-to-investigation] All prompts loaded');
+    renderAll();
+  } catch (err) {
+    console.error('[incident-to-investigation] Prompt load failed:', err);
+    setApiStatus('⚠ Spec load failed — ' + err.message, 'err');
+    renderAll();
+  }
+}
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+// Stream stages: capture (chat) → triage (algorithm) → assist (AI) →
+// framework (human) → narrative (AI) → classify (AI). Critical-severity
+// incidents also fire solo_critical into observation-to-insight, but that
+// bridge is handled by the other Live Sim, not here.
+const INITIAL_STAGES = { capture:'active', triage:'pending', assist:'pending', framework:'pending', narrative:'pending', classify:'pending' };
+let S = {
+  stages: { ...INITIAL_STAGES },
+  captureData:null, triageData:null, assistData:null,
+  frameworkData:null, narrativeData:null, classifyData:null,
+  chatMsgs:[], chatHistory:[], chatDone:false,
+};
+
+function resetPipeline() {
+  S = {
+    stages: { ...INITIAL_STAGES },
+    captureData:null, triageData:null, assistData:null,
+    frameworkData:null, narrativeData:null, classifyData:null,
+    chatMsgs:[], chatHistory:[], chatDone:false,
+  };
+  renderAll();
+}
+
+// ── RENDER ────────────────────────────────────────────────────────────────────
+function renderAll() { renderLeft(); renderCanvas(); }
+
+// ── LEFT PANEL ────────────────────────────────────────────────────────────────
+function renderLeft() {
+  const left = document.getElementById('left');
+  left.innerHTML = '';
+
+  // Header
+  const hdr = document.createElement('div');
+  hdr.className = 'left-hdr';
+  const done = S.stages.capture === 'complete';
+  hdr.innerHTML = `
+    <div class="left-stage">Stage 1 · Client</div>
+    <div class="left-job">capture.incident</div>
+    <div class="left-spec">INCIDENT-CAPTURE.md § CANONICAL-SYSTEM-PROMPT-STAGE-1</div>
+    ${done ? '<div class="left-status ok">✓ Submitted — triage running</div>' : ''}
+    ${!promptsReady ? '<div class="left-status warn" style="margin-top:5px;">⚠ Spec not loaded — serve from project root</div>' : ''}
+  `;
+  left.appendChild(hdr);
+
+  // Chat messages
+  const msgsDiv = document.createElement('div');
+  msgsDiv.className = 'chat-msgs';
+  msgsDiv.id = 'chat-msgs';
+  S.chatMsgs.forEach(m => appendMsgEl(msgsDiv, m.sender, m.text, null));
+  left.appendChild(msgsDiv);
+
+  // Capture-done summary + submit
+  if (S.chatDone && S.captureData && S.stages.capture === 'active') {
+    const d = S.captureData;
+    const capDone = document.createElement('div');
+    capDone.className = 'cap-done';
+    capDone.innerHTML = `
+      <div class="cap-done-label">✓ Captured — ready to submit</div>
+      <div class="cap-done-row"><span class="cap-done-key">incident_type</span><span class="cap-done-val">${escHtml(fmt(d.incident_type)||'—')}</span></div>
+      <div class="cap-done-row"><span class="cap-done-key">description</span><span class="cap-done-val">${escHtml(truncate(d.description||'—',52))}</span></div>
+      <div class="cap-done-row"><span class="cap-done-key">injury</span><span class="cap-done-val">${escHtml(fmt(d.injury_classification)||'—')}</span></div>
+      <div class="cap-done-row"><span class="cap-done-key">work_type</span><span class="cap-done-val">${escHtml(d.work_type||'—')}</span></div>
+      <div class="cap-done-row"><span class="cap-done-key">energy_type</span><span class="cap-done-val">${escHtml(fmt(d.energy_type)||'—')}</span></div>
+      <div class="cap-done-row"><span class="cap-done-key">notifiable</span><span class="cap-done-val">${escHtml(String(d.notifiable_flag ?? '—'))}</span></div>
+    `;
+    left.appendChild(capDone);
+
+    const btn = document.createElement('button');
+    btn.className = 'submit-btn';
+    btn.innerHTML = `<svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg> Submit → run triage`;
+    btn.onclick = submitCapture;
+    left.appendChild(btn);
+  }
+
+  // Prompt toggle — always visible after prompts load
+  if (promptsReady && PROMPTS.captureSystem) {
+    const wrap = document.createElement('div');
+    wrap.className = 'ptog-wrap';
+    wrap.appendChild(makePromptToggle('CANONICAL-SYSTEM-PROMPT-STAGE-1', PROMPTS.captureSystem));
+    left.appendChild(wrap);
+  }
+
+  // Input bar
+  if (S.stages.capture === 'active') {
+    const ibar = document.createElement('div');
+    ibar.className = 'chat-ibar';
+    ibar.innerHTML = `
+      <textarea class="chat-inp" id="chat-inp" placeholder="Describe what happened…" rows="1"
+        onkeydown="handleChatKey(event)" oninput="autoresize(this)"></textarea>
+      <button class="chat-snd" id="chat-snd" onclick="sendChat()">
+        <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>
+      </button>
+    `;
+    left.appendChild(ibar);
+  }
+
+  // Open message on first render — guard inside setTimeout to prevent double-fire
+  // when initPrompts also triggers renderAll before the first timeout fires
+  if (S.chatMsgs.length === 0 && S.stages.capture === 'active') {
+    setTimeout(() => {
+      if (S.chatMsgs.length > 0) return;
+      const msg = "Thanks for flagging this. What happened?";
+      S.chatMsgs.push({ sender:'ai', text:msg });
+      S.chatHistory.push({ role:'assistant', content:msg });
+      const el = document.getElementById('chat-msgs');
+      if (el) appendMsgEl(el, 'ai', msg, null);
+    }, 80);
+  }
+}
+
+// ── CANVAS ────────────────────────────────────────────────────────────────────
+function renderCanvas() {
+  const canvas = document.getElementById('canvas');
+  canvas.innerHTML = '';
+  STAGES.forEach(stage => canvas.appendChild(buildStep(stage)));
+}
+
+function buildStep(stage) {
+  const st = S.stages[stage.id];
+  const isPending = st === 'pending';
+  const isSkipped = st === 'skipped';
+  const isDone    = st === 'complete';
+  const isRunning = st === 'running';
+  const isActive  = st === 'active';
+
+  const step = document.createElement('div');
+  step.className = 'step' + (isPending ? ' dim' : isSkipped ? ' dim-lite' : '');
+  step.id = 'step-' + stage.id;
+
+  // Node
+  const ntype = NODE_TYPE[stage.side];
+  let nCls = ntype;
+  if (isDone)                   nCls = 'done';
+  else if (isRunning || isActive) nCls = ntype + ' pulse';
+
+  // Status label
+  let statHtml = '';
+  if (isRunning) statHtml = '<span class="sstat running">running</span>';
+  else if (isActive) statHtml = '<span class="sstat running">active</span>';
+  else if (isDone)   statHtml = '<span class="sstat done">complete</span>';
+  else if (isSkipped) statHtml = '<span class="sstat skipped">skipped</span>';
+
+  // Card border class
+  let cardCls = ntype;
+  if (isDone)   cardCls = 'done';
+  if (isPending) cardCls += ' pending';
+  if (isSkipped) cardCls += ' skipped';
+
+  const numBadge = NUM_BADGE[stage.side];
+  const refs = buildRefsStrip(stage.id);
+
+  step.innerHTML = `
+    <div class="spine">
+      <div class="node ${nCls}">${stage.n}</div>
+    </div>
+    <div class="scontent">
+      <div class="shead">
+        <span class="snum ${numBadge}">Stage ${stage.n}</span>
+        <span class="sjob">${stage.job}</span>
+        ${statHtml}
+        <span class="sspec">${stage.spec}</span>
+      </div>
+      <div class="scard ${cardCls}">
+        ${refs}
+        <div class="cbody" id="cb-${stage.id}"></div>
+      </div>
+    </div>
+  `;
+
+  const body = step.querySelector('#cb-' + stage.id);
+  if (stage.id === 'capture')   populateCapture(body, st);
+  if (stage.id === 'triage')    populateTriage(body, st);
+  if (stage.id === 'assist')    populateAssist(body, st);
+  if (stage.id === 'framework') populateFramework(body, st);
+  if (stage.id === 'narrative') populateNarrative(body, st);
+  if (stage.id === 'classify')  populateClassify(body, st);
+
+  return step;
+}
+
+function buildRefsStrip(id) {
+  const mapping = STAGE_SPEC[id];
+  if (!mapping) return '';
+  const refs = getStageRefs(id);
+
+  let inner;
+  if (refs === null) {
+    inner = `<span style="font-family:var(--mono);font-size:9px;color:var(--muted);">${REFS.error ? 'spec load failed — ' + escHtml(REFS.error) : 'loading references…'}</span>`;
+  } else if (refs.length === 0) {
+    inner = `<span style="font-family:var(--mono);font-size:9px;color:var(--muted);">no globals referenced at ${escHtml(mapping.stageLabel)}</span>`;
+  } else {
+    inner = refs.map(r => {
+      const cls = refTypeClass(r.level);
+      const levelLabel = (r.level === 'BEHAVIOURAL') ? 'INLINE' : r.level;
+      const roleLabel = r.role || '';
+      const tip = [r.level, roleLabel ? '(' + roleLabel + ')' : '', r.usedFor ? '— ' + r.usedFor : ''].filter(Boolean).join(' ');
+      return `<span class="ref-pill ${cls}" title="${escHtml(tip)}"><span class="rp-dot"></span><span class="rp-type">${escHtml(levelLabel)}</span>${escHtml(r.file)}${roleLabel ? `<span class="rp-role" title="Role: ${escHtml(roleLabel)}">${escHtml(roleLabel)}</span>` : ''}</span>`;
+    }).join('');
+  }
+
+  const sourceTag = mapping.spec === '__fw_classify__'
+    ? 'fw-classify-job.md (Rule 2)'
+    : mapping.spec + '.md § ' + mapping.stageLabel;
+  return `<div class="refs-strip"><span class="refs-lbl" title="Source: ${escHtml(sourceTag)}">REFS</span>${inner}</div>`;
+}
+
+// ── STAGE 1: CAPTURE (canvas panel) ───────────────────────────────────────────
+function populateCapture(body, st) {
+  if (st === 'active') {
+    body.appendChild(noteEl('info', 'Reporter conversation active — use the left panel to describe what happened. AI gathers structured incident detail in real time (incident type, injury class, scene status, notifiable flag).'));
+    return;
+  }
+  if (st === 'complete' && S.captureData) {
+    const d = S.captureData;
+    body.appendChild(blkLabel('Stage 1 output'));
+    fRow(body, 'incident_type', fmt(d.incident_type), 'hi-warn');
+    fRow(body, 'description', d.description, 'bright');
+    fRow(body, 'work_type', d.work_type);
+    fRow(body, 'injury_classification', fmt(d.injury_classification), d.injury_classification && d.injury_classification !== 'none' ? 'hi-warn' : '');
+    fRow(body, 'people_involved', String(d.people_involved_count ?? '—'));
+    fRow(body, 'occurred_at', fmt(d.occurred_at));
+    fRow(body, 'scene_secured', String(d.scene_secured ?? '—'));
+    fRow(body, 'site_manager_notified', String(d.site_manager_notified ?? '—'));
+    fRow(body, 'energy_type_hint', fmt(d.energy_type));
+    fRow(body, 'barrier_hint', fmt(d.barrier_assessment));
+    fRow(body, 'fw_factor_hint', d.fw_factor_hint || 'null', d.fw_factor_hint ? 'hi-plum' : '');
+    fRow(body, 'notifiable_flag (capture)', String(d.notifiable_flag ?? false), d.notifiable_flag ? 'hi-warn' : '');
+    fRow(body, 'immediate_action', d.immediate_action_taken || 'None recorded');
+    return;
+  }
+  body.innerHTML = '<div class="wait-txt">waiting for capture…</div>';
+}
+
+// ── CHAT LOGIC ────────────────────────────────────────────────────────────────
+function appendMsgEl(container, sender, text, qrs) {
+  const div = document.createElement('div');
+  div.className = 'msg msg-' + sender;
+  const label = sender === 'ai' ? 'Hiviz' : 'Marcus (reporter)';
+  div.innerHTML = `<div class="msg-sndr">${label}</div><div class="msg-bubble">${escHtml(text)}</div>`;
+  if (qrs && qrs.length) {
+    const qrDiv = document.createElement('div');
+    qrDiv.className = 'qrs';
+    qrs.forEach(q => {
+      const chip = document.createElement('span');
+      chip.className = 'qr'; chip.textContent = q;
+      chip.onclick = () => {
+        const inp = document.getElementById('chat-inp');
+        if (inp) { inp.value = q; qrDiv.remove(); sendChat(); }
+      };
+      qrDiv.appendChild(chip);
+    });
+    div.appendChild(qrDiv);
+  }
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+}
+
+function addTyping() {
+  const c = document.getElementById('chat-msgs');
+  if (!c) return;
+  const d = document.createElement('div');
+  d.id = 'typing'; d.className = 'msg msg-ai';
+  d.innerHTML = '<div class="msg-sndr">Hiviz</div><div class="typing"><div class="td"></div><div class="td"></div><div class="td"></div></div>';
+  c.appendChild(d); c.scrollTop = c.scrollHeight;
+}
+function removeTyping() { const el = document.getElementById('typing'); if (el) el.remove(); }
+
+async function sendChat() {
+  if (!apiKey) { alert('Add your Anthropic API key first.'); return; }
+  if (!promptsReady) { alert('Spec files not loaded — serve from project root.'); return; }
+  const inp = document.getElementById('chat-inp');
+  const text = inp ? inp.value.trim() : '';
+  if (!text) return;
+  inp.value = ''; autoresize(inp);
+
+  S.chatMsgs.push({ sender:'user', text });
+  S.chatHistory.push({ role:'user', content: text });
+  const msgsEl = document.getElementById('chat-msgs');
+  appendMsgEl(msgsEl, 'user', text, null);
+
+  const sndBtn = document.getElementById('chat-snd');
+  if (sndBtn) sndBtn.disabled = true;
+  addTyping();
+
+  const sys = PROMPTS.captureSystem + '\n\nSite: Northgate Open Cut\nReporter: Marcus, Site Supervisor';
+  try {
+    const resp = await callClaude(sys, S.chatHistory, 600);
+    const reply = resp.content[0].text;
+    removeTyping();
+    if (sndBtn) sndBtn.disabled = false;
+    S.chatHistory.push({ role:'assistant', content: reply });
+
+    if (reply.includes('<summary>')) {
+      const match = reply.match(/<summary>([\s\S]*?)<\/summary>/);
+      const narrative = reply.replace(/<summary>[\s\S]*?<\/summary>/, '').trim();
+      if (narrative) {
+        S.chatMsgs.push({ sender:'ai', text: narrative });
+        appendMsgEl(msgsEl, 'ai', narrative, null);
+      }
+      if (match) {
+        try {
+          S.captureData = JSON.parse(match[1].trim());
+          S.chatDone = true;
+          S.chatMsgs.push({ sender:'ai', text: '✓ Captured. Review the summary and submit when ready.' });
+          renderLeft(); // re-render to show capture-done summary + submit btn
+        } catch(e) {
+          S.chatMsgs.push({ sender:'ai', text: reply });
+          appendMsgEl(msgsEl, 'ai', reply, null);
+        }
+      }
+    } else {
+      let qrs = null;
+      if (/what work|type of work|working on/i.test(reply)) qrs = HIGH_RISK_WORK.map(x=>x.label).slice(0,6);
+      if (/anyone hurt|anyone injured|how serious/i.test(reply)) qrs = ['No injuries', 'First aid needed', 'Medical treatment', 'Needs hospital'];
+      if (/scene secured|area secured/i.test(reply)) qrs = ['Yes, scene secured', 'No, still active'];
+      if (/when did this|this shift|earlier today/i.test(reply)) qrs = ['This shift', 'Earlier today', 'Yesterday'];
+      if (/site manager.*notified|notified.*manager/i.test(reply)) qrs = ['Yes, notified', 'Not yet'];
+      S.chatMsgs.push({ sender:'ai', text: reply });
+      appendMsgEl(msgsEl, 'ai', reply, qrs);
+    }
+  } catch(err) {
+    removeTyping();
+    if (sndBtn) sndBtn.disabled = false;
+    appendMsgEl(msgsEl, 'ai', 'Error: ' + err.message, null);
+  }
+}
+
+function handleChatKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChat(); }
+}
+
+// ── STAGE 2: TRIAGE ALGORITHM ────────────────────────────────────────────────
+// Runs synchronously server-side per INCIDENT-CAPTURE.md §Stage 2.
+// No AI. Derives severity_class + requires_investigation from the capture
+// summary. Critical severity triggers the solo_critical bridge into the
+// observation-to-insight stream (handled there — this sim notes it only).
+function submitCapture() {
+  S.stages.capture = 'complete';
+  S.stages.triage  = 'running';
+  renderAll();
+  setTimeout(runTriage, 150);
+}
+
+function deriveSeverityClass(d) {
+  const inj = d.injury_classification;
+  if (inj === 'fatality' || inj === 'lost_time') return 'critical';
+  if (inj === 'restricted_work' || inj === 'medical_treatment') return 'serious';
+  if (inj === 'first_aid' || d.incident_type === 'near-miss') return 'moderate';
+  return 'minor';
+}
+
+function deriveRequiresInvestigation(d, sev) {
+  if (d.incident_type === 'injury') return true;
+  if (d.incident_type === 'near-miss') return true; // sim treats every near-miss as requiring inv
+  if (d.incident_type === 'property-damage') return false; // simplification — production: threshold-based
+  if (d.incident_type === 'environmental') return true;
+  if (sev === 'critical' || sev === 'serious') return true;
+  return false;
+}
+
+function runTriage() {
+  const d = S.captureData;
+  const severity_class = deriveSeverityClass(d);
+  const requires_investigation = deriveRequiresInvestigation(d, severity_class);
+  // notifiable_flag re-evaluated server-side independently of capture hint
+  const notifiable_flag = severity_class === 'critical' || d.notifiable_flag === true;
+  S.triageData = { severity_class, requires_investigation, notifiable_flag, solo_critical_triggered: severity_class === 'critical' };
+  S.stages.triage = 'complete';
+  if (requires_investigation) {
+    S.stages.assist = 'running';
+    setTimeout(runAssist, 200);
+  } else {
+    S.stages.assist = 'skipped';
+    S.stages.framework = 'skipped';
+    S.stages.narrative = 'skipped';
+    S.stages.classify = 'skipped';
+  }
+  renderAll();
+}
+
+function populateTriage(body, st) {
+  if (st === 'pending') { body.innerHTML = '<div class="wait-txt">waiting for capture submit…</div>'; return; }
+  if (!S.triageData) return;
+  const t = S.triageData;
+  const card = document.createElement('div');
+  card.className = 'route-c ' + (t.requires_investigation ? 'direct' : 'pool');
+  card.innerHTML = `
+    <div class="route-title">${t.requires_investigation
+      ? '⚡ INVESTIGATION REQUIRED — investigation.assist queued'
+      : '○ NO INVESTIGATION — record stored, pipeline ends'}</div>
+    <div class="route-rule">severity_class = ${t.severity_class}
+requires_investigation = ${t.requires_investigation}
+notifiable_flag = ${t.notifiable_flag}
+solo_critical_triggered = ${t.solo_critical_triggered}</div>
+    <div class="route-out">${t.requires_investigation
+      ? 'Triage created investigation record (status: open). investigation.assist will run with capture hints + incident description. On close, narrative + fw_classify queue.'
+      : 'Triage closed without investigation. Record stored. Downstream stages skipped.'}</div>
+  `;
+  body.appendChild(card);
+  if (t.solo_critical_triggered) {
+    body.appendChild(noteEl('warn', 'Severity = critical also fires the solo_critical bridge into the observation-to-insight stream (critical_insight.generate). That stream is exercised in observation-to-insight.html — this Live Sim shows only the incident → investigation path.'));
+  }
+}
+
+// ── STAGE 3: INVESTIGATION ASSIST ────────────────────────────────────────────
+function resolveTemplate(tpl, vars) {
+  return tpl.replace(/\{\{\s*([^}|]+?)(?:\s*\|\s*([^}]*?))?\s*\}\}/g, (_, key, fallback) => {
+    const k = key.trim();
+    const v = vars[k];
+    if (v === undefined || v === null || v === '') return (fallback ?? '').replace(/^"|"$/g, '');
+    return typeof v === 'string' ? v : JSON.stringify(v, null, 2);
+  });
+}
+
+function buildAssistUserPrompt() {
+  const d = S.captureData || {};
+  const t = S.triageData || {};
+  return resolveTemplate(PROMPTS.assistUserTpl, {
+    incident_type:             d.incident_type || '',
+    severity_class:            t.severity_class || '',
+    work_type_label:           d.work_type || 'not specified',
+    description:               d.description || '',
+    immediate_action_taken:    d.immediate_action_taken || 'None recorded',
+    capture_energy_type_hint:  d.energy_type ?? null,
+    capture_barrier_hint:      d.barrier_assessment ?? null,
+  });
+}
+
+async function runAssist() {
+  try {
+    const resp = await callClaude(PROMPTS.assistSystem, [{ role:'user', content: buildAssistUserPrompt() }], 1000);
+    const raw = resp.content[0].text.replace(/```json|```/g,'').trim();
+    S.assistData = JSON.parse(raw);
+    S.stages.assist = 'complete';
+    S.stages.framework = 'active';
+    renderAll();
+  } catch(err) {
+    S.assistData = { _error: err.message };
+    S.stages.assist = 'complete';
+    S.stages.framework = 'active';
+    renderAll();
+  }
+}
+
+function populateAssist(body, st) {
+  if (st === 'pending')  { body.innerHTML = '<div class="wait-txt">waiting for triage…</div>'; return; }
+  if (st === 'skipped')  { body.innerHTML = '<div class="wait-txt">not triggered — no investigation required</div>'; return; }
+  if (st === 'running')  {
+    body.appendChild(runRow('investigation.assist — BullMQ server job — calling AI…'));
+    body.appendChild(noteEl('info', 'System prompt: CANONICAL-SYSTEM-PROMPT-STAGE-3 from INCIDENT-CAPTURE.md'));
+    return;
+  }
+  if (!S.assistData) return;
+  const a = S.assistData;
+  if (a._error) { body.appendChild(noteEl('error', 'Assist failed: ' + a._error)); return; }
+
+  body.appendChild(blkLabel('AI-suggested contributing factors'));
+  (a.ai_suggested_contributing_factors || []).forEach(f => {
+    fRow(body, '•', f.factor || '', 'bright');
+    if (f.rationale) ratRow(body, f.rationale);
+  });
+  if (a.ai_suggested_root_cause) {
+    body.appendChild(blkLabel('AI-suggested root cause'));
+    fRow(body, 'root_cause', a.ai_suggested_root_cause, 'hi-warn');
+    if (a.ai_suggested_root_cause_rationale) ratRow(body, a.ai_suggested_root_cause_rationale);
+  }
+  if ((a.ai_suggested_corrective_actions || []).length) {
+    body.appendChild(blkLabel('AI-suggested corrective actions'));
+    a.ai_suggested_corrective_actions.forEach(act => {
+      fRow(body, '→', act.action || '');
+      if (act.rationale) ratRow(body, act.rationale);
+    });
+  }
+  if ((a.ai_suggested_interview_questions || []).length) {
+    body.appendChild(blkLabel('AI-suggested interview questions'));
+    a.ai_suggested_interview_questions.forEach(q => {
+      fRow(body, '?', q.question || '');
+      if (q.rationale) ratRow(body, q.rationale);
+    });
+  }
+  if (a.fw_factor_hint) fRow(body, 'fw_factor_hint', a.fw_factor_hint, 'hi-plum');
+
+  body.appendChild(makePromptToggle('System prompt — CANONICAL-SYSTEM-PROMPT-STAGE-3', PROMPTS.assistSystem));
+  body.appendChild(makePromptToggle('User prompt (resolved) — CANONICAL-USER-PROMPT-STAGE-3', buildAssistUserPrompt()));
+}
+
+// ── STAGE 4: FRAMEWORK COMPLETION + CLOSE ────────────────────────────────────
+// Human-driven gate. Investigator confirms (or edits) the AI suggestions, sets
+// sharing scope, sets legal_hold, decides cleared_for_sharing. For sim purposes
+// we model this as a single approve/reject decision against the AI suggestions.
+function populateFramework(body, st) {
+  if (st === 'pending') { body.innerHTML = '<div class="wait-txt">waiting for investigation.assist…</div>'; return; }
+  if (st === 'skipped') { body.innerHTML = '<div class="wait-txt">not triggered</div>'; return; }
+  if (!S.assistData || S.assistData._error) { body.appendChild(noteEl('error', 'Cannot close — investigation.assist failed.')); return; }
+
+  if (S.frameworkData) {
+    const closed = S.frameworkData.decision === 'closed';
+    body.appendChild(blkLabel('Close decision'));
+    fRow(body, 'action',                 S.frameworkData.decision, closed ? 'hi-ok' : 'hi-warn');
+    fRow(body, 'cleared_for_sharing',    closed ? 'true'  : 'false', closed ? 'hi-ok' : 'hi-warn');
+    fRow(body, 'legal_hold',             'false');
+    if (closed) {
+      fRow(body, 'next', 'investigation.generate_narrative + fw_classify queue in parallel', 'hi-plum');
+    } else {
+      fRow(body, 'next', 'investigation archived — no further jobs', 'hi-warn');
+    }
+    return;
+  }
+
+  body.appendChild(noteEl('info', 'Human gate — investigator confirms framework fields and signs off. AI suggestions above are the starting point; in production each is editable. On close with cleared_for_sharing = true and legal_hold = false, the toolbox narrative + FW classify jobs queue in parallel.'));
+
+  const btns = document.createElement('div');
+  btns.className = 'rev-btns';
+  btns.innerHTML = `
+    <button class="rev-btn rev-approve" onclick="handleClose('closed')">Close — cleared_for_sharing = true</button>
+    <button class="rev-btn rev-reject"  onclick="handleClose('archived')">Archive — no downstream</button>
+  `;
+  body.appendChild(btns);
+}
+
+function handleClose(decision) {
+  S.frameworkData = { decision };
+  S.stages.framework = 'complete';
+  if (decision === 'closed') {
+    S.stages.narrative = 'running';
+    S.stages.classify  = 'running';
+    renderAll();
+    setTimeout(runNarrative, 200);
+    setTimeout(runFWClassify, 400);
+  } else {
+    S.stages.narrative = 'skipped';
+    S.stages.classify  = 'skipped';
+    renderAll();
+  }
+}
+
+// ── STAGE 5: NARRATIVE GENERATION ────────────────────────────────────────────
+function buildNarrativeUserPrompt() {
+  const d = S.captureData || {};
+  const a = S.assistData || {};
+  // Confirmed framework fields come from the human gate; for sim purposes
+  // we treat the AI-suggested values as confirmed-on-close.
+  return resolveTemplate(PROMPTS.narrativeUserTpl, {
+    work_type_label:         d.work_type || 'not specified',
+    immediate_cause:         (a.ai_suggested_contributing_factors?.[0]?.factor) || 'unknown',
+    contributing_factors_json: a.ai_suggested_contributing_factors || [],
+    root_cause:              a.ai_suggested_root_cause || '',
+    corrective_actions_json: a.ai_suggested_corrective_actions || [],
+    sharing_scope:           'region',
+  });
+}
+
+async function runNarrative() {
+  try {
+    const resp = await callClaude(PROMPTS.narrativeSystem, [{ role:'user', content: buildNarrativeUserPrompt() }], 1000);
+    const raw = resp.content[0].text.replace(/```json|```/g,'').trim();
+    S.narrativeData = JSON.parse(raw);
+    S.stages.narrative = 'complete';
+    renderAll();
+  } catch(err) {
+    S.narrativeData = { _error: err.message };
+    S.stages.narrative = 'complete';
+    renderAll();
+  }
+}
+
+function populateNarrative(body, st) {
+  if (st === 'pending') { body.innerHTML = '<div class="wait-txt">waiting for close…</div>'; return; }
+  if (st === 'skipped') { body.innerHTML = '<div class="wait-txt">not triggered — investigation archived</div>'; return; }
+  if (st === 'running') {
+    body.appendChild(runRow('investigation.generate_narrative — calling AI…'));
+    body.appendChild(noteEl('info', 'System prompt: CANONICAL-SYSTEM-PROMPT-STAGE-3 from INVESTIGATION.md. Feeds toolbox talk content selection pool.'));
+    return;
+  }
+  if (!S.narrativeData) return;
+  const n = S.narrativeData;
+  if (n._error) { body.appendChild(noteEl('error', 'Narrative failed: ' + n._error)); return; }
+
+  body.appendChild(blkLabel('Toolbox narrative output'));
+  if (n.incident_story) {
+    body.appendChild(blkLabel('Incident story'));
+    const s = document.createElement('div'); s.className = 'narrative'; s.textContent = n.incident_story;
+    body.appendChild(s);
+  }
+  if (n.root_cause_plain) {
+    fRow(body, 'root_cause_plain', n.root_cause_plain, 'hi-warn');
+  }
+  if ((n.what_we_do_now || []).length) {
+    body.appendChild(blkLabel('What we do now'));
+    n.what_we_do_now.forEach(a => fRow(body, '→', a));
+  }
+  if ((n.discussion_questions || []).length) {
+    body.appendChild(blkLabel('Discussion questions'));
+    n.discussion_questions.forEach(q => fRow(body, '?', q));
+  }
+
+  body.appendChild(makePromptToggle('System prompt — CANONICAL-SYSTEM-PROMPT-STAGE-3', PROMPTS.narrativeSystem));
+  body.appendChild(makePromptToggle('User prompt (resolved) — CANONICAL-USER-PROMPT-STAGE-3', buildNarrativeUserPrompt()));
+}
+
+// ── STAGE 6: FW CLASSIFY (investigation path) ────────────────────────────────
+function buildFWUserPrompt() {
+  const d = S.captureData || {};
+  const a = S.assistData || {};
+  const t = S.triageData || {};
+  let tpl = (PROMPTS.fwUserTpl || '')
+    .replace('{{work_type_label}}', d.work_type || 'not specified')
+    .replace('{{severity_class}}', t.severity_class || 'minor')
+    .replace('{{immediate_cause}}', (a.ai_suggested_contributing_factors?.[0]?.factor) || 'unknown')
+    .replace('{{contributing_factors_json}}', JSON.stringify(a.ai_suggested_contributing_factors || [], null, 2))
+    .replace('{{root_cause}}', a.ai_suggested_root_cause || '')
+    .replace('{{corrective_actions_json}}', JSON.stringify(a.ai_suggested_corrective_actions || [], null, 2));
+  // Strip solo_critical conditional block (investigation path has its own gate)
+  tpl = tpl.replace(/\{\{#if trigger_source == 'solo_critical'\}\}[\s\S]*?\{\{\/if\}\}/g, '');
+  return tpl;
+}
+
+async function runFWClassify() {
+  try {
+    const resp = await callClaude(PROMPTS.fwSystem, [{ role:'user', content: buildFWUserPrompt() }], 2000);
+    const raw = resp.content[0].text.replace(/```json|```/g,'').trim();
+    S.classifyData = JSON.parse(raw);
+    S.stages.classify = 'complete';
+    renderAll();
+  } catch(err) {
+    S.classifyData = { _error: err.message };
+    S.stages.classify = 'complete';
+    renderAll();
+  }
+}
+
+function populateClassify(body, st) {
+  if (st === 'pending') { body.innerHTML = '<div class="wait-txt">waiting for close…</div>'; return; }
+  if (st === 'skipped') { body.innerHTML = '<div class="wait-txt">not triggered — investigation archived</div>'; return; }
+  if (st === 'running') {
+    body.appendChild(runRow('fw_classify (investigation path) — Blueprint injected in full — calling AI…'));
+    body.appendChild(noteEl('info', 'System prompt: CANONICAL-FW-CLASSIFY-BASE-SYSTEM-PROMPT + full fw-map-blueprint.md. Investigation-path user prompt passes severity_class as upstream value.'));
+    return;
+  }
+  if (!S.classifyData) return;
+  const r = S.classifyData;
+  if (r._error) { body.appendChild(noteEl('error', 'FW classification failed: ' + r._error)); return; }
+
+  body.appendChild(blkLabel('Inputs'));
+  fRow(body, 'source_type', 'investigation');
+  fRow(body, 'severity_class', S.triageData?.severity_class || '—');
+  fRow(body, 'fw-map-blueprint.md', '✓ Injected in full at runtime', 'hi-ok');
+
+  const items = r.classifications || [];
+  body.appendChild(blkLabel('FW Map® classifications'));
+  if (!items.length) {
+    body.appendChild(noteEl('info', 'No factors classified at ≥ 0.70 confidence. classifications = [] is a valid result — fw_classified_at set, no retry per spec.'));
+  } else {
+    items.forEach(cl => {
+      const f = document.createElement('div');
+      f.className = 'fw-f';
+      const matCls = {compliant:'mat-compliant',leading:'mat-leading',resilient:'mat-resilient'}[cl.fw_maturity_signal]||'';
+      f.innerHTML = `
+        <div class="fw-f-row">
+          <span class="fw-f-name">${escHtml(cl.fw_factor||'')}</span>
+          <span class="fw-badge fw-dom">${escHtml(cl.fw_domain||'')}</span>
+          <span class="fw-badge ${matCls}">${escHtml(cl.fw_maturity_signal||'')}</span>
+          ${confBadge(cl.fw_confidence)}
+        </div>
+        <div class="fw-rat">${escHtml(cl.fw_rationale||'')}</div>
+      `;
+      body.appendChild(f);
+    });
+  }
+
+  if (r.fw_classification_basis) {
+    body.appendChild(blkLabel('Classification basis'));
+    const b = document.createElement('div');
+    b.className = 'field-rat';
+    b.textContent = r.fw_classification_basis;
+    body.appendChild(b);
+  }
+
+  body.appendChild(makePromptToggle('System prompt (Base + full Blueprint — long)', PROMPTS.fwSystem));
+  body.appendChild(makePromptToggle('User prompt (resolved) — CANONICAL-FW-CLASSIFY-USER-PROMPT-INVESTIGATION', buildFWUserPrompt()));
+}
+
+// ── API ───────────────────────────────────────────────────────────────────────
+async function callClaude(system, messages, maxTokens) {
+  const r = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true',
+    },
+    body: JSON.stringify({ model:'claude-sonnet-4-20250514', max_tokens:maxTokens, system, messages }),
+  });
+  if (!r.ok) { const err = await r.json(); throw new Error(err.error?.message || 'API error ' + r.status); }
+  return r.json();
+}
+
+// ── UTILS ─────────────────────────────────────────────────────────────────────
+function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function fmt(s) { return s ? String(s).replace(/_/g,' ') : '—'; }
+function truncate(s, n) { return s && s.length > n ? s.slice(0,n) + '…' : (s||''); }
+function autoresize(el) { el.style.height='auto'; el.style.height=Math.min(el.scrollHeight,72)+'px'; }
+function confPct(v) { return v != null ? Math.round(v*100) + '%' : ''; }
+
+function confBadge(c) {
+  if (c == null) return '';
+  const cls = c >= 0.7 ? 'cb-hi' : c >= 0.5 ? 'cb-mid' : 'cb-lo';
+  return `<span class="cb ${cls}">${Math.round(c*100)}%</span>`;
+}
+
+function fRow(container, key, val, cls) {
+  const row = document.createElement('div');
+  row.className = 'field-row';
+  const valCls = 'field-val' + (cls ? ' ' + cls : '');
+  row.innerHTML = `<span class="field-key">${key}</span><span class="${valCls}">${escHtml(String(val||'—'))}</span>`;
+  container.appendChild(row);
+}
+
+function ratRow(container, text) {
+  const d = document.createElement('div');
+  d.className = 'field-rat';
+  d.textContent = text;
+  container.appendChild(d);
+}
+
+function blkLabel(text) {
+  const d = document.createElement('div');
+  d.className = 'blk-lbl';
+  d.innerHTML = `<span>${escHtml(text)}</span>`;
+  return d;
+}
+
+function noteEl(type, text) {
+  const d = document.createElement('div');
+  d.className = 'note ' + type;
+  d.textContent = text;
+  return d;
+}
+
+function runRow(text) {
+  const d = document.createElement('div');
+  d.className = 'run-row';
+  d.innerHTML = `<div class="spinner"></div><span>${escHtml(text)}</span>`;
+  return d;
+}
+
+function makePromptToggle(label, promptText) {
+  const wrap = document.createElement('div');
+  let open = false;
+  const tog = document.createElement('div');
+  tog.className = 'ptog';
+  tog.innerHTML = `<svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="var(--muted)" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg><span class="ptog-lbl">${escHtml(label)}</span><span class="ptog-ico">▼</span>`;
+  const block = document.createElement('div');
+  block.className = 'pblock';
+  block.textContent = promptText || '(not loaded)';
+  tog.onclick = () => { open = !open; tog.classList.toggle('open',open); block.classList.toggle('open',open); };
+  wrap.appendChild(tog); wrap.appendChild(block);
+  return wrap;
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+renderAll();
+initPrompts();
+</script>
+</body>
+</html>

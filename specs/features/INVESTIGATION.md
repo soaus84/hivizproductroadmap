@@ -123,7 +123,7 @@ Your writing voice:
 You output only valid JSON with no preamble, explanation, or markdown formatting.
 ```
 
-### User Prompt Template
+### CANONICAL-USER-PROMPT-STAGE-3
 
 ```
 Confirmed investigation findings:

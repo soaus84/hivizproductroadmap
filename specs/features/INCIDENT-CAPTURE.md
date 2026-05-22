@@ -425,7 +425,7 @@ You output only valid JSON with no preamble, explanation, or markdown formatting
 Every suggestion must have a companion rationale — specific, evidence-based, one sentence.
 ```
 
-### User Prompt Template
+### CANONICAL-USER-PROMPT-STAGE-3
 
 ```
 Incident type: {{incident_type}}
