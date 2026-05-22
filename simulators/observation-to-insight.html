@@ -659,8 +659,10 @@ async function initPrompts() {
     ]);
     PROMPTS.captureSystem  = featureSpecs['OBSERVATION-CAPTURE']['CANONICAL-SYSTEM-PROMPT-STAGE-1'];
     PROMPTS.enrichSystem   = featureSpecs['OBSERVATION-CAPTURE']['CANONICAL-SYSTEM-PROMPT-STAGE-2'];
+    PROMPTS.enrichUserTpl  = featureSpecs['OBSERVATION-CAPTURE']['CANONICAL-USER-PROMPT-STAGE-2'];
     PROMPTS.insightSystem  = featureSpecs['CRITICAL-INSIGHT']['CANONICAL-SYSTEM-PROMPT-STAGE-1'];
     PROMPTS.insightUserTpl = featureSpecs['CRITICAL-INSIGHT']['CANONICAL-USER-PROMPT-STAGE-1-CRITICAL-OBSERVATION'];
+    if (!PROMPTS.enrichUserTpl) throw new Error('CANONICAL-USER-PROMPT-STAGE-2 not found in OBSERVATION-CAPTURE.md');
     PROMPTS.fwBaseSystem   = extractSection(fwClassifyMd, 'CANONICAL-FW-CLASSIFY-BASE-SYSTEM-PROMPT');
     PROMPTS.fwUserTpl      = extractSection(fwClassifyMd, 'CANONICAL-FW-CLASSIFY-USER-PROMPT-INSIGHT');
     PROMPTS.blueprint      = blueprintMd;
@@ -1002,48 +1004,36 @@ function submitCapture() {
   setTimeout(runEnrichment, 150);
 }
 
+// Resolve {{placeholders}} in the canonical user prompt template loaded from
+// OBSERVATION-CAPTURE.md §CANONICAL-USER-PROMPT-STAGE-2. The template is the
+// spec — this function only substitutes values. If a placeholder is missing
+// here, that's a spec/template drift and should be fixed in the spec, not by
+// inlining content here.
+function resolveTemplate(tpl, vars) {
+  return tpl.replace(/\{\{\s*([^}|]+?)(?:\s*\|\s*([^}]*?))?\s*\}\}/g, (_, key, fallback) => {
+    const k = key.trim();
+    const v = vars[k];
+    if (v === undefined || v === null || v === '') return (fallback ?? '').replace(/^"|"$/g, '');
+    return typeof v === 'string' ? v : JSON.stringify(v, null, 2);
+  });
+}
+
 function buildEnrichUserPrompt() {
-  const d = S.captureData;
-  return `Observation text: "${d.what_was_observed || ''}"
-
-Work type declared by supervisor: ${d.work_type || 'not specified'}
-
-Available HIGH_RISK_WORK taxonomy:
-${JSON.stringify(HIGH_RISK_WORK, null, 2)}
-
-Available SAFETY_PRACTICE taxonomy:
-${JSON.stringify(SAFETY_PRACTICE, null, 2)}
-
-Capture-stage hints (from conversation — use to initialise confidence, not as final values):
-signal_type_hint: ${d.signal_type || null}
-energy_type_hint: ${d.energy_type || null}
-barrier_hint: ${d.barrier_assessment || null}
-fw_factor_hint: ${d.fw_factor_hint || null}
-
-Return JSON matching this exact schema:
-{
-  "inferred_high_risk_work_ids": ["hrw-id"],
-  "inferred_safety_practice_ids": ["sp-id"],
-  "signal_type": "positive_performance|weak_signal|at_risk_condition|unwanted_energy_event|barrier_failure",
-  "signal_type_confidence": 0.0,
-  "signal_type_rationale": "1 sentence",
-  "energy_type": "kinetic|gravitational|electrical|thermal|chemical|pressure|noise_vibration|none",
-  "energy_type_confidence": 0.0,
-  "energy_release_potential": "catastrophic|high|moderate|low|none",
-  "barrier_assessment": "barrier_absent|barrier_failed|barrier_degraded|barrier_held|none",
-  "barrier_confidence": 0.0,
-  "barrier_rationale": "1 sentence",
-  "failure_type": "systemic|behavioural|environmental|unclear",
-  "key_hazard": "short plain-language string",
-  "key_hazard_rationale": "1 sentence",
-  "stop_work_warranted": true,
-  "stop_work_warranted_rationale": "1 sentence",
-  "ai_anonymisation_flags": [],
-  "fw_factor_hint": "single FW Map factor name if strongly suggested — else null",
-  "context_questions_needed": false,
-  "context_question": null,
-  "enrichment_confidence": 0.0
-}`;
+  const d = S.captureData || {};
+  // HIGH_RISK_WORK / SAFETY_PRACTICE are sim fixtures that stand in for the
+  // organisation's work-type and safety-practice taxonomies. In production these
+  // come from DB queries; here they're injected as the template's
+  // {{work_type_taxonomy_json}} / {{practice_taxonomy_json}} values.
+  return resolveTemplate(PROMPTS.enrichUserTpl, {
+    what_was_observed:          d.what_was_observed || '',
+    work_type_label:            d.work_type || 'not specified',
+    work_type_taxonomy_json:    HIGH_RISK_WORK,
+    practice_taxonomy_json:     SAFETY_PRACTICE,
+    capture_signal_type_hint:   d.signal_type ?? null,
+    capture_energy_type_hint:   d.energy_type ?? null,
+    capture_barrier_hint:       d.barrier_assessment ?? null,
+    capture_fw_factor_hint:     d.fw_factor_hint ?? null,
+  });
 }
 
 async function runEnrichment() {

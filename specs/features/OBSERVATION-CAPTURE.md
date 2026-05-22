@@ -208,7 +208,7 @@ You do not hallucinate taxonomy values — only use IDs explicitly provided to y
 If you are uncertain, reflect that in enrichment_confidence.
 ```
 
-### User Prompt Template
+### CANONICAL-USER-PROMPT-STAGE-2
 
 ```
 Observation text: "{{what_was_observed}}"

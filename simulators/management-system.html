@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Hiviz — Management System Simulator</title>
+<title>management-system Live Sim — Hiviz</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap');
 
@@ -44,6 +44,57 @@ body::before {
 .logo-mark { width: 28px; height: 28px; background: var(--ms); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 11px; font-weight: 700; color: #0a0b0d; }
 .logo-name { font-family: var(--mono); font-size: 12px; font-weight: 700; color: var(--bright); }
 .logo-sub { font-family: var(--mono); font-size: 10px; color: var(--muted); }
+.hdr-meta { display: flex; align-items: center; gap: 6px; margin-top: 4px; flex-wrap: wrap; }
+.state-badge {
+  font-family: var(--mono); font-size: 8.5px; font-weight: 700;
+  letter-spacing: 1px; text-transform: uppercase;
+  padding: 2px 7px; border-radius: 3px;
+}
+.state-working { background: var(--green-dim); color: var(--green-text); border: 1px solid var(--green-border); }
+.state-dormant { background: var(--amber-dim); color: var(--amber-text); border: 1px solid var(--amber-border); }
+.state-spec    { background: var(--s2);         color: var(--muted);      border: 1px solid var(--border); }
+.state-broken  { background: var(--red-dim);    color: var(--red-text);   border: 1px solid var(--red-border); }
+.ws-tag {
+  font-family: var(--mono); font-size: 8.5px; font-weight: 600;
+  letter-spacing: 0.5px;
+  padding: 2px 6px; border-radius: 3px;
+  background: var(--ms-dim); color: var(--ms-text);
+  border: 1px solid var(--ms-border);
+}
+.refs-strip {
+  display: flex; align-items: center; gap: 5px; flex-wrap: wrap;
+  padding: 8px 12px;
+  border: 1px solid var(--border); border-radius: 6px;
+  background: rgba(255,255,255,0.01);
+  margin: 0 0 12px;
+}
+.refs-lbl { font-family: var(--mono); font-size: 8px; font-weight: 700; color: var(--muted); letter-spacing: 1px; flex-shrink: 0; }
+.ref-pill {
+  display: inline-flex; align-items: center; gap: 3px;
+  border-radius: 12px; padding: 2px 7px;
+  font-family: var(--mono); font-size: 9px; font-weight: 500;
+  border: 1px solid; white-space: nowrap; cursor: help;
+}
+.rp-dot { width: 4px; height: 4px; border-radius: 50%; flex-shrink: 0; }
+.rp-summary   { background: var(--teal-dim);  border-color: var(--teal-border);  color: var(--teal-text); }
+.rp-summary   .rp-dot { background: var(--teal); }
+.rp-spec-only { background: var(--red-dim);   border-color: var(--red-border);   color: var(--red-text); }
+.rp-spec-only .rp-dot { background: var(--red); }
+.rp-connected { background: var(--green-dim); border-color: var(--green-border); color: var(--green-text); }
+.rp-connected .rp-dot { background: var(--green); }
+.rp-type {
+  font-weight: 700; letter-spacing: 0.5px;
+  padding: 0 3px; margin-right: 3px;
+  border-radius: 2px; background: rgba(0,0,0,0.25);
+}
+.rp-role {
+  font-weight: 600; letter-spacing: 0.3px; font-size: 8px;
+  padding: 0 4px; margin-left: 4px;
+  border-radius: 2px;
+  background: var(--amber-dim); color: var(--amber-text);
+  border: 1px solid var(--amber-border);
+  text-transform: lowercase;
+}
 .header-right { display: flex; align-items: center; gap: 16px; }
 .api-key-wrap { display: flex; gap: 6px; align-items: center; }
 .api-key-input { background: var(--s2); border: 1px solid var(--border); border-radius: 5px; padding: 5px 10px; font-family: var(--mono); font-size: 11px; color: var(--text); outline: none; width: 190px; }
@@ -98,7 +149,9 @@ body::before {
 .run-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
 
 /* ── RIGHT CANVAS ── */
-.canvas { overflow-y: auto; padding: 24px 28px; display: flex; flex-direction: column; gap: 20px; }
+.canvas-col { display: flex; flex-direction: column; min-height: 0; }
+.canvas-col .refs-strip { margin: 18px 28px 0; flex-shrink: 0; }
+.canvas { overflow-y: auto; padding: 18px 28px 24px; display: flex; flex-direction: column; gap: 20px; flex: 1; min-height: 0; }
 .canvas::-webkit-scrollbar { width: 4px; } .canvas::-webkit-scrollbar-thumb { background: var(--border); }
 
 .empty { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 12px; }
@@ -248,8 +301,12 @@ body::before {
   <div class="logo">
     <div class="logo-mark">MS</div>
     <div>
-      <div class="logo-name">Hiviz</div>
-      <div class="logo-sub">Management System · Document Ingestion Simulator</div>
+      <div class="logo-name">Hiviz · Live Sim · management-system</div>
+      <div class="logo-sub">document.ingest — extract structured requirements from uploaded safety documents</div>
+      <div class="hdr-meta">
+        <span class="state-badge state-working" title="Stream state — see MODEL-MAP.md">working</span>
+        <span class="ws-tag" title="Workspaces this stream depends on">ms</span>
+      </div>
     </div>
   </div>
   <div class="header-right">
@@ -316,11 +373,18 @@ body::before {
     </div>
   </div>
 
-  <!-- CANVAS -->
-  <div class="canvas" id="canvas">
-    <div class="empty">
-      <div class="empty-icon">📋</div>
-      <div class="empty-text">Select an exemplar document or upload your own to see how AI ingestion extracts structured requirements for field use.</div>
+  <!-- CANVAS COLUMN -->
+  <div class="canvas-col">
+    <div class="refs-strip" title="Source: MANAGEMENT-SYSTEM-INGESTION.md § Stage 2">
+      <span class="refs-lbl">REFS</span>
+      <span class="ref-pill rp-spec-only" title="BEHAVIOURAL (behavioural) — JSON-only output discipline, retry policy, audit logging — applied inline"><span class="rp-dot"></span><span class="rp-type">INLINE</span>ai-output-standards.md<span class="rp-role">behavioural</span></span>
+      <span style="font-family:var(--mono);font-size:9px;color:var(--muted);margin-left:auto;">document.ingest works from raw document text — no taxonomy globals injected</span>
+    </div>
+    <div class="canvas" id="canvas">
+      <div class="empty">
+        <div class="empty-icon">📋</div>
+        <div class="empty-text">Select an exemplar document or upload your own to see how AI ingestion extracts structured requirements for field use.</div>
+      </div>
     </div>
   </div>
 </div>

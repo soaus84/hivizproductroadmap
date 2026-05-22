@@ -193,7 +193,7 @@
       <li class="file-item feat-item"><span class="file-tag tag-feat">feat</span><a href="specs/features/INVESTIGATION.md" class="file-link">features/INVESTIGATION.md</a><span class="file-dot"></span><span class="file-desc">Investigation assist (P4), toolbox narrative (P5), FW classification investigation path (P10) — used by workflow-sim.html</span></li>
       <li class="file-item feat-item"><span class="file-tag tag-feat">feat</span><a href="specs/features/TOOLBOX-TALK.md" class="file-link">features/TOOLBOX-TALK.md</a><span class="file-dot"></span><span class="file-desc">Full toolbox talk assembly (P6 of talks), content selection algorithm — used by workflow-sim.html</span></li>
       <li class="file-item feat-item"><span class="file-tag tag-feat">feat</span><a href="specs/features/ENQUIRY.md" class="file-link">features/ENQUIRY.md</a><span class="file-dot"></span><span class="file-desc">Question generation (P7), live synthesis (P8), final summary (P9), FW classification enquiry path (P10) — used by enquiry-sim.html</span></li>
-      <li class="file-item feat-item"><span class="file-tag tag-feat">feat</span><a href="specs/features/MANAGEMENT-SYSTEM-INGESTION.md" class="file-link">features/MANAGEMENT-SYSTEM-INGESTION.md</a><span class="file-dot"></span><span class="file-desc">Document ingestion AI prompt, requirement extraction schema — used by ms-sim.html</span></li>
+      <li class="file-item feat-item"><span class="file-tag tag-feat">feat</span><a href="specs/features/MANAGEMENT-SYSTEM-INGESTION.md" class="file-link">features/MANAGEMENT-SYSTEM-INGESTION.md</a><span class="file-dot"></span><span class="file-desc">Document ingestion AI prompt, requirement extraction schema — used by management-system.html</span></li>
       <li class="file-item feat-item"><span class="file-tag tag-feat">feat</span><a href="specs/features/VISIT-BRIEFING.md" class="file-link">features/VISIT-BRIEFING.md</a><span class="file-dot"></span><span class="file-desc">Visit briefing pack generation (P13), focus area prompts — no sim yet</span></li>
       <li class="file-item feat-item"><span class="file-tag tag-feat">feat</span><a href="specs/features/COMMUNITIES.md" class="file-link">features/COMMUNITIES.md</a><span class="file-dot"></span><span class="file-desc">CoP thread generation (P12), framing rules — no sim yet</span></li>
       <li class="file-item feat-item"><span class="file-tag tag-feat">feat</span><a href="specs/features/SITUATIONAL-BRIEF.md" class="file-link">features/SITUATIONAL-BRIEF.md</a><span class="file-dot"></span><span class="file-desc">Situational brief generation (P11) — no sim yet</span></li>
@@ -229,10 +229,10 @@
     <div class="section-intro">Each simulator exercises a feature pipeline end-to-end. Prompts are injected from the relevant feature spec — the sim is the harness, the feature file is the source. Requires an Anthropic API key for live AI calls.</div>
     <div class="section-rule"></div>
     <ul class="file-list">
-      <li class="file-item"><span class="file-tag tag-sim">sim</span><a href="simulators/capture-sim.html" class="file-link">capture-sim.html</a><span class="file-dot"></span><span class="file-desc">Capture sim — observation, incident, and auto triage. Prompts from OBSERVATION-CAPTURE.md + INCIDENT-CAPTURE.md</span></li>
-      <li class="file-item"><span class="file-tag tag-sim">sim</span><a href="simulators/capture-sim-offline.html" class="file-link">capture-sim-offline.html</a><span class="file-dot"></span><span class="file-desc">Capture sim — 4 states including offline and API unavailable. Prompt from OBSERVATION-CAPTURE.md</span></li>
-      <li class="file-item"><span class="file-tag tag-sim">sim</span><a href="simulators/enquiry-sim.html" class="file-link">enquiry-sim.html</a><span class="file-dot"></span><span class="file-desc">Enquiry pipeline — 3 scenarios (post-insight, mid-investigation, witness). Prompts from ENQUIRY.md</span></li>
-      <li class="file-item"><span class="file-tag tag-sim">sim</span><a href="simulators/workflow-sim.html" class="file-link">workflow-sim.html</a><span class="file-dot"></span><span class="file-desc">End-to-end intelligence pipeline — 3 scenarios. Prompts from CRITICAL-INSIGHT.md, INVESTIGATION.md, TOOLBOX-TALK.md</span></li>
+      <li class="file-item"><span class="file-tag tag-sim">wet</span><a href="simulators/capture-sim.html" class="file-link">capture-sim.html</a><span class="file-dot"></span><span class="file-desc"><strong>Wet sim — non-authoritative.</strong> Capture sim — observation, incident, auto triage. Predates the Live Sim class. Superseded by observation-to-insight.html. Do not use as spec reference.</span></li>
+      <li class="file-item"><span class="file-tag tag-sim">wet</span><a href="simulators/capture-sim-offline.html" class="file-link">capture-sim-offline.html</a><span class="file-dot"></span><span class="file-desc"><strong>Wet sim — non-authoritative.</strong> 4 capture states incl. offline + API unavailable. Hardcoded fallback prompts not in any spec. Offline behaviour will move into observation-to-insight.html as a capability gate. Do not use as spec reference.</span></li>
+      <li class="file-item"><span class="file-tag tag-sim">wet</span><a href="simulators/enquiry-sim.html" class="file-link">enquiry-sim.html</a><span class="file-dot"></span><span class="file-desc"><strong>Wet sim — non-authoritative.</strong> Scripted demo of 3 enquiry triggers. No live AI. Superseded by insight-to-pull.html (to build). Do not use as spec reference.</span></li>
+      <li class="file-item"><span class="file-tag tag-sim">wet</span><a href="simulators/workflow-sim.html" class="file-link">workflow-sim.html</a><span class="file-dot"></span><span class="file-desc"><strong>Wet sim — non-authoritative.</strong> Scripted demo of 3 end-to-end scenarios. No live AI. Superseded by insight-to-broadcast, incident-to-investigation, and systemic-causes Live Sims (to build). Do not use as spec reference.</span></li>
       <li class="file-item"><span class="file-tag tag-sim">live</span><a href="simulators/observation-to-insight.html" class="file-link">observation-to-insight.html</a><span class="file-dot"></span><span class="file-desc"><strong>Live Sim</strong> — observation capture → enrichment → routing → critical insight → human review → FW classify. Live AI, prompts and references fetched from spec at runtime, REFS strip per stage shows injection level + role. State: working · Workspace: core. Stream catalogue: specs/MODEL-MAP.md</span></li>
     </ul>
   </section>
@@ -247,10 +247,10 @@
     <div class="section-rule"></div>
     <ul class="file-list">
       <li class="file-item ms-item">
-        <span class="file-tag tag-ms">sim</span>
-        <a href="simulators/ms-sim.html" class="file-link">ms-sim.html</a>
+        <span class="file-tag tag-ms">live</span>
+        <a href="simulators/management-system.html" class="file-link">management-system.html</a>
         <span class="file-dot"></span>
-        <span class="file-desc">Document ingestion — extract requirements, field view, toolbox talk, review. Prompt from MANAGEMENT-SYSTEM-INGESTION.md</span>
+        <span class="file-desc"><strong>Live Sim</strong> — document ingestion. Extract structured requirements, field view, toolbox talk discussion prompts. Live AI, prompt from MANAGEMENT-SYSTEM-INGESTION.md. State: working · Workspace: ms.</span>
       </li>
     </ul>
   </section>

@@ -207,7 +207,7 @@ A stream tagged `core + ms` means "this stream exists in the core platform but p
 | requirement serving (query-time context injection) | spec-only across all consumers — needs per-stream wiring |
 | document review workflow (enquiry-based) | spec-only |
 
-**Live Sim:** `simulators/management-system.html` — convert from current `ms-sim.html`
+**Live Sim:** `simulators/management-system.html` ✓ working
 
 ---
 
@@ -283,7 +283,7 @@ The Live Sim contract is defined in `HOW-TO-READ-THIS.md §Live Sim Class`.
 | insight-to-broadcast | `simulators/insight-to-broadcast.html` | to build |
 | insight-to-pull | `simulators/insight-to-pull.html` | to build |
 | systemic-causes | `simulators/systemic-causes.html` | to build |
-| management-system-ingestion | `simulators/management-system.html` | to build (convert from `ms-sim.html`) |
+| management-system-ingestion | `simulators/management-system.html` | working |
 
 Retired wet sims (superseded by Live Sims):
 - `simulators/capture-sim.html` — covered by observation-to-insight (capture stage)

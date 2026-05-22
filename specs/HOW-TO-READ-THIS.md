@@ -199,6 +199,14 @@ Live Sims also expose **capability gates** in the UI where they affect the stage
 
 **Tuning tools** (e.g. `prompt-lab.html`) are a separate class: they target prompt-by-prompt tuning rather than stream-by-stream exercise. They share the spec-loading discipline but are not stream-scoped.
 
+### Wet Sims — non-authoritative
+
+Several simulators predate the Live Sim class: `capture-sim.html`, `capture-sim-offline.html`, `workflow-sim.html`, `enquiry-sim.html`. These are kept available for historical demo purposes but they are **not authoritative**. They may contain inlined prompt text, hardcoded enum values, or schemas that have drifted from the current spec.
+
+> **Rule.** Wet sims must not be used as a reference for prompts, contracts, or behaviour. AI and developers consulting the spec must go to `specs/features/`, `specs/globals/`, and `MODEL-MAP.md` — never to a wet sim. If a wet sim disagrees with the spec, the spec wins; the wet sim is stale.
+
+Each wet sim file carries a banner comment stating this and pointing to the corresponding Live Sim (or "to build" if the replacement doesn't exist yet).
+
 ---
 
 ## How to Navigate — What Are You Building?
