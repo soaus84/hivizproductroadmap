@@ -144,6 +144,7 @@ Platform-wide documentation that feature specs reference for schema, API, and ar
 | File | What it contains | When to read it |
 |------|-----------------|-----------------|
 | `SPEC.md` | Data model (full Prisma schema), API endpoints, algorithm engine, logic rules, notification events registry, async job queue, infrastructure | Always — source of truth for data and API |
+| `MODEL-MAP.md` | Holistic AI layer reference: streams, states, dependencies, capability gates, Live Sim catalogue. The dashboard for what's connected to what and what's working right now | Always — start here when orienting to the AI layer |
 | `views.md` | All UI/UX view specifications, screen flows, component behaviour | When building or understanding any UI surface |
 | `prompts.md` | Prompt index only — one-liner per prompt pointing to its feature file. No prompt text. | When you need to find which feature owns a prompt |
 | `HOW-TO-READ-THIS.md` | This file | Once, at the start of every session |
@@ -180,6 +181,23 @@ This means:
 - A comment at the top of each sim identifies its source file
 
 The prompt lab works the same way — each prompt entry loads from the feature file rather than hardcoding text in the JS array.
+
+### Live Sim Class
+
+A **Live Sim** is the canonical sim class for exercising a stream end-to-end. The catalogue of streams and their Live Sims lives in `MODEL-MAP.md`. To qualify as a Live Sim, a simulator must meet all six criteria:
+
+1. **Live AI** — calls Anthropic at runtime using the user's API key. No scripted output.
+2. **Spec-loaded prompts** — every prompt (system prompt + user prompt templates) is fetched from `specs/features/*.md` or `specs/globals/*.md` via `extractSection()`. Zero prompt text inlined in the sim file. If a prompt is missing a `CANONICAL-*` marker that makes it extractable, fix the spec — do not inline.
+3. **Stream-scoped** — exercises one coherent stream end-to-end, from entry trigger to terminal output. Not a single-stage harness; not a multi-stream demo.
+4. **References surfaced** — each stage shows its applicable globals as a REFS strip, tagged by injection level (SUMMARY / FULL / BEHAVIOURAL) and Role (first-time / pass-through / behavioural). Fetched from the relevant feature spec's `## Global References Used` table.
+5. **State badge** — the header carries the stream's current state (working / dormant / spec-only / broken) and its workspace tags (`core`, `risk`, `ms`, `analytics`, `communities`). Pulled from `MODEL-MAP.md` so it stays accurate as state changes.
+6. **No fixtures masquerading as taxonomy** — any taxonomy data displayed in the sim either comes from the relevant globals file or from a single shared fixture in `simulators/hiviz-prompt-loader.js`. No sim-local copies of enum lists.
+
+`simulators/observation-to-insight.html` is the exemplar — read it first when building a new Live Sim.
+
+Live Sims also expose **capability gates** in the UI where they affect the stage being exercised (per the gates table in `MODEL-MAP.md`). Toggling a gate changes the stream's behaviour live, so a Live Sim doubles as an empirical optimisation surface — "what does this branch produce with gate X on vs off?"
+
+**Tuning tools** (e.g. `prompt-lab.html`) are a separate class: they target prompt-by-prompt tuning rather than stream-by-stream exercise. They share the spec-loading discipline but are not stream-scoped.
 
 ---
 

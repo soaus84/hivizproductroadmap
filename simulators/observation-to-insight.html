@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pipeline Explorer — Hiviz</title>
+<title>observation-to-insight Live Sim — Hiviz</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap');
 
@@ -53,6 +53,23 @@ body::before {
 .hdr-logo { font-family: var(--mono); font-size: 9px; font-weight: 700; letter-spacing: 2px; color: var(--gold); margin-bottom: 2px; }
 .hdr-title { font-family: var(--mono); font-size: 17px; font-weight: 700; color: var(--bright); }
 .hdr-sub { font-size: 11px; color: var(--muted); margin-top: 3px; line-height: 1.5; max-width: 480px; }
+.hdr-meta { display: flex; align-items: center; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
+.state-badge {
+  font-family: var(--mono); font-size: 8.5px; font-weight: 700;
+  letter-spacing: 1px; text-transform: uppercase;
+  padding: 2px 7px; border-radius: 3px;
+}
+.state-working  { background: var(--green-dim); color: var(--green-text); border: 1px solid var(--green-border); }
+.state-dormant  { background: var(--amber-dim); color: var(--amber-text); border: 1px solid var(--amber-border); }
+.state-spec     { background: var(--surface2); color: var(--muted);       border: 1px solid var(--border); }
+.state-broken   { background: var(--red-dim);   color: var(--red-text);   border: 1px solid var(--red-border); }
+.ws-tag {
+  font-family: var(--mono); font-size: 8.5px; font-weight: 600;
+  letter-spacing: 0.5px;
+  padding: 2px 6px; border-radius: 3px;
+  background: var(--plum-dim); color: var(--plum-text);
+  border: 1px solid var(--plum-border);
+}
 .legend { display: flex; gap: 14px; margin-top: 8px; flex-wrap: wrap; }
 .leg { display: flex; align-items: center; gap: 5px; font-family: var(--mono); font-size: 9px; color: var(--muted); letter-spacing: 0.4px; }
 .leg-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
@@ -400,9 +417,13 @@ body::before {
 
 <div class="hdr">
   <div>
-    <div class="hdr-logo">Hiviz · Forge Works</div>
-    <div class="hdr-title">Pipeline Explorer</div>
-    <div class="hdr-sub">Observation → Critical Insight. Live AI. Prompts and references fetched from spec at runtime. Two injection rules: Rule 1 — any taxonomy reference injects its SUMMARY-REFERENCE block; Rule 2 — fw_classify gets the full Blueprint. The Role badge on each pill records whether the stage owns the classification (first-time) or consumes it (pass-through).</div>
+    <div class="hdr-logo">Hiviz · Forge Works · Live Sim</div>
+    <div class="hdr-title">observation-to-insight</div>
+    <div class="hdr-meta">
+      <span class="state-badge state-working" title="Stream state — see MODEL-MAP.md">working</span>
+      <span class="ws-tag" title="Workspaces this stream depends on">core</span>
+    </div>
+    <div class="hdr-sub">Observation capture → enrichment → routing → critical insight → human review → FW classify. Live AI. Prompts and references fetched from spec at runtime. Two injection rules: Rule 1 — any taxonomy reference injects its SUMMARY-REFERENCE block; Rule 2 — fw_classify gets the full Blueprint. The Role badge on each pill records whether the stage owns the classification (first-time) or consumes it (pass-through). Stream catalogue: <code>specs/MODEL-MAP.md</code>.</div>
     <div class="legend">
       <div class="leg"><div class="leg-dot" style="background:var(--green)"></div>FULL — entire global injected (Rule 2)</div>
       <div class="leg"><div class="leg-dot" style="background:var(--teal)"></div>SUMMARY — SUMMARY-REFERENCE block (Rule 1)</div>
@@ -589,10 +610,10 @@ async function initReferences() {
       REFS.byFeature[name] = parseGlobalRefsTable(md);
     }));
     REFS.ready = true;
-    console.log('[pipeline-explorer] References loaded — feature specs:', Object.keys(REFS.byFeature).join(', '));
+    console.log('[observation-to-insight] References loaded — feature specs:', Object.keys(REFS.byFeature).join(', '));
   } catch (err) {
     REFS.error = err.message;
-    console.error('[pipeline-explorer] Reference load failed:', err);
+    console.error('[observation-to-insight] Reference load failed:', err);
   }
 }
 
@@ -647,10 +668,10 @@ async function initPrompts() {
     const placeholder = '[Full per-factor definitions injected from globals/fw-map-blueprint.md at runtime]';
     PROMPTS.fwSystem = PROMPTS.fwBaseSystem.replace(placeholder, blueprintMd);
     promptsReady = true;
-    console.log('[pipeline-explorer] All prompts loaded');
+    console.log('[observation-to-insight] All prompts loaded');
     renderAll();
   } catch (err) {
-    console.error('[pipeline-explorer] Prompt load failed:', err);
+    console.error('[observation-to-insight] Prompt load failed:', err);
     setApiStatus('⚠ Spec load failed — ' + err.message, 'err');
     renderAll();
   }
