@@ -26,12 +26,12 @@ Post-delivery — Atrophy score update      (algorithm, async)
 
 ## Global References Used
 
-Talk assembly operates on pre-classified content (approved insights, closed investigations, enriched observations) and does not independently classify signal, energy, or barrier values. No taxonomy globals are injected into the assembly prompt.
+Talk assembly operates on pre-classified content (approved insights, closed investigations, enriched observations) and does not reference any taxonomy global. Rule 1 does not apply because no taxonomy global is referenced; only behavioural rules apply, inline. The `Role` column is diagnostic — see `HOW-TO-READ-THIS.md §Global Injection Rules`.
 
-| Global | File | Used for | Injection level |
+| Global | File | Used for | Role |
 |---|---|---|---|
-| Anonymisation rules | `globals/anonymisation-rules.md` | Content items scrubbed before assembly prompt | Spec-only |
-| AI output standards | `globals/ai-output-standards.md` | JSON-only, token limits (1500), audit logging | Spec-only |
+| Anonymisation rules | `globals/anonymisation-rules.md` | Content items scrubbed before assembly prompt | behavioural |
+| AI output standards | `globals/ai-output-standards.md` | JSON-only, token limits (1500), audit logging | behavioural |
 
 No taxonomy globals needed — this prompt operates on pre-classified content, not raw observations.
 

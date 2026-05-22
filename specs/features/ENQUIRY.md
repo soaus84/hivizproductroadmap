@@ -37,13 +37,13 @@ Stage 5 — FW classification      fw_classify (enquiry path)   (async AI — af
 
 ## Global References Used
 
-Enquiry AI stages (question generation, live synthesis, final summary) operate on already-classified insight/investigation context and the responses they elicit. No signal/energy/barrier classification is done by these prompts. The Blueprint reaches the pipeline only at Stage 5 (`fw_classify`), which loads it in **Full** per its own job spec.
+Enquiry AI stages (question generation, live synthesis, final summary) operate on already-classified insight/investigation context and the responses they elicit. No taxonomy global is referenced by these prompts, so Rule 1 does not apply. The full Blueprint reaches the pipeline only at Stage 5 (`fw_classify`), which loads it under Rule 2. The `Role` column is diagnostic — see `HOW-TO-READ-THIS.md §Global Injection Rules`.
 
-| Global | File | Used for | Injection level |
+| Global | File | Used for | Role |
 |---|---|---|---|
-| Anonymisation rules | `globals/anonymisation-rules.md` | Observation summaries and incident text scrubbed before Stage 1 | Spec-only |
-| AI output standards | `globals/ai-output-standards.md` | JSON-only, rationale standard, confidence thresholds | Spec-only |
-| FW Map® Blueprint | `globals/fw-map-blueprint.md` | Injected into `fw_classify` at runtime (Stage 5) | **Full** (Stage 5 only — via `fw-classify-job.md`) |
+| Anonymisation rules | `globals/anonymisation-rules.md` | Observation summaries and incident text scrubbed before Stage 1 | behavioural |
+| AI output standards | `globals/ai-output-standards.md` | JSON-only, rationale standard, confidence thresholds | behavioural |
+| FW Map® Blueprint | `globals/fw-map-blueprint.md` | Full Blueprint injected into `fw_classify` at runtime (Stage 5) under Rule 2 | Rule 2 — Full (Stage 5 only — via `fw-classify-job.md`) |
 
 ---
 

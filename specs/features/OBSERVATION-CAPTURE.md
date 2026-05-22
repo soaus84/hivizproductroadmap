@@ -23,16 +23,16 @@ Stage 3 — Context request        observation.context_request  (conditional, as
 
 ## Global References Used
 
-Both stages independently classify `signal_type`, `energy_type`, `barrier_assessment`, and `fw_factor_hint` from raw observation text — each is a first-time determination at this stage. Per the governing rule (first-time classification never gets Enum), all four taxonomy globals are injected at **Summary** level. The Summary blocks are extracted at runtime — e.g. `extractSection(md, 'SUMMARY-REFERENCE — signal-type-taxonomy')`.
+Both stages independently classify `signal_type`, `energy_type`, `barrier_assessment`, and `fw_factor_hint` from raw observation text. Under Rule 1, every taxonomy reference below injects its `SUMMARY-REFERENCE` block at runtime — e.g. `extractSection(md, 'SUMMARY-REFERENCE — signal-type-taxonomy')`. The `Role` column is diagnostic only — see `HOW-TO-READ-THIS.md §Global Injection Rules`.
 
-| Global | File | Used for | Injection level |
+| Global | File | Used for | Role |
 |---|---|---|---|
-| Signal type taxonomy | `globals/signal-type-taxonomy.md` | `signal_type` field — 5 values + routing rules | **Summary** (Stage 1, Stage 2) |
-| Energy type taxonomy | `globals/energy-type-taxonomy.md` | `energy_type` field — 8 values + definitions; `energy_release_potential` scale used in Stage 2 | **Summary** (Stage 1, Stage 2) |
-| Barrier assessment values | `globals/barrier-assessment-values.md` | `barrier_assessment` field — 5 states + definitions | **Summary** (Stage 1, Stage 2) |
-| AI output standards | `globals/ai-output-standards.md` | JSON-only, confidence thresholds, rationale standard, audit logging | Spec-only |
-| Anonymisation rules | `globals/anonymisation-rules.md` | PII flagging in enrichment; scrubbing for all downstream prompts | Spec-only |
-| FW Map® Blueprint | `globals/fw-map-blueprint.md` | `fw_factor_hint` selection — first-time determination at this stage; uses the lightweight `SUMMARY-REFERENCE — fw-map-blueprint` block, not the full per-factor content | **Summary** (Stage 1, Stage 2) — `fw_factor_hint` is selected for the first time here |
+| Signal type taxonomy | `globals/signal-type-taxonomy.md` | `signal_type` field — 5 values + routing rules | first-time (Stage 1, Stage 2) |
+| Energy type taxonomy | `globals/energy-type-taxonomy.md` | `energy_type` field — 8 values + definitions; `energy_release_potential` scale derived in Stage 2 | first-time (Stage 1, Stage 2) |
+| Barrier assessment values | `globals/barrier-assessment-values.md` | `barrier_assessment` field — 5 states + definitions | first-time (Stage 1, Stage 2) |
+| AI output standards | `globals/ai-output-standards.md` | JSON-only, confidence thresholds, rationale standard, audit logging | behavioural |
+| Anonymisation rules | `globals/anonymisation-rules.md` | PII flagging in enrichment; scrubbing for all downstream prompts | behavioural |
+| FW Map® Blueprint | `globals/fw-map-blueprint.md` | `fw_factor_hint` selection — uses the lightweight `SUMMARY-REFERENCE — fw-map-blueprint` block, not the full per-factor content | first-time (Stage 1, Stage 2) |
 
 ---
 

@@ -26,14 +26,14 @@ Stage 1 is listed here for completeness but its prompt lives in `INCIDENT-CAPTUR
 
 ## Global References Used
 
-Investigation jobs in this file (`investigation.generate_narrative`, Stage 3; `fw_classify` investigation path, Stage 4) consume already-confirmed framework fields and classified energy/barrier values from the upstream incident — no independent classification happens here. Taxonomy globals are injected at **Enum** level for validation and framing. The Blueprint reaches the pipeline only at Stage 4 (`fw_classify`), which loads it in **Full** per its own job spec.
+Investigation jobs in this file (`investigation.generate_narrative`, Stage 3; `fw_classify` investigation path, Stage 4) consume already-confirmed framework fields and classified energy/barrier values from the upstream incident — no independent classification happens here. Under Rule 1, taxonomy references still inject their `SUMMARY-REFERENCE` block at runtime to ground accurate framing. The Blueprint reaches the pipeline only at Stage 4 (`fw_classify`), which loads it under Rule 2. The `Role` column is diagnostic — see `HOW-TO-READ-THIS.md §Global Injection Rules`.
 
-| Global | File | Used for | Injection level |
+| Global | File | Used for | Role |
 |---|---|---|---|
-| Anonymisation rules | `globals/anonymisation-rules.md` | Incident text scrubbed before all AI prompts in this feature | Spec-only |
-| AI output standards | `globals/ai-output-standards.md` | JSON-only, rationale standard, draft status, audit logging | Spec-only |
-| FW Map® Blueprint | `globals/fw-map-blueprint.md` | Injected in full into `fw_classify` system prompt at runtime (Stage 4) | **Full** (Stage 4 only — via `fw-classify-job.md`) |
-| Energy type taxonomy | `globals/energy-type-taxonomy.md` | Referenced in toolbox narrative context — value passes through from upstream classification | **Enum** (Stage 3) |
+| Anonymisation rules | `globals/anonymisation-rules.md` | Incident text scrubbed before all AI prompts in this feature | behavioural |
+| AI output standards | `globals/ai-output-standards.md` | JSON-only, rationale standard, draft status, audit logging | behavioural |
+| FW Map® Blueprint | `globals/fw-map-blueprint.md` | Full Blueprint injected into `fw_classify` system prompt at runtime (Stage 4) under Rule 2 | Rule 2 — Full (Stage 4 only — via `fw-classify-job.md`) |
+| Energy type taxonomy | `globals/energy-type-taxonomy.md` | Referenced in toolbox narrative context — value passes through from upstream classification | pass-through (Stage 3) |
 
 ---
 

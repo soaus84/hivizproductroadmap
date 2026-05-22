@@ -90,16 +90,21 @@ Status: Supersedes v1.0 prompt library
 
 ## Global references used across multiple prompts
 
-Injection levels follow the model defined in `HOW-TO-READ-THIS.md`. The governing rule: a value being classified or selected for the first time always needs at least **Summary** — **Enum** is correct only downstream, where the value already exists and the job consumes or passes it through. **Full** is reserved for `fw_classify`. Each feature spec's Global References Used table records the per-stage level — see those tables for stage-specific assignments.
+Globals reach prompts under two rules — see `HOW-TO-READ-THIS.md §Global Injection Rules`:
 
-| Reference | File | Used by | Injection level |
-|---|---|---|---|
-| Forge Works Map® Blueprint | `specs/globals/fw-map-blueprint.md` | `fw_classify` (Full — entire Blueprint); `capture.observation`, `observation.enrich`, `capture.incident`, `capture.auto`, `investigation.assist` (Summary — `fw_factor_hint` selected for the first time at each); `cop_thread.generate`, `situational_brief.generate`, `visit_briefing.generate`, `critical_insight.generate`, `investigation.generate_narrative` (Enum — pass-through of factor names) | **Full** (`fw_classify`); **Summary** at every first-time `fw_factor_hint` determination; **Enum** for all pass-through consumers |
-| Signal type taxonomy | `specs/globals/signal-type-taxonomy.md` | `capture.observation`, `observation.enrich`, `capture.auto` (Summary — classifying signal_type from raw text); `critical_insight.generate` (Enum — pass-through in cluster summary) | **Summary** at first-time classification; **Enum** where passed through |
-| Energy type taxonomy | `specs/globals/energy-type-taxonomy.md` | `capture.observation`, `observation.enrich`, `capture.incident`, `capture.auto` (Summary — classifying); `critical_insight.generate`, `investigation.generate_narrative` (Enum — pass-through) | **Summary** at first-time classification; **Enum** where passed through |
-| Barrier assessment values | `specs/globals/barrier-assessment-values.md` | `capture.observation`, `observation.enrich`, `capture.incident`, `capture.auto` (Summary — classifying); other consumers (Enum — pass-through) | **Summary** at first-time classification; **Enum** where passed through |
-| AI output standards | `specs/globals/ai-output-standards.md` | All prompts | Spec-only |
-| Anonymisation rules | `specs/globals/anonymisation-rules.md` | `observation.enrich` and all downstream prompts that reference observation text | Spec-only |
+- **Rule 1** — when a global taxonomy is referenced in a prompt, inject its `SUMMARY-REFERENCE` block at runtime. This applies whether the stage is classifying for the first time or passing the value through downstream.
+- **Rule 2** — `fw_classify` receives the full `fw-map-blueprint.md` Blueprint.
+
+The `Role` column below is diagnostic: it records which jobs determine each value for the first time versus which consume it downstream. Role does not change what gets injected.
+
+| Reference | File | Used by — first-time roles | Used by — pass-through roles | Injection |
+|---|---|---|---|---|
+| Forge Works Map® Blueprint | `specs/globals/fw-map-blueprint.md` | `capture.observation`, `observation.enrich`, `capture.incident`, `capture.auto`, `investigation.assist` — each selects `fw_factor_hint` for the first time at its stage | `cop_thread.generate`, `situational_brief.generate`, `visit_briefing.generate`, `critical_insight.generate`, `investigation.generate_narrative` — receive factor names from upstream classification | Rule 1 Summary at every taxonomy reference; Rule 2 Full at `fw_classify` only |
+| Signal type taxonomy | `specs/globals/signal-type-taxonomy.md` | `capture.observation`, `observation.enrich`, `capture.auto` — classify `signal_type` from raw text | `critical_insight.generate` — receives the cluster signal type breakdown | Rule 1 Summary at every reference |
+| Energy type taxonomy | `specs/globals/energy-type-taxonomy.md` | `capture.observation`, `observation.enrich`, `capture.incident`, `capture.auto` — classify `energy_type` from raw text | `critical_insight.generate`, `investigation.generate_narrative` — receive `energy_type` and `energy_release_potential` from upstream | Rule 1 Summary at every reference |
+| Barrier assessment values | `specs/globals/barrier-assessment-values.md` | `capture.observation`, `observation.enrich`, `capture.incident`, `capture.auto` — classify `barrier_assessment` from raw text | Other consumers receive the value via observation summaries | Rule 1 Summary at every reference |
+| AI output standards | `specs/globals/ai-output-standards.md` | All prompts apply the rules inline | — | behavioural — referenced via spec, not injected |
+| Anonymisation rules | `specs/globals/anonymisation-rules.md` | `observation.enrich` flags identifying phrases; all downstream prompts scrub before passing observation text | — | behavioural — referenced via spec, not injected |
 
 ---
 

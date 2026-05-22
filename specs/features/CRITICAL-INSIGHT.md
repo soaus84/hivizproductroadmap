@@ -1,7 +1,7 @@
 # CRITICAL-INSIGHT.md — Critical Insight Feature Spec
 
 **Forge Works · Hiviz SafetyPlatform — Feature Spec**
-Version: 1.0 — May 2026
+Version: 1.1 — May 2026
 
 > **This is the canonical source for all prompt text, schemas, and pipeline logic related to critical insight generation, review, and FW Map® classification.** Simulators and the prompt lab load from this file.
 
@@ -14,7 +14,7 @@ A Critical Insight is the platform's primary intelligence output — a pattern-l
 The feature has four stages:
 
 ```
-Stage 1 — Insight generation       critical_insight.generate   (async AI — two prompt variants)
+Stage 1 — Insight generation       critical_insight.generate   (async AI — three prompt variants)
 Stage 2 — Human review             (safety manager — workbench UI)
 Stage 3 — FW Map® classification   fw_classify (insight path)  (async AI — on approval)
 Stage 4 — Downstream dispatch      (situational brief, CoP thread seed — see their feature specs)
@@ -37,25 +37,42 @@ Stage 4 — Downstream dispatch      (situational brief, CoP thread seed — see
 
 ---
 
+## Card Label Derivation
+
+Pipeline cards display a human-readable label derived from `generated_at_level`. This is a UI derivation — there is no separate `card_type` or `insight_type` field in the database.
+
+| `generated_at_level` | Card label | Badge style |
+|---|---|---|
+| `site` | Worksite Trend | `badge-worksite` |
+| `region` | Cross-site Pattern | `badge-cross-site` |
+| `division` | Cross-site Pattern | `badge-cross-site` |
+| `organisation` | Cross-site Pattern | `badge-cross-site` |
+
+This derivation applies in the pipeline Kanban, the worksite dashboard open insights strip, and any other surface that renders an insight card. The label must always reflect `generated_at_level` at render time — it is not stored.
+
+The distinction maps directly to how the algorithm generates the insight: a site-level trigger means the threshold was crossed within a single worksite's observation pool. A region, division, or organisation-level trigger means the threshold was crossed across the aggregated pool for that scope — meaning multiple sites contributed observations.
+
+---
+
 ## Global References Used
 
-Critical insight generation receives already-classified upstream values (cluster signal type breakdown, enriched observation fields, incident severity) and uses them to frame and contextualise the generated narrative — it does not re-classify. Taxonomy globals are therefore injected at **Enum** level for validation and pass-through framing. The Blueprint reaches the pipeline only at Stage 3 (`fw_classify`), which loads it in **Full** per its own job spec — Stage 1 of this file does not receive Blueprint content.
+Critical insight generation receives already-classified upstream values (cluster signal type breakdown, enriched observation fields, incident severity) and uses them to frame and contextualise the generated narrative — it does not re-classify. Under Rule 1, every taxonomy reference still injects its `SUMMARY-REFERENCE` block at runtime — the Summary descriptions ground accurate pass-through framing. The full Blueprint reaches the pipeline only at Stage 3 (`fw_classify`), which loads it under Rule 2. The `Role` column is diagnostic — see `HOW-TO-READ-THIS.md §Global Injection Rules`.
 
-| Global | File | Used for | Injection level |
+| Global | File | Used for | Role |
 |---|---|---|---|
-| Signal type taxonomy | `globals/signal-type-taxonomy.md` | Signal type breakdown in algorithm trigger input — values pass through, no re-classification | **Enum** (Stage 1) |
-| Energy type taxonomy | `globals/energy-type-taxonomy.md` | `energy_type` and `energy_release_potential` values consumed in critical_observation trigger user prompt to frame the toolbox narrative; not re-classified | **Enum** (Stage 1) |
-| Barrier assessment values | `globals/barrier-assessment-values.md` | Barrier state in observation summaries passed to prompt; not re-classified | **Enum** (Stage 1) |
-| AI output standards | `globals/ai-output-standards.md` | JSON-only, rationale standard, draft status, audit logging | Spec-only |
-| Anonymisation rules | `globals/anonymisation-rules.md` | Observation summaries scrubbed before Stage 1 prompt | Spec-only |
-| FW Map® Blueprint | `globals/fw-map-blueprint.md` | Injected in full into `fw_classify` (Stage 3) system prompt at runtime — Stage 1 does not receive Blueprint content | **Full** (Stage 3 only — via `fw-classify-job.md`) |
+| Signal type taxonomy | `globals/signal-type-taxonomy.md` | Signal type breakdown in algorithm trigger input — values pass through, no re-classification | pass-through (Stage 1) |
+| Energy type taxonomy | `globals/energy-type-taxonomy.md` | `energy_type` and `energy_release_potential` values consumed in critical_observation trigger user prompt to frame the toolbox narrative; not re-classified | pass-through (Stage 1) |
+| Barrier assessment values | `globals/barrier-assessment-values.md` | Barrier state in observation summaries passed to prompt; not re-classified | pass-through (Stage 1) |
+| AI output standards | `globals/ai-output-standards.md` | JSON-only, rationale standard, draft status, audit logging | behavioural |
+| Anonymisation rules | `globals/anonymisation-rules.md` | Observation summaries scrubbed before Stage 1 prompt | behavioural |
+| FW Map® Blueprint | `globals/fw-map-blueprint.md` | Full Blueprint injected into `fw_classify` (Stage 3) under Rule 2 — Stage 1 of this file does not reference the Blueprint | Rule 2 — Full (Stage 3 only — via `fw-classify-job.md`) |
 
 ---
 
 ## Sim Reference
 
 - `simulators/workflow-sim.html` — Scenario 0 ("Near-miss → Toolbox Talk") exercises the full insight pipeline in scripted form using static mock data. The sim does not make live AI calls for insight generation.
-- **Prompt lab** — loads Stage 1 (both variants) and Stage 3 from this file.
+- **Prompt lab** — loads Stage 1 (all three variants: Worksite Trend, Cross-site Pattern, and Critical Observation) and Stage 3 from this file.
 
 ---
 
@@ -68,9 +85,20 @@ Critical insight generation receives already-classified upstream values (cluster
 **Human gate:** Safety manager review required before `cleared_for_toolbox` is set
 **Max tokens:** 1000
 
+### Prompt variant selection
+
+| `trigger_source` | `generated_at_level` | Prompt variant |
+|---|---|---|
+| `algorithm` | `site` | `CANONICAL-USER-PROMPT-STAGE-1-ALGORITHM-WORKSITE-TREND` |
+| `algorithm` | `region` / `division` / `organisation` | `CANONICAL-USER-PROMPT-STAGE-1-ALGORITHM-CROSS-SITE-PATTERN` |
+| `solo_critical` | `site` (always) | `CANONICAL-USER-PROMPT-STAGE-1-SOLO-CRITICAL` |
+| `critical_observation` | `site` (always) | `CANONICAL-USER-PROMPT-STAGE-1-CRITICAL-OBSERVATION` |
+
+---
+
 ### CANONICAL-SYSTEM-PROMPT-STAGE-1
 
-Single system prompt used for both algorithm and solo_critical variants:
+Single system prompt used for all Stage 1 variants:
 
 ```
 You are a senior safety advisor drafting internal safety intelligence for a construction
@@ -88,25 +116,35 @@ what the org level scope permits.
 You output only valid JSON with no preamble, explanation, or markdown formatting.
 ```
 
-### User Prompt Template — Algorithm Trigger
+---
 
-Used when `trigger_source = algorithm`. Observation summaries must be scrubbed per `globals/anonymisation-rules.md` before inclusion.
+### CANONICAL-USER-PROMPT-STAGE-1-ALGORITHM-WORKSITE-TREND
+
+Used when `trigger_source = algorithm` AND `generated_at_level = 'site'`. Observation summaries must be scrubbed per `globals/anonymisation-rules.md` before inclusion.
 
 ```
-A trend threshold has been crossed.
+A trend threshold has been crossed at a single worksite.
 
 Trigger source: algorithm
+Card label: Worksite Trend
 
 Work type: {{work_type_label}}
-Org level: {{level}} — {{level_name}}
+Org level: site — {{level_name}}
 Time window: {{window_days}} days
 Signal types in cluster: {{signal_type_breakdown_json}}
 Observation count: {{count}} (threshold: {{threshold}})
+Sites affected: 1
 
 Anonymised observation summaries:
 {{observation_summaries_json}}
 // Each item: { "summary": "...", "signal_type": "at_risk_condition", "energy_type": "kinetic",
 //              "barrier_assessment": "barrier_degraded", "key_hazard_rationale": "..." }
+
+This pattern is contained to a single site. Your output should:
+- Frame the intelligence around what conditions at this site are producing this trend
+- Not imply or speculate about conditions at other sites
+- Focus on what needs to change at site level to break the pattern
+- Write the toolbox narrative for the crew at this site
 
 Return JSON:
 {
@@ -122,7 +160,57 @@ Return JSON:
 }
 ```
 
-### User Prompt Template — Solo Critical Trigger
+---
+
+### CANONICAL-USER-PROMPT-STAGE-1-ALGORITHM-CROSS-SITE-PATTERN
+
+Used when `trigger_source = algorithm` AND `generated_at_level IN ('region', 'division', 'organisation')`. Observation summaries must be scrubbed per `globals/anonymisation-rules.md` before inclusion.
+
+```
+A trend threshold has been crossed across multiple sites at {{level}} level.
+
+Trigger source: algorithm
+Card label: Cross-site Pattern
+
+Work type: {{work_type_label}}
+Org level: {{level}} — {{level_name}}
+Time window: {{window_days}} days
+Signal types in cluster: {{signal_type_breakdown_json}}
+Observation count: {{count}} (threshold: {{threshold}})
+Sites affected: {{sites_affected_count}}
+
+Anonymised observation summaries:
+{{observation_summaries_json}}
+// Each item: { "summary": "...", "signal_type": "at_risk_condition", "energy_type": "kinetic",
+//              "barrier_assessment": "barrier_degraded", "key_hazard_rationale": "..." }
+
+This is a cross-site pattern — observations have been drawn from {{sites_affected_count}} sites
+within the {{level}} scope. Your output should:
+- Frame the intelligence as a shared systemic condition, not a local site problem
+- Acknowledge the cross-site spread explicitly in pattern_summary
+- Identify the underlying systemic cause that could be present across sites
+- Write the toolbox narrative so it is relevant to any crew in this work type — not site-specific
+- Consider whether the pattern warrants systemic escalation given its breadth
+
+Return JSON:
+{
+  "pattern_summary": "2-3 sentences. What the pattern is, that it spans multiple sites, and why this breadth matters operationally.",
+  "pattern_summary_basis": "1 sentence. Which observations or signal types most strongly evidence this as a systemic rather than local pattern.",
+  "likely_systemic_cause": "1 sentence. The shared underlying condition that probably explains why this is appearing across sites.",
+  "likely_systemic_cause_rationale": "1 sentence. What points to a shared cause rather than coincidental local factors.",
+  "recommended_action": "1 sentence. The change most likely to address the systemic cause across all affected sites.",
+  "recommended_action_rationale": "1 sentence. Why this addresses the root cause, not a symptom.",
+  "toolbox_narrative": "4-6 sentences. Written so a supervisor can read it aloud to any crew doing this work type. Plain English. Present tense. No jargon. No blame. Opens with what crews across the region need to know today.",
+  "escalate_to_systemic": false,
+  "escalation_rationale": null
+}
+```
+
+**Note on `escalate_to_systemic` for cross-site patterns:** The AI should set this to `true` if `sites_affected_count` is high relative to total sites in scope, or if barrier assessments across the cluster show systemic failure rather than isolated events. The human review gate still applies; the reviewer can downgrade to `false` if they disagree.
+
+---
+
+### CANONICAL-USER-PROMPT-STAGE-1-SOLO-CRITICAL
 
 Used when `trigger_source = solo_critical`. Incident description scrubbed per `globals/anonymisation-rules.md`.
 
@@ -162,7 +250,7 @@ Return JSON:
 
 **Note on `escalate_to_systemic` for solo_critical:** Defaults to `true` — a critical severity incident is presumed to warrant systemic investigation. The human review gate still applies; the reviewer can downgrade to `false` if they disagree.
 
-### User Prompt Template — Critical Observation Trigger
+---
 
 ### CANONICAL-USER-PROMPT-STAGE-1-CRITICAL-OBSERVATION
 
@@ -196,44 +284,32 @@ Your output should:
 Return JSON:
 {
   "pattern_summary": "2-3 sentences. What this observation reveals about the state of controls for this work type. Acknowledge the single-observation basis without hedging the risk.",
-  "pattern_summary_basis": "1 sentence. Which specific elements of the observation support this framing.",
-  "likely_systemic_cause": "1 sentence. The underlying condition this observation most likely reflects.",
-  "likely_systemic_cause_rationale": "1 sentence. What in the observation points to this cause.",
-  "recommended_action": "1 sentence. The most important immediate check or action for this and other sites.",
-  "recommended_action_rationale": "1 sentence. Why this action directly addresses the likely cause.",
-  "toolbox_narrative": "4-6 sentences. Written for a supervisor to read aloud to their crew. Plain English. Present tense. No jargon. No blame. Opens with what the crew needs to know and check today.",
+  "pattern_summary_basis": "1 sentence. Which specific details of the observation most strongly support this framing.",
+  "likely_systemic_cause": "1 sentence. The underlying control gap this observation most likely reflects.",
+  "likely_systemic_cause_rationale": "1 sentence. What in the observation points to this cause rather than a one-off error.",
+  "recommended_action": "1 sentence. The most important check or action for other crews working this type.",
+  "recommended_action_rationale": "1 sentence. Why this directly addresses the identified control gap.",
+  "toolbox_narrative": "4-6 sentences. Written for a supervisor to read aloud to their crew. Plain English. Present tense. No jargon. No blame. Opens with what crews need to know and check today.",
   "escalate_to_systemic": false,
   "escalation_rationale": null
 }
 ```
 
-**Note on `escalate_to_systemic` for critical_observation:** Defaults to `false` — a critical observation indicates a control failure, not confirmed harm. The reviewer can escalate to `true` if the observation warrants systemic investigation, but it is not the presumption. Contrast with `solo_critical` (incident) which defaults to `true`.
+---
 
-**Note on `energy_release_potential`:** AI-derived by `observation.enrich` — not collected during capture. Values: `catastrophic|high|moderate|low|none`. See `globals/energy-type-taxonomy.md` §Energy Release Potential for definitions. A `catastrophic` value combined with `barrier_failure` or `unwanted_energy_event` represents the highest-severity critical observation the pipeline can receive.
-
-### Validation Rules
-
-- `pattern_summary` must be 2–3 sentences — not a single sentence (too thin), not a paragraph
-- `toolbox_narrative` must be 4–6 sentences — validated on storage
-- `likely_systemic_cause` must be a single sentence
-- `recommended_action` must be a single, implementable action — not a list
-- `escalation_rationale` must be non-null when `escalate_to_systemic = true`; must be null when false
-- Observation summaries passed in must have `ai_anonymisation_flags` applied before prompt construction
-
-### Storage
+### Stage 1 Output Storage
 
 ```sql
--- Fields written by critical_insight.generate
-critical_insight.pattern_summary         TEXT
-critical_insight.pattern_summary_basis   TEXT      -- stored but not shown in UI — internal evidence trail
-critical_insight.likely_systemic_cause   TEXT
+critical_insight.pattern_summary             TEXT
+critical_insight.pattern_summary_basis       TEXT    -- rationale fields stored separately; not surfaced in UI by default
+critical_insight.likely_systemic_cause       TEXT
 critical_insight.likely_systemic_cause_rationale TEXT
-critical_insight.recommended_action      TEXT
-critical_insight.recommended_action_rationale    TEXT
-critical_insight.toolbox_narrative       TEXT
-critical_insight.escalate_to_systemic    BOOLEAN
-critical_insight.escalation_rationale    TEXT
-critical_insight.ai_generated_at         TIMESTAMPTZ
+critical_insight.recommended_action          TEXT
+critical_insight.recommended_action_rationale TEXT
+critical_insight.toolbox_narrative           TEXT
+critical_insight.escalate_to_systemic        BOOLEAN
+critical_insight.escalation_rationale        TEXT
+critical_insight.ai_generated_at             TIMESTAMPTZ
 -- cleared_for_toolbox remains false until human approval
 ```
 
@@ -314,6 +390,30 @@ On `cleared_for_toolbox = true` and `fw_classified_at` set, the insight is avail
 
 ---
 
+## Schema Notes
+
+### `trigger_event` JSONB shape by trigger source
+
+```sql
+-- algorithm (site-level / Worksite Trend):
+--   { threshold, window_days, count, sites_affected_count: 1 }
+
+-- algorithm (region/division/organisation-level / Cross-site Pattern):
+--   { threshold, window_days, count, sites_affected_count: N }
+--   sites_affected_count: number of distinct worksites contributing observations
+--   to the cluster at trigger time. Populated from the observation pool query.
+
+-- solo_critical:
+--   { incident_id, severity_class, rationale }
+
+-- critical_observation:
+--   { observation_id, signal_type, barrier_assessment, energy_release_potential }
+```
+
+`sites_affected_count` is available to the Stage 1 prompt for algorithm triggers and is used in `CANONICAL-USER-PROMPT-STAGE-1-ALGORITHM-CROSS-SITE-PATTERN` to give the AI concrete cross-site breadth context.
+
+---
+
 ## Cooldown and Deduplication
 
 The trend detection algorithm enforces a cooldown window to prevent duplicate insights:
@@ -360,9 +460,8 @@ In V1, the talk assembly prompt uses a fixed veteran supervisor voice. V2: pass 
 **Endorsement model (V2)**
 `insight_endorsement` and `insight_comment` tables exist in the schema (V1). In V2, endorsements from peer managers at other sites feed back into the confidence weighting for `fw_classify` re-runs and surface in the CoP thread if seeded. High endorsement count is also a trigger signal for escalation recommendation.
 
+**Cross-site pattern targeting for enquiry (V2)**
+In V1, enquiry targeting defaults to source sites only regardless of insight level. V2: for Cross-site Pattern insights (`generated_at_level` = region/division/organisation), default targeting expands to all sites within that scope — not just the sites that contributed observations to the cluster. See `ENQUIRY.md`.
+
 **Multi-factor fw_factors into situational brief (V2)**
-V1 situational brief generation receives a single `fw_factor`. V2: pass full arrays. See `SITUATIONAL-BRIEF.md`.
-
----
-
-*Last updated: May 2026. Update this file when: prompt text changes; output schema changes; review action payload changes; FW classification schema changes. After updating, verify prompt lab P entries load correctly and that workflow-sim.html scenario descriptions remain accurate.*
+V1 situational brief generation receives a single `fw_factor`. V2: pass full `fw_factors[]`, `fw_domains[]`, `fw_maturity_signals[]`, and `fw_rationales[]` arrays so the brief can name each factor with its rationale rather than naming only the top one. See `SITUATIONAL-BRIEF.md`.

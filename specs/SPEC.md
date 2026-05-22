@@ -356,8 +356,12 @@ CREATE TABLE safety_intelligence.critical_insight (
   -- Source data (algorithm / solo_critical triggers)
   source_observation_ids   JSONB,
   source_investigation_ids JSONB,
-  trigger_event            JSONB,   -- algorithm: { threshold, window_days, count }
+  trigger_event            JSONB,   -- algorithm: { threshold, window_days, count, sites_affected_count }
+                                    --   sites_affected_count = 1 at generated_at_level = 'site' (Worksite Trend)
+                                    --   sites_affected_count = N at generated_at_level in ('region','division','organisation') (Cross-site Pattern)
                                     -- solo_critical: { incident_id, severity_class, rationale }
+                                    -- critical_observation: { observation_id, signal_type, barrier_assessment, energy_release_potential }
+                                    -- See features/CRITICAL-INSIGHT.md §Schema Notes for the canonical per-trigger shape.
 
   -- Source metadata (manual / external triggers)
   source_metadata          JSONB,

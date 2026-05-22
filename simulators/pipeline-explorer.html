@@ -297,6 +297,14 @@ body::before {
   padding: 0 3px; margin-right: 3px;
   border-radius: 2px; background: rgba(0,0,0,0.25);
 }
+.rp-role {
+  font-weight: 600; letter-spacing: 0.3px; font-size: 8px;
+  padding: 0 4px; margin-left: 4px;
+  border-radius: 2px;
+  background: var(--amber-dim); color: var(--amber-text);
+  border: 1px solid var(--amber-border);
+  text-transform: lowercase;
+}
 
 /* Card body */
 .cbody { padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; }
@@ -394,12 +402,12 @@ body::before {
   <div>
     <div class="hdr-logo">Hiviz · Forge Works</div>
     <div class="hdr-title">Pipeline Explorer</div>
-    <div class="hdr-sub">Observation → Critical Insight. Live AI. All prompts and reference levels fetched from spec. Per-stage references reflect each feature spec's Global References Used table; injection level follows the governing rule — first-time classification gets Summary, downstream consumption gets Enum.</div>
+    <div class="hdr-sub">Observation → Critical Insight. Live AI. Prompts and references fetched from spec at runtime. Two injection rules: Rule 1 — any taxonomy reference injects its SUMMARY-REFERENCE block; Rule 2 — fw_classify gets the full Blueprint. The Role badge on each pill records whether the stage owns the classification (first-time) or consumes it (pass-through).</div>
     <div class="legend">
-      <div class="leg"><div class="leg-dot" style="background:var(--green)"></div>FULL — entire global injected</div>
-      <div class="leg"><div class="leg-dot" style="background:var(--teal)"></div>SUMMARY — one-liner per value</div>
-      <div class="leg"><div class="leg-dot" style="background:var(--amber)"></div>ENUM — pipe-delimited values</div>
-      <div class="leg"><div class="leg-dot" style="background:var(--red)"></div>SPEC-ONLY — referenced, not injected</div>
+      <div class="leg"><div class="leg-dot" style="background:var(--green)"></div>FULL — entire global injected (Rule 2)</div>
+      <div class="leg"><div class="leg-dot" style="background:var(--teal)"></div>SUMMARY — SUMMARY-REFERENCE block (Rule 1)</div>
+      <div class="leg"><div class="leg-dot" style="background:var(--red)"></div>BEHAVIOURAL — referenced inline, not injected</div>
+      <div class="leg"><div class="leg-dot" style="background:var(--amber)"></div>Role: first-time vs pass-through</div>
     </div>
   </div>
   <div class="hdr-right">
@@ -493,24 +501,33 @@ const STAGE_SPEC = {
 // Populated by initReferences() at startup from /specs/features/*.md.
 const REFS = { byFeature: {}, ready: false, error: null };
 
-function refTypeClass(type) {
-  switch ((type || '').toUpperCase()) {
-    case 'FULL':      return 'rp-connected';
-    case 'SUMMARY':   return 'rp-summary';
-    case 'ENUM':      return 'rp-inline';
-    case 'SPEC-ONLY': return 'rp-spec-only';
-    default:          return 'rp-spec-only';
+function refTypeClass(level) {
+  switch ((level || '').toUpperCase()) {
+    case 'FULL':        return 'rp-connected';
+    case 'SUMMARY':     return 'rp-summary';
+    case 'BEHAVIOURAL': return 'rp-spec-only';
+    default:            return 'rp-spec-only';
   }
 }
 
-// Pull the first injection-level keyword from a table cell. Cell content is
-// markdown — bold markers and qualifiers are common, e.g.
-// "**Summary** (Stage 1, Stage 2) — fw_factor_hint selected here".
-function parseLevelToken(cell) {
+// Parse the Role column under the two-rule model. Cell content is markdown,
+// often with stage qualifiers and explanatory notes, e.g.
+// "first-time (Stage 1, Stage 2)" or "Rule 2 — Full (Stage 3 only)" or "behavioural".
+//
+// Returns { role, level } where role is the diagnostic label and level is the
+// injection level derived from the two rules in HOW-TO-READ-THIS.md:
+//   first-time   → level = SUMMARY (Rule 1)
+//   pass-through → level = SUMMARY (Rule 1)
+//   Rule 2 / Full → level = FULL    (Rule 2 — fw_classify only)
+//   behavioural  → level = BEHAVIOURAL (not injected; rule applied inline)
+function parseRoleAndLevel(cell) {
   if (!cell) return null;
-  const stripped = cell.replace(/\*\*/g, '').trim();
-  const m = stripped.match(/\b(Full|Summary|Enum|Spec-only)\b/i);
-  return m ? m[1].toUpperCase() : null;
+  const text = cell.replace(/\*\*/g, '');
+  if (/\bRule\s*2\b|\bFull\b/i.test(text))   return { role: 'Rule 2',       level: 'FULL' };
+  if (/\bfirst[-\s]?time\b/i.test(text))     return { role: 'first-time',   level: 'SUMMARY' };
+  if (/\bpass[-\s]?through\b/i.test(text))   return { role: 'pass-through', level: 'SUMMARY' };
+  if (/\bbehavioural\b/i.test(text))         return { role: 'behavioural',  level: 'BEHAVIOURAL' };
+  return null;
 }
 
 // Extract referenced filename. Cell content looks like
@@ -522,14 +539,15 @@ function parseFile(cell) {
   return m[1].replace(/^.*\//, '');
 }
 
-// Does this row's level cell apply to the named stage? A cell with no explicit
+// Does this row's Role cell apply to the named stage? A cell with no explicit
 // stage qualifier applies unconditionally. A cell that explicitly names stages
-// (e.g. "Summary (Stage 1, Stage 2)") applies only if our stage is listed.
-// A cell that says "not used in Stage X" is excluded for that stage.
-function levelAppliesToStage(levelCell, stageLabel) {
-  if (!levelCell) return false;
-  const text = levelCell.replace(/\*\*/g, '');
-  if (new RegExp('not used in [^.;]*\\b' + stageLabel + '\\b', 'i').test(text)) return false;
+// (e.g. "first-time (Stage 1, Stage 2)") applies only if our stage is listed.
+// A cell that says "not referenced in Stage X" (or "not used in Stage X") is
+// excluded for that stage.
+function levelAppliesToStage(roleCell, stageLabel) {
+  if (!roleCell) return false;
+  const text = roleCell.replace(/\*\*/g, '');
+  if (new RegExp('not (referenced|used) in [^.;|]*\\b' + stageLabel + '\\b', 'i').test(text)) return false;
   const stageList = text.match(/\(((?:Stage [^)]+))\)/);
   if (!stageList) return true; // unconditional
   return new RegExp('\\b' + stageLabel + '\\b').test(stageList[1]);
@@ -548,15 +566,15 @@ function parseGlobalRefsTable(md) {
     if (/^\|\s*-+/.test(line.trim())) continue;
     const cells = line.split('|').map(c => c.trim());
     if (cells.length < 5) continue;
-    // cells: [empty, Global name, File, Used for, Injection level, empty?]
+    // cells: [empty, Global name, File, Used for, Role, empty?]
     const label = cells[1];
     if (!label || /^Global$/i.test(label)) continue;
     const file = parseFile(cells[2]);
     const usedFor = cells[3];
-    const levelCell = cells[4];
-    const level = parseLevelToken(levelCell);
-    if (!file || !level) continue;
-    rows.push({ file, label, usedFor, levelCell, level });
+    const roleCell = cells[4];
+    const parsed = parseRoleAndLevel(roleCell);
+    if (!file || !parsed) continue;
+    rows.push({ file, label, usedFor, roleCell, role: parsed.role, level: parsed.level });
   }
   return rows;
 }
@@ -578,8 +596,8 @@ async function initReferences() {
   }
 }
 
-// Return the list of {file, level, usedFor} entries that apply to this stage,
-// drawn from the relevant spec's Global References Used table.
+// Return the list of {file, level, role, usedFor} entries that apply to this
+// stage, drawn from the relevant spec's Global References Used table.
 function getStageRefs(stageId) {
   const mapping = STAGE_SPEC[stageId];
   if (!mapping) return null;
@@ -587,15 +605,15 @@ function getStageRefs(stageId) {
   // (fw-classify-job.md), not from a feature-spec Global References Used table.
   if (mapping.spec === '__fw_classify__') {
     return [
-      { file: 'fw-map-blueprint.md', level: 'FULL',      usedFor: 'Entire Blueprint injected verbatim into fw_classify system prompt' },
-      { file: 'ai-output-standards.md', level: 'SPEC-ONLY', usedFor: 'JSON-only output discipline, retry policy' },
+      { file: 'fw-map-blueprint.md',    level: 'FULL',        role: 'Rule 2',      usedFor: 'Entire Blueprint injected verbatim into fw_classify system prompt' },
+      { file: 'ai-output-standards.md', level: 'BEHAVIOURAL', role: 'behavioural', usedFor: 'JSON-only output discipline, retry policy — applied inline' },
     ];
   }
   const rows = REFS.byFeature[mapping.spec];
   if (!rows) return null;
   return rows
-    .filter(r => levelAppliesToStage(r.levelCell, mapping.stageLabel))
-    .map(r => ({ file: r.file, level: r.level, usedFor: r.usedFor }));
+    .filter(r => levelAppliesToStage(r.roleCell, mapping.stageLabel))
+    .map(r => ({ file: r.file, level: r.level, role: r.role, usedFor: r.usedFor }));
 }
 
 // ── PROMPTS ───────────────────────────────────────────────────────────────────
@@ -820,18 +838,19 @@ function buildRefsStrip(id) {
   if (refs === null) {
     inner = `<span style="font-family:var(--mono);font-size:9px;color:var(--muted);">${REFS.error ? 'spec load failed — ' + escHtml(REFS.error) : 'loading references…'}</span>`;
   } else if (refs.length === 0) {
-    inner = `<span style="font-family:var(--mono);font-size:9px;color:var(--muted);">no globals consumed at ${escHtml(mapping.stageLabel)}</span>`;
+    inner = `<span style="font-family:var(--mono);font-size:9px;color:var(--muted);">no globals referenced at ${escHtml(mapping.stageLabel)}</span>`;
   } else {
     inner = refs.map(r => {
       const cls = refTypeClass(r.level);
-      const label = (r.level === 'SPEC-ONLY') ? 'SPEC' : r.level;
-      const tip = r.usedFor ? r.level + ' — ' + r.usedFor : r.level;
-      return `<span class="ref-pill ${cls}" title="${escHtml(tip)}"><span class="rp-dot"></span><span class="rp-type">${label}</span>${escHtml(r.file)}</span>`;
+      const levelLabel = (r.level === 'BEHAVIOURAL') ? 'INLINE' : r.level;
+      const roleLabel = r.role || '';
+      const tip = [r.level, roleLabel ? '(' + roleLabel + ')' : '', r.usedFor ? '— ' + r.usedFor : ''].filter(Boolean).join(' ');
+      return `<span class="ref-pill ${cls}" title="${escHtml(tip)}"><span class="rp-dot"></span><span class="rp-type">${escHtml(levelLabel)}</span>${escHtml(r.file)}${roleLabel ? `<span class="rp-role" title="Role: ${escHtml(roleLabel)}">${escHtml(roleLabel)}</span>` : ''}</span>`;
     }).join('');
   }
 
   const sourceTag = mapping.spec === '__fw_classify__'
-    ? 'fw-classify-job.md'
+    ? 'fw-classify-job.md (Rule 2)'
     : mapping.spec + '.md § ' + mapping.stageLabel;
   return `<div class="refs-strip"><span class="refs-lbl" title="Source: ${escHtml(sourceTag)}">REFS</span>${inner}</div>`;
 }

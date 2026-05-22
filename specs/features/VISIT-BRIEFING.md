@@ -22,12 +22,12 @@ Stage 2 — Briefing consumed      (human-driven — mobile app)
 
 ## Global References Used
 
-Visit briefing generation receives `fw_factor` from upstream site classification and uses the name to phrase `fw_context`. No classification is performed here.
+Visit briefing generation receives `fw_factor` from upstream site classification and uses the name to phrase `fw_context`. No classification is performed here. Under Rule 1, the `SUMMARY-REFERENCE — fw-map-blueprint` block injects at runtime so the briefing can frame the factor with its one-sentence sense. The `Role` column is diagnostic — see `HOW-TO-READ-THIS.md §Global Injection Rules`.
 
-| Global | File | Used for | Injection level |
+| Global | File | Used for | Role |
 |---|---|---|---|
-| AI output standards | `globals/ai-output-standards.md` | JSON-only, max tokens, audit logging | Spec-only |
-| FW Map® Blueprint | `globals/fw-map-blueprint.md` | `fw_factor` validation; V2 multi-factor context | **Enum** — 15 factor names only |
+| AI output standards | `globals/ai-output-standards.md` | JSON-only, max tokens, audit logging | behavioural |
+| FW Map® Blueprint | `globals/fw-map-blueprint.md` | `fw_factor` validation; V2 multi-factor context | pass-through (factor names) |
 
 ---
 

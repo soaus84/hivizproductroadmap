@@ -23,13 +23,13 @@ Stage 3 — Seeding              (API call to CoP platform — human-confirmed)
 
 ## Global References Used
 
-`cop_thread.generate` operates on already-classified upstream content (approved insight or closed investigation, plus FW classification if available) and reframes it as discussion prompts — it does not classify signal, energy, or barrier values. The Blueprint is referenced for framing principles and factor names only.
+`cop_thread.generate` operates on already-classified upstream content (approved insight or closed investigation, plus FW classification if available) and reframes it as discussion prompts — it does not classify signal, energy, or barrier values. The Blueprint is referenced for factor name pass-through; under Rule 1, the `SUMMARY-REFERENCE — fw-map-blueprint` block injects at runtime to ground accurate factor framing. Community framing principles are referenced via spec, not injected. The `Role` column is diagnostic — see `HOW-TO-READ-THIS.md §Global Injection Rules`.
 
-| Global | File | Used for | Injection level |
+| Global | File | Used for | Role |
 |---|---|---|---|
-| FW Map® Blueprint | `globals/fw-map-blueprint.md` | Community framing principles; factor name pass-through in thread output | **Enum** — 15 factor names only; framing principles referenced via spec |
-| Anonymisation rules | `globals/anonymisation-rules.md` | Source narratives scrubbed before prompt | Spec-only |
-| AI output standards | `globals/ai-output-standards.md` | JSON-only, max tokens, rationale standard | Spec-only |
+| FW Map® Blueprint | `globals/fw-map-blueprint.md` | Factor name pass-through in thread output; framing principles referenced via spec | pass-through (factor names) + behavioural (framing principles) |
+| Anonymisation rules | `globals/anonymisation-rules.md` | Source narratives scrubbed before prompt | behavioural |
+| AI output standards | `globals/ai-output-standards.md` | JSON-only, max tokens, rationale standard | behavioural |
 
 ---
 

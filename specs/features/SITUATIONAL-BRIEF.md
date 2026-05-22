@@ -23,13 +23,13 @@ Stage 3 — Distribution        (to sharing scope — human-confirmed)
 
 ## Global References Used
 
-Brief generation receives the FW classification produced upstream (factor, domain, maturity signal, rationale) and references the factor by name in `what_it_means`. No classification is performed here.
+Brief generation receives the FW classification produced upstream (factor, domain, maturity signal, rationale) and references the factor by name in `what_it_means`. No classification is performed here. Under Rule 1, the `SUMMARY-REFERENCE — fw-map-blueprint` block injects at runtime so the brief can name the factor accurately with its one-sentence sense. The `Role` column is diagnostic — see `HOW-TO-READ-THIS.md §Global Injection Rules`.
 
-| Global | File | Used for | Injection level |
+| Global | File | Used for | Role |
 |---|---|---|---|
-| FW Map® Blueprint | `globals/fw-map-blueprint.md` | Factor-level framing in `what_it_means` — factor name passes through from upstream classification | **Enum** — 15 factor names only |
-| Anonymisation rules | `globals/anonymisation-rules.md` | Source narratives scrubbed before prompt | Spec-only |
-| AI output standards | `globals/ai-output-standards.md` | JSON-only, max tokens, draft status | Spec-only |
+| FW Map® Blueprint | `globals/fw-map-blueprint.md` | Factor-level framing in `what_it_means` — factor name passes through from upstream classification | pass-through (factor names) |
+| Anonymisation rules | `globals/anonymisation-rules.md` | Source narratives scrubbed before prompt | behavioural |
+| AI output standards | `globals/ai-output-standards.md` | JSON-only, max tokens, draft status | behavioural |
 
 ---
 
