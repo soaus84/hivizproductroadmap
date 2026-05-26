@@ -27,6 +27,7 @@
     --tag-ms:   rgba(52,211,153,0.12); --tag-ms-text:   #34d399;
     --tag-glob: rgba(167,139,250,0.15); --tag-glob-text: #c4b5fd;
     --tag-feat: rgba(251,113,133,0.12); --tag-feat-text: #fda4af;
+    --tag-ws:   rgba(6,182,212,0.12);  --tag-ws-text:   #67e8f9;
   }
 
   html { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 14px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
@@ -53,12 +54,15 @@
   nav a.glob-nav:hover { border-color: #c4b5fd; }
   nav a.feat-nav { color: #fda4af; border-color: rgba(251,113,133,0.25); }
   nav a.feat-nav:hover { border-color: #fda4af; }
+  nav a.ws-nav { color: #67e8f9; border-color: rgba(6,182,212,0.25); }
+  nav a.ws-nav:hover { border-color: #67e8f9; }
 
   .section { margin: 0 0 52px; }
   .section.experiment { border: 1px solid rgba(212,168,67,0.15); border-radius: 6px; padding: 20px 20px 16px; margin: 0 0 52px; background: rgba(212,168,67,0.03); }
   .section.ms-section { border: 1px solid rgba(52,211,153,0.15); border-radius: 6px; padding: 20px 20px 16px; margin: 0 0 52px; background: rgba(52,211,153,0.03); }
   .section.glob-section { border: 1px solid rgba(167,139,250,0.15); border-radius: 6px; padding: 20px 20px 16px; margin: 0 0 52px; background: rgba(167,139,250,0.03); }
   .section.feat-section { border: 1px solid rgba(251,113,133,0.15); border-radius: 6px; padding: 20px 20px 16px; margin: 0 0 52px; background: rgba(251,113,133,0.03); }
+  .section.ws-section  { border: 1px solid rgba(6,182,212,0.15);   border-radius: 6px; padding: 20px 20px 16px; margin: 0 0 52px; background: rgba(6,182,212,0.03); }
 
   .section-header { display: flex; align-items: baseline; gap: 12px; margin-bottom: 6px; }
   .section-title { font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-secondary); }
@@ -88,6 +92,7 @@
   .tag-ms   { background: var(--tag-ms);   color: var(--tag-ms-text);   }
   .tag-glob { background: var(--tag-glob); color: var(--tag-glob-text); }
   .tag-feat { background: var(--tag-feat); color: var(--tag-feat-text); }
+  .tag-ws   { background: var(--tag-ws);   color: var(--tag-ws-text);   }
 
   .file-item.exp-item .file-link { color: rgba(212,168,67,0.6); }
   .file-item.exp-item:hover .file-link { color: var(--accent); }
@@ -97,6 +102,8 @@
   .file-item.glob-item:hover .file-link { color: #c4b5fd; }
   .file-item.feat-item .file-link { color: rgba(251,113,133,0.6); }
   .file-item.feat-item:hover .file-link { color: #fda4af; }
+  .file-item.ws-item .file-link { color: rgba(6,182,212,0.6); }
+  .file-item.ws-item:hover .file-link { color: #67e8f9; }
 
   .arch-note { font-size: 11px; color: var(--text-muted); background: var(--surface2); border: 1px solid var(--border); border-radius: 4px; padding: 8px 12px; margin-bottom: 14px; line-height: 1.6; }
   .arch-note strong { color: var(--text-secondary); font-weight: 600; }
@@ -117,6 +124,7 @@
     .section.ms-section { margin: 0 0 52px; }
     .section.glob-section { margin: 0 0 52px; }
     .section.feat-section { margin: 0 0 52px; }
+    .section.ws-section { margin: 0 0 52px; }
   }
 </style>
 </head>
@@ -134,6 +142,7 @@
 
   <nav>
     <a href="#overview">Overview</a>
+    <a href="#workspaces" class="ws-nav">Workspaces ✦</a>
     <a href="#globals" class="glob-nav">Globals ✦</a>
     <a href="#features" class="feat-nav">Features ✦</a>
     <a href="#platform-specs">Platform Specs</a>
@@ -153,15 +162,29 @@
       <li class="file-item"><span class="file-tag tag-md">md</span><a href="README.md" class="file-link">README.md</a><span class="file-dot"></span><span class="file-desc">Project overview and snapshot map</span></li>
       <li class="file-item"><span class="file-tag tag-md">md</span><a href="specs/HOW-TO-READ-THIS.md" class="file-link">specs/HOW-TO-READ-THIS.md</a><span class="file-dot"></span><span class="file-desc">Start here — documentation architecture, authority rules, navigation guide</span></li>
       <li class="file-item"><span class="file-tag tag-md">md</span><a href="specs/MODEL-MAP.md" class="file-link">specs/MODEL-MAP.md</a><span class="file-dot"></span><span class="file-desc">Holistic AI layer map — stream catalogue, states, capability gates, Live Sim links. The dashboard for what's connected to what and what's firing right now.</span></li>
-      <li class="file-item"><span class="file-tag tag-md">md</span><a href="specs/WORKSPACES.md" class="file-link">specs/WORKSPACES.md</a><span class="file-dot"></span><span class="file-desc">Workspace capability layers — what each workspace is, what it delivers, how they relate. Canonical mapping from code IDs to user-facing capability names.</span></li>
-      <li class="file-item"><span class="file-tag tag-md">md</span><a href="specs/workspaces/INSIGHT.md" class="file-link">workspaces/INSIGHT.md</a><span class="file-dot"></span><span class="file-desc"><strong>workspace.core</strong> — Insight workspace spec. Feature inventory, UX surfaces, capability gates, workspace connections. Always on.</span></li>
-      <li class="file-item"><span class="file-tag tag-md">md</span><a href="specs/workspaces/INCIDENT.md" class="file-link">workspaces/INCIDENT.md</a><span class="file-dot"></span><span class="file-desc"><strong>workspace.incident</strong> — Incident workspace spec. Formal incident pipeline, investigation, regulatory reporting. Activation decision.</span></li>
-      <li class="file-item"><span class="file-tag tag-md">md</span><a href="specs/workspaces/RISK.md" class="file-link">workspaces/RISK.md</a><span class="file-dot"></span><span class="file-desc"><strong>workspace.risk</strong> — Risk workspace spec. Critical control register, verification checklists, investigation attribution. Activation decision.</span></li>
-      <li class="file-item"><span class="file-tag tag-md">md</span><a href="specs/workspaces/MANAGEMENT-SYSTEM.md" class="file-link">workspaces/MANAGEMENT-SYSTEM.md</a><span class="file-dot"></span><span class="file-desc"><strong>workspace.ms</strong> — Management System workspace spec. Document ingestion, requirement extraction, procedure-gap detection. Activation decision.</span></li>
-      <li class="file-item"><span class="file-tag tag-md">md</span><a href="specs/workspaces/SYSTEMIC-MAP.md" class="file-link">workspaces/SYSTEMIC-MAP.md</a><span class="file-dot"></span><span class="file-desc"><strong>workspace.analytics</strong> — Systemic Map workspace spec. FW capacity profile, atrophy score, visit planning, situational briefs. Activation decision.</span></li>
-      <li class="file-item"><span class="file-tag tag-md">md</span><a href="specs/workspaces/COMMUNITIES.md" class="file-link">workspaces/COMMUNITIES.md</a><span class="file-dot"></span><span class="file-desc"><strong>workspace.communities</strong> — Communities workspace spec. CoP thread generation, peer learning, engagement signals. Activation decision.</span></li>
+      <li class="file-item"><span class="file-tag tag-md">md</span><a href="specs/WORKSPACES.md" class="file-link">specs/WORKSPACES.md</a><span class="file-dot"></span><span class="file-desc">Workspace index — what each workspace is, what it delivers, dependency map. Navigation layer between overview and workspace specs.</span></li>
       <li class="file-item"><span class="file-tag tag-html">html</span><a href="signal-flow.html" class="file-link">signal-flow.html</a><span class="file-dot"></span><span class="file-desc">Intelligence signal flow — pipeline stages, insight classes</span></li>
       <li class="file-item"><span class="file-tag tag-html">html</span><a href="architecture/platform-architecture.html" class="file-link">architecture/platform-architecture.html</a><span class="file-dot"></span><span class="file-desc">Connected, modular workspaces — system overview</span></li>
+    </ul>
+  </section>
+
+  <!-- ── WORKSPACES ── -->
+  <section class="section ws-section" id="workspaces">
+    <div class="section-header">
+      <span class="section-title">Workspaces ✦</span>
+      <span class="section-note">Six capability layers — always-on core plus five activation decisions</span>
+    </div>
+    <div class="section-intro">Each workspace spec covers standalone value, what activating turns on, feature inventory with build states, capability gates, and workspace connections. These are the AI instruction layer for building out each workspace's capability.</div>
+    <div class="section-rule"></div>
+    <ul class="file-list">
+      <li class="file-item ws-item"><span class="file-tag tag-ws">core</span><a href="specs/workspaces/INSIGHT.md" class="file-link">workspaces/INSIGHT.md</a><span class="file-dot"></span><span class="file-desc"><strong>workspace.core — Insight.</strong> Always on. Visit planning, observation capture, insight generation, toolbox talks, enquiries, corrective actions.</span></li>
+      <li class="file-item ws-item"><span class="file-tag tag-ws">ws</span><a href="specs/workspaces/INCIDENT.md" class="file-link">workspaces/INCIDENT.md</a><span class="file-dot"></span><span class="file-desc"><strong>workspace.incident — Incident.</strong> Activation decision. Formal incident pipeline, investigation, regulatory reporting, systemic cause bridge.</span></li>
+      <li class="file-item ws-item"><span class="file-tag tag-ws">ws</span><a href="specs/workspaces/RISK.md" class="file-link">workspaces/RISK.md</a><span class="file-dot"></span><span class="file-desc"><strong>workspace.risk — Risk.</strong> Activation decision. Critical control register, supervisor verification checklists, investigation control attribution.</span></li>
+      <li class="file-item ws-item"><span class="file-tag tag-ws">ws</span><a href="specs/workspaces/MANAGEMENT-SYSTEM.md" class="file-link">workspaces/MANAGEMENT-SYSTEM.md</a><span class="file-dot"></span><span class="file-desc"><strong>workspace.ms — Management System.</strong> Activation decision. Document ingestion, requirement extraction, procedure-gap detection.</span></li>
+      <li class="file-item ws-item"><span class="file-tag tag-ws">ws</span><a href="specs/workspaces/SYSTEMIC-MAP.md" class="file-link">workspaces/SYSTEMIC-MAP.md</a><span class="file-dot"></span><span class="file-desc"><strong>workspace.analytics — Systemic Map.</strong> Activation decision. Worksite intelligence decoration, FW capacity profile, atrophy scoring, situational briefs.</span></li>
+      <li class="file-item ws-item"><span class="file-tag tag-ws">ws</span><a href="specs/workspaces/COMMUNITIES.md" class="file-link">workspaces/COMMUNITIES.md</a><span class="file-dot"></span><span class="file-desc"><strong>workspace.communities — Communities.</strong> Activation decision. CoP thread generation, peer learning, engagement signals.</span></li>
+      <li class="file-item ws-item"><span class="file-tag tag-ws">disc</span><a href="v6-discovery.html" class="file-link">v6-discovery.html</a><span class="file-dot"></span><span class="file-desc">Management System workspace — narrative discovery doc. Older framing, useful for scope and vision context.</span></li>
+      <li class="file-item ws-item"><span class="file-tag tag-ws">disc</span><a href="v7-discovery.html" class="file-link">v7-discovery.html</a><span class="file-dot"></span><span class="file-desc">Communities workspace — narrative discovery doc. Older framing, useful for scope and vision context.</span></li>
     </ul>
   </section>
 
@@ -223,8 +246,6 @@
       <li class="file-item"><span class="file-tag tag-md">md</span><a href="specs/SPEC.md" class="file-link">specs/SPEC.md</a><span class="file-dot"></span><span class="file-desc">Data model, API, algorithms, logic rules, notifications, enquiry module — source of truth for data and API</span></li>
       <li class="file-item"><span class="file-tag tag-md">md</span><a href="specs/prompts.md" class="file-link">specs/prompts.md</a><span class="file-dot"></span><span class="file-desc">Prompt index only — one-liner per prompt pointing to its feature file. No prompt text lives here.</span></li>
       <li class="file-item"><span class="file-tag tag-html">html</span><a href="specs/08-offline-architecture.html" class="file-link">specs/08-offline-architecture.html</a><span class="file-dot"></span><span class="file-desc">Offline architecture — Capacitor SQLite, sync queue, enrichment retry</span></li>
-      <li class="file-item"><span class="file-tag tag-html">html</span><a href="v6-discovery.html" class="file-link">v6-discovery.html</a><span class="file-dot"></span><span class="file-desc">V6 Management System workspace discovery</span></li>
-      <li class="file-item"><span class="file-tag tag-html">html</span><a href="v7-discovery.html" class="file-link">v7-discovery.html</a><span class="file-dot"></span><span class="file-desc">V7 Communities workspace discovery</span></li>
     </ul>
   </section>
 
