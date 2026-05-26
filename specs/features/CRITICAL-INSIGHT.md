@@ -28,6 +28,7 @@ Stage 4 — Downstream dispatch      (situational brief, CoP thread seed — see
 |---|---|---|
 | `algorithm` | Trend detection threshold crossed | Cluster of anonymised enriched observations |
 | `critical_observation` | Single `barrier_failure` or `unwanted_energy_event` observation with `signal_type_confidence >= 0.70` | Single enriched observation record |
+| `platform_pattern` | Pattern detected across platform-derived signals (atrophy, corrective action debt, verification gaps, talk delivery failures) — V2 | Cluster of platform activity signals across sites in scope |
 | `manual` | Safety manager creates directly | Manager-authored content — Stage 1 skipped |
 | `external_alert` | Regulator / industry body / client alert | External content — Stage 1 skipped |
 | `external_investigation` | Finding from another system | External content — Stage 1 skipped |
@@ -430,3 +431,10 @@ In V1, enquiry targeting defaults to source sites only regardless of insight lev
 
 **Multi-factor fw_factors into situational brief (V2)**
 V1 situational brief generation receives a single `fw_factor`. V2: pass full `fw_factors[]`, `fw_domains[]`, `fw_maturity_signals[]`, and `fw_rationales[]` arrays so the brief can name each factor with its rationale rather than naming only the top one. See `SITUATIONAL-BRIEF.md`.
+
+**Platform-pattern trigger class (V2)**
+A new `trigger_source = 'platform_pattern'` that mirrors the existing `algorithm` trigger but operates on platform-derived signals rather than field observations. Where the algorithm trigger pools field observations and detects trends, the platform_pattern trigger pools activity signals from the platform itself — persistent atrophy across multiple sites, corrective actions consistently going overdue, toolbox talks generated but not delivered, verification gaps accumulating — and fires a Critical Insight when a pattern threshold is crossed.
+
+The insight generated follows the same pipeline: AI draft → human review → FW classification → toolbox / enquiry / CoP. Because it's a pattern-level finding (not a single event), it would likely classify against `operational_management`, `learning_systems`, or `communications_coordination` factors.
+
+**Workspace gating for platform signals:** Each signal type is only valid once the workspace providing it is active. Atrophy signals require `workspace.analytics`. Verification gap signals require `workspace.risk`. Talk delivery signals require `workspace.core` (always available). A site with no verifications because `workspace.risk` is not active must not be treated as a verification gap — absence of data from an inactive workspace is not a signal. The platform_pattern algorithm must only pool signals from workspaces confirmed active for that organisation.
