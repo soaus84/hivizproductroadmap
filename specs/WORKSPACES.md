@@ -73,7 +73,7 @@ Workspaces are **not product tiers in the pricing sense** — they are activatio
 
 **The key difference it makes:** Without the Risk workspace, the platform knows *that* incidents happen and can classify *why* at an organisational level. With it, it knows *which specific control failed* — the most actionable level of systemic understanding for high-energy work environments.
 
-**Design decision needed:** Control register schema, verification workflow, and attribution logic are not yet specced. This workspace is referenced in `MODEL-MAP.md` as affecting `incident-to-investigation` and `systemic-causes` but the feature spec does not yet exist. See V2 notes.
+**Spec authority:** `features/RISK-CONTROLS.md`
 
 **Code ID:** `workspace.risk`
 

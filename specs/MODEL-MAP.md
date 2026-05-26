@@ -91,7 +91,7 @@ A stream tagged `core + ms` means "this stream exists in the core platform but p
 
 **Consumes:** raw incident text (from supervisor capture)
 **Produces:** CriticalIncident (draft, pending review) + closed investigation + toolbox narrative + FW classification. Optional: CriticalInsight via systemic cause phase (`external_investigation` trigger).
-**Spec authority:** `features/INCIDENT-CAPTURE.md`, `features/CRITICAL-INCIDENT.md`, `features/INVESTIGATION.md`
+**Spec authority:** `features/INCIDENT-CAPTURE.md`, `features/CRITICAL-INCIDENT.md`, `features/INVESTIGATION.md`, `features/RISK-CONTROLS.md` (when `risk` active — control attribution stage)
 **Workspace:** `core` (+ `ms` for document context, + `risk` for control attribution)
 **Downstream consumers:** insight-to-broadcast (via toolbox narrative), systemic-causes, observation-to-insight (systemic cause bridge — human-initiated, not automatic)
 
