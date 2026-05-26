@@ -1322,7 +1322,7 @@ No default approval path or timed auto-approval.
 After a CriticalInsight is generated for a given work_type_id + org_level:
   - No new CriticalInsight generated for same combination for org.trend_cooldown_days (default: 30 days)
   - Cooldown resets if the reviewer rejects an insight
-  - Solo_critical trigger bypasses cooldown
+  - critical_observation trigger bypasses cooldown
 ```
 
 **INS-03: Rejection handling**

@@ -87,6 +87,7 @@ Status: Supersedes v1.0 prompt library
 | `situational_brief.generate` | Situational brief | `specs/features/SITUATIONAL-BRIEF.md` | Stage 1 |
 | `cop_thread.generate` | Community of practice thread | `specs/features/COMMUNITIES.md` | Stage 1 |
 | `visit_briefing.generate` | Visit briefing pack | `specs/features/VISIT-BRIEFING.md` | Stage 1 |
+| `visit_plan.summarise` | Visit summary (on complete) | `specs/features/SYSTEMIC-CAUSES.md` | Visit Completion |
 
 ### Management system
 

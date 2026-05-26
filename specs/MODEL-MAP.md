@@ -172,7 +172,7 @@ A stream tagged `core + ms` means "this stream exists in the core platform but p
 
 **Consumes:** any classified item with `fw_factors[]` populated
 **Produces:** situational briefs (manager comms), CoP thread seeds (peer discussion), visit briefings (manager pre-visit packs)
-**Spec authority:** `features/SITUATIONAL-BRIEF.md`, `features/COMMUNITIES.md`, `features/VISIT-BRIEFING.md`
+**Spec authority:** `features/SYSTEMIC-CAUSES.md` (aggregation engine, atrophy score, visit_plan, trigger logic), `features/SITUATIONAL-BRIEF.md`, `features/COMMUNITIES.md`, `features/VISIT-BRIEFING.md`
 **Workspace:** `core` (+ `communities` for CoP threading, + `analytics` for FW capacity profile views)
 **Downstream consumers:** none (terminal — distributed to managers, communities, visit plans)
 
