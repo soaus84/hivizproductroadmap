@@ -40,7 +40,7 @@ Workspaces are **not product tiers in the pricing sense** — they are activatio
 
 **Spec authority:** `features/OBSERVATION-CAPTURE.md`, `features/CRITICAL-INSIGHT.md`, `features/TOOLBOX-TALK.md`, `features/ENQUIRY.md`, `features/CORRECTIVE-ACTIONS.md`, `globals/fw-classify-job.md`
 
-**Code ID:** `workspace.core`
+**Code ID:** `workspace.core` · **Workspace doc:** `workspaces/INSIGHT.md`
 
 ---
 
@@ -68,7 +68,7 @@ Workspaces are **not product tiers in the pricing sense** — they are activatio
 
 **Spec authority:** `features/INCIDENT-CAPTURE.md`, `features/CRITICAL-INCIDENT.md`, `features/INVESTIGATION.md`
 
-**Code ID:** `workspace.incident`
+**Code ID:** `workspace.incident` · **Workspace doc:** `workspaces/INCIDENT.md`
 
 ---
 
@@ -89,7 +89,7 @@ Workspaces are **not product tiers in the pricing sense** — they are activatio
 
 **Spec authority:** `features/MANAGEMENT-SYSTEM-INGESTION.md`
 
-**Code ID:** `workspace.ms`
+**Code ID:** `workspace.ms` · **Workspace doc:** `workspaces/MANAGEMENT-SYSTEM.md`
 
 ---
 
@@ -109,7 +109,7 @@ Workspaces are **not product tiers in the pricing sense** — they are activatio
 
 **Spec authority:** `features/RISK-CONTROLS.md`
 
-**Code ID:** `workspace.risk`
+**Code ID:** `workspace.risk` · **Workspace doc:** `workspaces/RISK.md`
 
 ---
 
@@ -130,7 +130,7 @@ Workspaces are **not product tiers in the pricing sense** — they are activatio
 
 **Spec authority:** `features/SYSTEMIC-CAUSES.md`, `features/SITUATIONAL-BRIEF.md`, `features/VISIT-BRIEFING.md`
 
-**Code ID:** `workspace.analytics`
+**Code ID:** `workspace.analytics` · **Workspace doc:** `workspaces/SYSTEMIC-MAP.md`
 
 ---
 
@@ -151,7 +151,7 @@ Workspaces are **not product tiers in the pricing sense** — they are activatio
 
 **Spec authority:** `features/COMMUNITIES.md`
 
-**Code ID:** `workspace.communities`
+**Code ID:** `workspace.communities` · **Workspace doc:** `workspaces/COMMUNITIES.md`
 
 ---
 
