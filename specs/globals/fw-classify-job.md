@@ -69,12 +69,13 @@ Pattern summary: {{pattern_summary}}
 Likely systemic cause: {{likely_systemic_cause}}
 Toolbox narrative: {{toolbox_narrative}}
 
-{{#if trigger_source == 'solo_critical'}}
-Note: This is a single critical incident — not an accumulated trend.
-Severity class: critical
-Incident type: {{incident_type}}
-Weight classification evidence accordingly — a single event can still evidence systemic
-organisational factors when the narrative is specific and the cause chain is clear.
+{{#if trigger_source == 'external_investigation'}}
+Note: This insight originates from the systemic cause phase of a completed investigation.
+The investigation has already been FW-classified — confirmed factors: {{source_investigation_fw_factors | "not yet available"}}.
+Investigator-confirmed root cause: {{source_investigation_root_cause | "not provided"}}.
+Classify this insight independently based on the pattern_summary and likely_systemic_cause content.
+Treat convergence with the confirmed investigation factors as higher confidence — divergence
+is valid if the systemic framing supports a different organisational gap.
 {{/if}}
 
 Classify against the 15 Forge Works Map® factors.
@@ -112,10 +113,10 @@ Contributing factors: {{contributing_factors_json}}
 Root cause: {{root_cause}}
 Corrective actions: {{corrective_actions_json}}
 
-{{#if trigger_source == 'solo_critical'}}
-Note: This investigation stems from a single critical incident — not an accumulated trend.
-Weight your classification evidence accordingly. A single critical event can still evidence
-systemic organisational factors when the narrative is rich enough.
+{{#if severity_class == 'critical'}}
+Note: This investigation stems from a single critical-severity incident (direct path — not an accumulated trend).
+Weight your classification evidence accordingly. A single critical event can evidence
+systemic organisational factors when the contributing factors and root cause are specific.
 {{/if}}
 
 Classify against the 15 Forge Works Map® factors.

@@ -281,16 +281,20 @@ Worksite
   ├── worksite_role_slot (supervisor / manager / safety_professional / control_verifier)
   │     └── worksite_slot_assignment (user assignments to slots)
   │
-  ├── observation ──► AI enrichment ──► trend detection ──► critical_insight
-  │                                                               │
-  ├── incident ──► triage ──► investigation                      │
-  │                    │             │                            │
-  │            (solo critical)       └──────────────────────────►│
-  │                    │                                          │
-  │                    └──► critical_insight (solo_critical)      │
-  │                                                               ▼
-  │                                                          enquiry ──► enquiry_question
-  │                                                                           └── enquiry_response
+  ├── observation ──► AI enrichment ──► trend detection ──────────────────────────► critical_insight
+  │                         │                                                              ▲
+  │              (barrier_failure / unwanted_energy_event,                                │
+  │               confidence ≥ 0.70) ────────────────────────────────────────────────────┤
+  │                                                                                       │
+  ├── incident ──► triage ──► critical_incident ──► human review ──► investigation        │
+  │                                                                       │                │
+  │                                              (systemic cause phase,   │                │
+  │                                               optional, human-        └──────────────►┘
+  │                                               initiated)                external_investigation
+  │                                                                                       │
+  │                                                                                       ▼
+  │                                                                                 enquiry ──► enquiry_question
+  │                                                                                                 └── enquiry_response
   │
   ├── toolbox_talk (assembled from observations + investigations + critical_insights)
   │

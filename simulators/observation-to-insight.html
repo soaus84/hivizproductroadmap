@@ -1262,7 +1262,8 @@ function buildFWUserPrompt() {
     .replace('{{pattern_summary}}', ins.pattern_summary||'')
     .replace('{{likely_systemic_cause}}', ins.likely_systemic_cause||'')
     .replace('{{toolbox_narrative}}', ins.toolbox_narrative||'');
-  tpl = tpl.replace(/\{\{#if trigger_source == 'solo_critical'\}\}[\s\S]*?\{\{\/if\}\}/g, '');
+  // Strip external_investigation conditional block — observation sim never has that trigger source
+  tpl = tpl.replace(/\{\{#if trigger_source == 'external_investigation'\}\}[\s\S]*?\{\{\/if\}\}/g, '');
   return tpl;
 }
 

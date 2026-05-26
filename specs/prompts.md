@@ -37,16 +37,24 @@ Status: Supersedes v1.0 prompt library
 
 | Job | Label | Feature file | Stage |
 |---|---|---|---|
-| `critical_insight.generate` | Critical insight draft (algorithm trigger) | `specs/features/CRITICAL-INSIGHT.md` | Stage 1 |
-| `critical_insight.generate` | Critical insight draft (solo_critical trigger) | `specs/features/CRITICAL-INSIGHT.md` | Stage 1 |
+| `critical_insight.generate` | Critical insight draft (algorithm — Worksite Trend) | `specs/features/CRITICAL-INSIGHT.md` | Stage 1 |
+| `critical_insight.generate` | Critical insight draft (algorithm — Cross-site Pattern) | `specs/features/CRITICAL-INSIGHT.md` | Stage 1 |
 | `critical_insight.generate` | Critical insight draft (critical_observation trigger) | `specs/features/CRITICAL-INSIGHT.md` | Stage 1 |
+
+### Incident intelligence pipeline
+
+| Job | Label | Feature file | Stage |
+|---|---|---|---|
+| `critical_incident.generate` | CriticalIncident draft (critical_incident trigger — direct path) | `specs/features/CRITICAL-INCIDENT.md` | Stage 1 |
+| `critical_incident.generate` | CriticalIncident draft (algorithm trigger — site) | `specs/features/CRITICAL-INCIDENT.md` | Stage 1 |
+| `critical_incident.generate` | CriticalIncident draft (algorithm trigger — cross-site) | `specs/features/CRITICAL-INCIDENT.md` | Stage 1 |
 
 ### Investigation pipeline
 
 | Job | Label | Feature file | Stage |
 |---|---|---|---|
 | `investigation.assist` | Investigation framework assistance | `specs/features/INCIDENT-CAPTURE.md` | Stage 3 |
-| `investigation.generate_narrative` | Investigation toolbox narrative | `specs/features/INVESTIGATION.md` | Stage 3 |
+| `investigation.generate_narrative` | Investigation toolbox narrative | `specs/features/INVESTIGATION.md` | Stage 4 |
 
 ### Toolbox talk
 

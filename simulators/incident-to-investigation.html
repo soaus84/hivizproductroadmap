@@ -688,8 +688,11 @@ async function initPrompts() {
 // ── STATE ─────────────────────────────────────────────────────────────────────
 // Stream stages: capture (chat) → triage (algorithm) → assist (AI) →
 // framework (human) → narrative (AI) → classify (AI). Critical-severity
-// incidents also fire solo_critical into observation-to-insight, but that
-// bridge is handled by the other Live Sim, not here.
+// incidents create a CriticalIncident entity (see CRITICAL-INCIDENT.md) that
+// goes through human review before investigation opens. This sim proceeds
+// directly to investigation.assist for flow, noting CriticalIncident creation.
+// The systemic cause bridge (investigation → CriticalInsight via
+// external_investigation) is a human-initiated step handled post-close.
 const INITIAL_STAGES = { capture:'active', triage:'pending', assist:'pending', framework:'pending', narrative:'pending', classify:'pending' };
 let S = {
   stages: { ...INITIAL_STAGES },
@@ -1019,8 +1022,9 @@ function handleChatKey(e) {
 // ── STAGE 2: TRIAGE ALGORITHM ────────────────────────────────────────────────
 // Runs synchronously server-side per INCIDENT-CAPTURE.md §Stage 2.
 // No AI. Derives severity_class + requires_investigation from the capture
-// summary. Critical severity triggers the solo_critical bridge into the
-// observation-to-insight stream (handled there — this sim notes it only).
+// summary. Critical severity triggers CriticalIncident creation (direct path)
+// — see CRITICAL-INCIDENT.md. Sim notes this and proceeds directly to
+// investigation.assist (skipping the CriticalIncident review gate for flow).
 function submitCapture() {
   S.stages.capture = 'complete';
   S.stages.triage  = 'running';
@@ -1051,7 +1055,7 @@ function runTriage() {
   const requires_investigation = deriveRequiresInvestigation(d, severity_class);
   // notifiable_flag re-evaluated server-side independently of capture hint
   const notifiable_flag = severity_class === 'critical' || d.notifiable_flag === true;
-  S.triageData = { severity_class, requires_investigation, notifiable_flag, solo_critical_triggered: severity_class === 'critical' };
+  S.triageData = { severity_class, requires_investigation, notifiable_flag, critical_incident_triggered: severity_class === 'critical' };
   S.stages.triage = 'complete';
   if (requires_investigation) {
     S.stages.assist = 'running';
@@ -1078,14 +1082,14 @@ function populateTriage(body, st) {
     <div class="route-rule">severity_class = ${t.severity_class}
 requires_investigation = ${t.requires_investigation}
 notifiable_flag = ${t.notifiable_flag}
-solo_critical_triggered = ${t.solo_critical_triggered}</div>
+critical_incident_triggered = ${t.critical_incident_triggered}</div>
     <div class="route-out">${t.requires_investigation
       ? 'Triage created investigation record (status: open). investigation.assist will run with capture hints + incident description. On close, narrative + fw_classify queue.'
       : 'Triage closed without investigation. Record stored. Downstream stages skipped.'}</div>
   `;
   body.appendChild(card);
-  if (t.solo_critical_triggered) {
-    body.appendChild(noteEl('warn', 'Severity = critical also fires the solo_critical bridge into the observation-to-insight stream (critical_insight.generate). That stream is exercised in observation-to-insight.html — this Live Sim shows only the incident → investigation path.'));
+  if (t.critical_incident_triggered) {
+    body.appendChild(noteEl('warn', 'Severity = critical fires the CriticalIncident direct path (CRITICAL-INCIDENT.md). A CriticalIncident draft is generated and queued for safety manager review before investigation opens. This sim proceeds directly to investigation.assist — the CriticalIncident review gate is not exercised here. Post-close, the investigator may initiate the systemic cause phase to bridge findings into the insight pipeline as a CriticalInsight (external_investigation trigger).'));
   }
 }
 
@@ -1297,8 +1301,13 @@ function buildFWUserPrompt() {
     .replace('{{contributing_factors_json}}', JSON.stringify(a.ai_suggested_contributing_factors || [], null, 2))
     .replace('{{root_cause}}', a.ai_suggested_root_cause || '')
     .replace('{{corrective_actions_json}}', JSON.stringify(a.ai_suggested_corrective_actions || [], null, 2));
-  // Strip solo_critical conditional block (investigation path has its own gate)
-  tpl = tpl.replace(/\{\{#if trigger_source == 'solo_critical'\}\}[\s\S]*?\{\{\/if\}\}/g, '');
+  // Process severity_class == 'critical' conditional block
+  const isCritical = (S.triageData?.severity_class === 'critical');
+  if (isCritical) {
+    tpl = tpl.replace(/\{\{#if severity_class == 'critical'\}\}/g, '').replace(/\{\{\/if\}\}/g, '');
+  } else {
+    tpl = tpl.replace(/\{\{#if severity_class == 'critical'\}\}[\s\S]*?\{\{\/if\}\}/g, '');
+  }
   return tpl;
 }
 

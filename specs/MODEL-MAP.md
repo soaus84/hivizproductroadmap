@@ -74,7 +74,6 @@ A stream tagged `core + ms` means "this stream exists in the core platform but p
 | observation.enrich | working |
 | trend detection | spec-only — algorithm in `SPEC.md §7.2`, no live trigger yet |
 | critical_insight.generate (critical_observation trigger) | working |
-| critical_insight.generate (solo_critical trigger) | dormant — needs incident-to-investigation to fire |
 | critical_insight.generate (Worksite Trend trigger) | spec-only — needs trend detection live |
 | critical_insight.generate (Cross-site Pattern trigger) | spec-only — needs trend detection live |
 | human review gate | working |
@@ -86,26 +85,30 @@ A stream tagged `core + ms` means "this stream exists in the core platform but p
 
 ### 2 · incident-to-investigation
 
-**Path:** incident capture (or auto-triage routed to incident) → server triage algorithm → investigation assistance → human framework completion → investigation close → toolbox narrative + FW classification
+**Path:** incident capture → triage → CriticalIncident generation → human review → investigation assistance → human framework completion → investigation close → toolbox narrative + FW classification. Optional: systemic cause phase → CriticalInsight entering observation-to-insight.
 
-**Triggers:** supervisor reports an incident; auto-triage commits to the incident route
+**Triggers:** supervisor reports an incident; auto-triage commits to the incident route. Two sub-paths: direct path (critical severity → `CriticalIncident` immediately); pool path (moderate/minor incidents accumulate → algorithm trigger → `CriticalIncident`).
 
 **Consumes:** raw incident text (from supervisor capture)
-**Produces:** closed investigation + toolbox narrative + FW classification + (for critical severity) trigger into observation-to-insight stream as solo_critical
-**Spec authority:** `features/INCIDENT-CAPTURE.md`, `features/INVESTIGATION.md`
+**Produces:** CriticalIncident (draft, pending review) + closed investigation + toolbox narrative + FW classification. Optional: CriticalInsight via systemic cause phase (`external_investigation` trigger).
+**Spec authority:** `features/INCIDENT-CAPTURE.md`, `features/CRITICAL-INCIDENT.md`, `features/INVESTIGATION.md`
 **Workspace:** `core` (+ `ms` for document context, + `risk` for control attribution)
-**Downstream consumers:** insight-to-broadcast (via toolbox narrative), systemic-causes, observation-to-insight (solo_critical bridge)
+**Downstream consumers:** insight-to-broadcast (via toolbox narrative), systemic-causes, observation-to-insight (systemic cause bridge — human-initiated, not automatic)
 
 | Stage | State |
 |---|---|
 | capture.incident | working |
 | capture.auto | spec-only — observation-route variant only; incident-route auto triage exercised here as capture.incident |
 | server triage algorithm | working |
+| critical_incident.generate (critical_incident trigger — direct path) | spec-only — sim notes CriticalIncident creation but proceeds directly to investigation |
+| critical_incident.generate (algorithm trigger — pool path) | spec-only — needs incident trend detection live |
+| CriticalIncident human review gate | spec-only — sim proceeds directly to investigation |
 | investigation.assist | working |
 | investigator workbench (framework completion) | working (sim's close gate stands in for the full workbench) |
 | investigation close gate | working |
 | investigation.generate_narrative | working |
 | fw_classify (investigation path) | working |
+| systemic cause phase (Stage 3, optional) | spec-only — human-initiated bridge to insight pipeline via external_investigation |
 
 **Live Sim:** `simulators/incident-to-investigation.html` ✓ working
 
@@ -254,7 +257,7 @@ The full graph as a table. Read as "row produces something the column consumes":
 | ↓ produces / consumes → | obs-to-insight | inc-to-inv | insight-to-broadcast | insight-to-pull | systemic-causes |
 |---|:-:|:-:|:-:|:-:|:-:|
 | **obs-to-insight** | — | bridge: critical observation if also incident | ✓ approved insight feeds talk content selection | ✓ approved insight triggers enquiry | ✓ classified insight feeds factor aggregation |
-| **inc-to-inv** | ✓ solo_critical bridges into insight gen | — | ✓ toolbox narrative feeds talk content selection | ✓ investigator dispatches cross-site enquiry | ✓ classified investigation feeds factor aggregation |
+| **inc-to-inv** | ✓ systemic cause phase (human-initiated) bridges via external_investigation into insight gen | — | ✓ toolbox narrative feeds talk content selection | ✓ investigator dispatches cross-site enquiry | ✓ classified investigation feeds factor aggregation |
 | **insight-to-broadcast** | — | — | — | — | — |
 | **insight-to-pull** | — | — | ✓ enquiry toolbox narrative feeds talk content selection | — | ✓ classified enquiry feeds factor aggregation |
 | **systemic-causes** | — | — | — | — | — |
@@ -263,7 +266,7 @@ The full graph as a table. Read as "row produces something the column consumes":
 Terminal streams (broadcast, systemic-causes) have no outbound consumers — they emit to the field or to managers.
 
 The cross-stream bridges are the architecturally interesting points:
-- **solo_critical bridge** — a critical incident produces an insight without waiting for a trend
+- **systemic cause bridge** — a completed investigation's systemic cause phase (human-initiated) creates a CriticalInsight via `trigger_source = external_investigation`, entering the insight pipeline. This is the only sanctioned bridge between the incident and insight pipelines. It is never automatic — an investigator or safety manager must judge that confirmed root cause has organisation-level implications.
 - **investigation toolbox narrative bridge** — a closed investigation feeds the same talk-assembly pool as approved insights
 - **enquiry toolbox narrative bridge** — a completed enquiry can produce its own talk content
 - **MS workspace context bridges** — when active, requirement context flows into every classification and generation stage

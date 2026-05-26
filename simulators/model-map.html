@@ -412,7 +412,7 @@ const STREAMS = [
 
 // Cross-stream bridges — labelled arrows that span lanes. Drawn after layout.
 const BRIDGES = [
-  { fromStream:'incident-to-investigation', fromStage:'triage',    toStream:'observation-to-insight',  toStage:'insight',  label:'solo_critical', desc:'When triage assigns severity_class=critical, an insight is generated immediately — bridges into observation-to-insight stream.' },
+  { fromStream:'incident-to-investigation', fromStage:'classify',  toStream:'observation-to-insight',  toStage:'insight',  label:'systemic cause bridge', desc:'Human-initiated: when a completed investigation\'s findings point to a systemic condition beyond the incident site, the investigator initiates the systemic cause phase. Creates a CriticalInsight via trigger_source = external_investigation. The only sanctioned bridge from the incident pipeline to the insight pipeline — never automatic.' },
   { fromStream:'incident-to-investigation', fromStage:'narrative', toStream:'insight-to-broadcast',    toStage:'select',   label:'toolbox narrative', desc:'Closed investigation narrative enters the toolbox talk content pool.' },
   { fromStream:'incident-to-investigation', fromStage:'framework', toStream:'insight-to-pull',         toStage:'generate', label:'investigation_mid / witness', desc:'Investigator dispatches a cross-site or witness enquiry.' },
   { fromStream:'observation-to-insight',    fromStage:'classify',  toStream:'insight-to-broadcast',    toStage:'select',   label:'approved insight', desc:'Approved Critical Insight enters the talk content selection pool.' },
