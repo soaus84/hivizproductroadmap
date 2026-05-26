@@ -269,7 +269,7 @@ body::before {
   <div class="header fade-up">
     <div class="header-kicker">Hiviz SafetyPlatform · Architecture Reference</div>
     <div class="header-title">Signal Routing & Intelligence Flow</div>
-    <div class="header-desc">How observations and incidents are classified, routed, and escalated through the intelligence pipeline. Dashed purple elements indicate additions not yet in the V1 spec.</div>
+    <div class="header-desc">How observations and incidents are classified, routed, and escalated through the intelligence pipeline. Dashed purple elements indicate spec-only or proposed additions not yet live.</div>
   </div>
 
   <!-- LEGEND -->
@@ -346,7 +346,7 @@ body::before {
         <div class="sig-desc">Fatal or life-threatening event. notifiable_flag: true. Regulatory clock starts.</div>
       </div>
 
-      <div class="entry-section-label">Control Verification <span style="font-size:9px;color:var(--muted);">(V5)</span></div>
+      <div class="entry-section-label">Control Verification <span style="font-size:9px;color:var(--muted);">workspace.risk</span></div>
       <div class="signal-box sig-ctrl">
         <div class="sig-key">verification_result</div>
         <div class="sig-name">Control Not in Place</div>
@@ -440,7 +440,7 @@ body::before {
 
       <!-- CONTROL VERIFICATION -->
       <div class="route-group">
-        <div class="route-group-label">Control verification routing — operational action, not intelligence (V5)</div>
+        <div class="route-group-label">Control verification routing — operational action, not intelligence (workspace.risk)</div>
 
         <div class="route">
           <div class="route-source">control<br>not in place</div>
@@ -449,7 +449,7 @@ body::before {
             <div class="dest-action-label">Operational Alert <span class="dest-badge badge-immediate">immediate</span></div>
             <div class="dest-title">Direct to responsible manager — not the intelligence pipeline</div>
             <div class="dest-desc">A failed control verification is not an observation and not an incident — it's an operational gap that requires immediate action. Routes directly to the manager responsible for that control at that site. They confirm rectification. Only if not rectified within SLA does it escalate to safety manager and enter the intelligence pipeline.</div>
-            <div class="dest-note">→ Rectified: logged as verification event, control assurance record updated. Not rectified within SLA → escalates to insight pipeline as at_risk_condition.</div>
+            <div class="dest-note">→ Rectified: logged as verification event, control assurance record updated. Not rectified within SLA → creates a barrier_failure observation entering the intelligence pipeline as a high-confidence signal.</div>
           </div>
         </div>
       </div>
@@ -471,7 +471,7 @@ body::before {
     </div>
     <div class="pipe-stage" style="border-top: 2px solid var(--obs);">
       <div class="pipe-stage-label" style="color:var(--obs);">02 — Learn</div>
-      <div class="pipe-stage-desc">Enquiry dispatched to supervisors. Live synthesis updates as responses arrive. Toolbox talk generated and approved. FW Map® classification runs on insight + investigation. Communities thread seeded.</div>
+      <div class="pipe-stage-desc">Enquiry dispatched to supervisors. Live synthesis updates as responses arrive. Toolbox talk generated and approved. FW Map® classification runs on insight + investigation. When workspace.communities is active, AI generates a practice discussion thread for the relevant work-type community — seeded from insight approval, resolution, investigation outcome, or management system change.</div>
     </div>
     <div class="pipe-stage" style="border-top: 2px solid var(--crit-inc);">
       <div class="pipe-stage-label" style="color:var(--crit-inc);">03 — Improve</div>
@@ -497,9 +497,9 @@ body::before {
       <div class="ic-desc">Generated when near-miss count by work_type × org_level × time_window crosses a configurable threshold. Requires safety manager endorsement before moving through pipeline. The normal path.</div>
     </div>
     <div class="insight-class ic-cluster">
-      <div class="ic-label">Critical Cluster — proposed naming</div>
-      <div class="ic-title">Pattern Insight — accelerated threshold</div>
-      <div class="ic-desc">Same mechanism as Standard Insight but threshold crossed faster — same signal type, multiple sites, compressed timeframe. Proposed: arrives with higher urgency flag, reduced endorsement friction, pre-populated notification to division manager not just site.</div>
+      <div class="ic-label">Cross-site Pattern — trigger: cross_site_pattern</div>
+      <div class="ic-title">Pattern Insight — multiple sites, compressed timeframe</div>
+      <div class="ic-desc">Same mechanism as Standard Insight but threshold crossed across multiple sites in a compressed timeframe. Arrives with higher urgency; notification goes to division manager not just site. Capability gate: insight.cross_site_pattern (default: off).</div>
     </div>
     <div class="insight-class ic-critical">
       <div class="ic-label">Solo Critical Insight</div>
@@ -511,12 +511,14 @@ body::before {
   <!-- DESIGN NOTE -->
   <div class="design-note fade-up">
     <div class="design-note-title">
-      <span>✦</span> Design Notes — additions not yet in spec
+      <span>✦</span> Design Notes — spec-only / proposed
     </div>
     <div class="design-note-body">
       <strong>Pre-endorsed critical observations</strong> — A barrier_failure with catastrophic energy release potential currently requires human endorsement before the intelligence pipeline can act. Proposal: auto-endorse when energy_release_potential = catastrophic, with immediate notification to safety manager. The human still reviews — but the pipeline doesn't wait for them. This is the same logic as why emergency services don't wait for approval to respond.
       <br><br>
-      <strong>Control verification escalation path</strong> — A failed control check that isn't rectified within SLA is currently undefined in the spec. Proposal: after SLA breach, create an at_risk_condition observation automatically and inject it into the pool. This closes the loop between V5 control verification and the intelligence pipeline without requiring a separate escalation model.
+      <strong>Control verification escalation path</strong> — Now specced in RISK-CONTROLS.md (workspace.risk). A failed control check not rectified within SLA automatically creates a barrier_failure observation entering the intelligence pipeline. The loop between control verification and the insight pipeline is closed — no separate escalation model required.
+      <br><br>
+      <strong>Platform-pattern insights (V2)</strong> — A new trigger class that mirrors the algorithm trigger but operates on platform-derived signals rather than field observations. Persistent atrophy across multiple sites, corrective actions consistently overdue, toolbox talks generated but undelivered. Follows the same pipeline: AI draft → human review → FW classification. Workspace gating applies — signals only fire from active workspaces. See CRITICAL-INSIGHT.md V2 notes.
     </div>
   </div>
 
