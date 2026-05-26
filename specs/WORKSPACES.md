@@ -1,7 +1,7 @@
 # WORKSPACES.md — Workspace Capability Layers
 
 **Forge Works · Hiviz SafetyPlatform — Reference**
-Version: 1.0 — May 2026
+Version: 2.0 — May 2026
 
 > **This is the canonical reference for Hiviz's workspace model.** It defines what each workspace is, what it delivers to users, what it activates in the platform, and how workspaces relate to each other. Code-level workspace IDs (e.g. `workspace.ms`) map to named capability layers. The names here are the user-facing framing — the code IDs do not change.
 
@@ -13,33 +13,66 @@ A workspace is a capability layer that an organisation activates. Workspaces are
 
 Workspaces are **not product tiers in the pricing sense** — they are activation decisions. An organisation decides what they need; what they activate reflects their maturity and operational context.
 
+**The Insight workspace (`workspace.core`) is always on.** Every other workspace is an activation decision. An organisation focused purely on the observation-to-insight loop can run indefinitely on `core` alone. An organisation that also captures and investigates formal incidents activates `workspace.incident`. Each subsequent workspace compounds the intelligence value of those below it.
+
 ---
 
-## The Five Workspaces
+## The Six Workspaces
 
 ### 1 · Insight Workspace (`workspace.core`)
 
-**What it is:** The baseline intelligence pipeline. Every Hiviz organisation has this. It is the field-to-intelligence loop — capturing what is happening on site, generating pattern-level findings, routing them through human review, and broadcasting learning to crews.
+**What it is:** The always-on field intelligence loop. Every Hiviz organisation has this. It captures what is happening on site through supervisor observations, generates pattern-level findings, routes them through human review, and broadcasts learning back to crews. The loop runs whether or not formal incidents are being recorded.
+
+**The flow:** site visit → observation capture → AI enrichment → insight generation → human review → FW Map® classification → toolbox talk → corrective actions
 
 **What it delivers:**
-- Observation capture and AI enrichment (enriched near-miss, at-risk, barrier failure records)
-- Incident capture, triage, and investigation (AI-assisted framework completion, toolbox narrative)
-- Critical Insight generation and review (the platform's primary intelligence output)
+- Observation capture and AI enrichment (near-miss, at-risk, barrier failure records)
+- Critical Insight generation and review — the platform's primary intelligence output
 - Toolbox talk assembly and delivery (intelligence broadcast to crews)
-- Enquiry generation and synthesis (intelligence pulled from sites)
+- Enquiry generation and synthesis (intelligence pulled from sites, answered by field)
 - Corrective actions — the operational layer that converts intelligence findings into worksite-level tasks, owned by named onsite personnel, tracked to completion
 - FW Map® classification on all approved intelligence entities
 - Offline observation fallback
 
-**Who uses it:** Supervisors (capture, corrective action closure), safety managers (review, approve, action creation and dissemination), investigators (investigation workbench), all crew (toolbox talk recipients).
+**Who uses it:** Supervisors (observation capture, corrective action closure), safety managers (insight review, action creation and dissemination), all crew (toolbox talk recipients).
 
-**Spec authority:** `features/OBSERVATION-CAPTURE.md`, `features/CRITICAL-INSIGHT.md`, `features/INCIDENT-CAPTURE.md`, `features/CRITICAL-INCIDENT.md`, `features/INVESTIGATION.md`, `features/TOOLBOX-TALK.md`, `features/ENQUIRY.md`, `features/CORRECTIVE-ACTIONS.md`, `globals/fw-classify-job.md`
+**The key difference it makes:** The Insight workspace is the organisation's learning loop — not its compliance mechanism. It asks: "What are we seeing in the field, and what patterns should we act on?" That question is answerable without incident data. Incidents add weight and precision; the loop runs without them.
+
+**Spec authority:** `features/OBSERVATION-CAPTURE.md`, `features/CRITICAL-INSIGHT.md`, `features/TOOLBOX-TALK.md`, `features/ENQUIRY.md`, `features/CORRECTIVE-ACTIONS.md`, `globals/fw-classify-job.md`
 
 **Code ID:** `workspace.core`
 
 ---
 
-### 2 · Management System Workspace (`workspace.ms`)
+### 2 · Incident Workspace (`workspace.incident`)
+
+**What it is:** The formal incident pipeline — from first report through investigation close, regulatory compliance, and the systemic cause bridge back into the insight loop. When an organisation captures and formally investigates incidents, this workspace provides the structure, the intelligence support, and the compliance layer for doing that well.
+
+**The flow:** incident report → triage → CriticalIncident (AI draft → human review) → investigation → close → toolbox narrative + FW classification. Optional: systemic cause phase → CriticalInsight entering the insight pipeline.
+
+**What it delivers:**
+- Incident capture — conversational AI-assisted report, auto-triage, severity classification
+- CriticalIncident entity — the intelligence gate between triage and investigation; requires human review before investigation opens
+- Investigation assistance — AI-generated contributing factors, root cause, corrective actions; human framework completion
+- Investigation toolbox narrative — a closed investigation can produce talks specific to its findings (feeds insight-to-broadcast when Insight workspace also active)
+- FW Map® classification on closed investigations
+- Regulatory reporting layer — notifiable incident workflow, TRIFR contribution, external reporting record (partially specced; see V2 notes)
+- Corrective actions from investigation — the investigation close gate requires at least one confirmed action; these are tracked through `features/CORRECTIVE-ACTIONS.md`
+- Systemic cause bridge — when confirmed investigation findings have organisation-level implications, the investigator initiates the systemic cause phase to create a CriticalInsight (`trigger_source = 'external_investigation'`). This is the only sanctioned bridge from the incident pipeline to the insight pipeline.
+
+**Who uses it:** Supervisors (incident report), safety managers (CriticalIncident review, investigation oversight), investigators (investigation workbench), compliance officers (regulatory reporting).
+
+**The key difference it makes:** Without the Incident workspace, the platform learns from near-misses and observations — signals that something *could* go wrong. With it, the platform also learns from what *did* go wrong. Investigation findings feed FW classification with higher evidence weight than observations alone. When the systemic cause bridge fires, the most precisely understood safety failures in the organisation become the source of its broadest learning.
+
+**Regulatory complexity note:** Incident reporting has significant jurisdiction-specific requirements — notifiable thresholds, regulator notification timelines, external report formats, TRIFR methodology. This workspace carries that complexity so it doesn't pollute the insight loop. An organisation activating this workspace is opting in to the full compliance and reporting layer.
+
+**Spec authority:** `features/INCIDENT-CAPTURE.md`, `features/CRITICAL-INCIDENT.md`, `features/INVESTIGATION.md`
+
+**Code ID:** `workspace.incident`
+
+---
+
+### 3 · Management System Workspace (`workspace.ms`)
 
 **What it is:** The organisation's safety management system documents — procedures, standards, safe work method statements, legislative requirements — brought live into the AI layer. When active, every AI job that processes a field event can ask: "Is there a procedure, standard, or requirement that applies here?"
 
@@ -60,7 +93,7 @@ Workspaces are **not product tiers in the pricing sense** — they are activatio
 
 ---
 
-### 3 · Risk Workspace (`workspace.risk`)
+### 4 · Risk Workspace (`workspace.risk`)
 
 **What it is:** The organisation's critical control register — the specific controls that prevent catastrophic energy releases for each work type. When active, the platform can attribute whether a control was present, degraded, or absent in every incident and near-miss, and track control verification in the field.
 
@@ -72,7 +105,7 @@ Workspaces are **not product tiers in the pricing sense** — they are activatio
 
 **Who uses it:** Safety managers (control register maintenance), supervisors (control verification), investigators (attribution).
 
-**The key difference it makes:** Without the Risk workspace, the platform knows *that* incidents happen and can classify *why* at an organisational level. With it, it knows *which specific control failed* — the most actionable level of systemic understanding for high-energy work environments.
+**The key difference it makes:** Without the Risk workspace, the platform knows *that* things happen and can classify *why* at an organisational level. With it, it knows *which specific control failed* — the most actionable level of systemic understanding for high-energy work environments. The supervisor verification layer (control checks before work starts) is valuable with `core` alone. The full investigation attribution value requires `workspace.incident` to also be active.
 
 **Spec authority:** `features/RISK-CONTROLS.md`
 
@@ -80,7 +113,7 @@ Workspaces are **not product tiers in the pricing sense** — they are activatio
 
 ---
 
-### 4 · Systemic Map Workspace (`workspace.analytics`)
+### 5 · Systemic Map Workspace (`workspace.analytics`)
 
 **What it is:** The aggregate intelligence layer. Where the Insight workspace produces individual intelligence events (insights, investigations, enquiries), the Systemic Map workspace surfaces the pattern across all of them — what the organisation's FW Map® capacity looks like over time, where the gaps are, and where the platform has no data at all.
 
@@ -101,7 +134,7 @@ Workspaces are **not product tiers in the pricing sense** — they are activatio
 
 ---
 
-### 5 · Communities Workspace (`workspace.communities`)
+### 6 · Communities Workspace (`workspace.communities`)
 
 **What it is:** The peer learning layer. Where the Insight workspace broadcasts from the intelligence pipeline to crews, the Communities workspace creates a conversation — supervisors and safety professionals sharing experience across sites in the same context where they log observations, review insights, and plan visits.
 
@@ -125,11 +158,15 @@ Workspaces are **not product tiers in the pricing sense** — they are activatio
 ## Workspace Dependency Map
 
 ```
-workspace.core  (always on — the baseline)
+workspace.core  (always on — the Insight loop)
     │
-    ├── workspace.ms          (adds: document context into every AI job)
+    ├── workspace.incident    (adds: formal incident pipeline, investigation, regulatory reporting)
+    │       │
+    │       └── workspace.risk   (adds: control attribution into incident investigation)
+    │           (risk is most valuable when incident is also active — the control
+    │            attribution layer needs investigation records to attribute against)
     │
-    ├── workspace.risk        (adds: control attribution into incident pipeline)
+    ├── workspace.ms          (adds: document context into every AI job across all streams)
     │
     ├── workspace.analytics   (adds: aggregated FW profile, visit planning, atrophy)
     │       │
@@ -138,7 +175,12 @@ workspace.core  (always on — the baseline)
     │            the thread seeds are richer when the FW profile is available)
 ```
 
-Communities technically activates independently of analytics, but the combination is where the full value is: the systemic picture drives the community discussions, and the community discussions feed signal back into the systemic picture.
+**Reading the map:**
+- `workspace.risk` technically activates independently of `workspace.incident` — it adds control verification for the observation pipeline too. But its highest-value capability (investigation control attribution) requires incident workspace to be active. The risk workspace without incident is still useful for the supervisor verification clockwork and cross-site control health; it is incomplete without investigation attribution.
+- `workspace.ms` is a horizontal layer — it enriches every stream across every workspace that's active.
+- `workspace.analytics` aggregates across all active streams. More workspaces active = richer systemic picture, because more evidence types feed the FW capacity profile.
+
+The combination that gives the most complete intelligence picture: `core + incident + ms + risk + analytics`. Every event is captured (insight loop + incident pipeline), every procedure is known (ms), every control is tracked (risk), and the aggregate is visible (analytics).
 
 ---
 

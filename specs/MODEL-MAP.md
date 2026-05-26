@@ -42,13 +42,14 @@ Several streams depend on workspaces being enabled for the organisation. Workspa
 
 | Tag | Workspace | What it provides |
 |---|---|---|
-| `core` | always-on core safety platform | Observation capture, incident capture, FW classification, talk delivery |
-| `risk` | Risk workspace | Critical control register, control verification, control-failure attribution |
-| `ms` | Management System workspace | Document ingestion, requirement extraction, applicable-document context injection |
-| `analytics` | Analytics workspace | Trend surfacing UI, FW capacity profile dashboard, leading indicator views |
-| `communities` | Communities workspace | CoP threading, peer learning surfaces |
+| `core` | Insight workspace — always on | Observation capture, insight pipeline, FW classification, toolbox talks, enquiries, corrective actions |
+| `incident` | Incident workspace — activation decision | Incident capture, CriticalIncident, investigation, regulatory reporting, investigation-derived toolbox talks |
+| `risk` | Risk workspace — activation decision | Critical control register, verification clockwork, control-failure attribution (fullest value when `incident` also active) |
+| `ms` | Management System workspace — activation decision | Document ingestion, requirement extraction, applicable-document context into every AI job |
+| `analytics` | Systemic Map workspace — activation decision | Aggregated FW profile, visit planning, atrophy score, situational briefs |
+| `communities` | Communities workspace — activation decision | CoP threading, peer learning surfaces |
 
-A stream tagged `core + ms` means "this stream exists in the core platform but produces richer output when the MS workspace is enabled."
+A stream tagged `core + incident` means "this stream requires the incident workspace to be active." A stream tagged `core (+ incident when active)` means "it runs on core but produces richer output when the incident workspace is enabled."
 
 ---
 
@@ -92,7 +93,7 @@ A stream tagged `core + ms` means "this stream exists in the core platform but p
 **Consumes:** raw incident text (from supervisor capture)
 **Produces:** CriticalIncident (draft, pending review) + closed investigation + toolbox narrative + FW classification. Optional: CriticalInsight via systemic cause phase (`external_investigation` trigger).
 **Spec authority:** `features/INCIDENT-CAPTURE.md`, `features/CRITICAL-INCIDENT.md`, `features/INVESTIGATION.md`, `features/RISK-CONTROLS.md` (when `risk` active — control attribution stage)
-**Workspace:** `core` (+ `ms` for document context, + `risk` for control attribution)
+**Workspace:** `incident` (+ `ms` for document context, + `risk` for control attribution)
 **Downstream consumers:** insight-to-broadcast (via toolbox narrative), systemic-causes, observation-to-insight (systemic cause bridge — human-initiated, not automatic)
 
 | Stage | State |
@@ -120,10 +121,10 @@ A stream tagged `core + ms` means "this stream exists in the core platform but p
 
 **Triggers:** supervisor requests a toolbox talk for today's work type
 
-**Consumes:** approved insights, closed investigations with `toolbox_narrative`, recent enriched observations
+**Consumes:** approved insights + recent enriched observations (always); closed investigations with `toolbox_narrative` (when `incident` workspace active)
 **Produces:** delivered toolbox talk, attendance record, atrophy score update
 **Spec authority:** `features/TOOLBOX-TALK.md`
-**Workspace:** `core`
+**Workspace:** `core` (+ `incident` for investigation-derived talks)
 **Downstream consumers:** none (terminal — broadcast to crew)
 
 | Stage | State |
@@ -233,10 +234,11 @@ Capability gates are the activation mechanism. They control what fires without c
 
 | Gate | Default | Affects | What changes when enabled |
 |---|---|---|---|
-| `workspace.core` | on | every stream | baseline platform |
-| `workspace.risk` | off | incident-to-investigation, systemic-causes | control-failure attribution; critical control linkage in investigation framework |
+| `workspace.core` | on | observation-to-insight, insight-to-broadcast, insight-to-pull, systemic-causes | baseline Insight platform |
+| `workspace.incident` | off | incident-to-investigation, insight-to-broadcast (investigation talks) | formal incident pipeline; CriticalIncident; investigation; regulatory reporting; investigation-derived toolbox narratives; systemic cause bridge to insight pipeline |
+| `workspace.risk` | off | incident-to-investigation, observation-to-insight (SLA escalation), systemic-causes | control-failure attribution in investigation; supervisor verification clockwork; cross-site control health signals |
 | `workspace.ms` | off | every stream | applicable `DocumentRequirement` records injected as context; observation enrichment gains procedure-gap detection; investigation gains procedure-specific contributing factor suggestions |
-| `workspace.analytics` | off | systemic-causes | FW capacity profile dashboard; leading indicator surfaces |
+| `workspace.analytics` | off | systemic-causes | FW capacity profile dashboard; leading indicator surfaces; visit planning |
 | `workspace.communities` | off | systemic-causes | `cop_thread.generate` lights up; CoP platform seeding lights up |
 | `fw_classify.multi_factor` | on | observation-to-insight, incident-to-investigation, insight-to-pull | up to 3 factors per classification vs single dominant factor |
 | `insight.cross_site_pattern` | off | observation-to-insight | algorithm-trigger insights at region/division/organisation level produce the Cross-site Pattern variant; site-level remains Worksite Trend |
@@ -266,10 +268,10 @@ The full graph as a table. Read as "row produces something the column consumes":
 Terminal streams (broadcast, systemic-causes) have no outbound consumers — they emit to the field or to managers.
 
 The cross-stream bridges are the architecturally interesting points:
-- **systemic cause bridge** — a completed investigation's systemic cause phase (human-initiated) creates a CriticalInsight via `trigger_source = external_investigation`, entering the insight pipeline. This is the only sanctioned bridge between the incident and insight pipelines. It is never automatic — an investigator or safety manager must judge that confirmed root cause has organisation-level implications.
-- **investigation toolbox narrative bridge** — a closed investigation feeds the same talk-assembly pool as approved insights
+- **systemic cause bridge** — a completed investigation's systemic cause phase (human-initiated) creates a CriticalInsight via `trigger_source = external_investigation`, entering the insight pipeline. This is the only sanctioned bridge between the `incident` workspace and the `core` insight pipeline. It is never automatic — an investigator or safety manager must judge that confirmed root cause has organisation-level implications. Only fires when `workspace.incident` is active.
+- **investigation toolbox narrative bridge** — a closed investigation feeds the same talk-assembly pool as approved insights. Only fires when `workspace.incident` is active; an org on `core` alone receives talks sourced only from observations and insights.
 - **enquiry toolbox narrative bridge** — a completed enquiry can produce its own talk content
-- **MS workspace context bridges** — when active, requirement context flows into every classification and generation stage
+- **MS workspace context bridges** — when active, requirement context flows into every classification and generation stage across all active workspaces
 
 ---
 
