@@ -458,7 +458,60 @@ When both `workspace.risk` and `workspace.ms` are active, investigation attribut
 
 ---
 
-## 9 · Downstream Consumers
+## 9 · Supervisor Verification Checklist (On-Site Experience)
+
+The control register and clockwork are primarily specced from the manager and system perspective. This section defines the supervisor's on-site experience — the moment the verification actually happens.
+
+### 9.1 · What the supervisor sees
+
+When a supervisor (or any assigned verifier) opens the app at the start of their shift or before beginning high-risk work, they see a **Verify** section. This is not a sub-menu — it surfaces at the top of their home screen whenever verifications are due.
+
+**Checklist screen contents:**
+- Controls requiring verification now, grouped by work type
+- Overdue verifications — controls from a previous period not yet checked — pinned at the top with a visual flag
+- Controls verified earlier this period — visible but de-emphasised (confirmation only, no re-action needed)
+- The assigned verifier sees only their site's controls. Any on-site person with verifier access can complete a verification if the assigned verifier is unavailable.
+
+Each verification item shows:
+- Control name
+- Verification prompt (the question to answer): e.g. *"Is the fire watch confirmed in position at the work location?"*
+- Control type (Prevention / Mitigation)
+- Which hazard it relates to
+- Any active defeating factor warning if applicable
+
+### 9.2 · Recording a verification
+
+For each control, the verifier selects a result:
+
+| Result | What it means | What the verifier records |
+|---|---|---|
+| ✓ In place | Control is present and effective | No further input required — one tap |
+| ✗ Not in place | Control absent or non-functional | Optional notes (what's missing, what they did) — submits immediately |
+| — Not required this period | Triggering condition doesn't apply (e.g. no hot work this shift) | Brief reason |
+| ⚠ Defeating factor noted | Control is present but degraded | Description of the condition noted |
+
+The verification is intentionally fast — a single tap for a passing control. The prompt is plain language. The verifier is not asked to type unless something is wrong.
+
+### 9.3 · Not in place — what happens at the point of submission
+
+When a verifier marks a control as **not in place**, the response is immediate and visible to them:
+
+1. **Work hold notice surfaces** — if the control is a prevention control for a hazardous event, the app displays: *"This control is required before [work type] commences. Notify your supervisor. Work should be held until this is resolved."*
+2. **Alert fires to the manager responsible** — simultaneously, the manager receives a push notification
+3. **Verifier is not left wondering** — the app confirms the alert has been sent and tells them what to expect next (manager will be in contact; work should be held in the meantime)
+4. **Rectification clock starts** — the `rectification_sla_hours` window opens
+
+The verifier is not responsible for resolving the gap. They are responsible for flagging it accurately and immediately. The platform takes the routing from there.
+
+### 9.4 · Verification as an operational cadence
+
+The verification checklist is not a bureaucratic task — it is the primary prevention mechanism at the point of work. Every passing verification is a positive signal: this site, for this work type, on this shift, had the right controls in place. That record accumulates over time and contributes to the site's control health profile.
+
+A site that consistently verifies and passes is different from a site that never runs the checks. The difference isn't captured by incidents — it's captured by verification history. This is why `verification_frequency_note` exists and why `last_verified_at` is queryable: the absence of recent verification is as meaningful as a failed one.
+
+---
+
+## 10 · Downstream Consumers
 
 | Stream | What it receives from Risk workspace | When |
 |---|---|---|
@@ -470,7 +523,7 @@ When both `workspace.risk` and `workspace.ms` are active, investigation attribut
 
 ---
 
-## 10 · V2 Notes
+## 11 · V2 Notes
 
 **Defeating factor clockwork (V2)**
 The defeating factor schema is defined in this spec and must be carried in the data model from MVP. The clockwork execution — generating alerts at `alert_lead_days` before trigger date, transitioning `local_status` to `active_defeating`, and then `active_degraded` — is V2 scope. MVP: schema present, status transitions manual.
@@ -492,7 +545,7 @@ When `workspace.ms` is also active, `DocumentRequirement` records can seed contr
 
 ---
 
-## 11 · Spec Gaps — Design Decisions Needed Before Build
+## 12 · Spec Gaps — Design Decisions Needed Before Build
 
 The following require explicit design decisions before implementation begins. They are not deferred as V2 — they affect MVP architecture.
 

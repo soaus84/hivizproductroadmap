@@ -27,12 +27,13 @@ Workspaces are **not product tiers in the pricing sense** — they are activatio
 - Critical Insight generation and review (the platform's primary intelligence output)
 - Toolbox talk assembly and delivery (intelligence broadcast to crews)
 - Enquiry generation and synthesis (intelligence pulled from sites)
+- Corrective actions — the operational layer that converts intelligence findings into worksite-level tasks, owned by named onsite personnel, tracked to completion
 - FW Map® classification on all approved intelligence entities
 - Offline observation fallback
 
-**Who uses it:** Supervisors (capture), safety managers (review and approve), investigators (investigation workbench), all crew (toolbox talk recipients).
+**Who uses it:** Supervisors (capture, corrective action closure), safety managers (review, approve, action creation and dissemination), investigators (investigation workbench), all crew (toolbox talk recipients).
 
-**Spec authority:** `features/OBSERVATION-CAPTURE.md`, `features/CRITICAL-INSIGHT.md`, `features/INCIDENT-CAPTURE.md`, `features/CRITICAL-INCIDENT.md`, `features/INVESTIGATION.md`, `features/TOOLBOX-TALK.md`, `features/ENQUIRY.md`, `globals/fw-classify-job.md`
+**Spec authority:** `features/OBSERVATION-CAPTURE.md`, `features/CRITICAL-INSIGHT.md`, `features/INCIDENT-CAPTURE.md`, `features/CRITICAL-INCIDENT.md`, `features/INVESTIGATION.md`, `features/TOOLBOX-TALK.md`, `features/ENQUIRY.md`, `features/CORRECTIVE-ACTIONS.md`, `globals/fw-classify-job.md`
 
 **Code ID:** `workspace.core`
 
