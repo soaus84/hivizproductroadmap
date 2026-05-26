@@ -20,6 +20,9 @@ Supervisors capture observations in the field (conversational AI, seconds to com
 
 ## What activating this workspace turns on
 
+- Site visit planning — manager creates a visit (site + date); site list scoped to manager's purview (company/region/division/worksite hierarchy); each site shows time since last visit and last visitor's note; the list is sortable by signals from whichever workspaces are active — neglect/atrophy (`workspace.analytics`), control health (`workspace.risk`), recent incidents (`workspace.incident`), open intelligence debt (`workspace.core`); the visit itself is independent of that enrichment
+- Visit execution — manager starts visit; observations captured during it are linked to the visit record; only the manager's observations are visit-linked
+- Visit completion — manager closes the visit; notes for next visitor field captured on close; note surfaces to any manager planning a future visit to that site
 - Observation capture — conversational AI (mobile), offline fallback
 - AI enrichment of observations — signal type, energy type, barrier assessment, confidence scoring
 - Critical Insight generation — from single high-confidence signals and from pooled trend detection
@@ -40,6 +43,11 @@ Supervisors capture observations in the field (conversational AI, seconds to com
 
 | Feature | User role(s) | Spec authority | State |
 |---|---|---|---|
+| Visit creation — site + date, scoped to manager purview | Safety manager / divisional manager | `features/SYSTEMIC-CAUSES.md` §Visit Plan | spec-only |
+| Visit site list — contextual signals (recency, last visitor note) | Safety manager / divisional manager | `features/SYSTEMIC-CAUSES.md` §Visit Plan | spec-only |
+| Visit execution — start visit, link observations to visit record | Safety manager / divisional manager | `features/SYSTEMIC-CAUSES.md` §Visit Execution | spec-only |
+| Visit completion — close visit, capture notes for next visitor | Safety manager / divisional manager | `features/SYSTEMIC-CAUSES.md` §Visit Completion | spec-only |
+| Last visitor note — surfaces when planning a visit to same site | Safety manager / divisional manager | `features/SYSTEMIC-CAUSES.md` §Visit Plan | spec-only |
 | Observation capture conversation (`capture.observation`) | Supervisor | `features/OBSERVATION-CAPTURE.md` Stage 1 | working |
 | Observation AI enrichment (`observation.enrich`) | System (async) | `features/OBSERVATION-CAPTURE.md` Stage 2 | working |
 | Trend detection algorithm | System | `SPEC.md §7.2` | spec-only |

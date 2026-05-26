@@ -14,10 +14,12 @@ The Insight workspace tells you what happened. The Systemic Map workspace tells 
 
 Every classified insight, investigation, and enquiry contains evidence of an organisational capacity factor — a specific dimension of how safety management works (or doesn't) at this organisation. Individually, these are signals. The Systemic Map aggregates them across time and organisational scope into a profile: this organisation has a systemic gap in `operational_management` showing up across multiple work types and sites; this other factor has zero classified evidence — not because it's healthy, but because nobody has ever looked.
 
+The core model: **analytics decorates worksites.** Atrophy score, FW capacity signals, blind spots, open intelligence debt — these are computed continuously and attached to the worksite entity. They are not generated at the moment of planning a visit; they reflect the current state of each worksite based on its field intel history. That decoration is then consumed wherever worksites appear: visit planning, dashboards, alerts, situational briefs.
+
 That picture drives three things:
-1. **Situational briefs** to managers and divisional leadership — what the pattern shows and why it matters
-2. **Visit planning** — which sites need a manager visit most urgently, with an intelligence-driven briefing before they arrive
-3. **Atrophy scoring** — a per-worksite measure of how stale the safety intelligence loop has become, with alerts when a site goes dark
+1. **Worksite intelligence decoration** — each worksite carries a live picture of its safety intelligence health; managers see this whenever they look at their sites
+2. **Situational briefs** — AI-generated narrative summaries of the systemic pattern for managers and divisional leadership; human review gate before distribution
+3. **Atrophy alerting** — when a worksite's intelligence signals go stale across multiple dimensions, an alert fires and the site becomes prominent in visit planning
 
 **Why it needs workspace.core first:** The Systemic Map has nothing to aggregate until the intelligence pipeline is running. Without classified insights, enquiries, or investigations, the FW capacity profile is empty. The value scales with the volume and breadth of the upstream pipeline — the more workspaces active, the richer the systemic picture.
 
@@ -27,13 +29,13 @@ That picture drives three things:
 
 ## What activating this workspace turns on
 
-- FW capacity profile — per-org-level, per-time-window aggregation of all classified entities into a factor-by-factor picture of organisational capacity; blind spots surfaced where no evidence has been gathered
-- Atrophy score per worksite — composite of observation recency, toolbox talk recency, manager visit recency, and overdue corrective actions; alerts at threshold ≥ 60
+- Worksite atrophy score — computed continuously per worksite; composite of observation recency, toolbox talk recency, manager visit recency, and overdue corrective actions; alerts at threshold ≥ 60; resets when the relevant activity occurs
+- FW capacity profile — per-org-level aggregation of classified entities into a factor-by-factor picture of organisational capacity; blind spots surfaced where no evidence has been gathered
+- Worksite intelligence decoration — atrophy score, dominant FW signals, blind spot count, open insight count, and corrective action debt attached to each worksite; consumed by visit planning, dashboards, and alerts
 - Situational briefs — AI-generated narrative summaries of the systemic picture for managers and divisional leadership; human review gate before distribution
-- Visit planning — manager declares a visit intent; site prioritisation driven by atrophy, open insights, blind spots, and incident recency; 2–5 focus areas selected
-- Visit briefing pack — generated 48h before visit; focus areas become observation prompts during execution; observations captured on-visit enter normal enrichment pipeline
-- Visit summary generation — AI summary of completed visit: what was found, which focus areas were covered, what needs follow-up
-- Leading indicator surfaces — FW factor trends visible before they become incidents; blind spot alerts when a factor has no recent evidence
+- Visit briefing pack — generated before a planned visit; focus area suggestions drawn from the worksite's live intelligence decoration; surfaces open actions and relevant insights in enriched form
+- AI visit summary — on visit completion, AI generates a summary of what was found and what needs follow-up; informed by the worksite's intelligence context
+- Leading indicator surfaces — FW factor trends visible before they become incidents; blind spot alerts when a factor has no recent evidence at a worksite
 
 ---
 
@@ -47,11 +49,12 @@ That picture drives three things:
 | Atrophy alert — threshold crossing | System | `features/SYSTEMIC-CAUSES.md` §Atrophy Score | spec-only |
 | Situational brief generation (`situational_brief.generate`) | System (async) | `features/SITUATIONAL-BRIEF.md` | spec-only |
 | Situational brief human review gate | Safety manager | `features/SITUATIONAL-BRIEF.md` | spec-only |
-| Visit wizard — site prioritisation | Safety manager / divisional manager | `features/SYSTEMIC-CAUSES.md` §Visit Plan | spec-only |
-| Visit wizard — focus area selection | Safety manager / divisional manager | `features/SYSTEMIC-CAUSES.md` §Visit Wizard Flow | spec-only |
+| Worksite atrophy score computation | System (scheduled) | `features/SYSTEMIC-CAUSES.md` §Atrophy Score | spec-only |
+| Worksite atrophy alert — threshold crossing | System | `features/SYSTEMIC-CAUSES.md` §Atrophy Score | spec-only |
+| Worksite intelligence decoration — FW signals, blind spots, open debt | System (on demand) | `features/SYSTEMIC-CAUSES.md` §FW Factor Aggregation | spec-only |
 | Visit briefing pack generation (`visit_briefing.generate`) | System (async) | `features/VISIT-BRIEFING.md` | spec-only |
-| Visit execution mode | Safety manager / divisional manager | `features/SYSTEMIC-CAUSES.md` §Visit Execution | spec-only |
-| Visit completion + summary generation (`visit_plan.summarise`) | System (on complete) | `features/SYSTEMIC-CAUSES.md` §Visit Summary | spec-only |
+| Visit focus area suggestions — from worksite intelligence | System (async) | `features/SYSTEMIC-CAUSES.md` §Visit Wizard Flow | spec-only |
+| AI visit summary generation (`visit_plan.summarise`) | System (on complete) | `features/SYSTEMIC-CAUSES.md` §Visit Summary | spec-only |
 | FW capacity dashboard — safety manager view | Safety manager | `features/SYSTEMIC-CAUSES.md` | spec-only |
 | FW capacity dashboard — leadership view | Divisional manager / leadership | `features/SYSTEMIC-CAUSES.md` | spec-only |
 | Document coverage layer (when `workspace.ms` also active) | Safety manager | `features/MANAGEMENT-SYSTEM-INGESTION.md` | spec-only |
