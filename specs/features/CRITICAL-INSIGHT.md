@@ -1,7 +1,7 @@
 # CRITICAL-INSIGHT.md — Critical Insight Feature Spec
 
 **Forge Works · Hiviz SafetyPlatform — Feature Spec**
-Version: 1.1 — May 2026
+Version: 1.2 — May 2026
 
 > **This is the canonical source for all prompt text, schemas, and pipeline logic related to critical insight generation, review, and FW Map® classification.** Simulators and the prompt lab load from this file.
 
@@ -9,7 +9,7 @@ Version: 1.1 — May 2026
 
 ## What This Feature Is
 
-A Critical Insight is the platform's primary intelligence output — a pattern-level finding that surfaces systemic safety conditions across one or more sites. It can be triggered four ways, but the pipeline is the same regardless of source: AI drafts the insight, a safety manager reviews it, and on approval it becomes available for toolbox talk assembly, FW Map® classification, situational briefs, and community threads.
+A Critical Insight is the platform's primary intelligence output — a pattern-level finding that surfaces systemic safety conditions across one or more sites. It can be triggered five ways, but the pipeline is the same regardless of source: AI drafts the insight, a safety manager reviews it, and on approval it becomes available for toolbox talk assembly, FW Map® classification, situational briefs, and community threads.
 
 The feature has four stages:
 
@@ -27,11 +27,13 @@ Stage 4 — Downstream dispatch      (situational brief, CoP thread seed — see
 | `trigger_source` | What fires it | Input to Stage 1 |
 |---|---|---|
 | `algorithm` | Trend detection threshold crossed | Cluster of anonymised enriched observations |
-| `solo_critical` | Single critical-severity incident | Single incident record |
 | `critical_observation` | Single `barrier_failure` or `unwanted_energy_event` observation with `signal_type_confidence >= 0.70` | Single enriched observation record |
 | `manual` | Safety manager creates directly | Manager-authored content — Stage 1 skipped |
 | `external_alert` | Regulator / industry body / client alert | External content — Stage 1 skipped |
 | `external_investigation` | Finding from another system | External content — Stage 1 skipped |
+
+
+**External investigation trigger:** A CriticalInsight created via `external_investigation` originates from the systemic cause phase of a completed investigation — see `INVESTIGATION.md` Stage 3. This is the only sanctioned bridge between the incident pipeline and the insight pipeline. The safety manager authors the content directly; Stage 1 (AI generation) is skipped. `cleared_for_toolbox = true` is set immediately on creation. `fw_classify` queues immediately.
 
 **Manual and external trigger sources bypass Stage 1 entirely.** Content is authored by the safety manager directly. `cleared_for_toolbox = true` is set immediately on creation — there is no AI draft and no review step. `fw_classify` queues immediately on creation. These sources are not documented further in this spec — their pipeline starts at Stage 3.
 
@@ -79,7 +81,7 @@ Critical insight generation receives already-classified upstream values (cluster
 ## Stage 1 — Insight Generation
 
 **Job:** `critical_insight.generate`
-**Triggered:** Trend threshold crossed (algorithm) OR critical incident created (solo_critical) OR single critical observation (critical_observation)
+**Triggered:** Trend threshold crossed (algorithm) OR single critical observation (critical_observation)
 **Input:** Varies by trigger source — see prompt variants below
 **Output:** Draft CriticalInsight with `cleared_for_toolbox = false`
 **Human gate:** Safety manager review required before `cleared_for_toolbox` is set
@@ -91,7 +93,6 @@ Critical insight generation receives already-classified upstream values (cluster
 |---|---|---|
 | `algorithm` | `site` | `CANONICAL-USER-PROMPT-STAGE-1-ALGORITHM-WORKSITE-TREND` |
 | `algorithm` | `region` / `division` / `organisation` | `CANONICAL-USER-PROMPT-STAGE-1-ALGORITHM-CROSS-SITE-PATTERN` |
-| `solo_critical` | `site` (always) | `CANONICAL-USER-PROMPT-STAGE-1-SOLO-CRITICAL` |
 | `critical_observation` | `site` (always) | `CANONICAL-USER-PROMPT-STAGE-1-CRITICAL-OBSERVATION` |
 
 ---
@@ -210,47 +211,6 @@ Return JSON:
 
 ---
 
-### CANONICAL-USER-PROMPT-STAGE-1-SOLO-CRITICAL
-
-Used when `trigger_source = solo_critical`. Incident description scrubbed per `globals/anonymisation-rules.md`.
-
-```
-A critical incident has been reported that warrants immediate intelligence generation
-without waiting for trend accumulation.
-
-Trigger source: solo_critical
-
-Work type: {{work_type_label}}
-Org level: site — {{worksite_name}}
-Incident type: {{incident_type}}
-Severity class: critical
-Injury classification: {{injury_classification}}
-Incident description: {{incident_description}}
-Immediate actions taken: {{immediate_action_taken | "None recorded"}}
-
-This is a single event, not a pattern. Your output should:
-- Frame the intelligence around what this event reveals about systemic conditions
-- Not speculate beyond what the evidence supports
-- Acknowledge it is a single event while being direct about the risk it represents
-- Focus on what other sites need to know and check immediately
-
-Return JSON:
-{
-  "pattern_summary": "2-3 sentences. What this incident reveals about conditions that may exist more broadly. Acknowledge the single-event basis without hedging the risk.",
-  "pattern_summary_basis": "1 sentence. Which specific elements of the incident description support this framing.",
-  "likely_systemic_cause": "1 sentence. The underlying condition this incident most likely reflects.",
-  "likely_systemic_cause_rationale": "1 sentence. What in the incident description points to this cause.",
-  "recommended_action": "1 sentence. The most important immediate check or action for other sites.",
-  "recommended_action_rationale": "1 sentence. Why this action directly addresses the likely cause.",
-  "toolbox_narrative": "4-6 sentences. Written for a supervisor to read aloud. Plain English. Present tense. Opens with the reality of what happened and what crews need to know and do today.",
-  "escalate_to_systemic": true,
-  "escalation_rationale": "1 sentence. A critical incident warrants systemic investigation to understand whether these conditions are present elsewhere."
-}
-```
-
-**Note on `escalate_to_systemic` for solo_critical:** Defaults to `true` — a critical severity incident is presumed to warrant systemic investigation. The human review gate still applies; the reviewer can downgrade to `false` if they disagree.
-
----
 
 ### CANONICAL-USER-PROMPT-STAGE-1-CRITICAL-OBSERVATION
 
@@ -403,11 +363,14 @@ On `cleared_for_toolbox = true` and `fw_classified_at` set, the insight is avail
 --   sites_affected_count: number of distinct worksites contributing observations
 --   to the cluster at trigger time. Populated from the observation pool query.
 
--- solo_critical:
---   { incident_id, severity_class, rationale }
-
 -- critical_observation:
 --   { observation_id, signal_type, barrier_assessment, energy_release_potential }
+
+-- external_investigation:
+--   { investigation_id, investigation_ref, systemic_cause_summary }
+--   investigation_id: UUID of the source investigation
+--   investigation_ref: human-readable reference (e.g. INV-0042)
+--   systemic_cause_summary: 1-2 sentence summary authored at systemic cause phase initiation
 ```
 
 `sites_affected_count` is available to the Stage 1 prompt for algorithm triggers and is used in `CANONICAL-USER-PROMPT-STAGE-1-ALGORITHM-CROSS-SITE-PATTERN` to give the AI concrete cross-site breadth context.
@@ -429,9 +392,11 @@ THEN
 
 Cooldown is configurable per organisation. Default: 30 days at site level, 14 days at region and above.
 
-Solo_critical bypasses the cooldown — a critical incident always generates an insight regardless of recent history.
+Critical_observation bypasses the cooldown — a single critical observation (barrier_failure or unwanted_energy_event with signal_type_confidence >= 0.70) always generates an insight regardless of recent history for that work type.
 
-Critical_observation bypasses the cooldown — a single critical observation (barrier_failure or unwanted_energy_event) always generates an insight regardless of recent history for that work type.
+External_investigation bypasses the cooldown — a systemic cause finding from a closed investigation is always entered regardless of recent history. The safety manager's judgement is the quality gate.
+
+Manual and external_alert also bypass cooldown.
 
 ---
 
@@ -439,7 +404,7 @@ Critical_observation bypasses the cooldown — a single critical observation (ba
 
 | Trigger | Notification | Recipients |
 |---|---|---|
-| Insight draft created (algorithm/solo_critical) | N-INSIGHT-DRAFT | Safety manager |
+| Insight draft created (algorithm/critical_observation) | N-INSIGHT-DRAFT | Safety manager |
 | Insight approved | N-INSIGHT-APPROVED | Safety manager confirmation |
 | Insight rejected | N-INSIGHT-REJECTED | Safety manager confirmation |
 | `escalate_to_systemic = true` on approval | N-INSIGHT-ESCALATE | Safety manager, senior leadership |

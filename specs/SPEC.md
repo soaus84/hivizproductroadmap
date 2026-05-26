@@ -16,6 +16,7 @@ Status: Consolidated spec — supersedes specs/01, 03, 04, 06, 07
    - 3.0 Worksite Role Slots
    - 3.1 Observation
    - 3.2 Incident
+   - 3.2a CriticalIncident
    - 3.3 Investigation
    - 3.4 CriticalInsight
    - 3.5 ToolboxTalk
@@ -32,8 +33,9 @@ Status: Consolidated spec — supersedes specs/01, 03, 04, 06, 07
 7. [Algorithm Engine](#7-algorithm-engine)
    - 7.1 Incident Triage
    - 7.2 Trend Detection
-   - 7.3 Content Selection
-   - 7.4 Sharing Eligibility Gate
+   - 7.3 Incident Trend Detection
+   - 7.4 Content Selection
+   - 7.5 Sharing Eligibility Gate
 8. [Logic Rules Reference](#8-logic-rules-reference)
    - 8.1 Observation Rules
    - 8.2 Incident & Investigation Rules
@@ -71,6 +73,12 @@ Status: Consolidated spec — supersedes specs/01, 03, 04, 06, 07
 - **Every AI suggestion has a companion reason.** No AI output field exists without a corresponding rationale field stored alongside it. `ai_suggested_x` always has `ai_suggested_x_rationale`. This is a trust and liability principle: the platform surfaces AI outputs as suggestions with visible reasoning, never as recommendations or directives. The human reviewer sees the why, engages with it, and owns the decision.
 - **AI suggestion language standard.** Across all UI surfaces: use "suggested" not "recommended", "AI has identified" not "AI determined", "based on" not "because", "for your review" not as a directive. The safety professional makes the call — the AI makes the case.
 - **Operationally significant content only.** Hiviz surfaces only content that drives a communication, learning, or improvement outcome. No vanity metrics, no informational noise.
+
+- **Shared mechanisms, multiple origins.** Enquiry and Corrective Action are platform mechanisms, not single-source outputs. When a new trigger source is identified, the question is always "which existing mechanism does this enter?" — not "do we need a new one?" Both mechanisms carry a `trigger_source` field that documents the origin without changing the pipeline. Adding a new origin means adding a `trigger_source` value and ensuring the downstream pipeline handles it — nothing else.
+
+- **Generation criteria are the quality gate.** A `CriticalInsight` or `CriticalIncident` record represents a signal that demands attention by definition — the criteria for generating one are what ensure this. Two paths exist for each: a pool of signals crossing a trend threshold, or a single signal of sufficient severity bypassing the threshold directly. Threshold configuration and direct-path severity checks are therefore critical quality controls, not implementation details.
+
+- **Pipeline symmetry.** The observation pipeline and the incident pipeline are structurally parallel. Each has a pool/trend path and a direct/critical path. Each produces a platform intelligence entity (CriticalInsight, CriticalIncident) that requires human review before downstream action fires. The only sanctioned bridge between the two pipelines is the systemic cause phase of an investigation, which can produce a CriticalInsight via `trigger_source = 'external_investigation'`. No other cross-pipeline path exists.
 
 ---
 
@@ -285,6 +293,71 @@ CREATE INDEX idx_incident_severity ON safety_intelligence.incident(severity_clas
 
 ---
 
+### 3.2a CriticalIncident
+
+Generated entity. Produced by the incident trend detection algorithm or by the triage algorithm when a single incident meets the direct-path severity threshold. Not directly captured by humans except for the manual trigger source.
+
+```sql
+CREATE TABLE safety_intelligence.critical_incident (
+  id                    UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+  -- Trigger source
+  trigger_source        VARCHAR(30) NOT NULL
+                          CHECK (trigger_source IN (
+                            'algorithm',          -- incident trend threshold crossed
+                            'critical_incident',  -- single high-severity incident, direct path
+                            'manual'              -- safety manager or investigator enters directly
+                          )),
+
+  -- Source data
+  source_incident_ids   JSONB,
+  trigger_event         JSONB,   -- algorithm: { threshold, window_days, count, sites_affected_count }
+                                 -- critical_incident: { incident_id, severity_class, rationale }
+
+  -- Org scope
+  generated_at_level    VARCHAR(20) NOT NULL
+                          CHECK (generated_at_level IN ('site','region','division','organisation')),
+  scope_ref_id          UUID NOT NULL,
+
+  -- Taxonomy context
+  work_type_id          UUID REFERENCES work_type(id),
+
+  -- Content
+  pattern_summary                           TEXT,
+  pattern_summary_rationale                 TEXT,
+  likely_systemic_cause                     TEXT,
+  likely_systemic_cause_rationale           TEXT,
+  recommended_investigation_scope           TEXT,
+  recommended_investigation_scope_rationale TEXT,
+  ai_generated_at                           TIMESTAMPTZ,
+
+  -- Human review
+  reviewed_by_id  UUID REFERENCES users(id),
+  reviewed_at     TIMESTAMPTZ,
+  review_action   VARCHAR(20) CHECK (review_action IN ('approved','edited','rejected')),
+  reviewer_notes  TEXT,
+
+  -- Investigation linkage (set on approval)
+  investigation_id UUID REFERENCES safety_intelligence.investigation(id),
+
+  -- Audit
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX idx_critical_incident_level     ON safety_intelligence.critical_incident(generated_at_level, scope_ref_id);
+CREATE INDEX idx_critical_incident_work_type ON safety_intelligence.critical_incident(work_type_id);
+CREATE INDEX idx_critical_incident_trigger   ON safety_intelligence.critical_incident(trigger_source);
+CREATE INDEX idx_critical_incident_review    ON safety_intelligence.critical_incident(review_action);
+```
+
+**Direct-path threshold:** `critical_incident` trigger fires when `incident.severity_class = 'critical'` — fatality, permanent disability, or catastrophic loss. Mirrors the `critical_observation` threshold in the observation pipeline. Serious, moderate, and minor incidents enter the pool for trend detection.
+
+**Cooldown:** Algorithm trigger respects org-configured incident trend cooldown (default 30 days at site level). `critical_incident` and `manual` triggers bypass cooldown.
+
+
+---
+
 ### 3.3 Investigation
 
 ```sql
@@ -346,21 +419,21 @@ CREATE TABLE safety_intelligence.critical_insight (
   -- Trigger source
   trigger_source        VARCHAR(30) NOT NULL DEFAULT 'algorithm'
                           CHECK (trigger_source IN (
-                            'algorithm',              -- trend detection crossed threshold (default)
+                            'algorithm',              -- observation trend threshold crossed (default)
+                            'critical_observation',   -- single high-potential observation, direct path
                             'manual',                 -- safety manager entered directly
-                            'solo_critical',          -- single high-severity incident bypasses trend threshold
                             'external_alert',         -- regulator / industry body / client alert
-                            'external_investigation'  -- finding from investigation in another system
+                            'external_investigation'  -- finding from investigation systemic cause phase
                           )),
 
-  -- Source data (algorithm / solo_critical triggers)
+  -- Source data (algorithm / critical_observation triggers)
   source_observation_ids   JSONB,
   source_investigation_ids JSONB,
   trigger_event            JSONB,   -- algorithm: { threshold, window_days, count, sites_affected_count }
                                     --   sites_affected_count = 1 at generated_at_level = 'site' (Worksite Trend)
                                     --   sites_affected_count = N at generated_at_level in ('region','division','organisation') (Cross-site Pattern)
-                                    -- solo_critical: { incident_id, severity_class, rationale }
                                     -- critical_observation: { observation_id, signal_type, barrier_assessment, energy_release_potential }
+                                    -- external_investigation: { investigation_id, investigation_ref, systemic_cause_summary }
                                     -- See features/CRITICAL-INSIGHT.md §Schema Notes for the canonical per-trigger shape.
 
   -- Source metadata (manual / external triggers)
@@ -369,7 +442,6 @@ CREATE TABLE safety_intelligence.critical_insight (
   -- manual:               { authored_by_role, context }
   -- external_alert:       { alert_title, alert_url, issuing_body, alert_date }
   -- external_investigation: { investigation_ref, source_org, system, summary_provided_by }
-  -- solo_critical:        (use trigger_event instead)
 
   -- Org scope
   generated_at_level    VARCHAR(20) NOT NULL
@@ -422,7 +494,7 @@ CREATE INDEX idx_critical_insight_cleared ON safety_intelligence.critical_insigh
 CREATE INDEX idx_critical_insight_trigger ON safety_intelligence.critical_insight(trigger_source);
 ```
 
-**Solo critical trigger:** When an incident with `severity_class = 'critical'` is created, the triage algorithm may generate a CriticalInsight immediately without waiting for trend threshold. This bypasses the cooldown period. The `trigger_event` JSONB records `{ incident_id, severity_class, rationale }`. The human review gate still applies — solo_critical insights are not auto-approved.
+**Critical observation trigger:** When an enriched observation has `signal_type IN ('barrier_failure', 'unwanted_energy_event')` AND `signal_type_confidence >= 0.70`, a CriticalInsight is generated immediately without waiting for trend threshold. This bypasses the cooldown period. The `trigger_event` JSONB records `{ observation_id, signal_type, barrier_assessment, energy_release_potential }`. The human review gate still applies. See `features/OBSERVATION-CAPTURE.md` §Stage 2 for the downstream routing rule that fires this trigger.
 
 ---
 
@@ -828,7 +900,7 @@ POST   /api/v1/critical-insights/:id/review     -- human approval action
 **POST (manual/external) body:**
 ```json
 {
-  "trigger_source": "manual | external_alert | external_investigation | solo_critical",
+  "trigger_source": "manual | external_alert | external_investigation",
   "work_type_id": "uuid",
   "generated_at_level": "site | region | division | organisation",
   "scope_ref_id": "uuid",
@@ -979,16 +1051,20 @@ ELSE IF incident_type = 'property-damage'
 ELSE
   requires_investigation = false
 
--- Solo critical trigger
+-- Critical incident direct path
 IF severity_class = 'critical':
-  CREATE critical_insight (
-    trigger_source = 'solo_critical',
+  CREATE critical_incident (
+    trigger_source = 'critical_incident',
     trigger_event = { incident_id, severity_class, rationale },
     generated_at_level = 'site',
-    cleared_for_toolbox = false  -- review gate still applies
+    scope_ref_id = incident.worksite_id
   )
-  QUEUE job: critical_insight.generate
-  NOTIFY safety manager immediately
+  QUEUE job: critical_incident.generate
+  NOTIFY safety manager immediately (N-CRIT-INC-DRAFT)
+
+-- Incident pool routing (non-critical)
+-- Moderate and minor severity incidents accumulate in the incident pool.
+-- Incident trend detection runs on schedule — see §7.3.
 
 IF requires_investigation = true:
   CREATE investigation record
@@ -1032,7 +1108,46 @@ Threshold and cooldown values are configurable per organisation per level per wo
 
 ---
 
-### 7.3 Content Selection Rules
+---
+
+### 7.3 Incident Trend Detection
+
+Mirrors §7.2 Trend Detection but operates on the incident pool. Produces `CriticalIncident` records (see §3.2a) rather than `CriticalInsight` records.
+
+```
+ON incident created (after triage completes):
+
+FOR EACH org level (site → region → division → organisation):
+
+  count = COUNT incidents WHERE:
+    work_type_id = this.work_type_id
+    AND severity_class IN ('moderate', 'minor')   -- low-severity pool only
+    AND created_at >= now() - INTERVAL '{{org.incident_trend_window_days}} days'
+    AND [scope matches this org level]
+
+  threshold = org_threshold_config[level]['incident'][work_type_id]
+              ?? org_threshold_config[level]['incident']['default']
+              ?? 3
+
+  IF count >= threshold
+    AND NOT EXISTS critical_incident WHERE:
+      work_type_id = this.work_type_id
+      AND generated_at_level = level
+      AND created_at >= now() - INTERVAL '{{org.incident_trend_cooldown_days}} days'
+    THEN
+      CREATE critical_incident (
+        trigger_source = 'algorithm',
+        generated_at_level = level,
+        scope_ref_id = [relevant org entity id]
+      )
+      QUEUE job: critical_incident.generate
+      NOTIFY safety manager (N-CRIT-INC-DRAFT)
+```
+
+**Key distinction:** Only `severity_class IN ('moderate', 'minor')` incidents feed the pool. Critical incidents do not accumulate — they fire the direct path immediately via triage (§7.1). This mirrors the observation pipeline where `barrier_failure` and `unwanted_energy_event` observations with high confidence fire the direct path rather than accumulating in the trend pool.
+
+
+### 7.4 Content Selection Rules
 
 ```
 GIVEN: worksite_id, work_type_id, presenter_id
@@ -1092,7 +1207,7 @@ RETURN candidates[0..2]  -- max 3 items, priority order maintained
 
 ---
 
-### 7.4 Sharing Eligibility Gate
+### 7.5 Sharing Eligibility Gate
 
 Runs on every content item before it enters the selection pool. Hard stops:
 
@@ -1665,6 +1780,10 @@ All threshold and behavioural values are configurable per organisation via `org_
 | `ai.model` | `claude-sonnet-4-20250514` | AI model for all prompts |
 | `ai.max_tokens.default` | 1000 | Default token limit |
 | `ai.max_tokens.talk_assembly` | 1500 | Token limit for talk assembly prompt |
+| `incident_trend.window_days` | 30 | Rolling window for incident trend detection |
+| `incident_trend.threshold.site.default` | 3 | Incident count to trigger CriticalIncident at site level |
+| `incident_trend.threshold.region.default` | 5 | Incident count at region level |
+| `incident_trend.cooldown_days` | 30 | Days before same work_type + level triggers another CriticalIncident |
 
 ---
 
@@ -1735,6 +1854,17 @@ All threshold and behavioural values are configurable per organisation via `org_
 
 ---
 
+### Critical Incident Pipeline
+
+| # | Event | Trigger | Recipients | Channels | Tone | Timing | Message |
+|---|-------|---------|------------|----------|------|--------|---------|
+| N-CRIT-INC-DRAFT | CriticalIncident draft ready | Algorithm threshold crossed or critical severity triage | Safety Manager (scope) | push, inbox | action | Immediate | "A critical incident pattern has been detected in [work type] at [scope]. A CriticalIncident is ready for your review." |
+| N-CRIT-INC-APPROVED | CriticalIncident approved — investigation opened | Safety Manager approves | Investigation assignee, Safety Manager | push, email | action | Immediate | Assignee: "You've been assigned to investigate a pattern-level incident finding: [summary]. Investigation record created." Safety Manager: "CriticalIncident approved. Investigation [INV-ref] opened." |
+| N-CRIT-INC-REJECTED | CriticalIncident rejected | Safety Manager rejects | — | — | — | — | Silent. Cooldown resets. |
+| N-CRIT-INC-OVERDUE | Review overdue | No action >48h | Safety Manager | push, email | action | 48h then daily | "CriticalIncident [ref] has been waiting [N] days for review. Action required." |
+
+---
+
 ### Corrective Actions
 
 | # | Event | Trigger | Recipients | Channels | Tone | Timing | Message |
@@ -1796,6 +1926,8 @@ All threshold and behavioural values are configurable per organisation via `org_
 | `cop_thread.seed` | Thread approved by safety manager | immediate |
 | `visit_briefing.generate` | Visit plan created / Atrophy alert assigned | < 20s |
 | `visit_briefing.notify` | Briefing generated | immediate |
+| `critical_incident.generate` | Trend threshold crossed OR critical severity triage | < 15s |
+| `critical_incident.notify_reviewer` | CriticalIncident generated | immediate |
 
 All jobs are idempotent and retryable. Failed jobs must not block the primary user action.
 
@@ -1942,7 +2074,7 @@ Fields captured in V1 that are not yet fully consumed downstream. Do not re-desi
 Prompts for situational briefs and visit briefings currently receive single fw_factor values. V2: Pass full `fw_factors` arrays with `fw_rationales` into both prompts for richer multi-factor outputs. See prompts.md Prompts 10 and 12 V2 notes.
 
 **severity_class into fw_classify context (V2)**
-`incident.severity_class` is stored but not yet passed to the `fw_classify` job. V2: Pass severity_class into the fw_classify job for CriticalInsights with `trigger_source = 'solo_critical'`. A critical severity incident is stronger evidence of a systemic factor than a trend of minor near-misses.
+`incident.severity_class` is stored on the incident but not passed to the `fw_classify` job for investigations. V2: include `severity_class` in the `fw_classify` user prompt for investigation-sourced FW classifications — critical incidents carry stronger signal for GUIDE and ENABLE domain factors.
 
 ---
 

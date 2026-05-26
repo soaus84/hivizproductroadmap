@@ -1,7 +1,7 @@
 # INCIDENT-CAPTURE.md — Incident Capture Feature Spec
 
 **Forge Works · Hiviz SafetyPlatform — Feature Spec**
-Version: 1.0 — May 2026
+Version: 1.1 — May 2026
 
 > **This is the canonical source for all prompt text, schemas, and pipeline logic related to incident capture — including the auto triage entry point.** Simulators and the prompt lab load from this file. If prompt text elsewhere conflicts with this file, this file wins.
 
@@ -9,7 +9,7 @@ Version: 1.0 — May 2026
 
 ## What This Feature Is
 
-Incident capture covers the entire pipeline from first report through to investigation record creation. It has two entry paths and four stages:
+Incident capture covers the pipeline from first report through to CriticalIncident or investigation record creation. It has two entry paths and four stages:
 
 ```
 Entry path A — "What happened?" (single entry, user hasn't pre-selected)
@@ -20,7 +20,10 @@ Entry path B — "Report an Incident" (user has pre-selected incident)
 
 Both paths converge at:
   Stage 2 — Server triage algorithm        (synchronous, server-side, no AI)
+             → routes to: critical_incident direct path OR incident pool OR investigation
   Stage 3 — Investigation assistance       investigation.assist  (conditional async AI job)
+
+For the critical incident direct path and incident pool trend detection, see CRITICAL-INCIDENT.md.
 ```
 
 **Where auto routes to observation:** When `capture.auto` determines `routed_to = observation`, the conversation ends and the app submits to `POST /api/v1/observations` using the observation summary schema from `OBSERVATION-CAPTURE.md`. The incident pipeline does not run. This file documents the routing logic; the observation submission spec lives in `OBSERVATION-CAPTURE.md`.
@@ -370,11 +373,20 @@ IF incident_type = near-miss AND work_type.is_high_risk    → requires_investig
 IF incident_type = property-damage AND value > threshold   → requires_investigation = true
 ELSE                                                        → requires_investigation = false
 
--- Solo critical trigger
+-- Critical incident direct path
 IF severity_class = critical:
-  CREATE critical_insight (trigger_source = solo_critical)
-  QUEUE job: critical_insight.generate
-  NOTIFY safety manager immediately (N-CRIT)
+  CREATE critical_incident (
+    trigger_source = 'critical_incident',
+    trigger_event = { incident_id, severity_class, rationale },
+    generated_at_level = 'site',
+    scope_ref_id = incident.worksite_id
+  )
+  QUEUE job: critical_incident.generate
+  NOTIFY safety manager immediately (N-CRIT-INC-DRAFT)
+
+-- Incident pool routing (non-critical)
+-- Moderate and minor severity incidents accumulate in the incident pool.
+-- Incident trend detection runs on schedule — see SPEC.md §7.3.
 
 -- Notifiable flag confirmation
 Re-evaluate notifiable_flag independently of capture hint.
@@ -397,7 +409,7 @@ See `SPEC.md` §7.1 for the full triage algorithm pseudocode and threshold confi
 | Condition | Notification | Recipients |
 |---|---|---|
 | Any incident created | N-INC-REPORT | Site Manager, Safety Manager |
-| `severity_class = critical` | N-CRIT (immediate) | Safety Manager, senior leadership |
+| `severity_class = critical` | N-CRIT-INC-DRAFT (immediate) | Safety Manager |
 | `notifiable_flag = true` | N-NOTIF | Safety Manager |
 | `requires_investigation = true` | N-INV-ASSIGN | Investigation assignee |
 
@@ -491,6 +503,7 @@ When the investigator closes the investigation with `cleared_for_sharing = true`
 - `investigation.toolbox_narrative` job queues — see `INVESTIGATION.md` Stage 4
 - `fw_classify` job queues — see `globals/fw-map-blueprint.md` and `INVESTIGATION.md` Stage 5
 - CoP thread seed candidate created if `sharing_scope` permits — see `COMMUNITIES.md`
+- Systemic cause findings may generate a CriticalInsight — see `INVESTIGATION.md` Stage 3
 
 ---
 
