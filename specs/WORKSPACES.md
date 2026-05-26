@@ -160,9 +160,6 @@ These are not workspace decisions — they are configuration decisions within an
 
 ## V2 Notes
 
-**Risk workspace spec (V2)**
-The Risk workspace is referenced throughout the model but has no feature spec. The spec needs to define: critical control register schema, control verification capture flow, control failure attribution in triage, and how control signals feed FW classification. This is a significant spec gap — the workspace is listed as affecting `incident-to-investigation` but the mechanism is undefined.
-
 **Workspace onboarding flow**
 Each workspace activation should have a guided onboarding step: for `ms`, uploading initial documents; for `risk`, seeding the critical control register; for `communities`, creating initial CoP rooms. Not specced — V2 product design scope.
 
