@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>workspace.core — Field IA · Hiviz</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #eeeeed;
+  --white: #ffffff;
+  --dark: #1a1a1a;
+  --light: #ddddd8;
+  --lighter: #f0f0ec;
+  --text: #2a2a2a;
+  --muted: #888;
+  --spec: #2255bb;
+
+  --c-live:     #dc2626;
+  --c-trend:    #7c3aed;
+  --c-signal:   #0369a1;
+  --c-action:   #b45309;
+  --c-barrier:  #dc2626;
+  --c-positive: #16a34a;
+  --c-weak:     #b45309;
+  --c-awaiting: #ea580c;
+}
+
+html { background: var(--bg); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: var(--text); -webkit-font-smoothing: antialiased; }
+body { padding: 52px 48px 100px; }
+
+/* ── PAGE HEADER ── */
+.page-header { margin-bottom: 16px; }
+.page-eyebrow { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+.page-title { font-size: 24px; font-weight: 700; color: var(--dark); margin-bottom: 4px; }
+.page-desc { font-size: 12px; color: var(--muted); max-width: 640px; line-height: 1.6; margin-bottom: 16px; }
+.page-meta { display: flex; gap: 24px; padding: 10px 0; border-top: 1px solid var(--light); border-bottom: 1px solid var(--light); }
+.meta-item { font-size: 11px; color: var(--muted); }
+.meta-item strong { color: var(--text); font-weight: 600; }
+
+/* ── LEGEND ── */
+.legend { display: flex; flex-wrap: wrap; gap: 12px; margin: 20px 0 40px; }
+.legend-group { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.legend-sep { width: 1px; height: 14px; background: var(--light); }
+.l-item { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; color: var(--muted); }
+.l-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+
+/* ── SECTION ── */
+.section { margin-bottom: 60px; }
+.section-label { display: flex; align-items: baseline; gap: 10px; margin-bottom: 6px; }
+.section-role { font-size: 9px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+.section-title { font-size: 15px; font-weight: 700; color: var(--dark); }
+.section-note { font-size: 11px; color: var(--muted); }
+.section-rule { height: 1px; background: var(--light); margin-bottom: 20px; }
+
+/* ── FLOW ROW ── */
+.flow-row { display: flex; align-items: flex-start; overflow-x: auto; padding-bottom: 8px; gap: 0; }
+
+/* ── CONNECTOR ── */
+.connector { flex-shrink: 0; display: flex; align-items: center; padding: 0 6px; margin-top: 90px; color: #bbb; font-size: 18px; line-height: 1; }
+
+/* ── SCREEN WRAP ── */
+.sw { flex-shrink: 0; width: 220px; }
+
+/* ── SCREEN ── */
+.screen {
+  width: 220px;
+  height: 400px;
+  background: var(--white);
+  border: 1.5px solid #c8c8c4;
+  border-radius: 4px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  font-size: 9px;
+  line-height: 1.4;
+  position: relative;
+}
+
+/* Screen zones */
+.sh { background: var(--dark); color: white; padding: 8px 10px 7px; flex-shrink: 0; }
+.sh-row { display: flex; justify-content: space-between; align-items: center; }
+.sh-title { font-size: 9.5px; font-weight: 700; }
+.sh-sub { font-size: 8px; color: rgba(255,255,255,0.5); margin-top: 1px; }
+.sh-eyebrow { font-size: 7.5px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.45); margin-bottom: 2px; }
+.sh-btn { font-size: 7.5px; font-weight: 700; background: white; color: var(--dark); padding: 2px 7px; border-radius: 2px; }
+.sh-btn-ghost { font-size: 7.5px; border: 1px solid rgba(255,255,255,0.3); color: rgba(255,255,255,0.7); padding: 2px 7px; border-radius: 2px; }
+.sh-live { display: flex; align-items: center; gap: 5px; font-size: 8px; font-weight: 700; color: rgba(255,255,255,0.7); }
+.sh-live-dot { width: 6px; height: 6px; background: var(--c-live); border-radius: 50%; }
+
+.sb { flex: 1; padding: 8px 9px; overflow: hidden; display: flex; flex-direction: column; gap: 5px; }
+
+.sn { background: var(--lighter); border-top: 1px solid var(--light); padding: 5px 0 4px; display: flex; justify-content: space-around; flex-shrink: 0; }
+.sn-item { font-size: 7.5px; color: var(--muted); text-align: center; }
+.sn-item.on { color: var(--dark); font-weight: 700; }
+
+/* Tabs */
+.s-tabs { display: flex; border-bottom: 1px solid var(--light); margin: -8px -9px 0; }
+.s-tab { font-size: 8px; padding: 5px 9px; color: var(--muted); }
+.s-tab.on { color: var(--dark); font-weight: 700; border-bottom: 2px solid var(--dark); }
+
+/* Section label within screen */
+.s-sec { font-size: 7.5px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+
+/* Cards */
+.s-card { background: var(--lighter); border: 1px solid var(--light); border-radius: 3px; padding: 6px 7px; }
+.s-card.live-border { border-left: 2px solid var(--c-live); }
+.s-card-title { font-size: 9px; font-weight: 700; color: var(--dark); }
+.s-card-sub { font-size: 7.5px; color: var(--muted); margin-top: 1px; }
+.s-stats-row { display: flex; gap: 8px; margin-top: 5px; }
+.s-stat { text-align: center; }
+.s-stat-val { font-size: 10px; font-weight: 700; color: var(--dark); }
+.s-stat-lbl { font-size: 6.5px; text-transform: uppercase; color: var(--muted); letter-spacing: 0.04em; }
+
+/* Rows */
+.s-row { display: flex; align-items: flex-start; gap: 6px; padding: 4px 0; border-bottom: 1px solid var(--light); }
+.s-row:last-child { border-bottom: none; }
+.s-row-num { font-size: 8px; font-weight: 700; color: var(--muted); min-width: 12px; }
+.s-row-date { background: var(--lighter); border: 1px solid var(--light); border-radius: 2px; text-align: center; padding: 2px 4px; min-width: 28px; flex-shrink: 0; }
+.s-row-date-day { font-size: 9px; font-weight: 700; color: var(--dark); }
+.s-row-date-dow { font-size: 6.5px; color: var(--muted); }
+.s-row-body { flex: 1; }
+.s-row-title { font-size: 8.5px; font-weight: 600; color: var(--dark); }
+.s-row-sub { font-size: 7.5px; color: var(--muted); }
+.s-row-badges { display: flex; gap: 3px; margin-top: 2px; flex-wrap: wrap; }
+
+/* Badges */
+.badge { display: inline-block; font-size: 7px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; padding: 1px 4px; border-radius: 2px; }
+.b-live     { background: rgba(220,38,38,0.12); color: var(--c-live); }
+.b-trend    { background: rgba(124,58,237,0.12); color: var(--c-trend); }
+.b-signal   { background: rgba(3,105,161,0.12); color: var(--c-signal); }
+.b-action   { background: rgba(180,83,9,0.12); color: var(--c-action); }
+.b-due      { background: rgba(220,38,38,0.12); color: var(--c-live); }
+.b-overdue  { background: rgba(234,88,12,0.12); color: #c2410c; }
+.b-barrier  { background: rgba(220,38,38,0.12); color: var(--c-barrier); }
+.b-positive { background: rgba(22,163,74,0.12); color: var(--c-positive); }
+.b-weak     { background: rgba(180,83,9,0.12); color: var(--c-weak); }
+.b-awaiting { background: rgba(234,88,12,0.12); color: var(--c-awaiting); }
+.b-enriched { background: rgba(22,163,74,0.12); color: var(--c-positive); }
+.b-saved    { background: rgba(100,100,100,0.1); color: #666; }
+.b-offline  { background: rgba(100,100,100,0.1); color: #666; }
+.b-ready    { background: rgba(22,163,74,0.12); color: #15803d; }
+.b-pending  { background: rgba(100,100,100,0.1); color: #555; }
+.b-stopped  { background: rgba(220,38,38,0.12); color: var(--c-live); }
+
+/* AI narrative */
+.s-ai { background: #f9f8f3; border: 1px solid #e5e0cc; border-radius: 3px; padding: 6px 7px; }
+.s-ai-lbl { font-size: 7px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #9b8a5a; margin-bottom: 3px; display: flex; align-items: center; gap: 4px; }
+.s-ai-text { font-size: 7.5px; color: #555; line-height: 1.55; }
+
+/* Focus items */
+.s-focus { display: flex; gap: 5px; align-items: flex-start; padding: 3px 0; border-bottom: 1px solid var(--light); }
+.s-focus:last-child { border-bottom: none; }
+.s-focus-n { font-size: 7.5px; color: var(--muted); min-width: 10px; }
+.s-focus-body { flex: 1; }
+.s-focus-title { font-size: 8px; font-weight: 600; color: var(--dark); }
+.s-focus-sub { font-size: 7px; color: var(--muted); }
+
+/* Observation items */
+.s-obs { display: flex; justify-content: space-between; align-items: flex-start; padding: 3px 0; border-bottom: 1px solid var(--light); }
+.s-obs:last-child { border-bottom: none; }
+.s-obs-left { flex: 1; }
+.s-obs-title { font-size: 8px; font-weight: 600; color: var(--dark); }
+.s-obs-sub { font-size: 7px; color: var(--muted); }
+
+/* Stats bar */
+.s-statbar { display: flex; border-top: 1px solid var(--light); border-bottom: 1px solid var(--light); margin: 0 -9px; padding: 5px 9px; gap: 0; }
+.s-statbar-item { flex: 1; text-align: center; }
+.s-statbar-val { font-size: 11px; font-weight: 700; color: var(--dark); }
+.s-statbar-lbl { font-size: 6.5px; text-transform: uppercase; color: var(--muted); letter-spacing: 0.04em; }
+
+/* Summary block (confirm screen) */
+.s-summ { background: var(--dark); color: white; border-radius: 3px; padding: 6px 8px; }
+.s-summ-lbl { font-size: 7px; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.4); margin-bottom: 3px; }
+.s-summ-text { font-size: 9px; font-weight: 700; line-height: 1.4; }
+
+/* Fact rows */
+.s-fact { display: flex; justify-content: space-between; padding: 3px 0; border-bottom: 1px solid var(--light); }
+.s-fact:last-child { border-bottom: none; }
+.s-fact-lbl { font-size: 7px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.s-fact-val { font-size: 7.5px; font-weight: 600; color: var(--dark); display: flex; align-items: center; gap: 3px; }
+.fact-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+.dot-red { background: var(--c-live); }
+.dot-green { background: var(--c-positive); }
+
+/* Impact block */
+.s-impact { background: rgba(22,163,74,0.06); border: 1px solid rgba(22,163,74,0.2); border-radius: 3px; padding: 5px 6px; }
+.s-impact-lbl { font-size: 7px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: #15803d; margin-bottom: 2px; }
+.s-impact-text { font-size: 7.5px; color: #166534; line-height: 1.45; }
+
+/* CTAs */
+.s-ctas { display: flex; gap: 4px; margin-top: auto; padding-top: 5px; }
+.s-cta { flex: 1; font-size: 7.5px; font-weight: 700; text-align: center; padding: 5px 4px; border-radius: 2px; }
+.cta-dark { background: var(--dark); color: white; }
+.cta-light { background: var(--light); color: var(--dark); }
+.cta-full { flex: none !important; width: 100%; }
+.cta-accent { background: var(--dark); color: #d4f04d; }
+
+/* Voice */
+.s-voice { display: flex; align-items: center; gap: 6px; padding: 4px 0; }
+.s-voice-rec { display: flex; align-items: center; gap: 4px; }
+.s-voice-dot { width: 6px; height: 6px; background: var(--c-live); border-radius: 50%; }
+.s-voice-lbl { font-size: 7.5px; font-weight: 700; color: var(--c-live); }
+.s-voice-loc { font-size: 7.5px; color: var(--muted); }
+.s-voice-timer { font-size: 7.5px; color: var(--muted); margin-left: auto; }
+
+/* Conversation */
+.s-msg { margin-bottom: 4px; }
+.s-msg-who { font-size: 7px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 1px; }
+.s-msg-who.you { color: var(--dark); }
+.s-msg-who.ai  { color: var(--c-signal); }
+.s-msg-text { font-size: 8px; color: var(--text); line-height: 1.45; }
+.s-captured { font-size: 7.5px; font-weight: 700; color: var(--c-positive); display: flex; align-items: center; gap: 4px; }
+.s-captured::before { content: '●'; font-size: 6px; }
+
+/* Input row */
+.s-input-row { display: flex; gap: 4px; align-items: center; background: var(--lighter); border: 1px solid var(--light); border-radius: 3px; padding: 4px 7px; }
+.s-input-ph { font-size: 8px; color: #aaa; flex: 1; }
+.s-input-btn { font-size: 7.5px; font-weight: 700; background: var(--dark); color: white; padding: 3px 7px; border-radius: 2px; }
+
+/* Offline block */
+.s-offline { background: #fef2f2; border: 1px solid #fecaca; border-radius: 3px; padding: 8px; text-align: center; }
+.s-offline-title { font-size: 9px; font-weight: 700; color: #991b1b; margin-bottom: 2px; }
+.s-offline-sub { font-size: 7.5px; color: #b91c1c; line-height: 1.45; }
+.s-offline-count { font-size: 16px; font-weight: 700; color: #991b1b; margin: 4px 0; }
+
+/* Progress steps */
+.s-steps { display: flex; gap: 3px; align-items: center; }
+.s-step { flex: 1; height: 3px; border-radius: 2px; background: var(--light); }
+.s-step.done { background: var(--dark); }
+
+/* Input field */
+.s-field { background: var(--lighter); border: 1px solid var(--light); border-radius: 3px; padding: 6px 7px; }
+.s-field-lbl { font-size: 7px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin-bottom: 2px; }
+.s-field-ph { font-size: 8px; color: #aaa; }
+
+/* People */
+.s-people { display: flex; align-items: center; gap: 3px; }
+.s-avatar { width: 18px; height: 18px; background: var(--light); border-radius: 50%; font-size: 6.5px; font-weight: 700; color: var(--muted); display: flex; align-items: center; justify-content: center; }
+.s-people-lbl { font-size: 7.5px; color: var(--muted); margin-left: 2px; }
+
+/* Search */
+.s-search { background: var(--lighter); border: 1px solid var(--light); border-radius: 3px; padding: 5px 8px; font-size: 8px; color: #aaa; display: flex; align-items: center; gap: 5px; }
+.s-search-icon { color: var(--muted); font-size: 9px; }
+
+/* Insight card */
+.s-insight { background: var(--lighter); border: 1px solid var(--light); border-left: 2px solid var(--c-awaiting); border-radius: 3px; padding: 6px 7px; }
+.s-insight-title { font-size: 8.5px; font-weight: 700; color: var(--dark); margin: 2px 0; line-height: 1.35; }
+.s-insight-desc { font-size: 7.5px; color: var(--muted); line-height: 1.4; margin-bottom: 3px; }
+.s-insight-sites { font-size: 7px; font-weight: 600; letter-spacing: 0.05em; color: var(--muted); margin-bottom: 3px; }
+
+/* Hero text (endorsement count) */
+.s-hero { padding: 4px 0 6px; }
+.s-hero-count { font-size: 18px; font-weight: 700; color: var(--dark); }
+.s-hero-sub { font-size: 7.5px; color: var(--muted); margin-top: 1px; }
+
+/* Dividers between sections */
+.flow-divider { height: 1px; background: var(--light); margin: 0 0 56px; }
+
+/* ── ANNOTATION ── */
+.ann { margin-top: 10px; padding: 0 2px; width: 220px; }
+.ann-name { font-size: 11px; font-weight: 700; color: var(--dark); margin-bottom: 3px; }
+.ann-spec { font-size: 10px; color: var(--spec); font-style: italic; line-height: 1.5; margin-bottom: 3px; }
+.ann-note { font-size: 10px; color: var(--muted); line-height: 1.55; }
+
+</style>
+</head>
+<body>
+
+<!-- ── PAGE HEADER ── -->
+<div class="page-header">
+  <div class="page-eyebrow">Hiviz SafetyPlatform · workspace.core</div>
+  <div class="page-title">Field IA — Insight Workspace</div>
+  <p class="page-desc">Information architecture storyboard for the field and mobile experience of workspace.core. Screens are arranged by role flow. Each screen is annotated with its spec authority. Design state and workspace gates shown where relevant. Not a visual design — intended as a direct bridge between spec and screen layout.</p>
+  <div class="page-meta">
+    <div class="meta-item"><strong>Workspace:</strong> workspace.core (always on)</div>
+    <div class="meta-item"><strong>Device context:</strong> Mobile (iOS/Android), offline-capable</div>
+    <div class="meta-item"><strong>Roles covered:</strong> Off-site manager · Supervisor</div>
+    <div class="meta-item"><strong>Analytics enrichment:</strong> Shown where active (workspace.analytics)</div>
+    <div class="meta-item"><strong>Version:</strong> May 2026</div>
+  </div>
+</div>
+
+<!-- ── LEGEND ── -->
+<div class="legend">
+  <div class="legend-group">
+    <div class="l-item"><div class="l-dot" style="background:rgba(220,38,38,0.5)"></div>barrier / critical</div>
+    <div class="l-item"><div class="l-dot" style="background:rgba(22,163,74,0.5)"></div>positive</div>
+    <div class="l-item"><div class="l-dot" style="background:rgba(180,83,9,0.5)"></div>weak / action</div>
+    <div class="l-item"><div class="l-dot" style="background:rgba(124,58,237,0.5)"></div>trend</div>
+    <div class="l-item"><div class="l-dot" style="background:rgba(3,105,161,0.5)"></div>signal (ms / fw)</div>
+  </div>
+  <div class="legend-sep"></div>
+  <div class="legend-group">
+    <div class="l-item"><div class="l-dot" style="background:#ccc"></div>ENRICHED = AI enrichment complete</div>
+    <div class="l-item"><div class="l-dot" style="background:#ccc"></div>SAVED = queued, not yet synced</div>
+    <div class="l-item"><div class="l-dot" style="background:#ccc"></div>OFFLINE = captured offline, sync pending</div>
+  </div>
+  <div class="legend-sep"></div>
+  <div class="legend-group">
+    <div class="l-item"><div class="l-dot" style="background:#9b8a5a"></div>✦ = AI-generated content</div>
+    <div class="l-item"><div class="l-dot" style="background:rgba(6,182,212,0.5)"></div>ATR = atrophy score (workspace.analytics)</div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════
+     SECTION 1 — MANAGER · VISIT PLANNING & EXECUTION
+     ══════════════════════════════════════════════════════ -->
+
+<div class="section">
+  <div class="section-label">
+    <span class="section-role">Manager · Off-site</span>
+    <span class="section-title">Visit planning &amp; execution</span>
+    <span class="section-note">Plans visits to multiple sites · executes visit · captures observations</span>
+  </div>
+  <div class="section-rule"></div>
+
+  <div class="flow-row">
+
+    <!-- SCREEN: MY VISITS -->
+    <div class="sw">
+      <div class="screen">
+        <div class="sh">
+          <div class="sh-row"><span class="sh-title">My Visits</span><span class="sh-btn">+ Plan</span></div>
+        </div>
+        <div class="sb">
+          <div class="s-tabs">
+            <div class="s-tab on">Active 1</div>
+            <div class="s-tab">Upcoming 2</div>
+            <div class="s-tab">Past 24</div>
+          </div>
+          <div style="height:5px"></div>
+          <div class="s-card live-border">
+            <div class="sh-live" style="margin-bottom:3px;"><div class="sh-live-dot"></div>LIVE · 1:18 ELAPSED</div>
+            <div class="s-card-title">Northgate Open Cut</div>
+            <div class="s-card-sub">Pilbara · Iron Ore West</div>
+            <div class="s-stats-row">
+              <div class="s-stat"><div class="s-stat-val">04</div><div class="s-stat-lbl">Obs</div></div>
+              <div class="s-stat"><div class="s-stat-val">02</div><div class="s-stat-lbl">Focus</div></div>
+              <div class="s-stat"><div class="s-stat-val">06</div><div class="s-stat-lbl">People</div></div>
+              <div class="s-stat"><div class="s-stat-val">62</div><div class="s-stat-lbl">ATR</div></div>
+            </div>
+          </div>
+          <div class="s-sec">Upcoming · 2</div>
+          <div class="s-row">
+            <div class="s-row-date"><div class="s-row-date-dow">THU</div><div class="s-row-date-day">08</div></div>
+            <div class="s-row-body">
+              <div class="s-row-title">Ridgeback Processing</div>
+              <div class="s-row-sub">Newman, WA · 09:30</div>
+              <div class="s-row-badges"><span class="badge b-ready">Briefing ready</span><span class="badge b-saved">ATR 64</span></div>
+            </div>
+          </div>
+          <div class="s-row">
+            <div class="s-row-date"><div class="s-row-date-dow">MON</div><div class="s-row-date-day">12</div></div>
+            <div class="s-row-body">
+              <div class="s-row-title">Sylvania Underground</div>
+              <div class="s-row-sub">Kalgoorlie · 07:00</div>
+              <div class="s-row-badges"><span class="badge b-pending">Pending T-48h</span><span class="badge b-saved">ATR 28</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="sn">
+          <div class="sn-item on">Visits</div>
+          <div class="sn-item">Sites</div>
+          <div class="sn-item">Insights</div>
+          <div class="sn-item">Profile</div>
+        </div>
+      </div>
+      <div class="ann">
+        <div class="ann-name">My Visits — Home</div>
+        <div class="ann-spec">workspaces/INSIGHT.md §Visit planning<br>features/SYSTEMIC-CAUSES.md §Atrophy score</div>
+        <div class="ann-note">Active tab shows live visit. Upcoming shows ATR and briefing state. ATR score from workspace.analytics — visible but not required. Briefing state: BRIEFING READY (T≥48h), PENDING T-48H (briefing not yet generated).</div>
+      </div>
+    </div>
+
+    <div class="connector">›</div>
+
+    <!-- SCREEN: PLAN — SITE SELECTION -->
+    <div class="sw">
+      <div class="screen">
+        <div class="sh">
+          <div class="sh-eyebrow">New Visit · Step 1 of 3</div>
+          <div class="sh-title">Where are you going?</div>
+        </div>
+        <div class="sb">
+          <div class="s-steps"><div class="s-step done"></div><div class="s-step"></div><div class="s-step"></div></div>
+          <div class="s-search"><span class="s-search-icon">🔍</span><span>Search worksites...</span></div>
+          <div class="s-sec">Recommended for you · 03</div>
+          <div class="s-row">
+            <div class="s-row-body">
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <span class="badge b-due">Due · 3w ago</span>
+                <span style="font-size:7px;color:var(--muted)">4h drive</span>
+              </div>
+              <div class="s-row-title" style="margin-top:2px;">Northgate Open Cut</div>
+              <div class="s-row-sub">Pilbara · Live action overdue · 2 signals</div>
+            </div>
+          </div>
+          <div class="s-row">
+            <div class="s-row-body">
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <span class="badge b-trend">Trend · last week</span>
+                <span style="font-size:7px;color:var(--muted)">5h drive</span>
+              </div>
+              <div class="s-row-title" style="margin-top:2px;">Brookman Pit 2</div>
+              <div class="s-row-sub">Pilbara · Pre-start trend · same crew</div>
+            </div>
+          </div>
+          <div class="s-row">
+            <div class="s-row-body">
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <span class="badge b-overdue">Overdue · 3w</span>
+                <span style="font-size:7px;color:var(--muted)">6h drive</span>
+              </div>
+              <div class="s-row-title" style="margin-top:2px;">Jewell Crusher</div>
+              <div class="s-row-sub">Pilbara · Cold for 3 weeks</div>
+            </div>
+          </div>
+          <div class="s-sec" style="margin-top:2px;">Your sites · 02</div>
+          <div class="s-row">
+            <div class="s-row-body">
+              <div class="s-row-title">Marlow Stockyard</div>
+              <div class="s-row-sub">Pilbara · Logistics</div>
+            </div>
+          </div>
+          <div class="s-ctas"><div class="s-cta cta-dark cta-full">Continue →</div></div>
+        </div>
+      </div>
+      <div class="ann">
+        <div class="ann-name">Plan — Site Selection</div>
+        <div class="ann-spec">workspaces/INSIGHT.md §Visit planning<br>workspaces/SYSTEMIC-MAP.md §Worksite decoration</div>
+        <div class="ann-note">Sites sorted by need. Decoration signals (DUE, TREND, OVERDUE + reason text) come from workspace.analytics. Without analytics: list shows sites with last visit date only. Scoped to manager's purview (org hierarchy). Drive time shown as planning aid.</div>
+      </div>
+    </div>
+
+    <div class="connector">›</div>
+
+    <!-- SCREEN: PLAN — DATE -->
+    <div class="sw">
+      <div class="screen">
+        <div class="sh">
+          <div class="sh-eyebrow">New Visit · Step 2 of 3</div>
+          <div class="sh-title">When are you going?</div>
+        </div>
+        <div class="sb">
+          <div class="s-steps"><div class="s-step done"></div><div class="s-step done"></div><div class="s-step"></div></div>
+          <div class="s-card">
+            <div class="s-card-title">Northgate Open Cut</div>
+            <div class="s-card-sub">Pilbara · Iron Ore West · 4h drive</div>
+          </div>
+          <div class="s-ai" style="background:#f0f4ff;border-color:#c5d3f5;">
+            <div class="s-ai-lbl" style="color:#3b5bba;">◎ Last visitor's note · J. Dolan · 3 weeks ago</div>
+            <div class="s-ai-text">"Pre-start area congested at 06:00 changeover. Get there before handover starts if you can."</div>
+          </div>
+          <div class="s-field">
+            <div class="s-field-lbl">Date</div>
+            <div class="s-field-ph">Select date...</div>
+          </div>
+          <div class="s-field">
+            <div class="s-field-lbl">Time</div>
+            <div class="s-field-ph">Select arrival time...</div>
+          </div>
+          <div class="s-field">
+            <div class="s-field-lbl">Notes (optional)</div>
+            <div class="s-field-ph">What's the purpose of this visit?</div>
+          </div>
+          <div class="s-ctas"><div class="s-cta cta-dark cta-full">Confirm visit →</div></div>
+        </div>
+      </div>
+      <div class="ann">
+        <div class="ann-name">Plan — Date &amp; Notes</div>
+        <div class="ann-spec">workspaces/INSIGHT.md §Visit planning<br>workspaces/INSIGHT.md §Last visitor note</div>
+        <div class="ann-note">Previous visitor's note (read-only) surfaces from the site record — written by whoever last closed a visit here. Creates visit_plan record with status = planned. Briefing pack generation queues at T-48h before planned_date. Manager's own notes field is freeform — not AI-processed, saved to the site on visit close and shown to the next visitor.</div>
+      </div>
+    </div>
+
+    <div class="connector">›</div>
+
+    <!-- SCREEN: BRIEFING -->
+    <div class="sw">
+      <div class="screen">
+        <div class="sh">
+          <div class="sh-eyebrow" style="color:rgba(255,255,255,0.5)">T-21:30 · Tomorrow 09:30</div>
+          <div class="sh-row"><span class="sh-title">Ridgeback Processing</span></div>
+          <div class="sh-sub">Newman, WA · 4h drive</div>
+        </div>
+        <div class="sb">
+          <div style="display:flex;gap:8px;font-size:7.5px;color:var(--muted);">
+            <span>26°C</span><span>Shift 1/2</span><span>ATR 64</span>
+          </div>
+          <div class="s-ai">
+            <div class="s-ai-lbl">✦ What you should know</div>
+            <div class="s-ai-text">Pre-start checks slipping on heavy vehicles across 3 sites. Open action on Pit 3 berm overdue. Worth opening with the heat plan — peak forecast 32°C.</div>
+          </div>
+          <div class="s-sec">Focus · 03</div>
+          <div class="s-focus">
+            <div class="s-focus-n">01</div>
+            <div class="s-focus-body">
+              <div style="margin-bottom:2px;"><span class="badge b-trend">Trend</span></div>
+              <div class="s-focus-title">Pre-start check compliance</div>
+              <div class="s-focus-sub">6 obs · 3 sites · enquiry running</div>
+            </div>
+          </div>
+          <div class="s-focus">
+            <div class="s-focus-n">02</div>
+            <div class="s-focus-body">
+              <div style="margin-bottom:2px;"><span class="badge b-signal">Signal</span></div>
+              <div class="s-focus-title">Heat plan — work-stop</div>
+              <div class="s-focus-sub">Mgmt Sys flagged · 2 thermal obs</div>
+            </div>
+          </div>
+          <div class="s-focus">
+            <div class="s-focus-n">03</div>
+            <div class="s-focus-body">
+              <div style="margin-bottom:2px;"><span class="badge b-action">Action</span></div>
+              <div class="s-focus-title">Berm height — Pit 3</div>
+              <div class="s-focus-sub">1/3 complete · J. Morrow</div>
+            </div>
+          </div>
+          <div class="s-sec">On site · 06</div>
+          <div class="s-people">
+            <div class="s-avatar">JM</div><div class="s-avatar">KL</div><div class="s-avatar">TR</div><div class="s-avatar">+3</div>
+            <div class="s-people-lbl">J. Morrow, K. Lee +4</div>
+          </div>
+          <div class="s-ctas">
+            <div class="s-cta cta-light">Reschedule</div>
+            <div class="s-cta cta-dark">Start visit →</div>
+          </div>
+        </div>
+      </div>
+      <div class="ann">
+        <div class="ann-name">Visit Briefing</div>
+        <div class="ann-spec">features/VISIT-BRIEFING.md<br>workspaces/SYSTEMIC-MAP.md §Visit briefing pack</div>
+        <div class="ann-note">Generated 48h before visit. AI narrative (✦) from visit_briefing.generate job. Focus areas sourced from worksite intelligence: TREND (observation patterns), SIGNAL (FW/MS signals), ACTION (open corrective actions). "Mgmt Sys flagged" = workspace.ms contributing. "Enquiry running" shows active enquiry against a focus area. People pulled from site roster.</div>
+      </div>
+    </div>
+
+    <div class="connector">›</div>
+
+    <!-- SCREEN: ACTIVE VISIT -->
+    <div class="sw">
+      <div class="screen">
+        <div class="sh">
+          <div class="sh-row">
+            <div>
+              <div class="sh-live"><div class="sh-live-dot"></div>LIVE · 1:18</div>
+              <div class="sh-title" style="margin-top:1px;">Northgate Open Cut</div>
+            </div>
+            <span class="sh-btn-ghost">← Back</span>
+          </div>
+        </div>
+        <div class="sb">
+          <div class="s-sec">Captured today · 04</div>
+          <div class="s-obs">
+            <div class="s-obs-left">
+              <div style="display:flex;gap:3px;margin-bottom:2px;align-items:center;">
+                <span class="badge b-barrier">Barrier</span>
+                <span style="font-size:7px;color:var(--muted)">09:14</span>
+                <span class="badge b-enriched" style="margin-left:auto;">Enriched</span>
+              </div>
+              <div class="s-obs-title">Spotter not in position</div>
+              <div class="s-obs-sub">Pit 3 · stopped the work</div>
+            </div>
+          </div>
+          <div class="s-obs">
+            <div class="s-obs-left">
+              <div style="display:flex;gap:3px;margin-bottom:2px;align-items:center;">
+                <span class="badge b-positive">Positive</span>
+                <span style="font-size:7px;color:var(--muted)">08:58</span>
+                <span class="badge b-saved" style="margin-left:auto;">Saved</span>
+              </div>
+              <div class="s-obs-title">Pre-start done thoroughly</div>
+              <div class="s-obs-sub">Excavator 04 · K. Lee</div>
+            </div>
+          </div>
+          <div class="s-obs">
+            <div class="s-obs-left">
+              <div style="display:flex;gap:3px;margin-bottom:2px;align-items:center;">
+                <span class="badge b-weak">Weak</span>
+                <span style="font-size:7px;color:var(--muted)">08:51</span>
+                <span class="badge b-offline" style="margin-left:auto;">Offline</span>
+              </div>
+              <div class="s-obs-title">Heat plan — water station</div>
+              <div class="s-obs-sub">Pit 2 · 1 of 2 stocked</div>
+            </div>
+          </div>
+          <div class="s-obs">
+            <div class="s-obs-left">
+              <div style="display:flex;gap:3px;margin-bottom:2px;align-items:center;">
+                <span class="badge b-positive">Positive</span>
+                <span style="font-size:7px;color:var(--muted)">08:46</span>
+                <span class="badge b-enriched" style="margin-left:auto;">Enriched</span>
+              </div>
+              <div class="s-obs-title">Toolbox covered key risks</div>
+              <div class="s-obs-sub">Pre-shift · J. Morrow</div>
+            </div>
+          </div>
+          <div class="s-ctas"><div class="s-cta cta-dark cta-full">● Capture observation</div></div>
+        </div>
+      </div>
+      <div class="ann">
+        <div class="ann-name">Active Visit — Execution</div>
+        <div class="ann-spec">workspaces/INSIGHT.md §Visit execution<br>features/OBSERVATION-CAPTURE.md Stage 1</div>
+        <div class="ann-note">visit_plan.status = active on Start Visit. Observations captured here are linked via observation.visit_plan_id. Only manager's observations are visit-linked. Sync states: ENRICHED (AI complete), SAVED (queued, online), OFFLINE (captured offline — see offline screen). Capture observation CTA is persistent throughout visit.</div>
+      </div>
+    </div>
+
+    <div class="connector">›</div>
+
+    <!-- SCREEN: CLOSE VISIT -->
+    <div class="sw">
+      <div class="screen">
+        <div class="sh">
+          <div class="sh-eyebrow">Visit complete</div>
+          <div class="sh-title">Northgate Open Cut</div>
+          <div class="sh-sub">Today · 4h 12m on site</div>
+        </div>
+        <div class="sb">
+          <div class="s-sec">This visit</div>
+          <div class="s-fact"><div class="s-fact-lbl">Observations</div><div class="s-fact-val">4 captured</div></div>
+          <div class="s-fact"><div class="s-fact-lbl">Focus areas</div><div class="s-fact-val">2 of 3 covered</div></div>
+          <div class="s-fact"><div class="s-fact-lbl">Actions created</div><div class="s-fact-val">1</div></div>
+          <div style="height:4px"></div>
+          <div class="s-field" style="flex:1;">
+            <div class="s-field-lbl">Notes for next visitor</div>
+            <div class="s-field-ph">What should the next person know before they arrive?</div>
+          </div>
+          <div style="font-size:7.5px;color:var(--muted);margin-top:2px;line-height:1.5;">Note is saved to the site. Surfaces in visit planning for anyone planning a future visit here.</div>
+          <div class="s-ctas"><div class="s-cta cta-dark cta-full">Close visit →</div></div>
+        </div>
+      </div>
+      <div class="ann">
+        <div class="ann-name">Close Visit</div>
+        <div class="ann-spec">workspaces/INSIGHT.md §Visit completion<br>features/SYSTEMIC-CAUSES.md §Visit Completion</div>
+        <div class="ann-note">visit_plan.status = complete. Notes for next visitor persist on the site record and surface in Step 1 of the plan flow. Atrophy score resets manager_visit_recency signal. AI visit summary generation queues on close (workspace.analytics).</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="flow-divider"></div>
+
+
+<!-- ══════════════════════════════════════════════════════
+     SECTION 2 — SUPERVISOR · ON-SITE CAPTURE FLOW
+     ══════════════════════════════════════════════════════ -->
+
+<div class="section">
+  <div class="section-label">
+    <span class="section-role">Supervisor · On-site</span>
+    <span class="section-title">Site context &amp; observation capture</span>
+    <span class="section-note">Always on-site at a single worksite · voice-first capture · files and syncs</span>
+  </div>
+  <div class="section-rule"></div>
+
+  <div class="flow-row">
+
+    <!-- SCREEN: SITE VIEW -->
+    <div class="sw">
+      <div class="screen">
+        <div class="sh">
+          <div class="sh-row">
+            <div>
+              <div style="font-size:7.5px;color:rgba(255,255,255,0.5);margin-bottom:1px;">● ON SITE NOW</div>
+              <div class="sh-title">Northgate Open Cut</div>
+              <div class="sh-sub">Pilbara · Iron Ore West</div>
+            </div>
+          </div>
+        </div>
+        <div class="sb">
+          <div class="s-statbar">
+            <div class="s-statbar-item"><div class="s-statbar-val">14</div><div class="s-statbar-lbl">Visits</div></div>
+            <div class="s-statbar-item"><div class="s-statbar-val">Today</div><div class="s-statbar-lbl">Last obs</div></div>
+            <div class="s-statbar-item"><div class="s-statbar-val">62</div><div class="s-statbar-lbl">ATR</div></div>
+          </div>
+          <div class="s-ai">
+            <div class="s-ai-lbl">✦ Worth knowing</div>
+            <div class="s-ai-text">Iron-ore open cut, 12 active faces. Day-shift handover at 06:00 is where most signals cluster — bring your boots and a coffee.</div>
+          </div>
+          <div class="s-sec">Open focus · 03</div>
+          <div class="s-focus">
+            <div class="s-focus-n">01</div>
+            <div class="s-focus-body">
+              <div style="margin-bottom:1px;"><span class="badge b-trend">Trend</span></div>
+              <div class="s-focus-title">Pre-start check compliance</div>
+              <div class="s-focus-sub">6 obs · enquiry running</div>
+            </div>
+          </div>
+          <div class="s-focus">
+            <div class="s-focus-n">02</div>
+            <div class="s-focus-body">
+              <div style="margin-bottom:1px;"><span class="badge b-signal">Signal</span></div>
+              <div class="s-focus-title">Heat plan — work-stop</div>
+              <div class="s-focus-sub">2 thermal obs this week</div>
+            </div>
+          </div>
+          <div class="s-focus">
+            <div class="s-focus-n">03</div>
+            <div class="s-focus-body">
+              <div style="margin-bottom:1px;"><span class="badge b-action">Action</span></div>
+              <div class="s-focus-title">Berm height — Pit 3</div>
+              <div class="s-focus-sub">1/3 complete · J. Morrow</div>
+            </div>
+          </div>
+          <div class="s-ctas"><div class="s-cta cta-dark cta-full">● Capture observation</div></div>
+        </div>
+        <div class="sn">
+          <div class="sn-item on">Site</div>
+          <div class="sn-item">Insights</div>
+          <div class="sn-item">Profile</div>
+        </div>
+      </div>
+      <div class="ann">
+        <div class="ann-name">Site View</div>
+        <div class="ann-spec">workspaces/INSIGHT.md §Site visit (supervisor context)<br>workspaces/SYSTEMIC-MAP.md §Worksite decoration</div>
+        <div class="ann-note">Supervisor's home screen — scoped to their worksite. ATR and "Worth knowing" narrative from workspace.analytics. Focus areas surface the same intelligence as the manager briefing. Supervisor nav is simplified vs manager (no Visits tab). Capture CTA is the primary action.</div>
+      </div>
+    </div>
+
+    <div class="connector">›</div>
+
+    <!-- SCREEN: CAPTURE — VOICE -->
+    <div class="sw">
+      <div class="screen">
+        <div class="sh" style="background:#111;">
+          <div class="s-voice">
+            <div class="s-voice-rec"><div class="s-voice-dot"></div><div class="s-voice-lbl">REC</div></div>
+            <div class="s-voice-loc">Northgate · Pit 3</div>
+            <div class="s-voice-timer">00:42</div>
+          </div>
+        </div>
+        <div class="sb">
+          <div class="s-msg">
+            <div class="s-msg-who you">You · Voice 0:14</div>
+            <div class="s-msg-text">Excavator was reversing near the haul road and the spotter had walked off to talk to the loader operator. Operator kept reversing before I called it.</div>
+          </div>
+          <div class="s-msg">
+            <div class="s-msg-who ai">Hiviz</div>
+            <div class="s-msg-text">Got it. Did you stop the work?</div>
+          </div>
+          <div class="s-msg">
+            <div class="s-msg-who you">You</div>
+            <div class="s-msg-text">Yes, called it on the radio and walked over.</div>
+          </div>
+          <div class="s-msg">
+            <div class="s-msg-who ai">Hiviz</div>
+            <div class="s-msg-text">Anyone in the path of the excavator at the time?</div>
+          </div>
+          <div class="s-msg">
+            <div class="s-msg-who you">You</div>
+            <div class="s-msg-text">No, but the haul road was active so it was close.</div>
+          </div>
+          <div class="s-captured">All context captured</div>
+          <div class="s-ctas" style="margin-top:auto;">
+            <div class="s-cta cta-light">📷 Photo</div>
+            <div class="s-cta cta-dark">Review →</div>
+          </div>
+        </div>
+      </div>
+      <div class="ann">
+        <div class="ann-name">Capture — Voice Conversation</div>
+        <div class="ann-spec">features/OBSERVATION-CAPTURE.md Stage 1<br>workspaces/INSIGHT.md §Observation capture</div>
+        <div class="ann-note">capture.observation job. Supervisor speaks; AI asks clarifying questions to extract signal_type, energy_type, barrier_assessment, location context. "All context captured" fires when enrichment inputs are sufficient. Photo attachment optional. Typing also supported. Proceeds to Review (Confirm screen).</div>
+      </div>
+    </div>
+
+    <div class="connector">›</div>
+
+    <!-- SCREEN: CONFIRM -->
+    <div class="sw">
+      <div class="screen">
+        <div class="sh">
+          <div class="sh-row"><span class="sh-title">Review · File</span><span class="sh-btn-ghost">Edit</span></div>
+        </div>
+        <div class="sb">
+          <div class="s-summ">
+            <div class="s-summ-lbl">Summary</div>
+            <div class="s-summ-text">A control wasn't in place — you stopped it.</div>
+          </div>
+          <div class="s-fact"><div class="s-fact-lbl">When</div><div class="s-fact-val">Today 09:14 · Pit 3</div></div>
+          <div class="s-fact"><div class="s-fact-lbl">Work</div><div class="s-fact-val">Heavy vehicle</div></div>
+          <div class="s-fact"><div class="s-fact-lbl">What</div><div class="s-fact-val"><span class="fact-dot dot-red"></span>Control not in place</div></div>
+          <div class="s-fact"><div class="s-fact-lbl">Action</div><div class="s-fact-val"><span class="fact-dot dot-green"></span>Stopped the work</div></div>
+          <div class="s-fact"><div class="s-fact-lbl">Potential</div><div class="s-fact-val">Serious</div></div>
+          <div class="s-fact"><div class="s-fact-lbl">Similar</div><div class="s-fact-val">3 in 30 days · Northgate</div></div>
+          <div class="s-impact">
+            <div class="s-impact-lbl">Impact · Enquiry strengthened</div>
+            <div class="s-impact-text">Pre-start &amp; spotter discipline — now 3 of 5 needed to escalate to Improve.</div>
+          </div>
+          <div class="s-ctas">
+            <div class="s-cta cta-light">Add detail</div>
+            <div class="s-cta cta-dark">File · Sync when online</div>
+          </div>
+        </div>
+      </div>
+      <div class="ann">
+        <div class="ann-name">Confirm &amp; File</div>
+        <div class="ann-spec">features/OBSERVATION-CAPTURE.md Stage 1–2<br>features/CRITICAL-INSIGHT.md §Trigger sources</div>
+        <div class="ann-note">AI-structured summary of the conversation. Supervisor confirms or edits before filing. SIMILAR shows pattern context from observation pool — closes the feedback loop between field action and platform intelligence. IMPACT shows contribution to active enquiry or insight threshold. "Sync when online" = offline_fallback active. Filed observations enter enrichment pipeline on sync.</div>
+      </div>
+    </div>
+
+    <div class="connector">›</div>
+
+    <!-- SCREEN: OFFLINE STATE -->
+    <div class="sw">
+      <div class="screen">
+        <div class="sh">
+          <div class="sh-row">
+            <div>
+              <div style="font-size:7.5px;color:rgba(255,255,255,0.5);margin-bottom:1px;">● ON SITE NOW</div>
+              <div class="sh-title">Northgate Open Cut</div>
+            </div>
+            <span style="font-size:7.5px;font-weight:700;background:#dc2626;color:white;padding:2px 6px;border-radius:2px;">OFFLINE</span>
+          </div>
+        </div>
+        <div class="sb">
+          <div class="s-offline">
+            <div class="s-offline-title">No connection</div>
+            <div class="s-offline-count">2</div>
+            <div class="s-offline-sub">observations queued<br>Will sync automatically when online</div>
+          </div>
+          <div class="s-sec" style="margin-top:4px;">Queued</div>
+          <div class="s-obs">
+            <div class="s-obs-left">
+              <div style="display:flex;gap:3px;margin-bottom:2px;">
+                <span class="badge b-barrier">Barrier</span>
+                <span style="font-size:7px;color:var(--muted)">09:14</span>
+                <span class="badge b-offline" style="margin-left:auto;">Queued</span>
+              </div>
+              <div class="s-obs-title">Spotter not in position</div>
+              <div class="s-obs-sub">Pit 3 · saved to device</div>
+            </div>
+          </div>
+          <div class="s-obs">
+            <div class="s-obs-left">
+              <div style="display:flex;gap:3px;margin-bottom:2px;">
+                <span class="badge b-weak">Weak</span>
+                <span style="font-size:7px;color:var(--muted)">08:51</span>
+                <span class="badge b-offline" style="margin-left:auto;">Queued</span>
+              </div>
+              <div class="s-obs-title">Heat plan — water station</div>
+              <div class="s-obs-sub">Pit 2 · saved to device</div>
+            </div>
+          </div>
+          <div style="font-size:7.5px;color:var(--muted);margin-top:4px;line-height:1.55;">Capture continues normally offline. Enrichment and routing run after sync.</div>
+          <div class="s-ctas"><div class="s-cta cta-dark cta-full">● Capture observation</div></div>
+        </div>
+        <div class="sn">
+          <div class="sn-item on">Site</div>
+          <div class="sn-item">Insights</div>
+          <div class="sn-item">Profile</div>
+        </div>
+      </div>
+      <div class="ann">
+        <div class="ann-name">Offline State</div>
+        <div class="ann-spec">workspaces/INSIGHT.md §Offline observation fallback<br>Capability gate: observation.offline_fallback (default: on)</div>
+        <div class="ann-note">Observations queue to local SQLite (Capacitor). OFFLINE badge appears on queued items. Site view remains functional — focus areas, worth knowing, and previously synced data remain accessible. Capture CTA always available. Enrichment (observation.enrich) runs after reconnect and sync.</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="flow-divider"></div>
+
+
+<!-- ══════════════════════════════════════════════════════
+     SECTION 3 — MANAGER · INTELLIGENCE REVIEW (FIELD)
+     ══════════════════════════════════════════════════════ -->
+
+<div class="section">
+  <div class="section-label">
+    <span class="section-role">Manager · Field intelligence</span>
+    <span class="section-title">Insight review &amp; support</span>
+    <span class="section-note">Manager reviews AI-generated insights · supports for safety team action · tracks progress from the field</span>
+  </div>
+  <div class="section-rule"></div>
+
+  <div class="flow-row">
+
+    <!-- SCREEN: INSIGHTS LIST -->
+    <div class="sw">
+      <div class="screen">
+        <div class="sh">
+          <div class="sh-row">
+            <span class="sh-title">Insights</span>
+            <span class="sh-btn-ghost">My sites ▾</span>
+          </div>
+        </div>
+        <div class="sb">
+          <div class="s-hero">
+            <div class="s-hero-count">2 insights</div>
+            <div style="font-size:9px;font-weight:700;color:var(--c-awaiting);">need your input.</div>
+            <div class="s-hero-sub">Generated from 184 observations · your sites</div>
+          </div>
+          <div class="s-tabs">
+            <div class="s-tab on">For review 2</div>
+            <div class="s-tab">In action 2</div>
+            <div class="s-tab">Closed 2</div>
+          </div>
+          <div style="height:4px"></div>
+          <div class="s-insight">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <span class="badge b-awaiting">Awaiting endorsement</span>
+              <span style="font-size:7px;color:var(--muted);">Pre-start checks</span>
+            </div>
+            <div class="s-insight-title">Pre-start checks slipping during shift handovers</div>
+            <div class="s-insight-desc">7 obs · 14 days · 06:00–07:00 · loader and dozer crews · coincides with last roster change</div>
+            <div class="s-insight-sites">NORTHGATE · MARLOW · BROOKMAN</div>
+            <div class="s-ctas">
+              <div class="s-cta cta-dark">Support this</div>
+              <div class="s-cta cta-light">Dismiss</div>
+            </div>
+          </div>
+          <div class="s-insight" style="margin-top:4px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <span class="badge b-awaiting">Awaiting endorsement</span>
+              <span style="font-size:7px;color:var(--muted);">Heat plan</span>
+            </div>
+            <div class="s-insight-title">Heat plan compliance dropping past 14:00</div>
+            <div class="s-insight-desc">5 obs · crews working through hydration breaks · 38°C+ afternoons</div>
+            <div class="s-insight-sites">NORTHGATE · COOLINGA</div>
+            <div class="s-ctas">
+              <div class="s-cta cta-dark">Support this</div>
+              <div class="s-cta cta-light">Dismiss</div>
+            </div>
+          </div>
+        </div>
+        <div class="sn">
+          <div class="sn-item">Visits</div>
+          <div class="sn-item">Sites</div>
+          <div class="sn-item on">Insights</div>
+          <div class="sn-item">Profile</div>
+        </div>
+      </div>
+      <div class="ann">
+        <div class="ann-name">Insights — For Review</div>
+        <div class="ann-spec">features/CRITICAL-INSIGHT.md §Human review gate<br>workspaces/INSIGHT.md §Insight human review gate</div>
+        <div class="ann-note">Insights generated by algorithm trigger (pattern threshold) or critical_observation trigger. Scoped to manager's sites via "My sites" filter. For review = status awaiting input. In action = supported, safety team progressing. Closed = complete. "Support this" signals to the safety team that this insight has field backing — they own the improve step. Dismiss marks as rejected with optional reason. FW classification queues on support.</div>
+      </div>
+    </div>
+
+    <div class="connector">›</div>
+
+    <!-- SCREEN: INSIGHT DETAIL -->
+    <div class="sw">
+      <div class="screen">
+        <div class="sh">
+          <div class="sh-row"><span class="sh-btn-ghost">← Back</span><span class="badge b-awaiting" style="font-size:7.5px;">Awaiting endorsement</span></div>
+          <div class="sh-title" style="margin-top:4px;">Pre-start checks slipping during shift handovers</div>
+        </div>
+        <div class="sb">
+          <div class="s-ai">
+            <div class="s-ai-lbl">✦ Pattern</div>
+            <div class="s-ai-text">7 observations over 14 days, concentrated 06:00–07:00, loader and dozer crews across Northgate, Marlow, and Brookman. Coincides with the last roster change.</div>
+          </div>
+          <div class="s-ai" style="margin-top:0;">
+            <div class="s-ai-lbl">✦ Likely cause</div>
+            <div class="s-ai-text">Shift handover pressure — incoming crews arriving late to pre-start. Likely systemic, not individual.</div>
+          </div>
+          <div class="s-sec">Contributing observations · 7</div>
+          <div class="s-obs">
+            <div class="s-obs-left">
+              <div style="display:flex;gap:3px;margin-bottom:1px;"><span class="badge b-barrier">Barrier</span><span style="font-size:7px;color:var(--muted)">Northgate</span></div>
+              <div class="s-obs-title">Pre-start skipped on Excavator 04</div>
+            </div>
+          </div>
+          <div class="s-obs">
+            <div class="s-obs-left">
+              <div style="display:flex;gap:3px;margin-bottom:1px;"><span class="badge b-weak">Weak</span><span style="font-size:7px;color:var(--muted)">Marlow</span></div>
+              <div class="s-obs-title">Pre-start rushed — operator arrived late</div>
+            </div>
+          </div>
+          <div style="font-size:7.5px;color:var(--muted);padding:2px 0;">+ 5 more observations</div>
+          <div style="font-size:7.5px;color:var(--muted);">Sites affected: 3 · Northgate, Marlow, Brookman</div>
+          <div class="s-ctas">
+            <div class="s-cta cta-dark cta-full">Support this insight →</div>
+          </div>
+        </div>
+      </div>
+      <div class="ann">
+        <div class="ann-name">Insight Detail</div>
+        <div class="ann-spec">features/CRITICAL-INSIGHT.md §Review<br>workspaces/INSIGHT.md §Insight human review gate</div>
+        <div class="ann-note">Pattern summary and likely cause from insight generation (AI draft). Contributing observations listed. "Support this insight" signals confidence to the safety team — moves insight to In action status. Safety team owns the improve step: they create corrective actions, assign, and select target sites. Manager can view progress from the field. FW classification (fw_classify) queues on support. Dismiss marks insight as rejected with optional reason.</div>
+      </div>
+    </div>
+
+    <div class="connector">›</div>
+
+    <!-- SCREEN: INSIGHT PROGRESS -->
+    <div class="sw">
+      <div class="screen">
+        <div class="sh">
+          <div class="sh-row"><span class="sh-btn-ghost">← Back</span><span class="badge b-signal" style="font-size:7.5px;">In action</span></div>
+          <div class="sh-title" style="margin-top:4px;">Pre-start checks — shift handovers</div>
+        </div>
+        <div class="sb">
+          <div class="s-card" style="background:#f0f4ff;border-color:#c5d3f5;">
+            <div style="font-size:7.5px;font-weight:700;color:#3b5bba;margin-bottom:2px;">You supported this insight</div>
+            <div style="font-size:7.5px;color:#555;">Safety team is progressing the improve step. You'll be notified when actions are assigned to your sites.</div>
+          </div>
+          <div class="s-sec">Actions · 2 open</div>
+          <div class="s-obs">
+            <div class="s-obs-left">
+              <div style="display:flex;gap:3px;margin-bottom:1px;align-items:center;">
+                <span class="badge b-action">Open</span>
+                <span style="font-size:7px;color:var(--muted)">Due Fri</span>
+              </div>
+              <div class="s-obs-title">Brief supervisors — pre-start at handover</div>
+              <div class="s-obs-sub">Assigned: R. Patel · Northgate, Marlow, Brookman</div>
+            </div>
+          </div>
+          <div class="s-obs">
+            <div class="s-obs-left">
+              <div style="display:flex;gap:3px;margin-bottom:1px;align-items:center;">
+                <span class="badge b-action">Open</span>
+                <span style="font-size:7px;color:var(--muted)">Due next week</span>
+              </div>
+              <div class="s-obs-title">Verify compliance — first shift this week</div>
+              <div class="s-obs-sub">Assigned: K. Walsh · Northgate</div>
+            </div>
+          </div>
+          <div class="s-sec" style="margin-top:2px;">Safety team</div>
+          <div class="s-people">
+            <div class="s-avatar">RP</div><div class="s-avatar">KW</div>
+            <div class="s-people-lbl">R. Patel · K. Walsh (safety)</div>
+          </div>
+          <div style="font-size:7.5px;color:var(--muted);margin-top:4px;line-height:1.5;">Observations at your sites continue to feed this insight. You'll see the status update here as actions are completed.</div>
+        </div>
+      </div>
+      <div class="ann">
+        <div class="ann-name">Insight Progress</div>
+        <div class="ann-spec">features/CRITICAL-INSIGHT.md §Improve step<br>workspaces/INSIGHT.md §Insight progress (manager view)</div>
+        <div class="ann-note">Manager's view after supporting an insight. Safety team owns the improve step — they create corrective actions, assign personnel, and select target sites. Manager sees the actions created, who is responsible, and progress. Read-only from manager's perspective. Ongoing observations at manager's sites continue to feed the insight's evidence pool. FW classification runs asynchronously in the background.</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>
