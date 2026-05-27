@@ -154,9 +154,15 @@ Return JSON:
   "pattern_summary_basis": "1 sentence. Which observations most strongly evidence this pattern.",
   "likely_systemic_cause": "1 sentence. The underlying condition probably driving this pattern.",
   "likely_systemic_cause_rationale": "1 sentence. What points to this cause rather than others.",
-  "recommended_action": "1 sentence. The change that would most directly address the cause.",
-  "recommended_action_rationale": "1 sentence. Why this addresses the root cause, not a symptom.",
+  "recommended_actions": [
+    {"step": 1, "action": "Most immediate action — what must happen first."},
+    {"step": 2, "action": "Follow-up action — only include if genuinely sequential, not parallel."}
+  ],
+  "recommended_actions_note": "1-3 steps maximum. Steps must be genuinely sequential — each depends on or follows the previous. Do not split one action into sub-tasks. Do not list parallel actions as separate steps.",
+  "recommended_action_rationale": "1 sentence. Why these steps address the root cause rather than a symptom.",
   "toolbox_narrative": "4-6 sentences. Written so a supervisor can read it aloud to their crew. Plain English. Present tense. No jargon. No blame. Opens with what the crew needs to know today.",
+  "recommended_dissemination_scope": "affected_sites | work_type_in_scope | full_scope. This is a site-level pattern — default to affected_sites unless the cause is structural to this work type at any site, in which case recommend work_type_in_scope.",
+  "recommended_dissemination_rationale": "1 sentence. Why this scope is the right target for the corrective action.",
   "escalate_to_systemic": false,
   "escalation_rationale": null
 }
@@ -200,9 +206,15 @@ Return JSON:
   "pattern_summary_basis": "1 sentence. Which observations or signal types most strongly evidence this as a systemic rather than local pattern.",
   "likely_systemic_cause": "1 sentence. The shared underlying condition that probably explains why this is appearing across sites.",
   "likely_systemic_cause_rationale": "1 sentence. What points to a shared cause rather than coincidental local factors.",
-  "recommended_action": "1 sentence. The change most likely to address the systemic cause across all affected sites.",
-  "recommended_action_rationale": "1 sentence. Why this addresses the root cause, not a symptom.",
+  "recommended_actions": [
+    {"step": 1, "action": "Most immediate action — what must happen first across all affected sites."},
+    {"step": 2, "action": "Follow-up action — only include if genuinely sequential, not parallel."}
+  ],
+  "recommended_actions_note": "1-3 steps maximum. Steps must be genuinely sequential — each depends on or follows the previous. Do not split one action into sub-tasks. Do not list parallel actions as separate steps.",
+  "recommended_action_rationale": "1 sentence. Why these steps address the root cause rather than a symptom.",
   "toolbox_narrative": "4-6 sentences. Written so a supervisor can read it aloud to any crew doing this work type. Plain English. Present tense. No jargon. No blame. Opens with what crews across the region need to know today.",
+  "recommended_dissemination_scope": "affected_sites | work_type_in_scope | full_scope. This is a cross-site pattern — default to work_type_in_scope since the pattern has already crossed sites for this work type. Use full_scope only if the cause is role or practice based rather than work-type specific.",
+  "recommended_dissemination_rationale": "1 sentence. Why this scope is the right target for the corrective action.",
   "escalate_to_systemic": false,
   "escalation_rationale": null
 }
@@ -248,9 +260,15 @@ Return JSON:
   "pattern_summary_basis": "1 sentence. Which specific details of the observation most strongly support this framing.",
   "likely_systemic_cause": "1 sentence. The underlying control gap this observation most likely reflects.",
   "likely_systemic_cause_rationale": "1 sentence. What in the observation points to this cause rather than a one-off error.",
-  "recommended_action": "1 sentence. The most important check or action for other crews working this type.",
-  "recommended_action_rationale": "1 sentence. Why this directly addresses the identified control gap.",
+  "recommended_actions": [
+    {"step": 1, "action": "Most urgent action — immediate check or intervention for crews doing this work now."},
+    {"step": 2, "action": "Follow-up action — only include if genuinely sequential, not parallel."}
+  ],
+  "recommended_actions_note": "1-3 steps maximum. Steps must be genuinely sequential — each depends on or follows the previous. A single critical observation often warrants only one step. Do not list parallel actions as separate steps.",
+  "recommended_action_rationale": "1 sentence. Why these steps directly address the identified control gap.",
   "toolbox_narrative": "4-6 sentences. Written for a supervisor to read aloud to their crew. Plain English. Present tense. No jargon. No blame. Opens with what crews need to know and check today.",
+  "recommended_dissemination_scope": "affected_sites | work_type_in_scope | full_scope. This is a single critical observation — default to affected_sites for immediate action. Recommend work_type_in_scope if the control gap is structural to this work type (i.e. likely present wherever this work runs, not just where it was observed).",
+  "recommended_dissemination_rationale": "1 sentence. Why this scope is the right target for the corrective action.",
   "escalate_to_systemic": false,
   "escalation_rationale": null
 }
@@ -261,16 +279,27 @@ Return JSON:
 ### Stage 1 Output Storage
 
 ```sql
-critical_insight.pattern_summary             TEXT
-critical_insight.pattern_summary_basis       TEXT    -- rationale fields stored separately; not surfaced in UI by default
-critical_insight.likely_systemic_cause       TEXT
-critical_insight.likely_systemic_cause_rationale TEXT
-critical_insight.recommended_action          TEXT
-critical_insight.recommended_action_rationale TEXT
-critical_insight.toolbox_narrative           TEXT
-critical_insight.escalate_to_systemic        BOOLEAN
-critical_insight.escalation_rationale        TEXT
-critical_insight.ai_generated_at             TIMESTAMPTZ
+critical_insight.pattern_summary                    TEXT
+critical_insight.pattern_summary_basis              TEXT    -- rationale fields stored separately; not surfaced in UI by default
+critical_insight.likely_systemic_cause              TEXT
+critical_insight.likely_systemic_cause_rationale    TEXT
+critical_insight.recommended_action                 TEXT
+critical_insight.recommended_action_rationale       TEXT
+critical_insight.toolbox_narrative                  TEXT
+critical_insight.escalate_to_systemic               BOOLEAN
+critical_insight.escalation_rationale               TEXT
+critical_insight.recommended_actions                JSONB
+                                                    -- Ordered array of action steps from AI:
+                                                    -- [{"step": 1, "action": "..."}, {"step": 2, "action": "..."}]
+                                                    -- 1-3 steps; each step pre-populates one row in the improve step UI
+critical_insight.recommended_action_rationale       TEXT
+                                                    -- Why the recommended steps address the root cause
+critical_insight.recommended_dissemination_scope    VARCHAR(30)
+                                                    -- AI recommendation for improve step targeting
+                                                    -- CHECK IN ('affected_sites', 'work_type_in_scope', 'full_scope')
+critical_insight.recommended_dissemination_rationale TEXT
+                                                    -- 1 sentence explaining the recommendation
+critical_insight.ai_generated_at                    TIMESTAMPTZ
 -- cleared_for_toolbox remains false until human approval
 ```
 
@@ -353,6 +382,24 @@ On `cleared_for_toolbox = true` and `fw_classified_at` set, the insight is avail
 
 ## Schema Notes
 
+### First-class fields on the `critical_insight` entity
+
+```sql
+critical_insight.work_type_id               UUID REFERENCES work_type(id)
+-- Always populated for algorithm and critical_observation triggers.
+-- The work type the pattern was detected in — used to scope improve step targeting.
+-- Null for manual, external_alert, and external_investigation triggers
+-- (those are not work-type-specific by default).
+
+critical_insight.contributing_worksite_ids  UUID[]
+-- IDs of worksites whose observations contributed to this insight.
+-- Populated from the observation pool query at trigger time.
+-- For critical_observation: single worksite_id.
+-- For algorithm triggers: all distinct worksite_ids in the cluster.
+-- Used by the improve step to pre-populate the affected_sites targeting option.
+-- Null for manual, external_alert, and external_investigation triggers.
+```
+
 ### `trigger_event` JSONB shape by trigger source
 
 ```sql
@@ -363,6 +410,8 @@ On `cleared_for_toolbox = true` and `fw_classified_at` set, the insight is avail
 --   { threshold, window_days, count, sites_affected_count: N }
 --   sites_affected_count: number of distinct worksites contributing observations
 --   to the cluster at trigger time. Populated from the observation pool query.
+--   Note: actual worksite IDs are stored in contributing_worksite_ids[] above —
+--   sites_affected_count here is retained for audit/display convenience.
 
 -- critical_observation:
 --   { observation_id, signal_type, barrier_assessment, energy_release_potential }

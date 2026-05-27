@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Corrective Actions Sim — Hiviz</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap');
+:root {
+  --bg:#0a0b0d; --surface:#13141a; --surface2:#1a1b23; --surface3:#1e1f28;
+  --border:#252630; --text:#dde1eb; --muted:#5a5d6e; --bright:#e8ecf8;
+  --mono:'IBM Plex Mono',monospace; --sans:'IBM Plex Sans',sans-serif;
+  --plum:#7635DC; --plum-dim:rgba(118,53,220,0.12); --plum-border:rgba(118,53,220,0.3); --plum-text:#a78bfa;
+  --teal:#0891b2; --teal-dim:rgba(8,145,178,0.12); --teal-border:rgba(8,145,178,0.28); --teal-text:#22d3ee;
+  --amber:#d97706; --amber-dim:rgba(217,119,6,0.12); --amber-border:rgba(217,119,6,0.28); --amber-text:#fbbf24;
+  --green:#059669; --green-dim:rgba(5,150,105,0.12); --green-border:rgba(5,150,105,0.28); --green-text:#34d399;
+  --red:#dc2626; --red-dim:rgba(220,38,38,0.12); --red-border:rgba(220,38,38,0.28); --red-text:#f87171;
+  --gold:#d4a843;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:13px;line-height:1.6;display:flex;flex-direction:column;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(118,53,220,0.02) 1px,transparent 1px),linear-gradient(90deg,rgba(118,53,220,0.02) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0;}
+
+/* Header */
+.hdr{position:relative;z-index:10;padding:14px 22px 12px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;gap:20px;background:rgba(10,11,13,0.95);backdrop-filter:blur(10px);flex-shrink:0;}
+.hdr-left{}
+.hdr-logo{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:2px;color:var(--gold);margin-bottom:2px;}
+.hdr-title{font-family:var(--mono);font-size:16px;font-weight:700;color:var(--bright);}
+.hdr-sub{font-size:11px;color:var(--muted);margin-top:3px;max-width:560px;line-height:1.5;}
+.hdr-badges{display:flex;gap:6px;margin-top:7px;flex-wrap:wrap;}
+.badge{font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:2px 7px;border-radius:3px;}
+.b-working{background:var(--green-dim);color:var(--green-text);border:1px solid var(--green-border);}
+.b-spec{background:var(--surface2);color:var(--muted);border:1px solid var(--border);}
+.b-ws{background:var(--plum-dim);color:var(--plum-text);border:1px solid var(--plum-border);}
+.hdr-right{display:flex;flex-direction:column;gap:5px;flex-shrink:0;}
+.api-row{display:flex;gap:6px;}
+.api-input{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:6px 9px;font-family:var(--mono);font-size:11px;color:var(--text);outline:none;width:200px;}
+.api-input:focus{border-color:var(--plum-border);}
+.api-input::placeholder{color:var(--muted);}
+.api-btn{background:var(--gold);color:#0a0b0d;border:none;border-radius:6px;padding:6px 12px;font-family:var(--mono);font-size:11px;font-weight:700;cursor:pointer;}
+.api-status{font-family:var(--mono);font-size:10px;color:var(--muted);}
+.api-status.ok{color:var(--green-text);}
+.api-status.err{color:var(--red-text);}
+
+/* Layout */
+.app{display:flex;flex:1;min-height:0;overflow:hidden;position:relative;z-index:1;}
+
+/* Left: job log */
+.left{width:320px;flex-shrink:0;border-right:1px solid var(--border);background:var(--surface);display:flex;flex-direction:column;overflow:hidden;}
+.left-hdr{padding:10px 13px;border-bottom:1px solid var(--border);flex-shrink:0;}
+.left-stage{font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--plum-text);margin-bottom:2px;}
+.left-job{font-family:var(--mono);font-size:11px;font-weight:600;color:var(--bright);}
+.left-spec{font-family:var(--mono);font-size:9px;color:var(--muted);margin-top:1px;}
+
+/* Prompt toggles — persistent, above the log */
+.prompt-toggles{flex-shrink:0;border-bottom:1px solid var(--border);padding:8px 11px;display:flex;flex-direction:column;gap:5px;}
+.ptog-wrap{display:flex;flex-direction:column;gap:0;}
+.ptog{display:flex;align-items:center;gap:7px;padding:5px 8px;border-radius:5px;border:1px solid var(--border);background:var(--surface2);cursor:pointer;transition:all 0.15s;width:100%;}
+.ptog:hover{border-color:var(--plum-border);}
+.ptog-icon{font-size:10px;color:var(--muted);}
+.ptog-lbl{font-family:var(--mono);font-size:9px;color:var(--muted);flex:1;text-align:left;}
+.ptog-ico{font-family:var(--mono);font-size:8px;color:var(--muted);transition:transform 0.15s;}
+.ptog.open .ptog-ico{transform:rotate(180deg);}
+.ptog.open{border-color:var(--plum-border);}
+.ptog.open .ptog-lbl{color:var(--plum-text);}
+.prompt-block{background:var(--surface3);border:1px solid var(--border);border-top:none;border-radius:0 0 5px 5px;padding:9px 10px;font-family:var(--mono);font-size:9px;color:var(--muted);line-height:1.6;white-space:pre-wrap;word-break:break-word;max-height:220px;overflow-y:auto;display:none;}
+.prompt-block::-webkit-scrollbar{width:3px;}
+.prompt-block::-webkit-scrollbar-thumb{background:var(--border);}
+.prompt-block.open{display:block;}
+.ptog-placeholder{font-family:var(--mono);font-size:9px;color:var(--muted);padding:4px 2px;font-style:italic;}
+
+/* Streaming log */
+.log{flex:1;min-height:0;overflow-y:auto;padding:10px 12px;display:flex;flex-direction:column;gap:8px;}
+.log::-webkit-scrollbar{width:3px;}
+.log::-webkit-scrollbar-thumb{background:var(--border);}
+.log-entry{display:flex;flex-direction:column;gap:3px;}
+.log-label{font-family:var(--mono);font-size:8px;color:var(--muted);letter-spacing:0.5px;text-transform:uppercase;}
+.log-label.out{color:var(--amber-text);}
+.log-label.sys{color:var(--plum-text);}
+.log-text{font-family:var(--mono);font-size:10px;color:var(--text);line-height:1.55;white-space:pre-wrap;word-break:break-word;}
+.log-text.dim{color:var(--muted);}
+.stream-out{background:var(--surface2);border:1px solid var(--amber-border);border-radius:4px;padding:8px;font-family:var(--mono);font-size:10px;color:var(--amber-text);line-height:1.6;white-space:pre-wrap;word-break:break-word;max-height:260px;overflow-y:auto;}
+
+/* Right: workbench */
+.right{flex:1;min-width:0;overflow-y:auto;padding:22px 26px 40px;display:flex;flex-direction:column;gap:20px;}
+.right::-webkit-scrollbar{width:4px;}
+.right::-webkit-scrollbar-thumb{background:var(--border);}
+
+/* Scenario selector */
+.scenario-bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.scenario-btn{font-family:var(--mono);font-size:10px;font-weight:600;padding:6px 14px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--muted);cursor:pointer;transition:all 0.15s;letter-spacing:0.3px;}
+.scenario-btn.active{background:var(--plum-dim);border-color:var(--plum-border);color:var(--plum-text);}
+.scenario-btn:hover:not(.active){border-color:var(--plum-border);color:var(--text);}
+.scenario-lbl{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;}
+
+/* Step header */
+.step-hdr{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.step-num{width:22px;height:22px;border-radius:50%;background:var(--plum-dim);border:1px solid var(--plum-border);font-family:var(--mono);font-size:9px;font-weight:700;color:var(--plum-text);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.step-num.done{background:var(--green-dim);border-color:var(--green-border);color:var(--green-text);}
+.step-title{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--bright);}
+.step-spec{font-family:var(--mono);font-size:9px;color:var(--muted);}
+
+/* Panel */
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden;}
+.panel-hdr{padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.panel-title{font-family:var(--mono);font-size:10px;font-weight:700;color:var(--bright);letter-spacing:0.3px;}
+.panel-body{padding:14px;}
+
+/* Trigger data */
+.kv-grid{display:grid;grid-template-columns:140px 1fr;gap:3px 10px;}
+.kv-key{font-family:var(--mono);font-size:9px;color:var(--muted);}
+.kv-val{font-family:var(--mono);font-size:9px;color:var(--text);}
+.obs-list{margin-top:10px;display:flex;flex-direction:column;gap:5px;}
+.obs-item{background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:7px 9px;}
+.obs-badges{display:flex;gap:4px;margin-bottom:3px;flex-wrap:wrap;}
+.obs-text{font-size:11px;color:var(--text);line-height:1.4;}
+.tag{font-family:var(--mono);font-size:7.5px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;padding:1px 5px;border-radius:2px;}
+.t-barrier{background:var(--red-dim);color:var(--red-text);border:1px solid var(--red-border);}
+.t-atrisk{background:var(--amber-dim);color:var(--amber-text);border:1px solid var(--amber-border);}
+.t-kinetic{background:var(--teal-dim);color:var(--teal-text);border:1px solid var(--teal-border);}
+.t-thermal{background:rgba(251,146,60,0.12);color:#fb923c;border:1px solid rgba(251,146,60,0.28);}
+.t-site{background:var(--surface3);color:var(--muted);border:1px solid var(--border);}
+
+/* Run button */
+.run-btn{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:0.5px;padding:8px 18px;border-radius:6px;border:none;background:var(--plum);color:white;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;gap:6px;}
+.run-btn:hover:not(:disabled){background:#6020CC;transform:translateY(-1px);}
+.run-btn:disabled{background:var(--border);cursor:default;color:var(--muted);}
+.run-btn.running{background:var(--amber);animation:pulse 1.2s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.7}}
+
+/* Insight card */
+.insight-card{background:var(--surface2);border:1px solid var(--border);border-left:3px solid var(--plum);border-radius:6px;padding:14px;}
+.ic-status{font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--amber-text);margin-bottom:6px;}
+.ic-title{font-size:15px;font-weight:700;color:var(--bright);margin-bottom:8px;line-height:1.35;}
+.ic-section{font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin:8px 0 4px;}
+.ic-text{font-size:12px;color:var(--text);line-height:1.55;}
+.ic-scope-rec{display:flex;align-items:center;gap:8px;margin-top:10px;background:var(--plum-dim);border:1px solid var(--plum-border);border-radius:5px;padding:8px 10px;}
+.ic-scope-lbl{font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--plum-text);white-space:nowrap;}
+.ic-scope-val{font-family:var(--mono);font-size:10px;font-weight:700;color:var(--bright);}
+.ic-scope-why{font-size:11px;color:var(--muted);line-height:1.4;margin-top:3px;}
+.ic-sites{display:flex;gap:4px;flex-wrap:wrap;margin-top:6px;}
+
+/* Review actions */
+.review-btns{display:flex;gap:8px;flex-wrap:wrap;}
+.rev-btn{font-family:var(--mono);font-size:10px;font-weight:700;padding:8px 16px;border-radius:6px;border:1px solid;cursor:pointer;transition:all 0.15s;letter-spacing:0.3px;}
+.rev-approve{background:var(--green-dim);color:var(--green-text);border-color:var(--green-border);}
+.rev-approve:hover{background:rgba(5,150,105,0.2);}
+.rev-dismiss{background:var(--red-dim);color:var(--red-text);border-color:var(--red-border);}
+.rev-dismiss:hover{background:rgba(220,38,38,0.2);}
+
+/* Improve step */
+.improve-panel{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px;display:flex;flex-direction:column;gap:14px;}
+.imp-lbl{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:5px;}
+.action-textarea{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:10px 12px;font-family:var(--sans);font-size:13px;color:var(--bright);line-height:1.55;resize:vertical;min-height:68px;outline:none;}
+.action-textarea:focus{border-color:var(--plum-border);}
+.scope-options{display:flex;flex-direction:column;gap:6px;}
+.scope-opt{display:flex;align-items:flex-start;gap:10px;padding:9px 11px;border-radius:5px;border:1px solid var(--border);cursor:pointer;transition:all 0.15s;}
+.scope-opt.selected{background:var(--plum-dim);border-color:var(--plum-border);}
+.scope-opt:hover:not(.selected){border-color:var(--border);background:var(--surface2);}
+.scope-radio{width:14px;height:14px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;}
+.scope-opt.selected .scope-radio{border-color:var(--plum);background:var(--plum);}
+.scope-opt.selected .scope-radio::after{content:'';width:5px;height:5px;border-radius:50%;background:white;}
+.scope-name{font-family:var(--mono);font-size:10px;font-weight:700;color:var(--bright);}
+.scope-desc{font-size:11px;color:var(--muted);margin-top:1px;line-height:1.4;}
+.scope-sites{display:flex;gap:4px;flex-wrap:wrap;margin-top:5px;}
+.site-chip{font-family:var(--mono);font-size:8px;padding:2px 7px;border-radius:3px;border:1px solid var(--border);color:var(--muted);background:var(--surface2);}
+.site-chip.contrib{border-color:var(--plum-border);color:var(--plum-text);background:var(--plum-dim);}
+.site-chip.extra{border-color:var(--teal-border);color:var(--teal-text);background:var(--teal-dim);}
+
+/* Dissemination result */
+.diss-summary{background:var(--surface2);border:1px solid var(--green-border);border-radius:6px;padding:12px 14px;margin-bottom:14px;}
+.diss-title{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--green-text);margin-bottom:6px;}
+.instances-table{width:100%;border-collapse:collapse;}
+.instances-table th{font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;color:var(--muted);text-align:left;padding:5px 8px;border-bottom:1px solid var(--border);}
+.instances-table td{font-size:11px;color:var(--text);padding:7px 8px;border-bottom:1px solid var(--border);}
+.instances-table tr:last-child td{border-bottom:none;}
+.status-chip{font-family:var(--mono);font-size:8px;font-weight:700;padding:1px 6px;border-radius:2px;}
+.s-open{background:var(--amber-dim);color:var(--amber-text);border:1px solid var(--amber-border);}
+.s-inprog{background:var(--teal-dim);color:var(--teal-text);border:1px solid var(--teal-border);}
+.s-complete{background:var(--green-dim);color:var(--green-text);border:1px solid var(--green-border);}
+.s-overdue{background:var(--red-dim);color:var(--red-text);border:1px solid var(--red-border);}
+
+/* Progress view */
+.progress-section{display:flex;flex-direction:column;gap:12px;}
+.agg-bar-wrap{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:12px 14px;}
+.agg-title{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;}
+.progress-bar{height:6px;background:var(--border);border-radius:3px;overflow:hidden;}
+.progress-fill{height:100%;background:var(--green);border-radius:3px;transition:width 0.8s ease;}
+
+/* Simulate actions for progress demo */
+.sim-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;}
+.sim-btn{font-family:var(--mono);font-size:9px;font-weight:600;padding:4px 10px;border-radius:4px;border:1px solid var(--border);background:var(--surface);color:var(--muted);cursor:pointer;transition:all 0.15s;}
+.sim-btn:hover{border-color:var(--teal-border);color:var(--teal-text);}
+
+/* Empty / waiting states */
+.waiting{font-family:var(--mono);font-size:11px;color:var(--muted);padding:20px;text-align:center;border:1px dashed var(--border);border-radius:6px;}
+
+/* Divider */
+.step-div{height:1px;background:var(--border);margin:4px 0;}
+
+.hidden{display:none!important;}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-left">
+    <div class="hdr-logo">HIVIZ SAFETYPLATFORM</div>
+    <div class="hdr-title">corrective-actions-sim</div>
+    <div class="hdr-sub">Insight → improve step → dissemination targeting → per-site instances → aggregate progress. Uses real <code>critical_insight.generate</code> Stage 1 output including recommended targeting scope.</div>
+    <div class="hdr-badges">
+      <span class="badge b-working">Stage 1 live</span>
+      <span class="badge b-spec">Stage 3 spec-only</span>
+      <span class="badge b-ws">workspace.core</span>
+    </div>
+  </div>
+  <div class="hdr-right">
+    <div class="api-row">
+      <input class="api-input" id="apiKey" type="password" placeholder="sk-ant-…" autocomplete="off">
+      <button class="api-btn" onclick="saveKey()">Save</button>
+    </div>
+    <div class="api-status" id="apiStatus">Enter Anthropic API key to run live jobs</div>
+  </div>
+</div>
+
+<div class="app">
+
+  <!-- Left: job log -->
+  <div class="left">
+    <div class="left-hdr">
+      <div class="left-stage">AI Job</div>
+      <div class="left-job" id="jobName">Waiting…</div>
+      <div class="left-spec" id="jobSpec">CRITICAL-INSIGHT.md Stage 1</div>
+    </div>
+
+    <!-- Persistent prompt toggles -->
+    <div class="prompt-toggles" id="promptToggles">
+      <div class="ptog-placeholder">Prompts load from spec when generate runs</div>
+    </div>
+
+    <!-- Streaming log -->
+    <div class="log" id="jobLog">
+      <div class="log-entry">
+        <div class="log-label sys">Ready</div>
+        <div class="log-text dim">Select a scenario and run the insight generate job to begin.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right: workbench -->
+  <div class="right">
+
+    <!-- Scenario selector -->
+    <div>
+      <div class="scenario-lbl" style="margin-bottom:8px;">Select scenario</div>
+      <div class="scenario-bar">
+        <button class="scenario-btn active" onclick="selectScenario('cross_site',this)">Cross-site Pattern — Hot Work Pre-start</button>
+        <button class="scenario-btn" onclick="selectScenario('critical_obs',this)">Critical Observation — Spotter Absence</button>
+      </div>
+    </div>
+
+    <!-- Step 1: Trigger data -->
+    <div>
+      <div class="step-hdr">
+        <div class="step-num" id="step1num">1</div>
+        <div>
+          <div class="step-title">Trigger data</div>
+          <div class="step-spec">Observation cluster ready · threshold crossed · critical_insight.generate queued</div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-hdr">
+          <div class="panel-title" id="triggerTitle">—</div>
+          <span class="badge b-spec" id="triggerBadge">—</span>
+        </div>
+        <div class="panel-body">
+          <div class="kv-grid" id="triggerMeta"></div>
+          <div class="obs-list" id="triggerObs"></div>
+        </div>
+      </div>
+      <div style="margin-top:10px;display:flex;gap:10px;align-items:center;">
+        <button class="run-btn" id="runBtn" onclick="runGenerate()">
+          <span id="runBtnIcon">▶</span> Run critical_insight.generate
+        </button>
+        <span style="font-family:var(--mono);font-size:9px;color:var(--muted);" id="runStatus"></span>
+      </div>
+    </div>
+
+    <div class="step-div"></div>
+
+    <!-- Step 2: Insight review gate -->
+    <div id="step2" class="hidden">
+      <div class="step-hdr">
+        <div class="step-num" id="step2num">2</div>
+        <div>
+          <div class="step-title">Human review gate</div>
+          <div class="step-spec">Safety manager · CRITICAL-INSIGHT.md Stage 2</div>
+        </div>
+      </div>
+      <div class="insight-card" id="insightCard"></div>
+      <div style="margin-top:12px;">
+        <div class="review-btns">
+          <button class="rev-btn rev-approve" onclick="approveInsight()">Approve →</button>
+          <button class="rev-btn rev-dismiss" onclick="dismissInsight()">Dismiss</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="step-div" id="div23" style="display:none;"></div>
+
+    <!-- Step 3: Improve step -->
+    <div id="step3" class="hidden">
+      <div class="step-hdr">
+        <div class="step-num" id="step3num">3</div>
+        <div>
+          <div class="step-title">Improve step — action &amp; targeting</div>
+          <div class="step-spec">Safety manager · CORRECTIVE-ACTIONS.md §3.1</div>
+        </div>
+      </div>
+      <div class="improve-panel">
+        <div>
+          <div class="imp-lbl" style="display:flex;align-items:center;justify-content:space-between;">
+            <span>Action steps <span style="font-family:var(--mono);font-size:8px;font-weight:400;color:var(--muted);">· sequential · steps must depend on each other</span></span>
+            <button onclick="addActionStep()" style="font-family:var(--mono);font-size:9px;font-weight:700;background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:3px 9px;color:var(--muted);cursor:pointer;transition:all 0.15s;" onmouseover="this.style.borderColor='var(--plum-border)';this.style.color='var(--plum-text)';" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)';">+ step</button>
+          </div>
+          <div id="actionSteps" style="display:flex;flex-direction:column;gap:7px;margin-top:6px;"></div>
+          <div style="font-family:var(--mono);font-size:9px;color:var(--muted);margin-top:5px;">Pre-populated from insight's recommended_actions · edit before disseminating</div>
+        </div>
+        <div>
+          <div class="imp-lbl">Targeting — <span id="scopeRecLabel" style="color:var(--plum-text);">AI recommended</span></div>
+          <div class="scope-options" id="scopeOptions"></div>
+        </div>
+        <div>
+          <div class="imp-lbl">Due date &amp; priority</div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <div>
+              <select id="dueDate" style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:5px 8px;font-family:var(--mono);font-size:10px;color:var(--text);outline:none;">
+                <option>7 days</option><option>14 days</option><option selected>21 days</option><option>30 days</option>
+              </select>
+            </div>
+            <div>
+              <select id="priority" style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:5px 8px;font-family:var(--mono);font-size:10px;color:var(--text);outline:none;">
+                <option>critical</option><option selected>serious</option><option>moderate</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <button class="run-btn" onclick="disseminate()">Disseminate →</button>
+      </div>
+    </div>
+
+    <div class="step-div" id="div34" style="display:none;"></div>
+
+    <!-- Step 4: Instances -->
+    <div id="step4" class="hidden">
+      <div class="step-hdr">
+        <div class="step-num" id="step4num">4</div>
+        <div>
+          <div class="step-title">ActionDissemination created · per-site instances</div>
+          <div class="step-spec">CORRECTIVE-ACTIONS.md §2.1 · §2.2</div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-hdr">
+          <div class="panel-title">action_dissemination</div>
+          <span class="badge b-working">Created</span>
+        </div>
+        <div class="panel-body">
+          <div class="kv-grid" id="dissKv" style="margin-bottom:14px;"></div>
+          <div style="font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:7px;">corrective_action instances</div>
+          <table class="instances-table" id="instancesTable">
+            <thead><tr><th>Worksite</th><th>Assigned to</th><th>Status</th><th>Due</th></tr></thead>
+            <tbody id="instancesBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="step-div" id="div45" style="display:none;"></div>
+
+    <!-- Step 5: Progress view -->
+    <div id="step5" class="hidden">
+      <div class="step-hdr">
+        <div class="step-num" id="step5num">5</div>
+        <div>
+          <div class="step-title">Aggregate progress — safety manager view</div>
+          <div class="step-spec">CORRECTIVE-ACTIONS.md §5.2 · live query from instances</div>
+        </div>
+      </div>
+      <div class="progress-section">
+        <div class="agg-bar-wrap">
+          <div class="agg-title" id="aggSource">Progress against insight · insight-level view</div>
+          <div id="aggLabel" style="font-size:12px;color:var(--text);line-height:1.4;margin-bottom:10px;"></div>
+          <div class="progress-bar" style="margin-bottom:6px;"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+          <div id="aggCount" style="font-family:var(--mono);font-size:11px;color:var(--muted);"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-hdr" style="cursor:pointer;" onclick="this.nextElementSibling.classList.toggle('hidden')">
+            <div class="panel-title">Simulate site activity</div>
+            <div style="font-family:var(--mono);font-size:9px;color:var(--muted);">Mark instances complete or overdue · per-site drill-down</div>
+          </div>
+          <div class="panel-body">
+            <div class="sim-actions" id="simActions" style="margin-bottom:10px;"></div>
+            <table class="instances-table" id="progressTable">
+              <thead><tr><th>Worksite</th><th>Status</th><th>Closed by</th><th>Closure notes</th></tr></thead>
+              <tbody id="progressBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /right -->
+</div><!-- /app -->
+
+<script src="/simulators/hiviz-prompt-loader.js"></script>
+<script>
+
+// ── State ──────────────────────────────────────────────────────────
+let apiKey = '';
+let currentScenario = 'cross_site';
+let prompts = {};
+let insightResult = null;
+let selectedScope = null;
+let disseminationSites = [];
+let instanceStatuses = {};
+
+// ── Org / site registry ────────────────────────────────────────────
+const SITES = [
+  { id:'s1', name:'Northgate Open Cut',    work_types:['hot_work','heavy_vehicle','ground_disturbance'] },
+  { id:'s2', name:'Marlow Stockyard',      work_types:['hot_work','materials_handling'] },
+  { id:'s3', name:'Brookman Pit 2',        work_types:['hot_work','heavy_vehicle','blasting'] },
+  { id:'s4', name:'Ridgeback Processing',  work_types:['hot_work','confined_space'] },
+  { id:'s5', name:'Jewell Crusher',        work_types:['heavy_vehicle','materials_handling'] },
+  { id:'s6', name:'Sylvania Underground',  work_types:['ground_disturbance','confined_space'] },
+];
+
+const ASSIGNEES = {
+  s1:'J. Morrow',s2:'K. Walsh',s3:'R. Patel',s4:'T. Singh',s5:'L. Chen',s6:'D. Park'
+};
+
+// ── Canned scenarios ───────────────────────────────────────────────
+const SCENARIOS = {
+  cross_site: {
+    label: 'Cross-site Pattern — Hot Work Pre-start',
+    trigger_source: 'algorithm',
+    generated_at_level: 'region',
+    work_type_id: 'hot_work',
+    work_type_label: 'Hot work',
+    level_name: 'Pilbara Operations',
+    window_days: 21,
+    count: 8,
+    threshold: 6,
+    sites_affected_count: 3,
+    contributing_site_ids: ['s1','s2','s3'],
+    trigger_badge: 'algorithm · cross-site',
+    observations: [
+      { summary:'Pre-start checklist not completed before cutting commenced — supervisor signed off before equipment inspection finished', signal_type:'barrier_degraded', energy_type:'thermal', barrier_assessment:'barrier_absent', key_hazard_rationale:'No verification that fire watch was in position before hot work started', site:'Northgate' },
+      { summary:'Spotter signed off at start of shift but left position during active grinding — unnoticed for approx 15 minutes', signal_type:'barrier_degraded', energy_type:'thermal', barrier_assessment:'barrier_degraded', key_hazard_rationale:'Fire watch discipline not maintained throughout task', site:'Marlow' },
+      { summary:'Pre-start check rushed — 12-point checklist completed in under 90 seconds, items not individually verified', signal_type:'at_risk_condition', energy_type:'thermal', barrier_assessment:'barrier_degraded', key_hazard_rationale:'Checklist treated as form-filling, not genuine verification', site:'Northgate' },
+      { summary:'Hot work permit not sighted by incoming crew at shift change — work resumed without permit review', signal_type:'barrier_degraded', energy_type:'thermal', barrier_assessment:'barrier_absent', key_hazard_rationale:'Permit handover discipline not maintained at shift change', site:'Brookman' },
+      { summary:'Fire suppression equipment pre-check skipped — pressures not recorded before cutting commenced', signal_type:'at_risk_condition', energy_type:'thermal', barrier_assessment:'barrier_degraded', key_hazard_rationale:'Equipment readiness assumed rather than verified', site:'Marlow' },
+    ],
+    prompt_variant: 'CANONICAL-USER-PROMPT-STAGE-1-ALGORITHM-CROSS-SITE-PATTERN',
+  },
+  critical_obs: {
+    label: 'Critical Observation — Spotter Not In Position',
+    trigger_source: 'critical_observation',
+    generated_at_level: 'site',
+    work_type_id: 'heavy_vehicle',
+    work_type_label: 'Heavy vehicle operations',
+    level_name: 'Northgate Open Cut',
+    contributing_site_ids: ['s1'],
+    trigger_badge: 'critical_observation · barrier_failure',
+    signal_type: 'barrier_failure',
+    energy_type: 'kinetic',
+    energy_release_potential: 'high',
+    barrier_assessment: 'barrier_absent',
+    key_hazard: 'Excavator–pedestrian collision',
+    key_hazard_rationale: 'No spotter present while excavator reversing in active haul zone',
+    stop_work_warranted: true,
+    stop_work_called: true,
+    what_was_observed: 'Excavator reversing toward haul road intersection. Assigned spotter had walked off to speak with loader operator approximately 40 metres away. Operator continued reversing — I called stop work on the radio and walked over. Haul road was active at the time. Spotter returned when they heard the radio call.',
+    prompt_variant: 'CANONICAL-USER-PROMPT-STAGE-1-CRITICAL-OBSERVATION',
+  }
+};
+
+// ── API key ────────────────────────────────────────────────────────
+function saveKey() {
+  const v = document.getElementById('apiKey').value.trim();
+  if (!v.startsWith('sk-ant-')) { setStatus('Must start with sk-ant-','err'); return; }
+  apiKey = v;
+  localStorage.setItem('hiviz_api_key', v);
+  setStatus('Key saved ✓','ok');
+}
+
+function setStatus(msg, cls='') {
+  const el = document.getElementById('apiStatus');
+  el.textContent = msg; el.className = 'api-status' + (cls ? ' '+cls : '');
+}
+
+// ── Scenario ───────────────────────────────────────────────────────
+function selectScenario(id, btn) {
+  currentScenario = id;
+  document.querySelectorAll('.scenario-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  resetFlow();
+  renderTrigger();
+}
+
+function renderTrigger() {
+  const sc = SCENARIOS[currentScenario];
+  document.getElementById('triggerTitle').textContent = sc.label;
+  document.getElementById('triggerBadge').textContent = sc.trigger_badge;
+
+  const meta = document.getElementById('triggerMeta');
+  const rows = sc.trigger_source === 'algorithm' ? [
+    ['trigger_source', sc.trigger_source],
+    ['generated_at_level', sc.generated_at_level],
+    ['work_type', sc.work_type_label],
+    ['org_level', sc.level_name],
+    ['window_days', sc.window_days],
+    ['observation_count', `${sc.count} (threshold: ${sc.threshold})`],
+    ['sites_affected', sc.sites_affected_count],
+    ['contributing_sites', sc.contributing_site_ids.map(id=>SITES.find(s=>s.id===id).name).join(', ')],
+  ] : [
+    ['trigger_source', sc.trigger_source],
+    ['worksite', sc.level_name],
+    ['work_type', sc.work_type_label],
+    ['signal_type', sc.signal_type],
+    ['energy_type', sc.energy_type],
+    ['energy_release_potential', sc.energy_release_potential],
+    ['barrier_assessment', sc.barrier_assessment],
+    ['stop_work_warranted', sc.stop_work_warranted ? 'true' : 'false'],
+    ['stop_work_called', sc.stop_work_called ? 'true' : 'false'],
+  ];
+  meta.innerHTML = rows.map(([k,v])=>`<div class="kv-key">${k}</div><div class="kv-val">${v}</div>`).join('');
+
+  const obs = document.getElementById('triggerObs');
+  if (sc.observations) {
+    obs.innerHTML = '<div style="font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:5px;">Anonymised observation summaries (' + sc.observations.length + ')</div>' +
+      sc.observations.map(o=>`
+        <div class="obs-item">
+          <div class="obs-badges">
+            <span class="tag ${o.signal_type==='barrier_degraded'||o.signal_type==='barrier_failure'?'t-barrier':'t-atrisk'}">${o.signal_type}</span>
+            <span class="tag ${o.energy_type==='thermal'?'t-thermal':'t-kinetic'}">${o.energy_type}</span>
+            ${sc.trigger_source==='algorithm'?`<span class="tag t-site">${o.site}</span>`:''}
+          </div>
+          <div class="obs-text">${o.summary}</div>
+        </div>`).join('');
+  } else {
+    obs.innerHTML = `<div class="obs-item"><div class="obs-text">${sc.what_was_observed}</div></div>`;
+  }
+}
+
+// ── Fill prompt template ───────────────────────────────────────────
+function fillPrompt(template, sc) {
+  const obsJson = JSON.stringify(
+    (sc.observations||[]).map(o=>({
+      summary: o.summary,
+      signal_type: o.signal_type,
+      energy_type: o.energy_type,
+      barrier_assessment: o.barrier_assessment,
+      key_hazard_rationale: o.key_hazard_rationale
+    })), null, 2
+  );
+
+  const vars = {
+    work_type_label: sc.work_type_label,
+    level: sc.generated_at_level,
+    level_name: sc.level_name,
+    window_days: sc.window_days,
+    signal_type_breakdown_json: JSON.stringify({'barrier_degraded':5,'at_risk_condition':3}),
+    count: sc.count,
+    threshold: sc.threshold,
+    sites_affected_count: sc.sites_affected_count,
+    observation_summaries_json: obsJson,
+    worksite_name: sc.level_name,
+    signal_type: sc.signal_type,
+    energy_type: sc.energy_type,
+    energy_release_potential: sc.energy_release_potential,
+    barrier_assessment: sc.barrier_assessment,
+    key_hazard: sc.key_hazard,
+    key_hazard_rationale: sc.key_hazard_rationale,
+    stop_work_warranted: sc.stop_work_warranted,
+    stop_work_called: sc.stop_work_called,
+    what_was_observed: sc.what_was_observed,
+  };
+  return template.replace(/\{\{(\w+)\}\}/g, (_,k) => vars[k] !== undefined ? vars[k] : `[${k}]`);
+}
+
+// ── Run generate ───────────────────────────────────────────────────
+async function runGenerate() {
+  if (!apiKey) { setStatus('API key required','err'); return; }
+  const sc = SCENARIOS[currentScenario];
+  const btn = document.getElementById('runBtn');
+  btn.disabled = true;
+  btn.classList.add('running');
+  btn.innerHTML = '<span>⟳</span> Running…';
+  document.getElementById('runStatus').textContent = '';
+
+  // Load prompts if not loaded
+  if (!prompts['CRITICAL-INSIGHT']) {
+    logEntry('sys','Loading CRITICAL-INSIGHT.md prompts…');
+    try {
+      const loaded = await loadSimPrompts(['CRITICAL-INSIGHT']);
+      prompts = {...prompts, ...loaded};
+      logEntry('sys','Prompts loaded ✓');
+    } catch(e) {
+      logEntry('sys','Prompt load error: '+e.message);
+      resetBtn(); return;
+    }
+  }
+
+  const ci = prompts['CRITICAL-INSIGHT'];
+  const sysPrompt = ci['CANONICAL-SYSTEM-PROMPT-STAGE-1'];
+  const userTemplate = ci[sc.prompt_variant];
+
+  if (!sysPrompt || !userTemplate) {
+    logEntry('sys',`Prompt not found: ${sc.prompt_variant}`);
+    resetBtn(); return;
+  }
+
+  const userPrompt = fillPrompt(userTemplate, sc);
+
+  document.getElementById('jobName').textContent = 'critical_insight.generate';
+  renderPromptToggles(sysPrompt, userPrompt, sc.prompt_variant);
+
+  let fullResponse = '';
+  const outEl = logEntry('out','Streaming response…','');
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{
+        'x-api-key': apiKey,
+        'anthropic-version':'2023-06-01',
+        'anthropic-dangerous-direct-browser-access':'true',
+        'content-type':'application/json',
+      },
+      body: JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1200,
+        stream:true,
+        system: sysPrompt,
+        messages:[{role:'user',content:userPrompt}]
+      })
+    });
+
+    if (!res.ok) {
+      const err = await res.text();
+      logEntry('sys','API error '+res.status+': '+err);
+      resetBtn(); return;
+    }
+
+    const reader = res.body.getReader();
+    const dec = new TextDecoder();
+    let buf = '';
+
+    while(true) {
+      const {done,value} = await reader.read();
+      if (done) break;
+      buf += dec.decode(value, {stream:true});
+      const lines = buf.split('\n');
+      buf = lines.pop();
+      for (const line of lines) {
+        if (!line.startsWith('data:')) continue;
+        const data = line.slice(5).trim();
+        if (data === '[DONE]') continue;
+        try {
+          const ev = JSON.parse(data);
+          if (ev.type==='content_block_delta' && ev.delta?.text) {
+            fullResponse += ev.delta.text;
+            if (outEl) outEl.textContent = fullResponse;
+            outEl?.scrollIntoView({block:'nearest'});
+          }
+        } catch{}
+      }
+    }
+
+    // Parse JSON
+    const jsonMatch = fullResponse.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) { logEntry('sys','No JSON in response'); resetBtn(); return; }
+    insightResult = JSON.parse(jsonMatch[0]);
+    logEntry('sys','✓ Parsed — scope recommendation: '+insightResult.recommended_dissemination_scope);
+    showInsightCard(sc, insightResult);
+    resetBtn('done');
+
+  } catch(e) {
+    logEntry('sys','Error: '+e.message);
+    resetBtn();
+  }
+}
+
+function resetBtn(state) {
+  const btn = document.getElementById('runBtn');
+  btn.disabled = state==='done';
+  btn.classList.remove('running');
+  btn.innerHTML = state==='done' ? '✓ Generated' : '<span>▶</span> Run critical_insight.generate';
+}
+
+// ── Prompt toggles (persistent, above log) ────────────────────────
+function makePromptToggle(label, specRef, content) {
+  const wrap = document.createElement('div');
+  wrap.className = 'ptog-wrap';
+
+  const btn = document.createElement('button');
+  btn.className = 'ptog';
+  btn.innerHTML = `<span class="ptog-icon">⌥</span><span class="ptog-lbl">${label}<span style="color:var(--muted);font-weight:400;"> · ${specRef}</span></span><span class="ptog-ico">▼</span>`;
+
+  const block = document.createElement('div');
+  block.className = 'prompt-block';
+  block.textContent = content;
+
+  btn.onclick = () => {
+    const open = block.classList.toggle('open');
+    btn.classList.toggle('open', open);
+  };
+
+  wrap.appendChild(btn);
+  wrap.appendChild(block);
+  return wrap;
+}
+
+function renderPromptToggles(sysPrompt, userPrompt, variant) {
+  const container = document.getElementById('promptToggles');
+  container.innerHTML = '';
+  container.appendChild(makePromptToggle('CANONICAL-SYSTEM-PROMPT-STAGE-1', 'CRITICAL-INSIGHT.md', sysPrompt));
+  container.appendChild(makePromptToggle(variant, 'CRITICAL-INSIGHT.md', userPrompt));
+}
+
+// ── Log ────────────────────────────────────────────────────────────
+function logEntry(dir, label, text='') {
+  const log = document.getElementById('jobLog');
+  const entry = document.createElement('div');
+  entry.className = 'log-entry';
+
+  if (dir === 'out') {
+    const lbl = document.createElement('div');
+    lbl.className = 'log-label out';
+    lbl.textContent = label;
+    const stream = document.createElement('div');
+    stream.className = 'stream-out';
+    stream.textContent = text;
+    entry.appendChild(lbl);
+    entry.appendChild(stream);
+    log.appendChild(entry);
+    log.scrollTop = log.scrollHeight;
+    return stream;
+  } else {
+    const lbl = document.createElement('div');
+    lbl.className = 'log-label sys';
+    lbl.textContent = label;
+    const txt = document.createElement('div');
+    txt.className = 'log-text' + (text ? '' : ' dim');
+    txt.textContent = text || label;
+    entry.appendChild(lbl);
+    if (text) entry.appendChild(txt);
+    log.appendChild(entry);
+    log.scrollTop = log.scrollHeight;
+    return txt;
+  }
+}
+
+// ── Insight card ───────────────────────────────────────────────────
+function showInsightCard(sc, r) {
+  const scopeLabels = {
+    affected_sites: 'Affected sites only',
+    work_type_in_scope: 'All sites doing this work type in scope',
+    full_scope: 'All sites in scope'
+  };
+  const contribNames = sc.contributing_site_ids.map(id=>SITES.find(s=>s.id===id).name);
+
+  document.getElementById('insightCard').innerHTML = `
+    <div class="ic-status">Awaiting review · AI draft</div>
+    <div class="ic-title">${r.pattern_summary.split('.')[0]}.</div>
+    <div class="ic-section">Pattern</div>
+    <div class="ic-text">${r.pattern_summary}</div>
+    <div class="ic-section">Likely cause</div>
+    <div class="ic-text">${r.likely_systemic_cause}</div>
+    <div class="ic-section">Recommended action steps</div>
+    <div class="ic-text">${
+      Array.isArray(r.recommended_actions) && r.recommended_actions.length
+        ? r.recommended_actions.map(s=>`<div style="display:flex;gap:8px;margin-bottom:5px;"><span style="font-family:var(--mono);font-size:9px;font-weight:700;color:var(--plum-text);flex-shrink:0;margin-top:2px;">${s.step}.</span><span>${s.action}</span></div>`).join('')
+        : (r.recommended_action || '—')
+    }</div>
+    ${contribNames.length>1 ? `<div class="ic-sites">${contribNames.map(n=>`<span class="tag t-site">${n}</span>`).join('')}</div>` : ''}
+    <div class="ic-scope-rec">
+      <div class="ic-scope-lbl">✦ Recommended targeting</div>
+      <div>
+        <div class="ic-scope-val">${scopeLabels[r.recommended_dissemination_scope] || r.recommended_dissemination_scope}</div>
+        <div class="ic-scope-why">${r.recommended_dissemination_rationale || ''}</div>
+      </div>
+    </div>`;
+
+  show('step2'); show('div23');
+  document.getElementById('step1num').classList.add('done');
+}
+
+// ── Approve ────────────────────────────────────────────────────────
+function approveInsight() {
+  const sc = SCENARIOS[currentScenario];
+  document.getElementById('step2num').classList.add('done');
+  document.querySelectorAll('.review-btns .rev-btn').forEach(b=>b.disabled=true);
+
+  selectedScope = insightResult.recommended_dissemination_scope || 'affected_sites';
+  // Populate steps from recommended_actions[] or fall back to single recommended_action string
+  const steps = Array.isArray(insightResult.recommended_actions) && insightResult.recommended_actions.length
+    ? insightResult.recommended_actions
+    : [{step:1, action: insightResult.recommended_action || ''}];
+  renderActionSteps(steps);
+
+  renderScopeOptions(sc);
+  show('step3'); show('div34');
+}
+
+function dismissInsight() {
+  document.querySelectorAll('.review-btns .rev-btn').forEach(b=>b.disabled=true);
+  logEntry('sys','Insight dismissed');
+}
+
+// ── Scope options ──────────────────────────────────────────────────
+function renderScopeOptions(sc) {
+  const contribSites = sc.contributing_site_ids.map(id=>SITES.find(s=>s.id===id));
+  const wtSites = SITES.filter(s=>s.work_types.includes(sc.work_type_id));
+  const allSites = SITES;
+
+  const options = [
+    {
+      id:'affected_sites',
+      name:'Affected sites only',
+      desc:`Sites whose observations contributed to this insight (${contribSites.length} site${contribSites.length>1?'s':''})`,
+      sites: contribSites,
+      contrib_ids: sc.contributing_site_ids,
+    },
+    {
+      id:'work_type_in_scope',
+      name:`All sites doing ${sc.work_type_label.toLowerCase()} in region`,
+      desc:`Every site in Pilbara Operations with ${sc.work_type_label.toLowerCase()} active (${wtSites.length} sites)`,
+      sites: wtSites,
+      contrib_ids: sc.contributing_site_ids,
+    },
+    {
+      id:'full_scope',
+      name:'All sites in scope',
+      desc:`Every site in Pilbara Operations regardless of work type (${allSites.length} sites)`,
+      sites: allSites,
+      contrib_ids: sc.contributing_site_ids,
+    }
+  ];
+
+  document.getElementById('scopeOptions').innerHTML = options.map(opt=>`
+    <div class="scope-opt ${opt.id===selectedScope?'selected':''}" onclick="selectScope('${opt.id}')">
+      <div class="scope-radio"></div>
+      <div>
+        <div class="scope-name">${opt.name} ${opt.id===insightResult.recommended_dissemination_scope?'<span style="font-family:var(--mono);font-size:7.5px;background:var(--plum-dim);color:var(--plum-text);border:1px solid var(--plum-border);padding:1px 5px;border-radius:2px;margin-left:4px;">AI recommended</span>':''}</div>
+        <div class="scope-desc">${opt.desc}</div>
+        <div class="scope-sites">${opt.sites.map(s=>`<span class="site-chip ${opt.contrib_ids.includes(s.id)?'contrib':'extra'}">${s.name}</span>`).join('')}</div>
+      </div>
+    </div>`).join('');
+}
+
+function selectScope(id) {
+  selectedScope = id;
+  const sc = SCENARIOS[currentScenario];
+  renderScopeOptions(sc);
+}
+
+// ── Action steps (improve step) ────────────────────────────────────
+function renderActionSteps(steps) {
+  const container = document.getElementById('actionSteps');
+  container.innerHTML = '';
+  steps.forEach((s, i) => {
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;gap:8px;align-items:flex-start;';
+    row.innerHTML = `
+      <div style="font-family:var(--mono);font-size:10px;font-weight:700;color:var(--plum-text);min-width:16px;padding-top:11px;flex-shrink:0;">${i+1}</div>
+      <textarea class="action-textarea action-step" rows="2" style="flex:1;">${s.action || ''}</textarea>
+      ${steps.length > 1
+        ? `<button onclick="removeStep(this)" style="font-family:var(--mono);font-size:11px;background:transparent;border:1px solid var(--border);border-radius:4px;color:var(--muted);cursor:pointer;padding:5px 8px;flex-shrink:0;margin-top:4px;transition:all 0.15s;" onmouseover="this.style.borderColor='var(--red-border)';this.style.color='var(--red-text)';" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)';">×</button>`
+        : '<div style="width:30px;flex-shrink:0;"></div>'}
+    `;
+    container.appendChild(row);
+  });
+}
+
+function addActionStep() {
+  const steps = collectSteps();
+  steps.push({step: steps.length + 1, action: ''});
+  renderActionSteps(steps);
+  // Focus the new textarea
+  const areas = document.querySelectorAll('.action-step');
+  if (areas.length) areas[areas.length-1].focus();
+}
+
+function removeStep(btn) {
+  const steps = collectSteps();
+  const row = btn.parentElement;
+  const idx = Array.from(row.parentElement.children).indexOf(row);
+  steps.splice(idx, 1);
+  renderActionSteps(steps);
+}
+
+function collectSteps() {
+  return Array.from(document.querySelectorAll('.action-step')).map((ta, i) => ({
+    step: i + 1,
+    action: ta.value.trim()
+  }));
+}
+
+// ── Disseminate ────────────────────────────────────────────────────
+function disseminate() {
+  const sc = SCENARIOS[currentScenario];
+  const steps = collectSteps();
+  if (!steps.length || !steps[0].action) { alert('At least one action step is required'); return; }
+
+  const scopeMap = {
+    affected_sites: sc.contributing_site_ids.map(id=>SITES.find(s=>s.id===id)),
+    work_type_in_scope: SITES.filter(s=>s.work_types.includes(sc.work_type_id)),
+    full_scope: SITES,
+  };
+  disseminationSites = scopeMap[selectedScope] || [];
+
+  // Dissemination KV
+  const dueOpt = document.getElementById('dueDate').value;
+  const dueDate = new Date(Date.now() + parseInt(dueOpt)*24*3600*1000).toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'});
+  const firstStep = steps[0].action;
+  const stepPreview = (steps.length > 1 ? `[${steps.length} steps] ` : '') + (firstStep.length>72 ? firstStep.slice(0,72)+'…' : firstStep);
+  document.getElementById('dissKv').innerHTML = [
+    ['id','diss_'+Math.random().toString(36).slice(2,8)],
+    ['source_type','critical_insight'],
+    ['work_type',sc.work_type_label],
+    ['dissemination_scope',selectedScope],
+    ['actions (steps)',steps.length],
+    ['step 1 preview', stepPreview],
+    ['target_sites',disseminationSites.length],
+    ['due_date',dueDate],
+    ['priority',document.getElementById('priority').value],
+    ['created_by','R. Chen (Safety Manager)'],
+  ].map(([k,v])=>`<div class="kv-key">${k}</div><div class="kv-val">${v}</div>`).join('');
+
+  // Instance rows
+  instanceStatuses = {};
+  disseminationSites.forEach(s=>{ instanceStatuses[s.id]='open'; });
+
+  document.getElementById('instancesBody').innerHTML = disseminationSites.map(s=>`
+    <tr id="irow-${s.id}">
+      <td>${s.name}</td>
+      <td style="font-family:var(--mono);font-size:10px;color:var(--muted);">${ASSIGNEES[s.id]||'Unassigned'}</td>
+      <td><span class="status-chip s-open">open</span></td>
+      <td style="font-family:var(--mono);font-size:10px;color:var(--muted);">${dueDate}</td>
+    </tr>`).join('');
+
+  document.getElementById('step3num').classList.add('done');
+  show('step4'); show('div45');
+  renderProgress();
+  show('step5');
+}
+
+// ── Progress ───────────────────────────────────────────────────────
+function renderProgress() {
+  const total = disseminationSites.length;
+  const complete = Object.values(instanceStatuses).filter(s=>s==='complete').length;
+  const overdue = Object.values(instanceStatuses).filter(s=>s==='overdue').length;
+  const open = total - complete - overdue;
+  const pct = total > 0 ? Math.round((complete/total)*100) : 0;
+
+  // Insight-level view: action label + progress bar + count
+  const steps = collectSteps();
+  const actionLabel = steps.length ? steps[0].action : '—';
+  const stepSuffix = steps.length > 1 ? ` · ${steps.length} steps` : '';
+  document.getElementById('aggLabel').textContent = actionLabel.length > 90 ? actionLabel.slice(0,90)+'…' : actionLabel + stepSuffix;
+  document.getElementById('aggCount').textContent = `${complete} / ${total} sites complete (${pct}%)${overdue > 0 ? ` · ${overdue} overdue` : ''}`;
+  document.getElementById('progressFill').style.width = pct+'%';
+
+  document.getElementById('progressBody').innerHTML = disseminationSites.map(s=>{
+    const st = instanceStatuses[s.id];
+    const closedBy = st==='complete' ? ASSIGNEES[s.id] : '—';
+    const notes = st==='complete' ? 'Briefing completed at shift handover. Pre-start compliance checked.' : st==='overdue' ? '—' : '—';
+    return `<tr>
+      <td>${s.name}</td>
+      <td><span class="status-chip s-${st}">${st}</span></td>
+      <td style="font-family:var(--mono);font-size:10px;color:var(--muted);">${closedBy}</td>
+      <td style="font-size:11px;color:var(--muted);">${notes}</td>
+    </tr>`;
+  }).join('');
+
+  // Sim buttons
+  const openSites = disseminationSites.filter(s=>instanceStatuses[s.id]==='open');
+  document.getElementById('simActions').innerHTML = openSites.length === 0
+    ? `<span style="font-family:var(--mono);font-size:10px;color:var(--green-text);">All instances resolved</span>`
+    : openSites.map(s=>`
+        <button class="sim-btn" onclick="markComplete('${s.id}')">✓ ${s.name}</button>
+        <button class="sim-btn" style="border-color:var(--red-border);color:var(--red-text);" onclick="markOverdue('${s.id}')">overdue ${s.name.split(' ')[0]}</button>
+      `).join('');
+}
+
+function markComplete(id) {
+  instanceStatuses[id] = 'complete';
+  renderProgress();
+}
+function markOverdue(id) {
+  instanceStatuses[id] = 'overdue';
+  renderProgress();
+}
+
+// ── Reset ──────────────────────────────────────────────────────────
+function resetFlow() {
+  ['step2','step3','step4','step5','div23','div34','div45'].forEach(id=>hide(id));
+  ['step1num','step2num','step3num','step4num','step5num'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.classList.remove('done');
+  });
+  document.getElementById('runBtn').disabled = false;
+  document.getElementById('runBtn').classList.remove('running');
+  document.getElementById('runBtn').innerHTML = '<span>▶</span> Run critical_insight.generate';
+  document.querySelectorAll('.review-btns .rev-btn').forEach(b=>b.disabled=false);
+  document.getElementById('runStatus').textContent = '';
+  document.getElementById('jobLog').innerHTML = '<div class="log-entry"><div class="log-label sys">Ready</div><div class="log-text dim">Select a scenario and run the insight generate job to begin.</div></div>';
+  document.getElementById('jobName').textContent = 'Waiting…';
+  document.getElementById('promptToggles').innerHTML = '<div class="ptog-placeholder">Prompts load from spec when generate runs</div>';
+  const stepsEl = document.getElementById('actionSteps'); if (stepsEl) stepsEl.innerHTML = '';
+  insightResult = null; selectedScope = null; disseminationSites = []; instanceStatuses = {};
+}
+
+function show(id){const el=document.getElementById(id);if(el)el.classList.remove('hidden');}
+function hide(id){const el=document.getElementById(id);if(el)el.classList.add('hidden');}
+
+// ── Init ───────────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  const saved = localStorage.getItem('hiviz_api_key');
+  if (saved) { apiKey = saved; document.getElementById('apiKey').value = saved; setStatus('Key loaded from storage ✓','ok'); }
+  renderTrigger();
+});
+</script>
+</body>
+</html>
