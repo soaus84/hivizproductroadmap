@@ -188,7 +188,7 @@ Generate a field enquiry question set. Return the same JSON array schema as abov
 
 ## Stage 2 — Human Review and Dispatch
 
-**Human-driven.** No AI call. Safety manager reviews the question set, adjusts targeting, sets deadline, and dispatches.
+**Human-driven.** No AI call. For insight-triggered enquiries, the question set is seeded directly from `critical_insight.recommended_questions[]` — no separate generation job. Safety manager reviews the pre-populated questions, edits as needed, adjusts targeting, sets deadline, and dispatches.
 
 ### Review actions available
 

@@ -58,11 +58,13 @@ Supervisors capture observations in the field (conversational AI, seconds to com
 | Insight improve step — corrective action creation + dissemination | Safety manager | `features/CORRECTIVE-ACTIONS.md` §3.1 | spec-only |
 | Corrective action tracking — worksite task list | Supervisor / safety slot | `features/CORRECTIVE-ACTIONS.md` §5.1 | spec-only |
 | Corrective action dashboard — SM view | Safety manager | `features/CORRECTIVE-ACTIONS.md` §5.2 | spec-only |
+| Talk generation from insight — safety manager triggers assembly | Safety manager | `features/TOOLBOX-TALK.md` §Talk Dissemination | spec-only |
+| Talk review and edit — safety manager edits assembled talk before broadcast | Safety manager | `features/TOOLBOX-TALK.md` §Talk Dissemination | spec-only |
+| Talk broadcast — dissemination scope selection + push to sites | Safety manager | `features/TOOLBOX-TALK.md` §Talk Dissemination | spec-only |
+| Talk delivery progress — aggregate N / N sites delivered | Safety manager | `features/TOOLBOX-TALK.md` §Talk Dissemination | spec-only |
 | Toolbox talk assembly (`toolbox_talk.generate`) | System (async) | `features/TOOLBOX-TALK.md` | spec-only |
 | Toolbox talk delivery — presenter view | Supervisor | `features/TOOLBOX-TALK.md` | spec-only |
-| Toolbox talk attendance lock | Supervisor | `features/TOOLBOX-TALK.md` | spec-only |
-| Enquiry question generation (`enquiry.generate_questions`) | System (async) | `features/ENQUIRY.md` Stage 1 | spec-only |
-| Enquiry dispatch — human review + send | Safety manager | `features/ENQUIRY.md` Stage 2 | spec-only |
+| Enquiry dispatch — seed from insight's recommended_questions[], edit, send | Safety manager | `features/ENQUIRY.md` Stage 2 | spec-only |
 | Enquiry live synthesis (`enquiry.synthesise`) | System (per response) | `features/ENQUIRY.md` Stage 3 | spec-only |
 | Enquiry final summary (`enquiry.summarise`) | System (on close) | `features/ENQUIRY.md` Stage 4 | spec-only |
 | FW Map® classification — insight path (`fw_classify`) | System (async) | `globals/fw-classify-job.md` | working |

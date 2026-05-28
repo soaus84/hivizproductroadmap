@@ -243,6 +243,7 @@ toolbox_talk.observation_ids      JSONB    -- source observation UUIDs used
 toolbox_talk.investigation_ids    JSONB    -- source investigation UUIDs used
 toolbox_talk.critical_insight_ids JSONB    -- source insight UUIDs used
 toolbox_talk.generated_at         TIMESTAMPTZ
+toolbox_talk.attendee_count       INT      -- number of crew present at delivery
 ```
 
 `generated_content` structure mirrors the output JSON exactly. The presenter's edits overwrite sections in place; `content_edited = true` is flagged and the original is preserved in `generated_content_original` for audit.
@@ -263,9 +264,7 @@ toolbox_talk.generated_at         TIMESTAMPTZ
 
 ```json
 {
-  "attendee_ids": ["uuid", "uuid", ...],
   "attendee_count": 12,
-  "acknowledgement_method": "digital | signature | verbal",
   "delivered_at": "2026-05-13T07:45:00Z"
 }
 ```
@@ -301,10 +300,10 @@ Content selection returns a maximum of 3 items. Additional content degrades atte
 The presenter can edit any section before delivery. Edits are flagged; original generated content is preserved for audit.
 
 **TALK-04: Delivery record is final**
-Once delivered, content and attendance are locked. This is a regulatory record.
+Once delivered, content and delivery data are locked. This is a regulatory record.
 
-**TALK-05: Attendance acknowledgement**
-`acknowledgement_method` captures how attendance was confirmed. The platform does not mandate a method. `digital` is preferred; `signature` and `verbal` are valid fallbacks.
+**TALK-05: Delivery confirmation**
+The supervisor marks the talk as delivered. `attendee_count` records how many crew were present. No individual sign-off is required — the supervisor's confirmation is the accountable record.
 
 ---
 
@@ -322,6 +321,73 @@ atrophy_score = LEAST(100,
 ```
 
 A delivered talk resets `days_since_last_talk` to 0, reducing the atrophy score. Score bands: 0–39 Green, 40–69 Amber, 70+ Red (triggers visit recommendation alert N17). See `SPEC.md` §7 for full algorithm.
+
+---
+
+## Talk Dissemination — Safety Manager Broadcast
+
+The safety manager can generate a talk from an approved insight, review and edit it, and broadcast it to targeted worksites. This is distinct from the supervisor-pull path (§Stage 1–3) — it is a push from the safety manager to sites.
+
+### Flow
+
+```
+Insight approved
+  → Safety manager triggers talk generation from insight
+  → toolbox_talk.generate runs with insight narrative as primary content item
+  → Safety manager reviews assembled talk — edits any section if needed
+  → Selects dissemination scope (same targeting model as corrective actions)
+  → Broadcasts — TalkDissemination record created, per-site instances created
+  → Supervisors at targeted sites see the talk in their queue
+  → Supervisor delivers to crew, marks complete
+  → Aggregate progress updates: N / N sites delivered
+```
+
+### Entities
+
+**TalkDissemination** — parent record, created once when the safety manager broadcasts.
+
+```sql
+talk_dissemination.id                 UUID
+talk_dissemination.org_id             UUID
+talk_dissemination.source_insight_id  UUID  -- the insight this talk was generated from
+talk_dissemination.toolbox_talk_id    UUID  -- the assembled talk record
+talk_dissemination.dissemination_scope VARCHAR(30)
+                                      -- CHECK IN ('affected_sites', 'work_type_in_scope', 'full_scope')
+talk_dissemination.target_worksite_ids UUID[]  -- resolved at broadcast time
+talk_dissemination.created_by_id      UUID
+talk_dissemination.created_at         TIMESTAMPTZ
+```
+
+**TalkDelivery** — per-site instance, one per targeted worksite.
+
+```sql
+talk_delivery.id                  UUID
+talk_delivery.dissemination_id    UUID
+talk_delivery.worksite_id         UUID
+talk_delivery.status              VARCHAR(20)
+                                  -- CHECK IN ('pending', 'delivered')
+talk_delivery.delivered_by_id     UUID   -- supervisor who marked it done
+talk_delivery.attendee_count      INT
+talk_delivery.delivered_at        TIMESTAMPTZ
+UNIQUE (dissemination_id, worksite_id)
+```
+
+### Aggregate progress
+
+```sql
+SELECT
+  COUNT(*)                                      AS total_sites,
+  COUNT(*) FILTER (WHERE status = 'delivered')  AS delivered,
+  COUNT(*) FILTER (WHERE status = 'pending')    AS pending
+FROM talk_delivery
+WHERE dissemination_id = :id;
+```
+
+Visible against the insight as: **5 / 10 sites delivered (50%)**
+
+### Duplicate prevention
+
+A site already with a `pending` or `delivered` instance for this dissemination will not receive a second instance if the safety manager re-runs or adjusts scope. The `UNIQUE (dissemination_id, worksite_id)` constraint enforces this at the database level.
 
 ---
 
