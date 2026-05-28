@@ -335,7 +335,7 @@ Write a final summary. Return JSON:
 ### Validation Rules
 
 - `summary_narrative` must be 3–5 sentences
-- `recommended_actions` must have 2–4 items
+- `recommended_actions` must have 1–3 items
 - `toolbox_narrative` must be 2–3 sentences — this feeds toolbox talk content selection
 - `escalation_rationale` must be non-null if `escalate_to_systemic = true`
 - No names or identifying details

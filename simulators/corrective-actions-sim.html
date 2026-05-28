@@ -785,6 +785,12 @@ function showInsightCard(sc, r) {
         ? r.recommended_actions.map(s=>`<div style="display:flex;gap:8px;margin-bottom:5px;"><span style="font-family:var(--mono);font-size:9px;font-weight:700;color:var(--plum-text);flex-shrink:0;margin-top:2px;">${s.step}.</span><span>${s.action}</span></div>`).join('')
         : (r.recommended_action || '—')
     }</div>
+    <div class="ic-section">Suggested enquiry questions</div>
+    <div class="ic-text">${
+      Array.isArray(r.recommended_questions) && r.recommended_questions.length
+        ? r.recommended_questions.map((q,i)=>`<div style="display:flex;gap:8px;margin-bottom:5px;"><span style="font-family:var(--mono);font-size:9px;font-weight:700;color:var(--teal-text);flex-shrink:0;margin-top:2px;">${i+1}.</span><span>${q}</span></div>`).join('')
+        : '<span style="color:var(--muted);font-style:italic;">None returned</span>'
+    }</div>
     ${contribNames.length>1 ? `<div class="ic-sites">${contribNames.map(n=>`<span class="tag t-site">${n}</span>`).join('')}</div>` : ''}
     <div class="ic-scope-rec">
       <div class="ic-scope-lbl">✦ Recommended targeting</div>

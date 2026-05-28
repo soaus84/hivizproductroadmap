@@ -180,14 +180,16 @@ All four creation sources share the same dissemination flow. Each source provide
 
 **Source:** `source_type = 'critical_insight'`
 
-Triggered after a safety manager approves or edits a CriticalInsight. The platform prompts: "What actions does this insight require?"
+**Position in the insight pipeline:** The improve step follows the learn phase in the insight pipeline. The sequence is: insight reviewed and approved → **learn** → **improve** (corrective actions created and disseminated). The learn phase ensures the finding is communicated to crews before action is demanded; the improve step ensures the finding produces change. Neither phase gates the other — both are expected for a significant insight but a safety manager can complete one without the other. Enquiry is a separate intelligence-gathering channel (not a pipeline stage) that can be triggered from an insight independently of this sequence; when enquiry results are available they can inform the improve step (see §3.3).
+
+**Triggered:** After a safety manager approves or edits a CriticalInsight. The platform prompts: "What actions does this insight require?"
 
 **What the insight provides to the dissemination model:**
 - `work_type_id` — first-class FK on the insight
 - `contributing_worksite_ids[]` — sites whose observations triggered the insight; resolves `affected_sites` mode
 - `generated_at_level` — org scope for `work_type_in_scope` and `full_scope` queries
 - `recommended_dissemination_scope` — AI recommendation from Stage 1 (see `CRITICAL-INSIGHT.md §Stage 1 Output Storage`)
-- `recommended_action` — pre-populates the action title field
+- `recommended_actions[]` — pre-populates the action steps
 - `recommended_action_rationale` — pre-populates the rationale field
 
 **Default recommendations by insight type:**
@@ -216,20 +218,11 @@ At investigation close (INVESTIGATION.md Stage 2), at least one confirmed correc
 
 ---
 
-### 3.3 · Enquiry summary
+### 3.3 · Enquiry context in the improve step
 
-**Source:** `source_type = 'enquiry'`
+Enquiry is not a separate action source. Actions are always `source_type = 'critical_insight'`.
 
-When an enquiry is summarised (`enquiry.summarise`), the output includes `recommended_actions[]` — 2–3 specific, implementable actions from the enquiry findings. These appear as action candidates in the safety manager's workbench. The safety manager converts any they accept into `ActionDissemination` records.
-
-**What the enquiry provides:**
-- `work_type_id` — enquiries are work-type scoped
-- Responding site IDs — sites that submitted enquiry responses; resolves `affected_sites`
-- `generated_at_level` — enquiry scope for broader targeting
-
-**Default recommendation:** `work_type_in_scope` — enquiries are designed to surface conditions across a work type, and findings typically apply wherever that work runs.
-
-**Note:** Enquiry actions are not automatically created — the safety manager's conversion step is required.
+When an enquiry has been run against an insight and findings are available, those findings are passed as additional context when the safety manager runs the improve step. The action recommendations produced are then based on both the original insight context and what the enquiry found in the field — producing smarter, more grounded actions than insight context alone.
 
 ---
 

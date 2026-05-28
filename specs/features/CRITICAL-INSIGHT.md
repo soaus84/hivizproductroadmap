@@ -160,6 +160,11 @@ Return JSON:
   ],
   "recommended_actions_note": "1-3 steps maximum. Steps must be genuinely sequential — each depends on or follows the previous. Do not split one action into sub-tasks. Do not list parallel actions as separate steps.",
   "recommended_action_rationale": "1 sentence. Why these steps address the root cause rather than a symptom.",
+  "recommended_questions": [
+    "Question to send to worksites to probe this finding — specific and answerable in the field.",
+    "Second question — only include if it probes a genuinely distinct aspect of the finding."
+  ],
+  "recommended_questions_note": "1-3 questions maximum. Each question must be specific enough that a supervisor can answer it from direct observation. Do not ask questions that can only be answered by reviewing records or by management.",
   "toolbox_narrative": "4-6 sentences. Written so a supervisor can read it aloud to their crew. Plain English. Present tense. No jargon. No blame. Opens with what the crew needs to know today.",
   "recommended_dissemination_scope": "affected_sites | work_type_in_scope | full_scope. This is a site-level pattern — default to affected_sites unless the cause is structural to this work type at any site, in which case recommend work_type_in_scope.",
   "recommended_dissemination_rationale": "1 sentence. Why this scope is the right target for the corrective action.",
@@ -212,6 +217,11 @@ Return JSON:
   ],
   "recommended_actions_note": "1-3 steps maximum. Steps must be genuinely sequential — each depends on or follows the previous. Do not split one action into sub-tasks. Do not list parallel actions as separate steps.",
   "recommended_action_rationale": "1 sentence. Why these steps address the root cause rather than a symptom.",
+  "recommended_questions": [
+    "Question to send to worksites to probe this finding — specific and answerable in the field.",
+    "Second question — only include if it probes a genuinely distinct aspect of the finding."
+  ],
+  "recommended_questions_note": "1-3 questions maximum. Each question must be specific enough that a supervisor can answer it from direct observation. Do not ask questions that can only be answered by reviewing records or by management.",
   "toolbox_narrative": "4-6 sentences. Written so a supervisor can read it aloud to any crew doing this work type. Plain English. Present tense. No jargon. No blame. Opens with what crews across the region need to know today.",
   "recommended_dissemination_scope": "affected_sites | work_type_in_scope | full_scope. This is a cross-site pattern — default to work_type_in_scope since the pattern has already crossed sites for this work type. Use full_scope only if the cause is role or practice based rather than work-type specific.",
   "recommended_dissemination_rationale": "1 sentence. Why this scope is the right target for the corrective action.",
@@ -266,6 +276,11 @@ Return JSON:
   ],
   "recommended_actions_note": "1-3 steps maximum. Steps must be genuinely sequential — each depends on or follows the previous. A single critical observation often warrants only one step. Do not list parallel actions as separate steps.",
   "recommended_action_rationale": "1 sentence. Why these steps directly address the identified control gap.",
+  "recommended_questions": [
+    "Question to send to worksites to probe this finding — specific and answerable in the field.",
+    "Second question — only include if it probes a genuinely distinct aspect of the finding."
+  ],
+  "recommended_questions_note": "1-3 questions maximum. Each question must be specific enough that a supervisor can answer it from direct observation. Do not ask questions that can only be answered by reviewing records or by management.",
   "toolbox_narrative": "4-6 sentences. Written for a supervisor to read aloud to their crew. Plain English. Present tense. No jargon. No blame. Opens with what crews need to know and check today.",
   "recommended_dissemination_scope": "affected_sites | work_type_in_scope | full_scope. This is a single critical observation — default to affected_sites for immediate action. Recommend work_type_in_scope if the control gap is structural to this work type (i.e. likely present wherever this work runs, not just where it was observed).",
   "recommended_dissemination_rationale": "1 sentence. Why this scope is the right target for the corrective action.",
@@ -283,8 +298,6 @@ critical_insight.pattern_summary                    TEXT
 critical_insight.pattern_summary_basis              TEXT    -- rationale fields stored separately; not surfaced in UI by default
 critical_insight.likely_systemic_cause              TEXT
 critical_insight.likely_systemic_cause_rationale    TEXT
-critical_insight.recommended_action                 TEXT
-critical_insight.recommended_action_rationale       TEXT
 critical_insight.toolbox_narrative                  TEXT
 critical_insight.escalate_to_systemic               BOOLEAN
 critical_insight.escalation_rationale               TEXT
@@ -294,6 +307,10 @@ critical_insight.recommended_actions                JSONB
                                                     -- 1-3 steps; each step pre-populates one row in the improve step UI
 critical_insight.recommended_action_rationale       TEXT
                                                     -- Why the recommended steps address the root cause
+critical_insight.recommended_questions              JSONB
+                                                    -- Array of enquiry questions generated from the same insight context:
+                                                    -- ["Question 1...", "Question 2..."]
+                                                    -- 1-3 questions; pre-populates the enquiry dispatch step
 critical_insight.recommended_dissemination_scope    VARCHAR(30)
                                                     -- AI recommendation for improve step targeting
                                                     -- CHECK IN ('affected_sites', 'work_type_in_scope', 'full_scope')
@@ -338,7 +355,7 @@ critical_insight.ai_generated_at                    TIMESTAMPTZ
 - No further jobs queue
 
 **On edit + approve:**
-- Safety manager edits `pattern_summary`, `likely_systemic_cause`, `recommended_action`, or `toolbox_narrative`
+- Safety manager edits `pattern_summary`, `likely_systemic_cause`, `recommended_actions`, or `toolbox_narrative`
 - Edited content stored as authoritative (replaces AI draft)
 - `review_action = edited`
 - Same downstream as approval
