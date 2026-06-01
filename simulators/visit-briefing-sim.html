@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Visit Briefing Sim — Hiviz</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap');
+:root {
+  --bg:#0a0b0d; --surface:#13141a; --surface2:#1a1b23; --surface3:#1e1f28;
+  --border:#252630; --text:#dde1eb; --muted:#5a5d6e; --bright:#e8ecf8;
+  --mono:'IBM Plex Mono',monospace; --sans:'IBM Plex Sans',sans-serif;
+  --plum:#7635DC; --plum-dim:rgba(118,53,220,0.12); --plum-border:rgba(118,53,220,0.3); --plum-text:#a78bfa;
+  --teal:#0891b2; --teal-dim:rgba(8,145,178,0.12); --teal-border:rgba(8,145,178,0.28); --teal-text:#22d3ee;
+  --amber:#d97706; --amber-dim:rgba(217,119,6,0.12); --amber-border:rgba(217,119,6,0.28); --amber-text:#fbbf24;
+  --green:#059669; --green-dim:rgba(5,150,105,0.12); --green-border:rgba(5,150,105,0.28); --green-text:#34d399;
+  --red:#dc2626; --red-dim:rgba(220,38,38,0.12); --red-border:rgba(220,38,38,0.28); --red-text:#f87171;
+  --gold:#d4a843;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:13px;line-height:1.6;display:flex;flex-direction:column;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(118,53,220,0.02) 1px,transparent 1px),linear-gradient(90deg,rgba(118,53,220,0.02) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0;}
+
+/* Header */
+.hdr{position:relative;z-index:10;padding:14px 22px 12px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;gap:20px;background:rgba(10,11,13,0.95);backdrop-filter:blur(10px);flex-shrink:0;}
+.hdr-logo{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:2px;color:var(--gold);margin-bottom:2px;}
+.hdr-title{font-family:var(--mono);font-size:16px;font-weight:700;color:var(--bright);}
+.hdr-sub{font-size:11px;color:var(--muted);margin-top:3px;max-width:560px;line-height:1.5;}
+.hdr-badges{display:flex;gap:6px;margin-top:7px;flex-wrap:wrap;}
+.badge{font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:2px 7px;border-radius:3px;}
+.b-working{background:var(--green-dim);color:var(--green-text);border:1px solid var(--green-border);}
+.b-spec{background:var(--surface2);color:var(--muted);border:1px solid var(--border);}
+.b-ws{background:var(--plum-dim);color:var(--plum-text);border:1px solid var(--plum-border);}
+.hdr-right{display:flex;flex-direction:column;gap:5px;flex-shrink:0;}
+.api-row{display:flex;gap:6px;}
+.api-input{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:6px 9px;font-family:var(--mono);font-size:11px;color:var(--text);outline:none;width:200px;}
+.api-input:focus{border-color:var(--plum-border);}
+.api-input::placeholder{color:var(--muted);}
+.api-btn{background:var(--gold);color:#0a0b0d;border:none;border-radius:6px;padding:6px 12px;font-family:var(--mono);font-size:11px;font-weight:700;cursor:pointer;}
+.api-status{font-family:var(--mono);font-size:10px;color:var(--muted);}
+.api-status.ok{color:var(--green-text);}
+.api-status.err{color:var(--red-text);}
+
+/* App layout */
+.app{display:flex;flex:1;min-height:0;overflow:hidden;position:relative;z-index:1;}
+
+/* Left panel */
+.left{width:320px;flex-shrink:0;border-right:1px solid var(--border);background:var(--surface);display:flex;flex-direction:column;overflow:hidden;}
+.left-hdr{padding:10px 13px;border-bottom:1px solid var(--border);flex-shrink:0;}
+.left-stage{font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--plum-text);margin-bottom:2px;}
+.left-job{font-family:var(--mono);font-size:11px;font-weight:600;color:var(--bright);}
+.left-spec{font-family:var(--mono);font-size:9px;color:var(--muted);margin-top:1px;}
+
+/* Prompt toggles */
+.prompt-toggles{flex-shrink:0;border-bottom:1px solid var(--border);padding:8px 11px;display:flex;flex-direction:column;gap:5px;}
+.ptog-wrap{display:flex;flex-direction:column;gap:0;}
+.ptog{display:flex;align-items:center;gap:7px;padding:5px 8px;border-radius:5px;border:1px solid var(--border);background:var(--surface2);cursor:pointer;transition:all 0.15s;width:100%;}
+.ptog:hover{border-color:var(--plum-border);}
+.ptog-icon{font-size:10px;color:var(--muted);}
+.ptog-lbl{font-family:var(--mono);font-size:9px;color:var(--muted);flex:1;text-align:left;}
+.ptog-ico{font-family:var(--mono);font-size:8px;color:var(--muted);transition:transform 0.15s;}
+.ptog.open .ptog-ico{transform:rotate(180deg);}
+.ptog.open{border-color:var(--plum-border);}
+.ptog.open .ptog-lbl{color:var(--plum-text);}
+.prompt-block{background:var(--surface3);border:1px solid var(--border);border-top:none;border-radius:0 0 5px 5px;padding:9px 10px;font-family:var(--mono);font-size:9px;color:var(--muted);line-height:1.6;white-space:pre-wrap;word-break:break-word;max-height:220px;overflow-y:auto;display:none;}
+.prompt-block::-webkit-scrollbar{width:3px;}
+.prompt-block::-webkit-scrollbar-thumb{background:var(--border);}
+.prompt-block.open{display:block;}
+.ptog-placeholder{font-family:var(--mono);font-size:9px;color:var(--muted);padding:4px 2px;font-style:italic;}
+
+/* Log */
+.log{flex:1;min-height:0;overflow-y:auto;padding:10px 12px;display:flex;flex-direction:column;gap:8px;}
+.log::-webkit-scrollbar{width:3px;}
+.log::-webkit-scrollbar-thumb{background:var(--border);}
+.log-entry{display:flex;flex-direction:column;gap:3px;}
+.log-label{font-family:var(--mono);font-size:8px;color:var(--muted);letter-spacing:0.5px;text-transform:uppercase;}
+.log-label.out{color:var(--amber-text);}
+.log-label.sys{color:var(--plum-text);}
+.log-text{font-family:var(--mono);font-size:10px;color:var(--text);line-height:1.55;white-space:pre-wrap;word-break:break-word;}
+.log-text.dim{color:var(--muted);}
+.stream-out{background:var(--surface2);border:1px solid var(--amber-border);border-radius:4px;padding:8px;font-family:var(--mono);font-size:10px;color:var(--amber-text);line-height:1.6;white-space:pre-wrap;word-break:break-word;max-height:260px;overflow-y:auto;}
+
+/* Right panel */
+.right{flex:1;min-width:0;overflow-y:auto;padding:22px 26px 40px;display:flex;flex-direction:column;gap:20px;}
+.right::-webkit-scrollbar{width:4px;}
+.right::-webkit-scrollbar-thumb{background:var(--border);}
+
+/* Scenario selector */
+.scenario-bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.scenario-btn{font-family:var(--mono);font-size:10px;font-weight:600;padding:6px 14px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--muted);cursor:pointer;transition:all 0.15s;letter-spacing:0.3px;}
+.scenario-btn.active{background:var(--plum-dim);border-color:var(--plum-border);color:var(--plum-text);}
+.scenario-btn:hover:not(.active){border-color:var(--plum-border);color:var(--text);}
+.scenario-lbl{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;}
+
+/* Workspace row */
+.ws-row{display:flex;gap:5px;align-items:center;flex-wrap:wrap;}
+.ws-badge{font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:3px 8px;border-radius:3px;}
+.ws-on{background:var(--green-dim);color:var(--green-text);border:1px solid var(--green-border);}
+.ws-off{background:var(--surface2);color:var(--muted);border:1px solid var(--border);opacity:0.45;text-decoration:line-through;}
+.ws-note{font-family:var(--mono);font-size:9px;color:var(--muted);margin-left:4px;}
+
+/* Steps */
+.step-hdr{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.step-num{width:22px;height:22px;border-radius:50%;background:var(--plum-dim);border:1px solid var(--plum-border);font-family:var(--mono);font-size:9px;font-weight:700;color:var(--plum-text);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.step-num.done{background:var(--green-dim);border-color:var(--green-border);color:var(--green-text);}
+.step-num.human{background:var(--amber-dim);border-color:var(--amber-border);color:var(--amber-text);}
+.step-title{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--bright);}
+.step-spec{font-family:var(--mono);font-size:9px;color:var(--muted);}
+
+/* Panel */
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden;}
+.panel-hdr{padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.panel-title{font-family:var(--mono);font-size:10px;font-weight:700;color:var(--bright);letter-spacing:0.3px;}
+.panel-body{padding:14px;}
+
+/* KV grid */
+.kv-grid{display:grid;grid-template-columns:190px 1fr;gap:3px 10px;}
+.kv-key{font-family:var(--mono);font-size:9px;color:var(--muted);}
+.kv-val{font-family:var(--mono);font-size:9px;color:var(--text);}
+.kv-val.hi{color:var(--amber-text);}
+.kv-val.warn{color:var(--red-text);}
+.kv-val.dim{color:var(--muted);font-style:italic;}
+.kv-section{font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin:8px 0 4px;grid-column:1/-1;padding-top:6px;border-top:1px solid var(--border);}
+.kv-section:first-child{border-top:none;margin-top:0;padding-top:0;}
+.kv-section.omitted{color:var(--muted);opacity:0.5;}
+
+/* Run buttons */
+.run-btn{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:0.5px;padding:8px 18px;border-radius:6px;border:none;background:var(--plum);color:white;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;gap:6px;}
+.run-btn:hover:not(:disabled){background:#6020CC;transform:translateY(-1px);}
+.run-btn:disabled{background:var(--border);cursor:default;color:var(--muted);}
+.run-btn.running{background:var(--amber);animation:pulse 1.2s infinite;}
+.run-btn.human-btn{background:var(--amber-dim);color:var(--amber-text);border:1px solid var(--amber-border);}
+.run-btn.human-btn:hover:not(:disabled){background:rgba(217,119,6,0.22);transform:translateY(-1px);}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.7}}
+
+/* Briefing card */
+.briefing-card{background:var(--surface2);border:1px solid var(--plum-border);border-left:3px solid var(--plum);border-radius:6px;padding:16px;display:flex;flex-direction:column;gap:14px;}
+.bc-section{font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
+.bc-reading{font-size:13px;color:var(--bright);line-height:1.65;border-left:3px solid var(--plum-border);padding-left:12px;}
+.bc-fw{font-size:12px;color:var(--teal-text);line-height:1.55;background:var(--teal-dim);border:1px solid var(--teal-border);border-radius:5px;padding:10px 12px;}
+
+/* Focus areas */
+.focus-list{display:flex;flex-direction:column;gap:7px;}
+.focus-item{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:11px 13px;}
+.focus-item.active-visit{border-color:var(--plum-border);background:var(--plum-dim);cursor:pointer;}
+.focus-item.active-visit:hover{background:rgba(118,53,220,0.18);}
+.fi-tap{font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--plum-text);margin-bottom:4px;}
+.fi-topic{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--bright);margin-bottom:4px;}
+.fi-prompt{font-size:12px;color:var(--text);line-height:1.5;}
+.fi-source{display:flex;gap:5px;margin-top:7px;align-items:center;}
+.src-badge{font-family:var(--mono);font-size:7.5px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;padding:2px 6px;border-radius:2px;}
+.src-trend{background:var(--teal-dim);color:var(--teal-text);border:1px solid var(--teal-border);}
+.src-insight{background:var(--plum-dim);color:var(--plum-text);border:1px solid var(--plum-border);}
+.src-atrophy{background:var(--amber-dim);color:var(--amber-text);border:1px solid var(--amber-border);}
+.src-investigation{background:var(--red-dim);color:var(--red-text);border:1px solid var(--red-border);}
+.src-baseline{background:var(--surface3);color:var(--muted);border:1px solid var(--border);}
+.src-fw_signal{background:var(--teal-dim);color:var(--teal-text);border:1px solid var(--teal-border);}
+.src-label{font-family:var(--mono);font-size:9px;color:var(--muted);}
+
+/* View mode toggle */
+.mode-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.mode-toggle{display:flex;gap:0;border:1px solid var(--border);border-radius:6px;overflow:hidden;align-self:flex-start;}
+.mode-btn{font-family:var(--mono);font-size:9px;font-weight:700;padding:5px 12px;background:var(--surface);color:var(--muted);border:none;cursor:pointer;transition:all 0.15s;letter-spacing:0.3px;}
+.mode-btn.active{background:var(--plum-dim);color:var(--plum-text);}
+
+/* Collapsed detail */
+.collapsed-detail{font-family:var(--mono);font-size:9px;color:var(--muted);cursor:pointer;user-select:none;padding:5px 0;display:flex;align-items:center;gap:5px;}
+.collapsed-detail:hover{color:var(--text);}
+.collapsed-content{display:none;}
+.collapsed-content.open{display:block;}
+
+/* Observations table */
+.obs-table{width:100%;border-collapse:collapse;}
+.obs-table th{font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;color:var(--muted);text-align:left;padding:5px 8px;border-bottom:1px solid var(--border);}
+.obs-table td{font-size:11px;color:var(--text);padding:7px 8px;border-bottom:1px solid var(--border);vertical-align:top;line-height:1.45;}
+.obs-table tr:last-child td{border-bottom:none;}
+.sig-tag{font-family:var(--mono);font-size:7.5px;font-weight:700;padding:2px 6px;border-radius:2px;white-space:nowrap;}
+.sig-barrier{background:var(--red-dim);color:var(--red-text);border:1px solid var(--red-border);}
+.sig-atrisk{background:var(--amber-dim);color:var(--amber-text);border:1px solid var(--amber-border);}
+.sig-positive{background:var(--green-dim);color:var(--green-text);border:1px solid var(--green-border);}
+
+/* Summary card */
+.summary-card{background:var(--surface2);border:1px solid var(--teal-border);border-left:3px solid var(--teal);border-radius:6px;padding:16px;display:flex;flex-direction:column;gap:12px;}
+.sc-field{display:flex;flex-direction:column;gap:4px;}
+.sc-section{font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);}
+.sc-text{font-size:13px;color:var(--bright);line-height:1.65;}
+.sc-body{font-size:12px;color:var(--text);line-height:1.6;}
+.loop-note{background:var(--green-dim);border:1px solid var(--green-border);border-radius:5px;padding:9px 12px;font-family:var(--mono);font-size:9px;color:var(--green-text);margin-top:4px;}
+
+/* Misc */
+.step-div{height:1px;background:var(--border);margin:4px 0;}
+.waiting{font-family:var(--mono);font-size:11px;color:var(--muted);padding:20px;text-align:center;border:1px dashed var(--border);border-radius:6px;}
+.hidden{display:none!important;}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div>
+    <div class="hdr-logo">HIVIZ SAFETYPLATFORM</div>
+    <div class="hdr-title">visit-briefing-sim</div>
+    <div class="hdr-sub">Visit plan created → visit_briefing.generate → visit executed → visit_plan.summarise. Demonstrates workspace-gated inputs and sparse-data resilience across three client scenarios. Summary output loops back as last_visit_summary for the next briefing.</div>
+    <div class="hdr-badges">
+      <span class="badge b-working">Both AI jobs live</span>
+      <span class="badge b-spec">Stage 2 spec-only</span>
+      <span class="badge b-ws">workspace.core · analytics · incident</span>
+    </div>
+  </div>
+  <div class="hdr-right">
+    <div class="api-row">
+      <input class="api-input" id="apiKey" type="password" placeholder="sk-ant-…" autocomplete="off">
+      <button class="api-btn" onclick="saveKey()">Save</button>
+    </div>
+    <div class="api-status" id="apiStatus">Enter Anthropic API key to run live jobs</div>
+  </div>
+</div>
+
+<div class="app">
+
+  <!-- Left: job log -->
+  <div class="left">
+    <div class="left-hdr">
+      <div class="left-stage">AI Job</div>
+      <div class="left-job" id="jobName">Waiting…</div>
+      <div class="left-spec">VISIT-BRIEFING.md · SYSTEMIC-CAUSES.md</div>
+    </div>
+    <div class="prompt-toggles" id="promptToggles">
+      <div class="ptog-placeholder">Prompts load from spec when generate runs</div>
+    </div>
+    <div class="log" id="jobLog">
+      <div class="log-entry">
+        <div class="log-label sys">Ready</div>
+        <div class="log-text dim">Select a scenario and run visit_briefing.generate to begin.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right: workbench -->
+  <div class="right">
+
+    <!-- Scenario selector -->
+    <div>
+      <div class="scenario-lbl" style="margin-bottom:8px;">Select scenario</div>
+      <div class="scenario-bar">
+        <button class="scenario-btn active" onclick="selectScenario('new_client',this)">New Client — First Visit</button>
+        <button class="scenario-btn" onclick="selectScenario('atrophy_alert',this)">Atrophy Alert — Core + Analytics</button>
+        <button class="scenario-btn" onclick="selectScenario('full_stack',this)">Full Stack — Active Site</button>
+      </div>
+    </div>
+
+    <!-- Workspace indicator -->
+    <div>
+      <div class="scenario-lbl" style="margin-bottom:6px;">Active workspaces</div>
+      <div class="ws-row" id="wsRow"></div>
+    </div>
+
+    <!-- Step 1: Snapshot -->
+    <div>
+      <div class="step-hdr">
+        <div class="step-num" id="step1num">1</div>
+        <div>
+          <div class="step-title">Site intelligence snapshot</div>
+          <div class="step-spec">visit_plan created · visit_briefing.generate queued · workspace-gated fields omitted</div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-hdr">
+          <div class="panel-title" id="snapshotTitle">—</div>
+          <span class="badge b-spec" id="snapshotBadge">—</span>
+        </div>
+        <div class="panel-body">
+          <div class="kv-grid" id="snapshotKv"></div>
+        </div>
+      </div>
+      <div style="margin-top:10px;display:flex;gap:10px;align-items:center;">
+        <button class="run-btn" id="runBriefingBtn" onclick="runBriefing()">
+          <span>▶</span> Run visit_briefing.generate
+        </button>
+      </div>
+    </div>
+
+    <div class="step-div"></div>
+
+    <!-- Step 2: Briefing -->
+    <div id="step2" class="hidden">
+      <div class="step-hdr">
+        <div class="step-num" id="step2num">2</div>
+        <div>
+          <div class="step-title">Briefing ready — manager's phone</div>
+          <div class="step-spec">VISIT-BRIEFING.md Stage 2 · no human gate · executive summary</div>
+        </div>
+      </div>
+      <div class="mode-row">
+        <div class="scenario-lbl">View mode</div>
+        <div class="mode-toggle">
+          <button class="mode-btn active" id="modePreVisit" onclick="setMode('pre')">Pre-visit</button>
+          <button class="mode-btn" id="modeActive" onclick="setMode('active')">Active visit</button>
+        </div>
+      </div>
+      <div id="briefingCard" class="briefing-card"></div>
+      <div style="margin-top:12px;">
+        <button class="run-btn human-btn" id="startVisitBtn" onclick="startVisit()">Start Visit →</button>
+      </div>
+    </div>
+
+    <div class="step-div" id="div23" style="display:none;"></div>
+
+    <!-- Step 3: Observations -->
+    <div id="step3" class="hidden">
+      <div class="step-hdr">
+        <div class="step-num human" id="step3num">3</div>
+        <div>
+          <div class="step-title">Visit execution — observations logged</div>
+          <div class="step-spec">Human-driven · tagged with visit_id · enter normal observation pipeline</div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-hdr">
+          <div class="panel-title">visit_observations</div>
+          <span class="badge b-spec" id="obsCountBadge">—</span>
+        </div>
+        <div class="panel-body">
+          <table class="obs-table">
+            <thead><tr><th style="width:160px;">Work type</th><th style="width:110px;">Signal</th><th>Description</th></tr></thead>
+            <tbody id="obsBody"></tbody>
+          </table>
+        </div>
+      </div>
+      <div style="margin-top:12px;">
+        <button class="run-btn human-btn" id="closeVisitBtn" onclick="closeVisit()">Close Visit → queue visit_plan.summarise</button>
+      </div>
+    </div>
+
+    <div class="step-div" id="div34" style="display:none;"></div>
+
+    <!-- Step 4: Summary -->
+    <div id="step4" class="hidden">
+      <div class="step-hdr">
+        <div class="step-num" id="step4num">4</div>
+        <div>
+          <div class="step-title">visit_plan.summarise</div>
+          <div class="step-spec">SYSTEMIC-CAUSES.md · Visit Completion · output stored as last_visit_summary</div>
+        </div>
+      </div>
+      <div id="summaryArea">
+        <div class="waiting">Running visit_plan.summarise…</div>
+      </div>
+    </div>
+
+  </div><!-- /right -->
+</div><!-- /app -->
+
+<script src="/simulators/hiviz-prompt-loader.js"></script>
+<script>
+
+// ── State ──────────────────────────────────────────────────────────
+let apiKey = '';
+let currentScenario = 'new_client';
+let prompts = {};
+let briefingResult = null;
+let visitMode = 'pre';
+
+const ALL_WORKSPACES = [
+  { id:'core',      label:'workspace.core' },
+  { id:'analytics', label:'workspace.analytics' },
+  { id:'incident',  label:'workspace.incident' },
+];
+
+// ── Scenarios ──────────────────────────────────────────────────────
+const SCENARIOS = {
+  new_client: {
+    label: 'New Client — First Visit',
+    worksite_name: 'Hargrove Civil — Site 03',
+    manager_first_name: 'Sarah',
+    manager_name: 'Sarah Kimura',
+    visit_date: '12 Jun 2026',
+    workspaces: ['core'],
+    days_since_last_obs: null,
+    near_miss_30d: 0,
+    open_action_count: 0,
+    active_insights: [],
+    last_visit_summary: null,
+    visit_observations: [
+      { work_type:'Excavation / Ground Disturbance', observation_type:'at_risk_condition', description:'No formal pre-start check observed before excavator commenced. Operator confirmed no site-specific pre-start form exists — crew uses a mental checklist.', signal_type:'at_risk_condition', energy_type:'kinetic' },
+      { work_type:'General Site Access', observation_type:'positive_practice', description:'All workers in correct PPE. Induction records sighted and up to date. Site is newly activated — processes still being established.', signal_type:'positive_observation', energy_type:null },
+    ],
+  },
+  atrophy_alert: {
+    label: 'Atrophy Alert — Core + Analytics',
+    worksite_name: 'Ridgemont Earthworks',
+    manager_first_name: 'James',
+    manager_name: 'James Okafor',
+    visit_date: '15 Jun 2026',
+    workspaces: ['core','analytics'],
+    days_since_last_obs: 18,
+    near_miss_30d: 1,
+    open_action_count: 3,
+    active_insights: [
+      { insight_id:'INS-2204', pattern_summary:'Hot work pre-start compliance breaking down across shifts — checklists completed but verification not happening', work_type:'Hot Work', days_since_approved:12 }
+    ],
+    last_visit_summary: 'Visit 18 Apr 2026: Reviewed hot work controls and corrective action progress. Pre-start compliance improving but fire watch discipline inconsistent between crews. Three actions assigned; follow-up visit recommended in 6–8 weeks.',
+    atrophy_score: 74,
+    atrophy_band: 'high',
+    fw_factor: 'operational_management',
+    visit_observations: [
+      { work_type:'Hot Work', observation_type:'barrier_degraded', description:'Pre-start checklist completed but fire watch not physically verified in position before cutting commenced. Supervisor signed off remotely.', signal_type:'barrier_degraded', energy_type:'thermal' },
+      { work_type:'Hot Work', observation_type:'at_risk_condition', description:'Fire suppression equipment pre-check completed but pressures not recorded — verbal confirmation only.', signal_type:'at_risk_condition', energy_type:'thermal' },
+      { work_type:'General Site', observation_type:'at_risk_condition', description:'Open corrective action CA-2204 (pre-start compliance): site not aware it was assigned. Safety officer not copied on original dissemination.', signal_type:'at_risk_condition', energy_type:null },
+    ],
+  },
+  full_stack: {
+    label: 'Full Stack — Active Site',
+    worksite_name: 'Northgate Open Cut',
+    manager_first_name: 'Chris',
+    manager_name: 'Chris Delacroix',
+    visit_date: '17 Jun 2026',
+    workspaces: ['core','analytics','incident'],
+    days_since_last_obs: 4,
+    near_miss_30d: 2,
+    open_action_count: 5,
+    active_insights: [
+      { insight_id:'INS-2198', pattern_summary:'Spotter discipline during heavy vehicle reversing deteriorating — three observations in 21 days', work_type:'Heavy Vehicle Operations', days_since_approved:7 },
+      { insight_id:'INS-2187', pattern_summary:'Haul road communication failures between operators and spotters during shift handover', work_type:'Heavy Vehicle Operations', days_since_approved:21 },
+    ],
+    last_visit_summary: 'Visit 3 May 2026: Focused on heavy vehicle controls. Radio protocol between operators and spotters confirmed as the key gap — operators initiate movement before confirming spotter position. Investigation IM-118 opened. Corrective action to review spotter communication protocol assigned.',
+    atrophy_score: 42,
+    atrophy_band: 'moderate',
+    fw_factor: 'leadership_and_culture',
+    open_investigation_count: 1,
+    visit_observations: [
+      { work_type:'Heavy Vehicle Operations', observation_type:'barrier_degraded', description:'Radio communication between excavator operator and spotter intermittent during haul road crossing. Spotter confirmed they could not reliably hear operator.', signal_type:'barrier_degraded', energy_type:'kinetic' },
+      { work_type:'Heavy Vehicle Operations', observation_type:'positive_practice', description:'Pre-start checks consistently completed before shift. All vehicles had current inspection tags sighted.', signal_type:'positive_observation', energy_type:'kinetic' },
+      { work_type:'General Site', observation_type:'at_risk_condition', description:'Investigation IM-118 corrective action (spotter communication protocol) not yet assigned at site level. 3 weeks since investigation closed.', signal_type:'at_risk_condition', energy_type:null },
+      { work_type:'Site Leadership', observation_type:'at_risk_condition', description:'Site supervisor unable to name two of the five critical controls for heavy vehicle operations. No recent toolbox talk on critical control verification confirmed.', signal_type:'at_risk_condition', energy_type:null },
+    ],
+  },
+};
+
+// ── API key ────────────────────────────────────────────────────────
+function saveKey() {
+  const v = document.getElementById('apiKey').value.trim();
+  if (!v.startsWith('sk-ant-')) { setStatus('Must start with sk-ant-','err'); return; }
+  apiKey = v; localStorage.setItem('hiviz_api_key', v); setStatus('Key saved ✓','ok');
+}
+function setStatus(msg, cls='') {
+  const el = document.getElementById('apiStatus');
+  el.textContent = msg; el.className = 'api-status' + (cls ? ' '+cls : '');
+}
+
+// ── Scenario ───────────────────────────────────────────────────────
+function selectScenario(id, btn) {
+  currentScenario = id;
+  document.querySelectorAll('.scenario-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  resetFlow();
+  renderSnapshot();
+}
+
+function renderSnapshot() {
+  const sc = SCENARIOS[currentScenario];
+  document.getElementById('snapshotTitle').textContent = sc.worksite_name;
+  document.getElementById('snapshotBadge').textContent = sc.label;
+
+  // Workspace badges
+  const wsRow = document.getElementById('wsRow');
+  const omitted = ALL_WORKSPACES.filter(w => !sc.workspaces.includes(w.id)).map(w=>w.label);
+  wsRow.innerHTML = ALL_WORKSPACES.map(ws => {
+    const on = sc.workspaces.includes(ws.id);
+    return `<span class="ws-badge ${on?'ws-on':'ws-off'}">${ws.label}</span>`;
+  }).join('') + (omitted.length ? `<span class="ws-note">— ${omitted.join(', ')} fields omitted from prompt</span>` : `<span class="ws-note">— all fields available</span>`);
+
+  // KV grid
+  const kv = document.getElementById('snapshotKv');
+  const rows = [];
+
+  rows.push(['section', 'Visit details']);
+  rows.push(['worksite', sc.worksite_name, '']);
+  rows.push(['manager', sc.manager_first_name, '']);
+  rows.push(['visit_date', sc.visit_date, '']);
+
+  rows.push(['section', 'workspace.core — always active']);
+  const daysVal = sc.days_since_last_obs !== null ? sc.days_since_last_obs + ' days' : 'No observations on record';
+  const daysCls = sc.days_since_last_obs === null ? 'warn' : sc.days_since_last_obs > 14 ? 'hi' : '';
+  rows.push(['days_since_last_obs', daysVal, daysCls]);
+  rows.push(['near_miss_30d', sc.near_miss_30d, sc.near_miss_30d > 0 ? 'hi' : '']);
+  rows.push(['open_action_count', sc.open_action_count, '']);
+
+  if (sc.active_insights.length > 0) {
+    sc.active_insights.forEach((ins, i) => {
+      rows.push([`active_insight[${i}]`, ins.insight_id + ': ' + ins.pattern_summary.slice(0,55)+'…', '']);
+    });
+  } else {
+    rows.push(['active_insights', 'None', 'dim']);
+  }
+  rows.push(['last_visit_summary', sc.last_visit_summary ? sc.last_visit_summary.slice(0,72)+'…' : 'No previous visit recorded', sc.last_visit_summary ? '' : 'hi']);
+
+  if (sc.workspaces.includes('analytics')) {
+    rows.push(['section', 'workspace.analytics — active']);
+    rows.push(['atrophy_score', sc.atrophy_score + ' (' + sc.atrophy_band + ')', sc.atrophy_score >= 60 ? 'warn' : sc.atrophy_score >= 40 ? 'hi' : '']);
+    rows.push(['fw_factor', sc.fw_factor || 'Not yet classified', '']);
+  } else {
+    rows.push(['section-omitted', 'workspace.analytics — not active · atrophy_score, fw_factor omitted']);
+  }
+
+  if (sc.workspaces.includes('incident')) {
+    rows.push(['section', 'workspace.incident — active']);
+    rows.push(['open_investigation_count', sc.open_investigation_count ?? 0, '']);
+  } else {
+    rows.push(['section-omitted', 'workspace.incident — not active · open_investigation_count omitted']);
+  }
+
+  kv.innerHTML = rows.map(r => {
+    if (r[0] === 'section') return `<div class="kv-section">${escHtml(r[1])}</div>`;
+    if (r[0] === 'section-omitted') return `<div class="kv-section omitted">${escHtml(r[1])}</div>`;
+    const cls = r[2] ? ` class="kv-val ${r[2]}"` : ` class="kv-val"`;
+    return `<div class="kv-key">${escHtml(r[0])}</div><div${cls}>${escHtml(String(r[1]))}</div>`;
+  }).join('');
+}
+
+// ── Build user prompts ─────────────────────────────────────────────
+function buildBriefingUserPrompt(sc) {
+  const lines = [
+    `Site: ${sc.worksite_name}`,
+    `Manager: ${sc.manager_first_name}`,
+    `Visit date: ${sc.visit_date}`,
+    '',
+    'Site intelligence snapshot:',
+    `Days since last observation: ${sc.days_since_last_obs !== null ? sc.days_since_last_obs : 'No observations on record'}`,
+    `Near-misses (last 30 days): ${sc.near_miss_30d}`,
+    `Open corrective actions: ${sc.open_action_count}`,
+  ];
+
+  if (sc.workspaces.includes('analytics')) {
+    lines.push('');
+    lines.push(`Atrophy score: ${sc.atrophy_score} (${sc.atrophy_band})`);
+  }
+
+  if (sc.workspaces.includes('incident')) {
+    lines.push(`Open investigations: ${sc.open_investigation_count}`);
+  }
+
+  lines.push('');
+  lines.push('Active Critical Insights at this site:');
+  lines.push(sc.active_insights.length > 0 ? JSON.stringify(sc.active_insights, null, 2) : 'None');
+
+  lines.push('');
+  lines.push(`Last visit summary: ${sc.last_visit_summary || 'No previous visit recorded'}`);
+
+  if (sc.workspaces.includes('analytics') && sc.fw_factor) {
+    lines.push('');
+    lines.push(`Forge Works Map® signal: ${sc.fw_factor}`);
+  }
+
+  lines.push('');
+  lines.push('Generate focus areas for this visit.');
+  lines.push('');
+  lines.push('Return JSON:');
+  lines.push(JSON.stringify({
+    focus_areas: [{ topic:'Plain language topic label', prompt:'One sentence — observation direction.', source:'trend | investigation | atrophy | insight | fw_signal | baseline', source_label:'Human-readable source' }],
+    site_reading: '1–2 sentences. Direct, evidence-based.',
+    fw_context: '1–2 sentences or null.'
+  }, null, 2));
+
+  return lines.join('\n');
+}
+
+function buildSummaryUserPrompt(sc) {
+  const focusTopics = briefingResult?.focus_areas?.map(fa => fa.topic)
+    || sc.active_insights.map(i => i.pattern_summary)
+    || ['General site observation'];
+  return [
+    `Worksite: ${sc.worksite_name}`,
+    `Visit date: ${sc.visit_date}`,
+    `Manager: ${sc.manager_name}`,
+    `Focus areas selected: ${JSON.stringify(focusTopics, null, 2)}`,
+    '',
+    `Observations captured during visit: ${JSON.stringify(sc.visit_observations, null, 2)}`,
+    '',
+    'Summarise the visit.',
+    '',
+    'Return JSON:',
+    JSON.stringify({
+      headline: '1 sentence. Most significant finding or outcome.',
+      coverage: '1-2 sentences. Which focus areas were examined and what was found.',
+      observations_summary: '1-2 sentences. What field observations revealed — specific about work types and conditions.',
+      follow_up: '1 sentence. What needs follow-up. Null if nothing specific.'
+    }, null, 2)
+  ].join('\n');
+}
+
+// ── Prompt toggles ─────────────────────────────────────────────────
+function makePromptToggle(label, specRef, content) {
+  const wrap = document.createElement('div');
+  wrap.className = 'ptog-wrap';
+  const btn = document.createElement('button');
+  btn.className = 'ptog';
+  btn.innerHTML = `<span class="ptog-icon">⌥</span><span class="ptog-lbl">${escHtml(label)}<span style="color:var(--muted);font-weight:400;"> · ${escHtml(specRef)}</span></span><span class="ptog-ico">▼</span>`;
+  const block = document.createElement('div');
+  block.className = 'prompt-block';
+  block.textContent = content;
+  btn.onclick = () => { const open = block.classList.toggle('open'); btn.classList.toggle('open', open); };
+  wrap.appendChild(btn); wrap.appendChild(block);
+  return wrap;
+}
+
+function renderPromptToggles(sysPrompt, userPrompt, sysLabel, userLabel, specRef) {
+  const container = document.getElementById('promptToggles');
+  container.innerHTML = '';
+  container.appendChild(makePromptToggle(sysLabel, specRef, sysPrompt));
+  container.appendChild(makePromptToggle(userLabel, specRef, userPrompt));
+}
+
+// ── Log ────────────────────────────────────────────────────────────
+function logEntry(dir, label, text='') {
+  const log = document.getElementById('jobLog');
+  const entry = document.createElement('div');
+  entry.className = 'log-entry';
+  if (dir === 'out') {
+    const lbl = document.createElement('div'); lbl.className = 'log-label out'; lbl.textContent = label;
+    const stream = document.createElement('div'); stream.className = 'stream-out'; stream.textContent = text;
+    entry.appendChild(lbl); entry.appendChild(stream);
+    log.appendChild(entry); log.scrollTop = log.scrollHeight;
+    return stream;
+  }
+  const lbl = document.createElement('div'); lbl.className = 'log-label sys'; lbl.textContent = label;
+  const txt = document.createElement('div'); txt.className = 'log-text' + (text ? '' : ' dim'); txt.textContent = text || label;
+  entry.appendChild(lbl); if (text) entry.appendChild(txt);
+  log.appendChild(entry); log.scrollTop = log.scrollHeight;
+  return txt;
+}
+
+// ── Streaming call ─────────────────────────────────────────────────
+async function streamCall(sysPrompt, userPrompt, maxTokens) {
+  const outEl = logEntry('out', 'Streaming response…', '');
+  let full = '';
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true',
+      'content-type': 'application/json',
+    },
+    body: JSON.stringify({ model:'claude-sonnet-4-20250514', max_tokens:maxTokens, stream:true, system:sysPrompt, messages:[{role:'user',content:userPrompt}] })
+  });
+  if (!res.ok) throw new Error('API error ' + res.status + ': ' + await res.text());
+  const reader = res.body.getReader(); const dec = new TextDecoder(); let buf = '';
+  while (true) {
+    const { done, value } = await reader.read(); if (done) break;
+    buf += dec.decode(value, { stream:true });
+    const lines = buf.split('\n'); buf = lines.pop();
+    for (const line of lines) {
+      if (!line.startsWith('data:')) continue;
+      const data = line.slice(5).trim(); if (data === '[DONE]') continue;
+      try { const ev = JSON.parse(data); if (ev.type==='content_block_delta'&&ev.delta?.text) { full+=ev.delta.text; if(outEl) outEl.textContent=full; outEl?.scrollIntoView({block:'nearest'}); } } catch{}
+    }
+  }
+  const m = full.match(/\{[\s\S]*\}/); if (!m) throw new Error('No JSON in response');
+  return JSON.parse(m[0]);
+}
+
+// ── Step 1: Run briefing ───────────────────────────────────────────
+async function runBriefing() {
+  if (!apiKey) { setStatus('API key required','err'); return; }
+  const sc = SCENARIOS[currentScenario];
+  const btn = document.getElementById('runBriefingBtn');
+  btn.disabled = true; btn.classList.add('running'); btn.innerHTML = '<span>⟳</span> Running…';
+
+  if (!prompts['VISIT-BRIEFING']) {
+    logEntry('sys', 'Loading VISIT-BRIEFING.md prompts…');
+    try {
+      const loaded = await loadSimPrompts(['VISIT-BRIEFING']);
+      prompts = { ...prompts, ...loaded };
+      logEntry('sys', 'Prompts loaded ✓');
+    } catch (e) { logEntry('sys', 'Prompt load error: ' + e.message); resetBriefingBtn(); return; }
+  }
+
+  const vb = prompts['VISIT-BRIEFING'];
+  const sysPrompt = vb['CANONICAL-SYSTEM-PROMPT-STAGE-1'];
+  if (!sysPrompt) { logEntry('sys', 'CANONICAL-SYSTEM-PROMPT-STAGE-1 not found in VISIT-BRIEFING.md'); resetBriefingBtn(); return; }
+
+  const userPrompt = buildBriefingUserPrompt(sc);
+  document.getElementById('jobName').textContent = 'visit_briefing.generate';
+  renderPromptToggles(sysPrompt, userPrompt, 'CANONICAL-SYSTEM-PROMPT-STAGE-1', 'CANONICAL-USER-PROMPT-STAGE-1', 'VISIT-BRIEFING.md');
+  logEntry('sys', 'Running — scenario: ' + sc.label);
+  logEntry('sys', 'Workspaces active: ' + sc.workspaces.join(', '));
+
+  try {
+    briefingResult = await streamCall(sysPrompt, userPrompt, 1000);
+    logEntry('sys', '✓ Parsed — ' + (briefingResult.focus_areas?.length || 0) + ' focus areas · fw_context: ' + (briefingResult.fw_context ? 'yes' : 'null'));
+    document.getElementById('step1num').classList.add('done');
+    renderBriefingCard();
+    resetBriefingBtn('done');
+  } catch (e) { logEntry('sys', 'Error: ' + e.message); resetBriefingBtn(); }
+}
+
+function resetBriefingBtn(state) {
+  const btn = document.getElementById('runBriefingBtn');
+  btn.disabled = state === 'done'; btn.classList.remove('running');
+  btn.innerHTML = state === 'done' ? '✓ Generated' : '<span>▶</span> Run visit_briefing.generate';
+}
+
+// ── Step 2: Briefing card ──────────────────────────────────────────
+function renderBriefingCard() {
+  updateBriefingCard(visitMode);
+  show('step2'); show('div23');
+}
+
+function setMode(mode) {
+  visitMode = mode;
+  document.getElementById('modePreVisit').classList.toggle('active', mode === 'pre');
+  document.getElementById('modeActive').classList.toggle('active', mode === 'active');
+  if (briefingResult) updateBriefingCard(mode);
+}
+
+function srcClass(source) {
+  const map = { trend:'src-trend', insight:'src-insight', atrophy:'src-atrophy', investigation:'src-investigation', baseline:'src-baseline', fw_signal:'src-fw_signal' };
+  return map[source] || 'src-baseline';
+}
+
+function updateBriefingCard(mode) {
+  const r = briefingResult;
+  const isActive = mode === 'active';
+  const card = document.getElementById('briefingCard');
+
+  const focusHtml = (r.focus_areas || []).map(fa => `
+    <div class="focus-item${isActive ? ' active-visit' : ''}">
+      ${isActive ? '<div class="fi-tap">Tap to capture observation</div>' : ''}
+      <div class="fi-topic">${escHtml(fa.topic)}</div>
+      <div class="fi-prompt">${escHtml(fa.prompt)}</div>
+      <div class="fi-source">
+        <span class="src-badge ${srcClass(fa.source)}">${escHtml(fa.source)}</span>
+        <span class="src-label">${escHtml(fa.source_label || '')}</span>
+      </div>
+    </div>`).join('');
+
+  const readingHtml = isActive
+    ? `<div class="collapsed-detail" onclick="toggleCollapsed(this)">▶ Site reading</div>
+       <div class="collapsed-content"><div class="bc-reading" style="margin-top:8px;">${escHtml(r.site_reading || '')}</div></div>`
+    : `<div class="bc-section">Site reading</div><div class="bc-reading">${escHtml(r.site_reading || '')}</div>`;
+
+  const fwHtml = r.fw_context
+    ? (isActive
+        ? `<div class="collapsed-detail" onclick="toggleCollapsed(this)">▶ FW Map® signal</div>
+           <div class="collapsed-content"><div class="bc-fw" style="margin-top:8px;">${escHtml(r.fw_context)}</div></div>`
+        : `<div class="bc-section">FW Map® signal</div><div class="bc-fw">${escHtml(r.fw_context)}</div>`)
+    : '';
+
+  card.innerHTML = `
+    <div>
+      <div class="bc-section">Focus areas${isActive ? ' — tap any to open capture' : ''}</div>
+      <div class="focus-list">${focusHtml}</div>
+    </div>
+    <div>${readingHtml}</div>
+    ${fwHtml ? `<div>${fwHtml}</div>` : ''}
+  `;
+}
+
+function toggleCollapsed(el) {
+  const content = el.nextElementSibling;
+  const open = content.classList.toggle('open');
+  el.textContent = (open ? '▼' : '▶') + el.textContent.slice(1);
+}
+
+// ── Step 3: Visit execution ────────────────────────────────────────
+function startVisit() {
+  const sc = SCENARIOS[currentScenario];
+  document.getElementById('step2num').classList.add('done');
+  document.getElementById('startVisitBtn').disabled = true;
+  document.getElementById('startVisitBtn').textContent = '✓ Visit started';
+  setMode('active');
+
+  document.getElementById('obsCountBadge').textContent = sc.visit_observations.length + ' observations';
+  const tbody = document.getElementById('obsBody');
+  tbody.innerHTML = sc.visit_observations.map(obs => {
+    const sigCls = obs.signal_type === 'barrier_degraded' ? 'sig-barrier' : obs.signal_type === 'positive_observation' ? 'sig-positive' : 'sig-atrisk';
+    return `<tr>
+      <td style="font-family:var(--mono);font-size:9px;color:var(--muted);">${escHtml(obs.work_type)}</td>
+      <td><span class="sig-tag ${sigCls}">${escHtml((obs.signal_type||'').replace(/_/g,' '))}</span></td>
+      <td>${escHtml(obs.description)}</td>
+    </tr>`;
+  }).join('');
+
+  show('step3'); show('div34');
+}
+
+// ── Step 4: Summary ────────────────────────────────────────────────
+async function closeVisit() {
+  const sc = SCENARIOS[currentScenario];
+  document.getElementById('step3num').classList.add('done');
+  document.getElementById('closeVisitBtn').disabled = true;
+  document.getElementById('closeVisitBtn').textContent = '✓ Visit closed — running visit_plan.summarise';
+  show('step4');
+
+  document.getElementById('jobName').textContent = 'visit_plan.summarise';
+
+  if (!prompts['SYSTEMIC-CAUSES']) {
+    logEntry('sys', 'Loading SYSTEMIC-CAUSES.md prompts…');
+    try {
+      const loaded = await loadSimPrompts(['SYSTEMIC-CAUSES']);
+      prompts = { ...prompts, ...loaded };
+      logEntry('sys', 'SYSTEMIC-CAUSES prompts loaded ✓');
+    } catch (e) { logEntry('sys', 'Prompt load error: ' + e.message); renderSummaryError('Prompt load failed: ' + e.message); return; }
+  }
+
+  const sc_p = prompts['SYSTEMIC-CAUSES'];
+  const sysPrompt = sc_p['CANONICAL-SYSTEM-PROMPT-VISIT-SUMMARY'];
+  if (!sysPrompt) { logEntry('sys', 'CANONICAL-SYSTEM-PROMPT-VISIT-SUMMARY not found'); renderSummaryError('Prompt not found in SYSTEMIC-CAUSES.md — check CANONICAL headers were added'); return; }
+
+  const userPrompt = buildSummaryUserPrompt(sc);
+  renderPromptToggles(sysPrompt, userPrompt, 'CANONICAL-SYSTEM-PROMPT-VISIT-SUMMARY', 'CANONICAL-USER-PROMPT-VISIT-SUMMARY', 'SYSTEMIC-CAUSES.md');
+  logEntry('sys', 'Running visit_plan.summarise…');
+
+  try {
+    const result = await streamCall(sysPrompt, userPrompt, 600);
+    logEntry('sys', '✓ Summary generated — stored as last_visit_summary');
+    document.getElementById('step4num').classList.add('done');
+    document.getElementById('summaryArea').innerHTML = `
+      <div class="summary-card">
+        <div class="sc-field">
+          <div class="sc-section">Headline</div>
+          <div class="sc-text">${escHtml(result.headline || '—')}</div>
+        </div>
+        <div class="sc-field">
+          <div class="sc-section">Coverage</div>
+          <div class="sc-body">${escHtml(result.coverage || '—')}</div>
+        </div>
+        <div class="sc-field">
+          <div class="sc-section">Observations summary</div>
+          <div class="sc-body">${escHtml(result.observations_summary || '—')}</div>
+        </div>
+        ${result.follow_up ? `<div class="sc-field"><div class="sc-section">Follow-up</div><div class="sc-body">${escHtml(result.follow_up)}</div></div>` : ''}
+        <div class="loop-note">✓ Stored as <code>last_visit_summary</code> — referenced in the next visit briefing for ${escHtml(sc.worksite_name)}</div>
+      </div>`;
+  } catch (e) { logEntry('sys', 'Error: ' + e.message); renderSummaryError('Error: ' + e.message); }
+}
+
+function renderSummaryError(msg) {
+  document.getElementById('summaryArea').innerHTML = `<div class="waiting">${escHtml(msg)}</div>`;
+}
+
+// ── Reset ──────────────────────────────────────────────────────────
+function resetFlow() {
+  ['step2','step3','step4','div23','div34'].forEach(id => hide(id));
+  document.getElementById('step1num').classList.remove('done');
+  document.getElementById('step2num').classList.remove('done');
+  document.getElementById('step4num').classList.remove('done');
+  const s3 = document.getElementById('step3num'); if(s3){s3.classList.remove('done');}
+  const btn = document.getElementById('runBriefingBtn');
+  btn.disabled = false; btn.classList.remove('running'); btn.innerHTML = '<span>▶</span> Run visit_briefing.generate';
+  document.getElementById('startVisitBtn').disabled = false; document.getElementById('startVisitBtn').textContent = 'Start Visit →';
+  document.getElementById('closeVisitBtn').disabled = false; document.getElementById('closeVisitBtn').textContent = 'Close Visit → queue visit_plan.summarise';
+  document.getElementById('jobLog').innerHTML = '<div class="log-entry"><div class="log-label sys">Ready</div><div class="log-text dim">Select a scenario and run visit_briefing.generate to begin.</div></div>';
+  document.getElementById('jobName').textContent = 'Waiting…';
+  document.getElementById('promptToggles').innerHTML = '<div class="ptog-placeholder">Prompts load from spec when generate runs</div>';
+  document.getElementById('summaryArea').innerHTML = '<div class="waiting">Running visit_plan.summarise…</div>';
+  briefingResult = null; visitMode = 'pre';
+}
+
+function show(id) { const el = document.getElementById(id); if(el) el.classList.remove('hidden'); }
+function hide(id) { const el = document.getElementById(id); if(el) el.classList.add('hidden'); }
+function escHtml(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+// ── Init ───────────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  const saved = localStorage.getItem('hiviz_api_key');
+  if (saved) { apiKey = saved; document.getElementById('apiKey').value = saved; setStatus('Key loaded ✓','ok'); }
+  renderSnapshot();
+});
+</script>
+</body>
+</html>

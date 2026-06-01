@@ -14,7 +14,7 @@ A Critical Insight is the platform's primary intelligence output — a pattern-l
 The feature has four stages:
 
 ```
-Stage 1 — Insight generation       critical_insight.generate   (async AI — three prompt variants)
+Stage 1 — Insight generation       critical_insight.generate   (async AI — four prompt variants)
 Stage 2 — Human review             (safety manager — workbench UI)
 Stage 3 — FW Map® classification   fw_classify (insight path)  (async AI — on approval)
 Stage 4 — Downstream dispatch      (situational brief, CoP thread seed — see their feature specs)
@@ -28,6 +28,7 @@ Stage 4 — Downstream dispatch      (situational brief, CoP thread seed — see
 |---|---|---|
 | `algorithm` | Trend detection threshold crossed | Cluster of anonymised enriched observations |
 | `critical_observation` | Single `barrier_failure` or `unwanted_energy_event` observation with `signal_type_confidence >= 0.70` | Single enriched observation record |
+| `atrophy_pattern` | ≥ 3 worksites within a region or division transition to `elevated` or `critical` atrophy state within a 14-day window | Org level scope, affected site names + atrophy states, window |
 | `platform_pattern` | Pattern detected across platform-derived signals (atrophy, corrective action debt, verification gaps, talk delivery failures) — V2 | Cluster of platform activity signals across sites in scope |
 | `manual` | Safety manager creates directly | Manager-authored content — Stage 1 skipped |
 | `external_alert` | Regulator / industry body / client alert | External content — Stage 1 skipped |
@@ -75,7 +76,7 @@ Critical insight generation receives already-classified upstream values (cluster
 ## Sim Reference
 
 - `simulators/workflow-sim.html` — Scenario 0 ("Near-miss → Toolbox Talk") exercises the full insight pipeline in scripted form using static mock data. The sim does not make live AI calls for insight generation.
-- **Prompt lab** — loads Stage 1 (all three variants: Worksite Trend, Cross-site Pattern, and Critical Observation) and Stage 3 from this file.
+- **Prompt lab** — loads Stage 1 (all four variants: Worksite Trend, Cross-site Pattern, Critical Observation, and Atrophy Pattern) and Stage 3 from this file.
 
 ---
 
@@ -95,6 +96,7 @@ Critical insight generation receives already-classified upstream values (cluster
 | `algorithm` | `site` | `CANONICAL-USER-PROMPT-STAGE-1-ALGORITHM-WORKSITE-TREND` |
 | `algorithm` | `region` / `division` / `organisation` | `CANONICAL-USER-PROMPT-STAGE-1-ALGORITHM-CROSS-SITE-PATTERN` |
 | `critical_observation` | `site` (always) | `CANONICAL-USER-PROMPT-STAGE-1-CRITICAL-OBSERVATION` |
+| `atrophy_pattern` | `region` / `division` (always) | `CANONICAL-USER-PROMPT-STAGE-1-ATROPHY-PATTERN` |
 
 ---
 
@@ -291,6 +293,64 @@ Return JSON:
 
 ---
 
+### CANONICAL-USER-PROMPT-STAGE-1-ATROPHY-PATTERN
+
+Used when `trigger_source = atrophy_pattern`. Always generated at `region` or `division` level. No observation summaries are passed — this trigger fires on platform activity signals, not field observations. Site names within the org level scope are included as context; no personal data scrubbing applies.
+
+```
+The safety intelligence loop has degraded simultaneously across multiple worksites within a {{org_level}} scope.
+
+Trigger source: atrophy_pattern
+Card label: Cross-site Pattern
+
+Org level: {{org_level}} — {{level_name}}
+Window: {{window_days}} days
+Worksites that have transitioned to elevated or critical atrophy state within this window:
+{{sites_affected_json}}
+// Each item: { "site_name": "...", "atrophy_state": "elevated" | "critical" }
+
+Atrophy state reference:
+- elevated: signals are ageing — observations, toolbox talks, or manager visits are significantly overdue
+- critical: the intelligence loop is severely stale — the organisation has very low visibility into conditions at this site
+
+This trigger fires when multiple worksites within the same {{org_level}} reach elevated or critical state within the same window. This is not a field observation pattern — there is no cluster of field observations to analyse. The signal is that multiple sites have gone quiet simultaneously, which points to a shared organisational condition rather than isolated local factors at each site.
+
+Your output should:
+- Frame the finding as an organisational capacity signal: the problem is not what is happening in the field, but that the organisation is losing visibility across multiple sites at once
+- Name the scale and simultaneity — multiple sites degrading in the same short window is what distinguishes this from individual site management tasks
+- Identify what is most likely driving simultaneous loop failure — common causes include management capacity, competing operational pressures, insufficient visit cadence, or an environment where intelligence activities are treated as discretionary
+- Write the toolbox narrative to help crews understand why their active participation in the safety intelligence loop matters to their own safety — not as a compliance prompt
+- Set escalate_to_systemic to true if any affected sites are in critical atrophy state
+
+Return JSON:
+{
+  "pattern_summary": "2-3 sentences. What the degradation pattern is, across how many sites within the {{org_level}}, and why this matters — frame it as lost organisational visibility, not a process compliance issue.",
+  "pattern_summary_basis": "1 sentence. What about the scale, timing, or distribution of atrophy states most strongly points to a shared cause rather than coincidental local factors.",
+  "likely_systemic_cause": "1 sentence. The underlying organisational condition most likely driving simultaneous loop degradation across these sites.",
+  "likely_systemic_cause_rationale": "1 sentence. What about the pattern — number of sites, window, or mix of atrophy states — points to this cause rather than independent local issues.",
+  "recommended_actions": [
+    {"step": 1, "action": "Most immediate action — what must happen first to restore visibility across these sites."},
+    {"step": 2, "action": "Follow-up action — only include if genuinely sequential, not parallel."}
+  ],
+  "recommended_actions_note": "1-3 steps maximum. Steps must be genuinely sequential — each depends on or follows the previous. Do not split one action into sub-tasks. Do not list parallel actions as separate steps.",
+  "recommended_action_rationale": "1 sentence. Why these steps address the root cause of loop failure rather than a surface symptom.",
+  "recommended_questions": [
+    "Question to send to sites to probe why the loop has degraded — specific and answerable by a site supervisor.",
+    "Second question — only include if it probes a genuinely distinct dimension of the degradation."
+  ],
+  "recommended_questions_note": "1-3 questions maximum. Each question must be specific enough that a supervisor can answer it from their current working conditions and workload. Do not ask questions that can only be answered by reviewing management records or systems.",
+  "toolbox_narrative": "4-6 sentences. Written for a supervisor to read aloud to their crew. Plain English. Present tense. No jargon. No blame. Explains what the safety intelligence loop is, why it matters to the crew — not a compliance reminder — and what the crew can actively do to keep it healthy. Opens with what the crew needs to understand today.",
+  "recommended_dissemination_scope": "affected_sites | work_type_in_scope | full_scope. This is an organisational capacity signal, not a work-type-specific finding — default to full_scope within the {{org_level}}. Use affected_sites only if the pattern is narrowly concentrated and clearly does not indicate a broader organisational condition.",
+  "recommended_dissemination_rationale": "1 sentence. Why this scope reflects the nature of the signal — organisational capacity gap rather than a work-type-specific hazard.",
+  "escalate_to_systemic": false,
+  "escalation_rationale": null
+}
+```
+
+**Note on `escalate_to_systemic` for atrophy patterns:** The AI should set this to `true` if any affected sites are in `critical` atrophy state, or if the number of degraded sites is large relative to total sites in scope. The human review gate still applies; the reviewer can downgrade to `false` if they disagree.
+
+---
+
 ### Stage 1 Output Storage
 
 ```sql
@@ -432,6 +492,11 @@ critical_insight.contributing_worksite_ids  UUID[]
 
 -- critical_observation:
 --   { observation_id, signal_type, barrier_assessment, energy_release_potential }
+
+-- atrophy_pattern:
+--   { org_level, window_days, sites_affected: [{ worksite_id, atrophy_state }] }
+--   sites_affected: worksites that triggered the threshold crossing — same IDs as contributing_worksite_ids[]
+--   site names are resolved from worksite table at prompt-build time; not stored in trigger_event
 
 -- external_investigation:
 --   { investigation_id, investigation_ref, systemic_cause_summary }

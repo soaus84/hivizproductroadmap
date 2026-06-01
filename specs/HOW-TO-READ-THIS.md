@@ -270,7 +270,7 @@ fw_classified_at     TIMESTAMPTZ
 Arrays are parallel by index. Only factors that independently meet `fw_confidence >= 0.70` are stored. Maximum 3 per entity. Full factor definitions in `specs/globals/fw-map-blueprint.md`.
 
 ### Atrophy Score
-Calculated per worksite. Rises when no observations are logged. Drives manager visit recommendations and atrophy alerts (N17). Score >70 triggers alert. Formula in `SPEC.md` §7.
+Calculated per worksite once baseline is set (first visit completed). State: `null` (pre-baseline) / `active` (0–39) / `elevated` (40–69) / `critical` (70–100). Drives visit wizard prioritisation — elevated and critical sites surface higher; pre-baseline sites shown in a separate "first visit needed" group. A pattern of ≥ 3 sites reaching elevated/critical within 14 days triggers `critical_insight.generate` at the regional level. No push notifications. Full model in `SYSTEMIC-CAUSES.md` §Atrophy Score.
 
 ---
 

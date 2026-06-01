@@ -309,18 +309,9 @@ The supervisor marks the talk as delivered. `attendee_count` records how many cr
 
 ## Post-Delivery — Atrophy Score Update
 
-After `delivered_at` is set, the atrophy score algorithm runs asynchronously for the worksite:
+After `delivered_at` is set, the `toolbox_talk_recency` signal in the worksite's atrophy score resets to 0. This reduces the composite atrophy score and may transition the worksite from `elevated` to `active` state if other signals are also healthy.
 
-```
-atrophy_score = LEAST(100,
-  days_since_last_observation * 1.8 +
-  days_since_last_talk        * 1.2 +
-  open_investigations_count   * 8   +
-  near_miss_30d_count         * 3
-)
-```
-
-A delivered talk resets `days_since_last_talk` to 0, reducing the atrophy score. Score bands: 0–39 Green, 40–69 Amber, 70+ Red (triggers visit recommendation alert N17). See `SPEC.md` §7 for full algorithm.
+Atrophy state: `active` (0–39) / `elevated` (40–69) / `critical` (70–100). State is used for visit wizard prioritisation — no push notification fires on transition. Full model and composite formula in `SYSTEMIC-CAUSES.md` §Atrophy Score.
 
 ---
 

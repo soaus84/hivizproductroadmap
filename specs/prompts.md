@@ -40,6 +40,7 @@ Status: Supersedes v1.0 prompt library
 | `critical_insight.generate` | Critical insight draft (algorithm — Worksite Trend) | `specs/features/CRITICAL-INSIGHT.md` | Stage 1 |
 | `critical_insight.generate` | Critical insight draft (algorithm — Cross-site Pattern) | `specs/features/CRITICAL-INSIGHT.md` | Stage 1 |
 | `critical_insight.generate` | Critical insight draft (critical_observation trigger) | `specs/features/CRITICAL-INSIGHT.md` | Stage 1 |
+| `critical_insight.generate` | Critical insight draft (atrophy_pattern trigger) | `specs/features/CRITICAL-INSIGHT.md` | Stage 1 |
 
 ### Incident intelligence pipeline
 

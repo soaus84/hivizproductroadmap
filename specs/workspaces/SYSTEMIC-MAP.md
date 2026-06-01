@@ -19,7 +19,7 @@ The core model: **analytics decorates worksites.** Atrophy score, FW capacity si
 That picture drives three things:
 1. **Worksite intelligence decoration** — each worksite carries a live picture of its safety intelligence health; managers see this whenever they look at their sites
 2. **Situational briefs** — AI-generated narrative summaries of the systemic pattern for managers and divisional leadership; human review gate before distribution
-3. **Atrophy alerting** — when a worksite's intelligence signals go stale across multiple dimensions, an alert fires and the site becomes prominent in visit planning
+3. **Atrophy-driven visit prioritisation** — worksite atrophy state (null → active → elevated → critical) surfaces continuously in the visit wizard; when a pattern of degradation spans multiple sites, a critical insight is generated through the normal pipeline
 
 **Why it needs workspace.core first:** The Systemic Map has nothing to aggregate until the intelligence pipeline is running. Without classified insights, enquiries, or investigations, the FW capacity profile is empty. The value scales with the volume and breadth of the upstream pipeline — the more workspaces active, the richer the systemic picture.
 
@@ -29,9 +29,9 @@ That picture drives three things:
 
 ## What activating this workspace turns on
 
-- Worksite atrophy score — computed continuously per worksite; composite of observation recency, toolbox talk recency, manager visit recency, and overdue corrective actions; alerts at threshold ≥ 60; resets when the relevant activity occurs
+- Worksite atrophy state — computed continuously per worksite; `null` (pre-baseline, no visit completed) or scored composite of observation recency, toolbox talk recency, manager visit recency, and overdue corrective actions; state: active (0–39) / elevated (40–69) / critical (70–100); scoring activates on first completed visit; resets when relevant activity occurs
 - FW capacity profile — per-org-level aggregation of classified entities into a factor-by-factor picture of organisational capacity; blind spots surfaced where no evidence has been gathered
-- Worksite intelligence decoration — atrophy score, dominant FW signals, blind spot count, open insight count, and corrective action debt attached to each worksite; consumed by visit planning, dashboards, and alerts
+- Worksite intelligence decoration — atrophy state, dominant FW signals, blind spot count, open insight count, and corrective action debt attached to each worksite; consumed by visit planning and dashboards
 - Situational briefs — AI-generated narrative summaries of the systemic picture for managers and divisional leadership; human review gate before distribution
 - Visit briefing pack — generated before a planned visit; focus area suggestions drawn from the worksite's live intelligence decoration; surfaces open actions and relevant insights in enriched form
 - AI visit summary — on visit completion, AI generates a summary of what was found and what needs follow-up; informed by the worksite's intelligence context
@@ -45,12 +45,10 @@ That picture drives three things:
 |---|---|---|---|
 | FW capacity profile computation | System (on demand) | `features/SYSTEMIC-CAUSES.md` §FW Factor Aggregation | spec-only |
 | Blind spot detection | System | `features/SYSTEMIC-CAUSES.md` §Profile Thresholds | spec-only |
-| Atrophy score calculation | System (scheduled) | `features/SYSTEMIC-CAUSES.md` §Atrophy Score | spec-only |
-| Atrophy alert — threshold crossing | System | `features/SYSTEMIC-CAUSES.md` §Atrophy Score | spec-only |
+| Atrophy state computation | System (scheduled) | `features/SYSTEMIC-CAUSES.md` §Atrophy Score | spec-only |
+| Atrophy pattern insight — cross-site trigger | System | `features/SYSTEMIC-CAUSES.md` §Trigger Logic | spec-only |
 | Situational brief generation (`situational_brief.generate`) | System (async) | `features/SITUATIONAL-BRIEF.md` | spec-only |
 | Situational brief human review gate | Safety manager | `features/SITUATIONAL-BRIEF.md` | spec-only |
-| Worksite atrophy score computation | System (scheduled) | `features/SYSTEMIC-CAUSES.md` §Atrophy Score | spec-only |
-| Worksite atrophy alert — threshold crossing | System | `features/SYSTEMIC-CAUSES.md` §Atrophy Score | spec-only |
 | Worksite intelligence decoration — FW signals, blind spots, open debt | System (on demand) | `features/SYSTEMIC-CAUSES.md` §FW Factor Aggregation | spec-only |
 | Visit briefing pack generation (`visit_briefing.generate`) | System (async) | `features/VISIT-BRIEFING.md` | spec-only |
 | Visit focus area suggestions — from worksite intelligence | System (async) | `features/SYSTEMIC-CAUSES.md` §Visit Wizard Flow | spec-only |
@@ -66,7 +64,7 @@ That picture drives three things:
 | View | Role(s) | Purpose | Design state |
 |---|---|---|---|
 | FW capacity profile dashboard | Safety manager | Factor-by-factor picture: active factors, dominant maturity, blind spots; time window selector | to design |
-| Worksite atrophy overview | Safety manager | All sites: atrophy score, last observation date, last visit date, open actions; alert indicators | to design |
+| Worksite atrophy overview | Safety manager | All sites: atrophy state, last observation date, last visit date, open actions; pre-baseline sites in separate group | to design |
 | Situational brief review | Safety manager | Read AI draft brief; approve or edit before distribution to leadership | to design |
 | Visit planning — site selection | Safety manager / manager | Prioritised site list; atrophy, blind spots, open insights per site | wireframe: `wireframes/visit-wizard.html` |
 | Visit planning — focus area selection | Safety manager / manager | AI-curated focus areas with source badges; select 2–5 | wireframe: `wireframes/visit-wizard.html` |
