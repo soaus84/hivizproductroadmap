@@ -1,0 +1,268 @@
+{
+  "id": 6,
+  "type": "IMPROVEMENT",
+  "subType": "RISK_REDUCTION",
+  "description": "Implement a risk reduction activity across one or many worksites",
+  "practice": "NEITHER",
+  "subTypeOrder": 1,
+  "version": 2,
+  "configuration": {
+    "form": {
+      "$id": "https://my-hiviz.app/Briefing.schema.json",
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Improvement",
+      "type": "object",
+      "properties": {
+        "title": {
+          "label": "Title",
+          "inputType": "TEXT",
+          "type": "string",
+          "defaultValue": ""
+        },
+        "trigger": {
+          "label": "Trigger",
+          "description": "Why does this activity need to be done?",
+          "inputType": "TEXT",
+          "inputTypeOptions": {
+            "multiline": true,
+            "rows": 3
+          },
+          "type": "string"
+        },
+        "risk": {
+          "label": "Risk",
+          "description": "Which specific risk is being mitigated?",
+          "inputType": "TEXT",
+          "type": "string"
+        },
+        "expert": {
+          "label": "Expert",
+          "description": "Who should be contacted for additional information?",
+          "inputType": "TEXT",
+          "type": "string"
+        },
+        "instructions": {
+          "label": "Instructions",
+          "description": "What do you want the worksites to do?",
+          "inputType": "STEPS_LIST",
+          "inputTypeOptions": {
+            "multiline": true
+          },
+          "type": "array",
+          "items": {
+            "type": "CampaignStep"
+          },
+          "minItems": 1
+        },
+        "resourceHeader": {
+          "label": "Resources",
+          "value": "Attach the related links or files",
+          "inputType": "READONLY_TEXT",
+          "type": "string",
+          "optionalOverride": true
+        },
+        "links": {
+          "inputType": "LINK_RESOURCE",
+          "type": "array",
+          "defaultValue": []
+        },
+        "files": {
+          "inputType": "FILE",
+          "type": "array",
+          "defaultValue": []
+        },
+        "dueDate": {
+          "label": "Due date",
+          "description": "When do you need this done by?",
+          "inputType": "RELATIVE_DATE",
+          "type": "string",
+          "inputTypeOptions": {
+            "width": "50%",
+            "format": "dateTime"
+          }
+        },
+        "participants": {
+          "label": "Participating sites",
+          "inputType": "SITES_SELECTION",
+          "inputTypeOptions": {
+            "siteOptions": []
+          },
+          "type": "object",
+          "properties": {
+            "siteCount": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            }
+          },
+          "required": ["siteCount"],
+          "visibleForScopes": ["COMPANY", "DIVISION"]
+        }
+      },
+      "required": ["title", "trigger", "risk", "expert", "instructions", "dueDate", "participants"],
+      "draftRequired": ["title"],
+      "mapToTitle": "title",
+      "mapToDescription": "trigger",
+      "mapToSteps": "instructions",
+      "mapToSites": "participants",
+      "mapToEndDate": "dueDate"
+    },
+    "responses": {
+      "$id": "https://my-hiviz.app/Briefing.schema.json",
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Learning",
+      "type": "object",
+      "properties": {
+        "title": {
+          "label": "Title",
+          "inputType": "READONLY_HEADING",
+          "type": "string",
+          "value": "",
+          "answerMapping": {
+            "label": "title"
+          }
+        },
+        "trigger": {
+          "label": "Trigger",
+          "inputType": "READONLY_TEXT",
+          "type": "string",
+          "value": "",
+          "answerMapping": {
+            "value": "trigger"
+          }
+        },
+        "risk": {
+          "label": "Risk",
+          "inputType": "READONLY_TEXT",
+          "type": "string",
+          "value": "",
+          "answerMapping": {
+            "value": "risk"
+          }
+        },
+        "expert": {
+          "label": "Expert",
+          "inputType": "READONLY_TEXT",
+          "type": "string",
+          "value": "",
+          "answerMapping": {
+            "value": "expert"
+          }
+        },
+        "instructions": {
+          "label": "Instructions",
+          "inputType": "STEPS_LIST_CHECKABLE",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "value": [],
+          "nullable": false,
+          "answerMapping": {
+            "value": "instructions"
+          }
+        },
+        "resourceHeader": {
+          "label": "Resources",
+          "inputType": "READONLY_HEADING",
+          "type": "string",
+          "variant": "h6",
+          "answerMapping": {
+            "show": { "any": ["links", "files"] }
+          }
+        },
+        "links": {
+          "inputType": "READONLY_LINK_RESOURCE",
+          "type": "array",
+          "value": [],
+          "answerMapping": {
+            "value": "links"
+          }
+        },
+        "files": {
+          "inputType": "READONLY_FILE",
+          "type": "array",
+          "value": [],
+          "answerMapping": {
+            "value": "files"
+          }
+        }
+      },
+      "required": ["instructions"]
+    },
+    "report": {
+      "properties": {
+        "trigger": {
+          "label": "Trigger",
+          "inputType": "READONLY_TEXT",
+          "type": "string",
+          "value": "",
+          "answerMapping": {
+            "value": "trigger"
+          }
+        },
+        "risk": {
+          "label": "Risk",
+          "inputType": "READONLY_TEXT",
+          "type": "string",
+          "value": "",
+          "answerMapping": {
+            "value": "risk"
+          }
+        },
+        "expert": {
+          "label": "Expert",
+          "inputType": "READONLY_TEXT",
+          "type": "string",
+          "value": "",
+          "answerMapping": {
+            "value": "expert"
+          }
+        },
+        "resourceHeader": {
+          "label": "Resources",
+          "inputType": "READONLY_HEADING",
+          "type": "string",
+          "variant": "h6",
+          "answerMapping": {
+            "show": { "any": ["links", "files"] }
+          }
+        },
+        "links": {
+          "inputType": "READONLY_LINK_RESOURCE",
+          "type": "array",
+          "value": [],
+          "answerMapping": {
+            "value": "links"
+          }
+        },
+        "files": {
+          "inputType": "READONLY_FILE",
+          "type": "array",
+          "value": [],
+          "answerMapping": {
+            "value": "files"
+          }
+        },
+        "reportHeader": {
+          "label": "Report",
+          "inputType": "READONLY_HEADING",
+          "type": "string"
+        },
+        "chart1": {
+          "label": "Instructions",
+          "fieldKey": "instructions",
+          "inputType": "PROGRESS_LIST_CHART",
+          "sortType": "QUESTION"
+        }
+      },
+      "participants": {
+        "displayType": "SITE_STATUS",
+        "sitesSelectionCriteria": {},
+        "answerMapping": {
+          "sitesSelectionCriteria": "participants"
+        }
+      }
+    }
+  }
+}
