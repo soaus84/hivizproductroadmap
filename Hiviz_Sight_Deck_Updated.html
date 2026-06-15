@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Forge Works — From Visible Safety Leadership to Enabling the Safety of Work</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600;700&family=Hanken+Grotesk:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --brand-font: "Hanken Grotesk", system-ui, -apple-system, sans-serif;
+    --mono-font: "Geist Mono", ui-monospace, monospace;
+    --ink: #0A0A0A;
+    --paper: #EFEDE7;
+    --ink-soft: #525252;
+    --ink-muted: #A3A3A3;
+    --rule: #DEDCD4;
+    --rule-dark: rgba(255,255,255,0.12);
+    --lime: #FFFC36;
+    --hi-ink: #1A1F00;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    background: #0A0A0A;
+    font-family: var(--brand-font);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    height: 100%;
+  }
+
+  /* ── Deck shell ── */
+  .deck { width: 100vw; height: 100vh; position: relative; overflow: hidden; }
+  .slide {
+    position: absolute; inset: 0;
+    background: var(--paper);
+    color: var(--ink);
+    padding: 7vh 8vw;
+    display: flex;
+    flex-direction: column;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .4s ease;
+    overflow: hidden;
+  }
+  .slide.active { opacity: 1; pointer-events: all; }
+  .slide.dark { background: var(--ink); color: #F4F3EF; }
+
+  /* ── Type ── */
+  .eyebrow {
+    font-family: var(--mono-font);
+    font-size: clamp(12px, 1.1vw, 17px);
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    display: flex; align-items: center; gap: 14px;
+  }
+  .eyebrow::before { content: ""; width: 28px; height: 2px; background: currentColor; opacity: .5; }
+  .dark .eyebrow { color: var(--ink-muted); }
+  .eyebrow.lime { color: var(--hi-ink); }
+  .dark .eyebrow.lime { color: var(--lime); }
+  .dark .eyebrow.lime::before { background: var(--lime); opacity: 1; }
+
+  .display {
+    font-weight: 800;
+    letter-spacing: -2px;
+    line-height: 0.98;
+    text-wrap: balance;
+  }
+  .lead {
+    font-size: clamp(18px, 1.7vw, 27px);
+    line-height: 1.5;
+    font-weight: 500;
+    color: var(--ink-soft);
+    text-wrap: pretty;
+  }
+  .dark .lead { color: #BDBBB4; }
+  .muted2 { color: var(--ink-muted); }
+  .dark .muted2 { color: #6B6B66; }
+
+  /* ── Cover ── */
+  .cover { justify-content: space-between; }
+  .wordmark { font-weight: 900; letter-spacing: -4px; line-height: 0.9; font-size: clamp(80px, 10vw, 150px); }
+  .wordmark .hi { color: var(--lime); }
+  .cover-body { margin: auto 0; display: flex; flex-direction: column; gap: 2vh; }
+  .cover-foot { display: flex; justify-content: space-between; align-items: flex-end; }
+  .cover-foot .who { font-family: var(--mono-font); font-size: clamp(13px, 1vw, 16px); letter-spacing: 1px; color: var(--ink-muted); line-height: 1.7; }
+  .cover-foot .who b { color: #E8E7E1; font-weight: 600; }
+
+  /* ── Facts row ── */
+  .facts { display: grid; grid-template-columns: repeat(3, 1fr); margin-top: 3vh; border-top: 1px solid var(--rule); }
+  .fact { padding: clamp(16px, 2vh, 28px) clamp(20px, 2.5vw, 36px) 4px 0; border-right: 1px solid var(--rule); }
+  .fact:last-child { border-right: none; padding-right: 0; }
+  .fact .fk { font-family: var(--mono-font); font-size: clamp(11px, 0.9vw, 14px); font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--hi-ink); background: var(--lime); display: inline-block; padding: 4px 10px; border-radius: 4px; }
+  .fact .fv { font-size: clamp(16px, 1.5vw, 24px); line-height: 1.4; font-weight: 600; margin-top: 1.5vh; max-width: 18ch; }
+
+  /* ── Loop diagram ── */
+  .loop { display: grid; grid-template-columns: repeat(4, 1fr); margin-top: 1vh; }
+  .node { padding: 0 clamp(16px, 2vw, 30px); position: relative; }
+  .node:not(:first-child)::before {
+    content: ""; position: absolute; left: -8px; top: 28px; width: 14px; height: 14px;
+    border-top: 2px solid var(--lime); border-right: 2px solid var(--lime);
+    transform: rotate(45deg); opacity: .8;
+  }
+  .node .n { font-family: var(--mono-font); font-size: clamp(11px, 0.9vw, 15px); font-weight: 700; letter-spacing: 2px; color: var(--lime); }
+  .node .nt { font-size: clamp(22px, 2.2vw, 34px); font-weight: 800; letter-spacing: -1px; margin: 1.5vh 0 1vh; }
+  .node .nd { font-size: clamp(14px, 1.2vw, 19px); line-height: 1.45; font-weight: 500; color: #A9A8A0; max-width: 22ch; }
+
+  /* ── Loop 3-col variant ── */
+  .loop3 { display: grid; grid-template-columns: repeat(3, 1fr); margin-top: 1vh; }
+
+  /* ── Split layout ── */
+  .split { flex: 1; display: grid; grid-template-columns: 1fr 420px; gap: 5vw; align-items: center; min-height: 0; }
+  .copy { display: flex; flex-direction: column; gap: clamp(16px, 2.5vh, 30px); }
+
+  /* ── Bullet points ── */
+  .points { display: flex; flex-direction: column; gap: 1.5vh; margin-top: 0.5vh; }
+  .point { display: flex; gap: 14px; align-items: flex-start; }
+  .point .dot { width: 8px; height: 8px; border-radius: 99px; background: var(--ink); margin-top: 10px; flex-shrink: 0; }
+  .dark .point .dot { background: var(--lime); }
+  .point .pt { font-size: clamp(16px, 1.4vw, 21px); line-height: 1.42; font-weight: 600; color: var(--ink); }
+  .dark .point .pt { color: #E8E7E1; }
+  .point .pt .sub { display: block; font-size: clamp(13px, 1.1vw, 18px); font-weight: 500; color: var(--ink-soft); margin-top: 2px; }
+  .dark .point .pt .sub { color: #9A9991; }
+
+  /* ── Phone mockup placeholder ── */
+  .phone-wrap { display: flex; align-items: center; justify-content: center; height: 100%; }
+  .phone {
+    width: min(460px, 92vw);
+    height: 80vh;
+    background: #1A1A1A;
+    border-radius: 40px;
+    border: 2px solid rgba(255,255,255,0.08);
+    display: flex; flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 40px 80px rgba(0,0,0,0.5);
+    position: relative;
+  }
+  .phone-bar { height: 40px; background: #111; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .phone-notch { width: 80px; height: 22px; background: #0A0A0A; border-radius: 0 0 14px 14px; }
+  .phone-screen { flex: 1; padding: 22px 20px; display: flex; flex-direction: column; gap: 16px; overflow: hidden; }
+  .phone-screen.insight-screen { gap: 14px; }
+  .insight-panel { width: min(460px, 92vw); display: flex; flex-direction: column; gap: 16px; }
+  .chat-bubble { border-radius: 16px; padding: 14px 18px; font-size: 15px; line-height: 1.65; max-width: 92%; }
+  .chat-bubble.them { background: #2A2A2A; color: #E0DFD8; align-self: flex-start; }
+  .chat-bubble.me { background: var(--lime); color: var(--hi-ink); align-self: flex-end; font-weight: 600; }
+  .insight-card { background: #1E1E1E; border: 1px solid rgba(255,252,54,0.2); border-radius: 18px; padding: 18px; }
+  .insight-card .ic-label { font-family: var(--mono-font); font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--lime); margin-bottom: 8px; }
+  .insight-card .ic-title { font-size: 16px; font-weight: 700; color: #E8E7E1; line-height: 1.4; margin-bottom: 10px; }
+  .insight-card .ic-body { font-size: 14px; color: #9A9991; line-height: 1.65; }
+  .insight-card .ic-tag { display: inline-block; background: rgba(255,252,54,0.12); color: var(--lime); font-family: var(--mono-font); font-size: 11px; letter-spacing: 1px; padding: 5px 10px; border-radius: 6px; margin-top: 10px; }
+
+  /* ── AI tag ── */
+  .ai-tag { font-family: var(--mono-font); font-size: clamp(12px, 1vw, 15px); font-weight: 600; letter-spacing: 1px; color: var(--hi-ink); background: var(--lime); padding: 6px 12px; border-radius: 5px; display: inline-flex; align-items: center; gap: 6px; }
+
+  /* ── Close CTA ── */
+  .close-wrap { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: clamp(24px, 4vh, 40px); }
+  .close-cta { display: inline-flex; align-items: center; gap: 12px; font-family: var(--mono-font); font-size: clamp(14px, 1.2vw, 19px); letter-spacing: 1px; color: var(--lime); border: 1px solid var(--rule-dark); border-radius: 99px; padding: 14px 24px; align-self: flex-start; }
+
+  /* ── Page number ── */
+  .pageno { position: absolute; bottom: 3vh; right: 3.5vw; font-family: var(--mono-font); font-size: 13px; letter-spacing: 2px; color: var(--ink-muted); }
+  .dark .pageno { color: #5A5A55; }
+
+  /* ── Nav ── */
+  .nav { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; z-index: 100; }
+  .nav button {
+    width: 8px; height: 8px; border-radius: 99px;
+    border: none; background: rgba(255,255,255,0.2);
+    cursor: pointer; transition: all .2s;
+    padding: 0;
+  }
+  .nav button.on { background: var(--lime); width: 24px; }
+  .nav-arrows { position: fixed; bottom: 20px; right: 32px; display: flex; gap: 8px; z-index: 100; }
+  .nav-arrows button {
+    width: 40px; height: 40px; border-radius: 99px;
+    border: 1px solid rgba(255,255,255,0.15);
+    background: rgba(255,255,255,0.05);
+    color: #fff; font-size: 18px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background .2s;
+  }
+  .nav-arrows button:hover { background: rgba(255,255,255,0.12); }
+
+  /* ── Entrance animation ── */
+  @media (prefers-reduced-motion: no-preference) {
+    .slide.active .anim { animation: rise .55s cubic-bezier(.2,.7,.2,1) both; }
+    .slide.active .anim:nth-child(2) { animation-delay: .06s; }
+    .slide.active .anim:nth-child(3) { animation-delay: .12s; }
+    .slide.active .anim:nth-child(4) { animation-delay: .18s; }
+    .slide.active .anim:nth-child(5) { animation-delay: .24s; }
+  }
+  @keyframes rise { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+</style>
+</head>
+<body>
+
+<div class="deck">
+
+  <!-- 01 COVER -->
+  <div class="slide dark cover active">
+    <div class="anim eyebrow lime">Forge Works &middot; Field Safety Leadership</div>
+    <div class="cover-body anim">
+      <div class="wordmark">Hiviz Sight<span class="hi">.</span></div>
+      <p class="display" style="font-size:clamp(36px,4vw,58px); margin-top:3vh; max-width:20ch; color:#F4F3EF;">From visible safety leadership to improving the safety of work.</p>
+      <p class="lead" style="max-width:44ch; margin-top:2vh;">What the research says &mdash; and what it means for how your program is built.</p>
+    </div>
+    <div class="anim cover-foot">
+      <div class="who">PRESENTED BY<br><b>Forge Works</b></div>
+    </div>
+  </div>
+
+  <!-- 02 THE FINDING -->
+  <div class="slide">
+    <div class="anim eyebrow">The research finding</div>
+    <div class="anim" style="margin-top:4vh;">
+      <h2 class="display" style="font-size:clamp(32px,4.5vw,80px);">Most safety leadership programs<br>measure safety work &mdash;<br><span class="muted2">not the safety of work.</span></h2>
+    </div>
+    <p class="anim lead" style="max-width:62ch; margin-top:3vh;">Visits are counted. Actions are closed. Conditions go unchanged. The program looks active while the risk stays exactly where it was.</p>
+    <div class="anim facts">
+      <div class="fact"><span class="fk">Activity</span><div class="fv">Visits completed, observations logged, actions closed.</div></div>
+      <div class="fact"><span class="fk">Outcome</span><div class="fv">Conditions unchanged. Risk unreduced.</div></div>
+      <div class="fact"><span class="fk">The gap</span><div class="fv">No mechanism to convert field insight into system change.</div></div>
+    </div>
+    <div class="pageno">02</div>
+  </div>
+
+  <!-- 03 WHY IT FAILS -->
+  <div class="slide dark">
+    <div class="anim eyebrow lime">Why programs plateau</div>
+    <h2 class="anim display" style="font-size:clamp(28px,4vw,72px); margin-top:3vh; max-width:22ch;">Four traps that keep the loop from closing.</h2>
+    <div class="anim loop" style="margin-top:auto; padding-bottom:2vh;">
+      <div class="node">
+        <div class="n">TRAP 01</div>
+        <div class="nt">Scripted engagement</div>
+        <div class="nd">Generic checklists and scripted visits make the field conversation symbolic, not real.</div>
+      </div>
+      <div class="node">
+        <div class="n">TRAP 02</div>
+        <div class="nt">Siloed learning</div>
+        <div class="nd">A weak signal on one site never reaches the team managing the next. Learning stays local.</div>
+      </div>
+      <div class="node">
+        <div class="n">TRAP 03</div>
+        <div class="nt">Activity metrics</div>
+        <div class="nd">If the measure is visits and closures, the program optimises for visits and closures &mdash; not change.</div>
+      </div>
+      <div class="node">
+        <div class="n">TRAP 04</div>
+        <div class="nt">Unresolved trade-offs</div>
+        <div class="nd">Production pressure versus safety goes untracked. Leaders manage it locally. The pattern stays invisible.</div>
+      </div>
+    </div>
+    <div class="pageno">03</div>
+  </div>
+
+  <!-- 04 THE PRESCRIPTION -->
+  <div class="slide">
+    <div class="anim eyebrow">What the research prescribes</div>
+    <h2 class="anim display" style="font-size:clamp(32px,4.5vw,80px); margin-top:3vh; max-width:20ch;">Stop counting.<br><span class="muted2">Start converting.</span></h2>
+    <p class="anim lead" style="max-width:58ch; margin-top:3vh;">Field insight needs a mechanism to become operational change &mdash; at the system level, not just the site level. The program&rsquo;s job is to make that conversion reliable.</p>
+    <div class="anim facts" style="margin-top:auto;">
+      <div class="fact"><span class="fk">Practice</span><div class="fv">Are leaders engaging with real work, or performing a visit?</div></div>
+      <div class="fact"><span class="fk">Response</span><div class="fv">How quickly does a signal become an action? Does it hold?</div></div>
+      <div class="fact"><span class="fk">Improvement</span><div class="fv">Are conditions actually changing? Is the same risk recurring?</div></div>
+    </div>
+    <div class="pageno">04</div>
+  </div>
+
+  <!-- 05 THE FORGE WORKS APPROACH -->
+  <div class="slide dark">
+    <div class="anim eyebrow lime">The Forge Works approach</div>
+    <h2 class="anim display" style="font-size:clamp(28px,4vw,72px); margin-top:3vh; max-width:22ch;">We build the mechanisms the research describes.</h2>
+    <div class="anim loop3" style="margin-top:auto; padding-bottom:2vh;">
+      <div class="node">
+        <div class="n">CONSULTING</div>
+        <div class="nt">Program design</div>
+        <div class="nd">Leadership capability built around real work, not scripted visits. Structured for vertical integration across every level.</div>
+      </div>
+      <div class="node">
+        <div class="n">TRAINING</div>
+        <div class="nt">Safety Futures</div>
+        <div class="nd">Supervisors and managers learn to surface what is actually happening &mdash; not what is easy to report.</div>
+      </div>
+      <div class="node">
+        <div class="n">SOFTWARE</div>
+        <div class="nt">Hiviz Sight</div>
+        <div class="nd">The field intelligence layer that helps close the leaderhship loop &mdash; from what the field sees, to the insight that acts on it.</div>
+      </div>
+    </div>
+    <div class="pageno">05</div>
+  </div>
+
+  <!-- 06 HIVIZ SIGHT INTRO -->
+  <div class="slide">
+    <div class="split">
+      <div class="copy">
+        <div class="anim eyebrow">Sneak peek &middot; Hiviz Sight</div>
+        <h2 class="anim display" style="font-size:clamp(28px,4vw,72px);">The leadership loop,<br>built as a system.</h2>
+        <p class="anim lead" style="max-width:32ch;">A field app for the way supervisors and managers actually work. Short conversations, not forms. Real intelligence, not activity counts.</p>
+        <div class="anim points">
+          <div class="point"><span class="dot"></span><div class="pt">Observation in a conversation<span class="sub">Four exchanges, no fields. Classified as it is captured.</span></div></div>
+          <div class="point"><span class="dot"></span><div class="pt">Visit briefed by live site intelligence<span class="sub">Every visit arrives informed by what has actually been happening on that site.</span></div></div>
+          <div class="point"><span class="dot"></span><div class="pt">Cross-site patterns, not isolated reports<span class="sub">A signal on one site becomes an insight for every site.</span></div></div>
+        </div>
+      </div>
+      <div class="phone-wrap anim">
+        <div class="phone">
+          <div class="phone-bar"><div class="phone-notch"></div></div>
+          <div class="phone-screen">
+            <div class="chat-bubble them">What did you observe on site today?</div>
+            <div class="chat-bubble me">Crane operator bypassing the spotter. Third time this week.</div>
+            <div class="chat-bubble them">Noted. Was there production pressure involved?</div>
+            <div class="chat-bubble me">Yes &mdash; behind schedule, supervisor said keep moving.</div>
+            <div class="chat-bubble them">Got it. Classifying as Goal Conflict &middot; High Energy. Filing now.</div>
+            <div class="chat-bubble them" style="opacity:.5; font-size:11px;">Observation saved &mdash; syncing when back in range.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="pageno">06</div>
+  </div>
+
+  <!-- 07 FROM FIELD TO CHANGE -->
+  <div class="slide">
+    <div class="split">
+      <div class="copy">
+        <div class="anim eyebrow">How the loop closes</div>
+        <h2 class="anim display" style="font-size:clamp(26px,3.8vw,68px);">What the field sees <span class="muted2">changes what gets done.</span></h2>
+        <p class="anim lead" style="max-width:34ch;">Hiviz Sight turns field observations into Critical Insights &mdash; naming the systemic cause, surfacing the evidence, and feeding it back into visits, toolbox talks and verified controls.</p>
+        <div class="anim points">
+          <div class="point"><span class="dot"></span><div class="pt">A single observation can trigger a formal review<span class="sub">No need to wait for a pattern or an incident.</span></div></div>
+          <div class="point"><span class="dot"></span><div class="pt">Goal conflict tracked continuously<span class="sub">Production-versus-safety pressure measured across every site, not managed case by case.</span></div></div>
+          <div class="point"><span class="dot"></span><div class="pt">Reporting answers the right question<span class="sub">Are conditions improving &mdash; not did we complete our visits.</span></div></div>
+        </div>
+      </div>
+      <div class="insight-panel anim">
+        <div class="insight-card">
+          <div class="ic-label">&#9670; Critical Insight</div>
+          <div class="ic-title">Goal conflict pattern &mdash; Crane operations across 3 sites</div>
+          <div class="ic-body">Production pressure consistently overriding spotter protocols. 7 observations in 14 days. Systemic cause: scheduling targets vs. procedural requirements.</div>
+          <div class="ic-tag">Goal Conflict &middot; High Energy</div>
+        </div>
+        <div class="insight-card">
+          <div class="ic-label">&#9670; Toolbox Talk Generated</div>
+          <div class="ic-title">Crane spotter compliance &mdash; why it matters now</div>
+          <div class="ic-body">Based on recent field observations. Ready to deliver.</div>
+        </div>
+        <div class="insight-card">
+          <div class="ic-label">&#9670; Field Enquiry Sent</div>
+          <div class="ic-title">Learning spotter behaviour across sites</div>
+          <div class="ic-body">An enquiry has been sent to site teams to capture spotter handover compliance, pressure points, and bypass drivers in daily crane operations.</div>
+        </div>
+        <div class="insight-card">
+          <div class="ic-label">&#9670; Action Sent</div>
+          <div class="ic-title">Spotter verification and escalation campaign</div>
+          <div class="ic-body">Sites are asked to reinforce spotter protocol, log any deviations, and escalate production pressure issues so supervisors can intervene promptly.</div>
+        </div>
+      </div>
+    </div>
+    <div class="pageno">07</div>
+  </div>
+
+  <!-- 08 CLOSE -->
+  <div class="slide dark cover">
+    <div class="anim eyebrow lime">Let&rsquo;s explore this together</div>
+    <div class="anim close-wrap">
+      <h2 class="display" style="font-size:clamp(32px,5vw,90px); color:#F4F3EF; max-width:18ch;">Need to increase visibility into your sites?</h2>
+      <p class="lead" style="max-width:42ch;">A conversation with your safety leadership team &mdash; your sites, your risks, your current program. No pitch. Just the research, and what it makes possible.</p>
+      <div class="close-cta">Start the conversation &rarr;</div>
+    </div>
+    <div class="anim cover-foot">
+      <div class="who"><b>Forge Works</b><br>forgeworks.com</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Nav dots + arrows -->
+<div class="nav" id="nav"></div>
+<div class="nav-arrows">
+  <button onclick="go(-1)" aria-label="Previous">&#8592;</button>
+  <button onclick="go(1)" aria-label="Next">&#8594;</button>
+</div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const nav = document.getElementById('nav');
+  let cur = 0;
+
+  slides.forEach((_, i) => {
+    const b = document.createElement('button');
+    if (i === 0) b.classList.add('on');
+    b.setAttribute('aria-label', 'Slide ' + (i+1));
+    b.onclick = () => show(i);
+    nav.appendChild(b);
+  });
+
+  function show(n) {
+    slides[cur].classList.remove('active');
+    nav.children[cur].classList.remove('on');
+    cur = (n + slides.length) % slides.length;
+    slides[cur].classList.add('active');
+    nav.children[cur].classList.add('on');
+  }
+
+  function go(d) { show(cur + d); }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') { e.preventDefault(); go(1); }
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); go(-1); }
+  });
+</script>
+</body>
+</html>
