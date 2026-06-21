@@ -684,7 +684,7 @@ async function sendMessage() {
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method:'POST',
       headers:{ 'Content-Type':'application/json', 'x-api-key':apiKey, 'anthropic-version':'2023-06-01', 'anthropic-dangerous-direct-browser-access':'true' },
-      body: JSON.stringify({ model:'claude-sonnet-4-20250514', max_tokens:600, system:systemPrompt, messages:conversationHistory })
+      body: JSON.stringify({ model:'claude-sonnet-4-6', max_tokens:600, system:systemPrompt, messages:conversationHistory })
     });
     if (!response.ok) { const err = await response.json(); throw new Error(err.error?.message || 'API error'); }
     const data = await response.json();
@@ -767,7 +767,7 @@ async function runEnrichment(msgs) {
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
-      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1000, system: ENRICH_SYSTEM, messages: [{ role: 'user', content: buildEnrichPrompt(captureData) }] })
+      body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 1000, system: ENRICH_SYSTEM, messages: [{ role: 'user', content: buildEnrichPrompt(captureData) }] })
     });
     const data = await response.json();
     const raw = data.content[0].text.replace(/```json|```/g, '').trim();

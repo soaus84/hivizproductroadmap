@@ -1555,7 +1555,7 @@ async function sendMessage() {
         'anthropic-dangerous-direct-browser-access': 'true'
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-6',
         max_tokens: 600,
         system: systemPrompt,
         messages: conversationHistory
@@ -1742,7 +1742,7 @@ Return ONLY valid JSON, no preamble:
         'anthropic-dangerous-direct-browser-access': 'true'
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-6',
         max_tokens: 800,
         messages: [{ role: 'user', content: enrichContent }]
       })
@@ -1928,7 +1928,7 @@ Work type: ${item.work_type || 'unknown'}
             'anthropic-dangerous-direct-browser-access': 'true'
           },
           body: JSON.stringify({
-            model: 'claude-sonnet-4-20250514',
+            model: 'claude-sonnet-4-6',
             max_tokens: 400,
             messages: [{ role: 'user', content: enrichPrompt }]
           })
@@ -2063,7 +2063,7 @@ Work type: ${obs.work_type || 'unknown'}
         'anthropic-dangerous-direct-browser-access': 'true'
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-6',
         max_tokens: 400,
         messages: [{ role: 'user', content: enrichPrompt }]
       })

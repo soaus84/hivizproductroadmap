@@ -642,7 +642,7 @@ async function streamCall(sysPrompt, userPrompt, maxTokens) {
       'anthropic-dangerous-direct-browser-access': 'true',
       'content-type': 'application/json',
     },
-    body: JSON.stringify({ model:'claude-sonnet-4-20250514', max_tokens:maxTokens, stream:true, system:sysPrompt, messages:[{role:'user',content:userPrompt}] })
+    body: JSON.stringify({ model:'claude-sonnet-4-6', max_tokens:maxTokens, stream:true, system:sysPrompt, messages:[{role:'user',content:userPrompt}] })
   });
   if (!res.ok) throw new Error('API error ' + res.status + ': ' + await res.text());
   const reader = res.body.getReader(); const dec = new TextDecoder(); let buf = '';
