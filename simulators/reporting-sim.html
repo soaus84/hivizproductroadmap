@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manager Monthly Report — Hiviz Dry Sim</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap');
+:root {
+  --bg:#0a0b0d; --surface:#13141a; --surface2:#1a1b23; --surface3:#1e1f28;
+  --border:#252630; --text:#dde1eb; --muted:#5a5d6e; --bright:#e8ecf8;
+  --mono:'IBM Plex Mono',monospace; --sans:'IBM Plex Sans',sans-serif;
+  --plum:#7635DC; --plum-dim:rgba(118,53,220,0.12); --plum-border:rgba(118,53,220,0.3); --plum-text:#a78bfa;
+  --amber:#d97706; --amber-dim:rgba(217,119,6,0.12); --amber-border:rgba(217,119,6,0.28); --amber-text:#fbbf24;
+  --green:#059669; --green-dim:rgba(5,150,105,0.12); --green-border:rgba(5,150,105,0.28); --green-text:#34d399;
+  --red:#dc2626; --red-dim:rgba(220,38,38,0.12); --red-border:rgba(220,38,38,0.28); --red-text:#f87171;
+  --blue:#2563eb; --blue-dim:rgba(37,99,235,0.12); --blue-border:rgba(37,99,235,0.3); --blue-text:#60a5fa;
+  --gold:#d4a843;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:13px;line-height:1.6;display:flex;flex-direction:column;overflow:hidden;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(118,53,220,0.02) 1px,transparent 1px),linear-gradient(90deg,rgba(118,53,220,0.02) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0;}
+
+.hdr{position:relative;z-index:10;padding:13px 22px 11px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;gap:20px;background:rgba(10,11,13,0.96);backdrop-filter:blur(10px);flex-shrink:0;}
+.hdr-left{}
+.hdr-logo{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:2px;color:var(--gold);margin-bottom:2px;}
+.hdr-title{font-family:var(--mono);font-size:15px;font-weight:700;color:var(--bright);}
+.hdr-sub{font-size:11px;color:var(--muted);margin-top:2px;line-height:1.5;max-width:600px;}
+.hdr-badges{display:flex;gap:5px;margin-top:6px;flex-wrap:wrap;}
+.badge{font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:2px 7px;border-radius:3px;}
+.b-dry{background:var(--surface2);color:var(--muted);border:1px solid var(--border);}
+.b-spec{background:var(--plum-dim);color:var(--plum-text);border:1px solid var(--plum-border);}
+.b-scope{background:var(--amber-dim);color:var(--amber-text);border:1px solid var(--amber-border);}
+
+.app{display:flex;flex:1;min-height:0;overflow:hidden;position:relative;z-index:1;}
+
+/* Left — config panel */
+.left{width:260px;flex-shrink:0;border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto;background:var(--surface);}
+.left::-webkit-scrollbar{width:3px;}
+.left::-webkit-scrollbar-thumb{background:var(--border);}
+.panel-hdr{padding:10px 13px 8px;border-bottom:1px solid var(--border);flex-shrink:0;}
+.ph-label{font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--plum-text);margin-bottom:2px;}
+.ph-title{font-family:var(--mono);font-size:11px;font-weight:600;color:var(--bright);}
+.ph-sub{font-size:10px;color:var(--muted);margin-top:1px;}
+
+.config-section{padding:10px 13px;border-bottom:1px solid var(--border);}
+.cs-label{font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
+
+.ws-row{display:flex;align-items:center;justify-content:space-between;padding:6px 8px;border-radius:5px;margin-bottom:4px;border:1px solid var(--border);background:var(--surface2);}
+.ws-row.always-on{border-color:var(--green-border);background:var(--green-dim);}
+.ws-row.active{border-color:var(--plum-border);background:var(--plum-dim);}
+.ws-info{}
+.ws-name{font-family:var(--mono);font-size:10px;font-weight:600;color:var(--bright);}
+.ws-row.always-on .ws-name{color:var(--green-text);}
+.ws-row.active .ws-name{color:var(--plum-text);}
+.ws-desc{font-size:9px;color:var(--muted);margin-top:1px;}
+.ws-tag{font-family:var(--mono);font-size:8px;padding:1px 5px;border-radius:3px;font-weight:700;}
+.tag-on{background:var(--green-dim);color:var(--green-text);border:1px solid var(--green-border);}
+.tag-off{background:var(--surface3);color:var(--muted);border:1px solid var(--border);}
+
+.toggle{width:28px;height:15px;border-radius:8px;border:none;cursor:pointer;position:relative;transition:background 0.2s;flex-shrink:0;}
+.toggle.on{background:var(--plum);}
+.toggle.off{background:var(--border);}
+.toggle::after{content:'';position:absolute;top:2px;left:2px;width:11px;height:11px;border-radius:50%;background:white;transition:transform 0.2s;}
+.toggle.on::after{transform:translateX(13px);}
+
+.scenario-btns{display:flex;flex-direction:column;gap:4px;}
+.scenario-btn{padding:6px 10px;border-radius:4px;border:1px solid var(--border);background:var(--surface2);color:var(--muted);font-family:var(--mono);font-size:9px;font-weight:600;cursor:pointer;text-align:left;transition:all 0.15s;}
+.scenario-btn:hover{border-color:var(--plum-border);color:var(--plum-text);}
+.scenario-btn.active-scenario{border-color:var(--plum-border);background:var(--plum-dim);color:var(--plum-text);}
+.scenario-btn .sb-sub{font-family:var(--sans);font-size:9px;color:var(--muted);font-weight:400;margin-top:1px;}
+
+.module-list{display:flex;flex-direction:column;gap:3px;}
+.mod-item{display:flex;align-items:center;gap:6px;padding:5px 8px;border-radius:4px;border:1px solid transparent;}
+.mod-item.included{border-color:var(--green-border);background:var(--green-dim);}
+.mod-item.omitted{border-color:var(--border);background:var(--surface2);opacity:0.5;}
+.mod-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.mod-item.included .mod-dot{background:var(--green);}
+.mod-item.omitted .mod-dot{background:var(--muted);}
+.mod-name{font-family:var(--mono);font-size:9px;font-weight:600;color:var(--bright);}
+.mod-item.omitted .mod-name{color:var(--muted);}
+.mod-gate{font-family:var(--mono);font-size:8px;color:var(--muted);margin-left:auto;}
+.mod-item.included .mod-gate{color:var(--green-text);}
+
+/* Center — report data */
+.center{flex:1;min-width:0;display:flex;flex-direction:column;overflow:hidden;border-right:1px solid var(--border);}
+.center-hdr{padding:10px 16px 8px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.ch-title{font-family:var(--mono);font-size:11px;font-weight:600;color:var(--bright);}
+.ch-period{font-family:var(--mono);font-size:10px;color:var(--amber-text);background:var(--amber-dim);border:1px solid var(--amber-border);padding:2px 8px;border-radius:3px;}
+.center-body{flex:1;overflow-y:auto;padding:14px 16px;display:flex;flex-direction:column;gap:10px;}
+.center-body::-webkit-scrollbar{width:3px;}
+.center-body::-webkit-scrollbar-thumb{background:var(--border);}
+
+.module-card{border:1px solid var(--border);border-radius:6px;overflow:hidden;}
+.module-card.omitted-card{opacity:0.35;}
+.mc-hdr{padding:7px 12px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);}
+.mc-hdr.included-hdr{background:var(--green-dim);border-bottom-color:var(--green-border);}
+.mc-hdr.omitted-hdr{background:var(--surface2);}
+.mc-name{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;}
+.mc-hdr.included-hdr .mc-name{color:var(--green-text);}
+.mc-hdr.omitted-hdr .mc-name{color:var(--muted);}
+.mc-status{font-family:var(--mono);font-size:8px;padding:2px 6px;border-radius:3px;font-weight:700;}
+.s-included{background:var(--green-dim);color:var(--green-text);border:1px solid var(--green-border);}
+.s-omitted{background:var(--surface3);color:var(--muted);border:1px solid var(--border);}
+.mc-body{padding:10px 12px;background:var(--surface);display:flex;flex-wrap:wrap;gap:8px;}
+.mc-omit-msg{padding:8px 12px;background:var(--surface);font-size:10px;color:var(--muted);font-style:italic;}
+
+.stat{min-width:80px;}
+.stat-val{font-family:var(--mono);font-size:18px;font-weight:700;color:var(--bright);line-height:1;}
+.stat-val.good{color:var(--green-text);}
+.stat-val.warn{color:var(--amber-text);}
+.stat-val.bad{color:var(--red-text);}
+.stat-lbl{font-size:9px;color:var(--muted);margin-top:2px;}
+
+.divider{width:1px;background:var(--border);margin:0 2px;}
+
+.sub-section{width:100%;border-top:1px solid var(--border);padding-top:8px;margin-top:4px;}
+.ss-label{font-family:var(--mono);font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:5px;}
+.row-items{display:flex;flex-wrap:wrap;gap:6px;}
+.row-item{font-family:var(--mono);font-size:9px;padding:2px 7px;border-radius:3px;border:1px solid var(--border);background:var(--surface2);color:var(--text);}
+.row-item.highlight{border-color:var(--plum-border);background:var(--plum-dim);color:var(--plum-text);}
+
+.site-pill{display:flex;align-items:center;gap:5px;font-family:var(--mono);font-size:9px;padding:3px 7px;border-radius:4px;border:1px solid var(--amber-border);background:var(--amber-dim);color:var(--amber-text);}
+.site-pill.critical{border-color:var(--red-border);background:var(--red-dim);color:var(--red-text);}
+
+/* Right — AI summary */
+.right{width:320px;flex-shrink:0;display:flex;flex-direction:column;overflow:hidden;}
+.right-hdr{padding:10px 14px 8px;border-bottom:1px solid var(--border);flex-shrink:0;}
+.rh-label{font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--plum-text);margin-bottom:2px;}
+.rh-title{font-family:var(--mono);font-size:11px;font-weight:600;color:var(--bright);}
+.rh-model{font-family:var(--mono);font-size:9px;color:var(--muted);margin-top:1px;}
+.right-body{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:12px;}
+.right-body::-webkit-scrollbar{width:3px;}
+.right-body::-webkit-scrollbar-thumb{background:var(--border);}
+
+.summary-box{border:1px solid var(--plum-border);border-radius:6px;background:var(--plum-dim);padding:12px 14px;}
+.summary-text{font-size:12px;line-height:1.75;color:var(--bright);}
+
+.null-box{border:1px solid var(--border);border-radius:6px;background:var(--surface2);padding:10px 12px;font-size:10px;color:var(--muted);font-style:italic;line-height:1.5;}
+
+.prior-box{border:1px solid var(--border);border-radius:5px;background:var(--surface2);overflow:hidden;}
+.pb-hdr{padding:5px 10px;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;}
+.pb-body{padding:8px 10px;font-size:10px;color:var(--muted);font-style:italic;line-height:1.6;}
+
+.modules-used{border:1px solid var(--border);border-radius:5px;background:var(--surface);overflow:hidden;}
+.mu-hdr{padding:5px 10px;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;}
+.mu-body{padding:8px 10px;display:flex;flex-wrap:wrap;gap:4px;}
+.mu-chip{font-family:var(--mono);font-size:8px;padding:2px 6px;border-radius:3px;border:1px solid var(--green-border);background:var(--green-dim);color:var(--green-text);}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-left">
+    <div class="hdr-logo">HIVIZ · FORGE WORKS</div>
+    <div class="hdr-title">Manager Monthly Report — Assembly Sim</div>
+    <div class="hdr-sub">Shows how the report assembles from active workspace modules, how missing modules are handled, and what the AI summary looks like for each configuration.</div>
+    <div class="hdr-badges">
+      <span class="badge b-dry">DRY SIM</span>
+      <span class="badge b-spec">REPORTING.md</span>
+      <span class="badge b-scope">report.manager_monthly</span>
+    </div>
+  </div>
+</div>
+
+<div class="app">
+
+  <!-- LEFT: Config -->
+  <div class="left">
+    <div class="panel-hdr">
+      <div class="ph-label">Configuration</div>
+      <div class="ph-title">Report Assembly</div>
+      <div class="ph-sub">Toggle modules and month to test resilience</div>
+    </div>
+
+    <div class="config-section">
+      <div class="cs-label">Period</div>
+      <div class="ws-row" id="month-row">
+        <div class="ws-info">
+          <div class="ws-name" id="month-label">First month</div>
+          <div class="ws-desc" id="month-desc">No prior period — no trend language</div>
+        </div>
+        <button class="toggle off" id="toggle-month" onclick="toggleMonth()"></button>
+      </div>
+    </div>
+
+    <div class="config-section">
+      <div class="cs-label">Modules</div>
+      <div id="module-toggles"></div>
+    </div>
+  </div>
+
+  <!-- CENTER: Report data -->
+  <div class="center">
+    <div class="center-hdr">
+      <div class="ch-title">Assembled Report Data</div>
+      <div class="ch-period">May 2026</div>
+    </div>
+    <div class="center-body" id="report-body"></div>
+  </div>
+
+  <!-- RIGHT: AI summary -->
+  <div class="right">
+    <div class="right-hdr">
+      <div class="rh-label">AI Summary Job</div>
+      <div class="rh-title">executive_summary</div>
+      <div class="rh-model">report.generate_summary · claude-sonnet-4-6</div>
+    </div>
+    <div class="right-body" id="summary-body"></div>
+  </div>
+
+</div>
+
+<script>
+const state = {
+  modules: {
+    insight_pipeline:    true,
+    visits_observations: true,
+    visibility:          true,
+    incident_activity:   false,
+    corrective_actions:  false,
+    enquiry_activity:    false,
+  },
+  subsequentMonth: false,
+};
+
+const MODULES = [
+  { key: 'insight_pipeline',    label: 'insight_pipeline' },
+  { key: 'visits_observations', label: 'visits_observations' },
+  { key: 'visibility',          label: 'visibility' },
+  { key: 'incident_activity',   label: 'incident_activity' },
+  { key: 'corrective_actions',  label: 'corrective_actions' },
+  { key: 'enquiry_activity',    label: 'enquiry_activity' },
+];
+
+const DATA = {
+  insight_pipeline: {
+    generated: 14, approved: 9, rejected: 2, resolved_this_period: 4,
+    by_trigger_source: { algorithm: 5, critical_observation: 6, atrophy_pattern: 2, external_investigation: 1, manual: 0, external_alert: 0 },
+    pipeline_stage_snapshot: { prioritise: 3, learn: 4, improve: 7, resolved: 11 },
+    top_fw_factors: ['Supervisor Capability (4)', 'Worksite Conditions (3)', 'Procedure Compliance (3)'],
+    escalated_to_systemic: 1,
+  },
+  visits_observations: {
+    observations_submitted: 47, visits_conducted: 11, sites_visited: 8,
+    by_signal_type: { at_risk_condition: 29, barrier_failure: 9, unwanted_energy_event: 3, positive_practice: 6 },
+    stop_work_called: 2, stop_work_ai_warranted: 4,
+  },
+  visibility: {
+    sites_total: 10, sites_visited_this_period: 8,
+    sites_not_visited_30d: 2, sites_not_visited_60d: 0,
+    avg_days_since_last_visit: 18,
+    sites_with_observations: 8, sites_with_no_observations: 2,
+    low_visibility_sites: [
+      { name: 'Northside Civil Works', days_since_visit: 38, obs_count: 1 },
+      { name: 'Harbour Precinct Stage 2', days_since_visit: 31, obs_count: 0 },
+    ],
+  },
+  incident_activity: {
+    reported: 3,
+    by_severity: { critical: 0, serious: 1, moderate: 2, minor: 0 },
+    investigations_opened: 1, investigations_closed: 1, investigations_overdue: 0,
+  },
+};
+
+const PRIOR_SUMMARY = `April saw the pipeline establish steady rhythm — 11 insights generated, 7 approved, with Supervisor Capability emerging as the dominant FW Map® factor for the first time. Observation volume was solid at 42 across 7 sites, though one site remained quiet throughout the month. One incident was reported and the associated investigation was still open at period end. Overall a positive first month of the intelligence loop running at scale.`;
+
+function toggleMonth() {
+  state.subsequentMonth = !state.subsequentMonth;
+  const t = document.getElementById('toggle-month');
+  const r = document.getElementById('month-row');
+  const lbl = document.getElementById('month-label');
+  const desc = document.getElementById('month-desc');
+  if (state.subsequentMonth) {
+    t.classList.add('on'); t.classList.remove('off');
+    r.classList.add('active');
+    lbl.textContent = 'Subsequent month';
+    desc.textContent = 'Prior period available — trend language enabled';
+  } else {
+    t.classList.remove('on'); t.classList.add('off');
+    r.classList.remove('active');
+    lbl.textContent = 'First month';
+    desc.textContent = 'No prior period — no trend language';
+  }
+  render();
+}
+
+function toggleModule(key) {
+  state.modules[key] = !state.modules[key];
+  const t = document.getElementById('toggle-mod-' + key);
+  const r = document.getElementById('mod-row-' + key);
+  if (state.modules[key]) {
+    t.classList.add('on'); t.classList.remove('off');
+    r.classList.add('active');
+  } else {
+    t.classList.remove('on'); t.classList.add('off');
+    r.classList.remove('active');
+  }
+  render();
+}
+
+function render() {
+  renderModuleToggles();
+  renderReportBody();
+  renderSummary();
+}
+
+function renderModuleToggles() {
+  const el = document.getElementById('module-toggles');
+  if (el.children.length) return; // already built — toggles update via toggleModule()
+  el.innerHTML = MODULES.map(m => {
+    const on = state.modules[m.key];
+    return `<div class="ws-row ${on ? 'active' : ''}" id="mod-row-${m.key}">
+      <div class="ws-info">
+        <div class="ws-name ${on ? '' : ''}" style="font-size:10px;">${m.label}</div>
+      </div>
+      <button class="toggle ${on ? 'on' : 'off'}" id="toggle-mod-${m.key}" onclick="toggleModule('${m.key}')"></button>
+    </div>`;
+  }).join('');
+}
+
+function activeModuleKeys() {
+  return MODULES.map(m => m.key).filter(k => state.modules[k]);
+}
+
+function buildSummary(active, hasPrior) {
+  if (active.length === 0) return 'No modules active — enable at least one module to generate a summary.';
+  const ip = DATA.insight_pipeline;
+  const vo = DATA.visits_observations;
+  const vi = DATA.visibility;
+  const ia = DATA.incident_activity;
+  const ca = DATA.corrective_actions;
+  const ea = DATA.enquiry_activity;
+  const sentences = [];
+
+  if (active.includes('insight_pipeline')) {
+    const trend = hasPrior ? ', continuing the improvement trend from April' : ' — a solid result for the period';
+    sentences.push(`May saw ${ip.approved} insights approved from ${ip.generated} generated${trend}, with ${ip.top_fw_factors[0].split(' (')[0]} and ${ip.top_fw_factors[1].split(' (')[0]} the most frequently flagged FW Map® factors${hasPrior ? ' for the second consecutive month, pointing to a systemic pattern rather than isolated events' : ''}.`);
+    if (ip.escalated_to_systemic > 0) sentences.push(`${ip.escalated_to_systemic} insight has been escalated to systemic investigation.`);
+  }
+
+  if (active.includes('visits_observations')) {
+    const obsNote = active.includes('visibility') ? '' : ` Two sites recorded no observations this month, worth following up.`;
+    sentences.push(`Observation volume is healthy at ${vo.observations_submitted} submitted across ${vo.sites_visited} sites, with ${vo.by_signal_type.barrier_failure} barrier failure signals pointing to specific control gaps.${obsNote}`);
+    if (vo.stop_work_ai_warranted > vo.stop_work_called) {
+      sentences.push(`The stop-work divergence signal is worth watching — AI flagged on ${vo.stop_work_ai_warranted} occasions, called on ${vo.stop_work_called}.`);
+    }
+  }
+
+  if (active.includes('visibility')) {
+    const deteriorated = hasPrior ? ' has deteriorated slightly since April' : '';
+    const siteList = vi.low_visibility_sites.map(s => s.name).join(' and ');
+    const zeroObs = vi.low_visibility_sites.find(s => s.obs_count === 0);
+    sentences.push(`Visibility${deteriorated} is the area to watch: ${siteList} have had no manager visit in over 30 days${zeroObs ? `, and ${zeroObs.name} submitted zero observations this month` : ''}.`);
+  }
+
+  if (active.includes('incident_activity')) {
+    const seriousNote = ia.by_severity.serious > 0 ? ` including one serious` : '';
+    sentences.push(`On the incident side, ${ia.reported} incident${ia.reported !== 1 ? 's were' : ' was'} reported${seriousNote}, and the investigation opened this period has already been closed — a positive sign.`);
+  }
+
+  if (active.includes('corrective_actions')) {
+    const overdueNote = ca.overdue > 0 ? `, though ${ca.overdue} ${ca.overdue === 1 ? 'action is' : 'actions are'} now overdue` : '';
+    sentences.push(`The corrective action queue is moving with ${ca.closed} closed against ${ca.created} created${overdueNote}, giving a completion rate of ${ca.completion_rate}% for the period.`);
+  }
+
+  if (active.includes('enquiry_activity')) {
+    sentences.push(`${ea.dispatched} enquiries were dispatched this month with a ${ea.response_rate}% response rate — ${ea.synthesised} reached final synthesis.`);
+  }
+
+  return sentences.join(' ');
+}
+
+function renderReportBody() {
+  const el = document.getElementById('report-body');
+  const parts = [];
+
+  // insight_pipeline
+  const ip = DATA.insight_pipeline;
+  parts.push(`<div class="module-card">
+    <div class="mc-hdr included-hdr">
+      <div class="mc-name">insight_pipeline</div>
+      <span class="mc-status s-included">INCLUDED · workspace.core</span>
+    </div>
+    <div class="mc-body">
+      <div class="stat"><div class="stat-val">${ip.generated}</div><div class="stat-lbl">generated</div></div>
+      <div class="divider"></div>
+      <div class="stat"><div class="stat-val good">${ip.approved}</div><div class="stat-lbl">approved</div></div>
+      <div class="stat"><div class="stat-val bad">${ip.rejected}</div><div class="stat-lbl">rejected</div></div>
+      <div class="stat"><div class="stat-val good">${ip.resolved_this_period}</div><div class="stat-lbl">resolved</div></div>
+      <div class="sub-section">
+        <div class="ss-label">Trigger sources</div>
+        <div class="row-items">
+          <div class="row-item">algorithm ${ip.by_trigger_source.algorithm}</div>
+          <div class="row-item highlight">critical_obs ${ip.by_trigger_source.critical_observation}</div>
+          <div class="row-item">atrophy_pattern ${ip.by_trigger_source.atrophy_pattern}</div>
+          <div class="row-item">ext_investigation ${ip.by_trigger_source.external_investigation}</div>
+        </div>
+      </div>
+      <div class="sub-section">
+        <div class="ss-label">Pipeline stages (current)</div>
+        <div class="row-items">
+          <div class="row-item">prioritise ${ip.pipeline_stage_snapshot.prioritise}</div>
+          <div class="row-item">learn ${ip.pipeline_stage_snapshot.learn}</div>
+          <div class="row-item">improve ${ip.pipeline_stage_snapshot.improve}</div>
+          <div class="row-item highlight">resolved ${ip.pipeline_stage_snapshot.resolved}</div>
+        </div>
+      </div>
+      <div class="sub-section">
+        <div class="ss-label">Top FW factors</div>
+        <div class="row-items">${ip.top_fw_factors.map(f => `<div class="row-item">${f}</div>`).join('')}</div>
+      </div>
+    </div>
+  </div>`);
+
+  // visits_observations
+  const vo = DATA.visits_observations;
+  parts.push(`<div class="module-card">
+    <div class="mc-hdr included-hdr">
+      <div class="mc-name">visits_observations</div>
+      <span class="mc-status s-included">INCLUDED · workspace.core</span>
+    </div>
+    <div class="mc-body">
+      <div class="stat"><div class="stat-val">${vo.observations_submitted}</div><div class="stat-lbl">observations</div></div>
+      <div class="divider"></div>
+      <div class="stat"><div class="stat-val">${vo.visits_conducted}</div><div class="stat-lbl">visits</div></div>
+      <div class="stat"><div class="stat-val">${vo.sites_visited}</div><div class="stat-lbl">sites visited</div></div>
+      <div class="sub-section">
+        <div class="ss-label">Signal types</div>
+        <div class="row-items">
+          <div class="row-item">at_risk ${vo.by_signal_type.at_risk_condition}</div>
+          <div class="row-item warn">barrier_failure ${vo.by_signal_type.barrier_failure}</div>
+          <div class="row-item bad">unwanted_energy ${vo.by_signal_type.unwanted_energy_event}</div>
+          <div class="row-item">positive ${vo.by_signal_type.positive_practice}</div>
+        </div>
+      </div>
+      <div class="sub-section">
+        <div class="ss-label">Stop work signals</div>
+        <div class="row-items">
+          <div class="row-item">called ${vo.stop_work_called}</div>
+          <div class="row-item warn">AI warranted ${vo.stop_work_ai_warranted}</div>
+        </div>
+      </div>
+    </div>
+  </div>`);
+
+  // visibility — always included (core)
+  const vi = DATA.visibility;
+  parts.push(`<div class="module-card">
+    <div class="mc-hdr included-hdr">
+      <div class="mc-name">visibility</div>
+      <span class="mc-status s-included">INCLUDED · workspace.core</span>
+    </div>
+    <div class="mc-body">
+      <div class="stat"><div class="stat-val">${vi.sites_visited_this_period}/${vi.sites_total}</div><div class="stat-lbl">sites visited</div></div>
+      <div class="divider"></div>
+      <div class="stat"><div class="stat-val warn">${vi.sites_not_visited_30d}</div><div class="stat-lbl">no visit 30d+</div></div>
+      <div class="stat"><div class="stat-val">${vi.sites_not_visited_60d}</div><div class="stat-lbl">no visit 60d+</div></div>
+      <div class="stat"><div class="stat-val">${vi.avg_days_since_last_visit}d</div><div class="stat-lbl">avg since visit</div></div>
+      <div class="sub-section">
+        <div class="ss-label">Observation coverage</div>
+        <div class="row-items">
+          <div class="row-item good">with obs ${vi.sites_with_observations}</div>
+          <div class="row-item bad">no obs ${vi.sites_with_no_observations}</div>
+        </div>
+      </div>
+      <div class="sub-section">
+        <div class="ss-label">Low visibility sites</div>
+        <div class="row-items">
+          ${vi.low_visibility_sites.map(s => `<div class="site-pill">${s.name} · ${s.days_since_visit}d · ${s.obs_count} obs</div>`).join('')}
+        </div>
+      </div>
+    </div>
+  </div>`);
+
+  // corrective_actions
+  if (state.modules.corrective_actions) {
+    const ca = DATA.corrective_actions;
+    parts.push(`<div class="module-card">
+      <div class="mc-hdr included-hdr">
+        <div class="mc-name">corrective_actions</div>
+        <span class="mc-status s-included">INCLUDED</span>
+      </div>
+      <div class="mc-body">
+        <div class="stat"><div class="stat-val">${ca.created}</div><div class="stat-lbl">created</div></div>
+        <div class="divider"></div>
+        <div class="stat"><div class="stat-val good">${ca.closed}</div><div class="stat-lbl">closed</div></div>
+        <div class="stat"><div class="stat-val bad">${ca.overdue}</div><div class="stat-lbl">overdue</div></div>
+        <div class="stat"><div class="stat-val warn">${ca.completion_rate}%</div><div class="stat-lbl">completion</div></div>
+      </div>
+    </div>`);
+  } else {
+    parts.push(`<div class="module-card omitted-card">
+      <div class="mc-hdr omitted-hdr">
+        <div class="mc-name">corrective_actions</div>
+        <span class="mc-status s-omitted">OMITTED</span>
+      </div>
+      <div class="mc-omit-msg">Not passed to AI. Will not appear in summary.</div>
+    </div>`);
+  }
+
+  // enquiry_activity
+  if (state.modules.enquiry_activity) {
+    const ea = DATA.enquiry_activity;
+    parts.push(`<div class="module-card">
+      <div class="mc-hdr included-hdr">
+        <div class="mc-name">enquiry_activity</div>
+        <span class="mc-status s-included">INCLUDED</span>
+      </div>
+      <div class="mc-body">
+        <div class="stat"><div class="stat-val">${ea.dispatched}</div><div class="stat-lbl">dispatched</div></div>
+        <div class="divider"></div>
+        <div class="stat"><div class="stat-val good">${ea.response_rate}%</div><div class="stat-lbl">response rate</div></div>
+        <div class="stat"><div class="stat-val">${ea.synthesised}</div><div class="stat-lbl">synthesised</div></div>
+      </div>
+    </div>`);
+  } else {
+    parts.push(`<div class="module-card omitted-card">
+      <div class="mc-hdr omitted-hdr">
+        <div class="mc-name">enquiry_activity</div>
+        <span class="mc-status s-omitted">OMITTED</span>
+      </div>
+      <div class="mc-omit-msg">Not passed to AI. Will not appear in summary.</div>
+    </div>`);
+  }
+
+  // incident_activity
+  if (state.modules.incident_activity) {
+    const ia = DATA.incident_activity;
+    parts.push(`<div class="module-card">
+      <div class="mc-hdr included-hdr">
+        <div class="mc-name">incident_activity</div>
+        <span class="mc-status s-included">INCLUDED · workspace.incident</span>
+      </div>
+      <div class="mc-body">
+        <div class="stat"><div class="stat-val warn">${ia.reported}</div><div class="stat-lbl">reported</div></div>
+        <div class="divider"></div>
+        <div class="stat"><div class="stat-val">${ia.investigations_opened}</div><div class="stat-lbl">inv. opened</div></div>
+        <div class="stat"><div class="stat-val good">${ia.investigations_closed}</div><div class="stat-lbl">inv. closed</div></div>
+        <div class="stat"><div class="stat-val">${ia.investigations_overdue}</div><div class="stat-lbl">inv. overdue</div></div>
+        <div class="sub-section">
+          <div class="ss-label">By severity</div>
+          <div class="row-items">
+            <div class="row-item bad">critical ${ia.by_severity.critical}</div>
+            <div class="row-item warn">serious ${ia.by_severity.serious}</div>
+            <div class="row-item">moderate ${ia.by_severity.moderate}</div>
+            <div class="row-item">minor ${ia.by_severity.minor}</div>
+          </div>
+        </div>
+      </div>
+    </div>`);
+  } else {
+    parts.push(`<div class="module-card omitted-card">
+      <div class="mc-hdr omitted-hdr">
+        <div class="mc-name">incident_activity</div>
+        <span class="mc-status s-omitted">OMITTED — workspace.incident not active</span>
+      </div>
+      <div class="mc-omit-msg">Not passed to AI. Will not appear in executive summary.</div>
+    </div>`);
+  }
+
+  el.innerHTML = parts.join('');
+}
+
+function renderSummary() {
+  const el = document.getElementById('summary-body');
+  const active = activeModuleKeys();
+  const summary = buildSummary(active, state.subsequentMonth);
+  const prior = state.subsequentMonth ? PRIOR_SUMMARY : null;
+  const activeModules = active;
+
+  let html = '';
+
+  html += `<div class="modules-used">
+    <div class="mu-hdr">Modules passed to AI prompt</div>
+    <div class="mu-body">${activeModules.map(m => `<span class="mu-chip">${m}</span>`).join('')}</div>
+  </div>`;
+
+  if (prior) {
+    html += `<div class="prior-box">
+      <div class="pb-hdr">Prior period context — April 2026</div>
+      <div class="pb-body">${prior}</div>
+    </div>`;
+  } else {
+    html += `<div class="prior-box">
+      <div class="pb-hdr">Prior period context</div>
+      <div class="pb-body">No prior period report found for this org — AI writes from current period only. No trend language generated.</div>
+    </div>`;
+  }
+
+  html += `<div class="summary-box"><div class="summary-text">${summary}</div></div>`;
+
+  el.innerHTML = html;
+}
+
+// Init
+render();
+</script>
+</body>
+</html>

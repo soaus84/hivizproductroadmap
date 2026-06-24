@@ -96,6 +96,12 @@ Status: Supersedes v1.0 prompt library
 |---|---|---|---|
 | `document.ingest` | Document requirement extraction | `specs/features/MANAGEMENT-SYSTEM-INGESTION.md` | Stage 2 |
 
+### Periodic reports
+
+| Job | Label | Feature file | Notes |
+|---|---|---|---|
+| `report.generate_summary` | Manager monthly executive summary | `specs/features/REPORTING.md` | Async — runs after report data is assembled; one prompt serves all report types |
+
 ---
 
 ## Global references used across multiple prompts

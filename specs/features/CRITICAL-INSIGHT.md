@@ -152,6 +152,7 @@ This pattern is contained to a single site. Your output should:
 
 Return JSON:
 {
+  "title": "5-10 words. A plain-English headline for this insight — written as a finding, not a label. Specific enough to distinguish this insight from others of the same trigger type. No jargon.",
   "pattern_summary": "2-3 sentences. What the pattern is and why it matters operationally.",
   "pattern_summary_basis": "1 sentence. Which observations most strongly evidence this pattern.",
   "likely_systemic_cause": "1 sentence. The underlying condition probably driving this pattern.",
@@ -209,6 +210,7 @@ within the {{level}} scope. Your output should:
 
 Return JSON:
 {
+  "title": "5-10 words. A plain-English headline for this insight — written as a finding, not a label. Should convey the cross-site nature of the pattern. No jargon.",
   "pattern_summary": "2-3 sentences. What the pattern is, that it spans multiple sites, and why this breadth matters operationally.",
   "pattern_summary_basis": "1 sentence. Which observations or signal types most strongly evidence this as a systemic rather than local pattern.",
   "likely_systemic_cause": "1 sentence. The shared underlying condition that probably explains why this is appearing across sites.",
@@ -268,6 +270,7 @@ Your output should:
 
 Return JSON:
 {
+  "title": "5-10 words. A plain-English headline for this insight — written as a finding, not a label. Specific to this observation's hazard or control failure. No jargon.",
   "pattern_summary": "2-3 sentences. What this observation reveals about the state of controls for this work type. Acknowledge the single-observation basis without hedging the risk.",
   "pattern_summary_basis": "1 sentence. Which specific details of the observation most strongly support this framing.",
   "likely_systemic_cause": "1 sentence. The underlying control gap this observation most likely reflects.",
@@ -324,6 +327,7 @@ Your output should:
 
 Return JSON:
 {
+  "title": "5-10 words. A plain-English headline for this insight — written as a finding, not a label. Should convey the visibility loss or organisational capacity angle. No jargon.",
   "pattern_summary": "2-3 sentences. What the degradation pattern is, across how many sites within the {{org_level}}, and why this matters — frame it as lost organisational visibility, not a process compliance issue.",
   "pattern_summary_basis": "1 sentence. What about the scale, timing, or distribution of atrophy states most strongly points to a shared cause rather than coincidental local factors.",
   "likely_systemic_cause": "1 sentence. The underlying organisational condition most likely driving simultaneous loop degradation across these sites.",
@@ -354,6 +358,7 @@ Return JSON:
 ### Stage 1 Output Storage
 
 ```sql
+critical_insight.title                              TEXT    -- 5-10 word headline; used as card title and list view label
 critical_insight.pattern_summary                    TEXT
 critical_insight.pattern_summary_basis              TEXT    -- rationale fields stored separately; not surfaced in UI by default
 critical_insight.likely_systemic_cause              TEXT
