@@ -1,0 +1,663 @@
+<!doctype html>
+<html lang="en">
+<head>
+<title>Prism Manager View</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Hiviz Prism — shared styles. Keep this block identical across all Prism pages. */
+:root {
+  color-scheme: light;
+  --ground: #ffffff;
+  --surface: #ffffff;
+  --surface-2: #f4f5f7;
+  --line: #dcdfe4;
+  --line-soft: #eceef1;
+  --text: #101216;
+  --text-2: #3b424d;
+  --muted: #69717d;
+  --accent: #ffe500;          /* hi-vis highlight yellow */
+  --accent-ink: #101216;
+  --accent-soft: #fff8c2;
+  --accent-edge: #d9bf00;
+  /* Spectrum — one band per enrichment dimension */
+  --b-signal: #d2483a;
+  --b-energy: #cf7422;
+  --b-barrier: #a88f12;
+  --b-hazard: #25935e;
+  --b-fw: #2f78c2;
+  --b-reason: #7657d6;
+  --ok: #25935e;
+  --warn: #b87d12;
+  --bad: #d2483a;
+  --shadow: 0 1px 2px rgba(16,18,22,0.05);
+  --display: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --body: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-font-smoothing: antialiased; }
+body {
+  margin: 0; background: var(--ground); color: var(--text);
+  font-family: var(--body); font-size: 15px; line-height: 1.6;
+}
+a { color: inherit; }
+a:focus-visible, button:focus-visible, input:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; border-radius: 3px; }
+code, .mono { font-family: var(--mono); font-size: 0.86em; }
+code { background: var(--surface-2); border: 1px solid var(--line-soft); padding: 0 5px; border-radius: 4px; color: var(--text-2); }
+
+.wrap { max-width: 1120px; margin: 0 auto; padding-inline: 24px; }
+@media (max-width: 560px) { .wrap { padding-inline: 16px; } }
+
+/* Top bar */
+.topbar { border-bottom: 1px solid var(--line); background: var(--ground); position: sticky; top: env(safe-area-inset-top, 0px); z-index: 10; }
+.topbar .wrap { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-block: 12px; flex-wrap: wrap; }
+.brand { display: flex; align-items: baseline; gap: 8px; text-decoration: none; }
+.brand-hiviz { font-family: var(--display); font-weight: 900; font-size: 17px; letter-spacing: -0.01em; }
+.brand-prism { font-family: var(--mono); font-size: 12px; font-weight: 500; background: var(--accent); color: var(--accent-ink); padding: 1px 6px; border-radius: 3px; letter-spacing: 0.08em; text-transform: uppercase; }
+.pagenav { display: flex; gap: 4px; flex-wrap: wrap; }
+.pagenav a { font-size: 13px; text-decoration: none; color: var(--text-2); padding: 5px 11px; border-radius: 6px; border: 1px solid transparent; }
+.pagenav a:hover { color: var(--text); border-color: var(--line); }
+.pagenav a[aria-current="page"] { color: var(--text); background: var(--surface-2); border-color: var(--line); }
+
+/* Type */
+h1, h2, h3 { font-family: var(--display); letter-spacing: -0.02em; text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(34px, 5.4vw, 60px); line-height: 1.02; font-weight: 800; letter-spacing: -0.03em; }
+h2 { font-size: clamp(24px, 3vw, 32px); line-height: 1.12; font-weight: 800; }
+h3 { font-size: 17px; line-height: 1.3; font-weight: 700; letter-spacing: -0.01em; }
+.eyebrow { font-family: var(--body); font-weight: 700; font-size: 11.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+.lede { font-size: 18px; line-height: 1.55; color: var(--text-2); max-width: 62ch; }
+.prose { max-width: 66ch; color: var(--text-2); }
+.prose p { margin: 0 0 12px; }
+.muted { color: var(--muted); }
+.small { font-size: 13px; }
+
+section.block { padding-block: 56px; border-top: 1px solid var(--line-soft); }
+.block-head { display: grid; gap: 10px; margin-bottom: 28px; max-width: 72ch; }
+
+/* Chips */
+.chip { display: inline-flex; align-items: center; gap: 6px; font-family: var(--mono); font-size: 11.5px; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--line); color: var(--text-2); background: var(--surface); white-space: nowrap; }
+.chip .dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.chip.p1 { background: var(--accent); color: var(--accent-ink); border-color: var(--accent-edge); }
+.chip.ok { color: var(--ok); border-color: color-mix(in srgb, var(--ok) 40%, transparent); }
+.chip.warn { color: var(--warn); border-color: color-mix(in srgb, var(--warn) 40%, transparent); }
+.chip.bad { color: var(--bad); border-color: color-mix(in srgb, var(--bad) 40%, transparent); }
+
+/* Tables */
+.table-scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+table.data { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+table.data th { text-align: left; font-family: var(--mono); font-weight: 500; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); padding: 10px 14px; border-bottom: 1px solid var(--line); background: var(--surface-2); white-space: nowrap; }
+table.data td { padding: 11px 14px; border-bottom: 1px solid var(--line-soft); vertical-align: top; color: var(--text-2); }
+table.data tr:last-child td { border-bottom: none; }
+table.data td strong { color: var(--text); font-weight: 600; }
+
+.footer { padding-block: 40px 56px; border-top: 1px solid var(--line-soft); color: var(--muted); font-size: 13px; }
+.footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+</style>
+<style>
+  :root {
+    --s-risk: #c8372a;    --s-risk-bg: #fdecea;
+    --s-drift: #a86a00;   --s-drift-bg: #fff3dc;
+    --s-quiet: #4f5f78;   --s-quiet-bg: #eef1f6;
+    --s-hold: #1f8a55;    --s-hold-bg: #e8f5ee;
+    --s-none: #7b838f;    --s-none-bg: #f4f5f7;
+  }
+  body { background: var(--ground); }
+  .dash { padding-block: 28px 64px; display: grid; gap: 28px; }
+
+  /* Header: purview + freshness */
+  .dash-head { display: flex; justify-content: space-between; align-items: end; gap: 16px; flex-wrap: wrap; }
+  .purview { display: flex; align-items: end; gap: 10px; flex-wrap: wrap; }
+  .purview .field { display: grid; gap: 4px; }
+  .purview label { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+  .purview select { font: inherit; font-weight: 600; font-size: 15px; padding: 8px 34px 8px 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23101216' stroke-width='1.6'/%3E%3C/svg%3E") no-repeat right 12px center; appearance: none; color: var(--text); cursor: pointer; }
+  .purview .sep { color: var(--muted); padding-bottom: 9px; font-weight: 700; }
+  .fresh { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; font-size: 13px; color: var(--muted); }
+  .example-chip { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; border: 1px dashed var(--line); border-radius: 4px; padding: 2px 7px; color: var(--muted); }
+
+  /* Briefing */
+  .brief { display: grid; gap: 18px; }
+  .brief-text { font-size: clamp(20px, 2.4vw, 27px); line-height: 1.38; font-weight: 500; letter-spacing: -0.01em; max-width: 44ch; color: var(--text); margin: 0; text-wrap: pretty; }
+  .brief-text mark { background: linear-gradient(transparent 10%, var(--accent) 10%, var(--accent) 92%, transparent 92%); color: var(--accent-ink); padding-inline: 0.08em; font-weight: 700; }
+  .brief-text .st { font-weight: 700; }
+
+  /* Noise funnel */
+  .funnel { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+  .f-step { padding: 14px 16px 16px; display: grid; gap: 8px; align-content: start; border-right: 1px solid var(--line-soft); position: relative; }
+  .f-step:last-child { border-right: none; background: var(--accent-soft); }
+  .f-num { font-size: 26px; font-weight: 800; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; line-height: 1; }
+  .f-lbl { font-size: 13px; color: var(--text-2); line-height: 1.35; }
+  .f-bar { height: 6px; border-radius: 3px; background: var(--line); }
+  .f-step:last-child .f-bar { background: var(--text); }
+  @media (max-width: 720px) { .funnel { grid-template-columns: 1fr 1fr; } .f-step:nth-child(2) { border-right: none; } .f-step:nth-child(-n+2) { border-bottom: 1px solid var(--line-soft); } }
+
+  /* Ask */
+  .ask { display: grid; gap: 10px; border: 1px solid var(--line); border-radius: 12px; padding: 12px; background: var(--surface-2); }
+  .ask-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .ask-lbl { font-weight: 800; font-size: 14px; margin-right: 4px; }
+  .ask button { font: inherit; font-size: 13.5px; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--text); cursor: pointer; }
+  .ask button:hover { border-color: var(--text-2); }
+  .ask button[aria-pressed="true"] { background: var(--text); color: var(--ground); border-color: var(--text); }
+  .answer { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; font-size: 15px; line-height: 1.55; color: var(--text); max-width: 80ch; }
+  .answer p { margin: 0 0 8px; } .answer p:last-child { margin: 0; }
+  .answer .src { font-size: 12.5px; color: var(--muted); }
+
+  /* Main grid */
+  .main { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: 28px; align-items: start; }
+  @media (max-width: 960px) { .main { grid-template-columns: 1fr; } }
+  .col-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
+  .col-head h2 { font-size: 22px; }
+  .col-head .note { font-size: 13px; color: var(--muted); }
+
+  /* Attention cards */
+  .cards { display: grid; gap: 16px; }
+  .card { border: 1px solid var(--line); border-radius: 14px; background: var(--surface); overflow: hidden; }
+  .card.act { border-color: color-mix(in srgb, var(--s-risk) 45%, var(--line)); }
+  .card-top { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; padding: 14px 18px 0; font-size: 13px; color: var(--muted); }
+  .card-top .where { color: var(--text-2); font-weight: 600; }
+  .card-body { padding: 10px 18px 16px; display: grid; gap: 14px; }
+  .card h3 { font-size: 21px; line-height: 1.22; font-weight: 800; letter-spacing: -0.015em; }
+  .why-h { font-size: 11px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+  .why { list-style: none; margin: 0; padding: 0; display: grid; gap: 7px; }
+  .why li { display: grid; grid-template-columns: 14px 1fr; gap: 8px; font-size: 15px; line-height: 1.45; color: var(--text); }
+  .why li::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--text); margin-top: 8px; }
+  .facts { display: flex; gap: 6px; flex-wrap: wrap; }
+  .fact { font-size: 12.5px; padding: 3px 9px; border-radius: 999px; background: var(--surface-2); color: var(--text-2); border: 1px solid var(--line-soft); }
+  .next { background: var(--accent-soft); border: 1px solid color-mix(in srgb, var(--accent-edge) 45%, transparent); border-radius: 10px; padding: 12px 14px; display: grid; gap: 4px; }
+  .next-h { font-size: 11px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; }
+  .next p { margin: 0; font-size: 15px; line-height: 1.45; }
+  .card-foot { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; padding: 12px 18px; border-top: 1px solid var(--line-soft); background: var(--surface-2); }
+  .card-foot .conf { margin-left: auto; font-size: 12.5px; color: var(--muted); }
+  .btn-s { font: inherit; font-size: 13.5px; font-weight: 600; padding: 7px 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); color: var(--text); cursor: pointer; }
+  .btn-s:hover { border-color: var(--text-2); }
+  .btn-s.primary { background: var(--accent); border-color: var(--accent-edge); color: var(--accent-ink); }
+  .btn-s.done { background: var(--s-hold-bg); border-color: color-mix(in srgb, var(--s-hold) 40%, transparent); color: var(--s-hold); }
+  .evidence { border-top: 1px solid var(--line-soft); padding: 12px 18px 16px; display: grid; gap: 10px; }
+  .ev { display: grid; gap: 6px; padding: 10px 12px; border: 1px solid var(--line-soft); border-radius: 8px; background: var(--surface); }
+  .ev-meta { font-family: var(--mono); font-size: 11.5px; color: var(--muted); }
+  .ev-text { font-size: 14px; color: var(--text); line-height: 1.45; }
+  .ev-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+  .ev-tag { font-size: 12px; padding: 1px 8px; border-radius: 4px; border: 1px solid var(--line); color: var(--text-2); }
+  .dismissed { padding: 14px 18px; font-size: 14px; color: var(--muted); display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+  .dismissed button { font: inherit; font-size: 13px; background: none; border: none; color: var(--text); text-decoration: underline; cursor: pointer; padding: 0; }
+  .none-card { border: 1px dashed var(--line); border-radius: 14px; padding: 22px; font-size: 15px; color: var(--text-2); }
+
+  /* State pills */
+  .pill { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; padding: 3px 9px 3px 8px; border-radius: 999px; white-space: nowrap; }
+  .pill::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+  .pill.risk { color: var(--s-risk); background: var(--s-risk-bg); }
+  .pill.drift { color: var(--s-drift); background: var(--s-drift-bg); }
+  .pill.quiet { color: var(--s-quiet); background: var(--s-quiet-bg); }
+  .pill.quiet::before { background: none; border: 1.5px dashed currentColor; width: 5px; height: 5px; }
+  .pill.hold { color: var(--s-hold); background: var(--s-hold-bg); }
+  .pill.none { color: var(--s-none); background: var(--s-none-bg); }
+  .pill.none::before { background: none; border: 1.5px dotted currentColor; width: 5px; height: 5px; }
+
+  /* Patch */
+  .states { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+  .states button { font: inherit; font-size: 12.5px; font-weight: 600; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--text-2); cursor: pointer; }
+  .states button[aria-pressed="true"] { background: var(--text); color: var(--ground); border-color: var(--text); }
+  .patch { display: grid; gap: 14px; }
+  .region { border: 1px solid var(--line); border-radius: 12px; background: var(--surface); overflow: hidden; }
+  .region-head { display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; padding: 12px 14px; background: var(--surface-2); border-bottom: 1px solid var(--line-soft); }
+  .region-head button { font: inherit; font-weight: 800; font-size: 16px; background: none; border: none; padding: 0; color: var(--text); cursor: pointer; text-align: left; }
+  .region-head button:hover { text-decoration: underline; }
+  .region-head .div-name { font-size: 12px; color: var(--muted); grid-column: 1 / -1; }
+  .region-sum { grid-column: 1 / -1; font-size: 13.5px; color: var(--text-2); }
+  .sites { list-style: none; margin: 0; padding: 0; }
+  .site { display: grid; grid-template-columns: 1fr auto; gap: 2px 10px; padding: 10px 14px; border-bottom: 1px solid var(--line-soft); }
+  .site:last-child { border-bottom: none; }
+  .site-name { font-weight: 700; font-size: 14.5px; }
+  .site-why { grid-column: 1 / -1; font-size: 13.5px; color: var(--text-2); line-height: 1.4; }
+  .site.hold .site-why, .site.none .site-why { color: var(--muted); }
+  .held { font-size: 13px; color: var(--muted); padding: 10px 14px; }
+
+  /* Lower */
+  .themes { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 16px; }
+  @media (max-width: 860px) { .themes { grid-template-columns: 1fr; } }
+  .theme { border-top: 3px solid var(--text); padding-top: 12px; display: grid; gap: 8px; align-content: start; }
+  .theme h3 { font-size: 18px; font-weight: 800; }
+  .theme p { margin: 0; font-size: 14.5px; color: var(--text-2); line-height: 1.5; }
+  .theme .where-list { font-size: 13px; color: var(--muted); }
+
+  .aside-list { list-style: none; margin: 0; padding: 0; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+  .aside-list li { display: grid; grid-template-columns: 90px 1fr; gap: 14px; padding: 12px 16px; border-bottom: 1px solid var(--line-soft); align-items: baseline; }
+  .aside-list li:last-child { border-bottom: none; }
+  .aside-n { font-weight: 800; font-size: 18px; font-variant-numeric: tabular-nums; text-align: right; color: var(--muted); }
+  .aside-t b { font-weight: 700; }
+  .aside-t span { display: block; font-size: 13.5px; color: var(--text-2); }
+  .lower { display: grid; gap: 40px; }
+  .sec-head { display: grid; gap: 6px; margin-bottom: 16px; }
+  .sec-head h2 { font-size: 24px; }
+  .sec-head p { margin: 0; color: var(--text-2); max-width: 70ch; font-size: 14.5px; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="index.html"><span class="brand-hiviz">Hiviz</span><span class="brand-prism">Prism</span></a>
+    <nav class="pagenav" aria-label="Prism pages">
+      <a href="index.html">Pitch</a>
+      <a href="scope.html">Platform scope</a>
+      <a href="profiler.html">Product-in profiler</a>
+      <a href="dashboard.html" aria-current="page">Concept</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap dash">
+  <div class="dash-head">
+    <div class="purview" role="group" aria-label="Choose your purview">
+      <div class="field"><label for="div">Division</label><select id="div"></select></div>
+      <span class="sep" aria-hidden="true">›</span>
+      <div class="field"><label for="reg">Region</label><select id="reg"></select></div>
+    </div>
+    <div class="fresh"><span>Last 28 days · updated 6:10 am today</span><span class="example-chip">Example data</span></div>
+  </div>
+
+  <section class="brief" aria-labelledby="brief-h">
+    <h1 id="brief-h" class="eyebrow" style="font-size:12px">This week in <span id="scope-name">the whole organisation</span></h1>
+    <p class="brief-text" id="brief"></p>
+    <div class="funnel" id="funnel" aria-label="How Prism reduced the records to what needs you"></div>
+  </section>
+
+  <section class="ask" aria-label="Ask Prism">
+    <div class="ask-row" id="ask">
+      <span class="ask-lbl">Ask Prism</span>
+    </div>
+    <div class="answer" id="answer" hidden></div>
+  </section>
+
+  <div class="main">
+    <section aria-labelledby="needs-h">
+      <div class="col-head"><h2 id="needs-h">Needs you</h2><span class="note">Most urgent first. Each one says why.</span></div>
+      <div class="cards" id="cards"></div>
+    </section>
+
+    <section aria-labelledby="patch-h">
+      <div class="col-head"><h2 id="patch-h">Your patch</h2><span class="note">Select a region to focus on it</span></div>
+      <div class="states" id="states" role="group" aria-label="Filter sites by state"></div>
+      <div class="patch" id="patch"></div>
+    </section>
+  </div>
+
+  <div class="lower">
+    <section>
+      <div class="sec-head">
+        <h2>Running through your patch</h2>
+        <p>Threads Prism sees across more than one site. These are about how work is organised, not about any one person.</p>
+      </div>
+      <div class="themes" id="themes"></div>
+    </section>
+
+    <section>
+      <div class="sec-head">
+        <h2>What Prism set aside, and why</h2>
+        <p>Everything below was read and classified. None of it needs you this week. Open any line in the source system if you want to check.</p>
+      </div>
+      <ul class="aside-list" id="aside"></ul>
+    </section>
+  </div>
+</main>
+
+<footer class="footer">
+  <div class="wrap">
+    <span>Hiviz Prism · dashboard concept · all organisations, sites and records are fictional</span>
+    <span class="mono">Qualitative first. Numbers only where they explain.</span>
+  </div>
+</footer>
+
+<script>
+(function () {
+  // ---------- Example data (fictional) ----------
+  var ORG = [
+    { div: 'Infrastructure', regions: [
+      { name: 'Northern', sites: [
+        { name: 'North Yard', state: 'risk', why: 'Suspended loads moved outside the planned path three times in three weeks', records: 520 },
+        { name: 'Ridge Road Interchange', state: 'drift', why: 'Night-shift traffic setups drifting from the approved plan', records: 410 },
+        { name: 'Harbour Bridge Deck', state: 'hold', why: 'Steady reporting, findings being closed with fixes', records: 380 },
+        { name: 'Quarry Link', state: 'quiet', why: 'No reports for 19 days after months of steady weekly reporting', records: 140 }
+      ]},
+      { name: 'Southern', sites: [
+        { name: 'Rail Stabling Yard', state: 'drift', why: 'Isolations signed off before they were tested, twice on night shift', records: 330 },
+        { name: 'Southern Tunnels', state: 'hold', why: 'Busy site, issues found early and fixed', records: 610 },
+        { name: 'Creek Crossing', state: 'hold', why: 'Nothing unusual', records: 190 },
+        { name: 'Depot Upgrade', state: 'none', why: 'Not connected yet. Uses paper forms', records: 0 }
+      ]}
+    ]},
+    { div: 'Building', regions: [
+      { name: 'Metro', sites: [
+        { name: 'Tower 3', state: 'risk', why: 'Edge protection removed and not put back, twice, during facade work', records: 460 },
+        { name: 'Metro Station Box', state: 'drift', why: 'Housekeeping findings building up in the same stairwell', records: 350 },
+        { name: 'Hospital Fit-out', state: 'hold', why: 'Nothing unusual', records: 290 },
+        { name: 'Laneway Apartments', state: 'hold', why: 'Nothing unusual', records: 170 }
+      ]},
+      { name: 'Coastal', sites: [
+        { name: 'Coastal Aged Care', state: 'quiet', why: 'Every inspection item has passed for six weeks on a busy fit-out', records: 120 },
+        { name: 'Marina Offices', state: 'hold', why: 'Nothing unusual', records: 160 },
+        { name: 'School Upgrade', state: 'hold', why: 'Nothing unusual', records: 140 },
+        { name: 'Surf Club Rebuild', state: 'hold', why: 'Nothing unusual', records: 70 }
+      ]}
+    ]}
+  ];
+
+  var ITEMS = [
+    { id: 'ny', level: 'act', site: 'North Yard', region: 'Northern', div: 'Infrastructure',
+      short: 'loads swinging outside the planned path',
+      title: 'Loads are swinging outside the planned path during steel lifts',
+      changed: 'New this fortnight',
+      why: [
+        'Three near misses in 21 days, all during steel erection on day shift.',
+        'Two of them mention worn or improvised tag lines, so the same control is failing each time.',
+        'Reported by different people in two different systems, so it isn’t one person’s view.'
+      ],
+      facts: ['Suspended load', 'Could have been serious', 'Control failed, not missing'],
+      next: 'Walk a steel lift with the rigging crew this week. Ask where the tag lines come from and who checks them before a lift.',
+      conf: 'Strong evidence · 2 systems agree',
+      ev: [
+        { src: 'Procore', when: '4 Sep', text: 'Tag line snapped while guiding a steel beam. Load swung toward the laydown area. No one in the swing path.', tags: ['Energy released', 'Suspended load', 'Control failed'] },
+        { src: 'Mitti', when: '11 Sep', text: 'Rigger using a length of rope as a tag line, frayed at one end. Lift paused and rope replaced.', tags: ['At-risk condition', 'Control degraded'] },
+        { src: 'Procore', when: '19 Sep', text: 'Beam rotated in the wind during a lift and passed over the access path. Spotter cleared the path in time.', tags: ['Energy released', 'Suspended load', 'Control failed'] }
+      ] },
+    { id: 't3', level: 'act', site: 'Tower 3', region: 'Metro', div: 'Building',
+      short: 'edge protection coming down and not going back up',
+      title: 'Edge protection keeps coming down and not going back up',
+      changed: 'Second time. The first report was closed without a recorded fix',
+      why: [
+        'Two reports of missing edge protection on level 14 in ten days.',
+        'Both were during the same subcontractor’s facade install.',
+        'One report describes a worker leaning out past the edge to guide a panel.'
+      ],
+      facts: ['Fall from height', 'Could have been fatal', 'Same subcontractor'],
+      next: 'Talk to the facade subcontractor’s supervisor about how they sequence taking edge protection down and putting it back.',
+      conf: 'Strong evidence · repeat of a closed item',
+      ev: [
+        { src: 'Intelex', when: '9 Sep', text: 'Level 14 east edge: two mesh panels removed for facade install and not reinstated at end of shift.', tags: ['Control missing', 'Fall from height'] },
+        { src: 'Intelex', when: '18 Sep', text: 'Worker leaning past slab edge to guide a facade panel. Edge protection removed on that bay.', tags: ['At-risk behaviour', 'Control missing', 'Fall from height'] }
+      ] },
+    { id: 'ql', level: 'watch', site: 'Quarry Link', region: 'Northern', div: 'Infrastructure',
+      short: 'reporting gone quiet',
+      title: 'Reporting has gone quiet, but the work hasn’t stopped',
+      changed: 'Silent for 19 days',
+      why: [
+        'This site logged six to ten reports a week until 19 days ago, then nothing.',
+        'Permits are still being issued, so work is carrying on.',
+        'A new site manager started the same week reporting stopped.'
+      ],
+      facts: ['Silence is the signal', 'Handover'],
+      next: 'Call the new site manager. A sudden stop like this is usually a handover gap, not a safer site.',
+      conf: 'Pattern, not an event',
+      ev: [
+        { src: 'Mitti', when: '6 Sep', text: 'Last hazard report received: loose material on the haul road shoulder.', tags: ['Last record'] },
+        { src: 'Permit system', when: '8–24 Sep', text: 'Eleven permits issued since reporting stopped, including two for work near live traffic.', tags: ['Activity continuing'] }
+      ] },
+    { id: 'rs', level: 'watch', site: 'Rail Stabling Yard', region: 'Southern', div: 'Infrastructure',
+      short: 'isolations signed off before testing',
+      title: 'Isolations are being signed off before they’re tested',
+      changed: 'Twice in four weeks',
+      why: [
+        'Two permits were closed out before the test-for-dead step was recorded.',
+        'Both happened at the night-shift handover.',
+        'No one was hurt, but this is high-voltage work.'
+      ],
+      facts: ['Electrical', 'Could have been fatal', 'Night shift'],
+      next: 'Check how permits are handed over at night shift change. Ask who confirms the test before sign-off.',
+      conf: 'Moderate evidence · 1 system',
+      ev: [
+        { src: 'ServiceNow', when: '2 Sep', text: 'Permit closed at 18:55. Test-for-dead entry timestamped 19:20 by incoming shift.', tags: ['Control bypassed', 'Electrical'] },
+        { src: 'ServiceNow', when: '21 Sep', text: 'Permit signed off with test field blank. Test completed and recorded next morning.', tags: ['Control bypassed', 'Electrical'] }
+      ] },
+    { id: 'ca', level: 'watch', site: 'Coastal Aged Care', region: 'Coastal', div: 'Building',
+      short: 'perfect inspection scores',
+      title: 'Every inspection item has passed for six weeks',
+      changed: 'Six weeks running',
+      why: [
+        'Eighteen inspections with no findings, on an active fit-out.',
+        'Comments are blank or copied from the previous week.',
+        'Similar sites find three to five issues a week.'
+      ],
+      facts: ['Tick-box risk', 'Paper looks fine'],
+      next: 'Join the next inspection. A perfect score on a busy site usually means nobody is really looking at the checklist.',
+      conf: 'Pattern, not an event',
+      ev: [
+        { src: 'Mitti', when: '15 Aug – 22 Sep', text: '18 weekly site inspections. 100% pass. 14 of 18 have identical comments.', tags: ['No findings', 'Copied comments'] }
+      ] }
+  ];
+
+  var THEMES = [
+    { title: 'Controls fail at the handover', text: 'Edge protection that isn’t reinstated at end of shift, isolations signed off across a shift change, and a site that went quiet when its manager changed. The weak point is where one person hands to the next.', sites: ['Tower 3', 'Rail Stabling Yard', 'Quarry Link'] },
+    { title: 'Subcontractor-led high-risk work', text: 'The two most serious items both sit inside a subcontractor’s scope: rigging on steel erection and facade install. Check how their methods are reviewed before work starts.', sites: ['North Yard', 'Tower 3'] },
+    { title: 'Records look fine, the field may not', text: 'Perfect inspections and permits closed on paper before the work is done both suggest records are being completed to satisfy the system, not to check the work.', sites: ['Coastal Aged Care', 'Rail Stabling Yard'] }
+  ];
+
+  var ASIDE = [
+    { k: 0.74, t: 'Passed inspection items', s: 'Checks where everything was as expected. They count toward coverage but need nothing from you.' },
+    { k: 0.098, t: 'Routine housekeeping', s: 'Within the normal range for these sites. Prism flags housekeeping only when it clusters, as at Metro Station Box.' },
+    { k: 0.064, t: 'Low-risk hazards closed with a fix', s: 'Found, fixed, and recorded. This is the system working.' },
+    { k: 0.009, t: 'Duplicate reports merged', s: 'The same event logged in two systems, or by two people. Counted once.' },
+    { k: 0.004, t: 'Records too thin to read', s: 'Not enough detail to classify. Prism asked the reporter for more where the source system allows it.' }
+  ];
+
+  var ASK = [
+    { q: 'Why is North Yard flagged?', a: ['North Yard is flagged because the same control, the tag line, has failed three times in three weeks during steel lifts. Two loads actually moved outside the planned path.', 'What makes it urgent is the potential, not the outcome. Nobody was hurt, but a swinging beam over an access path could easily have been fatal.'], src: 'Based on 3 records from Procore and Mitti, 4–19 Sep' },
+    { q: 'Which sites have gone quiet?', a: ['Two. Quarry Link stopped reporting 19 days ago while permits kept being issued. Coastal Aged Care is still reporting, but every inspection passes with copied comments, which tells you as little as silence does.', 'Depot Upgrade isn’t quiet. It isn’t connected yet because it still uses paper forms.'], src: 'Based on reporting activity across all connected systems' },
+    { q: 'What’s changed since last week?', a: ['Tower 3 is new to the list. A second edge protection report came in on 18 Sep, and the first was closed without a recorded fix.', 'Metro Station Box moved from holding to drifting as housekeeping findings built up in one stairwell. Nothing has improved enough to come off the list yet.'], src: 'Compared with the view on 18 Sep' }
+  ];
+
+  // ---------- State ----------
+  var ST = { div: '', reg: '', filter: 'all', dismissed: {}, planned: {}, open: {}, ask: -1 };
+  var STATE_ORDER = { risk: 0, quiet: 1, drift: 2, hold: 3, none: 4 };
+  var STATE_LABEL = { risk: 'At risk', drift: 'Drifting', quiet: 'Gone quiet', hold: 'Holding', none: 'Not connected' };
+  var NUM = ['No', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine'];
+
+  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]; }); }
+  function $(id) { return document.getElementById(id); }
+  function word(n) { return n < NUM.length ? NUM[n] : String(n); }
+  function listJoin(a) { return a.length < 2 ? a.join('') : a.slice(0, -1).join(', ') + ' and ' + a[a.length - 1]; }
+
+  function regionsInScope() {
+    var out = [];
+    ORG.forEach(function (d) {
+      if (ST.div && d.div !== ST.div) return;
+      d.regions.forEach(function (r) { if (!ST.reg || r.name === ST.reg) out.push({ div: d.div, region: r }); });
+    });
+    return out;
+  }
+  function sitesInScope() {
+    var s = [];
+    regionsInScope().forEach(function (x) { x.region.sites.forEach(function (site) { s.push(site); }); });
+    return s;
+  }
+  function itemsInScope() {
+    return ITEMS.filter(function (i) { return (!ST.div || i.div === ST.div) && (!ST.reg || i.region === ST.reg); })
+      .sort(function (a, b) { return (a.level === 'act' ? 0 : 1) - (b.level === 'act' ? 0 : 1); });
+  }
+  function scopeName() { return ST.reg ? ST.reg + ' region' : ST.div ? ST.div + ' division' : 'the whole organisation'; }
+
+  // ---------- Purview selects ----------
+  function fillSelects() {
+    var d = $('div'), r = $('reg');
+    d.innerHTML = '<option value="">All divisions</option>' + ORG.map(function (x) { return '<option' + (x.div === ST.div ? ' selected' : '') + '>' + esc(x.div) + '</option>'; }).join('');
+    var regs = [];
+    ORG.forEach(function (x) { if (!ST.div || x.div === ST.div) x.regions.forEach(function (rg) { regs.push(rg.name); }); });
+    r.innerHTML = '<option value="">All regions</option>' + regs.map(function (n) { return '<option' + (n === ST.reg ? ' selected' : '') + '>' + esc(n) + '</option>'; }).join('');
+  }
+  $('div').addEventListener('change', function (e) { ST.div = e.target.value; ST.reg = ''; render(); });
+  $('reg').addEventListener('change', function (e) {
+    ST.reg = e.target.value;
+    if (ST.reg) ORG.forEach(function (d) { d.regions.forEach(function (r) { if (r.name === ST.reg) ST.div = d.div; }); });
+    render();
+  });
+
+  // ---------- Briefing + funnel ----------
+  function renderBrief() {
+    var items = itemsInScope().filter(function (i) { return !ST.dismissed[i.id]; });
+    var sites = sitesInScope();
+    var hold = sites.filter(function (s) { return s.state === 'hold'; }).length;
+    var quiet = sites.filter(function (s) { return s.state === 'quiet'; }).map(function (s) { return s.name; });
+    var none = sites.filter(function (s) { return s.state === 'none'; }).length;
+    var act = items.filter(function (i) { return i.level === 'act'; });
+    var out = [];
+    if (!items.length) {
+      out.push('<mark>Nothing needs you</mark> in ' + esc(scopeName()) + ' this week.');
+    } else {
+      out.push('<mark>' + word(items.length) + (items.length === 1 ? ' thing needs you' : ' things need you') + '</mark> this week.');
+      if (act.length) out.push('The most urgent is <span class="st">' + esc(act[0].short) + '</span> at ' + esc(act[0].site) + '.');
+    }
+    if (quiet.length) out.push(esc(listJoin(quiet)) + (quiet.length > 1 ? ' have' : ' has') + ' gone quiet, which usually means reporting or checking has slipped, not that the site is safer.');
+    out.push(word(hold) + ' of ' + sites.length + ' sites are holding and don’t need you.');
+    if (none) out.push(word(none) + (none === 1 ? ' site isn’t' : ' sites aren’t') + ' connected yet.');
+    $('brief').innerHTML = out.join(' ');
+    $('scope-name').textContent = scopeName();
+
+    var total = sites.reduce(function (a, s) { return a + s.records; }, 0);
+    var worth = Math.round(total * 0.075);
+    var patterns = Math.max(items.length, Math.round(total * 0.0026));
+    var steps = [
+      { n: total, l: 'records read from 5 connected systems' },
+      { n: worth, l: 'worth a closer look after enrichment' },
+      { n: patterns, l: 'patterns and signals across sites' },
+      { n: items.length, l: items.length === 1 ? 'needs you this week' : 'need you this week' }
+    ];
+    var max = Math.log10(Math.max(total, 10));
+    $('funnel').innerHTML = steps.map(function (s) {
+      var w = s.n > 0 ? Math.max(4, Math.round(Math.log10(s.n + 1) / max * 100)) : 2;
+      return '<div class="f-step"><span class="f-num">' + s.n.toLocaleString() + '</span><div class="f-bar" style="width:' + w + '%"></div><span class="f-lbl">' + esc(s.l) + '</span></div>';
+    }).join('');
+  }
+
+  // ---------- Ask ----------
+  var askRow = $('ask');
+  askRow.insertAdjacentHTML('beforeend', ASK.map(function (a, i) { return '<button type="button" data-i="' + i + '" aria-pressed="false">' + esc(a.q) + '</button>'; }).join(''));
+  askRow.addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b) return;
+    var i = +b.getAttribute('data-i');
+    ST.ask = ST.ask === i ? -1 : i;
+    askRow.querySelectorAll('button').forEach(function (x) { x.setAttribute('aria-pressed', +x.getAttribute('data-i') === ST.ask ? 'true' : 'false'); });
+    var ans = $('answer');
+    if (ST.ask < 0) { ans.hidden = true; return; }
+    var a = ASK[ST.ask];
+    ans.innerHTML = a.a.map(function (p) { return '<p>' + esc(p) + '</p>'; }).join('') + '<p class="src">' + esc(a.src) + ' · example answer</p>';
+    ans.hidden = false;
+  });
+
+  // ---------- Attention cards ----------
+  function renderCards() {
+    var items = itemsInScope();
+    if (!items.length) { $('cards').innerHTML = '<div class="none-card">Nothing in ' + esc(scopeName()) + ' needs you this week. Everything Prism read is summarised under “What Prism set aside”.</div>'; return; }
+    $('cards').innerHTML = items.map(function (i) {
+      if (ST.dismissed[i.id]) return '<div class="card"><div class="dismissed"><span>Marked not relevant: ' + esc(i.title) + '. Prism will use this to tune what it shows you.</span><button type="button" data-undo="' + i.id + '">Undo</button></div></div>';
+      var pill = i.level === 'act' ? '<span class="pill risk">Act now</span>' : '<span class="pill drift">Keep an eye on</span>';
+      var planned = ST.planned[i.id];
+      var open = ST.open[i.id];
+      return '<article class="card ' + i.level + '">' +
+        '<div class="card-top">' + pill + '<span class="where">' + esc(i.site) + '</span><span>' + esc(i.region) + ' · ' + esc(i.div) + '</span><span>· ' + esc(i.changed) + '</span></div>' +
+        '<div class="card-body"><h3>' + esc(i.title) + '</h3>' +
+          '<div><div class="why-h">Why this is here</div><ul class="why">' + i.why.map(function (w) { return '<li>' + esc(w) + '</li>'; }).join('') + '</ul></div>' +
+          '<div class="facts">' + i.facts.map(function (f) { return '<span class="fact">' + esc(f) + '</span>'; }).join('') + '</div>' +
+          '<div class="next"><span class="next-h">Suggested next step</span><p>' + esc(i.next) + '</p></div>' +
+        '</div>' +
+        '<div class="card-foot">' +
+          '<button type="button" class="btn-s ' + (planned ? 'done' : 'primary') + '" data-plan="' + i.id + '">' + (planned ? '✓ Visit planned' : 'Plan a visit') + '</button>' +
+          '<button type="button" class="btn-s" data-open="' + i.id + '" aria-expanded="' + (open ? 'true' : 'false') + '">' + (open ? 'Hide' : 'Show') + ' the records (' + i.ev.length + ')</button>' +
+          '<button type="button" class="btn-s" data-dismiss="' + i.id + '">Not relevant</button>' +
+          '<span class="conf">' + esc(i.conf) + '</span>' +
+        '</div>' +
+        (open ? '<div class="evidence">' + i.ev.map(function (e) {
+          return '<div class="ev"><span class="ev-meta">' + esc(e.src) + ' · ' + esc(e.when) + '</span><span class="ev-text">' + esc(e.text) + '</span><div class="ev-tags">' + e.tags.map(function (t) { return '<span class="ev-tag">' + esc(t) + '</span>'; }).join('') + '</div></div>';
+        }).join('') + '</div>' : '') +
+      '</article>';
+    }).join('');
+  }
+  $('cards').addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b) return;
+    var id;
+    if ((id = b.getAttribute('data-plan'))) ST.planned[id] = !ST.planned[id];
+    else if ((id = b.getAttribute('data-open'))) ST.open[id] = !ST.open[id];
+    else if ((id = b.getAttribute('data-dismiss'))) ST.dismissed[id] = true;
+    else if ((id = b.getAttribute('data-undo'))) delete ST.dismissed[id];
+    else return;
+    renderCards(); renderBrief();
+  });
+
+  // ---------- Patch ----------
+  var FILTERS = [['all', 'All'], ['risk', 'At risk'], ['quiet', 'Gone quiet'], ['drift', 'Drifting'], ['hold', 'Holding'], ['none', 'Not connected']];
+  $('states').innerHTML = FILTERS.map(function (f) { return '<button type="button" data-f="' + f[0] + '" aria-pressed="' + (f[0] === 'all') + '">' + f[1] + '</button>'; }).join('');
+  $('states').addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b) return;
+    ST.filter = b.getAttribute('data-f');
+    $('states').querySelectorAll('button').forEach(function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
+    renderPatch();
+  });
+
+  function regionSummary(sites) {
+    var c = {};
+    sites.forEach(function (s) { c[s.state] = (c[s.state] || 0) + 1; });
+    var parts = [];
+    if (c.risk) parts.push(word(c.risk).toLowerCase() + ' at risk');
+    if (c.quiet) parts.push(word(c.quiet).toLowerCase() + ' gone quiet');
+    if (c.drift) parts.push(word(c.drift).toLowerCase() + ' drifting');
+    if (!parts.length) return 'All sites holding. Nothing needs you here.';
+    var s = listJoin(parts);
+    return s.charAt(0).toUpperCase() + s.slice(1) + '. ' + (c.hold ? word(c.hold) + ' holding.' : '');
+  }
+
+  function renderPatch() {
+    var regs = regionsInScope();
+    $('patch').innerHTML = regs.map(function (x) {
+      var sites = x.region.sites.slice().sort(function (a, b) { return STATE_ORDER[a.state] - STATE_ORDER[b.state]; });
+      var worst = sites[0].state;
+      var shown = sites.filter(function (s) { return ST.filter === 'all' || s.state === ST.filter; });
+      var holdHidden = 0;
+      if (ST.filter === 'all') {
+        holdHidden = shown.filter(function (s) { return s.state === 'hold'; }).length;
+        shown = shown.filter(function (s) { return s.state !== 'hold'; });
+      }
+      if (ST.filter !== 'all' && !shown.length) return '';
+      return '<div class="region"><div class="region-head">' +
+        '<span class="div-name">' + esc(x.div) + '</span>' +
+        '<button type="button" data-reg="' + esc(x.region.name) + '" title="Focus on this region">' + esc(x.region.name) + '</button>' +
+        '<span class="pill ' + worst + '">' + STATE_LABEL[worst] + '</span>' +
+        '<span class="region-sum">' + esc(regionSummary(sites)) + '</span></div>' +
+        '<ul class="sites">' + shown.map(function (s) {
+          return '<li class="site ' + s.state + '"><span class="site-name">' + esc(s.name) + '</span><span class="pill ' + s.state + '">' + STATE_LABEL[s.state] + '</span><span class="site-why">' + esc(s.why) + '</span></li>';
+        }).join('') + '</ul>' +
+        (holdHidden ? '<div class="held">' + word(holdHidden) + (holdHidden === 1 ? ' other site is' : ' other sites are') + ' holding.</div>' : '') +
+      '</div>';
+    }).join('') || '<div class="none-card">No sites in this state here.</div>';
+  }
+  $('patch').addEventListener('click', function (e) {
+    var b = e.target.closest('button[data-reg]'); if (!b) return;
+    ST.reg = b.getAttribute('data-reg');
+    ORG.forEach(function (d) { d.regions.forEach(function (r) { if (r.name === ST.reg) ST.div = d.div; }); });
+    render();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+  // ---------- Themes + aside ----------
+  function renderLower() {
+    var inScope = sitesInScope().map(function (s) { return s.name; });
+    var themes = THEMES.filter(function (t) { return t.sites.some(function (s) { return inScope.indexOf(s) > -1; }); });
+    $('themes').innerHTML = themes.length ? themes.map(function (t) {
+      var here = t.sites.filter(function (s) { return inScope.indexOf(s) > -1; });
+      return '<div class="theme"><h3>' + esc(t.title) + '</h3><p>' + esc(t.text) + '</p><span class="where-list">Seen at ' + esc(listJoin(here)) + (here.length < t.sites.length ? ', and elsewhere in the organisation' : '') + '</span></div>';
+    }).join('') : '<div class="none-card" style="grid-column:1/-1">No cross-site threads in this purview.</div>';
+
+    var total = sitesInScope().reduce(function (a, s) { return a + s.records; }, 0);
+    $('aside').innerHTML = ASIDE.map(function (a) {
+      return '<li><span class="aside-n">' + Math.round(total * a.k).toLocaleString() + '</span><span class="aside-t"><b>' + esc(a.t) + '</b><span>' + esc(a.s) + '</span></span></li>';
+    }).join('');
+  }
+
+  function render() { fillSelects(); renderBrief(); renderCards(); renderPatch(); renderLower(); }
+  render();
+})();
+</script>
+</body>
+</html>

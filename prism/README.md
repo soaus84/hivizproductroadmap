@@ -27,6 +27,7 @@ Managers only: safety managers, operations managers, regional and divisional lea
 | `README.md` | This file — thesis, reuse map, and how Prism references the Hiviz specs |
 | `SCOPE.md` | Scope spec: source types, connector layer, thin entities, pipeline, cadence, in/out, open decisions |
 | `index.html` | Internal pitch page — the idea in one read |
+| `dashboard.html` | Greenfield dashboard concept — the manager view, with example data |
 | `scope.html` | Visual platform scope — data flow, source catalogue, entity model, reuse map |
 | `profiler.html` | Product-in profiler — common safety platforms, their API shape, and the connector pattern each needs |
 | _(styles)_ | Each page carries its own copy of the shared Prism styles so it renders on its own, including in the preview pane and as a published artifact. Change the token block in all three together |
