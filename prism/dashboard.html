@@ -199,7 +199,7 @@ table.data td strong { color: var(--text); font-weight: 600; }
   .pill.none { color: var(--s-none); background: var(--s-none-bg); }
   .pill.none::before { background: none; border: 1.5px dotted currentColor; width: 5px; height: 5px; }
 
-  /* Patch */
+  /* Purview: regions and sites */
   .states { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
   .states button { font: inherit; font-size: 12.5px; font-weight: 600; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--text-2); cursor: pointer; }
   .states button[aria-pressed="true"] { background: var(--text); color: var(--ground); border-color: var(--text); }
@@ -281,7 +281,7 @@ table.data td strong { color: var(--text); font-weight: 600; }
     </section>
 
     <section aria-labelledby="patch-h">
-      <div class="col-head"><h2 id="patch-h">Your patch</h2><span class="note">Select a region to focus on it</span></div>
+      <div class="col-head"><h2 id="patch-h">Your purview</h2><span class="note">Select a region to focus on it</span></div>
       <div class="states" id="states" role="group" aria-label="Filter sites by state"></div>
       <div class="patch" id="patch"></div>
     </section>
@@ -290,8 +290,8 @@ table.data td strong { color: var(--text); font-weight: 600; }
   <div class="lower">
     <section>
       <div class="sec-head">
-        <h2>Running through your patch</h2>
-        <p>Threads Prism sees across more than one site. These are about how work is organised, not about any one person.</p>
+        <h2>Insights in your purview</h2>
+        <p>Patterns Prism sees across more than one site. They are about how work is organised, not about any one person.</p>
       </div>
       <div class="themes" id="themes"></div>
     </section>
@@ -586,7 +586,7 @@ table.data td strong { color: var(--text); font-weight: 600; }
     renderCards(); renderBrief();
   });
 
-  // ---------- Patch ----------
+  // ---------- Purview: regions and sites ----------
   var FILTERS = [['all', 'All'], ['risk', 'At risk'], ['quiet', 'Gone quiet'], ['drift', 'Drifting'], ['hold', 'Holding'], ['none', 'Not connected']];
   $('states').innerHTML = FILTERS.map(function (f) { return '<button type="button" data-f="' + f[0] + '" aria-pressed="' + (f[0] === 'all') + '">' + f[1] + '</button>'; }).join('');
   $('states').addEventListener('click', function (e) {
@@ -647,7 +647,7 @@ table.data td strong { color: var(--text); font-weight: 600; }
     $('themes').innerHTML = themes.length ? themes.map(function (t) {
       var here = t.sites.filter(function (s) { return inScope.indexOf(s) > -1; });
       return '<div class="theme"><h3>' + esc(t.title) + '</h3><p>' + esc(t.text) + '</p><span class="where-list">Seen at ' + esc(listJoin(here)) + (here.length < t.sites.length ? ', and elsewhere in the organisation' : '') + '</span></div>';
-    }).join('') : '<div class="none-card" style="grid-column:1/-1">No cross-site threads in this purview.</div>';
+    }).join('') : '<div class="none-card" style="grid-column:1/-1">No cross-site insights in this purview.</div>';
 
     var total = sitesInScope().reduce(function (a, s) { return a + s.records; }, 0);
     $('aside').innerHTML = ASIDE.map(function (a) {
