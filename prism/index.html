@@ -1,0 +1,450 @@
+<title>Hiviz Prism</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,650;12..96,700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Hiviz Prism — shared styles. Dark-first, light variant via tokens. */
+:root {
+  color-scheme: dark;
+  --ground: #0c0e12;
+  --surface: #13161c;
+  --surface-2: #1a1e25;
+  --line: #262b34;
+  --line-soft: #1d2129;
+  --text: #e8eaee;
+  --text-2: #a9b0bb;
+  --muted: #737c89;
+  --accent: #d9ad45;          /* Hiviz gold */
+  --accent-ink: #1a1405;
+  --accent-soft: rgba(217,173,69,0.12);
+  /* Spectrum — one band per enrichment dimension */
+  --b-signal: #ef6a5b;
+  --b-energy: #f09a45;
+  --b-barrier: #e3c64e;
+  --b-hazard: #4fbf88;
+  --b-fw: #5aa2e6;
+  --b-reason: #a38cf0;
+  --ok: #4fbf88;
+  --warn: #e3a84e;
+  --bad: #ef6a5b;
+  --shadow: 0 1px 0 rgba(255,255,255,0.03) inset;
+  --display: "Bricolage Grotesque", "Helvetica Neue", Arial, sans-serif;
+  --body: "IBM Plex Sans", -apple-system, "Segoe UI", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    color-scheme: light;
+    --ground: #f5f6f8; --surface: #ffffff; --surface-2: #eef0f3;
+    --line: #d9dde3; --line-soft: #e6e9ed;
+    --text: #151920; --text-2: #3f4753; --muted: #69727f;
+    --accent: #a87a12; --accent-ink: #ffffff; --accent-soft: rgba(168,122,18,0.10);
+    --b-signal: #d2483a; --b-energy: #cf7422; --b-barrier: #a88f12;
+    --b-hazard: #25935e; --b-fw: #2f78c2; --b-reason: #7657d6;
+    --ok: #25935e; --warn: #b87d12; --bad: #d2483a;
+    --shadow: 0 1px 2px rgba(20,25,35,0.05);
+  }
+}
+:root[data-theme="light"] {
+  color-scheme: light;
+  --ground: #f5f6f8; --surface: #ffffff; --surface-2: #eef0f3;
+  --line: #d9dde3; --line-soft: #e6e9ed;
+  --text: #151920; --text-2: #3f4753; --muted: #69727f;
+  --accent: #a87a12; --accent-ink: #ffffff; --accent-soft: rgba(168,122,18,0.10);
+  --b-signal: #d2483a; --b-energy: #cf7422; --b-barrier: #a88f12;
+  --b-hazard: #25935e; --b-fw: #2f78c2; --b-reason: #7657d6;
+  --ok: #25935e; --warn: #b87d12; --bad: #d2483a;
+  --shadow: 0 1px 2px rgba(20,25,35,0.05);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-font-smoothing: antialiased; }
+body {
+  margin: 0; background: var(--ground); color: var(--text);
+  font-family: var(--body); font-size: 15px; line-height: 1.6;
+}
+a { color: inherit; }
+a:focus-visible, button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 3px; }
+code, .mono { font-family: var(--mono); font-size: 0.86em; }
+code { background: var(--surface-2); border: 1px solid var(--line-soft); padding: 0 5px; border-radius: 4px; color: var(--text-2); }
+
+.wrap { max-width: 1120px; margin: 0 auto; padding-inline: 24px; }
+@media (max-width: 560px) { .wrap { padding-inline: 16px; } }
+
+/* Top bar */
+.topbar { border-bottom: 1px solid var(--line); background: var(--ground); position: sticky; top: env(safe-area-inset-top, 0px); z-index: 10; }
+.topbar .wrap { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-block: 12px; flex-wrap: wrap; }
+.brand { display: flex; align-items: baseline; gap: 8px; text-decoration: none; }
+.brand-hiviz { font-family: var(--display); font-weight: 700; font-size: 17px; letter-spacing: -0.01em; }
+.brand-prism { font-family: var(--mono); font-size: 12px; color: var(--accent); letter-spacing: 0.08em; text-transform: uppercase; }
+.pagenav { display: flex; gap: 4px; flex-wrap: wrap; }
+.pagenav a { font-size: 13px; text-decoration: none; color: var(--text-2); padding: 5px 11px; border-radius: 6px; border: 1px solid transparent; }
+.pagenav a:hover { color: var(--text); border-color: var(--line); }
+.pagenav a[aria-current="page"] { color: var(--text); background: var(--surface-2); border-color: var(--line); }
+
+/* Type */
+h1, h2, h3 { font-family: var(--display); letter-spacing: -0.02em; text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(34px, 5.4vw, 60px); line-height: 1.02; font-weight: 700; }
+h2 { font-size: clamp(24px, 3vw, 32px); line-height: 1.12; font-weight: 650; }
+h3 { font-size: 17px; line-height: 1.3; font-weight: 600; letter-spacing: -0.01em; }
+.eyebrow { font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+.lede { font-size: 18px; line-height: 1.55; color: var(--text-2); max-width: 62ch; }
+.prose { max-width: 66ch; color: var(--text-2); }
+.prose p { margin: 0 0 12px; }
+.muted { color: var(--muted); }
+.small { font-size: 13px; }
+
+section.block { padding-block: 56px; border-top: 1px solid var(--line-soft); }
+.block-head { display: grid; gap: 10px; margin-bottom: 28px; max-width: 72ch; }
+
+/* Chips */
+.chip { display: inline-flex; align-items: center; gap: 6px; font-family: var(--mono); font-size: 11.5px; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--line); color: var(--text-2); background: var(--surface); white-space: nowrap; }
+.chip .dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.chip.p1 { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 40%, transparent); }
+.chip.ok { color: var(--ok); border-color: color-mix(in srgb, var(--ok) 40%, transparent); }
+.chip.warn { color: var(--warn); border-color: color-mix(in srgb, var(--warn) 40%, transparent); }
+.chip.bad { color: var(--bad); border-color: color-mix(in srgb, var(--bad) 40%, transparent); }
+
+/* Tables */
+.table-scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+table.data { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+table.data th { text-align: left; font-family: var(--mono); font-weight: 500; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); padding: 10px 14px; border-bottom: 1px solid var(--line); background: var(--surface-2); white-space: nowrap; }
+table.data td { padding: 11px 14px; border-bottom: 1px solid var(--line-soft); vertical-align: top; color: var(--text-2); }
+table.data tr:last-child td { border-bottom: none; }
+table.data td strong { color: var(--text); font-weight: 600; }
+
+.footer { padding-block: 40px 56px; border-top: 1px solid var(--line-soft); color: var(--muted); font-size: 13px; }
+.footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+</style>
+<style>
+  .hero { padding-block: 64px 48px; display: grid; gap: 40px; }
+  .hero-text { display: grid; gap: 20px; max-width: 760px; }
+  .hero-text h1 em { font-style: normal; color: var(--accent); }
+  .cta-row { display: flex; gap: 10px; flex-wrap: wrap; }
+  .btn { display: inline-flex; align-items: center; gap: 8px; text-decoration: none; font-weight: 500; font-size: 14px; padding: 10px 16px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); color: var(--text); }
+  .btn:hover { border-color: var(--muted); }
+  .btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+  .btn.primary:hover { filter: brightness(1.06); }
+
+  .figure { border: 1px solid var(--line); border-radius: 14px; background: var(--surface); padding: 20px; box-shadow: var(--shadow); }
+  .fig-scroll { overflow-x: auto; }
+  .fig-scroll svg { display: block; min-width: 720px; width: 100%; height: auto; }
+  .figcap { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-top: 12px; font-size: 13px; color: var(--muted); }
+  svg text { font-family: var(--mono); }
+  .svg-card { fill: var(--surface-2); stroke: var(--line); }
+  .svg-ink { fill: var(--text); }
+  .svg-ink2 { fill: var(--text-2); }
+  .svg-mute { fill: var(--muted); }
+  .svg-beam { stroke: var(--muted); }
+  .svg-prism { fill: var(--accent-soft); stroke: var(--accent); }
+
+  .three { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 16px; }
+  .four { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 16px; }
+  @media (max-width: 900px) { .four { grid-template-columns: repeat(2, minmax(0,1fr)); } }
+  @media (max-width: 720px) { .three, .four { grid-template-columns: 1fr; } }
+
+  .point { display: grid; gap: 8px; align-content: start; }
+  .point p { margin: 0; color: var(--text-2); font-size: 14.5px; }
+
+  .step { border: 1px solid var(--line); border-radius: 12px; background: var(--surface); padding: 18px; display: grid; gap: 10px; align-content: start; }
+  .step-n { font-family: var(--mono); font-size: 12px; color: var(--accent); }
+  .step p { margin: 0; font-size: 14px; color: var(--text-2); }
+  .step .reuse { font-size: 12px; color: var(--muted); border-top: 1px solid var(--line-soft); padding-top: 10px; }
+
+  .outputs { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1.1fr); gap: 32px; align-items: start; }
+  @media (max-width: 860px) { .outputs { grid-template-columns: 1fr; } }
+  .out-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; }
+  .out-list li { padding: 14px 0; border-bottom: 1px solid var(--line-soft); display: grid; gap: 4px; }
+  .out-list li:first-child { padding-top: 0; }
+  .out-list li span { color: var(--text-2); font-size: 14px; }
+
+  .insight { border: 1px solid var(--line); border-radius: 12px; background: var(--surface); overflow: hidden; }
+  .insight-top { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; padding: 14px 18px; border-bottom: 1px solid var(--line-soft); background: var(--surface-2); }
+  .insight-body { padding: 18px; display: grid; gap: 14px; }
+  .insight-body h3 { font-size: 19px; }
+  .insight-body p { margin: 0; color: var(--text-2); font-size: 14.5px; }
+  .kv { display: grid; grid-template-columns: 130px 1fr; gap: 6px 14px; font-size: 13px; }
+  .kv dt { color: var(--muted); font-family: var(--mono); font-size: 11.5px; padding-top: 2px; }
+  .kv dd { margin: 0; color: var(--text-2); display: flex; flex-wrap: wrap; gap: 6px; }
+  .why { border-left: 2px solid var(--b-reason); padding-left: 12px; font-size: 13.5px; color: var(--text-2); }
+  .insight-foot { display: flex; gap: 8px; flex-wrap: wrap; padding: 14px 18px; border-top: 1px solid var(--line-soft); }
+  .fake-btn { font-size: 13px; padding: 6px 12px; border-radius: 6px; border: 1px solid var(--line); color: var(--text-2); }
+  .fake-btn.go { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+
+  .yes { color: var(--ok); font-weight: 600; }
+  .no { color: var(--muted); }
+  .part { color: var(--warn); }
+  table.data td:first-child { color: var(--text); }
+  table.data th.us, table.data td.us { background: var(--accent-soft); }
+
+  .reuse-strip { display: flex; flex-wrap: wrap; gap: 8px; }
+</style>
+
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="index.html"><span class="brand-hiviz">Hiviz</span><span class="brand-prism">Prism</span></a>
+    <nav class="pagenav" aria-label="Prism pages">
+      <a href="index.html" aria-current="page">Pitch</a>
+      <a href="scope.html">Platform scope</a>
+      <a href="profiler.html">Product-in profiler</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+    <section class="hero">
+      <div class="hero-text">
+        <span class="eyebrow">Internal concept · Forge Works · September 2026</span>
+        <h1>The intelligence layer for the safety system <em>you already own.</em></h1>
+        <p class="lede">Prism connects to the incident, inspection and hazard tools an organisation already runs and turns their records into insight for managers. There's nothing to migrate and no new forms to fill in. The TV stays; we make it smart.</p>
+        <div class="cta-row">
+          <a class="btn primary" href="scope.html">See the platform scope →</a>
+          <a class="btn" href="profiler.html">Profile a prospect's tools</a>
+        </div>
+      </div>
+
+      <figure class="figure" style="margin:0">
+        <div class="fig-scroll">
+          <svg viewBox="0 0 900 300" role="img" aria-labelledby="prism-title prism-desc">
+            <title id="prism-title">A plain incident record refracted into six enrichment bands</title>
+            <desc id="prism-desc">A near-miss record from a customer's system passes through the Prism and comes out as signal type, energy, barrier state, key hazard, FW Map factor hint and rationale.</desc>
+            <!-- source record -->
+            <rect class="svg-card" x="8" y="78" width="232" height="144" rx="10" stroke-width="1"/>
+            <text x="24" y="104" font-size="11" class="svg-mute">PROCORE · INCIDENT · NM-2291</text>
+            <text x="24" y="130" font-size="13" class="svg-ink">Tag line snapped while guiding</text>
+            <text x="24" y="148" font-size="13" class="svg-ink">a steel beam. Load swung toward</text>
+            <text x="24" y="166" font-size="13" class="svg-ink">the laydown area. No one in the</text>
+            <text x="24" y="184" font-size="13" class="svg-ink">swing path.</text>
+            <text x="24" y="208" font-size="11" class="svg-mute">Category: Near miss · Site: North Yard</text>
+            <!-- beam in -->
+            <line class="svg-beam" x1="240" y1="150" x2="318" y2="150" stroke-width="3" stroke-linecap="round"/>
+            <!-- prism -->
+            <polygon class="svg-prism" points="350,52 290,248 410,248" stroke-width="1.5"/>
+            <!-- bands out: fan from ~ (385,150) -->
+            <g opacity="0.9">
+              <polygon points="382,142 382,146 560,58 560,70" style="fill:var(--b-signal)"/>
+              <polygon points="382,146 382,149 560,100 560,112" style="fill:var(--b-energy)"/>
+              <polygon points="382,149 382,152 560,142 560,154" style="fill:var(--b-barrier)"/>
+              <polygon points="382,152 382,155 560,184 560,196" style="fill:var(--b-hazard)"/>
+              <polygon points="382,155 382,158 560,226 560,238" style="fill:var(--b-fw)"/>
+              <polygon points="382,158 382,161 560,266 560,278" style="fill:var(--b-reason)"/>
+            </g>
+            <!-- labels -->
+            <g font-size="12.5">
+              <text x="574" y="62" class="svg-mute">signal_type</text>
+              <text x="574" y="78" class="svg-ink">unwanted_energy_event · 0.86</text>
+              <text x="574" y="104" class="svg-mute">energy_type · release_potential</text>
+              <text x="574" y="120" class="svg-ink">kinetic · high</text>
+              <text x="574" y="146" class="svg-mute">barrier_assessment</text>
+              <text x="574" y="162" class="svg-ink">barrier_failed · 0.81</text>
+              <text x="574" y="188" class="svg-mute">key_hazard</text>
+              <text x="574" y="204" class="svg-ink">uncontrolled suspended load</text>
+              <text x="574" y="230" class="svg-mute">fw_factor_hint</text>
+              <text x="574" y="246" class="svg-ink">resource_allocation</text>
+              <text x="574" y="272" class="svg-mute">rationale</text>
+              <text x="574" y="288" class="svg-ink">one sentence per field</text>
+            </g>
+          </svg>
+        </div>
+        <figcaption class="figcap">
+          <span>One record from a customer's own tool, refracted by the Hiviz enrichment stack.</span>
+          <span class="mono">Direct path → Critical Insight draft</span>
+        </figcaption>
+      </figure>
+    </section>
+  </div>
+
+  <section class="block">
+    <div class="wrap">
+      <div class="block-head">
+        <span class="eyebrow">Why this, why now</span>
+        <h2>A leaner product for a tighter market</h2>
+      </div>
+      <div class="three">
+        <div class="point">
+          <h3>Consulting is thinning out</h3>
+          <p>AI is taking the advisory work that has funded Forge Works. We need recurring revenue that doesn't depend on a consultant being in the room.</p>
+        </div>
+        <div class="point">
+          <h3>Nobody wants another system of record</h3>
+          <p>Organisations have already bought an EHS platform and trained people on it. Asking them to replace it means a year of change management we can't fund.</p>
+        </div>
+        <div class="point">
+          <h3>Managers have records, not reads</h3>
+          <p>The data exists. What's missing is someone telling a manager what it means this week, and why. That's the part Hiviz already does well.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="wrap">
+      <div class="block-head">
+        <span class="eyebrow">How it works</span>
+        <h2>Four steps from their data to a manager's desk</h2>
+      </div>
+      <div class="four">
+        <div class="step">
+          <span class="step-n">01 · Connect</span>
+          <h3>Plug into what's there</h3>
+          <p>Webhooks, API polling, platform tables, or a CSV drop. Read-only by default. We backfill the last 12 months, then stay live.</p>
+          <span class="reuse">New: connector layer, schema and site mapping</span>
+        </div>
+        <div class="step">
+          <span class="step-n">02 · Refract</span>
+          <h3>Enrich each record</h3>
+          <p>Every incident, hazard, failed inspection item and investigation gets a signal type, energy, barrier state, key hazard and FW Map® hint, each with a reason.</p>
+          <span class="reuse">Reuses the observation enrichment job and taxonomies</span>
+        </div>
+        <div class="step">
+          <span class="step-n">03 · Pool</span>
+          <h3>Build an opinionated data pool</h3>
+          <p>Records from every tool land in one classified pool. Nightly runs look for trends by site, region and work type. Serious single events skip the queue.</p>
+          <span class="reuse">Reuses trend detection and direct-path rules</span>
+        </div>
+        <div class="step">
+          <span class="step-n">04 · Surface</span>
+          <h3>Tell managers what it means</h3>
+          <p>Critical Insights for review, weekly digests, monthly reports, and visit briefings. Suggested actions go back into the customer's own tool.</p>
+          <span class="reuse">Reuses insight, reporting, briefs, visits</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="wrap outputs">
+      <div>
+        <div class="block-head">
+          <span class="eyebrow">What a manager gets</span>
+          <h2>Only manager surfaces. Nothing for crew.</h2>
+        </div>
+        <ul class="out-list">
+          <li><strong>Critical Insights</strong><span>Pattern-level findings drafted by AI, reviewed and owned by a safety manager.</span></li>
+          <li><strong>Periodic intelligence reports</strong><span>Weekly digest and monthly narrative, scoped to the manager's region or division.</span></li>
+          <li><strong>Field leadership visits</strong><span>A briefing before each site visit, with observation capture on the walk. These are the only records created in Hiviz.</span></li>
+          <li><strong>Systemic picture</strong><span>FW Map® capacity profile, blind spots, and sites that have gone quiet in their own system.</span></li>
+          <li><strong>Action push</strong><span>Suggested actions written back into the tool the site already uses, where its API allows.</span></li>
+        </ul>
+      </div>
+
+      <article class="insight" aria-label="Example Critical Insight card">
+        <div class="insight-top">
+          <span class="chip p1"><span class="dot"></span>Cross-site Pattern</span>
+          <span class="chip">Example · draft for review</span>
+        </div>
+        <div class="insight-body">
+          <span class="eyebrow">Lifting operations · Northern region · 21 days</span>
+          <h3>Tag line and rigging gear failures are clustering across three sites</h3>
+          <p>Twelve records across two systems describe loads moving outside the planned path. In eight, worn or improvised rigging gear was in use. None resulted in injury.</p>
+          <dl class="kv">
+            <dt>sources</dt>
+            <dd><span class="chip">Procore · 6</span><span class="chip">Mitti · 4</span><span class="chip">CSV import · 2</span></dd>
+            <dt>signal mix</dt>
+            <dd><span class="chip bad">energy event · 3</span><span class="chip warn">at-risk · 9</span></dd>
+            <dt>fw factor</dt>
+            <dd><span class="chip">resource_allocation · compliant</span></dd>
+          </dl>
+          <p class="why"><strong>Why this was suggested:</strong> based on three energy events with barrier_failed on the same control type within 21 days, above the region's threshold of two.</p>
+        </div>
+        <div class="insight-foot">
+          <span class="fake-btn go">Approve</span>
+          <span class="fake-btn">Edit</span>
+          <span class="fake-btn">Push action to Procore</span>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="wrap">
+      <div class="block-head">
+        <span class="eyebrow">Positioning</span>
+        <h2>Why Prism and not the alternatives</h2>
+        <p class="prose">Buyers will compare us with building it themselves, pasting data into a chatbot, or waiting for their vendor's AI. This is how we answer.</p>
+      </div>
+      <div class="table-scroll">
+        <table class="data">
+          <thead>
+            <tr><th></th><th>Power BI build</th><th>Paste into a chatbot</th><th>Their vendor's AI</th><th class="us">Hiviz Prism</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Works across all their tools</td><td class="part">If someone builds it</td><td class="part">One export at a time</td><td class="no">Vendor's own data only</td><td class="us yes">Yes</td></tr>
+            <tr><td>Safety-specific classification</td><td class="no">Whatever they define</td><td class="no">Generic</td><td class="part">Vendor categories</td><td class="us yes">Signal, energy, barrier, FW Map®</td></tr>
+            <tr><td>A reason for every suggestion</td><td class="no">No</td><td class="part">If asked</td><td class="part">Varies</td><td class="us yes">Stored with every field</td></tr>
+            <tr><td>Runs without being asked</td><td class="part">Refreshes numbers</td><td class="no">No</td><td class="part">Varies</td><td class="us yes">Nightly, weekly, monthly</td></tr>
+            <tr><td>Needs a data team</td><td class="no">Yes</td><td class="part">No, but no governance</td><td class="yes">No</td><td class="us yes">No</td></tr>
+            <tr><td>Changes their workflow</td><td class="yes">No</td><td class="yes">No</td><td class="yes">No</td><td class="us yes">No</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="wrap">
+      <div class="block-head">
+        <span class="eyebrow">How we sell it</span>
+        <h2>Start with their history, then stay connected</h2>
+      </div>
+      <div class="three">
+        <div class="step">
+          <span class="step-n">First light</span>
+          <h3>A retrospective in two weeks</h3>
+          <p>They send 12 months of exports. We return an intelligence report on their own data, covering top patterns, FW blind spots and sites going quiet. Fixed fee, credited to the subscription.</p>
+        </div>
+        <div class="step">
+          <span class="step-n">Subscription</span>
+          <h3>Live and running</h3>
+          <p>Live connectors, nightly runs, insights, reports, visit briefings and action push. Priced per organisation with a site band, never per record.</p>
+        </div>
+        <div class="step">
+          <span class="step-n">Add-ons</span>
+          <h3>Grow the read</h3>
+          <p>Procedure ingestion for requirement-gap detection, extra connectors, and consultant-led insight reviews for teams that want a human in the loop.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="wrap">
+      <div class="block-head">
+        <span class="eyebrow">Built on Hiviz</span>
+        <h2>Most of Prism is already specified</h2>
+        <p class="prose">Prism references the existing Hiviz specs rather than copying them. The new work is the connector layer, schema mapping, and source-type prompt variants.</p>
+      </div>
+      <div class="reuse-strip">
+        <span class="chip ok">signal-type-taxonomy</span>
+        <span class="chip ok">energy-type-taxonomy</span>
+        <span class="chip ok">barrier-assessment-values</span>
+        <span class="chip ok">fw-map-blueprint</span>
+        <span class="chip ok">fw-classify-job</span>
+        <span class="chip ok">ai-output-standards</span>
+        <span class="chip ok">anonymisation-rules</span>
+        <span class="chip ok">CRITICAL-INSIGHT</span>
+        <span class="chip ok">REPORTING</span>
+        <span class="chip ok">SITUATIONAL-BRIEF</span>
+        <span class="chip ok">VISIT-BRIEFING</span>
+        <span class="chip ok">SYSTEMIC-CAUSES</span>
+        <span class="chip warn">CORRECTIVE-ACTIONS → action push</span>
+        <span class="chip warn">CRITICAL-INCIDENT → imported pool</span>
+        <span class="chip p1">new · connectors</span>
+        <span class="chip p1">new · schema mapping</span>
+        <span class="chip p1">new · source enrichment variants</span>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="wrap">
+    <span>Hiviz Prism · internal concept, not for external distribution</span>
+    <span class="mono">prism/README.md · prism/SCOPE.md</span>
+  </div>
+</footer>

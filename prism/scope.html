@@ -1,0 +1,480 @@
+<!doctype html>
+<html lang="en">
+<head>
+<title>Prism Platform Scope</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,650;12..96,700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Hiviz Prism — shared styles. Dark-first, light variant via tokens. */
+:root {
+  color-scheme: dark;
+  --ground: #0c0e12;
+  --surface: #13161c;
+  --surface-2: #1a1e25;
+  --line: #262b34;
+  --line-soft: #1d2129;
+  --text: #e8eaee;
+  --text-2: #a9b0bb;
+  --muted: #737c89;
+  --accent: #d9ad45;          /* Hiviz gold */
+  --accent-ink: #1a1405;
+  --accent-soft: rgba(217,173,69,0.12);
+  /* Spectrum — one band per enrichment dimension */
+  --b-signal: #ef6a5b;
+  --b-energy: #f09a45;
+  --b-barrier: #e3c64e;
+  --b-hazard: #4fbf88;
+  --b-fw: #5aa2e6;
+  --b-reason: #a38cf0;
+  --ok: #4fbf88;
+  --warn: #e3a84e;
+  --bad: #ef6a5b;
+  --shadow: 0 1px 0 rgba(255,255,255,0.03) inset;
+  --display: "Bricolage Grotesque", "Helvetica Neue", Arial, sans-serif;
+  --body: "IBM Plex Sans", -apple-system, "Segoe UI", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    color-scheme: light;
+    --ground: #f5f6f8; --surface: #ffffff; --surface-2: #eef0f3;
+    --line: #d9dde3; --line-soft: #e6e9ed;
+    --text: #151920; --text-2: #3f4753; --muted: #69727f;
+    --accent: #a87a12; --accent-ink: #ffffff; --accent-soft: rgba(168,122,18,0.10);
+    --b-signal: #d2483a; --b-energy: #cf7422; --b-barrier: #a88f12;
+    --b-hazard: #25935e; --b-fw: #2f78c2; --b-reason: #7657d6;
+    --ok: #25935e; --warn: #b87d12; --bad: #d2483a;
+    --shadow: 0 1px 2px rgba(20,25,35,0.05);
+  }
+}
+:root[data-theme="light"] {
+  color-scheme: light;
+  --ground: #f5f6f8; --surface: #ffffff; --surface-2: #eef0f3;
+  --line: #d9dde3; --line-soft: #e6e9ed;
+  --text: #151920; --text-2: #3f4753; --muted: #69727f;
+  --accent: #a87a12; --accent-ink: #ffffff; --accent-soft: rgba(168,122,18,0.10);
+  --b-signal: #d2483a; --b-energy: #cf7422; --b-barrier: #a88f12;
+  --b-hazard: #25935e; --b-fw: #2f78c2; --b-reason: #7657d6;
+  --ok: #25935e; --warn: #b87d12; --bad: #d2483a;
+  --shadow: 0 1px 2px rgba(20,25,35,0.05);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-font-smoothing: antialiased; }
+body {
+  margin: 0; background: var(--ground); color: var(--text);
+  font-family: var(--body); font-size: 15px; line-height: 1.6;
+}
+a { color: inherit; }
+a:focus-visible, button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 3px; }
+code, .mono { font-family: var(--mono); font-size: 0.86em; }
+code { background: var(--surface-2); border: 1px solid var(--line-soft); padding: 0 5px; border-radius: 4px; color: var(--text-2); }
+
+.wrap { max-width: 1120px; margin: 0 auto; padding-inline: 24px; }
+@media (max-width: 560px) { .wrap { padding-inline: 16px; } }
+
+/* Top bar */
+.topbar { border-bottom: 1px solid var(--line); background: var(--ground); position: sticky; top: env(safe-area-inset-top, 0px); z-index: 10; }
+.topbar .wrap { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-block: 12px; flex-wrap: wrap; }
+.brand { display: flex; align-items: baseline; gap: 8px; text-decoration: none; }
+.brand-hiviz { font-family: var(--display); font-weight: 700; font-size: 17px; letter-spacing: -0.01em; }
+.brand-prism { font-family: var(--mono); font-size: 12px; color: var(--accent); letter-spacing: 0.08em; text-transform: uppercase; }
+.pagenav { display: flex; gap: 4px; flex-wrap: wrap; }
+.pagenav a { font-size: 13px; text-decoration: none; color: var(--text-2); padding: 5px 11px; border-radius: 6px; border: 1px solid transparent; }
+.pagenav a:hover { color: var(--text); border-color: var(--line); }
+.pagenav a[aria-current="page"] { color: var(--text); background: var(--surface-2); border-color: var(--line); }
+
+/* Type */
+h1, h2, h3 { font-family: var(--display); letter-spacing: -0.02em; text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(34px, 5.4vw, 60px); line-height: 1.02; font-weight: 700; }
+h2 { font-size: clamp(24px, 3vw, 32px); line-height: 1.12; font-weight: 650; }
+h3 { font-size: 17px; line-height: 1.3; font-weight: 600; letter-spacing: -0.01em; }
+.eyebrow { font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+.lede { font-size: 18px; line-height: 1.55; color: var(--text-2); max-width: 62ch; }
+.prose { max-width: 66ch; color: var(--text-2); }
+.prose p { margin: 0 0 12px; }
+.muted { color: var(--muted); }
+.small { font-size: 13px; }
+
+section.block { padding-block: 56px; border-top: 1px solid var(--line-soft); }
+.block-head { display: grid; gap: 10px; margin-bottom: 28px; max-width: 72ch; }
+
+/* Chips */
+.chip { display: inline-flex; align-items: center; gap: 6px; font-family: var(--mono); font-size: 11.5px; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--line); color: var(--text-2); background: var(--surface); white-space: nowrap; }
+.chip .dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.chip.p1 { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 40%, transparent); }
+.chip.ok { color: var(--ok); border-color: color-mix(in srgb, var(--ok) 40%, transparent); }
+.chip.warn { color: var(--warn); border-color: color-mix(in srgb, var(--warn) 40%, transparent); }
+.chip.bad { color: var(--bad); border-color: color-mix(in srgb, var(--bad) 40%, transparent); }
+
+/* Tables */
+.table-scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+table.data { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+table.data th { text-align: left; font-family: var(--mono); font-weight: 500; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); padding: 10px 14px; border-bottom: 1px solid var(--line); background: var(--surface-2); white-space: nowrap; }
+table.data td { padding: 11px 14px; border-bottom: 1px solid var(--line-soft); vertical-align: top; color: var(--text-2); }
+table.data tr:last-child td { border-bottom: none; }
+table.data td strong { color: var(--text); font-weight: 600; }
+
+.footer { padding-block: 40px 56px; border-top: 1px solid var(--line-soft); color: var(--muted); font-size: 13px; }
+.footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+</style>
+<style>
+  .intro { padding-block: 48px 36px; display: grid; gap: 14px; }
+  .intro h1 { font-size: clamp(30px, 4.4vw, 46px); }
+
+  /* Flow */
+  .flow-scroll { overflow-x: auto; padding-bottom: 6px; }
+  .flow { min-width: 1060px; display: grid; grid-template-columns: 1.15fr repeat(5, 1fr) 1.15fr; gap: 22px; position: relative; }
+  .stage { display: grid; gap: 8px; align-content: start; position: relative; }
+  .stage:not(:last-child)::after { content: ""; position: absolute; top: 14px; right: -17px; width: 12px; height: 12px; border-top: 2px solid var(--muted); border-right: 2px solid var(--muted); transform: rotate(45deg); opacity: .6; }
+  .stage-head { display: grid; gap: 2px; padding-bottom: 8px; border-bottom: 2px solid var(--line); min-height: 58px; }
+  .stage-head .eyebrow { font-size: 10.5px; }
+  .stage-head h3 { font-size: 16px; }
+  .stage.new .stage-head { border-bottom-color: var(--accent); }
+  .node { border: 1px solid var(--line); background: var(--surface); border-radius: 8px; padding: 8px 10px; font-size: 12.5px; color: var(--text-2); line-height: 1.4; }
+  .node b { display: block; color: var(--text); font-weight: 600; font-size: 13px; }
+  .node .mono { color: var(--muted); font-size: 11px; }
+  .node.band { border-left-width: 3px; }
+  .node.new { border-color: color-mix(in srgb, var(--accent) 45%, var(--line)); }
+  .loops { min-width: 1060px; margin-top: 18px; display: grid; gap: 8px; }
+  .loop { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--text-2); border: 1px dashed var(--line); border-radius: 8px; padding: 9px 12px; background: var(--surface); }
+  .loop .arrow { font-family: var(--mono); color: var(--accent); white-space: nowrap; }
+  .legend { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 16px; font-size: 12.5px; color: var(--muted); }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .sw { width: 14px; height: 3px; border-radius: 2px; display: inline-block; }
+
+  /* Cadence */
+  .cadence { display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: var(--surface); }
+  .cad { padding: 16px; display: grid; gap: 8px; align-content: start; border-right: 1px solid var(--line-soft); }
+  .cad:last-child { border-right: none; }
+  .cad .when { font-family: var(--mono); font-size: 12px; color: var(--accent); }
+  .cad p { margin: 0; font-size: 13.5px; color: var(--text-2); }
+  @media (max-width: 860px) { .cadence { grid-template-columns: 1fr 1fr; } .cad { border-bottom: 1px solid var(--line-soft); } }
+  @media (max-width: 520px) { .cadence { grid-template-columns: 1fr; } .cad { border-right: none; } }
+
+  /* Filters */
+  .filters { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+  .filters button { font: inherit; font-size: 13px; padding: 5px 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--text-2); cursor: pointer; }
+  .filters button[aria-pressed="true"] { background: var(--text); color: var(--ground); border-color: var(--text); }
+  td .feeds { color: var(--text-2); }
+
+  /* Entities */
+  .entities { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 16px; }
+  @media (max-width: 900px) { .entities { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 600px) { .entities { grid-template-columns: 1fr; } }
+  .entity { border: 1px solid var(--line); border-radius: 10px; background: var(--surface); overflow: hidden; }
+  .entity-head { padding: 10px 14px; border-bottom: 1px solid var(--line-soft); display: flex; justify-content: space-between; gap: 8px; align-items: baseline; background: var(--surface-2); }
+  .entity-head h3 { font-family: var(--mono); font-size: 14px; font-weight: 500; letter-spacing: 0; }
+  .entity p { margin: 0; padding: 12px 14px 0; font-size: 13px; color: var(--text-2); }
+  .fields { list-style: none; margin: 0; padding: 10px 14px 14px; font-family: var(--mono); font-size: 12px; color: var(--muted); display: grid; gap: 3px; }
+  .fields li b { color: var(--text-2); font-weight: 500; }
+  .entity.existing { border-style: dashed; }
+
+  /* Reuse */
+  .reuse { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 16px; }
+  @media (max-width: 800px) { .reuse { grid-template-columns: 1fr; } }
+  .reuse-col { border-top: 3px solid var(--line); padding-top: 12px; display: grid; gap: 10px; align-content: start; }
+  .reuse-col.kept { border-top-color: var(--ok); }
+  .reuse-col.adapted { border-top-color: var(--warn); }
+  .reuse-col.dropped { border-top-color: var(--muted); }
+  .reuse-col ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+  .reuse-col li { font-size: 13.5px; color: var(--text-2); }
+  .reuse-col li code { margin-right: 4px; }
+  .reuse-col.dropped li { color: var(--muted); }
+
+  .next { counter-reset: n; list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+  .next li { counter-increment: n; display: grid; grid-template-columns: 34px 1fr; gap: 10px; align-items: start; font-size: 14px; color: var(--text-2); }
+  .next li::before { content: counter(n, decimal-leading-zero); font-family: var(--mono); font-size: 12px; color: var(--accent); padding-top: 2px; }
+  .next li b { color: var(--text); font-weight: 600; }
+  td.rec { color: var(--text); }
+</style>
+
+</head>
+<body>
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="index.html"><span class="brand-hiviz">Hiviz</span><span class="brand-prism">Prism</span></a>
+    <nav class="pagenav" aria-label="Prism pages">
+      <a href="index.html">Pitch</a>
+      <a href="scope.html" aria-current="page">Platform scope</a>
+      <a href="profiler.html">Product-in profiler</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="wrap intro">
+    <span class="eyebrow">Platform scope · v0.1 draft · source of truth: prism/SCOPE.md</span>
+    <h1>How data comes in, gets refracted, and becomes insight</h1>
+    <p class="lede">Prism reads records from the customer's tools, enriches them with the Hiviz stack, pools them, and runs scheduled and direct-path detection. Only managers see the output. Stages outlined in gold are new build; everything else reuses a Hiviz spec.</p>
+  </div>
+
+  <section class="block" style="padding-top:24px">
+    <div class="wrap">
+      <div class="flow-scroll" tabindex="0" aria-label="Prism data flow, scrolls sideways on small screens">
+        <div class="flow">
+          <div class="stage">
+            <div class="stage-head"><span class="eyebrow">Their tools</span><h3>Sources</h3></div>
+            <div class="node"><b>EHS platform</b>Intelex, Cority, Enablon, Donesafe, Ideagen</div>
+            <div class="node"><b>Frontline apps</b>Mitti (SafetyCulture), SiteDocs</div>
+            <div class="node"><b>Construction</b>Procore, HammerTech, Autodesk</div>
+            <div class="node"><b>Platforms</b>ServiceNow, SharePoint lists, Sheets</div>
+            <div class="node"><b>Anything else</b>CSV, SFTP, forwarded emails</div>
+          </div>
+          <div class="stage new">
+            <div class="stage-head"><span class="eyebrow">New</span><h3>Connect</h3></div>
+            <div class="node new"><b>A · Webhook + fetch</b>seconds</div>
+            <div class="node new"><b>B · Incremental poll</b>15–60 min</div>
+            <div class="node new"><b>C · Scheduled extract</b>~24 h</div>
+            <div class="node new"><b>D · Platform table</b>minutes</div>
+            <div class="node new"><b>E · Drop</b>batch</div>
+          </div>
+          <div class="stage new">
+            <div class="stage-head"><span class="eyebrow">New</span><h3>Shape</h3></div>
+            <div class="node new"><b>Field map</b>AI-suggested, human-confirmed <span class="mono">connector.map_schema</span></div>
+            <div class="node new"><b>Site map</b>their locations → site / region / division</div>
+            <div class="node new"><b>Work type map</b>their categories → Hiviz work types</div>
+            <div class="node new"><b>Source record</b>pointer, hash, scrubbed summary</div>
+          </div>
+          <div class="stage">
+            <div class="stage-head"><span class="eyebrow">Reused + variants</span><h3>Refract</h3></div>
+            <div class="node band" style="border-left-color:var(--b-signal)"><b>signal_type</b>5 values + confidence</div>
+            <div class="node band" style="border-left-color:var(--b-energy)"><b>energy_type</b>+ release potential</div>
+            <div class="node band" style="border-left-color:var(--b-barrier)"><b>barrier_assessment</b>5 states</div>
+            <div class="node band" style="border-left-color:var(--b-hazard)"><b>key_hazard</b>+ stop-work warranted</div>
+            <div class="node band" style="border-left-color:var(--b-fw)"><b>fw_factor_hint</b>1 of 15 or null</div>
+            <div class="node band" style="border-left-color:var(--b-reason)"><b>rationale</b>for every field</div>
+          </div>
+          <div class="stage">
+            <div class="stage-head"><span class="eyebrow">Reused</span><h3>Pool</h3></div>
+            <div class="node"><b>Observation pool</b>hazards, near misses, failed items</div>
+            <div class="node"><b>Incident pool</b>imported incidents by severity</div>
+            <div class="node"><b>Activity signals</b>actions, visits, meetings, verifications</div>
+            <div class="node"><b>Exposure</b>hours worked, for rates</div>
+          </div>
+          <div class="stage">
+            <div class="stage-head"><span class="eyebrow">Reused</span><h3>Detect</h3></div>
+            <div class="node"><b>Direct path</b>single serious record, minutes</div>
+            <div class="node"><b>Trend runs</b>nightly, by level × work type</div>
+            <div class="node"><b>Systemic roll-up</b>weekly FW profile, blind spots, atrophy</div>
+            <div class="node"><b>Manager review</b>then <span class="mono">fw_classify</span></div>
+          </div>
+          <div class="stage">
+            <div class="stage-head"><span class="eyebrow">Managers only</span><h3>Surface</h3></div>
+            <div class="node"><b>Critical Insight</b>and Critical Incident</div>
+            <div class="node"><b>Digest + reports</b>weekly, monthly, quarterly</div>
+            <div class="node"><b>Situational brief</b>for leadership</div>
+            <div class="node"><b>Visit briefing</b>before field leadership visits</div>
+            <div class="node new"><b>Action push</b>written back to their tool</div>
+          </div>
+        </div>
+        <div class="loops">
+          <div class="loop"><span class="arrow">Surface → Sources</span>Action push writes suggested actions into the customer's tool where it has a create-action API. Otherwise a Hiviz tracker links to the source record.</div>
+          <div class="loop"><span class="arrow">Visit → Pool</span>Observations a manager captures on a field leadership visit are the only records created in Hiviz. They join the same pool.</div>
+          <div class="loop"><span class="arrow">Edit / delete → Refract</span>A changed content hash re-enriches the record and keeps the old version. A delete in the source removes the record from open evidence within 24 hours.</div>
+        </div>
+      </div>
+      <div class="legend">
+        <span><i class="sw" style="background:var(--accent)"></i>New build</span>
+        <span><i class="sw" style="background:var(--line)"></i>Reuses a Hiviz spec</span>
+        <span><i class="sw" style="background:linear-gradient(90deg,var(--b-signal),var(--b-energy),var(--b-barrier),var(--b-hazard),var(--b-fw),var(--b-reason))"></i>Enrichment bands</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="wrap">
+      <div class="block-head">
+        <span class="eyebrow">Cadence</span>
+        <h2>When insight is generated</h2>
+        <p class="prose">Serious single events move in minutes. Patterns come out of scheduled runs, so managers get a steady rhythm instead of a stream of alerts.</p>
+      </div>
+      <div class="cadence">
+        <div class="cad"><span class="when">On enrichment</span><h3>Direct path</h3><p>Barrier failure or energy event at ≥ 0.70, or a serious imported incident. An insight draft is ready in minutes.</p></div>
+        <div class="cad"><span class="when">Nightly</span><h3>Trend detection</h3><p>Thresholds per org level and work type across the enriched pool. Rates are used where exposure data exists.</p></div>
+        <div class="cad"><span class="when">Weekly</span><h3>Systemic roll-up</h3><p>FW capacity profile, blind spots, and atrophy. Shows sites that have gone quiet in their own system.</p></div>
+        <div class="cad"><span class="when">Weekly</span><h3>Manager digest</h3><p>What changed, what's waiting for review, and which pushed actions are overdue.</p></div>
+        <div class="cad"><span class="when">Monthly · quarterly</span><h3>Intelligence report</h3><p>A narrative report per region or division, built from the existing reporting modules plus new source-coverage modules.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="wrap">
+      <div class="block-head">
+        <span class="eyebrow">Source types</span>
+        <h2>What to capture from their current reporting</h2>
+        <p class="prose">Observations and incidents are the core. The other types either add evidence to the pool or give the pool context: activity, exposure, and control health. Exposure hours matter most: without them every trend is a raw count.</p>
+      </div>
+      <div class="filters" role="group" aria-label="Filter source types by priority">
+        <button type="button" data-f="all" aria-pressed="true">All</button>
+        <button type="button" data-f="P1" aria-pressed="false">P1 · launch</button>
+        <button type="button" data-f="P2" aria-pressed="false">P2 · fast follow</button>
+        <button type="button" data-f="P3" aria-pressed="false">P3 · context</button>
+      </div>
+      <div class="table-scroll">
+        <table class="data" id="sources">
+          <thead><tr><th>Priority</th><th>Source type</th><th>Called in their tool</th><th>What we read</th><th>Feeds</th></tr></thead>
+          <tbody>
+            <tr data-p="P1"><td><span class="chip p1">P1</span></td><td><code>incident</code></td><td>Incident, injury, property damage, environmental event</td><td>Narrative, actual and potential severity, date, location, activity</td><td class="feeds">Incident pool → Critical Incident. Direct path on serious outcomes</td></tr>
+            <tr data-p="P1"><td><span class="chip p1">P1</span></td><td><code>near_miss</code></td><td>Near miss, near hit, close call</td><td>Narrative, potential severity</td><td class="feeds">Observation pool. Direct path when energy was released</td></tr>
+            <tr data-p="P1"><td><span class="chip p1">P1</span></td><td><code>hazard_observation</code></td><td>Hazard report, safety observation, issue, BBS card</td><td>Narrative, category, location, status</td><td class="feeds">Observation pool</td></tr>
+            <tr data-p="P1"><td><span class="chip p1">P1</span></td><td><code>inspection_finding</code></td><td>Failed or flagged inspection and audit items</td><td>Question, response, comment, template, site</td><td class="feeds">Observation pool. Passed items count toward coverage only</td></tr>
+            <tr data-p="P1"><td><span class="chip p1">P1</span></td><td><code>corrective_action</code></td><td>Action, CAPA, task</td><td>Title, parent record, due date, status</td><td class="feeds">Action debt, atrophy, insight follow-through</td></tr>
+            <tr data-p="P2"><td><span class="chip">P2</span></td><td><code>investigation</code></td><td>Investigation, RCA, ICAM, 5 Whys</td><td>Contributing factors, root cause, actions</td><td class="feeds"><code>fw_classify</code> investigation path, systemic causes</td></tr>
+            <tr data-p="P2"><td><span class="chip">P2</span></td><td><code>control_verification</code></td><td>CCV, critical control check</td><td>Control, result, defeating factors</td><td class="feeds">Barrier signal for that control and energy</td></tr>
+            <tr data-p="P2"><td><span class="chip">P2</span></td><td><code>permit_to_work</code></td><td>Permit, isolation, confined space entry</td><td>Work type, exceptions, suspensions</td><td class="feeds">High-risk work exposure. Exceptions go to the pool</td></tr>
+            <tr data-p="P2"><td><span class="chip">P2</span></td><td><code>pre_task</code></td><td>JSA, JHA, SWMS, Take 5, pre-start</td><td>Hazards identified, stop-work flags, completion</td><td class="feeds">Weak signals, work-understanding context</td></tr>
+            <tr data-p="P2"><td><span class="chip">P2</span></td><td><code>leadership_visit</code></td><td>Safety walk, field leadership visit, gemba</td><td>Findings, frequency</td><td class="feeds">Visit coverage, atrophy baseline</td></tr>
+            <tr data-p="P2"><td><span class="chip">P2</span></td><td><code>meeting</code></td><td>Toolbox talk record, pre-start meeting</td><td>Topic, attendance, issues raised</td><td class="feeds">Coverage and activity</td></tr>
+            <tr data-p="P3"><td><span class="chip">P3</span></td><td><code>exposure</code></td><td>Hours worked, headcount, roster</td><td>Hours by site and period</td><td class="feeds">Denominators for every rate</td></tr>
+            <tr data-p="P3"><td><span class="chip">P3</span></td><td><code>plant_defect</code></td><td>Pre-start defect, work order, CMMS</td><td>Defect text, asset class, criticality</td><td class="feeds">Energy and barrier context for plant</td></tr>
+            <tr data-p="P3"><td><span class="chip">P3</span></td><td><code>contractor</code></td><td>Prequalification, induction</td><td>Company, trade, induction status</td><td class="feeds">Contractor management factor</td></tr>
+            <tr data-p="P3"><td><span class="chip">P3</span></td><td><code>training_expiry</code></td><td>Competency, ticket, licence</td><td>Expiries by role and site</td><td class="feeds">Resource and capability signals</td></tr>
+            <tr data-p="P3"><td><span class="chip">P3</span></td><td><code>external_notice</code></td><td>Regulator notice, client alert</td><td>Notice text, issuer</td><td class="feeds">Critical Insight <code>external_alert</code> path</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="small muted" style="margin-top:12px">Out of scope for v1: occupational health and claims data, environmental monitoring streams, telematics and IoT feeds.</p>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="wrap">
+      <div class="block-head">
+        <span class="eyebrow">Thin entities</span>
+        <h2>What Prism stores, and what it doesn't</h2>
+        <p class="prose">Prism keeps a pointer, a fingerprint, the enrichment, and a short scrubbed summary. Raw record bodies, attachments and identifying fields stay in the customer's system.</p>
+      </div>
+      <div class="entities">
+        <div class="entity"><div class="entity-head"><h3>SourceConnection</h3><span class="chip p1">new</span></div>
+          <p>One per connected tool. Holds how we talk to it and where we're up to.</p>
+          <ul class="fields"><li><b>vendor</b>, <b>pattern</b></li><li>auth_ref · scopes</li><li>cursor · backfill_from</li><li>status: connecting → live</li></ul></div>
+        <div class="entity"><div class="entity-head"><h3>FieldMap</h3><span class="chip p1">new</span></div>
+          <p>Versioned mapping from their object to a source type. AI suggests, a human confirms.</p>
+          <ul class="fields"><li><b>source_object</b> → <b>source_type</b></li><li>narrative_fields[]</li><li>occurred_at · site · severity · status</li><li>ai_mapping_rationale · confirmed_by</li></ul></div>
+        <div class="entity"><div class="entity-head"><h3>SiteMap · WorkTypeMap</h3><span class="chip p1">new</span></div>
+          <p>Their location and category values mapped onto the Hiviz hierarchy and work types.</p>
+          <ul class="fields"><li><b>their value</b> → worksite_id</li><li><b>their value</b> → work_type_id</li><li>confirmed_by · confirmed_at</li></ul></div>
+        <div class="entity"><div class="entity-head"><h3>SourceRecord</h3><span class="chip p1">new</span></div>
+          <p>The pointer. No raw body is stored.</p>
+          <ul class="fields"><li><b>external_id</b> · external_url</li><li>source_type · worksite_id · occurred_at</li><li>content_hash · source_status</li><li>scrubbed_summary · legal_hold</li></ul></div>
+        <div class="entity"><div class="entity-head"><h3>SourceEnrichment</h3><span class="chip warn">reused schema</span></div>
+          <p>The <code>observation.enrich</code> output schema unchanged, plus three Prism fields. Versioned.</p>
+          <ul class="fields"><li>ai_signal_type · ai_energy_type</li><li>ai_barrier_assessment · ai_key_hazard</li><li>ai_fw_factor_hint · *_rationale</li><li><b>+ source_type_confirmed</b></li><li><b>+ potential_severity</b></li><li><b>+ duplicate_of_record_id</b></li></ul></div>
+        <div class="entity existing"><div class="entity-head"><h3>Downstream</h3><span class="chip ok">existing Hiviz</span></div>
+          <p>Unchanged Hiviz schemas that consume enriched records as evidence.</p>
+          <ul class="fields"><li>CriticalInsight · CriticalIncident</li><li>report · situational_brief</li><li>visit_plan · visit_briefing</li><li>action_dissemination (→ action push)</li></ul></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="wrap">
+      <div class="block-head">
+        <span class="eyebrow">Reuse map</span>
+        <h2>What carries over from Hiviz</h2>
+        <p class="prose">Prism points to these specs and never copies them. Full list with links in <code>prism/README.md</code>.</p>
+      </div>
+      <div class="reuse">
+        <div class="reuse-col kept"><h3>Kept as-is</h3><ul>
+          <li><code>signal-type-taxonomy</code><code>energy-type-taxonomy</code><code>barrier-assessment-values</code></li>
+          <li><code>fw-map-blueprint</code><code>fw-classify-job</code></li>
+          <li><code>ai-output-standards</code><code>anonymisation-rules</code></li>
+          <li><code>CRITICAL-INSIGHT</code> primary output</li>
+          <li><code>REPORTING</code> with new modules</li>
+          <li><code>SITUATIONAL-BRIEF</code> · <code>VISIT-BRIEFING</code></li>
+          <li><code>SYSTEMIC-CAUSES</code> FW profile and atrophy</li>
+          <li><code>OBSERVATION-CAPTURE</code> for manager visits</li>
+        </ul></div>
+        <div class="reuse-col adapted"><h3>Adapted</h3><ul>
+          <li><code>CRITICAL-INCIDENT</code> fed by imported incidents</li>
+          <li><code>CORRECTIVE-ACTIONS</code> becomes action push</li>
+          <li><code>INVESTIGATION</code> read-only, classified</li>
+          <li><code>SPEC §7.2–7.3</code> trends count source records</li>
+          <li><code>MANAGEMENT-SYSTEM-INGESTION</code> optional add-on</li>
+        </ul></div>
+        <div class="reuse-col dropped"><h3>Dropped for Prism</h3><ul>
+          <li>Toolbox talks and crew broadcast</li>
+          <li>Enquiry</li>
+          <li>Communities and CoP threads</li>
+          <li>Risk-control register and verification clockwork</li>
+          <li>Incident capture conversations and auto triage</li>
+          <li>Offline crew capture</li>
+        </ul></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="wrap">
+      <div class="block-head">
+        <span class="eyebrow">Decisions to make</span>
+        <h2>Calls needed before sizing the build</h2>
+      </div>
+      <div class="table-scroll">
+        <table class="data">
+          <thead><tr><th>#</th><th>Decision</th><th>Starting recommendation</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">D1</td><td><strong>Copy boundary</strong></td><td class="rec">Thin copy: scrubbed summary stored, raw body never stored</td></tr>
+            <tr><td class="mono">D2</td><td><strong>Edits and deletes in source</strong></td><td class="rec">Mirror deletes within 24 h; re-enrich on edit with version history</td></tr>
+            <tr><td class="mono">D3</td><td><strong>Legal hold on imported investigations</strong></td><td class="rec">Held by default; customer rule per source object</td></tr>
+            <tr><td class="mono">D4</td><td><strong>Same event in two tools</strong></td><td class="rec">Enrichment suggests a duplicate; trends count the de-duplicated set</td></tr>
+            <tr><td class="mono">D5</td><td><strong>Counts or rates</strong></td><td class="rec">Counts at launch, rates once any exposure source connects, always labelled</td></tr>
+            <tr><td class="mono">D6</td><td><strong>Action push scope</strong></td><td class="rec">Write-back only where a create-action endpoint is documented</td></tr>
+            <tr><td class="mono">D7</td><td><strong>Pricing unit</strong></td><td class="rec">Per organisation with a site band, never per record</td></tr>
+            <tr><td class="mono">D8</td><td><strong>AI cost</strong></td><td class="rec">Model the backfill separately from live run-rate; batch the backfill</td></tr>
+            <tr><td class="mono">D9</td><td><strong>Residency and security</strong></td><td class="rec">AU and US regions, managed secrets, read-only scopes, SOC 2 Type I first</td></tr>
+            <tr><td class="mono">D10</td><td><strong>Vendor relationships</strong></td><td class="rec">Marketplace listings with Mitti, Procore, Autodesk; enterprise EHS vendors as channel</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="wrap">
+      <div class="block-head">
+        <span class="eyebrow">Also worth defining</span>
+        <h2>Specs to write next</h2>
+      </div>
+      <ol class="next">
+        <li><span><b>Connectors:</b> contract for each pattern, retry and dedupe rules, rate-limit budgets, health states.</span></li>
+        <li><span><b>Schema mapping:</b> the <code>connector.map_schema</code> prompt, FieldMap versioning, and the confirmation screen.</span></li>
+        <li><span><b>Source enrichment:</b> user-prompt variants for incident, inspection finding, investigation, and control verification. The system prompt stays in <code>OBSERVATION-CAPTURE.md</code>.</span></li>
+        <li><span><b>Action push:</b> write-back contract per vendor and the fallback tracker.</span></li>
+        <li><span><b>Data quality report module:</b> coverage by site, unmapped values, low-confidence share, sites with no records. This is also a strong sales artefact.</span></li>
+        <li><span><b>First light pilot kit:</b> export templates per vendor, intake checklist, and a report template.</span></li>
+        <li><span><b>Prism sim:</b> paste a CSV, watch records refract, see a first insight drafted.</span></li>
+      </ol>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="wrap">
+    <span>Hiviz Prism · platform scope draft</span>
+    <span class="mono">Source of truth: prism/SCOPE.md</span>
+  </div>
+</footer>
+
+<script>
+  (function () {
+    var buttons = document.querySelectorAll('.filters button');
+    var rows = document.querySelectorAll('#sources tbody tr');
+    buttons.forEach(function (b) {
+      b.addEventListener('click', function () {
+        var f = b.getAttribute('data-f');
+        buttons.forEach(function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
+        rows.forEach(function (r) { r.hidden = !(f === 'all' || r.getAttribute('data-p') === f); });
+      });
+    });
+  })();
+</script>
+</body>
+</html>
