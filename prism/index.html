@@ -137,10 +137,17 @@ table.data td strong { color: var(--text); font-weight: 600; }
   svg text { font-family: var(--mono); }
   .svg-card { fill: var(--surface-2); stroke: var(--line); }
   .svg-ink { fill: var(--text); }
-  .svg-ink2 { fill: var(--text-2); }
   .svg-mute { fill: var(--muted); }
-  .svg-beam { stroke: var(--muted); }
-  .svg-prism { fill: var(--accent-soft); stroke: var(--accent); }
+  .svg-link-in { stroke: var(--muted); fill: none; }
+  .svg-hub { fill: var(--surface-2); stroke: var(--text-2); }
+  .svg-hub-glyph { fill: none; stroke: var(--text); }
+  .mm .branch { fill: none; stroke: var(--c); stroke-width: 2.25; stroke-linecap: round; }
+  .mm .node-box { fill: color-mix(in srgb, var(--c) 14%, var(--surface)); stroke: var(--c); stroke-width: 1.25; }
+  .mm .node-dot { fill: var(--c); }
+  .mm .node-label { fill: var(--c); font-size: 10.5px; letter-spacing: 0.06em; }
+  .mm .node-value { fill: var(--text); font-size: 13.5px; }
+  .c-signal { --c: var(--b-signal); } .c-energy { --c: var(--b-energy); } .c-barrier { --c: var(--b-barrier); }
+  .c-hazard { --c: var(--b-hazard); } .c-fw { --c: var(--b-fw); } .c-reason { --c: var(--b-reason); }
 
   .three { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 16px; }
   .four { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 16px; }
@@ -210,44 +217,66 @@ table.data td strong { color: var(--text); font-weight: 600; }
 
       <figure class="figure" style="margin:0">
         <div class="fig-scroll">
-          <svg viewBox="0 0 900 300" role="img" aria-labelledby="prism-title prism-desc">
-            <title id="prism-title">A plain incident record refracted into six enrichment bands</title>
-            <desc id="prism-desc">A near-miss record from a customer's system passes through the Prism and comes out as signal type, energy, barrier state, key hazard, FW Map factor hint and rationale.</desc>
-            <!-- source record -->
-            <rect class="svg-card" x="8" y="78" width="232" height="144" rx="10" stroke-width="1"/>
-            <text x="24" y="104" font-size="11" class="svg-mute">PROCORE · INCIDENT · NM-2291</text>
-            <text x="24" y="130" font-size="13" class="svg-ink">Tag line snapped while guiding</text>
-            <text x="24" y="148" font-size="13" class="svg-ink">a steel beam. Load swung toward</text>
-            <text x="24" y="166" font-size="13" class="svg-ink">the laydown area. No one in the</text>
-            <text x="24" y="184" font-size="13" class="svg-ink">swing path.</text>
-            <text x="24" y="208" font-size="11" class="svg-mute">Category: Near miss · Site: North Yard</text>
-            <!-- beam in -->
-            <line class="svg-beam" x1="240" y1="150" x2="318" y2="150" stroke-width="3" stroke-linecap="round"/>
-            <!-- prism -->
-            <polygon class="svg-prism" points="350,52 290,248 410,248" stroke-width="1.5"/>
-            <!-- bands out: fan from ~ (385,150) -->
-            <g opacity="0.9">
-              <polygon points="382,142 382,146 560,58 560,70" style="fill:var(--b-signal)"/>
-              <polygon points="382,146 382,149 560,100 560,112" style="fill:var(--b-energy)"/>
-              <polygon points="382,149 382,152 560,142 560,154" style="fill:var(--b-barrier)"/>
-              <polygon points="382,152 382,155 560,184 560,196" style="fill:var(--b-hazard)"/>
-              <polygon points="382,155 382,158 560,226 560,238" style="fill:var(--b-fw)"/>
-              <polygon points="382,158 382,161 560,266 560,278" style="fill:var(--b-reason)"/>
+          <svg viewBox="0 0 900 336" role="img" aria-labelledby="prism-title prism-desc">
+            <title id="prism-title">A plain incident record branching into six enrichment nodes</title>
+            <desc id="prism-desc">A near-miss record from a customer's system feeds the Prism hub, which branches into signal type, energy, barrier state, key hazard, FW Map factor hint and rationale.</desc>
+            <!-- input: neutral source record -->
+            <rect class="svg-card" x="8" y="96" width="244" height="144" rx="12" stroke-width="1"/>
+            <text x="24" y="122" font-size="11" class="svg-mute">PROCORE · INCIDENT · NM-2291</text>
+            <text x="24" y="148" font-size="13" class="svg-ink">Tag line snapped while guiding</text>
+            <text x="24" y="166" font-size="13" class="svg-ink">a steel beam. Load swung toward</text>
+            <text x="24" y="184" font-size="13" class="svg-ink">the laydown area. No one in the</text>
+            <text x="24" y="202" font-size="13" class="svg-ink">swing path.</text>
+            <text x="24" y="226" font-size="11" class="svg-mute">Category: Near miss · Site: North Yard</text>
+            <path class="svg-link-in" d="M252,168 L356,168" stroke-width="2.25" stroke-linecap="round"/>
+            <!-- hub -->
+            <circle class="svg-hub" cx="390" cy="168" r="34" stroke-width="1.25"/>
+            <polygon class="svg-hub-glyph" points="390,153 376,179 404,179" stroke-width="1.5" stroke-linejoin="round"/>
+            <text x="390" y="220" font-size="10.5" text-anchor="middle" class="svg-mute">PRISM</text>
+            <!-- outputs -->
+            <g class="mm">
+            <g class="c-signal">
+              <path class="branch" d="M424,168 C514,168 490,36 580,36"/>
+              <rect class="node-box" x="580" y="13" width="300" height="46" rx="10"/>
+              <circle class="node-dot" cx="580" cy="36" r="4"/>
+              <text class="node-label" x="596" y="31">SIGNAL_TYPE</text>
+              <text class="node-value" x="596" y="49">unwanted_energy_event · 0.86</text>
             </g>
-            <!-- labels -->
-            <g font-size="12.5">
-              <text x="574" y="62" class="svg-mute">signal_type</text>
-              <text x="574" y="78" class="svg-ink">unwanted_energy_event · 0.86</text>
-              <text x="574" y="104" class="svg-mute">energy_type · release_potential</text>
-              <text x="574" y="120" class="svg-ink">kinetic · high</text>
-              <text x="574" y="146" class="svg-mute">barrier_assessment</text>
-              <text x="574" y="162" class="svg-ink">barrier_failed · 0.81</text>
-              <text x="574" y="188" class="svg-mute">key_hazard</text>
-              <text x="574" y="204" class="svg-ink">uncontrolled suspended load</text>
-              <text x="574" y="230" class="svg-mute">fw_factor_hint</text>
-              <text x="574" y="246" class="svg-ink">resource_allocation</text>
-              <text x="574" y="272" class="svg-mute">rationale</text>
-              <text x="574" y="288" class="svg-ink">one sentence per field</text>
+            <g class="c-energy">
+              <path class="branch" d="M424,168 C514,168 490,88 580,88"/>
+              <rect class="node-box" x="580" y="65" width="300" height="46" rx="10"/>
+              <circle class="node-dot" cx="580" cy="88" r="4"/>
+              <text class="node-label" x="596" y="83">ENERGY · RELEASE POTENTIAL</text>
+              <text class="node-value" x="596" y="101">kinetic · high</text>
+            </g>
+            <g class="c-barrier">
+              <path class="branch" d="M424,168 C514,168 490,140 580,140"/>
+              <rect class="node-box" x="580" y="117" width="300" height="46" rx="10"/>
+              <circle class="node-dot" cx="580" cy="140" r="4"/>
+              <text class="node-label" x="596" y="135">BARRIER_ASSESSMENT</text>
+              <text class="node-value" x="596" y="153">barrier_failed · 0.81</text>
+            </g>
+            <g class="c-hazard">
+              <path class="branch" d="M424,168 C514,168 490,192 580,192"/>
+              <rect class="node-box" x="580" y="169" width="300" height="46" rx="10"/>
+              <circle class="node-dot" cx="580" cy="192" r="4"/>
+              <text class="node-label" x="596" y="187">KEY_HAZARD</text>
+              <text class="node-value" x="596" y="205">uncontrolled suspended load</text>
+            </g>
+            <g class="c-fw">
+              <path class="branch" d="M424,168 C514,168 490,244 580,244"/>
+              <rect class="node-box" x="580" y="221" width="300" height="46" rx="10"/>
+              <circle class="node-dot" cx="580" cy="244" r="4"/>
+              <text class="node-label" x="596" y="239">FW_FACTOR_HINT</text>
+              <text class="node-value" x="596" y="257">resource_allocation</text>
+            </g>
+            <g class="c-reason">
+              <path class="branch" d="M424,168 C514,168 490,296 580,296"/>
+              <rect class="node-box" x="580" y="273" width="300" height="46" rx="10"/>
+              <circle class="node-dot" cx="580" cy="296" r="4"/>
+              <text class="node-label" x="596" y="291">RATIONALE</text>
+              <text class="node-value" x="596" y="309">one sentence for every field</text>
+            </g>
             </g>
           </svg>
         </div>
