@@ -1,0 +1,1541 @@
+<!doctype html>
+<html lang="en">
+<head>
+<title>Prism Manager Concept</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* ---------------------------------------------------------------
+   Hiviz Prism · manager concept
+   White, black, greys. Colour only for status:
+   success (good) · warning (watch) · critical (act) · info (new)
+   --------------------------------------------------------------- */
+:root {
+  color-scheme: light;
+  --bg: #ffffff;
+  --bg-2: #f6f7f8;
+  --bg-3: #eef0f2;
+  --border: #e1e4e8;
+  --border-2: #c3c8cf;
+  --text: #0d0f12;
+  --text-2: #1d2127;
+  --text-3: #5a616c;
+
+  /* Status: the only colour. Solid fills for scanning. */
+  --success: #15803d; --success-bg: #15803d; --success-border: #15803d; --success-dot: #15803d;
+  --warning: #b45309; --warning-bg: #b45309; --warning-border: #b45309; --warning-dot: #d97706;
+  --critical: #c42b1c; --critical-bg: #c42b1c; --critical-border: #c42b1c; --critical-dot: #c42b1c;
+  --info: #1d5fc4;    --info-bg: #1d5fc4;    --info-border: #1d5fc4;    --info-dot: #1d5fc4;
+  --critical-tint: #fdecea; --warning-tint: #fff4e0; --success-tint: #e9f6ee; --info-tint: #e9f1fd;
+
+  --brand: #ffe500;
+  --shadow: none;
+  --shadow-lg: 0 24px 48px -12px rgba(0,0,0,0.22), 0 0 0 1px #0d0f12;
+  --font: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+*, *::before, *::after { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { -webkit-font-smoothing: antialiased; }
+body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font); font-size: 16px; line-height: 1.5; }
+button, select, input { font: inherit; color: inherit; }
+a { color: inherit; text-decoration: none; }
+:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; border-radius: 6px; }
+h1, h2, h3, p { margin: 0; }
+h1 { font-size: 38px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.05; }
+h2 { font-size: 20px; font-weight: 800; letter-spacing: -0.02em; }
+h3 { font-size: 17px; font-weight: 800; letter-spacing: -0.01em; }
+.wrap { max-width: 1240px; margin: 0 auto; padding-inline: 24px; }
+@media (max-width: 640px) { .wrap { padding-inline: 16px; } }
+.muted { color: var(--text-3); }
+.mono { font-family: var(--mono); font-size: 13.5px; }
+.tnum { font-variant-numeric: tabular-nums; }
+
+/* ---------- Header: one lean row ---------- */
+.hdr { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 30; background: #fff; border-bottom: 1px solid var(--border); }
+.hdr .wrap { display: flex; align-items: center; gap: 8px 18px; min-height: 64px; flex-wrap: nowrap; padding-block: 10px; }
+.logo, .crumb, .tabs { flex: none; }
+.hdr .wrap { max-width: none; padding-inline: 24px; }
+@media (max-width: 640px) { .hdr .wrap { padding-inline: 16px; } }
+.logo { display: flex; align-items: center; gap: 9px; font-weight: 900; letter-spacing: -0.02em; font-size: 19px; }
+.logo svg { display: block; }
+.logo small { font-family: var(--mono); font-weight: 600; font-size: 11.5px; letter-spacing: 0.08em; text-transform: uppercase; background: var(--brand); color: var(--text); padding: 2px 6px; border-radius: 3px; vertical-align: 3px; }
+.crumb { display: flex; align-items: center; gap: 2px; }
+.crumb .slash { color: var(--text-3); font-size: 22px; font-weight: 300; margin-inline: 4px; }
+.pick { appearance: none; border: 0; background: transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='14' viewBox='0 0 10 14'%3E%3Cpath d='M2 5l3-3 3 3M2 9l3 3 3-3' fill='none' stroke='%238f8f8f' stroke-width='1.4'/%3E%3C/svg%3E") no-repeat right 6px center; padding: 6px 24px 6px 8px; border-radius: 6px; font-weight: 800; font-size: 16px; cursor: pointer; }
+.pick:hover { text-decoration: underline; text-underline-offset: 3px; }
+.tabs { display: flex; gap: 2px; margin-left: 8px; }
+.tabs a { padding: 7px 13px; border-radius: 8px; font-size: 16px; color: var(--text); font-weight: 700; }
+.tabs a:hover { text-decoration: underline; text-underline-offset: 4px; }
+.tabs a[aria-current="page"]:hover { text-decoration: none; }
+.tabs a[aria-current="page"] { color: var(--text); background: var(--brand); }
+.hdr-right { margin-left: auto; display: flex; align-items: center; justify-content: flex-end; gap: 10px; min-width: 0; flex: 1 1 auto; }
+.live { display: flex; align-items: center; gap: 8px; height: 34px; padding: 0 12px; border: 1px solid var(--border-2); border-radius: 999px; font-size: 14px; color: var(--text); min-width: 0; max-width: 380px; cursor: pointer; background: var(--bg); flex: 0 1 auto; }
+.live .lbl { font-weight: 800; flex: none; }
+.live:hover { border-color: var(--border-2); }
+.live .dot { flex: none; width: 9px; height: 9px; border-radius: 50%; background: #16a34a; box-shadow: 0 0 0 0 rgba(34,197,94,0.5); animation: live 2s infinite; }
+@keyframes live { 0% { box-shadow: 0 0 0 0 rgba(34,197,94,0.45); } 70% { box-shadow: 0 0 0 7px rgba(34,197,94,0); } 100% { box-shadow: 0 0 0 0 rgba(34,197,94,0); } }
+.live .txt { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.live .txt b { color: var(--text); font-weight: 800; }
+.live .txt.in { animation: slidein .5s ease-out; }
+@keyframes slidein { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+.issues { height: 34px; display: inline-flex; align-items: center; gap: 6px; padding: 0 14px; border-radius: 999px; font-size: 15px; font-weight: 800; background: var(--critical); color: #fff; white-space: nowrap; }
+.tab-badge { display: inline-grid; place-items: center; min-width: 20px; height: 20px; padding: 0 6px; margin-left: 7px; border-radius: 999px; background: var(--critical); color: #fff; font-size: 12px; font-weight: 800; line-height: 1; vertical-align: 1px; }
+.avatar-me { width: 34px; height: 34px; border-radius: 50%; background: var(--text); color: #fff; display: grid; place-items: center; font-size: 12px; font-weight: 600; flex: none; }
+@media (max-width: 1260px) { .live .txt { display: none; } }
+@media (max-width: 1040px) {
+  .hdr .wrap { flex-wrap: wrap; }
+  .tabs { order: 3; width: 100%; margin-left: -4px; }
+}
+@media (max-width: 720px) {
+  .hdr { position: static; }
+  .crumb .slash:first-child { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { .live .dot, .live .txt.in, .fresh { animation: none !important; } }
+
+/* ---------- Common ---------- */
+main { padding-block: 32px 80px; }
+.page-top { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 24px; }
+.page-top .sub { color: var(--text-3); margin-top: 8px; font-size: 16px; font-weight: 500; }
+.actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.btn { display: inline-flex; align-items: center; gap: 7px; height: 38px; padding: 0 14px; border-radius: 8px; border: 1px solid var(--border-2); background: var(--bg); font-size: 15px; font-weight: 700; cursor: pointer; white-space: nowrap; }
+.btn:hover { border-color: var(--text); }
+.btn.dark { background: var(--text); color: #fff; border-color: var(--text); }
+.btn.dark:hover { background: #262626; }
+.btn.sm { height: 32px; padding: 0 12px; font-size: 14px; }
+.btn.brand { background: var(--brand); border-color: #d9c200; }
+.card { border: 1px solid var(--border); border-radius: 12px; background: var(--bg); box-shadow: 0 1px 2px rgba(13,15,18,0.04); }
+.label { font-size: 12px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-3); }
+.seg { display: inline-flex; padding: 0; gap: 6px; flex-wrap: wrap; }
+.seg button { border: 1px solid var(--border-2); background: var(--bg); height: 36px; padding: 0 14px; border-radius: 999px; font-size: 15px; font-weight: 700; color: var(--text); cursor: pointer; white-space: nowrap; }
+.seg button[aria-pressed="true"] { background: var(--text); color: #fff; border-color: var(--text); }
+.seg button .c { margin-left: 6px; font-variant-numeric: tabular-nums; opacity: 0.7; }
+
+/* Badges */
+.badge { display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 10px; border-radius: 999px; font-size: 13px; font-weight: 700; border: 1px solid var(--border-2); background: var(--bg); color: var(--text); white-space: nowrap; }
+.badge i { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.badge.success { color: #fff; background: var(--success); border-color: var(--success); }
+.badge.warning { color: #fff; background: var(--warning); border-color: var(--warning); }
+.badge.critical { color: #fff; background: var(--critical); border-color: var(--critical); }
+.badge.info { color: #fff; background: var(--info); border-color: var(--info); }
+.t-success { color: var(--success); } .t-warning { color: var(--warning); } .t-critical { color: var(--critical); } .t-info { color: var(--info); }
+
+/* Source monograms (neutral, never coloured) */
+.mg { width: 24px; height: 24px; border-radius: 6px; display: inline-grid; place-items: center; font-size: 12px; font-weight: 800; background: var(--bg); color: var(--text); border: 1px solid var(--border-2); flex: none; }
+.mg.lg { width: 36px; height: 36px; border-radius: 8px; font-size: 15px; }
+.mg.off { color: var(--text-3); border-style: dashed; }
+.stack { display: inline-flex; }
+.stack .mg { margin-left: -4px; box-shadow: 0 0 0 2px var(--bg); }
+.stack .mg:first-child { margin-left: 0; }
+.av { width: 28px; height: 28px; border-radius: 50%; display: inline-grid; place-items: center; font-size: 11.5px; font-weight: 800; background: var(--bg); color: var(--text); border: 1px solid var(--border-2); flex: none; }
+.av.me { background: var(--text); color: #fff; border-color: var(--text); }
+.chip { display: inline-flex; align-items: center; height: 26px; padding: 0 9px; border-radius: 6px; background: var(--bg); border: 1px solid var(--border-2); color: var(--text); font-size: 13.5px; font-weight: 600; white-space: nowrap; }
+
+/* ---------- Focus: pipeline strip ---------- */
+.pipe { display: grid; grid-template-columns: 1fr 28px 1fr 28px 1fr; align-items: stretch; margin-bottom: 24px; }
+.pipe-step { padding: 16px 18px; display: grid; gap: 8px; align-content: start; }
+.pipe-step .v { font-size: 34px; font-weight: 800; letter-spacing: -0.03em; line-height: 1; font-variant-numeric: tabular-nums; }
+.pipe-step .s { font-size: 15px; color: var(--text-2); font-weight: 500; }
+.pipe-step .row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.pipe-arrow { display: grid; place-items: center; color: var(--text); }
+@media (max-width: 860px) { .pipe { grid-template-columns: 1fr; } .pipe-arrow { transform: rotate(90deg); height: 20px; } }
+
+/* Brief */
+.brief { padding: 18px 20px; display: grid; gap: 10px; margin-bottom: 28px; }
+.brief-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.brief-head .who { display: flex; align-items: center; gap: 8px; }
+.brief p.story { font-size: 20px; line-height: 1.5; color: var(--text); max-width: 72ch; font-weight: 500; }
+.brief p.story b { color: var(--text); font-weight: 800; }
+
+/* Insight cards */
+.list-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
+.igroup-sec { margin-bottom: 28px; }
+.igroup-h { font-size: 13px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text); margin-bottom: 12px; }
+.igroup-h .tnum { color: var(--text-3); margin-left: 4px; }
+.icards { display: grid; grid-template-columns: repeat(auto-fill, minmax(440px, 1fr)); gap: 16px; }
+@media (max-width: 520px) { .icards { grid-template-columns: 1fr; } }
+.icard { display: grid; gap: 12px; align-content: start; text-align: left; width: 100%; padding: 18px 20px; cursor: pointer; font: inherit; color: inherit; transition: border-color .15s, box-shadow .15s; }
+.icard:hover { border-color: var(--text); box-shadow: 0 4px 14px rgba(13,15,18,0.08); }
+.icard-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.icard-sev { display: inline-flex; align-items: center; gap: 7px; }
+.icard-sev .sev { margin-top: 0; }
+.sev-t { font-size: 13px; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; }
+.icard-title { font-size: 20px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.25; }
+.icard-story { font-size: 16px; color: var(--text); line-height: 1.5; }
+.icard-sites { display: flex; gap: 6px; flex-wrap: wrap; }
+.icard-foot { display: flex; align-items: center; gap: 10px 18px; flex-wrap: wrap; padding-top: 12px; border-top: 1px solid var(--border); }
+.icard-ev { display: inline-flex; align-items: center; gap: 8px; font-size: 14.5px; font-weight: 700; }
+.icard-foot .owner { margin-left: auto; }
+.owner { display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 700; min-width: 0; }
+.owner span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.trend { display: inline-flex; align-items: center; gap: 4px; font-size: 13.5px; font-weight: 800; }
+.trend.steady { color: var(--text-3); }
+.empty-card { padding: 20px; color: var(--text-2); }
+
+/* ---------- Sheet ---------- */
+.scrim { position: fixed; inset: 0; background: rgba(0,0,0,0.18); z-index: 50; }
+.sheet { position: fixed; top: 8px; right: 8px; bottom: 8px; width: min(600px, calc(100% - 16px)); z-index: 51; background: var(--bg); border-radius: 14px; box-shadow: var(--shadow-lg); display: grid; grid-template-rows: auto 1fr auto; overflow: hidden; }
+.sheet-head { padding: 20px 22px 18px; border-bottom: 1px solid var(--border); display: grid; gap: 12px; }
+.sheet-head .x { position: absolute; top: 14px; right: 14px; width: 30px; height: 30px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg); cursor: pointer; display: grid; place-items: center; }
+.sheet-head .x:hover { border-color: var(--text); }
+.sheet-head h2 { font-size: 26px; font-weight: 800; letter-spacing: -0.025em; padding-right: 40px; line-height: 1.2; }
+.sheet-head .meta { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.sheet-body { overflow-y: auto; padding: 20px; display: grid; gap: 24px; align-content: start; }
+.sheet-sec { display: grid; gap: 10px; }
+.sheet-sec > p { font-size: 17px; line-height: 1.55; color: var(--text); }
+.says { display: grid; }
+.say { border: 1px solid var(--border); border-radius: 10px; margin-top: -1px; }
+.say:first-child { border-radius: 10px 10px 0 0; } .say:last-child { border-radius: 0 0 10px 10px; } .say:only-child { border-radius: 10px; }
+.say-btn { display: grid; grid-template-columns: 32px 1fr auto; gap: 4px 12px; align-items: start; width: 100%; text-align: left; background: none; border: 0; padding: 12px 14px; cursor: pointer; }
+.say-btn:hover .say-name { text-decoration: underline; text-underline-offset: 3px; }
+.say-name { font-weight: 800; font-size: 16px; display: flex; gap: 8px; align-items: center; }
+.say-text { grid-column: 2 / -1; color: var(--text); font-size: 16px; }
+.say-more { font-size: 14px; font-weight: 700; color: var(--text); text-decoration: underline; text-underline-offset: 3px; white-space: nowrap; padding-top: 2px; }
+.recs { border-top: 1px solid var(--border); background: var(--bg); padding: 6px 14px 12px 58px; display: grid; }
+.rec { padding: 10px 0; border-bottom: 1px dashed var(--border-2); display: grid; gap: 6px; }
+.rec:last-child { border-bottom: 0; }
+.rec .when { font-size: 13.5px; font-weight: 700; color: var(--text-3); }
+.rec .txt { font-family: var(--mono); font-size: 13.5px; color: var(--text); }
+.rec .reads { display: flex; gap: 4px; flex-wrap: wrap; }
+.kv { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 8px; }
+.kv div { border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; display: grid; gap: 2px; }
+.kv dt { font-size: 12px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-3); }
+.kv dd { margin: 0; font-weight: 800; font-size: 17px; }
+.next { border: 0; background: var(--brand); border-radius: 10px; padding: 14px 16px; font-size: 17px; font-weight: 600; color: var(--text); }
+.update { font-size: 16px; color: var(--text); display: flex; gap: 10px; align-items: flex-start; }
+.sheet-foot { border-top: 1px solid var(--border); padding: 12px 20px; display: flex; gap: 10px 14px; align-items: center; flex-wrap: wrap; background: var(--bg); }
+.fld { display: flex; align-items: center; gap: 8px; }
+.fld label { font-size: 12px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-3); }
+.select { appearance: none; height: 38px; border: 1px solid var(--border-2); border-radius: 8px; padding: 0 30px 0 12px; background: var(--bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='14' viewBox='0 0 10 14'%3E%3Cpath d='M2 5l3-3 3 3M2 9l3 3 3-3' fill='none' stroke='%238f8f8f' stroke-width='1.4'/%3E%3C/svg%3E") no-repeat right 10px center; font-size: 15px; font-weight: 700; cursor: pointer; max-width: 200px; }
+.switch { display: inline-flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 700; cursor: pointer; margin-left: auto; }
+.switch input { appearance: none; width: 34px; height: 20px; border-radius: 999px; background: #b9bfc8; position: relative; cursor: pointer; transition: background .15s; }
+.switch input::after { content: ""; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,0.2); transition: transform .15s; }
+.switch input:checked { background: var(--text); }
+.switch input:checked::after { transform: translateX(14px); }
+
+/* ---------- Purview ---------- */
+.sec-t { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; gap: 10px; }
+.pv-summary { font-size: 22px; line-height: 1.45; font-weight: 500; max-width: 60ch; margin-bottom: 20px; }
+.pv-summary b { font-weight: 800; }
+.waiting { display: flex; align-items: center; gap: 10px 18px; flex-wrap: wrap; padding: 14px 18px; margin-bottom: 28px; }
+.waiting .label { margin-right: 4px; }
+.waiting a, .waiting button { font: inherit; font-size: 16px; font-weight: 800; background: none; border: 0; padding: 0; cursor: pointer; color: var(--text); text-decoration: underline; text-underline-offset: 3px; }
+.waiting .none { font-size: 16px; color: var(--text-2); }
+.slist { overflow: hidden; }
+.srow { display: grid; grid-template-columns: 140px minmax(0, 1fr) auto; gap: 4px 18px; align-items: start; padding: 16px 20px; border-bottom: 1px solid var(--border); }
+.srow:last-child { border-bottom: 0; }
+.srow .st { padding-top: 1px; }
+.srow .main { display: grid; gap: 4px; }
+.srow .nm { font-size: 17px; font-weight: 800; letter-spacing: -0.01em; }
+.srow .nm small { font-size: 14px; font-weight: 600; color: var(--text-3); margin-left: 8px; }
+.srow .why { font-size: 16px; color: var(--text); }
+.srow .meta { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; font-size: 14.5px; font-weight: 700; white-space: nowrap; }
+.srow .meta a { text-decoration: underline; text-underline-offset: 3px; }
+.hold-toggle { display: block; width: 100%; text-align: left; font: inherit; font-size: 15px; font-weight: 700; padding: 14px 20px; background: var(--bg); border: 0; cursor: pointer; color: var(--text); }
+.hold-toggle:hover { text-decoration: underline; text-underline-offset: 3px; }
+@media (max-width: 640px) { .srow { grid-template-columns: 1fr; } .srow .meta { align-items: flex-start; flex-direction: row; gap: 12px; } }
+
+/* ---------- Sources ---------- */
+.sgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 12px; }
+@media (max-width: 420px) { .sgrid { grid-template-columns: 1fr; } }
+.scard { padding: 16px; display: grid; gap: 14px; cursor: pointer; text-align: left; width: 100%; font: inherit; }
+.scard:hover { border-color: var(--border-2); }
+.scard .h { display: grid; grid-template-columns: 32px 1fr auto; gap: 2px 12px; align-items: center; }
+.scard .n { font-weight: 800; font-size: 18px; }
+.scard .w { grid-column: 2; font-size: 14px; font-weight: 600; color: var(--text-3); }
+.scard .says-now { font-size: 16px; color: var(--text); min-height: 48px; }
+.scard .ft { display: flex; justify-content: space-between; align-items: flex-end; gap: 8px; font-size: 14px; font-weight: 700; color: var(--text-2); }
+.scard .problem-line { font-size: 15px; font-weight: 700; }
+.back { display: inline-flex; align-items: center; gap: 6px; color: var(--text); font-weight: 700; font-size: 15px; margin-bottom: 16px; }
+.back:hover { color: var(--text); }
+.banner { border-radius: 10px; padding: 14px 16px; display: grid; gap: 6px; margin-bottom: 20px; border: 1px solid; font-size: 16px; }
+.banner.critical { background: var(--bg); border-color: var(--critical); }
+.banner.critical b { color: var(--critical); }
+.banner.warning { background: var(--bg); border-color: var(--warning); }
+.banner.warning b { color: var(--warning); }
+.banner.info { background: var(--bg); border-color: var(--info); }
+.banner.info b { color: var(--info); }
+.banner b { font-weight: 800; }
+.banner p { color: var(--text); }
+.feed { overflow: hidden; }
+.frow { display: grid; grid-template-columns: 92px minmax(0, 1fr) minmax(0, 1.1fr); gap: 16px; padding: 14px 16px; border-bottom: 1px solid var(--border); align-items: start; }
+.frow:last-child { border-bottom: 0; }
+.frow .when { font-size: 14px; font-weight: 700; color: var(--text-2); }
+.frow .raw { font-family: var(--mono); font-size: 13px; color: var(--text); white-space: pre-wrap; word-break: break-word; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; }
+.frow .read { display: grid; gap: 8px; }
+.frow .read .line { font-size: 16px; }
+.frow .read .line b { font-weight: 800; }
+.frow .tags { display: flex; gap: 4px; flex-wrap: wrap; }
+.frow.err .read .line b { color: var(--critical); } .frow.warn .read .line b { color: var(--warning); }
+
+.fresh { animation: fresh 2.4s ease-out; }
+@keyframes fresh { 0% { box-shadow: inset 3px 0 0 var(--info); } 100% { box-shadow: inset 3px 0 0 transparent; } }
+.fhead { display: grid; grid-template-columns: 92px minmax(0, 1fr) minmax(0, 1.1fr); gap: 16px; padding: 0 16px; height: 42px; align-items: center; background: var(--bg); border-bottom: 1px solid var(--border); font-size: 12px; color: var(--text-3); font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; }
+@media (max-width: 760px) { .fhead { display: none; } .frow { grid-template-columns: 1fr; gap: 8px; } }
+
+/* ---------- Meetings ---------- */
+.meet-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 18px; }
+.meet-bar .back { margin-bottom: 0; }
+.steps { display: flex; gap: 6px; list-style: none; margin: 0; padding: 0; flex-wrap: wrap; }
+.steps li { display: inline-flex; align-items: center; gap: 8px; height: 34px; padding: 0 12px 0 6px; border-radius: 999px; border: 1px solid var(--border); font-size: 14px; font-weight: 700; color: var(--text-3); }
+.steps .n { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font-size: 12px; font-weight: 800; border: 1px solid var(--border-2); color: var(--text-3); }
+.steps li.done { color: var(--text); } .steps li.done .n { background: var(--text); color: #fff; border-color: var(--text); }
+.steps li.on { background: var(--brand); border-color: #d9c200; color: var(--text); } .steps li.on .n { border-color: var(--text); color: var(--text); }
+.meet-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 16px; align-items: start; }
+@media (max-width: 520px) { .meet-grid { grid-template-columns: 1fr; } }
+.meet-card { padding: 20px 22px; display: grid; gap: 14px; align-content: start; }
+.muted-p { color: var(--text-3); font-size: 15px; }
+.meet-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.meet-actions.end { justify-content: flex-end; margin-top: 16px; }
+.btn[disabled] { opacity: 0.4; cursor: default; }
+.att { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.att-row { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 10px; cursor: pointer; }
+.att-row input { width: 18px; height: 18px; accent-color: var(--text); }
+.att-name { display: grid; font-weight: 700; } .att-name small { font-weight: 500; color: var(--text-3); font-size: 13.5px; }
+.plain { margin: 0; padding-left: 18px; display: grid; gap: 8px; font-size: 16px; }
+.plain b { font-weight: 800; }
+.report { display: grid; gap: 16px; }
+.rsec { padding: 20px 22px; display: grid; gap: 14px; }
+.rlead { font-size: 20px; line-height: 1.5; font-weight: 500; max-width: 70ch; }
+.rlead b { font-weight: 800; }
+.rnote { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; font-size: 15px; }
+.rcols { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; }
+.rcols h3 { margin-bottom: 10px; }
+.rlist { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.rlist li { display: grid; gap: 2px; }
+.rlist span { font-size: 14px; color: var(--text-3); font-weight: 600; }
+.rlink { font: inherit; font-weight: 800; font-size: 16px; text-align: left; background: none; border: 0; padding: 0; cursor: pointer; color: var(--text); }
+.rlink:hover { text-decoration: underline; text-underline-offset: 3px; }
+.agreed { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; }
+.agreed li { display: grid; grid-template-columns: 28px 1fr; gap: 12px; align-items: start; }
+.agreed-t { font-weight: 800; font-size: 16px; }
+.agreed-o { font-size: 15px; font-weight: 600; color: var(--text-2); }
+.agreed-note { font-size: 15px; color: var(--text); margin-top: 4px; }
+.walk { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 20px; align-items: start; }
+@media (max-width: 900px) { .walk { grid-template-columns: 1fr; } }
+.walk-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.walk-list button { display: grid; grid-template-columns: 26px 1fr; gap: 10px; align-items: start; width: 100%; text-align: left; font: inherit; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg); cursor: pointer; }
+.walk-list li.on button { border-color: #d9c200; background: var(--brand); }
+.wl-n { width: 24px; height: 24px; border-radius: 50%; border: 1px solid var(--border-2); display: grid; place-items: center; font-size: 12px; font-weight: 800; }
+.walk-list li.on .wl-n { border-color: var(--text); }
+.wl-t { font-weight: 700; font-size: 14.5px; line-height: 1.3; display: grid; gap: 2px; } .wl-t small { font-weight: 600; font-size: 12.5px; color: var(--text-3); }
+.walk-list li.on .wl-t small { color: var(--text); }
+.walk-card { padding: 22px 24px; display: grid; gap: 14px; }
+.walk-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.why-here { margin-left: auto; font-size: 13px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; }
+.walk-title { font-size: 26px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.2; }
+.walk-story { font-size: 17px; line-height: 1.5; }
+.walk-sites { display: flex; gap: 6px; flex-wrap: wrap; }
+.walk-says ul { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 8px; }
+.walk-says li { display: grid; grid-template-columns: 26px 1fr; gap: 10px; align-items: start; font-size: 15.5px; }
+.walk-says b { font-weight: 800; }
+.walk-latest, .walk-next { display: grid; gap: 4px; font-size: 16px; }
+.walk-next { background: var(--brand); border-radius: 10px; padding: 12px 14px; font-weight: 600; }
+.walk-next .label { color: var(--text); }
+.walk-form { display: flex; flex-wrap: wrap; gap: 12px 16px; align-items: center; padding-top: 14px; border-top: 1px solid var(--border); }
+.walk-form .switch { margin-left: 0; }
+.w-note-l { width: 100%; font-size: 12px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-3); margin-bottom: -6px; }
+.w-note { width: 100%; font: inherit; font-size: 16px; border: 1px solid var(--border-2); border-radius: 10px; padding: 10px 12px; resize: vertical; color: var(--text); background: var(--bg); }
+.w-note:focus-visible { outline: 2px solid var(--text); outline-offset: 1px; }
+.people { display: flex; gap: 8px 14px; flex-wrap: wrap; }
+.person { display: inline-flex; align-items: center; gap: 8px; font-weight: 700; font-size: 15px; }
+.mlist { display: grid; gap: 16px; }
+.mhead { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; align-items: flex-start; }
+
+/* ---------- Generation, dismissal, insight page ---------- */
+.gen { padding: 26px 28px; display: grid; gap: 20px; max-width: 720px; }
+.gen-bar { height: 6px; border-radius: 3px; background: var(--border); overflow: hidden; }
+.gen-bar span { display: block; height: 100%; background: var(--text); transition: width .5s ease; }
+.gen-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.gen-list li { display: flex; align-items: center; gap: 12px; font-size: 17px; color: var(--text-3); font-weight: 600; }
+.gen-list li.done, .gen-list li.now { color: var(--text); }
+.gen-i { width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid var(--border-2); display: grid; place-items: center; font-size: 12px; font-weight: 800; flex: none; }
+.gen-list li.done .gen-i { background: var(--text); border-color: var(--text); color: #fff; }
+.gen-list li.now .gen-i { border-color: var(--text); border-top-color: transparent; animation: spin .8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .gen-list li.now .gen-i { animation: none; border-top-color: var(--text); } .gen-bar span { transition: none; } }
+.btn.danger { background: var(--critical); border-color: var(--critical); color: #fff; }
+.btn.danger:hover { border-color: var(--text); }
+.dismiss { display: grid; gap: 12px; border: 1px solid var(--critical); border-radius: 12px; padding: 16px; background: var(--bg); }
+.reasons { display: grid; gap: 6px; }
+.reason { display: flex; align-items: center; gap: 10px; font-size: 15.5px; font-weight: 600; cursor: pointer; }
+.reason input { width: 18px; height: 18px; accent-color: var(--text); }
+.walk-dismiss { display: flex; justify-content: flex-start; margin-top: -8px; }
+.open-page { font-size: 15px; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; justify-self: start; }
+.ins-head { display: grid; gap: 12px; margin-bottom: 24px; }
+.ins-head .meta { display: flex; gap: 8px 12px; flex-wrap: wrap; align-items: center; }
+.ins-title { font-size: 38px; max-width: 26ch; }
+.ins-grid { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(300px, 1fr); gap: 28px; align-items: start; }
+@media (max-width: 960px) { .ins-grid { grid-template-columns: 1fr; } }
+.ins-main { display: grid; gap: 28px; }
+.ins-sec { display: grid; gap: 12px; }
+.ins-story { font-size: 20px; line-height: 1.5; max-width: 62ch; }
+.src-say { padding: 16px 18px; display: grid; gap: 12px; }
+.src-say-h { display: grid; grid-template-columns: 36px 1fr; gap: 12px; align-items: start; }
+.src-say-h b { font-weight: 800; font-size: 17px; }
+.src-say-h p { font-size: 16px; margin-top: 4px; }
+.src-recs { display: grid; border-top: 1px solid var(--border); padding-left: 48px; }
+.ins-side { display: grid; gap: 16px; }
+.side-card { padding: 18px 20px; display: grid; gap: 14px; align-content: start; }
+.fld.col { display: grid; gap: 6px; }
+.select.wide { max-width: none; width: 100%; }
+.switch.left { margin-left: 0; }
+.hist { list-style: none; margin: 0; padding: 0; display: grid; }
+.hist li { display: grid; grid-template-columns: 14px 1fr; gap: 12px; padding-bottom: 16px; position: relative; }
+.hist li:not(:last-child)::before { content: ""; position: absolute; left: 6px; top: 14px; bottom: 0; width: 1px; background: var(--border-2); }
+.hist-dot { width: 13px; height: 13px; border-radius: 50%; border: 2px solid var(--text); background: var(--bg); margin-top: 4px; }
+.hist li:first-child .hist-dot { background: var(--text); }
+.hist-what { font-weight: 800; font-size: 15.5px; }
+.hist-text { font-size: 15px; color: var(--text); }
+.hist-meta { font-size: 13.5px; color: var(--text-3); font-weight: 600; margin-top: 2px; }
+
+/* ---------- Help ---------- */
+.help-btn { width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--border-2); background: var(--bg); font-weight: 800; font-size: 16px; cursor: pointer; flex: none; }
+.help-btn:hover { border-color: var(--text); }
+.what { font: inherit; font-size: 15px; font-weight: 700; background: none; border: 0; padding: 0; cursor: pointer; color: var(--text); text-decoration: underline; text-underline-offset: 3px; }
+.sheet.help { z-index: 52; grid-template-rows: auto 1fr; }
+.help-nav { display: flex; gap: 6px; flex-wrap: wrap; }
+.help-nav .chip { cursor: pointer; font: inherit; font-size: 13.5px; font-weight: 700; }
+.help-nav .chip:hover { border-color: var(--text); }
+.help-sec { display: grid; gap: 12px; }
+.help-sec h3 { font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; }
+.help-list { margin: 0; display: grid; gap: 12px; }
+.help-list div { display: grid; grid-template-columns: 150px 1fr; gap: 12px; align-items: start; }
+.help-list dt b { font-weight: 800; font-size: 16px; }
+.help-list dd { margin: 0; font-size: 16px; line-height: 1.45; }
+@media (max-width: 480px) { .help-list div { grid-template-columns: 1fr; gap: 4px; } }
+
+.srow[data-site] { cursor: pointer; }
+.srow[data-site]:hover .nm a { text-decoration: underline; text-underline-offset: 3px; }
+.srow .nm a { color: var(--text); }
+.icards.one { grid-template-columns: 1fr; }
+.chip.link:hover { border-color: var(--text); }
+.site-srcs { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.site-srcs li { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.site-srcs a { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.site-srcs a:hover .nm { text-decoration: underline; text-underline-offset: 3px; }
+.site-srcs .nm { display: grid; font-weight: 800; font-size: 15.5px; }
+.site-srcs .nm small { font-weight: 600; font-size: 13px; color: var(--text-3); }
+.frow .when .mg { margin-top: 6px; }
+.foot { border-top: 1px solid var(--border); padding-block: 24px 40px; color: var(--text-3); font-size: 14px; }
+.toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--text); color: #fff; border-radius: 8px; padding: 8px 14px; font-size: 13.5px; z-index: 60; box-shadow: var(--shadow-lg); }
+</style>
+</head>
+<body>
+<header class="hdr">
+  <div class="wrap">
+    <a class="logo" href="#focus" aria-label="Hiviz Prism">
+      <svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><path d="M11 2.5 20 19H2z" fill="none" stroke="#0d0f12" stroke-width="1.8" stroke-linejoin="round"/><path d="M11 9.5 15.2 17H6.8z" fill="#ffe500"/></svg>
+      <span>Hiviz <small>Prism</small></span>
+    </a>
+    <div class="crumb" role="group" aria-label="Purview">
+      <span class="slash" aria-hidden="true">/</span>
+      <select class="pick" id="f-div" aria-label="Division"></select>
+      <span class="slash" aria-hidden="true">/</span>
+      <select class="pick" id="f-reg" aria-label="Region"></select>
+    </div>
+    <nav class="tabs" aria-label="Views">
+      <a href="#focus" data-view="focus">Insights</a>
+      <a href="#sites" data-view="sites">Sites</a>
+      <a href="#sources" data-view="sources">Sources<span class="tab-badge" id="src-badge" hidden></span></a>
+    </nav>
+    <div class="hdr-right">
+      <a class="live" href="#sources" aria-label="Live data arriving"><span class="dot" aria-hidden="true"></span><span class="lbl">Live</span><span class="txt" id="live-txt" aria-live="polite"></span></a>
+      <button type="button" class="help-btn" data-help="ideas" aria-label="Help and definitions">?</button>
+      <span class="avatar-me" title="You, division manager">DM</span>
+    </div>
+  </div>
+</header>
+
+<main class="wrap" id="view"></main>
+
+<div class="scrim" id="scrim" hidden></div>
+<aside class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title" hidden></aside>
+<aside class="sheet help" id="help" role="dialog" aria-modal="true" aria-labelledby="help-title" hidden></aside>
+<div class="toast" id="toast" role="status" hidden></div>
+
+<footer class="foot"><div class="wrap">Hiviz Prism · concept · all organisations, people, sites and records are fictional. Live arrivals are simulated.</div></footer>
+
+<script>
+(function () {
+  'use strict';
+
+  /* =============================================================
+     Example data (fictional)
+     ============================================================= */
+  var YOU = 'You';
+  var ORG = [
+    { div: 'Infrastructure', regions: [
+      { name: 'Northern', rm: 'Priya Nair', sites: [
+        { id: 'ny', name: 'North Yard', state: 'risk', why: 'Loads moving outside the planned path during steel lifts.', visit: 9, src: ['procore', 'mitti', 'intelex'] },
+        { id: 'rr', name: 'Ridge Road Interchange', state: 'watch', why: 'Night traffic setups drifting from the approved plan.', visit: 23, src: ['procore', 'hammertech', 'servicenow'] },
+        { id: 'hb', name: 'Harbour Bridge Deck', state: 'watch', why: 'Improvised tag lines, and pre-starts done in seconds.', visit: 14, src: ['procore', 'mitti', 'intelex'] },
+        { id: 'ql', name: 'Quarry Link', state: 'quiet', why: 'No reports for 19 days, but permits are still being issued.', visit: 41, src: ['mitti', 'servicenow'] }
+      ]},
+      { name: 'Southern', rm: 'Tom Walsh', sites: [
+        { id: 'rs', name: 'Rail Stabling Yard', state: 'risk', why: 'Isolations signed off before they were tested, at night-shift change.', visit: 17, src: ['servicenow', 'intelex'] },
+        { id: 'st', name: 'Southern Tunnels', state: 'watch', why: 'Pre-start checks completed in under a minute on most shifts.', visit: 6, src: ['intelex', 'servicenow'] },
+        { id: 'cc', name: 'Creek Crossing', state: 'hold', why: 'Steady reporting. Issues fixed quickly.', visit: 12, src: ['intelex', 'evotix'] },
+        { id: 'du', name: 'Depot Upgrade', state: 'none', why: 'Paper forms only. Not visible to Prism.', visit: 52, src: [] }
+      ]}
+    ]},
+    { div: 'Building', regions: [
+      { name: 'Metro', rm: 'Sam Ortiz', sites: [
+        { id: 't3', name: 'Tower 3', state: 'risk', why: 'Edge protection removed and not put back during facade work.', visit: 8, src: ['intelex', 'hammertech'] },
+        { id: 'hf', name: 'Hospital Fit-out', state: 'watch', why: 'The same facade subcontractor starts next week.', visit: 20, src: ['intelex', 'hammertech'] },
+        { id: 'ms', name: 'Metro Station Box', state: 'hold', why: 'Nothing unusual.', visit: 11, src: ['intelex'] }
+      ]},
+      { name: 'Coastal', rm: 'Jo Park', sites: [
+        { id: 'ca', name: 'Coastal Aged Care', state: 'quiet', why: 'Every inspection item passed for six weeks.', visit: 38, src: ['mitti'] },
+        { id: 'mo', name: 'Marina Offices', state: 'hold', why: 'Nothing unusual.', visit: 15, src: ['mitti'] }
+      ]}
+    ]}
+  ];
+
+  var SOURCES = [
+    { id: 'procore', mg: 'P', name: 'Procore', what: 'Observations, incidents', how: 'Webhook', status: 'live', last: 2, today: 184,
+      now: 'Tag lines failing on steel lifts at North Yard, and positive spotter reports at Ridge Road.', hist: '342546735846957468' },
+    { id: 'mitti', mg: 'M', name: 'Mitti', what: 'Inspections, issues', how: 'Webhook', status: 'failing', last: 212, today: 31,
+      now: 'Nothing since 6:10 am. Before that: rope used as tag lines at Harbour Bridge Deck.', hist: '354463540000000000',
+      problem: 'Deliveries failing since 6:10 am with “401 Unauthorised”. The API token was probably changed.',
+      doing: 'Prism retries every 10 minutes and has emailed the system admin. Mitti keeps the events, so nothing is lost once the token is fixed.',
+      impact: 'Quarry Link, Harbour Bridge Deck and Coastal Aged Care send inspections through Mitti, so their picture is incomplete today.' },
+    { id: 'intelex', mg: 'I', name: 'Intelex', what: 'Incidents, investigations, pre-starts', how: 'Polled every 15 min', status: 'live', last: 11, today: 96,
+      now: 'Pre-starts at Southern Tunnels are finished in under a minute, with identical answers.', hist: '223343324453343344' },
+    { id: 'servicenow', mg: 'S', name: 'ServiceNow', what: 'Permits, isolations', how: 'Platform table', status: 'live', last: 4, today: 143,
+      now: 'Two isolations at Rail Stabling Yard were closed before the test was recorded.', hist: '455364456574565476' },
+    { id: 'hammertech', mg: 'H', name: 'HammerTech', what: 'Inductions, inspections', how: 'Polled every 30 min', status: 'delayed', last: 48, today: 22,
+      now: 'A new night traffic crew was inducted at Ridge Road the week setups started drifting.', hist: '112121211211100000',
+      problem: 'Last pull was 48 minutes ago. HammerTech is responding slowly.',
+      doing: 'Prism keeps trying and will flag it if the delay passes two hours.' },
+    { id: 'evotix', mg: 'E', name: 'Evotix export', what: 'Weekly CSV of incidents', how: 'File drop', status: 'partial', last: 520, today: 198,
+      now: 'Mostly routine. One vehicle-into-fence event at Creek Crossing.', hist: '000000000000900000',
+      problem: 'Last night’s file imported 198 of 212 rows. 14 rows have no site in column D.',
+      doing: 'The 14 rows are held. Add a site and they’ll be enriched like the rest.' },
+    { id: 'paper', mg: '—', name: 'Paper forms', what: 'Depot Upgrade', how: 'Not connected', status: 'none', last: null, today: 0,
+      now: 'Prism can’t see this site.', hist: '000000000000000000',
+      problem: 'Depot Upgrade records hazards and incidents on paper.',
+      doing: 'Scanning forms into the file drop would bring it in without changing how the site works.' }
+  ];
+  var SRC_STATUS = { live: ['success', 'Live'], delayed: ['warning', 'Delayed'], partial: ['warning', 'Partly imported'], failing: ['critical', 'Failing'], none: ['info', 'Not connected'] };
+  var SRC = {}; SOURCES.forEach(function (s) { SRC[s.id] = s; });
+
+  // tone on a read: critical | warning | success | '' (neutral)
+  function R(when, site, text, reads) { return { when: when, site: site, text: text, reads: reads }; }
+  var INSIGHTS = [
+    { id: 'hand', sev: 'critical', status: 'new', owner: '', trend: 'worse', lead: true, since: '22 Sep', short: 'handover failures',
+      sites: ['rr', 'rs', 'ql'], hist: '0000000100000010010010102012',
+      title: 'Controls are failing at handovers',
+      story: 'Three sites, three kinds of handover, one failure: controls that hold during the work break down when the work changes hands.',
+      read: [['Could have been', 'Fatal', 'critical'], ['Control', 'Failing at handover', 'critical'], ['Energy', 'Electrical, traffic', ''], ['Factor', 'Communications and coordination', '']],
+      next: 'Give this an owner today. Start with the night-shift permit handover at Rail Stabling Yard: what gets passed on, and what gets lost.',
+      says: [
+        { src: 'servicenow', n: 5, text: 'Isolations closed before the test-for-dead step, both at night-shift change.', recs: [
+          R('21 Sep', 'rs', 'ISO-40912 closed 05:52 · test_for_dead: empty · shift: night', [['Control bypassed', 'critical'], ['Electrical', '']]),
+          R('2 Sep', 'rs', 'ISO-40877 closed 18:55 · test recorded 19:20 by incoming shift', [['Control bypassed', 'critical'], ['Electrical', '']]) ] },
+        { src: 'procore', n: 4, text: 'Traffic setups at Ridge Road changed after the night crew took over.', recs: [
+          R('23 Sep', 'rr', '"cones moved from plan at ramp 2 after crew change"', [['At-risk condition', 'warning'], ['Moving traffic', '']]) ] },
+        { src: 'mitti', n: 3, text: 'Quarry Link’s weekly inspections stopped the week its site manager changed.', recs: [
+          R('6 Sep', 'ql', 'Last inspection received · Quarry Link · weekly site walk', [['Reporting stopped', 'warning']]) ] },
+        { src: 'hammertech', n: 2, text: 'A new night traffic crew was inducted at Ridge Road the same week.', recs: [
+          R('15 Sep', 'rr', 'Kerbline Traffic · 6 workers inducted · night shift', [['Context', '']]) ] }
+      ] },
+    { id: 'fat', sev: 'warning', status: 'new', owner: '', trend: 'worse', lead: false, since: '24 Sep', short: 'night-shift fatigue',
+      sites: ['rr', 'rs', 'st'], hist: '0000000000000100010100101101',
+      title: 'Night crews are describing fatigue more often',
+      story: 'Night-shift reports mention being tired, or the end of a long run, three times as often as in July.',
+      read: [['Could have been', 'Serious injury', 'critical'], ['Control', 'Roster limits unclear', 'warning'], ['Factor', 'Goal conflict and trade-offs', '']],
+      next: 'Ask the regional managers how long night runs are, and who approves extending them.',
+      says: [
+        { src: 'procore', n: 4, text: 'Night crews mention being tired, mostly after the fifth night in a row.', recs: [
+          R('24 Sep', 'rr', '"crew flat, 6th night straight, slow on setup"', [['Weak signal', 'warning'], ['Fatigue', '']]) ] },
+        { src: 'intelex', n: 3, text: 'Two incident reports note "end of a long run" in the description.', recs: [
+          R('19 Sep', 'st', 'INC-3372 · minor strike on segment crane · "end of long run of nights"', [['Energy released', 'critical'], ['Fatigue', '']]) ] },
+        { src: 'servicenow', n: 2, text: 'Permits show runs of six and seven night shifts.', recs: [
+          R('22 Sep', 'rs', 'Crew roster attached to PTW-88120 · 7 consecutive nights', [['Context', '']]) ] }
+      ] },
+    { id: 'load', sev: 'critical', status: 'working', owner: 'Priya Nair', trend: 'steady', lead: true, since: '12 Sep', updated: 3, short: 'suspended loads',
+      sites: ['ny', 'hb'], hist: '0000100002001001010001000100',
+      title: 'Suspended loads are moving outside the planned path',
+      story: 'Tag lines are snapping or being improvised during steel lifts, so loads swing over areas that should be clear.',
+      read: [['Could have been', 'Fatal', 'critical'], ['Control', 'Failed', 'critical'], ['Energy', 'Suspended load', ''], ['Factor', 'Resource allocation', '']],
+      latest: 'Rigging gear audit booked at both sites for 30 September. Worn tag lines replaced at North Yard.',
+      next: 'Check the audit happens on the 30th, and ask whether the rigging subcontractor uses the same gear on other jobs.',
+      says: [
+        { src: 'procore', n: 7, text: 'Tag lines snapping or fraying during steel lifts at North Yard.', recs: [
+          R('26 Sep', 'ny', 'NM-2318 · "tag line frayed, load spun on lift of B14, crew stepped clear"', [['Energy released', 'critical'], ['Control failed', 'critical']]),
+          R('19 Sep', 'ny', 'NM-2290 · "beam rotated in wind, passed over access path"', [['Energy released', 'critical'], ['Control failed', 'critical']]) ] },
+        { src: 'mitti', n: 4, text: 'Rope being used in place of tag lines at Harbour Bridge Deck.', recs: [
+          R('25 Sep', 'hb', 'Issue · "rope being used as tagline again" · deck level', [['At-risk condition', 'warning'], ['Control degraded', 'warning']]) ] }
+      ] },
+    { id: 'pre', sev: 'warning', status: 'working', owner: 'Tom Walsh', trend: 'worse', lead: false, since: '1 Sep', updated: 16, short: 'pre-start checks',
+      sites: ['st', 'hb'], hist: '1101101110111011101111011111',
+      title: 'Pre-start checks are being ticked, not done',
+      story: 'Checklists are completed in under a minute with the same answers every day, on sites where conditions change daily.',
+      read: [['Could have been', 'Unknown', 'warning'], ['Control', 'Can’t be trusted from the record', 'warning'], ['Factor', 'Monitoring and metrics', '']],
+      latest: 'Supervisors reminded of the purpose of the pre-start at a toolbox talk.',
+      next: 'A reminder hasn’t changed the pattern. Ask for one pre-start a week to be done with a manager present.',
+      says: [
+        { src: 'intelex', n: 18, text: 'Pre-starts completed in under a minute, with identical answers across days and crews.', recs: [
+          R('26 Sep', 'st', 'Daily Pre-Start v3 · started 06:31:02 · submitted 06:31:40 · 24/24 "Yes"', [['Weak signal', 'warning'], ['38 seconds', '']]) ] },
+        { src: 'mitti', n: 4, text: 'Two events this month involved hazards a real pre-start should have caught.', recs: [
+          R('17 Sep', 'hb', 'Issue · "unsecured grating found after shift start"', [['At-risk condition', 'warning']]) ] }
+      ] },
+    { id: 'spot', sev: 'warning', status: 'working', owner: 'Priya Nair', trend: 'better', lead: false, since: '18 Aug', updated: 5, short: 'spotters for reversing plant',
+      sites: ['ny', 'rr'], hist: '1100101000100000000000000000',
+      title: 'Spotters for reversing plant',
+      story: 'Plant was reversing without spotters in August. Since the new roster, reports show spotters in place and calling stops.',
+      read: [['Control', 'Held', 'success'], ['Energy', 'Moving plant', ''], ['Factor', 'Operational management', '']],
+      latest: 'Spotter roster in place on both sites. One repeat on 2 September, none since.',
+      next: 'Keep it for two more weeks, then close.',
+      says: [
+        { src: 'procore', n: 7, text: 'Spotters now calling stops on reversing plant. One repeat on 2 September.', recs: [
+          R('24 Sep', 'rr', 'OB-7741 · "spotter stopped the reversing grader when ped walked behind"', [['Positive performance', 'success'], ['Control held', 'success']]) ] }
+      ] },
+    { id: 'house', sev: 'warning', status: 'resolved', owner: 'Tom Walsh', trend: 'better', lead: false, since: '4 Aug', updated: 2, short: 'blocked access routes',
+      sites: ['cc', 'st'], hist: '1110110100000000000000000000',
+      title: 'Blocked access routes',
+      story: 'Materials stored in access routes were a repeat finding in August. No repeat in four weeks since the laydown plan changed.',
+      read: [['Control', 'Held', 'success'], ['Factor', 'Operational management', '']],
+      latest: 'Laydown plan changed and marked on site. No repeat for four weeks.',
+      next: 'Close it. Prism reopens it if the pattern comes back.',
+      says: [
+        { src: 'intelex', n: 5, text: 'No blocked access routes reported since the laydown plan changed.', recs: [
+          R('28 Aug', 'cc', 'Inspection · access routes clear · laydown areas marked', [['Control held', 'success']]) ] }
+      ] },
+    { id: 'edge', sev: 'critical', status: 'working', owner: 'Sam Ortiz', trend: 'worse', lead: true, since: '9 Sep', updated: 4, short: 'edge protection after facade work',
+      sites: ['t3', 'hf'], hist: '0000000000100000000100000011',
+      title: 'Edge protection isn’t going back up after facade work',
+      story: 'The facade subcontractor removes edge protection to fit panels and doesn’t put it back. They start on a second site next week.',
+      read: [['Could have been', 'Fatal', 'critical'], ['Control', 'Missing', 'critical'], ['Energy', 'Fall from height', ''], ['Factor', 'Contractor management', '']],
+      latest: 'Met the subcontractor’s supervisor. Revised method statement due 29 September.',
+      next: 'Make the revised method a condition of starting at Hospital Fit-out.',
+      says: [
+        { src: 'intelex', n: 6, text: 'Edge protection removed on level 14 and not reinstated, twice in ten days.', recs: [
+          R('18 Sep', 't3', '"worker leaning past slab edge to guide facade panel"', [['At-risk behaviour', 'critical'], ['Control missing', 'critical']]) ] },
+        { src: 'hammertech', n: 1, text: 'The same subcontractor is inducted at Hospital Fit-out for next week.', recs: [
+          R('25 Sep', 'hf', 'Facade subcontractor · 8 workers booked for induction · 2 Oct', [['Context', '']]) ] }
+      ] },
+    { id: 'tick', sev: 'warning', status: 'new', owner: '', trend: 'steady', lead: false, since: '23 Sep', short: 'copied inspections',
+      sites: ['ca', 'mo'], hist: '1010101010101010101010101010',
+      title: 'Inspections pass every item, with copied comments',
+      story: 'Two sites have passed every inspection item for weeks, with comments copied from the week before.',
+      read: [['Could have been', 'Unknown', 'warning'], ['Control', 'Can’t be trusted from the record', 'warning'], ['Factor', 'Monitoring and metrics', '']],
+      next: 'Join the next inspection at Coastal Aged Care and watch it being done.',
+      says: [
+        { src: 'mitti', n: 24, text: 'Twenty-four inspections, every item passed, most comments identical week to week.', recs: [
+          R('22 Sep', 'ca', 'Weekly site inspection · 42/42 pass · comment: "all good, as per last week"', [['No findings', 'warning']]) ] }
+      ] }
+  ];
+
+  // Feed per source: raw record and Prism's one-line read
+  function F(src, ago, site, raw, line, tags) { return { src: src, at: Date.now() - ago * 60000, site: site, raw: raw, line: line, tags: tags }; }
+  var FEED = [
+    F('procore', 2, 'ny', 'NM-2318\ncategory: Near Miss\nloc: North Yard / Laydown B\n"tag line frayed, load spun on lift of B14, crew stepped clear"', '<b>Energy released.</b> A frayed tag line let a steel beam spin during a lift.', [['Control failed', 'critical'], ['Suspended load', ''], ['Suspended loads insight', '']]),
+    F('procore', 38, 'rr', 'OB-7741\ncategory: Positive\nloc: Ridge Rd IC / ramp 2\n"spotter stopped the reversing grader when ped walked behind"', '<b>Control held.</b> A spotter stopped reversing plant when someone walked behind it.', [['Positive', 'success'], ['Spotters insight', '']]),
+    F('servicenow', 4, 'rs', 'x_permit_isolation ISO-40912\nstate: closed 05:52\ntest_for_dead_at: (empty)\nshift: night', '<b>Control bypassed.</b> An isolation was closed with no test recorded.', [['Could have been fatal', 'critical'], ['Handovers insight', '']]),
+    F('servicenow', 61, 'ql', 'x_permit_work PTW-88102\nstate: issued\nwork: "haul road shoulder repair near live traffic"', '<b>Work continues</b> at a site that hasn’t reported anything for 19 days.', [['Gone quiet', 'warning'], ['Handovers insight', '']]),
+    F('intelex', 11, 'st', 'Daily Pre-Start v3 · TBM-2\nstarted 06:31:02 · submitted 06:31:40\n24 of 24 "Yes" · "all good"', '<b>Done in 38 seconds</b>, with the same answers as yesterday.', [['Weak signal', 'warning'], ['Pre-start insight', '']]),
+    F('intelex', 140, 'cc', 'INC-3390 · First aid\n"cut to hand from sheet edge, gloves not rated for task, replaced"', '<b>One-off.</b> Wrong gloves for the task, fixed on the spot.', [['Set aside', '']]),
+    F('hammertech', 48, 'rr', 'Kerbline Traffic Pty\nworkers_inducted: 6 · shift: night', '<b>Context.</b> A new night traffic crew, the week setups started drifting.', [['Handovers insight', '']]),
+    F('evotix', 520, 'cc', 'row 41: 2026-09-24, Creek Crossing, Property damage,\n"ute reversed into site fence"', '<b>One-off.</b> A vehicle reversed into a fence.', [['Set aside', '']]),
+    F('mitti', 214, 'hb', 'Issue #5521 · Harbour Bridge Deck\n"rope being used as tagline again"', '<b>Control degraded.</b> Rope used in place of a tag line.', [['At-risk', 'warning'], ['Suspended loads insight', '']])
+  ];
+  var FAILS = {
+    mitti: [{ at: Date.now() - 212 * 60000, level: 'err', raw: 'POST /webhooks/mitti\n401 Unauthorised · retry 21 of ∞', line: '<b>Delivery failed.</b> 31 events are waiting in Mitti and will be collected once the token is replaced.' }],
+    evotix: [{ at: Date.now() - 520 * 60000, level: 'warn', raw: 'weekly_incidents_2026-09-25.csv\nrows 88–101: column D (site) empty', line: '<b>14 rows held.</b> Prism can’t tell where these happened until a site is added.' }],
+    hammertech: [{ at: Date.now() - 20 * 60000, level: 'warn', raw: 'GET /v1/inspections?modified_since=…\n200 OK after 94 s', line: '<b>Slow response.</b> Prism will keep retrying.' }]
+  };
+  var ARRIVALS = [
+    ['procore', 'ny', 'OB-7760\ncategory: Hazard\n"exclusion zone tape down near crane"', '<b>Control degraded.</b> Exclusion zone down near a crane.', [['At-risk', 'warning'], ['Suspended loads insight', '']], 'Hazard at North Yard'],
+    ['servicenow', 'rs', 'x_permit_isolation ISO-40931\nclosed 07:15 · test_for_dead_at 07:09', '<b>Control held.</b> Tested before sign-off.', [['Good practice', 'success'], ['Handovers insight', '']], 'Isolation tested before sign-off'],
+    ['intelex', 'hb', 'Daily Pre-Start v3\nstarted 07:02:10 · submitted 07:02:41\n24 of 24 "Yes"', '<b>Done in 31 seconds.</b>', [['Weak signal', 'warning'], ['Pre-start insight', '']], 'Pre-start in 31 seconds'],
+    ['procore', 'rr', 'OB-7762\ncategory: Positive\n"night crew briefed traffic plan changes before setup"', '<b>Control held.</b> Night crew briefed before setup.', [['Positive', 'success'], ['Handovers insight', '']], 'Positive report at Ridge Road'],
+    ['intelex', 'ny', 'INC-3401 · Near miss\n"sling slipped on load, lowered safely"', '<b>Energy released.</b> A sling slipped on a load.', [['Could have been serious', 'critical'], ['Suspended loads insight', '']], 'Near miss at North Yard'],
+    ['servicenow', 'st', 'x_permit_work PTW-88140\nhot work · TBM cutterhead', '<b>Context.</b> Hot work permit issued.', [['Set aside', '']], 'Hot work permit issued']
+  ];
+
+  /* =============================================================
+     State and helpers
+     ============================================================= */
+  var ST = { div: 'Infrastructure', reg: '', view: 'focus', src: '', filter: 'all', sheet: '', openSay: {} };
+  var NUM = ['No', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten'];
+  function word(n) { return n < NUM.length ? NUM[n] : String(n); }
+  function lw(n) { return word(n).toLowerCase(); }
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function $(id) { return document.getElementById(id); }
+  function join(a) { return a.length < 2 ? a.join('') : a.slice(0, -1).join(', ') + ' and ' + a[a.length - 1]; }
+  function cap(t) { return t.charAt(0).toUpperCase() + t.slice(1); }
+  function low(t) { return t.charAt(0).toLowerCase() + t.slice(1); }
+  function ago(ts) { var m = Math.round((Date.now() - ts) / 60000); if (m < 1) return 'just now'; if (m < 60) return m + 'm ago'; var h = Math.floor(m / 60); return h < 24 ? h + 'h ago' : '1d ago'; }
+  function initials(n) { return n === YOU ? 'DM' : n.split(' ').map(function (p) { return p[0]; }).join('').slice(0, 2).toUpperCase(); }
+
+  var SITE = {};
+  ORG.forEach(function (d) { d.regions.forEach(function (r) { r.sites.forEach(function (s) { s.region = r.name; s.div = d.div; SITE[s.id] = s; }); }); });
+  function regionsInView() { var o = []; ORG.forEach(function (d) { if (ST.div && d.div !== ST.div) return; d.regions.forEach(function (r) { if (!ST.reg || r.name === ST.reg) o.push({ div: d.div, r: r }); }); }); return o; }
+  function sitesInView() { var s = []; regionsInView().forEach(function (x) { s = s.concat(x.r.sites); }); return s; }
+  function insightsInView() { var ids = sitesInView().map(function (s) { return s.id; }); return INSIGHTS.filter(function (i) { return !i.closed && !i.dismissed && i.sites.some(function (id) { return ids.indexOf(id) > -1; }); }); }
+  function stalled(i) { return i.status === 'working' && i.updated >= 14; }
+  function recCount(i) { return i.says.reduce(function (a, s) { return a + s.n; }, 0); }
+  function owners() { var o = [YOU]; regionsInView().forEach(function (x) { if (o.indexOf(x.r.rm) < 0) o.push(x.r.rm); }); o.push('Dana Brooks'); return o; }
+  function scopeLabel() { return ST.reg ? ST.reg + ' region' : ST.div ? ST.div + ' division' : 'All divisions'; }
+
+  /* Icons and small visuals */
+  function sevIcon(sev) {
+    return sev === 'critical'
+      ? '<svg class="sev" width="16" height="16" viewBox="0 0 16 16" aria-label="Critical"><path d="M5.2 1h5.6L15 5.2v5.6L10.8 15H5.2L1 10.8V5.2z" fill="var(--critical-dot)"/><path d="M8 4.2v4.6M8 11.2v.4" stroke="#fff" stroke-width="1.7" stroke-linecap="round"/></svg>'
+      : '<svg class="sev" width="16" height="16" viewBox="0 0 16 16" aria-label="Warning"><path d="M8 1.5 15 14H1z" fill="var(--warning-dot)" stroke="var(--warning-dot)" stroke-linejoin="round"/><path d="M8 6v3.6M8 11.6v.3" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/></svg>';
+  }
+  function trendHTML(t) {
+    if (t === 'worse') return '<span class="trend t-critical"><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 9 9 2M4 2h5v5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>Getting worse</span>';
+    if (t === 'better') return '<span class="trend t-success"><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 3l7 7M4 10h5V5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>Getting better</span>';
+    return '<span class="trend steady"><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M1.5 6h9M7 2.5 10.5 6 7 9.5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>No change</span>';
+  }
+  function statusBadge(i) {
+    if (i.dismissed) return '<span class="badge"><i></i>Dismissed</span>';
+    if (i.closed) return '<span class="badge success"><i></i>Closed</span>';
+    if (i.status === 'new') return '<span class="badge info"><i></i>New</span>';
+    if (i.status === 'resolved') return '<span class="badge success"><i></i>Ready to close</span>';
+    if (stalled(i)) return '<span class="badge warning"><i></i>Stalled ' + i.updated + 'd</span>';
+    return '<span class="badge"><i></i>In progress</span>';
+  }
+  function mgStack(ids) { return '<span class="stack">' + ids.map(function (id) { var s = SRC[id]; return '<span class="mg" title="' + esc(s.name) + '">' + esc(s.mg) + '</span>'; }).join('') + '</span>'; }
+  // 28-day evidence histogram. Neutral greys, last 7 days darker.
+
+  function tagBadge(t) { return '<span class="badge' + (t[1] ? ' ' + t[1] : '') + '">' + esc(t[0]) + '</span>'; }
+  function toast(msg) { var t = $('toast'); t.textContent = msg; t.hidden = false; clearTimeout(toast.h); toast.h = setTimeout(function () { t.hidden = true; }, 2200); }
+
+  /* =============================================================
+     Header
+     ============================================================= */
+  function fillFilters() {
+    $('f-div').innerHTML = '<option value="">All divisions</option>' + ORG.map(function (x) { return '<option' + (x.div === ST.div ? ' selected' : '') + '>' + esc(x.div) + '</option>'; }).join('');
+    var regs = []; ORG.forEach(function (x) { if (!ST.div || x.div === ST.div) x.regions.forEach(function (g) { regs.push(g.name); }); });
+    $('f-reg').innerHTML = '<option value="">All regions</option>' + regs.map(function (n) { return '<option' + (n === ST.reg ? ' selected' : '') + '>' + esc(n) + '</option>'; }).join('');
+  }
+  $('f-div').addEventListener('change', function (e) { ST.div = e.target.value; ST.reg = ''; fillFilters(); if (ST.view === 'meeting') { startMeeting(); return; } render(); });
+  $('f-reg').addEventListener('change', function (e) { ST.reg = e.target.value; if (ST.reg) ORG.forEach(function (d) { d.regions.forEach(function (g) { if (g.name === ST.reg) ST.div = d.div; }); }); fillFilters(); if (ST.view === 'meeting') { startMeeting(); return; } render(); });
+  function sourceIssues() { return SOURCES.filter(function (s) { return ['failing', 'delayed', 'partial'].indexOf(s.status) > -1; }); }
+  function renderIssues() {
+    var n = sourceIssues().length, b = $('src-badge');
+    b.hidden = !n; b.textContent = n;
+    b.setAttribute('aria-label', n + (n === 1 ? ' source issue' : ' source issues'));
+  }
+
+  /* =============================================================
+     Focus
+     ============================================================= */
+  function storyFor(list) {
+    var fresh = list.filter(function (i) { return i.status === 'new'; }).sort(function (a, b) { return (a.sev === 'critical' ? 0 : 1) - (b.sev === 'critical' ? 0 : 1); });
+    var hot = list.filter(function (i) { return i.status === 'working' && !stalled(i) && i.sev === 'critical'; });
+    var stuck = list.filter(stalled);
+    var done = list.filter(function (i) { return i.status === 'resolved'; });
+    var out = [];
+    if (fresh.length) out.push('<b>' + esc(cap(fresh[0].title.toLowerCase().replace(/^./, function (c) { return c; }))) + '</b> across ' + lw(fresh[0].sites.length) + ' sites, and nobody owns it yet' + (fresh.length > 1 ? '. ' + word(fresh.length - 1) + ' more new ' + (fresh.length - 1 === 1 ? 'insight needs' : 'insights need') + ' an owner' : '') + '.');
+    hot.forEach(function (i) { out.push('<b>' + esc(i.owner) + '</b> is on ' + esc(i.short) + (i.trend === 'worse' ? ', and it’s getting worse.' : i.trend === 'better' ? ', and it’s improving.' : ', and it hasn’t got worse.')); });
+    stuck.forEach(function (i) { out.push('Work on ' + esc(i.short) + ' has <b>stalled</b>, with no update in ' + i.updated + ' days.'); });
+    if (done.length) out.push(esc(cap(join(done.map(function (i) { return i.short; })))) + ' can be closed.');
+    return out.join(' ') || 'Nothing new or stalled right now.';
+  }
+
+  var FILTERS = [
+    ['all', 'All', function () { return true; }],
+    ['owner', 'Needs owner', function (i) { return !i.owner; }],
+    ['stalled', 'Stalled', stalled],
+    ['worse', 'Getting worse', function (i) { return i.trend === 'worse'; }],
+    ['lead', 'For leadership', function (i) { return i.lead; }]
+  ];
+
+  function renderFocus() {
+    var all = insightsInView();
+    var f = FILTERS.filter(function (x) { return x[0] === ST.filter; })[0] || FILTERS[0];
+    var list = all.filter(f[2]);
+    var linked = all.reduce(function (a, i) { return a + recCount(i); }, 0);
+
+    var order = [
+      ['Needs an owner', function (i) { return i.status === 'new'; }],
+      ['Stalled', stalled],
+      ['In progress', function (i) { return i.status === 'working' && !stalled(i); }],
+      ['Ready to close', function (i) { return i.status === 'resolved'; }]
+    ];
+    var rows = order.map(function (g) {
+      var items = list.filter(g[1]).sort(function (a, b) { return (a.sev === 'critical' ? 0 : 1) - (b.sev === 'critical' ? 0 : 1); });
+      if (!items.length) return '';
+      return '<section class="igroup-sec"><h2 class="igroup-h">' + esc(g[0]) + ' <span class="tnum">' + items.length + '</span></h2><div class="icards">' + items.map(row).join('') + '</div></section>';
+    }).join('');
+
+    $('view').innerHTML =
+      '<div class="page-top"><div><h1>Insights</h1><p class="sub">' + esc(scopeLabel()) + ' · right now, updated as records arrive</p></div>' +
+        '<div class="actions"><button type="button" class="btn" data-go="meetings">Past Focus reviews</button><button type="button" class="btn brand" id="start-meeting">Start a Focus review</button></div></div>' +
+
+      '<div class="card brief"><div class="brief-head"><span class="who"><svg width="16" height="16" viewBox="0 0 22 22" aria-hidden="true"><path d="M11 2.5 20 19H2z" fill="none" stroke="#0d0f12" stroke-width="2" stroke-linejoin="round"/><path d="M11 9.5 15.2 17H6.8z" fill="#ffe500"/></svg><h2>The story right now</h2></span><span class="label">Written by Prism from ' + linked + ' linked records</span></div>' +
+        '<p class="story">' + storyFor(all) + '</p></div>' +
+
+      (function () {
+        var unowned = all.filter(function (i) { return !i.owner; }).length, yours = all.filter(function (i) { return i.owner === YOU; }).length, w = [];
+        if (unowned) w.push('<button type="button" data-gofilter="owner">' + word(unowned) + (unowned === 1 ? ' insight needs' : ' insights need') + ' an owner</button>');
+        if (yours) w.push('<button type="button" data-gofilter="all">' + word(yours) + (yours === 1 ? ' insight is' : ' insights are') + ' yours</button>');
+        return '<div class="card waiting"><span class="label">Waiting on you</span>' + (w.length ? w.join('') : '<span class="none">Nothing is waiting on you.</span>') + '</div>';
+      })() +
+      '<div class="list-top"><div class="seg" role="group" aria-label="Filter insights">' + FILTERS.map(function (x) {
+          return '<button type="button" data-filter="' + x[0] + '" aria-pressed="' + (x[0] === ST.filter) + '">' + esc(x[1]) + '<span class="c">' + all.filter(x[2]).length + '</span></button>';
+        }).join('') + '</div><button type="button" class="what" data-help="insights">What the labels mean</button></div>' +
+      (rows || '<p class="card empty-card">Nothing matches this filter.</p>');
+  }
+
+  function row(i) {
+    var srcIds = i.says.map(function (s) { return s.src; });
+    var sites = i.sites.map(function (id) { return SITE[id]; });
+    return '<button type="button" class="card icard" data-open="' + i.id + '">' +
+      '<span class="icard-top"><span class="icard-sev">' + sevIcon(i.sev) + '<span class="sev-t t-' + i.sev + '">' + (i.sev === 'critical' ? 'Critical' : 'Warning') + '</span></span><span class="icard-status">' + statusBadge(i) + '</span></span>' +
+      '<span class="icard-title">' + esc(i.title) + '</span>' +
+      '<span class="icard-story">' + esc(i.story) + '</span>' +
+      '<span class="icard-sites">' + sites.map(function (s) { return '<span class="chip">' + esc(s.name) + '</span>'; }).join('') + '</span>' +
+      '<span class="icard-foot">' +
+        '<span class="icard-ev">' + mgStack(srcIds) + '<span>' + recCount(i) + ' records from ' + srcIds.length + (srcIds.length === 1 ? ' system' : ' systems') + '</span></span>' +
+        trendHTML(i.trend) +
+        '<span class="owner">' + (i.owner ? '<span class="av' + (i.owner === YOU ? ' me' : '') + '">' + initials(i.owner) + '</span><span>' + esc(i.owner) + '</span>' : '<span class="btn sm" data-assign="' + i.id + '">Assign owner</span>') + '</span>' +
+      '</span>' +
+    '</button>';
+  }
+
+
+
+  /* ---------- History, dismissal and the insight page ---------- */
+  function insightById(id) { return INSIGHTS.filter(function (x) { return x.id === id; })[0]; }
+  var SEED_HISTORY = {
+    hand: [['22 Sep', 'Prism', 'Raised', 'Linked records from ServiceNow, Procore and Mitti across three sites.'], ['23 Sep', 'Prism', 'Four more records linked', 'Traffic setups at Ridge Road changed after the night crew took over.'], ['26 Sep', 'Prism', 'Getting worse', 'A second isolation at Rail Stabling Yard was closed before it was tested.']],
+    fat: [['24 Sep', 'Prism', 'Raised', 'Nine night-shift reports mentioning fatigue in four weeks.']],
+    load: [['12 Sep', 'Prism', 'Raised', 'Four suspended load events across North Yard and Harbour Bridge Deck.'], ['12 Sep', 'Focus review', 'Assigned to Priya Nair', 'Agreed: book a rigging gear audit at both sites.'], ['15 Sep', 'Priya Nair', 'Update', 'Worn tag lines replaced at North Yard.'], ['23 Sep', 'Priya Nair', 'Update', 'Rigging gear audit booked for 30 September.']],
+    pre: [['1 Sep', 'Prism', 'Raised', 'Pre-starts completed in under a minute, with identical answers.'], ['2 Sep', 'You', 'Assigned to Tom Walsh', ''], ['10 Sep', 'Tom Walsh', 'Update', 'Supervisors reminded of the purpose of the pre-start.'], ['12 Sep', 'Focus review', 'Agreed', 'Tom to remind supervisors what the pre-start is for.'], ['26 Sep', 'Prism', 'Stalled', 'No update for 16 days, and the pattern hasn’t changed.']],
+    spot: [['18 Aug', 'Prism', 'Raised', 'Three near misses with reversing plant in August.'], ['19 Aug', 'You', 'Assigned to Priya Nair', ''], ['12 Sep', 'Focus review', 'Agreed', 'Roll the spotter roster out to Ridge Road.'], ['21 Sep', 'Priya Nair', 'Update', 'Spotter roster in place on both sites.'], ['24 Sep', 'Prism', 'Getting better', 'No repeats in two weeks, and spotters are calling stops.']],
+    house: [['4 Aug', 'Prism', 'Raised', 'Six findings of materials stored in access routes.'], ['5 Aug', 'You', 'Assigned to Tom Walsh', ''], ['12 Sep', 'Focus review', 'Agreed', 'Mark out laydown areas at Creek Crossing.'], ['24 Sep', 'Tom Walsh', 'Ready to close', 'No repeat for four weeks since the laydown plan changed.']],
+    edge: [['9 Sep', 'Prism', 'Raised', 'Edge protection removed and not reinstated on level 14.'], ['9 Sep', 'Alex Chen', 'Assigned to Sam Ortiz', ''], ['15 Sep', 'Focus review', 'Agreed', 'Meet the facade subcontractor’s supervisor.'], ['22 Sep', 'Sam Ortiz', 'Update', 'Met the supervisor. Revised method due 29 September.'], ['25 Sep', 'Prism', 'Getting worse', 'The same subcontractor is booked to start at Hospital Fit-out.']],
+    tick: [['23 Sep', 'Prism', 'Raised', 'Twenty-four inspections with every item passed and copied comments.']]
+  };
+  INSIGHTS.forEach(function (i) { i.history = (SEED_HISTORY[i.id] || []).map(function (h) { return { when: h[0], who: h[1], what: h[2], text: h[3] }; }); });
+  function logEvent(i, what, text, who) { i.history.push({ when: 'Today', who: who || YOU, what: what, text: text || '' }); }
+
+  var DISMISS_REASONS = ['Not a real pattern', 'Already being handled elsewhere', 'Duplicate of another insight', 'Outside our control', 'Other'];
+  ST.dismissing = '';
+  function dismissForm(id, ctx) {
+    return '<div class="dismiss"><h3>Dismiss this insight</h3><p class="muted-p">The reason is kept in the insight’s history and helps Prism tune what it raises.</p>' +
+      '<div class="reasons" role="radiogroup" aria-label="Reason">' + DISMISS_REASONS.map(function (r, k) {
+        return '<label class="reason"><input type="radio" name="d-reason-' + ctx + '" value="' + esc(r) + '"' + (k === 0 ? ' checked' : '') + '>' + esc(r) + '</label>';
+      }).join('') + '</div>' +
+      '<textarea class="w-note" id="d-note-' + ctx + '" rows="2" placeholder="Add detail (optional)"></textarea>' +
+      '<div class="meet-actions"><button type="button" class="btn" data-dcancel="' + id + '">Cancel</button><button type="button" class="btn danger" data-dconfirm="' + id + '" data-dctx="' + ctx + '">Dismiss insight</button></div></div>';
+  }
+  function doDismiss(id, ctx) {
+    var i = insightById(id);
+    var r = document.querySelector('input[name="d-reason-' + ctx + '"]:checked');
+    var reason = r ? r.value : 'Other';
+    var el = document.getElementById('d-note-' + ctx), note = el ? el.value.trim() : '';
+    i.dismissed = { reason: reason, note: note, who: YOU };
+    logEvent(i, 'Dismissed', reason + (note ? '. ' + note : ''));
+    ST.dismissing = '';
+    return { reason: reason, note: note };
+  }
+  function rerenderFor(id) {
+    if (ST.sheet === id && !$('sheet').hidden) openSheet(id);
+    else if (ST.view === 'meeting') renderMeeting();
+    else render();
+  }
+  document.addEventListener('click', function (e) {
+    var o = e.target.closest('[data-dopen]'); if (o) { ST.dismissing = o.getAttribute('data-dopen'); rerenderFor(ST.dismissing); var f = document.querySelector('.dismiss input'); if (f) f.focus(); return; }
+    var c = e.target.closest('[data-dcancel]'); if (c) { var cid = c.getAttribute('data-dcancel'); ST.dismissing = ''; rerenderFor(cid); return; }
+    var d = e.target.closest('[data-dconfirm]');
+    if (d) {
+      var id = d.getAttribute('data-dconfirm'), ctx = d.getAttribute('data-dctx'), res = doDismiss(id, ctx);
+      if (ctx === 'sheet') { closeSheet(); render(); }
+      else if (ctx === 'walk' && MT) { MT.log[id] = { done: true, changes: ['Dismissed: ' + res.reason], note: res.note }; if (MT.idx < MT.items.length - 1) MT.idx++; else MT.step = 4; renderMeeting(); window.scrollTo(0, 0); }
+      else render();
+      toast('Insight dismissed. Prism will use the reason to tune what it raises.');
+    }
+  });
+
+  function renderInsight(id) {
+    var i = insightById(id); if (!i) return renderFocus();
+    var ow = owners(); if (i.owner && ow.indexOf(i.owner) < 0) ow.unshift(i.owner);
+    var gone = i.dismissed || i.closed;
+    $('view').innerHTML = '<a class="back" href="#focus">← Insights</a>' +
+      '<div class="ins-head"><div class="meta"><span class="icard-sev">' + sevIcon(i.sev) + '<span class="sev-t t-' + i.sev + '">' + (i.sev === 'critical' ? 'Critical' : 'Warning') + '</span></span>' + statusBadge(i) + trendHTML(i.trend) + '<span class="label">Raised ' + esc(i.since) + '</span></div>' +
+        '<h1 class="ins-title">' + esc(i.title) + '</h1>' +
+        '<div class="meta">' + i.sites.map(function (s) { return '<a class="chip link" href="#site/' + s + '">' + esc(SITE[s].name) + '</a>'; }).join('') + '</div></div>' +
+      (i.dismissed ? '<div class="banner info"><b>Dismissed: ' + esc(i.dismissed.reason) + '</b>' + (i.dismissed.note ? '<p>' + esc(i.dismissed.note) + '</p>' : '') + '<p>Prism won’t raise this again unless the pattern changes.</p></div>' : '') +
+      (i.closed ? '<div class="banner info"><b>Closed</b><p>Prism will reopen it if the pattern returns.</p></div>' : '') +
+      '<div class="ins-grid"><div class="ins-main">' +
+        '<section class="ins-sec"><span class="label">The story</span><p class="ins-story">' + esc(i.story) + '</p></section>' +
+        '<section class="ins-sec"><span class="label">What each source says · ' + recCount(i) + ' records from ' + i.says.length + (i.says.length === 1 ? ' system' : ' systems') + '</span>' +
+          i.says.map(function (s) {
+            var src = SRC[s.src];
+            return '<div class="card src-say"><div class="src-say-h"><span class="mg lg">' + esc(src.mg) + '</span><div><b>' + esc(src.name) + '</b> <span class="badge">' + s.n + ' records</span><p>' + esc(s.text) + '</p></div></div>' +
+              '<div class="src-recs">' + s.recs.map(function (r) {
+                return '<div class="rec"><span class="when">' + esc(r.when) + ' · ' + esc(SITE[r.site].name) + '</span><span class="txt">' + esc(r.text) + '</span><span class="reads">' + r.reads.map(tagBadge).join('') + '</span></div>';
+              }).join('') + (s.n > s.recs.length ? '<div class="rec"><span class="when">and ' + (s.n - s.recs.length) + ' more like these</span></div>' : '') + '</div></div>';
+          }).join('') + '</section>' +
+        '<section class="ins-sec"><span class="label">How Prism read it</span><dl class="kv">' + i.read.map(function (r) { return '<div><dt>' + esc(r[0]) + '</dt><dd class="' + (r[2] ? 't-' + r[2] : '') + '">' + esc(r[1]) + '</dd></div>'; }).join('') + '</dl></section>' +
+        (gone ? '' : '<section class="ins-sec"><span class="label">Suggested next step</span><p class="next">' + esc(i.next) + '</p></section>') +
+      '</div><aside class="ins-side">' +
+        '<section class="card side-card"><h2>Owner and status</h2>' +
+          (gone ? '<p class="muted-p">' + (i.dismissed ? 'Dismissed by ' + esc(i.dismissed.who) + '.' : 'Closed.') + '</p>' :
+          (ST.dismissing === i.id ? dismissForm(i.id, 'page') :
+            '<span class="fld col"><label for="i-owner">Owner</label><select class="select wide" id="i-owner"><option value="">No owner</option>' + ow.map(function (o) { return '<option' + (o === i.owner ? ' selected' : '') + '>' + esc(o) + '</option>'; }).join('') + '</select></span>' +
+            '<span class="fld col"><label for="i-status">Status</label><select class="select wide" id="i-status">' + [['new', 'New'], ['working', 'In progress'], ['resolved', 'Ready to close'], ['closed', 'Close it']].map(function (o) { return '<option value="' + o[0] + '"' + (o[0] === i.status ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select></span>' +
+            '<label class="switch left"><input type="checkbox" id="i-lead"' + (i.lead ? ' checked' : '') + '>For leadership</label>' +
+            '<label class="w-note-l" for="i-note">Add an update</label><textarea class="w-note" id="i-note" rows="2" placeholder="What’s happened since the last update"></textarea>' +
+            '<div class="meet-actions"><button type="button" class="btn brand" id="i-post">Post update</button><button type="button" class="btn" data-dopen="' + i.id + '">Dismiss…</button></div>')) +
+        '</section>' +
+        '<section class="card side-card"><h2>History</h2><ol class="hist">' + i.history.slice().reverse().map(function (h) {
+          return '<li><span class="hist-dot" aria-hidden="true"></span><div><p class="hist-what">' + esc(h.what) + '</p>' + (h.text ? '<p class="hist-text">' + esc(h.text) + '</p>' : '') + '<p class="hist-meta">' + esc(h.when) + ' · ' + esc(h.who === YOU ? 'You' : h.who) + '</p></div></li>';
+        }).join('') + '</ol></section>' +
+      '</aside></div>';
+  }
+  document.addEventListener('change', function (e) {
+    if (ST.view !== 'insight') return;
+    var i = insightById(ST.insight); if (!i) return;
+    if (e.target.id === 'i-owner') { i.owner = e.target.value; logEvent(i, i.owner ? 'Assigned to ' + i.owner : 'Owner removed'); if (i.owner && i.status === 'new') { i.status = 'working'; i.updated = 0; } render(); }
+    else if (e.target.id === 'i-status') {
+      var v = e.target.value;
+      if (v === 'closed') { i.closed = true; logEvent(i, 'Closed'); toast('Insight closed. Prism will reopen it if the pattern returns.'); }
+      else { i.status = v; logEvent(i, 'Status: ' + ({ new: 'New', working: 'In progress', resolved: 'Ready to close' })[v]); }
+      render();
+    }
+    else if (e.target.id === 'i-lead') { i.lead = e.target.checked; logEvent(i, i.lead ? 'Raised with leadership' : 'Removed from leadership'); render(); }
+  });
+  document.addEventListener('click', function (e) {
+    if (ST.view !== 'insight' || !e.target.closest('#i-post')) return;
+    var i = insightById(ST.insight), t = $('i-note').value.trim(); if (!t) { $('i-note').focus(); return; }
+    i.latest = t; i.updated = 0; logEvent(i, 'Update', t); render(); toast('Update posted');
+  });
+
+  /* ---------- Report generation ---------- */
+  function genTasks() {
+    var last = lastMeeting(), list = insightsInView(), connected = SOURCES.filter(function (s) { return s.status !== 'none'; });
+    var read = SOURCES.reduce(function (a, s) { return a + s.today; }, 0) * 14 - 1344;
+    return [
+      'Reading ' + read.toLocaleString() + ' records from ' + connected.length + ' sources',
+      'Linking them to ' + list.length + ' open insights',
+      last ? 'Comparing with ' + last.date : 'Looking back over the last four weeks',
+      last ? 'Checking the ' + last.decisions.length + ' actions agreed last time' : 'No earlier actions to check',
+      'Writing the state of safety'
+    ];
+  }
+  function generateReport() {
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    MT.gen = 0; MT.step = 1.5; renderMeeting();
+    var n = genTasks().length;
+    (function next() {
+      setTimeout(function () {
+        if (!MT || ST.view !== 'meeting' || MT.step !== 1.5) return;
+        MT.gen++;
+        if (MT.gen > n) { MT.step = 2; renderMeeting(); window.scrollTo(0, 0); return; }
+        renderMeeting(); next();
+      }, reduce ? 200 : 700);
+    })();
+  }
+  function genView(head) {
+    var tasks = genTasks(), g = MT.gen;
+    return meetingTop('Preparing the report', head) +
+      '<section class="card gen"><div class="gen-bar" role="progressbar" aria-valuemin="0" aria-valuemax="' + tasks.length + '" aria-valuenow="' + Math.min(g, tasks.length) + '"><span style="width:' + Math.round(Math.min(g, tasks.length) / tasks.length * 100) + '%"></span></div>' +
+      '<ol class="gen-list">' + tasks.map(function (t, k) {
+        var st = k < g ? 'done' : k === g ? 'now' : '';
+        return '<li class="' + st + '"><span class="gen-i" aria-hidden="true">' + (st === 'done' ? '✓' : '') + '</span>' + esc(t) + (st === 'now' ? '…' : '') + '</li>';
+      }).join('') + '</ol></section>';
+  }
+
+  /* ---------- Insight sheet ---------- */
+  function openSheet(id, focusOwner) {
+    var i = INSIGHTS.filter(function (x) { return x.id === id; })[0]; if (!i) return;
+    ST.sheet = id;
+    var sites = i.sites.map(function (s) { return SITE[s].name; });
+    var ow = owners(); if (i.owner && ow.indexOf(i.owner) < 0) ow.unshift(i.owner);
+    $('sheet').innerHTML =
+      '<div class="sheet-head" style="position:relative"><button type="button" class="x" id="sheet-x" aria-label="Close"><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 2l8 8M10 2l-8 8" stroke="currentColor" stroke-width="1.6"/></svg></button>' +
+        '<div class="meta">' + sevIcon(i.sev) + statusBadge(i) + trendHTML(i.trend) + '<span class="label">· since ' + esc(i.since) + '</span></div>' +
+        '<h2 id="sheet-title">' + esc(i.title) + '</h2>' +
+        '<a class="open-page" href="#insight/' + i.id + '">Open insight page \u2192</a>' +
+        '<div class="meta">' + sites.map(function (n) { return '<span class="chip">' + esc(n) + '</span>'; }).join('') + '</div></div>' +
+      '<div class="sheet-body">' +
+        (ST.dismissing === i.id ? '<section class="sheet-sec">' + dismissForm(i.id, 'sheet') + '</section>' : '') +
+        '<section class="sheet-sec"><span class="label">The story</span><p>' + esc(i.story) + '</p></section>' +
+        '<section class="sheet-sec"><span class="label">What each source says · ' + recCount(i) + ' records from ' + i.says.length + (i.says.length === 1 ? ' system' : ' systems') + '</span><div class="says">' +
+          i.says.map(function (s, k) {
+            var key = i.id + ':' + k, open = !!ST.openSay[key], src = SRC[s.src];
+            return '<div class="say"><button type="button" class="say-btn" data-say="' + key + '" aria-expanded="' + open + '">' +
+              '<span class="mg lg">' + esc(src.mg) + '</span>' +
+              '<span class="say-name">' + esc(src.name) + '<span class="badge">' + s.n + '</span></span>' +
+              '<span class="say-more">' + (open ? 'Hide records' : 'Show records') + '</span>' +
+              '<span class="say-text">' + esc(s.text) + '</span></button>' +
+              (open ? '<div class="recs">' + s.recs.map(function (r) {
+                return '<div class="rec"><span class="when">' + esc(r.when) + ' · ' + esc(SITE[r.site].name) + '</span><span class="txt">' + esc(r.text) + '</span><span class="reads">' + r.reads.map(tagBadge).join('') + '</span></div>';
+              }).join('') + (s.n > s.recs.length ? '<div class="rec"><span class="when">and ' + (s.n - s.recs.length) + ' more like these</span></div>' : '') + '</div>' : '') +
+            '</div>';
+          }).join('') + '</div></section>' +
+        '<section class="sheet-sec"><span class="label">How Prism read it</span><dl class="kv">' + i.read.map(function (r) {
+          return '<div><dt>' + esc(r[0]) + '</dt><dd class="' + (r[2] ? 't-' + r[2] : '') + '">' + esc(r[1]) + '</dd></div>';
+        }).join('') + '</dl></section>' +
+        (i.latest ? '<section class="sheet-sec"><span class="label">Latest update · ' + i.updated + (i.updated === 1 ? ' day' : ' days') + ' ago' + (i.owner ? ' · ' + esc(i.owner) : '') + '</span><p class="update">' + (i.owner ? '<span class="av">' + initials(i.owner) + '</span>' : '') + '<span>' + esc(i.latest) + '</span></p></section>' : '') +
+        '<section class="sheet-sec"><span class="label">Suggested next step</span><p class="next">' + esc(i.next) + '</p></section>' +
+      '</div>' +
+      '<div class="sheet-foot">' +
+        '<span class="fld"><label for="s-owner">Owner</label><select class="select" id="s-owner"><option value="">No owner</option>' + ow.map(function (o) { return '<option' + (o === i.owner ? ' selected' : '') + '>' + esc(o) + '</option>'; }).join('') + '</select></span>' +
+        '<span class="fld"><label for="s-status">Status</label><select class="select" id="s-status">' + [['new', 'New'], ['working', 'In progress'], ['resolved', 'Ready to close']].map(function (o) { return '<option value="' + o[0] + '"' + (o[0] === i.status ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select></span>' +
+        '<label class="switch"><input type="checkbox" id="s-lead"' + (i.lead ? ' checked' : '') + '>For leadership</label>' +
+        (i.status === 'resolved' ? '<button type="button" class="btn dark" id="s-close">Close insight</button>' : '') +
+        '<button type="button" class="btn" data-dopen="' + i.id + '">Dismiss\u2026</button>' +
+      '</div>';
+    $('sheet').hidden = false; $('scrim').hidden = false;
+    (focusOwner ? $('s-owner') : $('sheet-x')).focus();
+  }
+  function closeSheet() { if ($('sheet').hidden) return; var id = ST.sheet; ST.sheet = ''; ST.dismissing = ''; $('sheet').hidden = true; $('scrim').hidden = true; var b = document.querySelector('[data-open="' + id + '"]'); if (b) b.focus(); }
+  function sheetInsight() { return INSIGHTS.filter(function (x) { return x.id === ST.sheet; })[0]; }
+  $('sheet').addEventListener('click', function (e) {
+    if (e.target.closest('#sheet-x')) return closeSheet();
+    var say = e.target.closest('[data-say]');
+    if (say) { var k = say.getAttribute('data-say'); ST.openSay[k] = !ST.openSay[k]; var top = $('sheet').querySelector('.sheet-body').scrollTop; openSheet(ST.sheet); $('sheet').querySelector('.sheet-body').scrollTop = top; var nb = $('sheet').querySelector('[data-say="' + k + '"]'); if (nb) nb.focus(); return; }
+    if (e.target.closest('#s-close')) { sheetInsight().closed = true; logEvent(sheetInsight(), 'Closed'); closeSheet(); render(); toast('Insight closed. Prism will reopen it if the pattern returns.'); }
+  });
+  $('sheet').addEventListener('change', function (e) {
+    var i = sheetInsight(); if (!i) return;
+    if (e.target.id === 's-owner') { i.owner = e.target.value; logEvent(i, i.owner ? 'Assigned to ' + i.owner : 'Owner removed'); if (i.owner && i.status === 'new') { i.status = 'working'; i.updated = 0; } toast(i.owner ? 'Assigned to ' + i.owner : 'Owner removed'); }
+    else if (e.target.id === 's-status') { i.status = e.target.value; logEvent(i, 'Status: ' + ({ new: 'New', working: 'In progress', resolved: 'Ready to close' })[i.status]); if (i.status === 'working' && i.updated == null) i.updated = 0; }
+    else if (e.target.id === 's-lead') { i.lead = e.target.checked; logEvent(i, i.lead ? 'Raised with leadership' : 'Removed from leadership'); }
+    var top = $('sheet').querySelector('.sheet-body').scrollTop; openSheet(i.id); $('sheet').querySelector('.sheet-body').scrollTop = top; render();
+  });
+
+  /* ---------- Help: one set of definitions, opened from anywhere ---------- */
+  var HELP = [
+    ['ideas', 'The main ideas', [
+      ['', 'Insight', 'A pattern Prism finds by linking records across sources and sites. Every insight says why it was raised.'],
+      ['', 'Purview', 'The division, region and sites you’re responsible for. Change it in the header.'],
+      ['', 'Source', 'A system the organisation already uses, such as Procore or Intelex. Prism reads from it and never replaces it.'],
+      ['', 'Enrichment', 'How Prism reads each record: what happened, the energy involved, whether a control held, and what it could have led to.'],
+      ['', 'Focus review', 'The regular meeting where managers review the state of safety and act on insights.']
+    ]],
+    ['sites', 'Worksite states', [
+      ['critical', 'At risk', 'A critical insight involves this site, or a control has failed recently.'],
+      ['warning', 'Watch', 'Signals are drifting, but nothing is critical yet.'],
+      ['warning', 'Gone quiet', 'Reporting has stopped, or the records look too perfect to trust.'],
+      ['info', 'Not connected', 'Prism can’t see this site yet.'],
+      ['success', 'Holding', 'Reporting is steady and issues are being fixed.']
+    ]],
+    ['insights', 'Insight status', [
+      ['info', 'New', 'Prism has raised it and nobody owns it yet.'],
+      ['', 'In progress', 'Someone owns it and it’s being worked on.'],
+      ['warning', 'Stalled', 'It has an owner, but there’s been no update for 14 days or more.'],
+      ['success', 'Ready to close', 'The pattern has stopped. Close it, or keep watching for a little longer.'],
+      ['success', 'Closed', 'Finished. Prism reopens it if the pattern comes back.'],
+      ['', 'Dismissed', 'A manager decided it isn’t worth acting on and recorded why. Prism uses the reason to tune what it raises.']
+    ]],
+    ['severity', 'Severity and trend', [
+      ['critical', 'Critical', 'Could lead to a fatality or serious injury, or a critical control has failed.'],
+      ['warning', 'Warning', 'A real pattern that isn’t critical yet.'],
+      ['critical', 'Getting worse', 'More evidence, or more serious evidence, than the two weeks before.'],
+      ['', 'No change', 'About the same as the two weeks before.'],
+      ['success', 'Getting better', 'Less evidence, or evidence that controls are now holding.']
+    ]],
+    ['sources', 'Source status', [
+      ['success', 'Live', 'Sending as expected.'],
+      ['warning', 'Delayed', 'Sending, but later than usual.'],
+      ['warning', 'Partly imported', 'Some records couldn’t be read and are held for review.'],
+      ['critical', 'Failing', 'Nothing is arriving. Prism keeps retrying and tells the system admin.'],
+      ['info', 'Not connected', 'Prism can’t see this data yet.']
+    ]]
+  ];
+  var helpTrigger = null;
+  function openHelp(section, trigger) {
+    helpTrigger = trigger || null;
+    $('help').innerHTML =
+      '<div class="sheet-head" style="position:relative"><button type="button" class="x" id="help-x" aria-label="Close"><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 2l8 8M10 2l-8 8" stroke="currentColor" stroke-width="1.6"/></svg></button><h2 id="help-title">What things mean</h2>' +
+        '<div class="help-nav">' + HELP.map(function (g) { return '<button type="button" class="chip" data-helpjump="' + g[0] + '">' + esc(g[1]) + '</button>'; }).join('') + '</div></div>' +
+      '<div class="sheet-body" id="help-body">' + HELP.map(function (g) {
+        return '<section class="help-sec" id="help-' + g[0] + '"><h3>' + esc(g[1]) + '</h3><dl class="help-list">' + g[2].map(function (t) {
+          var term = g[0] === 'ideas' ? '<b>' + esc(t[1]) + '</b>' : '<span class="badge' + (t[0] ? ' ' + t[0] : '') + '"><i></i>' + esc(t[1]) + '</span>';
+          return '<div><dt>' + term + '</dt><dd>' + esc(t[2]) + '</dd></div>';
+        }).join('') + '</dl></section>';
+      }).join('') + '</div>';
+    $('help').hidden = false; $('scrim').hidden = false;
+    jumpHelp(section);
+    $('help-x').focus();
+  }
+  function jumpHelp(section) {
+    var el = $('help-' + section), body = $('help-body');
+    if (el && body) body.scrollTop = el.offsetTop - body.offsetTop - 8;
+  }
+  function closeHelp() { if ($('help').hidden) return; $('help').hidden = true; if ($('sheet').hidden) $('scrim').hidden = true; if (helpTrigger && document.body.contains(helpTrigger)) helpTrigger.focus(); }
+  document.addEventListener('click', function (e) {
+    var h = e.target.closest('[data-help]'); if (h) { openHelp(h.getAttribute('data-help'), h); return; }
+    var j = e.target.closest('[data-helpjump]'); if (j) { jumpHelp(j.getAttribute('data-helpjump')); return; }
+    if (e.target.closest('#help-x')) closeHelp();
+  });
+  $('scrim').addEventListener('click', function () { closeHelp(); closeSheet(); });
+  document.addEventListener('keydown', function (e) { if (e.key !== 'Escape') return; if (!$('help').hidden) closeHelp(); else closeSheet(); });
+
+  /* =============================================================
+     Purview
+     ============================================================= */
+  var STATE = { risk: ['critical', 'At risk'], watch: ['warning', 'Watch'], quiet: ['warning', 'Gone quiet'], hold: ['success', 'Holding'], none: ['info', 'Not connected'] };
+  function renderSites() {
+    var sites = sitesInView(), list = insightsInView(), multiRegion = regionsInView().length > 1;
+    var order = { risk: 0, quiet: 1, none: 1, watch: 2, hold: 3 };
+    function n(keys) { return sites.filter(function (x) { return keys.indexOf(x.state) > -1; }).length; }
+    var parts = [], risk = n(['risk']), out = n(['quiet', 'none']), watch = n(['watch']), hold = n(['hold']);
+    if (risk) parts.push(['critical', risk, 'at risk']);
+    if (out) parts.push(['warning', out, 'out of sight']);
+    if (watch) parts.push(['', watch, 'to watch']);
+    if (hold) parts.push(['', hold, 'holding']);
+    var bits = parts.map(function (p, k) { var t = (k ? lw(p[1]) : word(p[1])) + ' ' + p[2]; return p[0] ? '<b class="t-' + p[0] + '">' + t + '</b>' : t; });
+
+    var sorted = sites.slice().sort(function (a, b) { return order[a.state] - order[b.state]; });
+    var active = sorted.filter(function (x) { return x.state !== 'hold'; }), holding = sorted.filter(function (x) { return x.state === 'hold'; });
+    function siteRow(x) {
+      var st = STATE[x.state], ins = list.filter(function (i) { return i.sites.indexOf(x.id) > -1; }).length;
+      return '<div class="srow" data-site="' + x.id + '"><span class="st"><span class="badge ' + st[0] + '"><i></i>' + st[1] + '</span></span>' +
+        '<div class="main"><span class="nm"><a href="#site/' + x.id + '">' + esc(x.name) + '</a>' + (multiRegion ? '<small>' + esc(x.region) + '</small>' : '') + '</span><span class="why">' + esc(x.why) + '</span></div>' +
+        '<span class="meta">' + (x.visit > 30 ? '<span class="t-warning">Not visited in ' + x.visit + ' days</span>' : '') + (ins ? '<a href="#site/' + x.id + '">' + word(ins) + (ins === 1 ? ' insight' : ' insights') + '</a>' : '') + '</span></div>';
+    }
+
+    $('view').innerHTML =
+      '<div class="page-top"><div><h1>Sites</h1><p class="sub">Your duty of care · ' + esc(scopeLabel()) + '</p></div></div>' +
+      '<p class="pv-summary"><b>' + word(sites.length) + ' worksites.</b> ' + join(bits) + '.</p>' +
+      '<div class="sec-t"><h2>Worksites</h2><button type="button" class="what" data-help="sites">What do these mean?</button></div>' +
+      '<div class="card slist">' + active.map(siteRow).join('') +
+        (holding.length ? (ST.showHold ? holding.map(siteRow).join('') + '<button type="button" class="hold-toggle" data-hold="0">Hide holding sites</button>'
+          : '<button type="button" class="hold-toggle" data-hold="1">' + word(holding.length) + (holding.length === 1 ? ' site is' : ' sites are') + ' holding. Show ' + (holding.length === 1 ? 'it' : 'them') + '</button>') : '') +
+      '</div>';
+  }
+  document.addEventListener('click', function (e) {
+    var h = e.target.closest('[data-hold]'); if (h) { ST.showHold = h.getAttribute('data-hold') === '1'; renderSites(); return; }
+    var sr = e.target.closest('[data-site]'); if (sr && !e.target.closest('a')) { go('site/' + sr.getAttribute('data-site')); return; }
+    var pv = e.target.closest('[data-plan-visit]'); if (pv) { var sid = pv.getAttribute('data-plan-visit'); ST.visitPlanned = ST.visitPlanned || {}; ST.visitPlanned[sid] = true; renderSite(sid); toast('Visit planned for next week'); return; }
+    var g = e.target.closest('[data-gofilter]'); if (g) { ST.filter = g.getAttribute('data-gofilter'); go('focus'); }
+  });
+
+  function renderSite(id) {
+    var x = SITE[id]; if (!x) return renderSites();
+    var st = STATE[x.state];
+    var ins = INSIGHTS.filter(function (i) { return !i.closed && !i.dismissed && i.sites.indexOf(id) > -1; });
+    var region = null; ORG.forEach(function (d) { d.regions.forEach(function (r) { if (r.name === x.region) region = r; }); });
+    var recs = FEED.filter(function (f) { return f.site === id; }).sort(function (a, b) { return b.at - a.at; }).map(function (f) {
+      return { src: f.src, when: ago(f.at), raw: f.raw, line: f.line, tags: f.tags };
+    });
+    INSIGHTS.forEach(function (i) { i.says.forEach(function (sy) { sy.recs.forEach(function (r) { if (r.site === id) recs.push({ src: sy.src, when: r.when, raw: r.text, line: '<b>' + esc(i.title) + '</b>', tags: r.reads }); }); }); });
+    var planned = ST.visitPlanned && ST.visitPlanned[id];
+    $('view').innerHTML = '<a class="back" href="#sites">← Sites</a>' +
+      '<div class="ins-head"><div class="meta"><span class="badge ' + st[0] + '"><i></i>' + st[1] + '</span><span class="label">' + esc(x.region) + ' region' + (region ? ' · ' + esc(region.rm) + ', regional manager' : '') + '</span></div>' +
+        '<h1 class="ins-title">' + esc(x.name) + '</h1></div>' +
+      '<p class="ins-story" style="margin-bottom:28px">' + esc(x.why) + '</p>' +
+      '<div class="ins-grid"><div class="ins-main">' +
+        '<section class="ins-sec"><span class="label">Insights involving this site</span>' +
+          (ins.length ? '<div class="icards one">' + ins.map(row).join('') + '</div>' : '<p class="card empty-card">No open insights involve this site.</p>') + '</section>' +
+        '<section class="ins-sec"><span class="label">Recent records · as Prism read them</span>' +
+          (recs.length ? '<div class="card feed"><div class="fhead"><span>Received</span><span>As received</span><span>What Prism made of it</span></div>' + recs.map(function (r) {
+            return '<div class="frow"><span class="when">' + esc(r.when) + '<br><span class="mg" title="' + esc(SRC[r.src].name) + '">' + esc(SRC[r.src].mg) + '</span></span><span class="raw">' + esc(r.raw) + '</span><span class="read"><span class="line">' + r.line + '</span><span class="tags">' + r.tags.map(tagBadge).join('') + '</span></span></div>';
+          }).join('') + '</div>' : '<p class="card empty-card">No records from this site.</p>') + '</section>' +
+      '</div><aside class="ins-side">' +
+        '<section class="card side-card"><h2>Leadership visits</h2>' +
+          '<p class="' + (x.visit > 30 ? 't-warning' : '') + '" style="font-size:16px;font-weight:700">' + (x.visit > 30 ? 'Not visited in ' + x.visit + ' days' : 'Last visited ' + x.visit + ' days ago') + '</p>' +
+          (x.visit > 30 ? '<p class="muted-p">Sites without a leadership visit for over a month are flagged.</p>' : '') +
+          (planned ? '<p style="font-weight:700">Visit planned for next week.</p>' : '<div class="meet-actions"><button type="button" class="btn brand" data-plan-visit="' + id + '">Plan a visit</button></div>') +
+        '</section>' +
+        '<section class="card side-card"><h2>Sources for this site</h2>' +
+          (x.src.length ? '<ul class="site-srcs">' + x.src.map(function (sid) {
+            var so = SRC[sid], ss = SRC_STATUS[so.status];
+            return '<li><a href="#sources/' + sid + '"><span class="mg lg">' + esc(so.mg) + '</span><span class="nm">' + esc(so.name) + '<small>' + esc(so.what) + '</small></span></a><span class="badge ' + ss[0] + '"><i></i>' + ss[1] + '</span></li>';
+          }).join('') + '</ul>' : '<p class="muted-p">No connected sources. This site still uses paper forms.</p>') +
+        '</section>' +
+      '</aside></div>';
+  }
+
+
+  /* =============================================================
+     Sources
+     ============================================================= */
+  function lastOf(s) { return s.lastTs ? ago(s.lastTs) : s.last == null ? 'never' : ago(Date.now() - s.last * 60000); }
+  // From sources, through enrichment, to insights. Shown on the Sources page.
+  function pipeHTML() {
+    var all = insightsInView();
+    var connected = SOURCES.filter(function (s) { return s.status !== 'none'; });
+    var failing = SOURCES.filter(function (s) { return s.status === 'failing'; }).length;
+    var totalRead = SOURCES.reduce(function (a, s) { return a + s.today; }, 0) * 14 - 1344;
+    var linked = all.reduce(function (a, i) { return a + recCount(i); }, 0);
+    var worth = Math.round(totalRead * 0.12);
+    var fresh = all.filter(function (i) { return i.status === 'new'; }).length;
+    var stuck = all.filter(stalled).length;
+    return (
+  '<div class="card pipe" aria-label="From sources to insights">' +
+          '<div class="pipe-step"><span class="label">Sources</span><div class="row"><span class="v">' + connected.length + '</span>' + mgStack(connected.map(function (s) { return s.id; })) + '</div>' +
+            '<span class="s">' + (failing ? '<span class="t-critical">' + word(failing) + ' failing</span> · ' : '') + 'records arriving now</span></div>' +
+          '<div class="pipe-arrow"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M5 2l6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></div>' +
+          '<div class="pipe-step"><span class="label">Enriched by Prism</span><div class="row"><span class="v" id="read-count">' + totalRead.toLocaleString() + '</span><span class="s">records read in two weeks</span></div>' +
+            '<span class="s">' + worth.toLocaleString() + ' worth a closer look · ' + linked + ' linked into insights</span></div>' +
+          '<div class="pipe-arrow"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M5 2l6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></div>' +
+          '<div class="pipe-step"><span class="label">Insights</span><div class="row"><span class="v">' + all.length + '</span><span class="s">open in ' + esc(scopeLabel()) + '</span></div>' +
+            '<div class="row">' + (fresh ? '<span class="badge info"><i></i>' + fresh + ' new</span>' : '') + (stuck ? '<span class="badge warning"><i></i>' + stuck + ' stalled</span>' : '') + '</div></div>' +
+        '</div>'
+    );
+  }
+
+  function renderSources() {
+    if (ST.src) return renderSource(SRC[ST.src]);
+    var live = SOURCES.filter(function (s) { return s.status === 'live'; }).length;
+    $('view').innerHTML =
+      '<div class="page-top"><div><h1>Sources</h1><p class="sub">' + word(live) + ' of ' + SOURCES.length + ' sending normally · shared across all divisions · <button type="button" class="what" data-help="sources">What the statuses mean</button></p></div>' +
+        (sourceIssues().length ? '<span class="issues">' + sourceIssues().length + (sourceIssues().length === 1 ? ' source issue' : ' source issues') + '</span>' : '') + '</div>' +
+      pipeHTML() +
+      '<div class="sgrid">' + SOURCES.map(function (s) {
+        var st = SRC_STATUS[s.status];
+        return '<button type="button" class="card scard" data-src="' + s.id + '">' +
+          '<div class="h"><span class="mg lg' + (s.status === 'none' ? ' off' : '') + '">' + esc(s.mg) + '</span><span class="n">' + esc(s.name) + '</span><span class="badge ' + st[0] + '"><i></i>' + st[1] + '</span><span class="w">' + esc(s.what) + ' · ' + esc(s.how) + '</span></div>' +
+          '<p class="says-now">' + (s.problem && s.status !== 'none' ? '<span class="problem-line t-' + st[0] + '">' + esc(s.problem) + '</span>' : esc(s.now)) + '</p>' +
+          '<div class="ft"><span>' + (s.status === 'none' ? 'Nothing received' : 'Last ' + esc(lastOf(s)) + ' · ' + s.today + ' today') + '</span></div>' +
+        '</button>';
+      }).join('') + '</div>';
+  }
+  function renderSource(s) {
+    if (!s) { ST.src = ''; return renderSources(); }
+    var st = SRC_STATUS[s.status];
+    var items = FEED.filter(function (f) { return f.src === s.id; }).sort(function (a, b) { return b.at - a.at; });
+    var fails = (FAILS[s.id] || []).map(function (e) { return '<div class="frow ' + e.level + '"><span class="when">' + esc(ago(e.at)) + '</span><span class="raw">' + esc(e.raw) + '</span><span class="read"><span class="line">' + e.line + '</span></span></div>'; }).join('');
+    $('view').innerHTML =
+      '<a class="back" href="#sources">← Sources</a>' +
+      '<div class="page-top"><div style="display:flex;gap:14px;align-items:center"><span class="mg lg">' + esc(s.mg) + '</span><div><h1>' + esc(s.name) + '</h1><p class="sub">' + esc(s.what) + ' · ' + esc(s.how) + (s.status !== 'none' ? ' · last ' + esc(lastOf(s)) + ' · ' + s.today + ' today' : '') + '</p></div></div><span class="badge ' + st[0] + '"><i></i>' + st[1] + '</span></div>' +
+      (s.problem ? '<div class="banner ' + st[0] + '"><b>' + esc(s.problem) + '</b><p>' + esc(s.doing) + '</p>' + (s.impact ? '<p>' + esc(s.impact) + '</p>' : '') + '</div>' : '') +
+      '<div class="sec-t"><h2>Feed</h2><span class="label">Each record as it arrived, and what Prism made of it</span></div>' +
+      '<div class="card feed"><div class="fhead"><span>Received</span><span>As received</span><span>What Prism made of it</span></div>' + fails +
+        (items.length ? items.map(function (f) {
+          return '<div class="frow' + (f.fresh ? ' fresh' : '') + '"><span class="when">' + esc(ago(f.at)) + '<br>' + esc(SITE[f.site] ? SITE[f.site].name : '') + '</span><span class="raw">' + esc(f.raw) + '</span><span class="read"><span class="line">' + f.line + '</span><span class="tags">' + f.tags.map(tagBadge).join('') + '</span></span></div>';
+        }).join('') : (fails ? '' : '<div class="frow"><span class="when">—</span><span class="read" style="grid-column:2/-1">Nothing received from this source.</span></div>')) + '</div>';
+  }
+
+  /* =============================================================
+     Pulse
+     ============================================================= */
+  var tick = 0;
+  function pulse(first) {
+    var a = ARRIVALS[tick % ARRIVALS.length]; tick++;
+    var s = SRC[a[0]];
+    if (!first) {
+      FEED.forEach(function (f) { f.fresh = false; });
+      FEED.push({ src: a[0], at: Date.now(), site: a[1], raw: a[2], line: a[3], tags: a[4], fresh: true });
+      s.lastTs = Date.now(); s.today++;
+      var rc = $('read-count'); if (rc) rc.textContent = (parseInt(rc.textContent.replace(/,/g, ''), 10) + 1).toLocaleString();
+    }
+    var t = $('live-txt');
+    t.classList.remove('in'); void t.offsetWidth; t.classList.add('in');
+    t.innerHTML = first ? 'enriching as records arrive' : '<b>' + esc(s.name) + '</b> · ' + esc(a[5]);
+    if (ST.view === 'sources' && !first) renderSources();
+  }
+
+  /* =============================================================
+     Meetings: the state-of-safety report, with action
+     ============================================================= */
+  var ROLE = { 'You': 'Division manager', 'Priya Nair': 'Regional manager, Northern', 'Tom Walsh': 'Regional manager, Southern', 'Sam Ortiz': 'Regional manager, Metro', 'Jo Park': 'Regional manager, Coastal', 'Dana Brooks': 'HSE lead' };
+  var MEETINGS = [
+    { id: 'm-infra-0912', div: 'Infrastructure', reg: '', date: 'Friday 12 September', short: '12 Sep',
+      attendees: ['You', 'Priya Nair', 'Tom Walsh'],
+      notes: 'Agreed to focus on lifting and pre-starts this fortnight.',
+      decisions: [
+        { ins: 'load', who: 'Priya Nair', text: 'Book a rigging gear audit at North Yard and Harbour Bridge Deck.', outcome: ['success', 'Done. The audit is booked for 30 September.'] },
+        { ins: 'pre', who: 'Tom Walsh', text: 'Remind supervisors what the pre-start is for.', outcome: ['warning', 'Done, but the pattern hasn’t changed. No update in 16 days.'] },
+        { ins: 'spot', who: 'Priya Nair', text: 'Roll the spotter roster out to Ridge Road.', outcome: ['success', 'Done. No repeats in two weeks.'] },
+        { ins: 'house', who: 'Tom Walsh', text: 'Mark out laydown areas at Creek Crossing.', outcome: ['success', 'Done. The pattern has stopped and it can be closed.'] }
+      ] },
+    { id: 'm-build-0915', div: 'Building', reg: '', date: 'Monday 15 September', short: '15 Sep',
+      attendees: ['Sam Ortiz', 'Jo Park'],
+      notes: 'Facade work is the priority.',
+      decisions: [
+        { ins: 'edge', who: 'Sam Ortiz', text: 'Meet the facade subcontractor’s supervisor about edge protection.', outcome: ['success', 'Done. A revised method is due on 29 September.'] }
+      ] }
+  ];
+  var MT = null; // the meeting in progress
+
+  function lastMeeting() {
+    return MEETINGS.filter(function (m) { return m.div === ST.div && m.reg === ST.reg; })[0] || null;
+  }
+  function managersInView() {
+    var o = [];
+    if (ST.div === 'Infrastructure' || !ST.div) o.push('You');
+    regionsInView().forEach(function (x) { if (o.indexOf(x.r.rm) < 0) o.push(x.r.rm); });
+    o.push('Dana Brooks');
+    return o;
+  }
+  // Agenda order: needs an owner, stalled, getting worse, ready to close, then the rest
+  function agenda() {
+    var list = insightsInView();
+    function rank(i) {
+      if (i.status === 'new') return 0;
+      if (stalled(i)) return 1;
+      if (i.trend === 'worse') return 2;
+      if (i.status === 'resolved') return 3;
+      return 4;
+    }
+    return list.slice().sort(function (a, b) { return rank(a) - rank(b) || (a.sev === 'critical' ? 0 : 1) - (b.sev === 'critical' ? 0 : 1); });
+  }
+  function agendaReason(i) {
+    if (i.status === 'new') return 'Needs an owner';
+    if (stalled(i)) return 'Stalled';
+    if (i.trend === 'worse') return 'Getting worse';
+    if (i.status === 'resolved') return 'Ready to close';
+    return 'Check progress';
+  }
+
+  function startMeeting() {
+    var last = lastMeeting();
+    var att = {};
+    managersInView().forEach(function (m) { att[m] = !last || last.attendees.indexOf(m) > -1 || m === 'You'; });
+    MT = { step: 1, attendees: att, idx: 0, log: {}, notes: '', items: [] };
+    go('meeting');
+  }
+
+  var STEPS = ['Set up', 'Report', 'Walk-through', 'Wrap-up'];
+  function stepper() {
+    return '<ol class="steps">' + STEPS.map(function (t, k) {
+      var n = k + 1, at = Math.ceil(MT.step), cls = n === at ? 'on' : n < at ? 'done' : '';
+      return '<li class="' + cls + '"><span class="n">' + (n < at ? '✓' : n) + '</span>' + esc(t) + '</li>';
+    }).join('') + '</ol>';
+  }
+  function meetingTop(title, sub) {
+    return '<div class="meet-bar"><a class="back" href="#focus">← Leave review</a>' + stepper() + '</div>' +
+      '<div class="page-top"><div><h1>' + esc(title) + '</h1><p class="sub">' + sub + '</p></div></div>';
+  }
+  function whoLine(names) {
+    return names.map(function (n) { return '<span class="person"><span class="av' + (n === YOU ? ' me' : '') + '">' + initials(n) + '</span>' + esc(n) + '</span>'; }).join('');
+  }
+
+  function renderMeeting() {
+    if (!MT) { MT = null; return renderFocus(); }
+    var last = lastMeeting();
+    var sinceTxt = last ? 'since ' + last.short : 'first Focus review for this purview';
+    var head = esc(scopeLabel()) + ' · Friday 26 September · ' + esc(sinceTxt);
+
+    // Step 1: set up
+    if (MT.step === 1) {
+      var people = managersInView();
+      $('view').innerHTML = meetingTop('Start a Focus review', head) +
+        '<div class="meet-grid"><section class="card meet-card">' +
+          '<h2>Who’s here</h2><p class="muted-p">Managers with responsibility in ' + esc(scopeLabel()) + '. To change the purview, use the selector in the header.</p>' +
+          '<ul class="att">' + people.map(function (p) {
+            return '<li><label class="att-row"><input type="checkbox" data-att="' + esc(p) + '"' + (MT.attendees[p] ? ' checked' : '') + '><span class="av' + (p === YOU ? ' me' : '') + '">' + initials(p) + '</span><span class="att-name">' + esc(p === YOU ? 'You' : p) + '<small>' + esc(ROLE[p] || '') + '</small></span></label></li>';
+          }).join('') + '</ul>' +
+        '</section><section class="card meet-card">' +
+          '<h2>What Prism will prepare</h2>' +
+          '<ul class="plain"><li><b>State of safety</b> across ' + esc(scopeLabel()) + ' right now.</li><li><b>Since last time</b>: what’s new, stalled, worse, better or ready to close ' + (last ? 'since ' + esc(last.short) : 'over the last four weeks') + '.</li><li><b>As discussed</b>: what was agreed last time, and whether it happened.</li></ul>' +
+          '<p class="muted-p">' + (last ? 'Last review: ' + esc(last.date) + ' with ' + esc(join(last.attendees)) + '.' : 'There’s no earlier Focus review for this purview.') + '</p>' +
+          '<div class="meet-actions"><button type="button" class="btn brand" id="gen-report">Prepare the report</button></div>' +
+        '</section></div>';
+      return;
+    }
+
+    if (MT.step === 1.5) { $('view').innerHTML = genView(head); return; }
+
+    // Step 2: the report
+    if (MT.step === 2) {
+      var list = insightsInView(), sites = sitesInView();
+      var risk = sites.filter(function (s) { return s.state === 'risk'; }), quiet = sites.filter(function (s) { return s.state === 'quiet' || s.state === 'none'; }), hold = sites.filter(function (s) { return s.state === 'hold'; });
+      var failing = SOURCES.filter(function (s) { return s.status === 'failing'; });
+      function lines(arr, tone, fmt) {
+        return arr.length ? '<ul class="rlist">' + arr.map(function (i) { return '<li><button type="button" class="rlink" data-open="' + i.id + '">' + esc(i.title) + '</button><span>' + fmt(i) + '</span></li>'; }).join('') + '</ul>' : '<p class="muted-p">None.</p>';
+      }
+      var fresh = list.filter(function (i) { return i.status === 'new'; });
+      var worse = list.filter(function (i) { return i.trend === 'worse' && i.status !== 'new' && !stalled(i); });
+      var stuck = list.filter(stalled);
+      var better = list.filter(function (i) { return i.trend === 'better' && i.status !== 'resolved'; });
+      var ready = list.filter(function (i) { return i.status === 'resolved'; });
+      var ag = agenda();
+      $('view').innerHTML = meetingTop('State of safety', head) +
+        '<div class="report">' +
+          '<section class="card rsec"><span class="label">1 · State of safety</span><p class="rlead">' +
+            '<b>' + word(risk.length) + (risk.length === 1 ? ' site is' : ' sites are') + ' at risk</b>' + (risk.length ? ' (' + esc(join(risk.map(function (s) { return s.name; }))) + ')' : '') + '. ' +
+            (quiet.length ? word(quiet.length) + (quiet.length === 1 ? ' is' : ' are') + ' out of sight: ' + esc(join(quiet.map(function (s) { return s.name; }))) + '. ' : '') +
+            word(hold.length) + (hold.length === 1 ? ' is' : ' are') + ' holding. ' +
+            'There ' + (list.length === 1 ? 'is one open insight' : 'are ' + lw(list.length) + ' open insights') + ', ' + lw(list.filter(function (i) { return i.sev === 'critical'; }).length) + ' of them critical.' +
+          '</p>' + (failing.length ? '<p class="rnote"><span class="badge critical"><i></i>' + esc(failing[0].name) + ' failing</span> ' + esc(failing[0].impact) + '</p>' : '') + '</section>' +
+          '<section class="card rsec"><span class="label">2 · Since last time' + (last ? ' · ' + esc(last.short) : '') + '</span>' +
+            '<div class="rcols">' +
+              '<div><h3><span class="badge info"><i></i>New</span></h3>' + lines(fresh, 'info', function (i) { return 'No owner yet · ' + esc(join(i.sites.map(function (s) { return SITE[s].name; }))); }) + '</div>' +
+              '<div><h3><span class="badge critical"><i></i>Getting worse</span></h3>' + lines(worse, 'critical', function (i) { return 'With ' + esc(i.owner); }) + '</div>' +
+              '<div><h3><span class="badge warning"><i></i>Stalled</span></h3>' + lines(stuck, 'warning', function (i) { return 'No update in ' + i.updated + ' days · ' + esc(i.owner); }) + '</div>' +
+              '<div><h3><span class="badge success"><i></i>Better or done</span></h3>' + lines(better.concat(ready), 'success', function (i) { return i.status === 'resolved' ? 'Ready to close' : 'Improving · ' + esc(i.owner); }) + '</div>' +
+            '</div></section>' +
+          '<section class="card rsec"><span class="label">3 · As discussed' + (last ? ' on ' + esc(last.short) : '') + '</span>' +
+            (last ? '<ul class="agreed">' + last.decisions.map(function (d) {
+              return '<li><span class="av">' + initials(d.who) + '</span><div><p class="agreed-t">' + esc(d.who) + ': ' + esc(d.text) + '</p><p class="agreed-o t-' + d.outcome[0] + '">' + esc(d.outcome[1]) + '</p></div></li>';
+            }).join('') + '</ul>' : '<p class="muted-p">Nothing on record. This is the first Focus review for ' + esc(scopeLabel()) + '.</p>') +
+          '</section>' +
+        '</div>' +
+        '<div class="meet-actions end"><button type="button" class="btn" id="copy-report">Copy report</button><button type="button" class="btn brand" data-mstep="3"' + (ag.length ? '' : ' disabled') + '>Walk through ' + lw(ag.length) + ' insights</button></div>';
+      return;
+    }
+
+    // Step 3: walk-through, one insight at a time
+    if (MT.step === 3) {
+      if (!MT.items.length) MT.items = agenda().map(function (i) { return i.id; });
+      var ids = MT.items, cur = INSIGHTS.filter(function (x) { return x.id === ids[MT.idx]; })[0];
+      if (!cur) { MT.step = 4; return renderMeeting(); }
+      var ow = managersInView(); if (cur.owner && ow.indexOf(cur.owner) < 0) ow.unshift(cur.owner);
+      var entry = MT.log[cur.id] || {};
+      $('view').innerHTML = meetingTop('Walk-through', head + ' · ' + (MT.idx + 1) + ' of ' + ids.length) +
+        '<div class="walk"><ol class="walk-list">' + ids.map(function (id, k) {
+          var it = INSIGHTS.filter(function (x) { return x.id === id; })[0], lg = MT.log[id];
+          return '<li class="' + (k === MT.idx ? 'on' : '') + '"><button type="button" data-goto="' + k + '"><span class="wl-n">' + (lg && lg.done ? '✓' : k + 1) + '</span><span class="wl-t">' + esc(it.title) + '<small>' + esc(lg && lg.done ? (lg.skipped ? 'Skipped' : (lg.changes[0] || '').indexOf('Dismissed') === 0 ? 'Dismissed' : 'Updated') : agendaReason(it)) + '</small></span></button></li>';
+        }).join('') + '</ol>' +
+        '<section class="card walk-card">' +
+          '<div class="walk-head"><span class="icard-sev">' + sevIcon(cur.sev) + '<span class="sev-t t-' + cur.sev + '">' + (cur.sev === 'critical' ? 'Critical' : 'Warning') + '</span></span>' + statusBadge(cur) + trendHTML(cur.trend) + '<span class="why-here">' + esc(agendaReason(cur)) + '</span></div>' +
+          '<h2 class="walk-title">' + esc(cur.title) + '</h2><p class="walk-story">' + esc(cur.story) + '</p>' +
+          '<div class="walk-sites">' + cur.sites.map(function (s) { return '<span class="chip">' + esc(SITE[s].name) + '</span>'; }).join('') + '</div>' +
+          '<div class="walk-says"><span class="label">What each source says</span><ul>' + cur.says.map(function (s) { return '<li><span class="mg">' + esc(SRC[s.src].mg) + '</span><span><b>' + esc(SRC[s.src].name) + ' · ' + s.n + '</b> ' + esc(s.text) + '</span></li>'; }).join('') + '</ul></div>' +
+          (cur.latest ? '<p class="walk-latest"><span class="label">Latest update</span>' + esc(cur.latest) + '</p>' : '') +
+          '<p class="walk-next"><span class="label">Suggested</span>' + esc(cur.next) + '</p>' +
+          (ST.dismissing === cur.id ? dismissForm(cur.id, 'walk') : (          '<div class="walk-form">' +
+            '<span class="fld"><label for="w-owner">Owner</label><select class="select" id="w-owner"><option value="">No owner</option>' + ow.map(function (o) { return '<option' + (o === cur.owner ? ' selected' : '') + '>' + esc(o) + '</option>'; }).join('') + '</select></span>' +
+            '<span class="fld"><label for="w-status">Status</label><select class="select" id="w-status">' + [['new', 'New'], ['working', 'In progress'], ['resolved', 'Ready to close'], ['closed', 'Close it']].map(function (o) { return '<option value="' + o[0] + '"' + (o[0] === cur.status ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select></span>' +
+            '<label class="switch"><input type="checkbox" id="w-lead"' + (cur.lead ? ' checked' : '') + '>For leadership</label>' +
+            '<label class="w-note-l" for="w-note">Decision or note</label><textarea id="w-note" class="w-note" rows="3" placeholder="What was agreed, by whom, by when">' + esc(entry.note || '') + '</textarea>' +
+          '</div>' +
+          '<div class="meet-actions end"><button type="button" class="btn" data-walk="back"' + (MT.idx ? '' : ' disabled') + '>Back</button><button type="button" class="btn" data-walk="skip">Skip</button><button type="button" class="btn brand" data-walk="save">' + (MT.idx === ids.length - 1 ? 'Save and finish' : 'Save and next') + '</button></div>' +
+          '<div class="walk-dismiss"><button type="button" class="btn" data-dopen="' + cur.id + '">Dismiss\u2026</button></div>')) +
+        '</section></div>';
+      return;
+    }
+
+    // Step 4: wrap-up
+    var att = Object.keys(MT.attendees).filter(function (k) { return MT.attendees[k]; });
+    var done = MT.items.filter(function (id) { return MT.log[id] && MT.log[id].done && !MT.log[id].skipped; });
+    var skipped = MT.items.filter(function (id) { return !MT.log[id] || MT.log[id].skipped; });
+    $('view').innerHTML = meetingTop('Wrap-up', head) +
+      '<div class="meet-grid"><section class="card meet-card"><h2>Decisions</h2>' +
+        (done.length ? '<ul class="agreed">' + done.map(function (id) {
+          var it = INSIGHTS.filter(function (x) { return x.id === id; })[0], lg = MT.log[id];
+          return '<li><span class="av' + (it.owner === YOU ? ' me' : '') + '">' + (it.owner ? initials(it.owner) : '—') + '</span><div><p class="agreed-t">' + esc(it.title) + '</p><p class="agreed-o">' + esc(lg.changes.join(' · ') || 'Reviewed, no change') + '</p>' + (lg.note ? '<p class="agreed-note">“' + esc(lg.note) + '”</p>' : '') + '</div></li>';
+        }).join('') + '</ul>' : '<p class="muted-p">No insights were updated.</p>') +
+        (skipped.length ? '<p class="muted-p">Not covered: ' + esc(join(skipped.map(function (id) { return INSIGHTS.filter(function (x) { return x.id === id; })[0].title; }))) + '.</p>' : '') +
+      '</section><section class="card meet-card"><h2>Attended</h2><div class="people">' + whoLine(att) + '</div>' +
+        '<label class="w-note-l" for="m-notes">Review notes</label><textarea id="m-notes" class="w-note" rows="4" placeholder="Anything else worth recording">' + esc(MT.notes) + '</textarea>' +
+        '<div class="meet-actions"><button type="button" class="btn" id="copy-summary">Copy summary</button><button type="button" class="btn brand" id="save-meeting">Save Focus review</button></div>' +
+      '</section></div>';
+  }
+
+  function saveWalkItem(skip) {
+    var id = MT.items[MT.idx], cur = INSIGHTS.filter(function (x) { return x.id === id; })[0];
+    var changes = [];
+    if (!skip) {
+      var owner = $('w-owner').value, status = $('w-status').value, lead = $('w-lead').checked, note = $('w-note').value.trim();
+      if (owner !== cur.owner) { changes.push(owner ? 'Owner: ' + owner : 'Owner removed'); cur.owner = owner; }
+      if (status === 'closed') { changes.push('Closed'); cur.closed = true; }
+      else if (status !== cur.status) { changes.push('Status: ' + ({ new: 'New', working: 'In progress', resolved: 'Ready to close' })[status]); cur.status = status; }
+      if (cur.owner && cur.status === 'new') { cur.status = 'working'; changes.push('Status: In progress'); }
+      if (changes.length) cur.updated = 0;
+      if (lead !== cur.lead) { changes.push(lead ? 'Raised with leadership' : 'Removed from leadership'); cur.lead = lead; }
+      MT.log[id] = { done: true, changes: changes, note: note };
+      if (changes.length || note) logEvent(cur, 'Focus review', changes.join(' \u00b7 ') + (note ? (changes.length ? '. ' : '') + note : ''), 'Focus review');
+      if (note) { cur.latest = note; cur.updated = 0; }
+    } else {
+      MT.log[id] = { done: true, skipped: true, changes: [], note: '' };
+    }
+    if (MT.idx < MT.items.length - 1) MT.idx++; else MT.step = 4;
+    renderMeeting(); window.scrollTo(0, 0);
+  }
+
+  function summaryText() {
+    var att = Object.keys(MT.attendees).filter(function (k) { return MT.attendees[k]; });
+    var done = MT.items.filter(function (id) { return MT.log[id] && MT.log[id].done && !MT.log[id].skipped; });
+    return 'Focus review · ' + scopeLabel() + ' · Friday 26 September\nAttended: ' + join(att) + '\n\n' +
+      done.map(function (id) { var it = INSIGHTS.filter(function (x) { return x.id === id; })[0], lg = MT.log[id]; return '• ' + it.title + ': ' + (lg.changes.join(', ') || 'reviewed, no change') + (lg.note ? '. ' + lg.note : ''); }).join('\n') +
+      (MT.notes ? '\n\nNotes: ' + MT.notes : '') + '\n\nPrepared with Hiviz Prism.';
+  }
+  function reportText() {
+    return 'State of safety · ' + scopeLabel() + ' · Friday 26 September\n\n' + $('view').querySelector('.report').innerText + '\n\nPrepared by Hiviz Prism.';
+  }
+  function copy(text, ok) {
+    try { navigator.clipboard.writeText(text).then(function () { toast(ok); }, function () { toast('Copy isn’t available here'); }); }
+    catch (err) { toast('Copy isn’t available here'); }
+  }
+
+  // Past meetings
+  function renderMeetings() {
+    var mine = MEETINGS.filter(function (m) { return (!ST.div || m.div === ST.div) && (!ST.reg || m.reg === ST.reg); });
+    $('view').innerHTML = '<a class="back" href="#focus">← Insights</a>' +
+      '<div class="page-top"><div><h1>Past Focus reviews</h1><p class="sub">' + esc(scopeLabel()) + '</p></div><div class="actions"><button type="button" class="btn brand" id="start-meeting">Start a Focus review</button></div></div>' +
+      (mine.length ? '<div class="mlist">' + mine.map(function (m) {
+        var label = m.reg ? m.reg + ' region' : m.div ? m.div + ' division' : 'Whole organisation';
+        return '<article class="card meet-card"><div class="mhead"><div><h2>' + esc(m.date) + '</h2><p class="muted-p">' + esc(label) + ' · ' + m.decisions.length + (m.decisions.length === 1 ? ' decision' : ' decisions') + '</p></div><div class="people">' + whoLine(m.attendees) + '</div></div>' +
+          '<ul class="agreed">' + m.decisions.map(function (d) {
+            var it = INSIGHTS.filter(function (x) { return x.id === d.ins; })[0];
+            return '<li><span class="av' + (d.who === YOU ? ' me' : '') + '">' + initials(d.who) + '</span><div><p class="agreed-t">' + esc(it ? it.title : '') + '</p><p class="agreed-o">' + esc(d.who) + ': ' + esc(d.text) + '</p></div></li>';
+          }).join('') + '</ul>' + (m.notes ? '<p class="agreed-note">' + esc(m.notes) + '</p>' : '') + '</article>';
+      }).join('') + '</div>' : '<p class="card empty-card">No Focus reviews on record for ' + esc(scopeLabel()) + ' yet.</p>');
+  }
+
+  document.addEventListener('change', function (e) {
+    var t = e.target;
+    if (t.hasAttribute && t.hasAttribute('data-att') && MT) MT.attendees[t.getAttribute('data-att')] = t.checked;
+    if (t.id === 'm-notes' && MT) MT.notes = t.value;
+  });
+  document.addEventListener('click', function (e) {
+    if (e.target.closest('#start-meeting')) { startMeeting(); return; }
+    if (!MT) return;
+    if (e.target.closest('#gen-report')) { generateReport(); return; }
+    var ms = e.target.closest('[data-mstep]'); if (ms) { MT.step = +ms.getAttribute('data-mstep'); renderMeeting(); window.scrollTo(0, 0); return; }
+    var wk = e.target.closest('[data-walk]');
+    if (wk) {
+      var act = wk.getAttribute('data-walk');
+      if (act === 'back') { if (MT.idx) MT.idx--; renderMeeting(); }
+      else saveWalkItem(act === 'skip');
+      return;
+    }
+    var gt = e.target.closest('[data-goto]'); if (gt) { MT.idx = +gt.getAttribute('data-goto'); renderMeeting(); return; }
+    if (e.target.closest('#copy-report')) { copy(reportText(), 'Report copied'); return; }
+    if (e.target.closest('#copy-summary')) { MT.notes = $('m-notes').value; copy(summaryText(), 'Summary copied'); return; }
+    if (e.target.closest('#save-meeting')) {
+      MT.notes = $('m-notes').value;
+      var att = Object.keys(MT.attendees).filter(function (k) { return MT.attendees[k]; });
+      var decisions = MT.items.filter(function (id) { return MT.log[id] && MT.log[id].done && !MT.log[id].skipped; }).map(function (id) {
+        var it = INSIGHTS.filter(function (x) { return x.id === id; })[0], lg = MT.log[id];
+        return { ins: id, who: it.owner || 'You', text: lg.note || lg.changes.join(', ') || 'Reviewed, no change', outcome: ['', 'Agreed today'] };
+      });
+      MEETINGS.unshift({ id: 'm-' + Date.now(), div: ST.div, reg: ST.reg, date: 'Friday 26 September', short: '26 Sep', attendees: att, notes: MT.notes, decisions: decisions });
+      MT = null; go('meetings'); toast('Focus review saved');
+    }
+  });
+
+  /* =============================================================
+     Routing (in-page, so it works inside sandboxed frames)
+     ============================================================= */
+  function go(target) { try { history.replaceState(null, '', '#' + target); } catch (err) { /* ignore */ } route(target); }
+  function route(target) {
+    var h = (target || (location.hash || '').slice(1) || 'focus').split('/');
+    ST.view = ['focus', 'sites', 'site', 'sources', 'meeting', 'meetings', 'insight'].indexOf(h[0]) > -1 ? h[0] : 'focus';
+    ST.insight = ST.view === 'insight' ? (h[1] || '') : '';
+    ST.site = ST.view === 'site' ? (h[1] || '') : '';
+    ST.dismissing = '';
+    if (ST.view === 'meeting' && !MT) ST.view = 'focus';
+    var tab = ['meeting', 'meetings', 'insight'].indexOf(ST.view) > -1 ? 'focus' : ST.view === 'site' ? 'sites' : ST.view;
+    ST.src = ST.view === 'sources' ? (h[1] || '') : '';
+    document.querySelectorAll('.tabs a').forEach(function (a) { if (a.getAttribute('data-view') === tab) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
+    closeSheet(); render(); window.scrollTo(0, 0);
+  }
+  function render() { if (ST.view === 'sites') renderSites(); else if (ST.view === 'site') renderSite(ST.site); else if (ST.view === 'sources') renderSources(); else if (ST.view === 'meeting') renderMeeting(); else if (ST.view === 'meetings') renderMeetings(); else if (ST.view === 'insight') renderInsight(ST.insight); else renderFocus(); }
+
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest('a[href^="#"]');
+    if (a) { e.preventDefault(); go(a.getAttribute('href').slice(1) || 'focus'); return; }
+    if (e.target.closest('#sheet') || e.target.closest('#help')) return;
+    var as = e.target.closest('[data-assign]');
+    if (as) { e.stopPropagation(); openSheet(as.getAttribute('data-assign'), true); return; }
+    var op = e.target.closest('[data-open]'); if (op) { openSheet(op.getAttribute('data-open')); return; }
+    var fl = e.target.closest('[data-filter]'); if (fl) { ST.filter = fl.getAttribute('data-filter'); renderFocus(); var nb = document.querySelector('[data-filter="' + ST.filter + '"]'); if (nb) nb.focus(); return; }
+    var sc = e.target.closest('[data-src]'); if (sc) { go('sources/' + sc.getAttribute('data-src')); return; }
+    var gd = e.target.closest('[data-go]'); if (gd) { go(gd.getAttribute('data-go')); return; }
+  });
+
+  fillFilters(); renderIssues(); pulse(true); route();
+  setInterval(function () { pulse(false); }, 5000);
+})();
+</script>
+</body>
+</html>
