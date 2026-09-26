@@ -450,6 +450,12 @@ main { padding-block: 32px 80px; }
 .frow.clickable:focus-visible { outline: 2px solid var(--text); outline-offset: -2px; }
 .walk-ev { display: grid; gap: 2px; border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px; }
 .walk-ev .rec-btn .txt { font-family: var(--mono); font-size: 13.5px; }
+
+.tlabel { display: inline-flex; align-items: center; height: 22px; padding: 0 7px; border: 1px solid var(--text); border-radius: 4px; font-size: 11.5px; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text); background: var(--bg); white-space: nowrap; }
+.types { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.src-types { margin-bottom: 20px; }
+.src-types .label { margin-right: 4px; }
+.frow .when .tlabel { margin-bottom: 4px; }
 .foot { border-top: 1px solid var(--border); padding-block: 24px 40px; color: var(--text-3); font-size: 14px; }
 .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--text); color: #fff; border-radius: 8px; padding: 8px 14px; font-size: 13.5px; z-index: 60; box-shadow: var(--shadow-lg); }
 </style>
@@ -528,26 +534,26 @@ main { padding-block: 32px 80px; }
   ];
 
   var SOURCES = [
-    { id: 'procore', mg: 'P', name: 'Procore', what: 'Observations, incidents', how: 'Webhook', status: 'live', last: 2, today: 184,
+    { id: 'procore', types: ['Observation', 'Near miss', 'Incident'], mg: 'P', name: 'Procore', what: 'Observations, incidents', how: 'Webhook', status: 'live', last: 2, today: 184,
       now: 'Tag lines failing on steel lifts at North Yard, and positive spotter reports at Ridge Road.', hist: '342546735846957468' },
-    { id: 'mitti', mg: 'M', name: 'Mitti', what: 'Inspections, issues', how: 'Webhook', status: 'failing', last: 212, today: 31,
+    { id: 'mitti', types: ['Inspection', 'Hazard', 'Action'], mg: 'M', name: 'Mitti', what: 'Inspections, issues', how: 'Webhook', status: 'failing', last: 212, today: 31,
       now: 'Nothing since 6:10 am. Before that: rope used as tag lines at Harbour Bridge Deck.', hist: '354463540000000000',
       problem: 'Deliveries failing since 6:10 am with “401 Unauthorised”. The API token was probably changed.',
       doing: 'Prism retries every 10 minutes and has emailed the system admin. Mitti keeps the events, so nothing is lost once the token is fixed.',
       impact: 'Quarry Link, Harbour Bridge Deck and Coastal Aged Care send inspections through Mitti, so their picture is incomplete today.' },
-    { id: 'intelex', mg: 'I', name: 'Intelex', what: 'Incidents, investigations, pre-starts', how: 'Polled every 15 min', status: 'live', last: 11, today: 96,
+    { id: 'intelex', types: ['Incident', 'Investigation', 'Pre-start'], mg: 'I', name: 'Intelex', what: 'Incidents, investigations, pre-starts', how: 'Polled every 15 min', status: 'live', last: 11, today: 96,
       now: 'Pre-starts at Southern Tunnels are finished in under a minute, with identical answers.', hist: '223343324453343344' },
-    { id: 'servicenow', mg: 'S', name: 'ServiceNow', what: 'Permits, isolations', how: 'Platform table', status: 'live', last: 4, today: 143,
+    { id: 'servicenow', types: ['Permit', 'Isolation permit'], mg: 'S', name: 'ServiceNow', what: 'Permits, isolations', how: 'Platform table', status: 'live', last: 4, today: 143,
       now: 'Two isolations at Rail Stabling Yard were closed before the test was recorded.', hist: '455364456574565476' },
-    { id: 'hammertech', mg: 'H', name: 'HammerTech', what: 'Inductions, inspections', how: 'Polled every 30 min', status: 'delayed', last: 48, today: 22,
+    { id: 'hammertech', types: ['Induction', 'Inspection'], mg: 'H', name: 'HammerTech', what: 'Inductions, inspections', how: 'Polled every 30 min', status: 'delayed', last: 48, today: 22,
       now: 'A new night traffic crew was inducted at Ridge Road the week setups started drifting.', hist: '112121211211100000',
       problem: 'Last pull was 48 minutes ago. HammerTech is responding slowly.',
       doing: 'Prism keeps trying and will flag it if the delay passes two hours.' },
-    { id: 'evotix', mg: 'E', name: 'Evotix export', what: 'Weekly CSV of incidents', how: 'File drop', status: 'partial', last: 520, today: 198,
+    { id: 'evotix', types: ['Incident'], mg: 'E', name: 'Evotix export', what: 'Weekly CSV of incidents', how: 'File drop', status: 'partial', last: 520, today: 198,
       now: 'Mostly routine. One vehicle-into-fence event at Creek Crossing.', hist: '000000000000900000',
       problem: 'Last night’s file imported 198 of 212 rows. 14 rows have no site in column D.',
       doing: 'The 14 rows are held. Add a site and they’ll be enriched like the rest.' },
-    { id: 'paper', mg: '—', name: 'Paper forms', what: 'Depot Upgrade', how: 'Not connected', status: 'none', last: null, today: 0,
+    { id: 'paper', types: ['Hazard', 'Incident'], mg: '—', name: 'Paper forms', what: 'Depot Upgrade', how: 'Not connected', status: 'none', last: null, today: 0,
       now: 'Prism can’t see this site.', hist: '000000000000000000',
       problem: 'Depot Upgrade records hazards and incidents on paper.',
       doing: 'Scanning forms into the file drop would bring it in without changing how the site works.' }
@@ -998,8 +1004,8 @@ main { padding-block: 32px 80px; }
   function recType(raw) {
     if (/ISO-/.test(raw)) return 'Isolation permit'; if (/PTW-|x_permit_work/.test(raw)) return 'Permit';
     if (/NM-/.test(raw)) return 'Near miss'; if (/OB-/.test(raw)) return 'Observation'; if (/INC-/.test(raw)) return 'Incident';
-    if (/Pre-Start/.test(raw)) return 'Pre-start'; if (/Issue/.test(raw)) return 'Issue'; if (/[Ii]nspection/.test(raw)) return 'Inspection';
-    if (/induct|Induct/.test(raw)) return 'Induction'; if (/row \d+/.test(raw)) return 'Imported row'; return 'Record';
+    if (/Pre-Start/.test(raw)) return 'Pre-start'; if (/Issue|category: Hazard/.test(raw)) return 'Hazard'; if (/[Ii]nspection/.test(raw)) return 'Inspection';
+    if (/induct|Induct/.test(raw)) return 'Induction'; if (/row \d+/.test(raw)) return 'Incident'; return 'Record';
   }
   function recRef(raw) { var m = raw.match(/[A-Z]{2,4}-\d{3,5}|#\d+/); return m ? m[0] : ''; }
   function derivedReading(rec) {
@@ -1088,9 +1094,10 @@ main { padding-block: 32px 80px; }
     var so = e.target.closest('[data-rc-source]'); if (so) toast('In the live product this opens the record in ' + SRC[RECS[so.getAttribute('data-rc-source')].src].name + '.');
   });
   // Clickable record row, shared by every view
+  function typeLabel(t) { return '<span class="tlabel">' + esc(t) + '</span>'; }
   function recRow(r, withSource) {
     var src = SRC[r.src], site = SITE[r.site];
-    return '<button type="button" class="rec rec-btn" data-rec="' + r.id + '"><span class="when">' + (withSource ? '<span class="mg">' + esc(src.mg) + '</span>' : '') + esc(recWhen(r)) + ' · ' + esc(site ? site.name : '') + ' · ' + esc(r.type) + '</span><span class="txt">' + esc(r.raw) + '</span><span class="reads">' + r.tags.map(tagBadge).join('') + '</span></button>';
+    return '<button type="button" class="rec rec-btn" data-rec="' + r.id + '"><span class="when">' + typeLabel(r.type) + (withSource ? '<span class="mg">' + esc(src.mg) + '</span>' : '') + esc(recWhen(r)) + ' · ' + esc(site ? site.name : '') + '</span><span class="txt">' + esc(r.raw) + '</span><span class="reads">' + r.tags.map(tagBadge).join('') + '</span></button>';
   }
 
   /* ---------- Insight sheet ---------- */
@@ -1280,7 +1287,7 @@ main { padding-block: 32px 80px; }
         '<section class="ins-sec"><span class="label">Recent records · as Prism read them</span>' +
           (recs.length ? '<div class="card feed"><div class="fhead"><span>Received</span><span>As received</span><span>What Prism made of it</span></div>' + recs.map(function (r) {
             var line = r.line || (r.insights.length ? '<b>' + esc(insightById(r.insights[0]).title) + '</b>' : '<b>' + esc(r.type) + '</b>');
-            return '<div class="frow clickable" data-rec="' + r.id + '" tabindex="0" role="button"><span class="when">' + esc(recWhen(r)) + '<br><span class="mg" title="' + esc(SRC[r.src].name) + '">' + esc(SRC[r.src].mg) + '</span></span><span class="raw">' + esc(r.raw) + '</span><span class="read"><span class="line">' + line + '</span><span class="tags">' + r.tags.map(tagBadge).join('') + '</span></span></div>';
+            return '<div class="frow clickable" data-rec="' + r.id + '" tabindex="0" role="button"><span class="when">' + typeLabel(r.type) + '<br>' + esc(recWhen(r)) + '<br><span class="mg" title="' + esc(SRC[r.src].name) + '">' + esc(SRC[r.src].mg) + '</span></span><span class="raw">' + esc(r.raw) + '</span><span class="read"><span class="line">' + line + '</span><span class="tags">' + r.tags.map(tagBadge).join('') + '</span></span></div>';
           }).join('') + '</div>' : '<p class="card empty-card">No records from this site.</p>') + '</section>' +
       '</div><aside class="ins-side">' +
         '<section class="card side-card"><h2>Leadership visits</h2>' +
@@ -1336,7 +1343,8 @@ main { padding-block: 32px 80px; }
       '<div class="sgrid">' + SOURCES.map(function (s) {
         var st = SRC_STATUS[s.status];
         return '<button type="button" class="card scard" data-src="' + s.id + '">' +
-          '<div class="h"><span class="mg lg' + (s.status === 'none' ? ' off' : '') + '">' + esc(s.mg) + '</span><span class="n">' + esc(s.name) + '</span><span class="badge ' + st[0] + '"><i></i>' + st[1] + '</span><span class="w">' + esc(s.what) + ' · ' + esc(s.how) + '</span></div>' +
+          '<div class="h"><span class="mg lg' + (s.status === 'none' ? ' off' : '') + '">' + esc(s.mg) + '</span><span class="n">' + esc(s.name) + '</span><span class="badge ' + st[0] + '"><i></i>' + st[1] + '</span><span class="w">' + esc(s.how) + '</span></div>' +
+          '<div class="types">' + s.types.map(typeLabel).join('') + '</div>' +
           '<p class="says-now">' + (s.problem && s.status !== 'none' ? '<span class="problem-line t-' + st[0] + '">' + esc(s.problem) + '</span>' : esc(s.now)) + '</p>' +
           '<div class="ft"><span>' + (s.status === 'none' ? 'Nothing received' : 'Last ' + esc(lastOf(s)) + ' · ' + s.today + ' today') + '</span></div>' +
         '</button>';
@@ -1349,12 +1357,13 @@ main { padding-block: 32px 80px; }
     var fails = (FAILS[s.id] || []).map(function (e) { return '<div class="frow ' + e.level + '"><span class="when">' + esc(ago(e.at)) + '</span><span class="raw">' + esc(e.raw) + '</span><span class="read"><span class="line">' + e.line + '</span></span></div>'; }).join('');
     $('view').innerHTML =
       '<a class="back" href="#sources">← Sources</a>' +
-      '<div class="page-top"><div style="display:flex;gap:14px;align-items:center"><span class="mg lg">' + esc(s.mg) + '</span><div><h1>' + esc(s.name) + '</h1><p class="sub">' + esc(s.what) + ' · ' + esc(s.how) + (s.status !== 'none' ? ' · last ' + esc(lastOf(s)) + ' · ' + s.today + ' today' : '') + '</p></div></div><span class="badge ' + st[0] + '"><i></i>' + st[1] + '</span></div>' +
+      '<div class="page-top"><div style="display:flex;gap:14px;align-items:center"><span class="mg lg">' + esc(s.mg) + '</span><div><h1>' + esc(s.name) + '</h1><p class="sub">' + esc(s.how) + (s.status !== 'none' ? ' · last ' + esc(lastOf(s)) + ' · ' + s.today + ' today' : '') + '</p></div></div><span class="badge ' + st[0] + '"><i></i>' + st[1] + '</span></div>' +
       (s.problem ? '<div class="banner ' + st[0] + '"><b>' + esc(s.problem) + '</b><p>' + esc(s.doing) + '</p>' + (s.impact ? '<p>' + esc(s.impact) + '</p>' : '') + '</div>' : '') +
+      '<div class="types src-types"><span class="label">Sends</span>' + s.types.map(typeLabel).join('') + '</div>' +
       '<div class="sec-t"><h2>Feed</h2><span class="label">Each record as it arrived, and what Prism made of it</span></div>' +
       '<div class="card feed"><div class="fhead"><span>Received</span><span>As received</span><span>What Prism made of it</span></div>' + fails +
         (items.length ? items.map(function (f) {
-          return '<div class="frow clickable' + (f.fresh ? ' fresh' : '') + '" data-rec="' + f.id + '" tabindex="0" role="button"><span class="when">' + esc(ago(f.at)) + '<br>' + esc(SITE[f.site] ? SITE[f.site].name : '') + '</span><span class="raw">' + esc(f.raw) + '</span><span class="read"><span class="line">' + f.line + '</span><span class="tags">' + f.tags.map(tagBadge).join('') + '</span></span></div>';
+          return '<div class="frow clickable' + (f.fresh ? ' fresh' : '') + '" data-rec="' + f.id + '" tabindex="0" role="button"><span class="when">' + typeLabel(RECS[f.id] ? RECS[f.id].type : 'Record') + '<br>' + esc(ago(f.at)) + '<br>' + esc(SITE[f.site] ? SITE[f.site].name : '') + '</span><span class="raw">' + esc(f.raw) + '</span><span class="read"><span class="line">' + f.line + '</span><span class="tags">' + f.tags.map(tagBadge).join('') + '</span></span></div>';
         }).join('') : (fails ? '' : '<div class="frow"><span class="when">—</span><span class="read" style="grid-column:2/-1">Nothing received from this source.</span></div>')) + '</div>';
   }
 
