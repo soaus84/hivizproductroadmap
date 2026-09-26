@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-<title>Prism Manager Concept</title>
+<title>Hiviz Manager Concept</title>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -9,7 +9,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <style>
 /* ---------------------------------------------------------------
-   Hiviz Prism · manager concept
+   Hiviz · manager concept. Prism is the AI enrichment layer inside it.
    White, black, greys. Colour only for status:
    success (good) · warning (watch) · critical (act) · info (new)
    --------------------------------------------------------------- */
@@ -456,6 +456,75 @@ main { padding-block: 32px 80px; }
 .src-types { margin-bottom: 20px; }
 .src-types .label { margin-right: 4px; }
 .frow .when .tlabel { margin-bottom: 4px; }
+
+/* Site cards */
+.sgrid3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+@media (max-width: 1000px) { .sgrid3 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 640px) { .sgrid3 { grid-template-columns: 1fr; } }
+.scard2 { padding: 18px 20px; display: grid; gap: 10px; align-content: start; cursor: pointer; transition: border-color .15s, box-shadow .15s; }
+.scard2:hover { border-color: var(--text); box-shadow: 0 4px 14px rgba(13,15,18,0.08); }
+.scard2:hover .sc-name { text-decoration: underline; text-underline-offset: 3px; }
+.sc-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.sc-name { font-size: 19px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.25; color: var(--text); }
+.sc-why { font-size: 16px; line-height: 1.45; color: var(--text); }
+.sc-foot { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; padding-top: 10px; border-top: 1px solid var(--border); font-size: 14.5px; font-weight: 700; color: var(--text-2); }
+
+/* ---------- Feed list ---------- */
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.src-tabs { margin-bottom: 20px; }
+.feed-note { margin: -8px 0 14px; }
+.ffbar { display: flex; gap: 8px 10px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
+.ffbar .select { height: 36px; font-size: 14.5px; }
+.ff-count { margin-left: auto; font-size: 14px; font-weight: 700; color: var(--text-3); }
+.flist { overflow: hidden; container: feed / inline-size; }
+.fhead2, .frow2 { display: grid; grid-template-columns: 84px 128px 128px minmax(120px, 0.9fr) minmax(0, 2fr) 170px 150px; gap: 14px; align-items: center; padding: 0 16px; }
+.fhead2 { height: 40px; border-bottom: 1px solid var(--border); font-size: 12px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-3); }
+.frow2 { width: 100%; text-align: left; font: inherit; color: inherit; background: var(--bg); border: 0; border-bottom: 1px solid var(--border); padding-block: 12px; cursor: pointer; }
+.frow2:last-child { border-bottom: 0; }
+.frow2:hover .f-read { text-decoration: underline; text-underline-offset: 3px; }
+.frow2:focus-visible { outline: 2px solid var(--text); outline-offset: -2px; }
+.f-when { font-size: 14px; font-weight: 700; color: var(--text-2); }
+.f-src { display: inline-flex; align-items: center; gap: 8px; font-size: 14.5px; font-weight: 700; }
+.f-site { font-size: 14.5px; font-weight: 600; }
+.f-read { font-size: 15.5px; line-height: 1.4; }
+.f-part { font-size: 14px; font-weight: 700; }
+.f-part .muted { font-weight: 600; }
+.feed-link { display: inline-block; margin-top: 12px; font-size: 14.5px; font-weight: 700; color: var(--text-2); text-decoration: underline; text-underline-offset: 3px; }
+.feed-link:hover { color: var(--text); }
+.feed.pinned { margin-bottom: 12px; }
+@container feed (max-width: 980px) {
+  .fhead2 { display: none; }
+  .frow2 { display: flex; flex-wrap: wrap; gap: 6px 12px; padding: 12px 16px; }
+  .f-read { order: 9; flex-basis: 100%; }
+  .f-sig { order: 10; } .f-part { order: 11; }
+}
+
+/* ---------- My Focus ---------- */
+.mf-btn { display: inline-flex; align-items: center; gap: 8px; height: 34px; padding: 0 12px; border-radius: 999px; border: 1px solid var(--border-2); font-size: 14.5px; font-weight: 800; white-space: nowrap; flex: none; }
+.mf-btn:hover { border-color: var(--text); }
+.mf-btn[aria-current="page"] { background: var(--brand); border-color: #d9c200; }
+.mf-count { min-width: 20px; height: 20px; padding: 0 6px; border-radius: 999px; background: var(--critical); color: #fff; font-size: 12px; font-weight: 800; display: inline-grid; place-items: center; }
+.tab-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--critical); margin-left: 6px; vertical-align: 2px; }
+.mf-group { margin-bottom: 26px; }
+.mf-list { overflow: hidden; }
+.mf-row { display: grid; grid-template-columns: 120px minmax(0, 1fr) auto; gap: 6px 18px; align-items: center; padding: 16px 20px; border-bottom: 1px solid var(--border); }
+.mf-row:last-child { border-bottom: 0; }
+.mf-main { display: grid; gap: 3px; }
+.mf-title { font-size: 17px; font-weight: 800; letter-spacing: -0.01em; }
+.mf-why { font-size: 15px; color: var(--text-2); }
+.mf-act { display: flex; align-items: center; gap: 12px; justify-content: flex-end; flex-wrap: wrap; }
+.mf-open { font-size: 14px; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; color: var(--text-2); }
+.mf-done { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.mf-done li { display: flex; align-items: center; gap: 10px; font-size: 15px; color: var(--text-2); }
+.mf-done .gen-i { background: var(--text); border-color: var(--text); color: #fff; }
+
+.walk-list li.done .wl-t { color: var(--text-2); }
+.walk-list li.done .wl-n { background: var(--text); border-color: var(--text); color: #fff; }
+.mf-resolved { display: flex; align-items: center; gap: 10px; font-size: 16px; font-weight: 800; margin: 0; }
+.mf-resolved .gen-i { background: var(--text); border-color: var(--text); color: #fff; }
+.linkish { font: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+@media (max-width: 760px) { .mf-row { grid-template-columns: 1fr; } .mf-act { justify-content: flex-start; } }
+@media (max-width: 1260px) { .mf-btn { padding: 0 10px; } }
 .foot { border-top: 1px solid var(--border); padding-block: 24px 40px; color: var(--text-3); font-size: 14px; }
 .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--text); color: #fff; border-radius: 8px; padding: 8px 14px; font-size: 13.5px; z-index: 60; box-shadow: var(--shadow-lg); }
 </style>
@@ -463,9 +532,9 @@ main { padding-block: 32px 80px; }
 <body>
 <header class="hdr">
   <div class="wrap">
-    <a class="logo" href="#focus" aria-label="Hiviz Prism">
+    <a class="logo" href="#focus" aria-label="Hiviz">
       <svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><path d="M11 2.5 20 19H2z" fill="none" stroke="#0d0f12" stroke-width="1.8" stroke-linejoin="round"/><path d="M11 9.5 15.2 17H6.8z" fill="#ffe500"/></svg>
-      <span>Hiviz <small>Prism</small></span>
+      <span>Hiviz</span>
     </a>
     <div class="crumb" role="group" aria-label="Purview">
       <span class="slash" aria-hidden="true">/</span>
@@ -476,10 +545,11 @@ main { padding-block: 32px 80px; }
     <nav class="tabs" aria-label="Views">
       <a href="#focus" data-view="focus">Insights</a>
       <a href="#sites" data-view="sites">Sites</a>
-      <a href="#sources" data-view="sources">Sources<span class="tab-badge" id="src-badge" hidden></span></a>
+      <a href="#sources" data-view="sources">Sources<span class="tab-dot" id="src-badge" hidden></span></a>
     </nav>
     <div class="hdr-right">
       <a class="live" href="#sources" aria-label="Live data arriving"><span class="dot" aria-hidden="true"></span><span class="lbl">Live</span><span class="txt" id="live-txt" aria-live="polite"></span></a>
+      <a class="mf-btn" id="mf-btn" href="#myfocus"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.2" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="8" cy="8" r="2.4" fill="currentColor"/></svg>My Focus<span class="mf-count" id="mf-count" hidden></span></a>
       <button type="button" class="help-btn" data-help="ideas" aria-label="Help and definitions">?</button>
       <span class="avatar-me" title="You, division manager">DM</span>
     </div>
@@ -494,7 +564,7 @@ main { padding-block: 32px 80px; }
 <aside class="sheet rec-sheet" id="rec" role="dialog" aria-modal="true" aria-labelledby="rec-title" hidden></aside>
 <div class="toast" id="toast" role="status" hidden></div>
 
-<footer class="foot"><div class="wrap">Hiviz Prism · concept · all organisations, people, sites and records are fictional. Live arrivals are simulated.</div></footer>
+<footer class="foot"><div class="wrap">Hiviz · concept · enrichment by Prism · all organisations, people, sites and records are fictional. Live arrivals are simulated.</div></footer>
 
 <script>
 (function () {
@@ -517,7 +587,7 @@ main { padding-block: 32px 80px; }
         { id: 'rs', name: 'Rail Stabling Yard', state: 'risk', why: 'Isolations signed off before they were tested, at night-shift change.', visit: 17, src: ['servicenow', 'intelex'] },
         { id: 'st', name: 'Southern Tunnels', state: 'watch', why: 'Pre-start checks completed in under a minute on most shifts.', visit: 6, src: ['intelex', 'servicenow'] },
         { id: 'cc', name: 'Creek Crossing', state: 'hold', why: 'Steady reporting. Issues fixed quickly.', visit: 12, src: ['intelex', 'evotix'] },
-        { id: 'du', name: 'Depot Upgrade', state: 'none', why: 'Paper forms only. Not visible to Prism.', visit: 52, src: [] }
+        { id: 'du', name: 'Depot Upgrade', state: 'none', why: 'Paper forms only. Not visible to Hiviz.', visit: 52, src: [] }
       ]}
     ]},
     { div: 'Building', regions: [
@@ -539,7 +609,7 @@ main { padding-block: 32px 80px; }
     { id: 'mitti', types: ['Inspection', 'Hazard', 'Action'], mg: 'M', name: 'Mitti', what: 'Inspections, issues', how: 'Webhook', status: 'failing', last: 212, today: 31,
       now: 'Nothing since 6:10 am. Before that: rope used as tag lines at Harbour Bridge Deck.', hist: '354463540000000000',
       problem: 'Deliveries failing since 6:10 am with “401 Unauthorised”. The API token was probably changed.',
-      doing: 'Prism retries every 10 minutes and has emailed the system admin. Mitti keeps the events, so nothing is lost once the token is fixed.',
+      doing: 'Hiviz retries every 10 minutes and has emailed the system admin. Mitti keeps the events, so nothing is lost once the token is fixed.',
       impact: 'Quarry Link, Harbour Bridge Deck and Coastal Aged Care send inspections through Mitti, so their picture is incomplete today.' },
     { id: 'intelex', types: ['Incident', 'Investigation', 'Pre-start'], mg: 'I', name: 'Intelex', what: 'Incidents, investigations, pre-starts', how: 'Polled every 15 min', status: 'live', last: 11, today: 96,
       now: 'Pre-starts at Southern Tunnels are finished in under a minute, with identical answers.', hist: '223343324453343344' },
@@ -548,13 +618,13 @@ main { padding-block: 32px 80px; }
     { id: 'hammertech', types: ['Induction', 'Inspection'], mg: 'H', name: 'HammerTech', what: 'Inductions, inspections', how: 'Polled every 30 min', status: 'delayed', last: 48, today: 22,
       now: 'A new night traffic crew was inducted at Ridge Road the week setups started drifting.', hist: '112121211211100000',
       problem: 'Last pull was 48 minutes ago. HammerTech is responding slowly.',
-      doing: 'Prism keeps trying and will flag it if the delay passes two hours.' },
+      doing: 'Hiviz keeps trying and will flag it if the delay passes two hours.' },
     { id: 'evotix', types: ['Incident'], mg: 'E', name: 'Evotix export', what: 'Weekly CSV of incidents', how: 'File drop', status: 'partial', last: 520, today: 198,
       now: 'Mostly routine. One vehicle-into-fence event at Creek Crossing.', hist: '000000000000900000',
       problem: 'Last night’s file imported 198 of 212 rows. 14 rows have no site in column D.',
       doing: 'The 14 rows are held. Add a site and they’ll be enriched like the rest.' },
     { id: 'paper', types: ['Hazard', 'Incident'], mg: '—', name: 'Paper forms', what: 'Depot Upgrade', how: 'Not connected', status: 'none', last: null, today: 0,
-      now: 'Prism can’t see this site.', hist: '000000000000000000',
+      now: 'Hiviz can’t see this site.', hist: '000000000000000000',
       problem: 'Depot Upgrade records hazards and incidents on paper.',
       doing: 'Scanning forms into the file drop would bring it in without changing how the site works.' }
   ];
@@ -682,10 +752,34 @@ main { padding-block: 32px 80px; }
     F('evotix', 520, 'cc', 'row 41: 2026-09-24, Creek Crossing, Property damage,\n"ute reversed into site fence"', '<b>One-off.</b> A vehicle reversed into a fence.', [['Set aside', '']]),
     F('mitti', 214, 'hb', 'Issue #5521 · Harbour Bridge Deck\n"rope being used as tagline again"', '<b>Control degraded.</b> Rope used in place of a tag line.', [['At-risk', 'warning'], ['Suspended loads insight', '']])
   ];
+  // Two weeks of routine records per site: the everyday data Prism reads and sets aside
+  (function () {
+    var T = {
+      procore: [['OB-7{n}\ncategory: Positive\n"good barricading around the excavation at gate {g}"', '<b>Control held.</b> Good barricading around an excavation.', [['Positive', 'success'], ['Set aside', '']]],
+                ['OB-7{n}\ncategory: Hazard\n"offcuts left on walkway, cleared by crew"', '<b>Routine.</b> Housekeeping, cleared on the spot.', [['Set aside', '']]]],
+      mitti: [['Weekly site inspection #{n}\n38 of 40 pass · 2 minor items closed same day', '<b>Routine.</b> Two minor items, both closed the same day.', [['Set aside', '']]]],
+      intelex: [['Daily Pre-Start v3 · crew {g}\nduration 4 min 12 s · 2 hazards noted', '<b>Done properly.</b> Four minutes, with two hazards noted.', [['Good practice', 'success'], ['Set aside', '']]],
+                ['INC-3{n} · First aid\n"minor cut, treated on site, gloves replaced"', '<b>One-off.</b> Minor first aid, treated on site.', [['Set aside', '']]]],
+      servicenow: [['x_permit_work PTW-88{n}\nstate: closed · all checks recorded', '<b>Routine.</b> Permit closed with every check recorded.', [['Set aside', '']]]],
+      hammertech: [['Induction · {g} workers · day shift', '<b>Context.</b> New workers inducted.', [['Set aside', '']]]],
+      evotix: [['row {n}: 2026-09-{d}, first aid,\n"minor strain lifting materials, rested"', '<b>One-off.</b> Minor strain, rested and returned.', [['Set aside', '']]]]
+    };
+    var n = 100;
+    ORG.forEach(function (d) { d.regions.forEach(function (r) { r.sites.forEach(function (site, si) {
+      var srcs = site.src.filter(function (x) { return site.id !== 'ql' || x === 'servicenow'; });
+      for (var k = 0; k < 7 && srcs.length; k++) {
+        var src = srcs[(k + si) % srcs.length], opts = T[src]; if (!opts) continue;
+        var t = opts[(k + si) % opts.length], mins = 180 + (k * 2 + si % 3) * 1440 + (k * 97 + si * 41) % 600;
+        if (src === 'mitti' && mins < 212) mins += 300;
+        n++;
+        FEED.push(F(src, mins, site.id, t[0].replace('{n}', n).replace('{g}', 2 + (k % 5)).replace('{d}', ('0' + (25 - k)).slice(-2)), t[1], t[2]));
+      }
+    }); }); });
+  })();
   var FAILS = {
     mitti: [{ at: Date.now() - 212 * 60000, level: 'err', raw: 'POST /webhooks/mitti\n401 Unauthorised · retry 21 of ∞', line: '<b>Delivery failed.</b> 31 events are waiting in Mitti and will be collected once the token is replaced.' }],
-    evotix: [{ at: Date.now() - 520 * 60000, level: 'warn', raw: 'weekly_incidents_2026-09-25.csv\nrows 88–101: column D (site) empty', line: '<b>14 rows held.</b> Prism can’t tell where these happened until a site is added.' }],
-    hammertech: [{ at: Date.now() - 20 * 60000, level: 'warn', raw: 'GET /v1/inspections?modified_since=…\n200 OK after 94 s', line: '<b>Slow response.</b> Prism will keep retrying.' }]
+    evotix: [{ at: Date.now() - 520 * 60000, level: 'warn', raw: 'weekly_incidents_2026-09-25.csv\nrows 88–101: column D (site) empty', line: '<b>14 rows held.</b> Hiviz can’t place these until a site is added.' }],
+    hammertech: [{ at: Date.now() - 20 * 60000, level: 'warn', raw: 'GET /v1/inspections?modified_since=…\n200 OK after 94 s', line: '<b>Slow response.</b> Hiviz will keep retrying.' }]
   };
   var ARRIVALS = [
     ['procore', 'ny', 'OB-7760\ncategory: Hazard\n"exclusion zone tape down near crane"', '<b>Control degraded.</b> Exclusion zone down near a crane.', [['At-risk', 'warning'], ['Suspended loads insight', '']], 'Hazard at North Yard'],
@@ -708,7 +802,7 @@ main { padding-block: 32px 80px; }
   function join(a) { return a.length < 2 ? a.join('') : a.slice(0, -1).join(', ') + ' and ' + a[a.length - 1]; }
   function cap(t) { return t.charAt(0).toUpperCase() + t.slice(1); }
   function low(t) { return t.charAt(0).toLowerCase() + t.slice(1); }
-  function ago(ts) { var m = Math.round((Date.now() - ts) / 60000); if (m < 1) return 'just now'; if (m < 60) return m + 'm ago'; var h = Math.floor(m / 60); return h < 24 ? h + 'h ago' : '1d ago'; }
+  function ago(ts) { var m = Math.round((Date.now() - ts) / 60000); if (m < 1) return 'just now'; if (m < 60) return m + 'm ago'; var h = Math.floor(m / 60); return h < 24 ? h + 'h ago' : Math.floor(h / 24) + 'd ago'; }
   function initials(n) { return n === YOU ? 'DM' : n.split(' ').map(function (p) { return p[0]; }).join('').slice(0, 2).toUpperCase(); }
 
   var SITE = {};
@@ -728,9 +822,9 @@ main { padding-block: 32px 80px; }
       : '<svg class="sev" width="16" height="16" viewBox="0 0 16 16" aria-label="Warning"><path d="M8 1.5 15 14H1z" fill="var(--warning-dot)" stroke="var(--warning-dot)" stroke-linejoin="round"/><path d="M8 6v3.6M8 11.6v.3" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/></svg>';
   }
   function trendHTML(t) {
-    if (t === 'worse') return '<span class="trend t-critical"><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 9 9 2M4 2h5v5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>Getting worse</span>';
-    if (t === 'better') return '<span class="trend t-success"><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 3l7 7M4 10h5V5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>Getting better</span>';
-    return '<span class="trend steady"><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M1.5 6h9M7 2.5 10.5 6 7 9.5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>No change</span>';
+    if (t === 'worse') return '<span class="trend t-critical"><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 3l7 7M4 10h5V5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>Worsening</span>';
+    if (t === 'better') return '<span class="trend t-success"><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 9 9 2M4 2h5v5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>Improving</span>';
+    return '<span class="trend steady"><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M1.5 6h9M7 2.5 10.5 6 7 9.5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>Steady</span>';
   }
   function statusBadge(i) {
     if (i.dismissed) return '<span class="badge"><i></i>Dismissed</span>';
@@ -759,8 +853,9 @@ main { padding-block: 32px 80px; }
   function sourceIssues() { return SOURCES.filter(function (s) { return ['failing', 'delayed', 'partial'].indexOf(s.status) > -1; }); }
   function renderIssues() {
     var n = sourceIssues().length, b = $('src-badge');
-    b.hidden = !n; b.textContent = n;
-    b.setAttribute('aria-label', n + (n === 1 ? ' source issue' : ' source issues'));
+    b.hidden = !n;
+    b.setAttribute('aria-label', n ? 'Sources need attention' : '');
+    b.setAttribute('role', 'img');
   }
 
   /* =============================================================
@@ -773,7 +868,7 @@ main { padding-block: 32px 80px; }
     var done = list.filter(function (i) { return i.status === 'resolved'; });
     var out = [];
     if (fresh.length) out.push('<b>' + esc(cap(fresh[0].title.toLowerCase().replace(/^./, function (c) { return c; }))) + '</b> across ' + lw(fresh[0].sites.length) + ' sites, and nobody owns it yet' + (fresh.length > 1 ? '. ' + word(fresh.length - 1) + ' more new ' + (fresh.length - 1 === 1 ? 'insight needs' : 'insights need') + ' an owner' : '') + '.');
-    hot.forEach(function (i) { out.push('<b>' + esc(i.owner) + '</b> is on ' + esc(i.short) + (i.trend === 'worse' ? ', and it’s getting worse.' : i.trend === 'better' ? ', and it’s improving.' : ', and it hasn’t got worse.')); });
+    hot.forEach(function (i) { out.push('<b>' + esc(i.owner) + '</b> is on ' + esc(i.short) + (i.trend === 'worse' ? ', and it’s worsening.' : i.trend === 'better' ? ', and it’s improving.' : ', and it hasn’t got worse.')); });
     stuck.forEach(function (i) { out.push('Work on ' + esc(i.short) + ' has <b>stalled</b>, with no update in ' + i.updated + ' days.'); });
     if (done.length) out.push(esc(cap(join(done.map(function (i) { return i.short; })))) + ' can be closed.');
     return out.join(' ') || 'Nothing new or stalled right now.';
@@ -783,7 +878,7 @@ main { padding-block: 32px 80px; }
     ['all', 'All', function () { return true; }],
     ['owner', 'Needs owner', function (i) { return !i.owner; }],
     ['stalled', 'Stalled', stalled],
-    ['worse', 'Getting worse', function (i) { return i.trend === 'worse'; }],
+    ['worse', 'Worsening', function (i) { return i.trend === 'worse'; }],
     ['lead', 'For leadership', function (i) { return i.lead; }]
   ];
 
@@ -812,16 +907,11 @@ main { padding-block: 32px 80px; }
       '<div class="card brief"><div class="brief-head"><span class="who"><svg width="16" height="16" viewBox="0 0 22 22" aria-hidden="true"><path d="M11 2.5 20 19H2z" fill="none" stroke="#0d0f12" stroke-width="2" stroke-linejoin="round"/><path d="M11 9.5 15.2 17H6.8z" fill="#ffe500"/></svg><h2>The story right now</h2></span><span class="label">Written by Prism from ' + linked + ' linked records</span></div>' +
         '<p class="story">' + storyFor(all) + '</p></div>' +
 
-      (function () {
-        var unowned = all.filter(function (i) { return !i.owner; }).length, yours = all.filter(function (i) { return i.owner === YOU; }).length, w = [];
-        if (unowned) w.push('<button type="button" data-gofilter="owner">' + word(unowned) + (unowned === 1 ? ' insight needs' : ' insights need') + ' an owner</button>');
-        if (yours) w.push('<button type="button" data-gofilter="all">' + word(yours) + (yours === 1 ? ' insight is' : ' insights are') + ' yours</button>');
-        return '<div class="card waiting"><span class="label">Waiting on you</span>' + (w.length ? w.join('') : '<span class="none">Nothing is waiting on you.</span>') + '</div>';
-      })() +
       '<div class="list-top"><div class="seg" role="group" aria-label="Filter insights">' + FILTERS.map(function (x) {
           return '<button type="button" data-filter="' + x[0] + '" aria-pressed="' + (x[0] === ST.filter) + '">' + esc(x[1]) + '<span class="c">' + all.filter(x[2]).length + '</span></button>';
         }).join('') + '</div><button type="button" class="what" data-help="insights">What the labels mean</button></div>' +
-      (rows || '<p class="card empty-card">Nothing matches this filter.</p>');
+      (rows || '<p class="card empty-card">Nothing matches this filter.</p>') +
+      '<a class="feed-link" href="#sources/feed">See the feed behind these insights →</a>';
   }
 
   function row(i) {
@@ -845,13 +935,13 @@ main { padding-block: 32px 80px; }
   /* ---------- History, dismissal and the insight page ---------- */
   function insightById(id) { return INSIGHTS.filter(function (x) { return x.id === id; })[0]; }
   var SEED_HISTORY = {
-    hand: [['22 Sep', 'Prism', 'Raised', 'Linked records from ServiceNow, Procore and Mitti across three sites.'], ['23 Sep', 'Prism', 'Four more records linked', 'Traffic setups at Ridge Road changed after the night crew took over.'], ['26 Sep', 'Prism', 'Getting worse', 'A second isolation at Rail Stabling Yard was closed before it was tested.']],
+    hand: [['22 Sep', 'Prism', 'Raised', 'Linked records from ServiceNow, Procore and Mitti across three sites.'], ['23 Sep', 'Prism', 'Four more records linked', 'Traffic setups at Ridge Road changed after the night crew took over.'], ['26 Sep', 'Prism', 'Worsening', 'A second isolation at Rail Stabling Yard was closed before it was tested.']],
     fat: [['24 Sep', 'Prism', 'Raised', 'Nine night-shift reports mentioning fatigue in four weeks.']],
     load: [['12 Sep', 'Prism', 'Raised', 'Four suspended load events across North Yard and Harbour Bridge Deck.'], ['12 Sep', 'Focus review', 'Assigned to Priya Nair', 'Agreed: book a rigging gear audit at both sites.'], ['15 Sep', 'Priya Nair', 'Update', 'Worn tag lines replaced at North Yard.'], ['23 Sep', 'Priya Nair', 'Update', 'Rigging gear audit booked for 30 September.']],
     pre: [['1 Sep', 'Prism', 'Raised', 'Pre-starts completed in under a minute, with identical answers.'], ['2 Sep', 'You', 'Assigned to Tom Walsh', ''], ['10 Sep', 'Tom Walsh', 'Update', 'Supervisors reminded of the purpose of the pre-start.'], ['12 Sep', 'Focus review', 'Agreed', 'Tom to remind supervisors what the pre-start is for.'], ['26 Sep', 'Prism', 'Stalled', 'No update for 16 days, and the pattern hasn’t changed.']],
-    spot: [['18 Aug', 'Prism', 'Raised', 'Three near misses with reversing plant in August.'], ['19 Aug', 'You', 'Assigned to Priya Nair', ''], ['12 Sep', 'Focus review', 'Agreed', 'Roll the spotter roster out to Ridge Road.'], ['21 Sep', 'Priya Nair', 'Update', 'Spotter roster in place on both sites.'], ['24 Sep', 'Prism', 'Getting better', 'No repeats in two weeks, and spotters are calling stops.']],
+    spot: [['18 Aug', 'Prism', 'Raised', 'Three near misses with reversing plant in August.'], ['19 Aug', 'You', 'Assigned to Priya Nair', ''], ['12 Sep', 'Focus review', 'Agreed', 'Roll the spotter roster out to Ridge Road.'], ['21 Sep', 'Priya Nair', 'Update', 'Spotter roster in place on both sites.'], ['24 Sep', 'Prism', 'Improving', 'No repeats in two weeks, and spotters are calling stops.']],
     house: [['4 Aug', 'Prism', 'Raised', 'Six findings of materials stored in access routes.'], ['5 Aug', 'You', 'Assigned to Tom Walsh', ''], ['12 Sep', 'Focus review', 'Agreed', 'Mark out laydown areas at Creek Crossing.'], ['24 Sep', 'Tom Walsh', 'Ready to close', 'No repeat for four weeks since the laydown plan changed.']],
-    edge: [['9 Sep', 'Prism', 'Raised', 'Edge protection removed and not reinstated on level 14.'], ['9 Sep', 'Alex Chen', 'Assigned to Sam Ortiz', ''], ['15 Sep', 'Focus review', 'Agreed', 'Meet the facade subcontractor’s supervisor.'], ['22 Sep', 'Sam Ortiz', 'Update', 'Met the supervisor. Revised method due 29 September.'], ['25 Sep', 'Prism', 'Getting worse', 'The same subcontractor is booked to start at Hospital Fit-out.']],
+    edge: [['9 Sep', 'Prism', 'Raised', 'Edge protection removed and not reinstated on level 14.'], ['9 Sep', 'Alex Chen', 'Assigned to Sam Ortiz', ''], ['15 Sep', 'Focus review', 'Agreed', 'Meet the facade subcontractor’s supervisor.'], ['22 Sep', 'Sam Ortiz', 'Update', 'Met the supervisor. Revised method due 29 September.'], ['25 Sep', 'Prism', 'Worsening', 'The same subcontractor is booked to start at Hospital Fit-out.']],
     tick: [['23 Sep', 'Prism', 'Raised', 'Twenty-four inspections with every item passed and copied comments.']]
   };
   INSIGHTS.forEach(function (i) { i.history = (SEED_HISTORY[i.id] || []).map(function (h) { return { when: h[0], who: h[1], what: h[2], text: h[3] }; }); });
@@ -990,7 +1080,7 @@ main { padding-block: 32px 80px; }
     'hand:0:0': [['Signal', 'Control bypassed', 'critical', 'The isolation was closed with no test-for-dead recorded.'], ['Energy', 'Electrical, high voltage', '', 'Traction power isolation in the stabling yard.'], ['Control', 'Signed off before the test', 'critical', 'The test field was empty when the permit was closed.'], ['Could have been', 'Fatal', 'critical', 'Workers could have treated live equipment as isolated.'], ['Key hazard', 'Energised equipment treated as isolated', '', 'The same hazard as the isolation on 2 September.'], ['Confidence', 'High', '', 'The record states the times directly.']],
     'hand:0:1': [['Signal', 'Control bypassed', 'critical', 'The test was recorded 25 minutes after sign-off.'], ['Energy', 'Electrical, high voltage', '', 'Traction power isolation.'], ['Control', 'Tested after sign-off', 'critical', 'The outgoing shift signed off and the incoming shift did the test.'], ['Could have been', 'Fatal', 'critical', 'For 25 minutes the equipment was recorded as safe without a test.'], ['Confidence', 'High', '', 'Both timestamps are in the record.']],
     'hand:1:0': [['Signal', 'At-risk condition', 'warning', 'Cones were moved from the approved plan after the crew changed.'], ['Energy', 'Moving traffic', '', 'Live lanes beside ramp 2.'], ['Control', 'Degraded', 'warning', 'The traffic plan existed but wasn’t being followed.'], ['Could have been', 'Serious injury', 'critical', 'Workers were exposed to live traffic.'], ['Confidence', 'Moderate', '', 'One observer, described in general terms.']],
-    'hand:2:0': [['Signal', 'Reporting stopped', 'warning', 'This was the last inspection before 19 days without any reports.'], ['Control', 'Can’t be assessed', '', 'Nothing has been reported since.'], ['Could have been', 'Unknown', 'warning', 'Prism can’t see what’s happening on site.'], ['Confidence', 'Moderate', '', 'Based on the gap in reporting, not on one record.']],
+    'hand:2:0': [['Signal', 'Reporting stopped', 'warning', 'This was the last inspection before 19 days without any reports.'], ['Control', 'Can’t be assessed', '', 'Nothing has been reported since.'], ['Could have been', 'Unknown', 'warning', 'No records are coming in to read.'], ['Confidence', 'Moderate', '', 'Based on the gap in reporting, not on one record.']],
     'hand:3:0': [['Signal', 'Context', '', 'No hazard in the record itself.'], ['Why it matters', 'New night crew, the week setups drifted', 'warning', 'The timing links it to the traffic setup changes at Ridge Road.'], ['Confidence', 'Moderate', '', 'A link in time, not a direct cause.']],
     'fat:0:0': [['Signal', 'Weak signal', 'warning', 'Fatigue described, but no event.'], ['Control', 'Roster limits unclear', 'warning', 'The crew was on its sixth night in a row.'], ['Could have been', 'Serious injury', 'critical', 'Tired crews make more mistakes during setup.'], ['Confidence', 'Moderate', '', 'One report, in the reporter’s own words.']],
     'fat:1:0': [['Signal', 'Energy released', 'critical', 'A segment crane struck something during a lift.'], ['Energy', 'Suspended load', '', 'Tunnel segment handling.'], ['Control', 'Failed', 'critical', 'The lift didn’t go as planned.'], ['Could have been', 'Serious injury', 'critical', 'A heavy segment moving unexpectedly.'], ['Key hazard', 'Fatigue late in a run of nights', '', 'The report says “end of long run of nights”.'], ['Confidence', 'High', '', 'The record names fatigue directly.']],
@@ -1019,7 +1109,7 @@ main { padding-block: 32px 80px; }
     var ORDER = ['Signal', 'Energy', 'Control', 'Could have been', 'Confidence'];
     return rows.sort(function (a, b) { return ORDER.indexOf(a[0]) - ORDER.indexOf(b[0]); });
   }
-  function addRec(r) { r.id = r.id || 'rec' + (++recSeq); r.type = recType(r.raw); r.ref = recRef(r.raw); r.corrections = []; RECS[r.id] = r; return r; }
+  function addRec(r) { r.id = r.id || 'rec' + (++recSeq); r.type = recType(r.raw); if (r.type === 'Record' && SRC[r.src] && SRC[r.src].types) r.type = SRC[r.src].types[0]; r.ref = recRef(r.raw); r.corrections = []; RECS[r.id] = r; return r; }
   INSIGHTS.forEach(function (i) {
     i.says.forEach(function (sy, a) {
       sy.recs.forEach(function (r, b) {
@@ -1100,6 +1190,84 @@ main { padding-block: 32px 80px; }
     return '<button type="button" class="rec rec-btn" data-rec="' + r.id + '"><span class="when">' + typeLabel(r.type) + (withSource ? '<span class="mg">' + esc(src.mg) + '</span>' : '') + esc(recWhen(r)) + ' · ' + esc(site ? site.name : '') + '</span><span class="txt">' + esc(r.raw) + '</span><span class="reads">' + r.tags.map(tagBadge).join('') + '</span></button>';
   }
 
+  /* ---------- Feed: one list pattern for every view ---------- */
+  var MON = { Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5, Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11 };
+  function recTs(r) {
+    if (r.at) return r.at;
+    var m = String(r.when).match(/(\d{1,2})\s+([A-Z][a-z]{2})\s*$/);
+    return m ? new Date(2026, MON[m[2]], +m[1], 12).getTime() : 0;
+  }
+  function recSummary(r) {
+    if (r.line) return r.line.replace(/<[^>]+>/g, '');
+    if (r.reading) return r.reading[0][3];
+    var q = r.raw.match(/"([^"]+)"/);
+    return q ? cap(q[1]) + '.' : r.raw.split('\n')[0];
+  }
+  function recSignal(r) {
+    if (r.reading) return [r.reading[0][1], r.reading[0][2]];
+    var t = r.tags.filter(function (x) { return x[1]; })[0] || r.tags.filter(function (x) { return !/insight|Set aside/i.test(x[0]); })[0];
+    return t ? [t[0], t[1] || ''] : ['Context', ''];
+  }
+  function sigGroup(r) { var t = recSignal(r)[1]; return t === 'critical' || t === 'warning' ? 'attention' : t === 'success' ? 'good' : 'other'; }
+  ST.feedF = {};
+  var SIG_OPTS = [['', 'Any signal'], ['attention', 'Needs attention'], ['good', 'Good'], ['other', 'Everything else']];
+  var PART_OPTS = [['', 'In or out of insights'], ['in', 'Part of an insight'], ['out', 'Set aside']];
+  function feedHTML(key, base, dims, limit) {
+    var all = Object.keys(RECS).map(function (k) { return RECS[k]; }).filter(base).sort(function (a, b) { return recTs(b) - recTs(a); });
+    var f = ST.feedF[key] || (ST.feedF[key] = {});
+    var list = limit ? all : all.filter(function (r) {
+      if (f.src && r.src !== f.src) return false;
+      if (f.type && r.type !== f.type) return false;
+      if (f.site && r.site !== f.site) return false;
+      if (f.sig && sigGroup(r) !== f.sig) return false;
+      if (f.part === 'in' && !r.insights.length) return false;
+      if (f.part === 'out' && r.insights.length) return false;
+      return true;
+    });
+    var shown = limit ? list.slice(0, limit) : list;
+    function uniq(fn) { var o = []; all.forEach(function (r) { var v = fn(r); if (v && o.indexOf(v) < 0) o.push(v); }); return o; }
+    function sel(dim, label, opts) {
+      return '<label class="ff"><span class="sr">' + esc(label) + '</span><select class="select" data-ff="' + key + '|' + dim + '">' + opts.map(function (o) {
+        return '<option value="' + esc(o[0]) + '"' + ((f[dim] || '') === o[0] ? ' selected' : '') + '>' + esc(o[1]) + '</option>';
+      }).join('') + '</select></label>';
+    }
+    var bar = limit ? '' : '<div class="ffbar">' +
+      (dims.indexOf('src') > -1 ? sel('src', 'Source', [['', 'All sources']].concat(uniq(function (r) { return r.src; }).map(function (s) { return [s, SRC[s].name]; }))) : '') +
+      (dims.indexOf('type') > -1 ? sel('type', 'Type', [['', 'All types']].concat(uniq(function (r) { return r.type; }).sort().map(function (t) { return [t, t]; }))) : '') +
+      (dims.indexOf('site') > -1 ? sel('site', 'Site', [['', 'All sites']].concat(uniq(function (r) { return r.site; }).map(function (s) { return [s, SITE[s].name]; }))) : '') +
+      sel('sig', 'Signal', SIG_OPTS) + sel('part', 'Part of an insight', PART_OPTS) +
+      '<span class="ff-count">' + list.length + (list.length === 1 ? ' record' : ' records') + '</span></div>';
+    var rows = shown.map(function (r) {
+      var sg = recSignal(r), src = SRC[r.src], site = SITE[r.site];
+      var part = r.insights.map(insightById).filter(Boolean)[0];
+      return '<button type="button" class="frow2' + (r.fresh ? ' fresh' : '') + '" data-rec="' + r.id + '">' +
+        '<span class="f-when">' + esc(recWhen(r)) + '</span>' +
+        '<span class="f-type">' + typeLabel(r.type) + '</span>' +
+        '<span class="f-src"><span class="mg">' + esc(src.mg) + '</span>' + esc(src.name) + '</span>' +
+        '<span class="f-site">' + esc(site ? site.name : '') + '</span>' +
+        '<span class="f-read">' + esc(recSummary(r)) + '</span>' +
+        '<span class="f-sig"><span class="badge' + (sg[1] ? ' ' + sg[1] : '') + '">' + esc(sg[0]) + '</span></span>' +
+        '<span class="f-part">' + (part ? esc(cap(part.short)) : '<span class="muted">Set aside</span>') + '</span></button>';
+    }).join('');
+    return bar + '<div class="card flist"><div class="fhead2"><span>Received</span><span>Type</span><span>Source</span><span>Site</span><span>What Prism made of it</span><span>Signal</span><span>Part of</span></div>' +
+      (rows || '<p class="empty-card">No records match these filters.</p>') + '</div>';
+  }
+  function feedCount(base) { return Object.keys(RECS).filter(function (k) { return base(RECS[k]); }).length; }
+  function sitesInViewIds() { return sitesInView().map(function (x) { return x.id; }); }
+  document.addEventListener('change', function (e) {
+    var k = e.target.getAttribute && e.target.getAttribute('data-ff'); if (!k) return;
+    var p = k.split('|'); (ST.feedF[p[0]] = ST.feedF[p[0]] || {})[p[1]] = e.target.value;
+    render();
+    var el = document.querySelector('[data-ff="' + k + '"]'); if (el) el.focus();
+  });
+
+  function renderSiteFeed(id) {
+    var x = SITE[id]; if (!x) return renderSites();
+    $('view').innerHTML = '<a class="back" href="#site/' + id + '">← ' + esc(x.name) + '</a>' +
+      '<div class="page-top"><div><h1>The feed behind ' + esc(x.name) + '</h1><p class="sub">Every record from this site, newest first, as Prism read it</p></div></div>' +
+      feedHTML('site-all:' + id, function (r) { return r.site === id; }, ['src', 'type']);
+  }
+
   /* ---------- Insight sheet ---------- */
   function openSheet(id, focusOwner) {
     var i = INSIGHTS.filter(function (x) { return x.id === id; })[0]; if (!i) return;
@@ -1161,9 +1329,11 @@ main { padding-block: 32px 80px; }
   /* ---------- Help: one set of definitions, opened from anywhere ---------- */
   var HELP = [
     ['ideas', 'The main ideas', [
+      ['', 'Hiviz', 'The platform. It connects to the systems you already use, tracks every insight, and runs Focus reviews.'],
+      ['', 'Prism', 'The AI enrichment layer inside Hiviz. It reads every record, links them into insights and writes the story, with a reason for everything it concludes.'],
       ['', 'Insight', 'A pattern Prism finds by linking records across sources and sites. Every insight says why it was raised.'],
       ['', 'Purview', 'The division, region and sites you’re responsible for. Change it in the header.'],
-      ['', 'Source', 'A system the organisation already uses, such as Procore or Intelex. Prism reads from it and never replaces it.'],
+      ['', 'Source', 'A system the organisation already uses, such as Procore or Intelex. Hiviz connects to it and Prism reads what comes in. Neither replaces it.'],
       ['', 'Enrichment', 'How Prism reads each record: what happened, the energy involved, whether a control held, and what it could have led to.'],
       ['', 'Focus review', 'The regular meeting where managers review the state of safety and act on insights.']
     ]],
@@ -1171,7 +1341,7 @@ main { padding-block: 32px 80px; }
       ['critical', 'At risk', 'A critical insight involves this site, or a control has failed recently.'],
       ['warning', 'Watch', 'Signals are drifting, but nothing is critical yet.'],
       ['warning', 'Gone quiet', 'Reporting has stopped, or the records look too perfect to trust.'],
-      ['info', 'Not connected', 'Prism can’t see this site yet.'],
+      ['info', 'Not connected', 'Hiviz can’t see this site yet.'],
       ['success', 'Holding', 'Reporting is steady and issues are being fixed.']
     ]],
     ['insights', 'Insight status', [
@@ -1185,16 +1355,16 @@ main { padding-block: 32px 80px; }
     ['severity', 'Severity and trend', [
       ['critical', 'Critical', 'Could lead to a fatality or serious injury, or a critical control has failed.'],
       ['warning', 'Warning', 'A real pattern that isn’t critical yet.'],
-      ['critical', 'Getting worse', 'More evidence, or more serious evidence, than the two weeks before.'],
-      ['', 'No change', 'About the same as the two weeks before.'],
-      ['success', 'Getting better', 'Less evidence, or evidence that controls are now holding.']
+      ['critical', 'Worsening', 'More evidence, or more serious evidence, than the two weeks before.'],
+      ['', 'Steady', 'About the same as the two weeks before.'],
+      ['success', 'Improving', 'Less evidence, or evidence that controls are now holding.']
     ]],
     ['sources', 'Source status', [
       ['success', 'Live', 'Sending as expected.'],
       ['warning', 'Delayed', 'Sending, but later than usual.'],
       ['warning', 'Partly imported', 'Some records couldn’t be read and are held for review.'],
-      ['critical', 'Failing', 'Nothing is arriving. Prism keeps retrying and tells the system admin.'],
-      ['info', 'Not connected', 'Prism can’t see this data yet.']
+      ['critical', 'Failing', 'Nothing is arriving. Hiviz keeps retrying and tells the system admin.'],
+      ['info', 'Not connected', 'Hiviz can’t see this data yet.']
     ]]
   ];
   var helpTrigger = null;
@@ -1245,25 +1415,32 @@ main { padding-block: 32px 80px; }
     var bits = parts.map(function (p, k) { var t = (k ? lw(p[1]) : word(p[1])) + ' ' + p[2]; return p[0] ? '<b class="t-' + p[0] + '">' + t + '</b>' : t; });
 
     var sorted = sites.slice().sort(function (a, b) { return order[a.state] - order[b.state]; });
-    var active = sorted.filter(function (x) { return x.state !== 'hold'; }), holding = sorted.filter(function (x) { return x.state === 'hold'; });
-    function siteRow(x) {
+    var SF = [['all', 'All', null], ['risk', 'At risk', ['risk']], ['quiet', 'Gone quiet', ['quiet']], ['none', 'Not connected', ['none']], ['watch', 'Watch', ['watch']], ['hold', 'Holding', ['hold']]];
+    var cur = SF.filter(function (f) { return f[0] === ST.siteFilter; })[0] || SF[0];
+    var shown = sorted.filter(function (x) { return !cur[2] || cur[2].indexOf(x.state) > -1; });
+    function siteCard(x) {
       var st = STATE[x.state], ins = list.filter(function (i) { return i.sites.indexOf(x.id) > -1; }).length;
-      return '<div class="srow" data-site="' + x.id + '"><span class="st"><span class="badge ' + st[0] + '"><i></i>' + st[1] + '</span></span>' +
-        '<div class="main"><span class="nm"><a href="#site/' + x.id + '">' + esc(x.name) + '</a>' + (multiRegion ? '<small>' + esc(x.region) + '</small>' : '') + '</span><span class="why">' + esc(x.why) + '</span></div>' +
-        '<span class="meta">' + (x.visit > 30 ? '<span class="t-warning">Not visited in ' + x.visit + ' days</span>' : '') + (ins ? '<a href="#site/' + x.id + '">' + word(ins) + (ins === 1 ? ' insight' : ' insights') + '</a>' : '') + '</span></div>';
+      return '<div class="card scard2" data-site="' + x.id + '">' +
+        '<div class="sc-top"><span class="badge ' + st[0] + '"><i></i>' + st[1] + '</span>' + (multiRegion ? '<span class="label">' + esc(x.region) + '</span>' : '') + '</div>' +
+        '<a class="sc-name" href="#site/' + x.id + '">' + esc(x.name) + '</a>' +
+        '<p class="sc-why">' + esc(x.why) + '</p>' +
+        '<div class="sc-foot"><span' + (x.visit > 30 ? ' class="t-warning"' : '') + '>' + (x.visit > 30 ? 'Not visited in ' + x.visit + ' days' : 'Visited ' + x.visit + ' days ago') + '</span>' +
+          '<span>' + (ins ? word(ins) + (ins === 1 ? ' insight' : ' insights') : 'No insights') + '</span></div>' +
+      '</div>';
     }
 
     $('view').innerHTML =
       '<div class="page-top"><div><h1>Sites</h1><p class="sub">Your duty of care · ' + esc(scopeLabel()) + '</p></div></div>' +
       '<p class="pv-summary"><b>' + word(sites.length) + ' worksites.</b> ' + join(bits) + '.</p>' +
-      '<div class="sec-t"><h2>Worksites</h2><button type="button" class="what" data-help="sites">What do these mean?</button></div>' +
-      '<div class="card slist">' + active.map(siteRow).join('') +
-        (holding.length ? (ST.showHold ? holding.map(siteRow).join('') + '<button type="button" class="hold-toggle" data-hold="0">Hide holding sites</button>'
-          : '<button type="button" class="hold-toggle" data-hold="1">' + word(holding.length) + (holding.length === 1 ? ' site is' : ' sites are') + ' holding. Show ' + (holding.length === 1 ? 'it' : 'them') + '</button>') : '') +
-      '</div>';
+      '<div class="list-top"><div class="seg" role="group" aria-label="Filter sites">' + SF.map(function (f) {
+          var n = f[2] ? sites.filter(function (x) { return f[2].indexOf(x.state) > -1; }).length : sites.length;
+          return '<button type="button" data-sitefilter="' + f[0] + '" aria-pressed="' + (f[0] === cur[0]) + '">' + esc(f[1]) + '<span class="c">' + n + '</span></button>';
+        }).join('') + '</div><button type="button" class="what" data-help="sites">What do these mean?</button></div>' +
+      (shown.length ? '<div class="sgrid3">' + shown.map(siteCard).join('') + '</div>' : '<p class="card empty-card">No sites in this state.</p>');
   }
   document.addEventListener('click', function (e) {
-    var h = e.target.closest('[data-hold]'); if (h) { ST.showHold = h.getAttribute('data-hold') === '1'; renderSites(); return; }
+    var stb = e.target.closest('[data-srctab]'); if (stb) { ST.srcTab = stb.getAttribute('data-srctab'); renderSources(); return; }
+    var sf = e.target.closest('[data-sitefilter]'); if (sf) { ST.siteFilter = sf.getAttribute('data-sitefilter'); renderSites(); var nb = document.querySelector('[data-sitefilter="' + ST.siteFilter + '"]'); if (nb) nb.focus(); return; }
     var sr = e.target.closest('[data-site]'); if (sr && !e.target.closest('a')) { go('site/' + sr.getAttribute('data-site')); return; }
     var pv = e.target.closest('[data-plan-visit]'); if (pv) { var sid = pv.getAttribute('data-plan-visit'); ST.visitPlanned = ST.visitPlanned || {}; ST.visitPlanned[sid] = true; renderSite(sid); toast('Visit planned for next week'); return; }
     var g = e.target.closest('[data-gofilter]'); if (g) { ST.filter = g.getAttribute('data-gofilter'); go('focus'); }
@@ -1274,8 +1451,7 @@ main { padding-block: 32px 80px; }
     var st = STATE[x.state];
     var ins = INSIGHTS.filter(function (i) { return !i.closed && !i.dismissed && i.sites.indexOf(id) > -1; });
     var region = null; ORG.forEach(function (d) { d.regions.forEach(function (r) { if (r.name === x.region) region = r; }); });
-    var recs = Object.keys(RECS).map(function (k) { return RECS[k]; }).filter(function (r) { return r.site === id; })
-      .sort(function (a, b) { return (b.at || 0) - (a.at || 0); });
+    var nRecs = feedCount(function (r) { return r.site === id; });
     var planned = ST.visitPlanned && ST.visitPlanned[id];
     $('view').innerHTML = '<a class="back" href="#sites">← Sites</a>' +
       '<div class="ins-head"><div class="meta"><span class="badge ' + st[0] + '"><i></i>' + st[1] + '</span><span class="label">' + esc(x.region) + ' region' + (region ? ' · ' + esc(region.rm) + ', regional manager' : '') + '</span></div>' +
@@ -1285,10 +1461,7 @@ main { padding-block: 32px 80px; }
         '<section class="ins-sec"><span class="label">Insights involving this site</span>' +
           (ins.length ? '<div class="icards one">' + ins.map(row).join('') + '</div>' : '<p class="card empty-card">No open insights involve this site.</p>') + '</section>' +
         '<section class="ins-sec"><span class="label">Recent records · as Prism read them</span>' +
-          (recs.length ? '<div class="card feed"><div class="fhead"><span>Received</span><span>As received</span><span>What Prism made of it</span></div>' + recs.map(function (r) {
-            var line = r.line || (r.insights.length ? '<b>' + esc(insightById(r.insights[0]).title) + '</b>' : '<b>' + esc(r.type) + '</b>');
-            return '<div class="frow clickable" data-rec="' + r.id + '" tabindex="0" role="button"><span class="when">' + typeLabel(r.type) + '<br>' + esc(recWhen(r)) + '<br><span class="mg" title="' + esc(SRC[r.src].name) + '">' + esc(SRC[r.src].mg) + '</span></span><span class="raw">' + esc(r.raw) + '</span><span class="read"><span class="line">' + line + '</span><span class="tags">' + r.tags.map(tagBadge).join('') + '</span></span></div>';
-          }).join('') + '</div>' : '<p class="card empty-card">No records from this site.</p>') + '</section>' +
+          (nRecs ? feedHTML('site-recent:' + id, function (r) { return r.site === id; }, [], 5) + '<a class="feed-link" href="#site/' + id + '/feed">See the feed behind this site (' + nRecs + (nRecs === 1 ? ' record' : ' records') + ') →</a>' : '<p class="card empty-card">No records from this site.</p>') + '</section>' +
       '</div><aside class="ins-side">' +
         '<section class="card side-card"><h2>Leadership visits</h2>' +
           '<p class="' + (x.visit > 30 ? 't-warning' : '') + '" style="font-size:16px;font-weight:700">' + (x.visit > 30 ? 'Not visited in ' + x.visit + ' days' : 'Last visited ' + x.visit + ' days ago') + '</p>' +
@@ -1339,6 +1512,8 @@ main { padding-block: 32px 80px; }
     $('view').innerHTML =
       '<div class="page-top"><div><h1>Sources</h1><p class="sub">' + word(live) + ' of ' + SOURCES.length + ' sending normally · shared across all divisions · <button type="button" class="what" data-help="sources">What the statuses mean</button></p></div>' +
         (sourceIssues().length ? '<span class="issues">' + sourceIssues().length + (sourceIssues().length === 1 ? ' source issue' : ' source issues') + '</span>' : '') + '</div>' +
+      '<div class="seg src-tabs" role="group" aria-label="Show"><button type="button" data-srctab="cards" aria-pressed="' + (ST.srcTab !== 'feed') + '">Sources</button><button type="button" data-srctab="feed" aria-pressed="' + (ST.srcTab === 'feed') + '">Feed</button></div>' +
+      (ST.srcTab === 'feed' ? '<p class="muted-p feed-note">Every record behind ' + esc(scopeLabel()) + ', newest first, as Prism read it.</p>' + feedHTML('all', function (r) { return sitesInViewIds().indexOf(r.site) > -1; }, ['src', 'type', 'site']) :
       pipeHTML() +
       '<div class="sgrid">' + SOURCES.map(function (s) {
         var st = SRC_STATUS[s.status];
@@ -1348,23 +1523,20 @@ main { padding-block: 32px 80px; }
           '<p class="says-now">' + (s.problem && s.status !== 'none' ? '<span class="problem-line t-' + st[0] + '">' + esc(s.problem) + '</span>' : esc(s.now)) + '</p>' +
           '<div class="ft"><span>' + (s.status === 'none' ? 'Nothing received' : 'Last ' + esc(lastOf(s)) + ' · ' + s.today + ' today') + '</span></div>' +
         '</button>';
-      }).join('') + '</div>';
+      }).join('') + '</div>');
   }
   function renderSource(s) {
     if (!s) { ST.src = ''; return renderSources(); }
     var st = SRC_STATUS[s.status];
-    var items = FEED.filter(function (f) { return f.src === s.id; }).sort(function (a, b) { return b.at - a.at; });
     var fails = (FAILS[s.id] || []).map(function (e) { return '<div class="frow ' + e.level + '"><span class="when">' + esc(ago(e.at)) + '</span><span class="raw">' + esc(e.raw) + '</span><span class="read"><span class="line">' + e.line + '</span></span></div>'; }).join('');
     $('view').innerHTML =
       '<a class="back" href="#sources">← Sources</a>' +
       '<div class="page-top"><div style="display:flex;gap:14px;align-items:center"><span class="mg lg">' + esc(s.mg) + '</span><div><h1>' + esc(s.name) + '</h1><p class="sub">' + esc(s.how) + (s.status !== 'none' ? ' · last ' + esc(lastOf(s)) + ' · ' + s.today + ' today' : '') + '</p></div></div><span class="badge ' + st[0] + '"><i></i>' + st[1] + '</span></div>' +
       (s.problem ? '<div class="banner ' + st[0] + '"><b>' + esc(s.problem) + '</b><p>' + esc(s.doing) + '</p>' + (s.impact ? '<p>' + esc(s.impact) + '</p>' : '') + '</div>' : '') +
       '<div class="types src-types"><span class="label">Sends</span>' + s.types.map(typeLabel).join('') + '</div>' +
-      '<div class="sec-t"><h2>Feed</h2><span class="label">Each record as it arrived, and what Prism made of it</span></div>' +
-      '<div class="card feed"><div class="fhead"><span>Received</span><span>As received</span><span>What Prism made of it</span></div>' + fails +
-        (items.length ? items.map(function (f) {
-          return '<div class="frow clickable' + (f.fresh ? ' fresh' : '') + '" data-rec="' + f.id + '" tabindex="0" role="button"><span class="when">' + typeLabel(RECS[f.id] ? RECS[f.id].type : 'Record') + '<br>' + esc(ago(f.at)) + '<br>' + esc(SITE[f.site] ? SITE[f.site].name : '') + '</span><span class="raw">' + esc(f.raw) + '</span><span class="read"><span class="line">' + f.line + '</span><span class="tags">' + f.tags.map(tagBadge).join('') + '</span></span></div>';
-        }).join('') : (fails ? '' : '<div class="frow"><span class="when">—</span><span class="read" style="grid-column:2/-1">Nothing received from this source.</span></div>')) + '</div>';
+      '<div class="sec-t"><h2>Feed</h2><span class="label">Newest first, as Prism read it</span></div>' +
+      (fails ? '<div class="card feed pinned">' + fails + '</div>' : '') +
+      feedHTML('src:' + s.id, function (r) { return r.src === s.id; }, ['type', 'site']);
   }
 
   /* =============================================================
@@ -1377,7 +1549,8 @@ main { padding-block: 32px 80px; }
     if (!first) {
       FEED.forEach(function (f) { f.fresh = false; });
       var nf = { src: a[0], at: Date.now(), site: a[1], raw: a[2], line: a[3], tags: a[4], fresh: true };
-      FEED.push(nf); feedToRec(nf);
+      Object.keys(RECS).forEach(function (k) { RECS[k].fresh = false; });
+      FEED.push(nf); feedToRec(nf); RECS[nf.id].fresh = true;
       s.lastTs = Date.now(); s.today++;
       var rc = $('read-count'); if (rc) rc.textContent = (parseInt(rc.textContent.replace(/,/g, ''), 10) + 1).toLocaleString();
     }
@@ -1399,6 +1572,7 @@ main { padding-block: 32px 80px; }
         { ins: 'load', who: 'Priya Nair', text: 'Book a rigging gear audit at North Yard and Harbour Bridge Deck.', outcome: ['success', 'Done. The audit is booked for 30 September.'] },
         { ins: 'pre', who: 'Tom Walsh', text: 'Remind supervisors what the pre-start is for.', outcome: ['warning', 'Done, but the pattern hasn’t changed. No update in 16 days.'] },
         { ins: 'spot', who: 'Priya Nair', text: 'Roll the spotter roster out to Ridge Road.', outcome: ['success', 'Done. No repeats in two weeks.'] },
+        { ins: 'spot', who: 'You', text: 'Check the spotter roster is in the Ridge Road induction pack.', outcome: ['warning', 'Not done yet.'] },
         { ins: 'house', who: 'Tom Walsh', text: 'Mark out laydown areas at Creek Crossing.', outcome: ['success', 'Done. The pattern has stopped and it can be closed.'] }
       ] },
     { id: 'm-build-0915', div: 'Building', reg: '', date: 'Monday 15 September', short: '15 Sep',
@@ -1435,7 +1609,7 @@ main { padding-block: 32px 80px; }
   function agendaReason(i) {
     if (i.status === 'new') return 'Needs an owner';
     if (stalled(i)) return 'Stalled';
-    if (i.trend === 'worse') return 'Getting worse';
+    if (i.trend === 'worse') return 'Worsening';
     if (i.status === 'resolved') return 'Ready to close';
     return 'Check progress';
   }
@@ -1514,9 +1688,9 @@ main { padding-block: 32px 80px; }
           '<section class="card rsec"><span class="label">2 · Since last time' + (last ? ' · ' + esc(last.short) : '') + '</span>' +
             '<div class="rcols">' +
               '<div><h3><span class="badge info"><i></i>New</span></h3>' + lines(fresh, 'info', function (i) { return 'No owner yet · ' + esc(join(i.sites.map(function (s) { return SITE[s].name; }))); }) + '</div>' +
-              '<div><h3><span class="badge critical"><i></i>Getting worse</span></h3>' + lines(worse, 'critical', function (i) { return 'With ' + esc(i.owner); }) + '</div>' +
+              '<div><h3><span class="badge critical"><i></i>Worsening</span></h3>' + lines(worse, 'critical', function (i) { return 'With ' + esc(i.owner); }) + '</div>' +
               '<div><h3><span class="badge warning"><i></i>Stalled</span></h3>' + lines(stuck, 'warning', function (i) { return 'No update in ' + i.updated + ' days · ' + esc(i.owner); }) + '</div>' +
-              '<div><h3><span class="badge success"><i></i>Better or done</span></h3>' + lines(better.concat(ready), 'success', function (i) { return i.status === 'resolved' ? 'Ready to close' : 'Improving · ' + esc(i.owner); }) + '</div>' +
+              '<div><h3><span class="badge success"><i></i>Improving or done</span></h3>' + lines(better.concat(ready), 'success', function (i) { return i.status === 'resolved' ? 'Ready to close' : 'Improving · ' + esc(i.owner); }) + '</div>' +
             '</div></section>' +
           '<section class="card rsec"><span class="label">3 · As discussed' + (last ? ' on ' + esc(last.short) : '') + '</span>' +
             (last ? '<ul class="agreed">' + last.decisions.map(function (d) {
@@ -1607,10 +1781,10 @@ main { padding-block: 32px 80px; }
     var done = MT.items.filter(function (id) { return MT.log[id] && MT.log[id].done && !MT.log[id].skipped; });
     return 'Focus review · ' + scopeLabel() + ' · Friday 26 September\nAttended: ' + join(att) + '\n\n' +
       done.map(function (id) { var it = INSIGHTS.filter(function (x) { return x.id === id; })[0], lg = MT.log[id]; return '• ' + it.title + ': ' + (lg.changes.join(', ') || 'reviewed, no change') + (lg.note ? '. ' + lg.note : ''); }).join('\n') +
-      (MT.notes ? '\n\nNotes: ' + MT.notes : '') + '\n\nPrepared with Hiviz Prism.';
+      (MT.notes ? '\n\nNotes: ' + MT.notes : '') + '\n\nPrepared with Hiviz. Story written by Prism.';
   }
   function reportText() {
-    return 'State of safety · ' + scopeLabel() + ' · Friday 26 September\n\n' + $('view').querySelector('.report').innerText + '\n\nPrepared by Hiviz Prism.';
+    return 'State of safety · ' + scopeLabel() + ' · Friday 26 September\n\n' + $('view').querySelector('.report').innerText + '\n\nPrepared by Hiviz. Story written by Prism.';
   }
   function copy(text, ok) {
     try { navigator.clipboard.writeText(text).then(function () { toast(ok); }, function () { toast('Copy isn’t available here'); }); }
@@ -1665,22 +1839,169 @@ main { padding-block: 32px 80px; }
   });
 
   /* =============================================================
+     My Focus: everything that needs you, until it's done
+     ============================================================= */
+  var MY_DIV = 'Infrastructure'; // the signed-in division manager's purview
+  ST.nudged = {}; ST.visitPlanned = ST.visitPlanned || {}; ST.mfDone = []; ST.mfWalk = -1; ST.mfSnap = null; ST.mfRes = {};
+  function mySites() { var o = []; ORG.forEach(function (d) { if (d.div === MY_DIV) d.regions.forEach(function (r) { o = o.concat(r.sites); }); }); return o; }
+  function myInsights() { var ids = mySites().map(function (x) { return x.id; }); return INSIGHTS.filter(function (i) { return !i.closed && !i.dismissed && i.sites.some(function (s) { return ids.indexOf(s) > -1; }); }); }
+  var MF_GROUPS = [['assign', 'Assign an owner'], ['chase', 'Chase up'], ['visit', 'Plan a visit'], ['update', 'Post an update'], ['close', 'Close'], ['agreed', 'Agreed at a Focus review']];
+  function myFocusItems() {
+    var items = [], ins = myInsights(), crit = function (i) { return i.sev === 'critical' ? 0 : 1; };
+    ins.filter(function (i) { return !i.owner; }).sort(function (a, b) { return crit(a) - crit(b); }).forEach(function (i) {
+      items.push({ kind: 'assign', id: 'a-' + i.id, ins: i, sev: i.sev, title: i.title, why: 'Raised ' + i.since + '. Nobody owns it yet.' });
+    });
+    ins.filter(function (i) { return stalled(i) && i.owner !== YOU && !ST.nudged[i.id]; }).forEach(function (i) {
+      items.push({ kind: 'chase', id: 'c-' + i.id, ins: i, sev: i.sev, title: i.title, why: 'With ' + i.owner + '. No update in ' + i.updated + ' days.' });
+    });
+    mySites().filter(function (x) { return (x.state === 'risk' || x.state === 'quiet') && x.visit > 14 && !ST.visitPlanned[x.id]; }).sort(function (a, b) { return b.visit - a.visit; }).forEach(function (x) {
+      items.push({ kind: 'visit', id: 'v-' + x.id, site: x, sev: x.state === 'risk' ? 'critical' : 'warning', title: x.name, why: STATE[x.state][1] + '. Last leadership visit ' + x.visit + ' days ago.' });
+    });
+    ins.filter(function (i) { return i.owner === YOU && (i.updated == null || i.updated >= 7); }).forEach(function (i) {
+      items.push({ kind: 'update', id: 'u-' + i.id, ins: i, sev: i.sev, title: i.title, why: 'Yours. ' + (i.updated == null ? 'No update yet.' : 'Last update ' + i.updated + ' days ago.') });
+    });
+    ins.filter(function (i) { return i.status === 'resolved'; }).forEach(function (i) {
+      items.push({ kind: 'close', id: 'x-' + i.id, ins: i, sev: 'success', title: i.title, why: 'The pattern has stopped. ' + (i.latest || '') });
+    });
+    MEETINGS.filter(function (m) { return m.div === MY_DIV; }).forEach(function (m) {
+      m.decisions.forEach(function (d, k) {
+        if (d.who === YOU && !d.doneByYou) items.push({ kind: 'agreed', id: 'g-' + m.id + '-' + k, dec: d, meeting: m, ins: insightById(d.ins), sev: 'warning', title: d.text, why: 'Agreed at the Focus review on ' + m.short + '.' });
+      });
+    });
+    return items;
+  }
+  function renderMyFocusCount() {
+    var n = myFocusItems().length, b = $('mf-count');
+    b.textContent = n; b.hidden = !n;
+    $('mf-btn').setAttribute('aria-label', 'My Focus, ' + n + (n === 1 ? ' item' : ' items'));
+    $('mf-btn').setAttribute('aria-current', ST.view === 'myfocus' ? 'page' : 'false');
+  }
+
+  function mfSev(it) {
+    if (it.kind === 'close') return '<span class="badge success"><i></i>Ready to close</span>';
+    if (it.kind === 'agreed') return '<span class="badge"><i></i>Agreed</span>';
+    return sevIcon(it.sev === 'critical' ? 'critical' : 'warning');
+  }
+  function mfAction(it, big) {
+    var i = it.ins;
+    if (it.kind === 'assign') {
+      var ow = owners();
+      return '<span class="fld"><label for="mfo-' + i.id + '" class="sr">Owner</label><select class="select" id="mfo-' + i.id + '" data-mf-assign="' + i.id + '"><option value="">Choose an owner</option>' + ow.map(function (o) { return '<option>' + esc(o) + '</option>'; }).join('') + '</select></span>';
+    }
+    if (it.kind === 'chase') return '<button type="button" class="btn brand" data-mf-nudge="' + i.id + '">Nudge ' + esc(i.owner) + '</button>';
+    if (it.kind === 'visit') return '<button type="button" class="btn brand" data-mf-visit="' + it.site.id + '">Plan a visit</button>';
+    if (it.kind === 'update') return '<a class="btn brand" href="#insight/' + i.id + '">Post an update</a>';
+    if (it.kind === 'close') return '<button type="button" class="btn brand" data-mf-close="' + i.id + '">Close it</button>';
+    if (it.kind === 'agreed') return '<button type="button" class="btn brand" data-mf-agreed="' + it.id + '">Mark as done</button>';
+    return '';
+  }
+  function mfOpen(it) {
+    if (it.site) return '<a class="mf-open" href="#site/' + it.site.id + '">Open site</a>';
+    if (it.ins) return '<a class="mf-open" href="#insight/' + it.ins.id + '">Open insight</a>';
+    return '';
+  }
+  function mfDone(label) { ST.mfDone.unshift(label); }
+
+  function renderMyFocus() {
+    var items = myFocusItems();
+    if (ST.mfWalk > -1) return renderMyFocusWalk(items);
+    var head = '<div class="page-top"><div><h1>My Focus</h1><p class="sub">Everything that needs you across ' + esc(MY_DIV) + ' division. Items clear when they’re done.</p></div>' +
+      (items.length ? '<div class="actions"><button type="button" class="btn brand" data-mf-walk="0">Work through them</button></div>' : '') + '</div>';
+    var groups = MF_GROUPS.map(function (g) {
+      var list = items.filter(function (it) { return it.kind === g[0]; });
+      if (!list.length) return '';
+      return '<section class="mf-group"><h2 class="igroup-h">' + esc(g[1]) + ' <span class="tnum">' + list.length + '</span></h2><div class="card mf-list">' + list.map(function (it) {
+        return '<div class="mf-row"><span class="mf-sev">' + mfSev(it) + '</span><div class="mf-main"><span class="mf-title">' + esc(it.title) + '</span><span class="mf-why">' + esc(it.why) + '</span></div>' +
+          '<div class="mf-act">' + mfAction(it) + mfOpen(it) + '</div></div>';
+      }).join('') + '</div></section>';
+    }).join('');
+    var done = ST.mfDone.length ? '<section class="mf-group"><h2 class="igroup-h">Done today <span class="tnum">' + ST.mfDone.length + '</span></h2><ul class="mf-done">' + ST.mfDone.map(function (d) { return '<li><span class="gen-i">✓</span>' + esc(d) + '</li>'; }).join('') + '</ul></section>' : '';
+    $('view').innerHTML = head + (items.length ? groups : '<p class="card empty-card">Nothing needs you right now.</p>') + done;
+  }
+  function renderMyFocusWalk(live) {
+    if (!ST.mfSnap) ST.mfSnap = live.slice();
+    var items = ST.mfSnap, liveIds = live.map(function (x) { return x.id; });
+    function isDone(x) { return liveIds.indexOf(x.id) < 0; }
+    if (!items.length) { ST.mfWalk = -1; ST.mfSnap = null; return renderMyFocus(); }
+    if (ST.mfWalk >= items.length) ST.mfWalk = items.length - 1;
+    var it = items[ST.mfWalk], i = it.ins, done = isDone(it);
+    var left = items.filter(function (x) { return !isDone(x); }).length;
+    var evidence = '';
+    if (i && it.kind !== 'agreed') {
+      var ev = []; i.says.forEach(function (sy) { sy.recs.forEach(function (r) { ev.push(RECS[r.id]); }); });
+      ev.sort(function (a, b) { var t = function (x) { return x.tags.some(function (g) { return g[1] === 'critical'; }) ? 0 : 1; }; return t(a) - t(b); });
+      evidence = '<p class="walk-story">' + esc(i.story) + '</p><div class="walk-ev"><span class="label">Evidence</span>' + ev.slice(0, 3).map(function (r) { return recRow(r, true); }).join('') + '</div>';
+    } else if (it.site) {
+      var n = myInsights().filter(function (x) { return x.sites.indexOf(it.site.id) > -1; }).length;
+      evidence = '<p class="walk-story">' + esc(it.site.why) + '</p><p class="muted-p">' + (n ? word(n) + (n === 1 ? ' insight involves' : ' insights involve') + ' this site.' : 'No insights involve this site.') + '</p>';
+    } else if (i) {
+      evidence = '<p class="walk-story">This was agreed as part of “' + esc(i.title) + '”.</p>';
+    }
+    $('view').innerHTML =
+      '<div class="meet-bar"><button type="button" class="back linkish" data-mf-walk="-1">← Back to the list</button><span class="label">' + (ST.mfWalk + 1) + ' of ' + items.length + ' · ' + (left ? left + ' still open' : 'all done') + '</span></div>' +
+      '<div class="page-top"><div><h1>My Focus</h1><p class="sub">One at a time. Items clear when they’re done.</p></div></div>' +
+      '<div class="walk"><ol class="walk-list">' + items.map(function (x, k) {
+        var d = isDone(x);
+        return '<li class="' + (k === ST.mfWalk ? 'on' : '') + (d ? ' done' : '') + '"><button type="button" data-mf-walk="' + k + '"><span class="wl-n">' + (d ? '✓' : k + 1) + '</span><span class="wl-t">' + esc(x.title) + '<small>' + esc(d ? (ST.mfRes[x.id] || 'Done') : (MF_GROUPS.filter(function (g) { return g[0] === x.kind; })[0] || ['', ''])[1]) + '</small></span></button></li>';
+      }).join('') + '</ol>' +
+      '<section class="card walk-card"><div class="walk-head">' + mfSev(it) + '<span class="why-here">' + esc((MF_GROUPS.filter(function (g) { return g[0] === it.kind; })[0] || ['', ''])[1]) + '</span></div>' +
+        '<h2 class="walk-title">' + esc(it.title) + '</h2><p class="muted-p" style="color:var(--text)">' + esc(it.why) + '</p>' + evidence +
+        (done ? '<div class="walk-form"><p class="mf-resolved"><span class="gen-i">✓</span>' + esc(ST.mfRes[it.id] || 'Done') + '</p>' + mfOpen(it) + '</div>'
+              : '<div class="walk-form">' + mfAction(it, true) + mfOpen(it) + '</div>') +
+        '<div class="meet-actions end"><button type="button" class="btn" data-mf-walk="' + Math.max(0, ST.mfWalk - 1) + '"' + (ST.mfWalk ? '' : ' disabled') + '>Back</button><button type="button" class="btn' + (done || !left ? ' brand' : '') + '" data-mf-walk="' + (ST.mfWalk + 1 < items.length ? ST.mfWalk + 1 : -1) + '">' + (ST.mfWalk + 1 < items.length ? (done ? 'Next' : 'Leave it for now') : 'Finish') + '</button></div>' +
+      '</section></div>';
+  }
+  function mfRerender() {
+    if (ST.view === 'myfocus' && ST.mfSnap && ST.mfWalk > -1) {
+      var liveIds = myFocusItems().map(function (x) { return x.id; }), snap = ST.mfSnap;
+      if (liveIds.indexOf(snap[ST.mfWalk].id) < 0) {
+        for (var k = 1; k <= snap.length; k++) { var j = (ST.mfWalk + k) % snap.length; if (liveIds.indexOf(snap[j].id) > -1) { ST.mfWalk = j; break; } }
+      }
+    }
+    render();
+  }
+  document.addEventListener('change', function (e) {
+    var id = e.target.getAttribute && e.target.getAttribute('data-mf-assign'); if (!id || !e.target.value) return;
+    var i = insightById(id); i.owner = e.target.value; if (i.status === 'new') { i.status = 'working'; i.updated = 0; }
+    logEvent(i, 'Assigned to ' + i.owner); ST.mfRes['a-' + i.id] = 'Assigned to ' + i.owner; mfDone('Assigned “' + i.title + '” to ' + i.owner); toast('Assigned to ' + i.owner); mfRerender();
+  });
+  document.addEventListener('click', function (e) {
+    var w = e.target.closest('[data-mf-walk]'); if (w) { ST.mfWalk = +w.getAttribute('data-mf-walk'); if (ST.mfWalk < 0) ST.mfSnap = null; if (ST.view !== 'myfocus') { ST.keepWalk = true; go('myfocus'); } else { render(); window.scrollTo(0, 0); } return; }
+    var n = e.target.closest('[data-mf-nudge]');
+    if (n) { var i = insightById(n.getAttribute('data-mf-nudge')); ST.nudged[i.id] = true; ST.mfRes['c-' + i.id] = 'Nudged ' + i.owner; logEvent(i, 'Nudged ' + i.owner, 'Asked for an update.'); mfDone('Nudged ' + i.owner + ' about “' + i.title + '”'); toast(i.owner + ' has been asked for an update'); mfRerender(); return; }
+    var v = e.target.closest('[data-mf-visit]');
+    if (v) { var sid = v.getAttribute('data-mf-visit'); ST.visitPlanned[sid] = true; ST.mfRes['v-' + sid] = 'Visit planned for next week'; mfDone('Planned a visit to ' + SITE[sid].name); toast('Visit planned for next week'); mfRerender(); return; }
+    var c = e.target.closest('[data-mf-close]');
+    if (c) { var ci = insightById(c.getAttribute('data-mf-close')); ci.closed = true; ST.mfRes['x-' + ci.id] = 'Closed'; logEvent(ci, 'Closed'); mfDone('Closed “' + ci.title + '”'); toast('Insight closed. Prism will reopen it if the pattern returns.'); mfRerender(); return; }
+    var g = e.target.closest('[data-mf-agreed]');
+    if (g) {
+      var it = myFocusItems().filter(function (x) { return x.id === g.getAttribute('data-mf-agreed'); })[0];
+      if (it) { it.dec.doneByYou = true; ST.mfRes[it.id] = 'Marked as done'; if (it.ins) logEvent(it.ins, 'Done', it.dec.text); mfDone(it.dec.text); toast('Marked as done'); }
+      mfRerender();
+    }
+  });
+
+  /* =============================================================
      Routing (in-page, so it works inside sandboxed frames)
      ============================================================= */
   function go(target) { try { history.replaceState(null, '', '#' + target); } catch (err) { /* ignore */ } route(target); }
   function route(target) {
     var h = (target || (location.hash || '').slice(1) || 'focus').split('/');
-    ST.view = ['focus', 'sites', 'site', 'sources', 'meeting', 'meetings', 'insight'].indexOf(h[0]) > -1 ? h[0] : 'focus';
+    ST.view = ['focus', 'sites', 'site', 'sources', 'meeting', 'meetings', 'insight', 'myfocus'].indexOf(h[0]) > -1 ? h[0] : 'focus';
+    if (!ST.keepWalk) { ST.mfSnap = null; if (ST.view === 'myfocus') ST.mfWalk = -1; } ST.keepWalk = false;
     ST.insight = ST.view === 'insight' ? (h[1] || '') : '';
     ST.site = ST.view === 'site' ? (h[1] || '') : '';
     ST.dismissing = '';
     if (ST.view === 'meeting' && !MT) ST.view = 'focus';
     var tab = ['meeting', 'meetings', 'insight'].indexOf(ST.view) > -1 ? 'focus' : ST.view === 'site' ? 'sites' : ST.view;
     ST.src = ST.view === 'sources' ? (h[1] || '') : '';
+    if (ST.src === 'feed') { ST.src = ''; ST.srcTab = 'feed'; } else if (ST.view === 'sources' && !ST.src) ST.srcTab = 'cards';
+    ST.siteFeed = ST.view === 'site' && h[2] === 'feed';
     document.querySelectorAll('.tabs a').forEach(function (a) { if (a.getAttribute('data-view') === tab) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
     closeRec(); closeSheet(); render(); window.scrollTo(0, 0);
   }
-  function render() { if (ST.view === 'sites') renderSites(); else if (ST.view === 'site') renderSite(ST.site); else if (ST.view === 'sources') renderSources(); else if (ST.view === 'meeting') renderMeeting(); else if (ST.view === 'meetings') renderMeetings(); else if (ST.view === 'insight') renderInsight(ST.insight); else renderFocus(); }
+  function render() { renderView(); renderMyFocusCount(); }
+  function renderView() { if (ST.view === 'myfocus') renderMyFocus(); else if (ST.view === 'sites') renderSites(); else if (ST.view === 'site') { if (ST.siteFeed) renderSiteFeed(ST.site); else renderSite(ST.site); } else if (ST.view === 'sources') renderSources(); else if (ST.view === 'meeting') renderMeeting(); else if (ST.view === 'meetings') renderMeetings(); else if (ST.view === 'insight') renderInsight(ST.insight); else renderFocus(); }
 
   document.addEventListener('click', function (e) {
     var a = e.target.closest('a[href^="#"]');
