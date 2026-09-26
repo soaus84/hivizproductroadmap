@@ -420,6 +420,36 @@ main { padding-block: 32px 80px; }
 .site-srcs .nm { display: grid; font-weight: 800; font-size: 15.5px; }
 .site-srcs .nm small { font-weight: 600; font-size: 13px; color: var(--text-3); }
 .frow .when .mg { margin-top: 6px; }
+
+/* ---------- Record detail ---------- */
+.sheet.rec-sheet { z-index: 53; width: min(560px, calc(100% - 16px)); }
+.rd-src { display: grid; line-height: 1.25; } .rd-src b { font-weight: 800; font-size: 16px; } .rd-src small { font-size: 13.5px; color: var(--text-3); font-weight: 600; }
+.rd-raw { margin: 0; font-family: var(--mono); font-size: 13.5px; line-height: 1.55; white-space: pre-wrap; word-break: break-word; border: 1px solid var(--border-2); border-radius: 10px; padding: 12px 14px; color: var(--text); }
+.rd-rows { margin: 0; border-top: 1px solid var(--border); }
+.rd-rows > div { display: grid; grid-template-columns: 140px 1fr; gap: 4px 14px; padding: 11px 0; border-bottom: 1px solid var(--border); }
+.rd-rows dt { font-size: 14px; font-weight: 700; color: var(--text-3); padding-top: 1px; }
+.rd-rows dd { margin: 0; display: grid; gap: 3px; }
+.rd-v { font-size: 16.5px; font-weight: 800; }
+.rd-why { font-size: 15px; color: var(--text-2); line-height: 1.45; }
+.rd-fix { font-size: 14.5px; }
+.rd-fix b { font-weight: 800; }
+@media (max-width: 480px) { .rd-rows > div { grid-template-columns: 1fr; } }
+.links { display: grid; gap: 8px; }
+.link-item { display: grid; gap: 2px; padding: 10px 12px; border: 1px solid var(--border-2); border-radius: 10px; }
+.link-item b { font-weight: 800; font-size: 15.5px; }
+.link-item span { font-size: 13.5px; font-weight: 600; color: var(--text-3); }
+.link-item:hover { border-color: var(--text); }
+.link-item:hover b { text-decoration: underline; text-underline-offset: 3px; }
+.rd-correct { border: 1px solid var(--border-2); border-radius: 12px; padding: 16px; }
+.rec-btn { display: grid; gap: 6px; width: 100%; text-align: left; font: inherit; color: inherit; background: none; border: 0; border-bottom: 1px dashed var(--border-2); padding: 10px 0; cursor: pointer; }
+.rec-btn:last-child { border-bottom: 0; }
+.rec-btn:hover .txt { text-decoration: underline; text-underline-offset: 3px; }
+.rec-btn .when { display: flex; align-items: center; gap: 8px; }
+.frow.clickable { cursor: pointer; }
+.frow.clickable:hover .read .line { text-decoration: underline; text-underline-offset: 3px; }
+.frow.clickable:focus-visible { outline: 2px solid var(--text); outline-offset: -2px; }
+.walk-ev { display: grid; gap: 2px; border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px; }
+.walk-ev .rec-btn .txt { font-family: var(--mono); font-size: 13.5px; }
 .foot { border-top: 1px solid var(--border); padding-block: 24px 40px; color: var(--text-3); font-size: 14px; }
 .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--text); color: #fff; border-radius: 8px; padding: 8px 14px; font-size: 13.5px; z-index: 60; box-shadow: var(--shadow-lg); }
 </style>
@@ -455,6 +485,7 @@ main { padding-block: 32px 80px; }
 <div class="scrim" id="scrim" hidden></div>
 <aside class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title" hidden></aside>
 <aside class="sheet help" id="help" role="dialog" aria-modal="true" aria-labelledby="help-title" hidden></aside>
+<aside class="sheet rec-sheet" id="rec" role="dialog" aria-modal="true" aria-labelledby="rec-title" hidden></aside>
 <div class="toast" id="toast" role="status" hidden></div>
 
 <footer class="foot"><div class="wrap">Hiviz Prism · concept · all organisations, people, sites and records are fictional. Live arrivals are simulated.</div></footer>
@@ -466,6 +497,7 @@ main { padding-block: 32px 80px; }
   /* =============================================================
      Example data (fictional)
      ============================================================= */
+  var ORG_NAME = 'Tallowmere Group'; // fictional demo company
   var YOU = 'You';
   var ORG = [
     { div: 'Infrastructure', regions: [
@@ -681,7 +713,7 @@ main { padding-block: 32px 80px; }
   function stalled(i) { return i.status === 'working' && i.updated >= 14; }
   function recCount(i) { return i.says.reduce(function (a, s) { return a + s.n; }, 0); }
   function owners() { var o = [YOU]; regionsInView().forEach(function (x) { if (o.indexOf(x.r.rm) < 0) o.push(x.r.rm); }); o.push('Dana Brooks'); return o; }
-  function scopeLabel() { return ST.reg ? ST.reg + ' region' : ST.div ? ST.div + ' division' : 'All divisions'; }
+  function scopeLabel() { return ST.reg ? ST.reg + ' region' : ST.div ? ST.div + ' division' : ORG_NAME; }
 
   /* Icons and small visuals */
   function sevIcon(sev) {
@@ -712,7 +744,7 @@ main { padding-block: 32px 80px; }
      Header
      ============================================================= */
   function fillFilters() {
-    $('f-div').innerHTML = '<option value="">All divisions</option>' + ORG.map(function (x) { return '<option' + (x.div === ST.div ? ' selected' : '') + '>' + esc(x.div) + '</option>'; }).join('');
+    $('f-div').innerHTML = '<option value="">' + esc(ORG_NAME) + '</option>' + ORG.map(function (x) { return '<option' + (x.div === ST.div ? ' selected' : '') + '>' + esc(x.div) + '</option>'; }).join('');
     var regs = []; ORG.forEach(function (x) { if (!ST.div || x.div === ST.div) x.regions.forEach(function (g) { regs.push(g.name); }); });
     $('f-reg').innerHTML = '<option value="">All regions</option>' + regs.map(function (n) { return '<option' + (n === ST.reg ? ' selected' : '') + '>' + esc(n) + '</option>'; }).join('');
   }
@@ -873,9 +905,7 @@ main { padding-block: 32px 80px; }
           i.says.map(function (s) {
             var src = SRC[s.src];
             return '<div class="card src-say"><div class="src-say-h"><span class="mg lg">' + esc(src.mg) + '</span><div><b>' + esc(src.name) + '</b> <span class="badge">' + s.n + ' records</span><p>' + esc(s.text) + '</p></div></div>' +
-              '<div class="src-recs">' + s.recs.map(function (r) {
-                return '<div class="rec"><span class="when">' + esc(r.when) + ' · ' + esc(SITE[r.site].name) + '</span><span class="txt">' + esc(r.text) + '</span><span class="reads">' + r.reads.map(tagBadge).join('') + '</span></div>';
-              }).join('') + (s.n > s.recs.length ? '<div class="rec"><span class="when">and ' + (s.n - s.recs.length) + ' more like these</span></div>' : '') + '</div></div>';
+              '<div class="src-recs">' + s.recs.map(function (r) { return recRow(RECS[r.id]); }).join('') + (s.n > s.recs.length ? '<div class="rec"><span class="when">and ' + (s.n - s.recs.length) + ' more like these</span></div>' : '') + '</div></div>';
           }).join('') + '</section>' +
         '<section class="ins-sec"><span class="label">How Prism read it</span><dl class="kv">' + i.read.map(function (r) { return '<div><dt>' + esc(r[0]) + '</dt><dd class="' + (r[2] ? 't-' + r[2] : '') + '">' + esc(r[1]) + '</dd></div>'; }).join('') + '</dl></section>' +
         (gone ? '' : '<section class="ins-sec"><span class="label">Suggested next step</span><p class="next">' + esc(i.next) + '</p></section>') +
@@ -947,6 +977,122 @@ main { padding-block: 32px 80px; }
       }).join('') + '</ol></section>';
   }
 
+  /* ---------- Records: one enriched item, opened from anywhere ---------- */
+  // Full readings for the records behind the new and critical insights.
+  // [label, value, tone, reason]. Other records are read from their labels.
+  var READINGS = {
+    'hand:0:0': [['Signal', 'Control bypassed', 'critical', 'The isolation was closed with no test-for-dead recorded.'], ['Energy', 'Electrical, high voltage', '', 'Traction power isolation in the stabling yard.'], ['Control', 'Signed off before the test', 'critical', 'The test field was empty when the permit was closed.'], ['Could have been', 'Fatal', 'critical', 'Workers could have treated live equipment as isolated.'], ['Key hazard', 'Energised equipment treated as isolated', '', 'The same hazard as the isolation on 2 September.'], ['Confidence', 'High', '', 'The record states the times directly.']],
+    'hand:0:1': [['Signal', 'Control bypassed', 'critical', 'The test was recorded 25 minutes after sign-off.'], ['Energy', 'Electrical, high voltage', '', 'Traction power isolation.'], ['Control', 'Tested after sign-off', 'critical', 'The outgoing shift signed off and the incoming shift did the test.'], ['Could have been', 'Fatal', 'critical', 'For 25 minutes the equipment was recorded as safe without a test.'], ['Confidence', 'High', '', 'Both timestamps are in the record.']],
+    'hand:1:0': [['Signal', 'At-risk condition', 'warning', 'Cones were moved from the approved plan after the crew changed.'], ['Energy', 'Moving traffic', '', 'Live lanes beside ramp 2.'], ['Control', 'Degraded', 'warning', 'The traffic plan existed but wasn’t being followed.'], ['Could have been', 'Serious injury', 'critical', 'Workers were exposed to live traffic.'], ['Confidence', 'Moderate', '', 'One observer, described in general terms.']],
+    'hand:2:0': [['Signal', 'Reporting stopped', 'warning', 'This was the last inspection before 19 days without any reports.'], ['Control', 'Can’t be assessed', '', 'Nothing has been reported since.'], ['Could have been', 'Unknown', 'warning', 'Prism can’t see what’s happening on site.'], ['Confidence', 'Moderate', '', 'Based on the gap in reporting, not on one record.']],
+    'hand:3:0': [['Signal', 'Context', '', 'No hazard in the record itself.'], ['Why it matters', 'New night crew, the week setups drifted', 'warning', 'The timing links it to the traffic setup changes at Ridge Road.'], ['Confidence', 'Moderate', '', 'A link in time, not a direct cause.']],
+    'fat:0:0': [['Signal', 'Weak signal', 'warning', 'Fatigue described, but no event.'], ['Control', 'Roster limits unclear', 'warning', 'The crew was on its sixth night in a row.'], ['Could have been', 'Serious injury', 'critical', 'Tired crews make more mistakes during setup.'], ['Confidence', 'Moderate', '', 'One report, in the reporter’s own words.']],
+    'fat:1:0': [['Signal', 'Energy released', 'critical', 'A segment crane struck something during a lift.'], ['Energy', 'Suspended load', '', 'Tunnel segment handling.'], ['Control', 'Failed', 'critical', 'The lift didn’t go as planned.'], ['Could have been', 'Serious injury', 'critical', 'A heavy segment moving unexpectedly.'], ['Key hazard', 'Fatigue late in a run of nights', '', 'The report says “end of long run of nights”.'], ['Confidence', 'High', '', 'The record names fatigue directly.']],
+    'load:0:0': [['Signal', 'Energy released', 'critical', 'The load spun during the lift.'], ['Energy', 'Kinetic, suspended load', '', 'A steel beam under a crane.'], ['Control', 'Failed', 'critical', 'The tag line was in place but frayed.'], ['Could have been', 'Serious injury', 'critical', 'The crew had to step clear.'], ['Key hazard', 'Uncontrolled suspended load', '', 'The same hazard as three other records.'], ['Confidence', 'High', '', 'The record describes the event clearly.']],
+    'load:0:1': [['Signal', 'Energy released', 'critical', 'The beam rotated in the wind during a lift.'], ['Energy', 'Kinetic, suspended load', '', 'A steel beam under a crane.'], ['Control', 'Failed', 'critical', 'The tag line didn’t keep the load on its path.'], ['Could have been', 'Fatal', 'critical', 'The beam passed over a path people use.'], ['Confidence', 'High', '', 'The record describes the event clearly.']],
+    'load:1:0': [['Signal', 'At-risk condition', 'warning', 'Rope used as a tag line, noticed before anything happened.'], ['Energy', 'Kinetic, suspended load', '', 'Deck lifting.'], ['Control', 'Degraded', 'warning', 'An improvised control instead of the right gear.'], ['Could have been', 'Serious injury', 'critical', 'Rope can snap under load, as it did at North Yard.'], ['Confidence', 'High', '', '“Again” in the record suggests it isn’t the first time.']],
+    'edge:0:0': [['Signal', 'At-risk behaviour', 'critical', 'A worker leaned past the slab edge.'], ['Energy', 'Gravity, fall from height', '', 'Level 14.'], ['Control', 'Missing', 'critical', 'Edge protection had been removed on that bay.'], ['Could have been', 'Fatal', 'critical', 'A fall from level 14.'], ['Confidence', 'High', '', 'The record describes it directly.']]
+  };
+  var TAG_INSIGHT = { 'Suspended loads insight': 'load', 'Handovers insight': 'hand', 'Pre-start insight': 'pre', 'Spotters insight': 'spot' };
+  var RECS = {}, recSeq = 0;
+  function recType(raw) {
+    if (/ISO-/.test(raw)) return 'Isolation permit'; if (/PTW-|x_permit_work/.test(raw)) return 'Permit';
+    if (/NM-/.test(raw)) return 'Near miss'; if (/OB-/.test(raw)) return 'Observation'; if (/INC-/.test(raw)) return 'Incident';
+    if (/Pre-Start/.test(raw)) return 'Pre-start'; if (/Issue/.test(raw)) return 'Issue'; if (/[Ii]nspection/.test(raw)) return 'Inspection';
+    if (/induct|Induct/.test(raw)) return 'Induction'; if (/row \d+/.test(raw)) return 'Imported row'; return 'Record';
+  }
+  function recRef(raw) { var m = raw.match(/[A-Z]{2,4}-\d{3,5}|#\d+/); return m ? m[0] : ''; }
+  function derivedReading(rec) {
+    var rows = [], toned = rec.tags.filter(function (t) { return t[1]; })[0], plain = rec.tags.filter(function (t) { return !t[1] && !/insight/i.test(t[0]); })[0];
+    rows.push(['Signal', toned ? toned[0] : (plain ? plain[0] : 'Context'), toned ? toned[1] : '', 'From the description in the record.']);
+    var ins = rec.insights.map(insightById).filter(Boolean)[0];
+    if (ins) ins.read.forEach(function (r) { if (r[0] === 'Energy' || r[0] === 'Could have been') rows.push([r[0], r[1], r[2], 'In line with the other records behind this insight.']); });
+    var ctl = rec.tags.filter(function (t) { return /Control/.test(t[0]); })[0];
+    if (ctl) rows.push(['Control', ctl[0].replace(/^Control /, ''), ctl[1], 'From what the record says about the control.']);
+    rows.push(['Confidence', ins ? 'Moderate' : 'Low', '', ins ? 'Consistent with other records, but brief.' : 'A one-off, with little detail.']);
+    var ORDER = ['Signal', 'Energy', 'Control', 'Could have been', 'Confidence'];
+    return rows.sort(function (a, b) { return ORDER.indexOf(a[0]) - ORDER.indexOf(b[0]); });
+  }
+  function addRec(r) { r.id = r.id || 'rec' + (++recSeq); r.type = recType(r.raw); r.ref = recRef(r.raw); r.corrections = []; RECS[r.id] = r; return r; }
+  INSIGHTS.forEach(function (i) {
+    i.says.forEach(function (sy, a) {
+      sy.recs.forEach(function (r, b) {
+        var key = i.id + ':' + a + ':' + b;
+        r.id = 'r-' + key.replace(/:/g, '-');
+        addRec({ id: r.id, src: sy.src, when: r.when, site: r.site, raw: r.text, tags: r.reads, insights: [i.id], reading: READINGS[key] || null });
+      });
+    });
+  });
+  function feedToRec(f) {
+    var ins = []; f.tags.forEach(function (t) { if (TAG_INSIGHT[t[0]]) ins.push(TAG_INSIGHT[t[0]]); });
+    f.id = f.id || 'rec' + (++recSeq);
+    addRec({ id: f.id, src: f.src, at: f.at, site: f.site, raw: f.raw, tags: f.tags, line: f.line, insights: ins, reading: null });
+  }
+  FEED.forEach(feedToRec);
+  function recWhen(r) { return r.at ? ago(r.at) : r.when; }
+
+  var recTrigger = null;
+  function openRec(id, trigger) {
+    var r = RECS[id]; if (!r) return;
+    if (trigger) recTrigger = trigger;
+    var src = SRC[r.src], site = SITE[r.site], rows = r.reading || derivedReading(r);
+    $('rec').innerHTML =
+      '<div class="sheet-head" style="position:relative"><button type="button" class="x" id="rec-x" aria-label="Close"><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 2l8 8M10 2l-8 8" stroke="currentColor" stroke-width="1.6"/></svg></button>' +
+        '<div class="meta"><span class="mg lg">' + esc(src.mg) + '</span><span class="rd-src"><b>' + esc(src.name) + '</b><small>' + esc(r.type) + (r.ref ? ' · ' + esc(r.ref) : '') + '</small></span></div>' +
+        '<h2 id="rec-title">' + esc(r.type) + ' at ' + esc(site ? site.name : 'an unknown site') + '</h2>' +
+        '<div class="meta"><span class="label">Received ' + esc(recWhen(r)) + '</span>' + (site ? '<a class="chip link" href="#site/' + site.id + '">' + esc(site.name) + '</a>' : '') + '</div></div>' +
+      '<div class="sheet-body">' +
+        '<section class="sheet-sec"><span class="label">As received from ' + esc(src.name) + '</span><pre class="rd-raw">' + esc(r.raw) + '</pre></section>' +
+        '<section class="sheet-sec"><span class="label">How Prism read it</span><dl class="rd-rows">' + rows.map(function (row) {
+          var fix = r.corrections.filter(function (c) { return c.field === row[0]; }).slice(-1)[0];
+          return '<div><dt>' + esc(row[0]) + '</dt><dd><span class="rd-v' + (row[2] && !fix ? ' t-' + row[2] : '') + '"' + (fix ? ' style="text-decoration:line-through;color:var(--text-3)"' : '') + '>' + esc(row[1]) + '</span>' +
+            (fix ? '<span class="rd-fix">Corrected by you: <b>' + esc(fix.value) + '</b>' + (fix.note ? '. ' + esc(fix.note) : '') + '</span>' : '') +
+            '<span class="rd-why">' + esc(row[3]) + '</span></dd></div>';
+        }).join('') + '</dl></section>' +
+        (r.insights.length ? '<section class="sheet-sec"><span class="label">Part of</span><div class="links">' + r.insights.map(function (iid) {
+          var i = insightById(iid); return i ? '<a class="link-item" href="#insight/' + iid + '"><b>' + esc(i.title) + '</b><span>' + statusText(i) + '</span></a>' : '';
+        }).join('') + '</div></section>' : '<section class="sheet-sec"><span class="label">Part of</span><p class="muted-p">Not part of any insight. Prism set it aside as a one-off.</p></section>') +
+        (ST.correcting === id ? '<section class="sheet-sec rd-correct"><h3>Correct Prism’s reading</h3>' +
+          '<span class="fld col"><label for="rc-field">What’s wrong</label><select class="select wide" id="rc-field">' + rows.map(function (row) { return '<option>' + esc(row[0]) + '</option>'; }).join('') + '</select></span>' +
+          '<span class="fld col"><label for="rc-value">What it should be</label><input class="w-note" id="rc-value" type="text" placeholder="For example: Control held"></span>' +
+          '<label class="w-note-l" for="rc-note">Why (optional)</label><textarea class="w-note" id="rc-note" rows="2"></textarea>' +
+          '<div class="meet-actions"><button type="button" class="btn" data-rc-cancel="1">Cancel</button><button type="button" class="btn brand" data-rc-save="' + id + '">Save correction</button></div></section>' : '') +
+      '</div>' +
+      '<div class="sheet-foot"><button type="button" class="btn" data-rc-open="' + id + '">Prism read this wrong</button><button type="button" class="btn dark" data-rc-source="' + id + '">Open in ' + esc(src.name) + '</button></div>';
+    $('rec').hidden = false; $('scrim').hidden = false;
+    if (ST.correcting === id) $('rc-value').focus(); else $('rec-x').focus();
+  }
+  function statusText(i) { return i.dismissed ? 'Dismissed' : i.closed ? 'Closed' : i.status === 'new' ? 'New · no owner' : stalled(i) ? 'Stalled · ' + i.owner : i.status === 'resolved' ? 'Ready to close' : 'In progress · ' + i.owner; }
+  function closeRec() {
+    if ($('rec').hidden) return;
+    $('rec').hidden = true; ST.correcting = '';
+    if ($('sheet').hidden && $('help').hidden) $('scrim').hidden = true;
+    if (recTrigger && document.body.contains(recTrigger)) recTrigger.focus();
+  }
+  function recOpen() { return !$('rec').hidden; }
+  document.addEventListener('click', function (e) {
+    var t = e.target.closest('[data-rec]'); if (t) { e.preventDefault(); ST.correcting = ''; openRec(t.getAttribute('data-rec'), t); return; }
+    if (!recOpen() || !e.target.closest('#rec')) return;
+    if (e.target.closest('#rec-x')) { closeRec(); return; }
+    var o = e.target.closest('[data-rc-open]'); if (o) { ST.correcting = o.getAttribute('data-rc-open'); openRec(ST.correcting); var b = $('rec').querySelector('.sheet-body'); b.scrollTop = b.scrollHeight; return; }
+    if (e.target.closest('[data-rc-cancel]')) { var cid = ST.correcting; ST.correcting = ''; openRec(cid); return; }
+    var sv = e.target.closest('[data-rc-save]');
+    if (sv) {
+      var rid = sv.getAttribute('data-rc-save'), val = $('rc-value').value.trim();
+      if (!val) { $('rc-value').focus(); return; }
+      RECS[rid].corrections.push({ field: $('rc-field').value, value: val, note: $('rc-note').value.trim() });
+      ST.correcting = ''; openRec(rid);
+      toast('Thanks. Prism will use this to improve how it reads ' + SRC[RECS[rid].src].name + ' records.');
+      return;
+    }
+    var so = e.target.closest('[data-rc-source]'); if (so) toast('In the live product this opens the record in ' + SRC[RECS[so.getAttribute('data-rc-source')].src].name + '.');
+  });
+  // Clickable record row, shared by every view
+  function recRow(r, withSource) {
+    var src = SRC[r.src], site = SITE[r.site];
+    return '<button type="button" class="rec rec-btn" data-rec="' + r.id + '"><span class="when">' + (withSource ? '<span class="mg">' + esc(src.mg) + '</span>' : '') + esc(recWhen(r)) + ' · ' + esc(site ? site.name : '') + ' · ' + esc(r.type) + '</span><span class="txt">' + esc(r.raw) + '</span><span class="reads">' + r.tags.map(tagBadge).join('') + '</span></button>';
+  }
+
   /* ---------- Insight sheet ---------- */
   function openSheet(id, focusOwner) {
     var i = INSIGHTS.filter(function (x) { return x.id === id; })[0]; if (!i) return;
@@ -970,9 +1116,7 @@ main { padding-block: 32px 80px; }
               '<span class="say-name">' + esc(src.name) + '<span class="badge">' + s.n + '</span></span>' +
               '<span class="say-more">' + (open ? 'Hide records' : 'Show records') + '</span>' +
               '<span class="say-text">' + esc(s.text) + '</span></button>' +
-              (open ? '<div class="recs">' + s.recs.map(function (r) {
-                return '<div class="rec"><span class="when">' + esc(r.when) + ' · ' + esc(SITE[r.site].name) + '</span><span class="txt">' + esc(r.text) + '</span><span class="reads">' + r.reads.map(tagBadge).join('') + '</span></div>';
-              }).join('') + (s.n > s.recs.length ? '<div class="rec"><span class="when">and ' + (s.n - s.recs.length) + ' more like these</span></div>' : '') + '</div>' : '') +
+              (open ? '<div class="recs">' + s.recs.map(function (r) { return recRow(RECS[r.id]); }).join('') + (s.n > s.recs.length ? '<div class="rec"><span class="when">and ' + (s.n - s.recs.length) + ' more like these</span></div>' : '') + '</div>' : '') +
             '</div>';
           }).join('') + '</div></section>' +
         '<section class="sheet-sec"><span class="label">How Prism read it</span><dl class="kv">' + i.read.map(function (r) {
@@ -1072,8 +1216,11 @@ main { padding-block: 32px 80px; }
     var j = e.target.closest('[data-helpjump]'); if (j) { jumpHelp(j.getAttribute('data-helpjump')); return; }
     if (e.target.closest('#help-x')) closeHelp();
   });
-  $('scrim').addEventListener('click', function () { closeHelp(); closeSheet(); });
-  document.addEventListener('keydown', function (e) { if (e.key !== 'Escape') return; if (!$('help').hidden) closeHelp(); else closeSheet(); });
+  $('scrim').addEventListener('click', function () { if (recOpen()) { closeRec(); return; } closeHelp(); closeSheet(); });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' && e.target.matches && e.target.matches('.frow[data-rec]')) { openRec(e.target.getAttribute('data-rec'), e.target); return; }
+    if (e.key !== 'Escape') return; if (recOpen()) closeRec(); else if (!$('help').hidden) closeHelp(); else closeSheet();
+  });
 
   /* =============================================================
      Purview
@@ -1120,10 +1267,8 @@ main { padding-block: 32px 80px; }
     var st = STATE[x.state];
     var ins = INSIGHTS.filter(function (i) { return !i.closed && !i.dismissed && i.sites.indexOf(id) > -1; });
     var region = null; ORG.forEach(function (d) { d.regions.forEach(function (r) { if (r.name === x.region) region = r; }); });
-    var recs = FEED.filter(function (f) { return f.site === id; }).sort(function (a, b) { return b.at - a.at; }).map(function (f) {
-      return { src: f.src, when: ago(f.at), raw: f.raw, line: f.line, tags: f.tags };
-    });
-    INSIGHTS.forEach(function (i) { i.says.forEach(function (sy) { sy.recs.forEach(function (r) { if (r.site === id) recs.push({ src: sy.src, when: r.when, raw: r.text, line: '<b>' + esc(i.title) + '</b>', tags: r.reads }); }); }); });
+    var recs = Object.keys(RECS).map(function (k) { return RECS[k]; }).filter(function (r) { return r.site === id; })
+      .sort(function (a, b) { return (b.at || 0) - (a.at || 0); });
     var planned = ST.visitPlanned && ST.visitPlanned[id];
     $('view').innerHTML = '<a class="back" href="#sites">← Sites</a>' +
       '<div class="ins-head"><div class="meta"><span class="badge ' + st[0] + '"><i></i>' + st[1] + '</span><span class="label">' + esc(x.region) + ' region' + (region ? ' · ' + esc(region.rm) + ', regional manager' : '') + '</span></div>' +
@@ -1134,7 +1279,8 @@ main { padding-block: 32px 80px; }
           (ins.length ? '<div class="icards one">' + ins.map(row).join('') + '</div>' : '<p class="card empty-card">No open insights involve this site.</p>') + '</section>' +
         '<section class="ins-sec"><span class="label">Recent records · as Prism read them</span>' +
           (recs.length ? '<div class="card feed"><div class="fhead"><span>Received</span><span>As received</span><span>What Prism made of it</span></div>' + recs.map(function (r) {
-            return '<div class="frow"><span class="when">' + esc(r.when) + '<br><span class="mg" title="' + esc(SRC[r.src].name) + '">' + esc(SRC[r.src].mg) + '</span></span><span class="raw">' + esc(r.raw) + '</span><span class="read"><span class="line">' + r.line + '</span><span class="tags">' + r.tags.map(tagBadge).join('') + '</span></span></div>';
+            var line = r.line || (r.insights.length ? '<b>' + esc(insightById(r.insights[0]).title) + '</b>' : '<b>' + esc(r.type) + '</b>');
+            return '<div class="frow clickable" data-rec="' + r.id + '" tabindex="0" role="button"><span class="when">' + esc(recWhen(r)) + '<br><span class="mg" title="' + esc(SRC[r.src].name) + '">' + esc(SRC[r.src].mg) + '</span></span><span class="raw">' + esc(r.raw) + '</span><span class="read"><span class="line">' + line + '</span><span class="tags">' + r.tags.map(tagBadge).join('') + '</span></span></div>';
           }).join('') + '</div>' : '<p class="card empty-card">No records from this site.</p>') + '</section>' +
       '</div><aside class="ins-side">' +
         '<section class="card side-card"><h2>Leadership visits</h2>' +
@@ -1208,7 +1354,7 @@ main { padding-block: 32px 80px; }
       '<div class="sec-t"><h2>Feed</h2><span class="label">Each record as it arrived, and what Prism made of it</span></div>' +
       '<div class="card feed"><div class="fhead"><span>Received</span><span>As received</span><span>What Prism made of it</span></div>' + fails +
         (items.length ? items.map(function (f) {
-          return '<div class="frow' + (f.fresh ? ' fresh' : '') + '"><span class="when">' + esc(ago(f.at)) + '<br>' + esc(SITE[f.site] ? SITE[f.site].name : '') + '</span><span class="raw">' + esc(f.raw) + '</span><span class="read"><span class="line">' + f.line + '</span><span class="tags">' + f.tags.map(tagBadge).join('') + '</span></span></div>';
+          return '<div class="frow clickable' + (f.fresh ? ' fresh' : '') + '" data-rec="' + f.id + '" tabindex="0" role="button"><span class="when">' + esc(ago(f.at)) + '<br>' + esc(SITE[f.site] ? SITE[f.site].name : '') + '</span><span class="raw">' + esc(f.raw) + '</span><span class="read"><span class="line">' + f.line + '</span><span class="tags">' + f.tags.map(tagBadge).join('') + '</span></span></div>';
         }).join('') : (fails ? '' : '<div class="frow"><span class="when">—</span><span class="read" style="grid-column:2/-1">Nothing received from this source.</span></div>')) + '</div>';
   }
 
@@ -1221,7 +1367,8 @@ main { padding-block: 32px 80px; }
     var s = SRC[a[0]];
     if (!first) {
       FEED.forEach(function (f) { f.fresh = false; });
-      FEED.push({ src: a[0], at: Date.now(), site: a[1], raw: a[2], line: a[3], tags: a[4], fresh: true });
+      var nf = { src: a[0], at: Date.now(), site: a[1], raw: a[2], line: a[3], tags: a[4], fresh: true };
+      FEED.push(nf); feedToRec(nf);
       s.lastTs = Date.now(); s.today++;
       var rc = $('read-count'); if (rc) rc.textContent = (parseInt(rc.textContent.replace(/,/g, ''), 10) + 1).toLocaleString();
     }
@@ -1389,6 +1536,11 @@ main { padding-block: 32px 80px; }
           '<h2 class="walk-title">' + esc(cur.title) + '</h2><p class="walk-story">' + esc(cur.story) + '</p>' +
           '<div class="walk-sites">' + cur.sites.map(function (s) { return '<span class="chip">' + esc(SITE[s].name) + '</span>'; }).join('') + '</div>' +
           '<div class="walk-says"><span class="label">What each source says</span><ul>' + cur.says.map(function (s) { return '<li><span class="mg">' + esc(SRC[s.src].mg) + '</span><span><b>' + esc(SRC[s.src].name) + ' · ' + s.n + '</b> ' + esc(s.text) + '</span></li>'; }).join('') + '</ul></div>' +
+          (function () {
+            var ev = []; cur.says.forEach(function (sy) { sy.recs.forEach(function (r) { ev.push(RECS[r.id]); }); });
+            ev.sort(function (a, b) { var t = function (x) { return x.tags.some(function (g) { return g[1] === 'critical'; }) ? 0 : 1; }; return t(a) - t(b); });
+            return '<div class="walk-ev"><span class="label">' + (cur.status === 'new' ? 'Check the evidence before assigning' : 'Evidence') + '</span>' + ev.slice(0, 3).map(function (r) { return recRow(r, true); }).join('') + '</div>';
+          })() +
           (cur.latest ? '<p class="walk-latest"><span class="label">Latest update</span>' + esc(cur.latest) + '</p>' : '') +
           '<p class="walk-next"><span class="label">Suggested</span>' + esc(cur.next) + '</p>' +
           (ST.dismissing === cur.id ? dismissForm(cur.id, 'walk') : (          '<div class="walk-form">' +
@@ -1462,7 +1614,7 @@ main { padding-block: 32px 80px; }
     $('view').innerHTML = '<a class="back" href="#focus">← Insights</a>' +
       '<div class="page-top"><div><h1>Past Focus reviews</h1><p class="sub">' + esc(scopeLabel()) + '</p></div><div class="actions"><button type="button" class="btn brand" id="start-meeting">Start a Focus review</button></div></div>' +
       (mine.length ? '<div class="mlist">' + mine.map(function (m) {
-        var label = m.reg ? m.reg + ' region' : m.div ? m.div + ' division' : 'Whole organisation';
+        var label = m.reg ? m.reg + ' region' : m.div ? m.div + ' division' : ORG_NAME;
         return '<article class="card meet-card"><div class="mhead"><div><h2>' + esc(m.date) + '</h2><p class="muted-p">' + esc(label) + ' · ' + m.decisions.length + (m.decisions.length === 1 ? ' decision' : ' decisions') + '</p></div><div class="people">' + whoLine(m.attendees) + '</div></div>' +
           '<ul class="agreed">' + m.decisions.map(function (d) {
             var it = INSIGHTS.filter(function (x) { return x.id === d.ins; })[0];
@@ -1517,14 +1669,14 @@ main { padding-block: 32px 80px; }
     var tab = ['meeting', 'meetings', 'insight'].indexOf(ST.view) > -1 ? 'focus' : ST.view === 'site' ? 'sites' : ST.view;
     ST.src = ST.view === 'sources' ? (h[1] || '') : '';
     document.querySelectorAll('.tabs a').forEach(function (a) { if (a.getAttribute('data-view') === tab) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
-    closeSheet(); render(); window.scrollTo(0, 0);
+    closeRec(); closeSheet(); render(); window.scrollTo(0, 0);
   }
   function render() { if (ST.view === 'sites') renderSites(); else if (ST.view === 'site') renderSite(ST.site); else if (ST.view === 'sources') renderSources(); else if (ST.view === 'meeting') renderMeeting(); else if (ST.view === 'meetings') renderMeetings(); else if (ST.view === 'insight') renderInsight(ST.insight); else renderFocus(); }
 
   document.addEventListener('click', function (e) {
     var a = e.target.closest('a[href^="#"]');
     if (a) { e.preventDefault(); go(a.getAttribute('href').slice(1) || 'focus'); return; }
-    if (e.target.closest('#sheet') || e.target.closest('#help')) return;
+    if (e.target.closest('#sheet') || e.target.closest('#help') || e.target.closest('#rec')) return;
     var as = e.target.closest('[data-assign]');
     if (as) { e.stopPropagation(); openSheet(as.getAttribute('data-assign'), true); return; }
     var op = e.target.closest('[data-open]'); if (op) { openSheet(op.getAttribute('data-open')); return; }
