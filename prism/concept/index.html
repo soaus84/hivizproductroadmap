@@ -613,6 +613,29 @@ button.ind-btn:hover .ind-name { text-decoration: underline; text-underline-offs
 .mc { display: grid; gap: 10px; align-content: start; }
 .linkish { color: inherit; text-align: left; }
 .plan { display: grid; gap: 12px; }
+.plan-read { margin: 0; display: grid; gap: 4px; font-size: 15px; }
+.plan-read .badge, .plan-read .tlabel { margin-right: 6px; }
+.rt-list { list-style: none; margin: 0; padding: 0; display: grid; }
+.rt-list li { display: grid; grid-template-columns: 118px minmax(0, 1fr) auto; gap: 6px 14px; align-items: center; padding: 12px 0; border-top: 1px solid var(--border); }
+.rt-list .badge, .rt-list .tlabel { justify-self: start; white-space: nowrap; }
+.rt-main { display: grid; gap: 2px; }
+.rt-main span { font-size: 14.5px; color: var(--text-2); }
+.rt-btns { display: flex; gap: 6px; }
+.rt-rv { font-size: 13.5px; font-weight: 700; color: var(--text-3); }
+.rt-rv.on { color: var(--text); }
+.rt-undo { font-size: 13.5px; text-decoration: underline; }
+.rt-state { display: inline-flex; gap: 10px; align-items: baseline; }
+.rt-sum { font-size: 18px; font-weight: 700; line-height: 1.4; margin: 0; }
+.rt-ba { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.rt-ba > div { display: grid; gap: 4px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 10px; }
+.rt-rep { margin: 0; display: grid; gap: 2px; }
+.rt-rep.drop b { color: var(--warning); }
+.rt-acts { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.rt-acts li { display: flex; gap: 10px; align-items: baseline; }
+.rt-acts small { color: var(--text-3); font-weight: 600; }
+.w-rt { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; font-size: 15px; }
+.w-rt span:last-child { color: var(--text-3); font-size: 13.5px; font-weight: 600; }
+@media (max-width: 640px) { .rt-list li { grid-template-columns: 1fr; } }
 .walk-plan { border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
 .walk-plan.just { border: 2px solid var(--text); padding: 13px 15px; }
 .rlist.ra { gap: 16px; }
@@ -1219,7 +1242,8 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
       'Reading ' + read.toLocaleString() + ' records from ' + connected.length + ' sources',
       'Linking them to ' + list.length + ' open insights',
       last ? 'Comparing with ' + last.date : 'Looking back over the last four weeks',
-      last ? 'Checking the ' + last.decisions.length + ' actions agreed last time' : 'No earlier actions to check',
+      last ? 'Checking in on the actions agreed last time' : 'No earlier actions to check',
+      'Scoring plans that reached 90 days',
       'Writing the state of safety'
     ];
   }
@@ -1491,10 +1515,95 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
       A('Get a revised facade method from the subcontractor', 'Sam Ortiz', '29 Sep', 'track'),
       A('Make the revised method a condition of starting at Hospital Fit-out', 'Sam Ortiz', '2 Oct')] }
   };
-  INSIGHTS.forEach(function (i) { i.plan = PLANS[i.id] || null; });
+  // What Prism sees so far against "listens for": working, pattern continues, or too early
+  var READS = {
+    load: ['early', 'The audit is on 30 Sep, and tag line failures are still arriving at the same rate.'],
+    pre: ['continues', '22 pre-starts were completed in under a minute since the reminder on 19 Sep.'],
+    spot: ['working', 'At Ridge Road, no reversing without a spotter in two weeks. One repeat at North Yard.'],
+    house: ['working', 'No blocked routes at Creek Crossing since the laydown areas were marked. Prism suggests closing it.'],
+    edge: ['continues', 'Edge protection was left off twice more since 15 Sep.']
+  };
+  INSIGHTS.forEach(function (i) { i.plan = PLANS[i.id] || null; if (i.plan && READS[i.id]) i.plan.read = READS[i.id]; });
+  INSIGHTS.forEach(function (i) { if (i.id === 'pre') i.follows = 'r-pre0'; });
+  function addDays(d, n) { var m = /^(\d+) (\w{3})/.exec(d || ''); if (!m) return ''; var t = new Date(2026, MON[m[2]], +m[1] + n); return t.getDate() + ' ' + Object.keys(MON)[t.getMonth()]; }
+  function agreedDate(pl) { var m = /on (\d+ \w{3})/.exec(pl.agreed || ''); return m ? m[1] : ''; }
+
+  /* ---------- 90-day retros: did the plan make a difference? ---------- */
+  var OUT = {
+    worked: ['success', 'Worked', 'The pattern stopped and stayed stopped.'],
+    quiet: ['success', 'Quiet', 'Nothing since, and reporting held up. Good news.'],
+    partly: ['warning', 'Partly', 'Better, but not gone.'],
+    didnt: ['critical', 'Didn\u2019t work', 'The pattern continued or changed shape.'],
+    cant: ['', 'Can\u2019t tell', 'Reporting dropped, so quiet doesn\u2019t mean safe.']
+  };
+  var RETROS = [
+    { id: 'r-dust', title: 'Silica dust controls skipped during cutting', sites: ['cc', 'ny'], agreed: '27 Jun', closed: '20 Aug', outcome: 'worked',
+      expect: 'No dry cutting without extraction at Creek Crossing and North Yard.', before: '9 records of dry cutting', after: 'None', reporting: ['Steady', 'Both sites reported as often as before.'],
+      ind: ['learning_development', 1], moved: 'From Compliant to Compliant, some Leading',
+      actions: [['Fit on-tool extraction to every cut-off saw', 'Dana Brooks'], ['Silica toolbox talk at both sites', 'Tom Walsh']],
+      summary: 'The pattern stopped in the first fortnight and hasn\u2019t come back.' },
+    { id: 'r-cone', title: 'Traffic cones moved outside the approved plan', sites: ['rr'], agreed: '24 Jun', closed: '12 Aug', outcome: 'partly',
+      expect: 'Traffic setups at Ridge Road match the approved plan on every shift.', before: '11 setups off-plan', after: '3, all on the night shift', reporting: ['Steady', 'Ridge Road reported at its usual rate.'],
+      ind: ['communications_coordination', 4], moved: 'No change',
+      actions: [['Re-brief the day traffic crew on the approved plan', 'Priya Nair'], ['Photo check of each setup before work starts', 'Priya Nair']],
+      summary: 'Day shifts now hold the plan. Night shifts don\u2019t, and that\u2019s now part of the handover insight.', link: 'hand' },
+    { id: 'r-lone', title: 'People working alone at night in the tunnels', sites: ['st'], agreed: '26 Jun', closed: '8 Aug', outcome: 'quiet',
+      expect: 'No lone working reported at Southern Tunnels.', before: '5 reports of lone working', after: 'None', reporting: ['Steady', 'Southern Tunnels kept reporting at its usual rate.'],
+      ind: ['resource_allocation', 2], moved: 'No change',
+      actions: [['Roster night work in pairs', 'Tom Walsh']],
+      summary: 'Nothing has come back, and the site kept reporting. Quiet is good news here.' },
+    { id: 'r-hot', title: 'Hot work permits closed before the fire watch ended', sites: ['ql'], agreed: '30 Jun', closed: '1 Aug', outcome: 'cant',
+      expect: 'Fire watch completed before hot work permits close at Quarry Link.', before: '6 permits closed early', after: 'None in the permits that still arrive', reporting: ['Dropped', 'Quarry Link sent 70% fewer records. Its inspections stopped on 6 Sep.'],
+      ind: ['monitoring_metrics', 1], moved: 'No change',
+      actions: [['Add a fire watch sign-off to the hot work permit', 'Priya Nair']],
+      summary: 'The pattern looks gone, but so is most of Quarry Link\u2019s reporting.' },
+    { id: 'r-pre0', title: 'Pre-starts skipped on the early shift at Harbour Bridge Deck', sites: ['hb'], agreed: '20 Jun', closed: '18 Jul', outcome: 'didnt',
+      expect: 'Every early shift at Harbour Bridge Deck completes a pre-start.', before: '14 early shifts with no pre-start', after: 'None skipped, but 31 done in under a minute', reporting: ['Steady', 'Harbour Bridge Deck reported at its usual rate.'],
+      ind: ['monitoring_metrics', 1], moved: 'From Compliant, some Leading to Compliant',
+      actions: [['Make the pre-start a condition of starting the shift', 'Tom Walsh']],
+      summary: 'Pre-starts stopped being skipped and started being ticked. Prism raised a follow-on insight.', link: 'pre' }
+  ];
+  var RETRO = {}; RETROS.forEach(function (r) { r.due = addDays(r.agreed, 90); r.review = null; RETRO[r.id] = r; });
+  function retrosInView() { var regs = regionsInScope(); return RETROS.filter(function (r) { return r.sites.some(function (s) { return regs.indexOf(SITE[s].region) > -1; }); }); }
+  function outBadge(k) { var o = OUT[k]; return o[0] ? '<span class="badge ' + o[0] + '"><i></i>' + o[1] + '</span>' : '<span class="tlabel">' + o[1] + '</span>'; }
+  function retroReview(r) {
+    if (!(ST.view === 'meeting' && MT)) return r.review ? '<span class="rt-rv">' + (r.review === 'confirmed' ? 'Confirmed' : 'Challenged') + ' at a Focus review</span>' : '<span class="rt-rv">For the next Focus review</span>';
+    if (r.review) return '<span class="rt-state"><span class="rt-rv on">' + (r.review === 'confirmed' ? 'Confirmed' : 'Challenged: Prism will look again') + '</span><button type="button" class="linkish rt-undo" data-rundo="' + r.id + '">Undo</button></span>';
+    return '<span class="rt-btns"><button type="button" class="btn sm" data-rset="' + r.id + ':confirmed">Confirm</button><button type="button" class="btn sm" data-rset="' + r.id + ':challenged">Challenge</button></span>';
+  }
+  function openRetro(id, trigger) {
+    var r = RETRO[id]; if (!r) return;
+    if (trigger) recTrigger = trigger;
+    var f = FACTOR[r.ind[0]], lk = r.link && insightById(r.link);
+    $('rec').innerHTML =
+      '<div class="sheet-head" style="position:relative"><button type="button" class="x" id="rec-x" aria-label="Close"><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 2l8 8M10 2l-8 8" stroke="currentColor" stroke-width="1.6"/></svg></button>' +
+        '<div class="meta">' + outBadge(r.outcome) + '<span class="label">90-day retro \u00b7 due ' + esc(r.due) + '</span></div>' +
+        '<h2 id="rec-title">' + esc(r.title) + '</h2><p class="muted-p">Plan agreed ' + esc(r.agreed) + ' \u00b7 closed ' + esc(r.closed) + ' \u00b7 ' + esc(join(r.sites.map(function (s) { return SITE[s].name; }))) + '</p></div>' +
+      '<div class="sheet-body">' +
+        '<section class="sheet-sec"><span class="label">Prism\u2019s verdict</span><p class="rt-sum">' + esc(r.summary) + '</p><p class="muted-p">' + esc(OUT[r.outcome][2]) + '</p></section>' +
+        '<section class="sheet-sec"><span class="label">Prism listened for</span><p>' + esc(r.expect) + '</p>' +
+          '<div class="rt-ba"><div><span class="label">90 days before</span><b>' + esc(r.before) + '</b></div><div><span class="label">90 days since</span><b>' + esc(r.after) + '</b></div></div>' +
+          '<p class="rt-rep' + (r.reporting[0] === 'Dropped' ? ' drop' : '') + '"><span class="label">Reporting from these sites</span><b>' + esc(r.reporting[0]) + '.</b> ' + esc(r.reporting[1]) + '</p></section>' +
+        '<section class="sheet-sec"><span class="label">On the Forge Works Map</span><p>' + factorBtn(r.ind[0]) + ' \u00b7 ' + esc(f.inds[r.ind[1]].toLowerCase()) + '</p><p class="muted-p">' + esc(r.moved) + ' over the 90 days.</p></section>' +
+        '<section class="sheet-sec"><span class="label">The plan</span><ul class="rt-acts">' + r.actions.map(function (a) { return '<li><span class="badge success"><i></i>Done</span><span>' + esc(a[0]) + ' <small>' + esc(a[1]) + '</small></span></li>'; }).join('') + '</ul></section>' +
+        (lk ? '<section class="sheet-sec"><span class="label">' + (r.outcome === 'didnt' ? 'Follow-on insight' : 'Carried into') + '</span><div class="links"><button type="button" class="link-item" data-fopen="' + lk.id + '"><b>' + esc(lk.title) + '</b><span>' + statusText(lk) + '</span></button></div></section>' : '') +
+      '</div>' +
+      '<div class="sheet-foot">' + retroReview(r) + '</div>';
+    $('rec').hidden = false; $('scrim').hidden = false; $('rec-x').focus();
+  }
+  document.addEventListener('click', function (e) {
+    var ro = e.target.closest('[data-retro]'); if (ro) { e.preventDefault(); e.stopPropagation(); openRetro(ro.getAttribute('data-retro'), ro); return; }
+    var rs = e.target.closest('[data-rset]'), ru = e.target.closest('[data-rundo]');
+    if (rs || ru) {
+      e.stopPropagation();
+      var pr = rs ? rs.getAttribute('data-rset').split(':') : [ru.getAttribute('data-rundo'), null], r = RETRO[pr[0]];
+      r.review = pr[1]; if (MT) MT.retros[r.id] = pr[1];
+      if (!$('rec').hidden && $('rec').querySelector('.rt-sum')) openRetro(r.id);
+      var y = window.scrollY; if (ST.view === 'meeting') { renderMeeting(); window.scrollTo(0, y); }
+    }
+  }, true);
   var PA_ST = [['todo', 'Not started'], ['track', 'On track'], ['risk', 'At risk'], ['done', 'Done']];
   function planAgreed(i) { return !i.plan || i.plan.state === 'agreed'; }
-  var MON = { Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5, Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11 };
   function overdue(a) { var m = /^(\d+) (\w{3})/.exec(a.due || ''); return a.st !== 'done' && !!m && MON[m[2]] != null && new Date(2026, MON[m[2]], +m[1]) < new Date(2026, 8, 26); }
   function actBadge(a) {
     if (a.st === 'done') return '<span class="badge success"><i></i>Done</span>';
@@ -1524,7 +1633,9 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
       }).join('') + '</ol>' +
       (prop ? '<div class="pa-add"><input type="text" class="w-note" id="pa-t-' + i.id + '" placeholder="Add an action: what will be done"><select class="select" id="pa-w-' + i.id + '"><option value="">Who</option>' + people.map(function (o) { return '<option>' + esc(o) + '</option>'; }).join('') + '</select><input type="text" class="w-note pa-due" id="pa-d-' + i.id + '" placeholder="By when"><button type="button" class="btn" data-pa-add="' + i.id + '">Add</button></div>' : '') +
       '<p class="plan-exp"><span class="label">Prism listens for</span>' + esc(pl.expect) + '</p>' +
-      (prop ? '<div class="plan-foot"><p class="muted-p">' + (ST.view === 'meeting' && MT ? 'Agree it here and the actions go into this review\u2019s summary.' : 'Plans are agreed together in the Focus review. Agree it now if it can\u2019t wait.') + '</p><button type="button" class="btn brand" data-pa-agree="' + i.id + '"' + (pl.actions.length ? '' : ' disabled') + '>Agree plan</button></div>' : '<p class="muted-p">' + esc(planSummary(i)) + '.</p>') +
+      (pl.read ? '<p class="plan-read"><span class="label">Prism\u2019s read so far</span><span>' + (pl.read[0] === 'working' ? '<span class="badge success"><i></i>Working</span>' : pl.read[0] === 'continues' ? '<span class="badge critical"><i></i>Pattern continues</span>' : '<span class="tlabel">Too early</span>') + ' ' + esc(pl.read[1]) + '</span></p>' : '') +
+      (i.follows && RETRO[i.follows] ? '<p class="plan-read"><span class="label">Follows on from</span><span><button type="button" class="linkish map-link" data-retro="' + i.follows + '">' + esc(RETRO[i.follows].title) + '</button> \u00b7 closed ' + esc(RETRO[i.follows].closed) + ' \u00b7 retro: ' + OUT[RETRO[i.follows].outcome][1] + '</span></p>' : '') +
+      (prop ? '<div class="plan-foot"><p class="muted-p">' + (ST.view === 'meeting' && MT ? 'Agree it here and the actions go into this review\u2019s summary.' : 'Plans are agreed together in the Focus review. Agree it now if it can\u2019t wait.') + '</p><button type="button" class="btn brand" data-pa-agree="' + i.id + '"' + (pl.actions.length ? '' : ' disabled') + '>Agree plan</button></div>' : '<p class="muted-p">' + esc(planSummary(i)) + '.' + (agreedDate(pl) ? ' 90-day retro on ' + esc(addDays(agreedDate(pl), 90)) + '.' : '') + '</p>') +
     '</section>';
   }
   document.addEventListener('click', function (e) {
@@ -1983,7 +2094,7 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
     var last = lastMeeting();
     var att = {};
     managersInView().forEach(function (m) { att[m] = !last || last.attendees.indexOf(m) > -1 || m === 'You'; });
-    MT = { step: 1, attendees: att, idx: 0, log: {}, notes: '', items: [], agreed: {}, checks: {} };
+    MT = { step: 1, attendees: att, idx: 0, log: {}, notes: '', items: [], agreed: {}, checks: {}, retros: {} };
     go('meeting');
   }
 
@@ -2019,7 +2130,7 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
           }).join('') + '</ul>' +
         '</section><section class="card meet-card">' +
           '<h2>What Prism will prepare</h2>' +
-          '<ul class="plain"><li><b>State of safety</b> across ' + esc(scopeLabel()) + ' right now.</li><li><b>On the Forge Works Map</b>: which factors moved over the last 90 days, and where the clearest gap is.</li><li><b>Since last time</b>: what’s new, stalled, worse, better or ready to close ' + (last ? 'since ' + esc(last.short) : 'over the last four weeks') + '.</li><li><b>Actions</b>: a check-in on every action agreed last time, and any plans agreed since.</li></ul>' +
+          '<ul class="plain"><li><b>State of safety</b> across ' + esc(scopeLabel()) + ' right now.</li><li><b>On the Forge Works Map</b>: which factors moved over the last 90 days, and where the clearest gap is.</li><li><b>Since last time</b>: what’s new, stalled, worse, better or ready to close ' + (last ? 'since ' + esc(last.short) : 'over the last four weeks') + '.</li><li><b>Actions</b>: a check-in on every action agreed last time, and any plans agreed since.</li><li><b>90-day retros</b>: whether plans that reached 90 days made a difference.</li></ul>' +
           '<p class="muted-p">' + (last ? 'Last review: ' + esc(last.date) + ' with ' + esc(join(last.attendees)) + '.' : 'There’s no earlier Focus review for this purview.') + '</p>' +
           '<div class="meet-actions"><button type="button" class="btn brand" id="gen-report">Prepare the report</button></div>' +
         '</section></div>';
@@ -2058,14 +2169,14 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
               '<div><h3><span class="badge warning"><i></i>Stalled</span></h3>' + lines(stuck, 'warning', function (i) { return 'No update in ' + i.updated + ' days · ' + esc(i.owner); }) + '</div>' +
               '<div><h3><span class="badge success"><i></i>Improving or done</span></h3>' + lines(better.concat(ready), 'success', function (i) { return i.status === 'resolved' ? 'Ready to close' : 'Improving · ' + esc(i.owner); }) + '</div>' +
             '</div></section>' +
-          reportActions(list, last) +
+          reportActions(list, last) + reportRetros() +
           (function () {
             var sl = scopeLevel(), open = function (i) { return !i.closed && !i.dismissed; };
             var incoming = INSIGHTS.filter(function (i) { return open(i) && i.esc && i.esc.to === sl; });
             var held = INSIGHTS.filter(function (i) { return open(i) && i.level === sl && i.level !== i.home; });
             var outgoing = INSIGHTS.filter(function (i) { return open(i) && i.esc && i.esc.from === sl; });
             var li = function (i, text) { return '<li><button type="button" class="rlink" data-open="' + i.id + '">' + esc(i.title) + '</button><span>' + esc(text) + '</span></li>'; };
-            return '<section class="card rsec"><span class="label">5 · Escalations</span><div class="rcols">' +
+            return '<section class="card rsec"><span class="label">6 · Escalations</span><div class="rcols">' +
               '<div><h3><span class="badge info"><i></i>Escalated to this level</span></h3>' + (incoming.length ? '<ul class="rlist">' + incoming.map(function (i) { return li(i, 'From ' + nameOf(i.esc.by) + ' · ' + i.esc.reason); }).join('') + '</ul>' : '<p class="muted-p">None.</p>') + '</div>' +
               '<div><h3><span class="tlabel">Held at this level</span></h3>' + (held.length ? '<ul class="rlist">' + held.map(function (i) { return li(i, 'Accepted from ' + levelName(i.home)); }).join('') + '</ul>' : '<p class="muted-p">None.</p>') + '</div>' +
               '<div><h3><span class="tlabel">Passed up</span></h3>' + (outgoing.length ? '<ul class="rlist">' + outgoing.map(function (i) { return li(i, 'Waiting for ' + levelOwner(i.esc.to)); }).join('') + '</ul>' : '<p class="muted-p">None.</p>') + '</div>' +
@@ -2125,6 +2236,10 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
           return '<li><span class="av' + (it.owner === YOU ? ' me' : '') + '">' + (it.owner ? initials(it.owner) : '—') + '</span><div><p class="agreed-t">' + esc(it.title) + '</p><p class="agreed-o">' + esc(lg.changes.join(' · ') || (it.plan && it.plan.state === 'proposed' ? 'Reviewed. Plan still to agree' : 'Reviewed, no change')) + '</p>' + (lg.note ? '<p class="agreed-note">“' + esc(lg.note) + '”</p>' : '') + '</div></li>';
         }).join('') + '</ul>' : '<p class="muted-p">No insights were updated.</p>') +
         (function () {
+          var ks = Object.keys(MT.retros).filter(function (k) { return MT.retros[k]; }); if (!ks.length) return '';
+          return '<div class="w-acts"><span class="label">90-day retros</span><ul class="w-rt">' + ks.map(function (k) { var r = RETRO[k]; return '<li>' + outBadge(r.outcome) + ' ' + esc(r.title) + ' <span>' + (MT.retros[k] === 'confirmed' ? 'Confirmed' : 'Challenged: Prism will look again') + '</span></li>'; }).join('') + '</ul></div>';
+        })() +
+        (function () {
           var per = {};
           Object.keys(MT.agreed).forEach(function (id) { var it = insightById(id); it.plan.actions.forEach(function (a) { var w = a.who || 'No one yet'; (per[w] = per[w] || []).push({ a: a, it: it }); }); });
           var ws = Object.keys(per); if (!ws.length) return '<p class="w-map"><span class="label">New actions</span>No plans were agreed in this review.</p>';
@@ -2167,6 +2282,17 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
       (fromLast.length ? '<ul class="rlist ra">' + fromLast.map(group).join('') + '</ul>' : '<p class="muted-p">' + (last ? 'No plans were agreed on ' + esc(last.short) + '.' : 'Nothing on record. This is the first Focus review for ' + esc(scopeLabel()) + '.') + '</p>') +
       (outside.length ? '<h3 class="ra-h">Agreed outside a review since then</h3><ul class="rlist ra">' + outside.map(group).join('') + '</ul>' : '') +
       '</section>';
+  }
+  // Report section: plans that reached 90 days, with Prism's verdict for the room to confirm or challenge
+  function reportRetros() {
+    var rs = retrosInView(); if (!rs.length) return '';
+    var c = {}; rs.forEach(function (r) { c[r.outcome] = (c[r.outcome] || 0) + 1; });
+    var parts = ['worked', 'quiet', 'partly', 'didnt', 'cant'].filter(function (k) { return c[k]; }).map(function (k) { return lw(c[k]) + ' ' + ({ worked: 'worked', quiet: 'went quiet', partly: 'partly worked', didnt: 'didn\u2019t work', cant: 'can\u2019t be judged yet' })[k]; });
+    return '<section class="card rsec"><span class="label">5 · 90-day retros</span>' +
+      '<p class="rlead"><b>' + word(rs.length) + (rs.length === 1 ? ' plan' : ' plans') + ' reached 90 days:</b> ' + esc(join(parts)) + '.</p>' +
+      '<ul class="rt-list">' + rs.map(function (r) {
+        return '<li>' + outBadge(r.outcome) + '<div class="rt-main"><button type="button" class="rlink" data-retro="' + r.id + '">' + esc(r.title) + '</button><span>' + esc(r.summary) + '</span></div>' + retroReview(r) + '</li>';
+      }).join('') + '</ul></section>';
   }
   // Report section: the Map over the last 90 days, with the insights that give evidence for each move
   function reportMap(list) {
@@ -2220,6 +2346,7 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
     return 'Focus review · ' + scopeLabel() + ' · Friday 26 September\nAttended: ' + join(att) + '\n\n' +
       done.map(function (id) { var it = INSIGHTS.filter(function (x) { return x.id === id; })[0], lg = MT.log[id]; return '• ' + it.title + ': ' + (lg.changes.join(', ') || 'reviewed, no change') + (lg.note ? '. ' + lg.note : ''); }).join('\n') +
       (Object.keys(MT.agreed).length ? '\n\nNew actions:\n' + Object.keys(MT.agreed).map(function (id) { var it = insightById(id); return it.plan.actions.map(function (a) { return '• ' + (a.who || 'No one yet') + ': ' + a.t + ' (by ' + a.due + ')'; }).join('\n'); }).join('\n') : '') +
+      (Object.keys(MT.retros).filter(function (k) { return MT.retros[k]; }).length ? '\n\n90-day retros:\n' + Object.keys(MT.retros).filter(function (k) { return MT.retros[k]; }).map(function (k) { return '• ' + RETRO[k].title + ': ' + OUT[RETRO[k].outcome][1] + ' (' + MT.retros[k] + ')'; }).join('\n') : '') +
       (MT.notes ? '\n\nNotes: ' + MT.notes : '') +
       (function () { var lc = document.querySelector('input[name="lc"]:checked'); if (!lc) return ''; var f = FACTOR[lc.getAttribute('data-lcf')]; return '\n\nLeadership check: ' + f.ind[+lc.getAttribute('data-lck')][0] + ' (' + f.name + '): ' + LEVELS[+lc.value]; })() +
       '\n\nPrepared with Hiviz. Story written by Prism.';
