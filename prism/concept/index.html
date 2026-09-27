@@ -613,6 +613,23 @@ button.ind-btn:hover .ind-name { text-decoration: underline; text-underline-offs
 .mc { display: grid; gap: 10px; align-content: start; }
 .linkish { color: inherit; text-align: left; }
 .plan { display: grid; gap: 12px; }
+.pa-link { display: grid; gap: 8px; margin-top: 6px; padding: 10px 12px; border: 1px dashed var(--border-2); border-radius: 10px; }
+.pl-top { display: flex; align-items: center; gap: 8px 10px; flex-wrap: wrap; }
+.pl-t { font-size: 14px; }
+.pl-bar { flex: 0 0 90px; height: 6px; border-radius: 3px; background: var(--border); overflow: hidden; }
+.pl-bar i { display: block; height: 100%; background: var(--text); }
+.pl-more { font-size: 14px; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
+.pv { margin-left: auto; font-size: 11px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-3); border: 1px dashed var(--border-2); border-radius: 999px; padding: 0 7px; cursor: help; }
+.pl-items { list-style: none; margin: 0; padding: 0; display: grid; }
+.pl-items li { display: grid; grid-template-columns: 70px minmax(0, 1fr) auto; gap: 10px; align-items: baseline; padding: 6px 0; border-top: 1px solid var(--border); font-size: 14px; }
+.pl-items small { color: var(--text-3); font-weight: 600; }
+.pl-ref { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12.5px; color: var(--text-2); }
+.pl-st { font-size: 13px; font-weight: 700; color: var(--text-2); white-space: nowrap; }
+.pl-closed span:nth-child(2) { color: var(--text-3); text-decoration: line-through; text-decoration-thickness: 1px; }
+.pl-late .pl-st { color: var(--critical); }
+.pl-rest span { color: var(--text-3); }
+.pl-sug { margin: 0; font-size: 13.5px; color: var(--text-2); }
+.pl-use { font-weight: 800; text-decoration: underline; text-underline-offset: 3px; }
 .plan-read { margin: 0; display: grid; gap: 4px; font-size: 15px; }
 .plan-read .badge, .plan-read .tlabel { margin-right: 6px; }
 .rt-list { list-style: none; margin: 0; padding: 0; display: grid; }
@@ -1602,6 +1619,41 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
       var y = window.scrollY; if (ST.view === 'meeting') { renderMeeting(); window.scrollTo(0, y); }
     }
   }, true);
+  /* ---------- Integration preview: site-level actions under a management action ---------- */
+  // Hiviz holds the one management action; the source system holds the work on each site, and Prism reads it back
+  var LINKS = {
+    'load:1': { src: 'procore', synced: '12 min ago', total: 12, closed: 9, items: [
+      ['PC-7781', 'ny', 'Brief the tag line standard to steel crew A', 'closed', 'closed 24 Sep'],
+      ['PC-7786', 'hb', 'Replace frayed tag lines on the deck crane', 'closed', 'closed 25 Sep'],
+      ['PC-7790', 'ny', 'Brief the tag line standard to steel crew C', 'open', 'due 30 Sep'],
+      ['PC-7793', 'hb', 'Brief the tag line standard to the night crew', 'open', 'due 2 Oct'],
+      ['PC-7795', 'hb', 'Add tag line checks to the lift plan template', 'open', 'due 3 Oct']] },
+    'pre:1': { src: 'intelex', synced: '1 hr ago', total: 4, closed: 1, items: [
+      ['FRM-212', 'hb', 'Rebuild the pre-start form around the lift plan', 'closed', 'closed 22 Sep'],
+      ['FRM-214', 'st', 'Rebuild the pre-start form around tunnelling tasks', 'late', 'due 24 Sep \u00b7 overdue'],
+      ['FRM-215', 'st', 'Trial the new form on the night shift', 'open', 'due 1 Oct'],
+      ['FRM-216', 'hb', 'Retire the old checklist', 'open', 'due 3 Oct']] }
+  };
+  function linkSuggest(l) { return l.closed === l.total ? 'done' : l.items.some(function (x) { return x[3] === 'late'; }) ? 'risk' : 'track'; }
+  ST.openLink = {};
+  function linkHTML(i, k, a) {
+    var key = i.id + ':' + k, l = LINKS[key]; if (!l || !i.plan || i.plan.state !== 'agreed') return '';
+    var src = SRC[l.src], sites = []; l.items.forEach(function (x) { var n = SITE[x[1]].name; if (sites.indexOf(n) < 0) sites.push(n); });
+    var sg = linkSuggest(l), sgl = PA_ST.filter(function (x) { return x[0] === sg; })[0][1], open = ST.openLink[key];
+    return '<div class="pa-link"><div class="pl-top"><span class="mg">' + esc(src.mg) + '</span><span class="pl-t"><b>' + l.closed + ' of ' + l.total + '</b> ' + esc(src.name) + ' actions closed across ' + esc(join(sites)) + '</span>' +
+        '<span class="pl-bar" aria-hidden="true"><i style="width:' + Math.round(l.closed / l.total * 100) + '%"></i></span>' +
+        '<button type="button" class="linkish pl-more" data-palink="' + key + '" aria-expanded="' + !!open + '">' + (open ? 'Hide' : 'Show') + '</button>' +
+        '<span class="pv" title="Integration preview. In the MVP, check-ins are made by hand.">Preview</span></div>' +
+      (open ? '<ul class="pl-items">' + l.items.map(function (x) {
+        return '<li class="pl-' + x[3] + '"><span class="pl-ref">' + esc(x[0]) + '</span><span>' + esc(x[2]) + ' <small>' + esc(SITE[x[1]].name) + '</small></span><span class="pl-st">' + esc(x[4]) + '</span></li>';
+      }).join('') + (l.total > l.items.length ? '<li class="pl-rest"><span></span><span>and ' + (l.total - l.items.length) + ' more, all closed</span><span></span></li>' : '') + '</ul>' : '') +
+      '<p class="pl-sug">' + (sg === a.st ? 'Matches ' + esc(src.name) + ': ' + esc(sgl.toLowerCase()) : 'From ' + esc(src.name) + ', Prism suggests <b>' + esc(sgl) + '</b> <button type="button" class="linkish pl-use" data-pause="' + key + ':' + sg + '">Use this</button>') + ' \u00b7 synced ' + esc(l.synced) + '</p>' +
+    '</div>';
+  }
+  document.addEventListener('click', function (e) {
+    var t = e.target.closest('[data-palink]'); if (t) { var k = t.getAttribute('data-palink'); ST.openLink[k] = !ST.openLink[k]; rerenderFor(k.split(':')[0]); return; }
+    var u = e.target.closest('[data-pause]'); if (u) { var pr = u.getAttribute('data-pause').split(':'), i = insightById(pr[0]), a = i.plan.actions[+pr[1]]; a.st = pr[2]; i.updated = 0; logEvent(i, 'Action ' + PA_ST.filter(function (x) { return x[0] === pr[2]; })[0][1].toLowerCase(), a.t + ' (from ' + SRC[LINKS[pr[0] + ':' + pr[1]].src].name + ')', 'Prism'); toast('Checked in from ' + SRC[LINKS[pr[0] + ':' + pr[1]].src].name); rerenderFor(i.id); }
+  });
   var PA_ST = [['todo', 'Not started'], ['track', 'On track'], ['risk', 'At risk'], ['done', 'Done']];
   function planAgreed(i) { return !i.plan || i.plan.state === 'agreed'; }
   function overdue(a) { var m = /^(\d+) (\w{3})/.exec(a.due || ''); return a.st !== 'done' && !!m && MON[m[2]] != null && new Date(2026, MON[m[2]], +m[1]) < new Date(2026, 8, 26); }
@@ -1627,7 +1679,7 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
     return '<section class="' + cls + ' plan' + (prop ? ' prop' : '') + '"><div class="plan-head"><span class="label">Plan</span><span class="plan-state">' + (prop ? 'Proposed by Prism \u00b7 not agreed yet' : esc(pl.agreed)) + '</span></div>' +
       '<ol class="plan-acts">' + pl.actions.map(function (a, k) {
         var st = PA_ST.filter(function (x) { return x[0] === a.st; })[0];
-        return '<li class="pa st-' + a.st + '"><div class="pa-main"><span class="pa-t">' + esc(a.t) + '</span><span class="pa-meta">' + who(a) + '<span>by ' + esc(a.due) + '</span></span></div>' +
+        return '<li class="pa st-' + a.st + '"><div class="pa-main"><span class="pa-t">' + esc(a.t) + '</span><span class="pa-meta">' + who(a) + '<span>by ' + esc(a.due) + '</span></span>' + linkHTML(i, k, a) + '</div>' +
           (prop ? '<button type="button" class="btn sm" data-pa-remove="' + i.id + ':' + k + '" aria-label="Remove this action">Remove</button>'
                 : '<label class="pa-ci"><span class="sr">How\u2019s it going?</span><select class="select" data-pa="' + i.id + ':' + k + '">' + PA_ST.map(function (x) { return '<option value="' + x[0] + '"' + (x[0] === a.st ? ' selected' : '') + '>' + x[1] + '</option>'; }).join('') + '</select></label>') + '</li>';
       }).join('') + '</ol>' +
@@ -2273,7 +2325,7 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
     var n = function (f) { return acts.filter(f).length; };
     var group = function (i) {
       return '<li class="ra-i"><button type="button" class="rlink" data-open="' + i.id + '">' + esc(i.title) + '</button><ul class="ra-acts">' + i.plan.actions.map(function (a) {
-        return '<li>' + actBadge(a) + '<span class="ra-t">' + esc(a.t) + '</span><span class="ra-m">' + (a.who ? esc(a.who) : 'No one yet') + ' \u00b7 by ' + esc(a.due) + '</span></li>';
+        return '<li>' + actBadge(a) + '<span class="ra-t">' + esc(a.t) + '</span><span class="ra-m">' + (a.who ? esc(a.who) : 'No one yet') + ' \u00b7 by ' + esc(a.due) + (function () { var l = LINKS[i.id + ':' + i.plan.actions.indexOf(a)]; return l ? ' \u00b7 ' + esc(SRC[l.src].name) + ': ' + l.closed + ' of ' + l.total + ' closed' : ''; })() + '</span></li>';
       }).join('') + '</ul></li>';
     };
     return '<section class="card rsec"><span class="label">4 · Actions' + (last ? ' agreed on ' + esc(last.short) : '') + '</span>' +
