@@ -522,6 +522,92 @@ main { padding-block: 32px 80px; }
 .walk-list li.done .wl-n { background: var(--text); border-color: var(--text); color: #fff; }
 .mf-resolved { display: flex; align-items: center; gap: 10px; font-size: 16px; font-weight: 800; margin: 0; }
 .mf-resolved .gen-i { background: var(--text); border-color: var(--text); color: #fff; }
+
+.esc-line { font-size: 15.5px; }
+.esc-line b { font-weight: 800; }
+.esc-reason { font-size: 15px; color: var(--text-2); }
+.icard-status { display: inline-flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+
+/* ---------- Forge Works Map ---------- */
+.map-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-rows: auto repeat(5, 1fr); gap: 12px 20px; }
+.map-col { display: grid; grid-row: span 6; grid-template-rows: subgrid; }
+@media (max-width: 1000px) { .map-grid { grid-template-columns: 1fr; grid-template-rows: none; row-gap: 20px; } .map-col { grid-row: auto; grid-template-rows: none; gap: 12px; } }
+.map-dom { display: flex; align-items: baseline; gap: 10px; padding-bottom: 8px; border-bottom: 2px solid var(--text); }
+.map-dom h2 { font-size: 20px; }
+.fcard { display: grid; align-content: start; gap: 10px; padding: 16px 18px; transition: border-color .15s, box-shadow .15s; }
+.fcard:hover { border-color: var(--text); box-shadow: 0 4px 14px rgba(13,15,18,0.08); }
+.fcard:hover .fc-name { text-decoration: underline; text-underline-offset: 3px; }
+.fcard.blind { border-style: dashed; border-color: var(--border-2); }
+.fc-name { font-size: 17px; font-weight: 800; letter-spacing: -0.01em; }
+.fc-meta { display: flex; gap: 12px; align-items: center; font-size: 14px; font-weight: 700; color: var(--text-2); }
+.fc-held { font-size: 14px; color: var(--text-2); }
+.lvl { display: inline-flex; align-items: center; gap: 10px; }
+.lvl-bar { display: inline-flex; gap: 3px; }
+.lvl-bar i { width: 26px; height: 8px; border-radius: 2px; background: var(--bg); border: 1.5px solid var(--text); overflow: hidden; display: block; }
+.lvl-bar i b { display: block; height: 100%; background: var(--text); }
+.lvl-t { font-size: 15px; font-weight: 800; }
+.lvl.sm .lvl-bar i { width: 16px; height: 7px; }
+.lvl.sm .lvl-t { font-size: 13.5px; }
+.lvl.blind .lvl-bar i { border-style: dashed; border-color: var(--info); }
+.lvl.blind .lvl-t { color: var(--info); }
+.lvl-key { display: flex; align-items: center; gap: 8px 16px; flex-wrap: wrap; }
+.map-tabs { margin: 0; }
+.map-note { margin-top: 24px; font-size: 13.5px; color: var(--text-3); }
+.map-link { text-decoration: underline; text-underline-offset: 3px; }
+.map-compare { overflow: hidden; }
+.cmp { width: 100%; border-collapse: collapse; font-size: 15px; }
+.cmp th { text-align: left; font-size: 12px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-3); padding: 12px 16px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+.cmp td { padding: 10px 16px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+.cmp td:not(:first-child) { white-space: nowrap; }
+.cmp td:not(:first-child) .trend { margin-left: 10px; }
+.cmp td a { font-weight: 800; }
+.cmp td a:hover { text-decoration: underline; text-underline-offset: 3px; }
+.cmp tr.cmp-dom td { font-size: 12px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text); background: var(--bg); padding-top: 18px; border-bottom: 2px solid var(--text); }
+.f-rating { gap: 10px; }
+.f-rate-row { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
+.f-rate-row .lvl-t { font-size: 22px; }
+.f-rate-row .lvl-bar i { width: 40px; height: 12px; }
+.ind-list { overflow: hidden; }
+.ind-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 18px; align-items: center; padding: 14px 18px; border-bottom: 1px solid var(--border); }
+.ind-row:last-child { border-bottom: 0; }
+.ind-main { display: grid; gap: 3px; }
+.ind-name { font-size: 16.5px; font-weight: 800; }
+.ind-drv { font-size: 14.5px; }
+.ind-drv a { text-decoration: underline; text-underline-offset: 3px; }
+.ind-drv.muted { color: var(--text-3); font-weight: 600; }
+.ind-rate { display: flex; align-items: center; gap: 12px; justify-content: flex-end; }
+@media (max-width: 640px) { .ind-row { grid-template-columns: 1fr; } .ind-rate { justify-content: flex-start; } }
+.lvl-desc { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.lvl-desc li { display: grid; gap: 6px; padding: 12px 14px; border: 1px solid var(--border); border-radius: 10px; }
+.lvl-desc li.now { border-color: var(--text); }
+.lvl-desc li.next { background: var(--brand); border-color: #d9c200; }
+.lvl-desc p { font-size: 15px; line-height: 1.45; margin: 0; }
+.lvl-desc-h { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.fc-named, .f-named { font-size: 14px; font-weight: 700; color: var(--text-2); margin: 0; }
+.f-named { font-size: 15px; }
+.ind-list .ind-row { display: block; padding: 0; }
+.ind-btn { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 18px; align-items: center; width: 100%; padding: 14px 18px; background: none; border: 0; font: inherit; color: inherit; text-align: left; cursor: pointer; }
+.ind-btn.static { cursor: default; }
+button.ind-btn:hover .ind-name { text-decoration: underline; text-underline-offset: 3px; }
+.ind-detail { padding: 0 18px 16px; display: grid; gap: 10px; }
+.ind-levels { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.ind-levels li { display: grid; gap: 4px; align-content: start; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; }
+.ind-levels li.now { border-color: var(--text); }
+.ind-levels li.next { background: var(--brand); border-color: #d9c200; }
+.il-h { font-size: 12px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; }
+.il-t { font-size: 14.5px; line-height: 1.4; }
+.il-t.gap { color: var(--text-3); font-style: italic; }
+.ind-ev { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin: 0; }
+.ev-src { font-size: 12.5px; font-weight: 700; padding: 2px 8px; border: 1px solid var(--border-2); border-radius: 999px; }
+.ind-links { margin: 0; font-size: 14.5px; }
+.ind-links .linkish { font-weight: 700; color: inherit; text-decoration: underline; text-underline-offset: 3px; }
+.ind-links a { text-decoration: underline; text-underline-offset: 3px; font-weight: 700; }
+@media (max-width: 760px) { .ind-levels { grid-template-columns: 1fr; } }
+@media (max-width: 640px) { .ind-btn { grid-template-columns: 1fr; } .ind-rate { justify-content: flex-start; } }
+.mc-f { margin: 0; font-size: 15px; font-weight: 700; }
+.mc-l { margin: 0; display: grid; gap: 2px; font-size: 14.5px; line-height: 1.4; }
+.mc-l.next { background: var(--brand); padding: 8px 10px; border-radius: 8px; }
+.tag-now, .tag-next { font-size: 11.5px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; }
 .linkish { font: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
 @media (max-width: 760px) { .mf-row { grid-template-columns: 1fr; } .mf-act { justify-content: flex-start; } }
 @media (max-width: 1260px) { .mf-btn { padding: 0 10px; } }
@@ -545,6 +631,7 @@ main { padding-block: 32px 80px; }
     <nav class="tabs" aria-label="Views">
       <a href="#focus" data-view="focus">Insights</a>
       <a href="#sites" data-view="sites">Sites</a>
+      <a href="#map" data-view="map">Map</a>
       <a href="#sources" data-view="sources">Sources<span class="tab-dot" id="src-badge" hidden></span></a>
     </nav>
     <div class="hdr-right">
@@ -638,7 +725,7 @@ main { padding-block: 32px 80px; }
       sites: ['rr', 'rs', 'ql'], hist: '0000000100000010010010102012',
       title: 'Controls are failing at handovers',
       story: 'Three sites, three kinds of handover, one failure: controls that hold during the work break down when the work changes hands.',
-      read: [['Could have been', 'Fatal', 'critical'], ['Control', 'Failing at handover', 'critical'], ['Energy', 'Electrical, traffic', ''], ['Factor', 'Communications and coordination', '']],
+      read: [['Could have been', 'Fatal', 'critical'], ['Control', 'Failing at handover', 'critical'], ['Energy', 'Electrical, traffic', ''], ['Factor', 'Communication & coordination', '']],
       next: 'Give this an owner today. Start with the night-shift permit handover at Rail Stabling Yard: what gets passed on, and what gets lost.',
       says: [
         { src: 'servicenow', n: 5, text: 'Isolations closed before the test-for-dead step, both at night-shift change.', recs: [
@@ -879,7 +966,7 @@ main { padding-block: 32px 80px; }
     ['owner', 'Needs owner', function (i) { return !i.owner; }],
     ['stalled', 'Stalled', stalled],
     ['worse', 'Worsening', function (i) { return i.trend === 'worse'; }],
-    ['lead', 'For leadership', function (i) { return i.lead; }]
+    ['esc', 'Escalated', function (i) { return !!i.esc || i.level !== i.home; }]
   ];
 
   function renderFocus() {
@@ -918,7 +1005,7 @@ main { padding-block: 32px 80px; }
     var srcIds = i.says.map(function (s) { return s.src; });
     var sites = i.sites.map(function (id) { return SITE[id]; });
     return '<button type="button" class="card icard" data-open="' + i.id + '">' +
-      '<span class="icard-top"><span class="icard-sev">' + sevIcon(i.sev) + '<span class="sev-t t-' + i.sev + '">' + (i.sev === 'critical' ? 'Critical' : 'Warning') + '</span></span><span class="icard-status">' + statusBadge(i) + '</span></span>' +
+      '<span class="icard-top"><span class="icard-sev">' + sevIcon(i.sev) + '<span class="sev-t t-' + i.sev + '">' + (i.sev === 'critical' ? 'Critical' : 'Warning') + '</span></span><span class="icard-status">' + escBadge(i) + statusBadge(i) + '</span></span>' +
       '<span class="icard-title">' + esc(i.title) + '</span>' +
       '<span class="icard-story">' + esc(i.story) + '</span>' +
       '<span class="icard-sites">' + sites.map(function (s) { return '<span class="chip">' + esc(s.name) + '</span>'; }).join('') + '</span>' +
@@ -990,7 +1077,7 @@ main { padding-block: 32px 80px; }
     var ow = owners(); if (i.owner && ow.indexOf(i.owner) < 0) ow.unshift(i.owner);
     var gone = i.dismissed || i.closed;
     $('view').innerHTML = '<a class="back" href="#focus">← Insights</a>' +
-      '<div class="ins-head"><div class="meta"><span class="icard-sev">' + sevIcon(i.sev) + '<span class="sev-t t-' + i.sev + '">' + (i.sev === 'critical' ? 'Critical' : 'Warning') + '</span></span>' + statusBadge(i) + trendHTML(i.trend) + '<span class="label">Raised ' + esc(i.since) + '</span></div>' +
+      '<div class="ins-head"><div class="meta"><span class="icard-sev">' + sevIcon(i.sev) + '<span class="sev-t t-' + i.sev + '">' + (i.sev === 'critical' ? 'Critical' : 'Warning') + '</span></span>' + statusBadge(i) + escBadge(i) + trendHTML(i.trend) + '<span class="label">Raised ' + esc(i.since) + '</span></div>' +
         '<h1 class="ins-title">' + esc(i.title) + '</h1>' +
         '<div class="meta">' + i.sites.map(function (s) { return '<a class="chip link" href="#site/' + s + '">' + esc(SITE[s].name) + '</a>'; }).join('') + '</div></div>' +
       (i.dismissed ? '<div class="banner info"><b>Dismissed: ' + esc(i.dismissed.reason) + '</b>' + (i.dismissed.note ? '<p>' + esc(i.dismissed.note) + '</p>' : '') + '<p>Prism won’t raise this again unless the pattern changes.</p></div>' : '') +
@@ -1003,7 +1090,7 @@ main { padding-block: 32px 80px; }
             return '<div class="card src-say"><div class="src-say-h"><span class="mg lg">' + esc(src.mg) + '</span><div><b>' + esc(src.name) + '</b> <span class="badge">' + s.n + ' records</span><p>' + esc(s.text) + '</p></div></div>' +
               '<div class="src-recs">' + s.recs.map(function (r) { return recRow(RECS[r.id]); }).join('') + (s.n > s.recs.length ? '<div class="rec"><span class="when">and ' + (s.n - s.recs.length) + ' more like these</span></div>' : '') + '</div></div>';
           }).join('') + '</section>' +
-        '<section class="ins-sec"><span class="label">How Prism read it</span><dl class="kv">' + i.read.map(function (r) { return '<div><dt>' + esc(r[0]) + '</dt><dd class="' + (r[2] ? 't-' + r[2] : '') + '">' + esc(r[1]) + '</dd></div>'; }).join('') + '</dl></section>' +
+        '<section class="ins-sec"><span class="label">How Prism read it</span><dl class="kv">' + i.read.map(function (r) { var fk = r[0] === 'Factor' ? factorByName(r[1]) : null, fx = fk && INS_FACTOR[i.id]; return '<div><dt>' + esc(r[0]) + '</dt><dd class="' + (r[2] ? 't-' + r[2] : '') + '">' + (fk ? '<a class="map-link" href="#map/' + fk + '">' + esc(r[1]) + '</a>' + (fx ? ' \u00b7 ' + esc(FACTOR[fx[0]].inds[fx[1]]) : '') : esc(r[1])) + '</dd></div>'; }).join('') + '</dl></section>' +
         (gone ? '' : '<section class="ins-sec"><span class="label">Suggested next step</span><p class="next">' + esc(i.next) + '</p></section>') +
       '</div><aside class="ins-side">' +
         '<section class="card side-card"><h2>Owner and status</h2>' +
@@ -1011,10 +1098,11 @@ main { padding-block: 32px 80px; }
           (ST.dismissing === i.id ? dismissForm(i.id, 'page') :
             '<span class="fld col"><label for="i-owner">Owner</label><select class="select wide" id="i-owner"><option value="">No owner</option>' + ow.map(function (o) { return '<option' + (o === i.owner ? ' selected' : '') + '>' + esc(o) + '</option>'; }).join('') + '</select></span>' +
             '<span class="fld col"><label for="i-status">Status</label><select class="select wide" id="i-status">' + [['new', 'New'], ['working', 'In progress'], ['resolved', 'Ready to close'], ['closed', 'Close it']].map(function (o) { return '<option value="' + o[0] + '"' + (o[0] === i.status ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select></span>' +
-            '<label class="switch left"><input type="checkbox" id="i-lead"' + (i.lead ? ' checked' : '') + '>For leadership</label>' +
             '<label class="w-note-l" for="i-note">Add an update</label><textarea class="w-note" id="i-note" rows="2" placeholder="What’s happened since the last update"></textarea>' +
             '<div class="meet-actions"><button type="button" class="btn brand" id="i-post">Post update</button><button type="button" class="btn" data-dopen="' + i.id + '">Dismiss…</button></div>')) +
         '</section>' +
+        (gone ? '' : escPanel(i)) +
+        mapCard(i) +
         '<section class="card side-card"><h2>History</h2><ol class="hist">' + i.history.slice().reverse().map(function (h) {
           return '<li><span class="hist-dot" aria-hidden="true"></span><div><p class="hist-what">' + esc(h.what) + '</p>' + (h.text ? '<p class="hist-text">' + esc(h.text) + '</p>' : '') + '<p class="hist-meta">' + esc(h.when) + ' · ' + esc(h.who === YOU ? 'You' : h.who) + '</p></div></li>';
         }).join('') + '</ol></section>' +
@@ -1030,7 +1118,6 @@ main { padding-block: 32px 80px; }
       else { i.status = v; logEvent(i, 'Status: ' + ({ new: 'New', working: 'In progress', resolved: 'Ready to close' })[v]); }
       render();
     }
-    else if (e.target.id === 'i-lead') { i.lead = e.target.checked; logEvent(i, i.lead ? 'Raised with leadership' : 'Removed from leadership'); render(); }
   });
   document.addEventListener('click', function (e) {
     if (ST.view !== 'insight' || !e.target.closest('#i-post')) return;
@@ -1144,7 +1231,7 @@ main { padding-block: 32px 80px; }
           return '<div><dt>' + esc(row[0]) + '</dt><dd><span class="rd-v' + (row[2] && !fix ? ' t-' + row[2] : '') + '"' + (fix ? ' style="text-decoration:line-through;color:var(--text-3)"' : '') + '>' + esc(row[1]) + '</span>' +
             (fix ? '<span class="rd-fix">Corrected by you: <b>' + esc(fix.value) + '</b>' + (fix.note ? '. ' + esc(fix.note) : '') + '</span>' : '') +
             '<span class="rd-why">' + esc(row[3]) + '</span></dd></div>';
-        }).join('') + '</dl></section>' +
+        }).join('') + (function () { var fx = recFactor(r); return fx ? '<div><dt>Map</dt><dd><span class="rd-v"><a class="map-link" href="#map/' + fx[0] + '">' + esc(FACTOR[fx[0]].name) + '</a> \u00b7 ' + esc(FACTOR[fx[0]].inds[fx[1]]) + '</span><span class="rd-why">The Forge Works Map indicator this record gives evidence for.</span></dd></div>' : ''; })() + '</dl></section>' +
         (r.insights.length ? '<section class="sheet-sec"><span class="label">Part of</span><div class="links">' + r.insights.map(function (iid) {
           var i = insightById(iid); return i ? '<a class="link-item" href="#insight/' + iid + '"><b>' + esc(i.title) + '</b><span>' + statusText(i) + '</span></a>' : '';
         }).join('') + '</div></section>' : '<section class="sheet-sec"><span class="label">Part of</span><p class="muted-p">Not part of any insight. Prism set it aside as a one-off.</p></section>') +
@@ -1268,6 +1355,97 @@ main { padding-block: 32px 80px; }
       feedHTML('site-all:' + id, function (r) { return r.site === id; }, ['src', 'type']);
   }
 
+  /* ---------- Escalation: up the purview, one level at a time ---------- */
+  var DIV_LEAD = { Infrastructure: YOU, Building: 'Alex Chen' };
+  var GROUP_EXEC = 'Morgan Hale';
+  var ESC_REASONS = ['Needs a decision or resources beyond this level', 'Affects other divisions or regions', 'Regulatory or legal exposure', 'A critical risk isn’t moving fast enough'];
+  function regionDiv(r) { var d = ''; ORG.forEach(function (x) { x.regions.forEach(function (g) { if (g.name === r) d = x.div; }); }); return d; }
+  function homeLevel(i) {
+    var regs = [], divs = [];
+    i.sites.forEach(function (s) { var x = SITE[s]; if (regs.indexOf(x.region) < 0) regs.push(x.region); if (divs.indexOf(x.div) < 0) divs.push(x.div); });
+    return regs.length === 1 ? 'region:' + regs[0] : divs.length === 1 ? 'div:' + divs[0] : 'org';
+  }
+  function parentLevel(k) { if (k.indexOf('region:') === 0) return 'div:' + regionDiv(k.slice(7)); if (k.indexOf('div:') === 0) return 'org'; return null; }
+  function levelOwner(k) {
+    if (k.indexOf('region:') === 0) { var n = k.slice(7), rm = ''; ORG.forEach(function (d) { d.regions.forEach(function (r) { if (r.name === n) rm = r.rm; }); }); return rm; }
+    if (k.indexOf('div:') === 0) return DIV_LEAD[k.slice(4)] || '';
+    return GROUP_EXEC;
+  }
+  function levelName(k) { return k.indexOf('region:') === 0 ? k.slice(7) + ' region' : k.indexOf('div:') === 0 ? k.slice(4) + ' division' : ORG_NAME; }
+  function levelRole(k) { return k.indexOf('region:') === 0 ? 'regional manager' : k.indexOf('div:') === 0 ? 'division manager' : 'group executive'; }
+  function scopeLevel() { return ST.reg ? 'region:' + ST.reg : ST.div ? 'div:' + ST.div : 'org'; }
+  function nameOf(n) { return n === YOU ? 'You' : n; }
+  INSIGHTS.forEach(function (i) { i.home = homeLevel(i); i.level = i.home; i.esc = null; });
+  (function () {
+    var l = insightById('load'), note = 'Replacing rigging gear across both sites needs budget I don’t hold.';
+    l.esc = { from: l.level, to: parentLevel(l.level), reason: ESC_REASONS[0], note: note, by: 'Priya Nair', when: '25 Sep' };
+    l.history.push({ when: '25 Sep', who: 'Priya Nair', what: 'Escalated to ' + levelName(l.esc.to), text: ESC_REASONS[0] + '. ' + note });
+  })();
+
+  function escBadge(i) {
+    if (i.esc) return '<span class="badge info"><i></i>Escalated to ' + esc(levelName(i.esc.to)) + '</span>';
+    if (i.level !== i.home) return '<span class="tlabel">Held at ' + esc(levelName(i.level)) + '</span>';
+    return '';
+  }
+  ST.escForm = ''; ST.actAs = '';
+  function escPanel(i) {
+    var parent = parentLevel(i.level), h = '<section class="card side-card"><h2>Escalation</h2>';
+    if (i.esc) {
+      var target = levelOwner(i.esc.to), mine = target === YOU || ST.actAs === i.id, up = parentLevel(i.esc.to);
+      h += '<p class="esc-line"><b>' + esc(nameOf(i.esc.by)) + '</b> escalated this to ' + esc(levelName(i.esc.to)) + (i.esc.when === 'Today' ? ' today' : ' on ' + esc(i.esc.when)) + '.</p>' +
+        '<p class="esc-reason">' + esc(i.esc.reason) + (i.esc.note ? '. “' + esc(i.esc.note) + '”' : '.') + '</p>';
+      if (mine) {
+        h += '<p class="muted-p">' + (target === YOU ? 'It’s waiting for you.' : 'Responding as ' + esc(target) + ', ' + levelRole(i.esc.to) + ' (demo).') + '</p>' +
+          '<label class="w-note-l" for="esc-note">Note (optional)</label><textarea class="w-note" id="esc-note" rows="2"></textarea>' +
+          '<div class="meet-actions"><button type="button" class="btn brand" data-esc-accept="' + i.id + '">Accept</button><button type="button" class="btn" data-esc-back="' + i.id + '">Send back</button>' +
+          (up ? '<button type="button" class="btn" data-esc-up="' + i.id + '">Escalate to ' + esc(levelName(up)) + '</button>' : '') + '</div>';
+      } else {
+        h += '<p class="muted-p">Waiting for ' + esc(target) + ', ' + levelRole(i.esc.to) + '.</p><button type="button" class="what" data-esc-actas="' + i.id + '">Respond as ' + esc(target) + ' (demo)</button>';
+      }
+    } else if (parent && levelOwner(i.level) === YOU) {
+      if (ST.escForm === i.id) {
+        h += '<p class="muted-p">This goes to ' + esc(levelOwner(parent)) + ', ' + levelRole(parent) + '. They can accept it, send it back, or pass it further up.</p>' +
+          '<div class="reasons" role="radiogroup" aria-label="Why escalate">' + ESC_REASONS.map(function (r, k) { return '<label class="reason"><input type="radio" name="esc-reason" value="' + esc(r) + '"' + (k === 0 ? ' checked' : '') + '>' + esc(r) + '</label>'; }).join('') + '</div>' +
+          '<textarea class="w-note" id="esc-note" rows="2" placeholder="What do you need from them?"></textarea>' +
+          '<div class="meet-actions"><button type="button" class="btn" data-esc-cancel="1">Cancel</button><button type="button" class="btn brand" data-esc-send="' + i.id + '">Escalate</button></div>';
+      } else {
+        h += '<p class="muted-p">Held at ' + esc(levelName(i.level)) + '. If it needs a decision or resources beyond this level, escalate it.</p><div class="meet-actions"><button type="button" class="btn" data-esc-open="' + i.id + '">Escalate to ' + esc(levelName(parent)) + '…</button></div>';
+      }
+    } else {
+      h += '<p class="muted-p">' + (parent ? 'Held at ' + esc(levelName(i.level)) + '. ' + esc(levelOwner(i.level)) + ', ' + levelRole(i.level) + ', can escalate it.' : 'Held at ' + esc(ORG_NAME) + ', the top level.') + '</p>';
+    }
+    return h + '</section>';
+  }
+  document.addEventListener('click', function (e) {
+    var t;
+    if ((t = e.target.closest('[data-esc-open]'))) { ST.escForm = t.getAttribute('data-esc-open'); render(); return; }
+    if (e.target.closest('[data-esc-cancel]')) { ST.escForm = ''; render(); return; }
+    if ((t = e.target.closest('[data-esc-actas]'))) { ST.actAs = t.getAttribute('data-esc-actas'); render(); return; }
+    if ((t = e.target.closest('[data-esc-send]'))) {
+      var i = insightById(t.getAttribute('data-esc-send')), r = document.querySelector('input[name="esc-reason"]:checked'), note = (($('esc-note') || {}).value || '').trim();
+      i.esc = { from: i.level, to: parentLevel(i.level), reason: r ? r.value : ESC_REASONS[0], note: note, by: YOU, when: 'Today' };
+      logEvent(i, 'Escalated to ' + levelName(i.esc.to), i.esc.reason + (note ? '. ' + note : ''));
+      ST.escForm = ''; toast('Escalated to ' + levelOwner(i.esc.to)); render(); return;
+    }
+    var act = e.target.closest('[data-esc-accept],[data-esc-back],[data-esc-up]'); if (!act) return;
+    var id = act.getAttribute('data-esc-accept') || act.getAttribute('data-esc-back') || act.getAttribute('data-esc-up');
+    var ins = insightById(id), en = ins.esc, actor = levelOwner(en.to), n2 = (($('esc-note') || {}).value || '').trim();
+    if (act.hasAttribute('data-esc-accept')) {
+      ins.level = en.to; ins.owner = actor; if (ins.status === 'new') ins.status = 'working'; ins.updated = 0;
+      logEvent(ins, 'Accepted at ' + levelName(en.to), n2 || 'Now owned by ' + nameOf(actor) + ', ' + levelRole(en.to) + '.', actor);
+      ins.esc = null; ST.mfRes['e-' + id] = 'Accepted'; toast('Accepted. It now sits with ' + levelName(ins.level) + '.');
+    } else if (act.hasAttribute('data-esc-back')) {
+      logEvent(ins, 'Sent back to ' + levelName(en.from), n2, actor);
+      ins.esc = null; ST.mfRes['e-' + id] = 'Sent back to ' + levelOwner(en.from); toast('Sent back to ' + levelOwner(en.from));
+    } else {
+      var up = parentLevel(en.to);
+      ins.esc = { from: en.to, to: up, reason: en.reason, note: n2, by: actor, when: 'Today' };
+      logEvent(ins, 'Escalated to ' + levelName(up), en.reason + (n2 ? '. ' + n2 : ''), actor);
+      ST.mfRes['e-' + id] = 'Escalated to ' + levelName(up); toast('Escalated to ' + levelOwner(up));
+    }
+    ST.actAs = ''; mfRerender();
+  });
+
   /* ---------- Insight sheet ---------- */
   function openSheet(id, focusOwner) {
     var i = INSIGHTS.filter(function (x) { return x.id === id; })[0]; if (!i) return;
@@ -1276,7 +1454,7 @@ main { padding-block: 32px 80px; }
     var ow = owners(); if (i.owner && ow.indexOf(i.owner) < 0) ow.unshift(i.owner);
     $('sheet').innerHTML =
       '<div class="sheet-head" style="position:relative"><button type="button" class="x" id="sheet-x" aria-label="Close"><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 2l8 8M10 2l-8 8" stroke="currentColor" stroke-width="1.6"/></svg></button>' +
-        '<div class="meta">' + sevIcon(i.sev) + statusBadge(i) + trendHTML(i.trend) + '<span class="label">· since ' + esc(i.since) + '</span></div>' +
+        '<div class="meta">' + sevIcon(i.sev) + statusBadge(i) + escBadge(i) + trendHTML(i.trend) + '<span class="label">· since ' + esc(i.since) + '</span></div>' +
         '<h2 id="sheet-title">' + esc(i.title) + '</h2>' +
         '<a class="open-page" href="#insight/' + i.id + '">Open insight page \u2192</a>' +
         '<div class="meta">' + sites.map(function (n) { return '<span class="chip">' + esc(n) + '</span>'; }).join('') + '</div></div>' +
@@ -1295,7 +1473,7 @@ main { padding-block: 32px 80px; }
             '</div>';
           }).join('') + '</div></section>' +
         '<section class="sheet-sec"><span class="label">How Prism read it</span><dl class="kv">' + i.read.map(function (r) {
-          return '<div><dt>' + esc(r[0]) + '</dt><dd class="' + (r[2] ? 't-' + r[2] : '') + '">' + esc(r[1]) + '</dd></div>';
+          var fk = r[0] === 'Factor' ? factorByName(r[1]) : null, fx = fk && INS_FACTOR[i.id]; return '<div><dt>' + esc(r[0]) + '</dt><dd class="' + (r[2] ? 't-' + r[2] : '') + '">' + (fk ? '<a class="map-link" href="#map/' + fk + '">' + esc(r[1]) + '</a>' + (fx ? ' \u00b7 ' + esc(FACTOR[fx[0]].inds[fx[1]]) : '') : esc(r[1])) + '</dd></div>';
         }).join('') + '</dl></section>' +
         (i.latest ? '<section class="sheet-sec"><span class="label">Latest update · ' + i.updated + (i.updated === 1 ? ' day' : ' days') + ' ago' + (i.owner ? ' · ' + esc(i.owner) : '') + '</span><p class="update">' + (i.owner ? '<span class="av">' + initials(i.owner) + '</span>' : '') + '<span>' + esc(i.latest) + '</span></p></section>' : '') +
         '<section class="sheet-sec"><span class="label">Suggested next step</span><p class="next">' + esc(i.next) + '</p></section>' +
@@ -1303,7 +1481,6 @@ main { padding-block: 32px 80px; }
       '<div class="sheet-foot">' +
         '<span class="fld"><label for="s-owner">Owner</label><select class="select" id="s-owner"><option value="">No owner</option>' + ow.map(function (o) { return '<option' + (o === i.owner ? ' selected' : '') + '>' + esc(o) + '</option>'; }).join('') + '</select></span>' +
         '<span class="fld"><label for="s-status">Status</label><select class="select" id="s-status">' + [['new', 'New'], ['working', 'In progress'], ['resolved', 'Ready to close']].map(function (o) { return '<option value="' + o[0] + '"' + (o[0] === i.status ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select></span>' +
-        '<label class="switch"><input type="checkbox" id="s-lead"' + (i.lead ? ' checked' : '') + '>For leadership</label>' +
         (i.status === 'resolved' ? '<button type="button" class="btn dark" id="s-close">Close insight</button>' : '') +
         '<button type="button" class="btn" data-dopen="' + i.id + '">Dismiss\u2026</button>' +
       '</div>';
@@ -1322,7 +1499,6 @@ main { padding-block: 32px 80px; }
     var i = sheetInsight(); if (!i) return;
     if (e.target.id === 's-owner') { i.owner = e.target.value; logEvent(i, i.owner ? 'Assigned to ' + i.owner : 'Owner removed'); if (i.owner && i.status === 'new') { i.status = 'working'; i.updated = 0; } toast(i.owner ? 'Assigned to ' + i.owner : 'Owner removed'); }
     else if (e.target.id === 's-status') { i.status = e.target.value; logEvent(i, 'Status: ' + ({ new: 'New', working: 'In progress', resolved: 'Ready to close' })[i.status]); if (i.status === 'working' && i.updated == null) i.updated = 0; }
-    else if (e.target.id === 's-lead') { i.lead = e.target.checked; logEvent(i, i.lead ? 'Raised with leadership' : 'Removed from leadership'); }
     var top = $('sheet').querySelector('.sheet-body').scrollTop; openSheet(i.id); $('sheet').querySelector('.sheet-body').scrollTop = top; render();
   });
 
@@ -1350,6 +1526,8 @@ main { padding-block: 32px 80px; }
       ['warning', 'Stalled', 'It has an owner, but there’s been no update for 14 days or more.'],
       ['success', 'Ready to close', 'The pattern has stopped. Close it, or keep watching for a little longer.'],
       ['success', 'Closed', 'Finished. Prism reopens it if the pattern comes back.'],
+      ['info', 'Escalated to\u2026', 'Passed up to the next level of the purview. That level can accept it, send it back, or escalate it further, up to ' + ORG_NAME + '.'],
+      ['', 'Held at\u2026', 'Accepted by a higher level, which now owns it as part of its duty of care.'],
       ['', 'Dismissed', 'A manager decided it isn’t worth acting on and recorded why. Prism uses the reason to tune what it raises.']
     ]],
     ['severity', 'Severity and trend', [
@@ -1358,6 +1536,17 @@ main { padding-block: 32px 80px; }
       ['critical', 'Worsening', 'More evidence, or more serious evidence, than the two weeks before.'],
       ['', 'Steady', 'About the same as the two weeks before.'],
       ['success', 'Improving', 'Less evidence, or evidence that controls are now holding.']
+    ]],
+    ['map', 'Forge Works Map', [
+      ['', 'Forge Works Map', '15 systemic factors in three domains (Guide, Enable, Execute) that describe how mature an organisation\u2019s safety capacity is. Forge Works IP.'],
+      ['', 'Compliant', 'Safety comes from following the system: rules, procedures, compliance and lagging measures.'],
+      ['', 'Leading', 'Safety is actively led: clear goals, known risks fixed, leading indicators and two-way communication.'],
+      ['', 'Resilient', 'Safety comes from how the work is done: work-as-done, weak signals, co-design and spare capacity.'],
+      ['', 'Level names', 'Each factor names its own levels. Communication & coordination, for example, runs from One-way to Two-way to Open communication.'],
+      ['', 'Mixed maturity', 'A factor can sit between levels, such as \u201cCompliant, some Leading\u201d. That\u2019s normal: its indicators move at different speeds.'],
+      ['', 'Indicators', 'The threads Prism follows through the levels of each factor. Each record and insight is linked to the indicator it gives evidence for.'],
+      ['info', 'Needs management input', 'Some indicators, such as what safety means to leaders, can\u2019t be read from records. Focus reviews, surveys and interviews fill them in.'],
+      ['', 'Held back by', 'The weakest indicator under a factor, and usually the best place to act.']
     ]],
     ['sources', 'Source status', [
       ['success', 'Live', 'Sending as expected.'],
@@ -1563,7 +1752,7 @@ main { padding-block: 32px 80px; }
   /* =============================================================
      Meetings: the state-of-safety report, with action
      ============================================================= */
-  var ROLE = { 'You': 'Division manager', 'Priya Nair': 'Regional manager, Northern', 'Tom Walsh': 'Regional manager, Southern', 'Sam Ortiz': 'Regional manager, Metro', 'Jo Park': 'Regional manager, Coastal', 'Dana Brooks': 'HSE lead' };
+  var ROLE = { 'Morgan Hale': 'Group executive', 'Alex Chen': 'Division manager, Building', 'You': 'Division manager', 'Priya Nair': 'Regional manager, Northern', 'Tom Walsh': 'Regional manager, Southern', 'Sam Ortiz': 'Regional manager, Metro', 'Jo Park': 'Regional manager, Coastal', 'Dana Brooks': 'HSE lead' };
   var MEETINGS = [
     { id: 'm-infra-0912', div: 'Infrastructure', reg: '', date: 'Friday 12 September', short: '12 Sep',
       attendees: ['You', 'Priya Nair', 'Tom Walsh'],
@@ -1598,6 +1787,7 @@ main { padding-block: 32px 80px; }
   function agenda() {
     var list = insightsInView();
     function rank(i) {
+      if (i.esc && i.esc.to === scopeLevel()) return -1;
       if (i.status === 'new') return 0;
       if (stalled(i)) return 1;
       if (i.trend === 'worse') return 2;
@@ -1607,6 +1797,7 @@ main { padding-block: 32px 80px; }
     return list.slice().sort(function (a, b) { return rank(a) - rank(b) || (a.sev === 'critical' ? 0 : 1) - (b.sev === 'critical' ? 0 : 1); });
   }
   function agendaReason(i) {
+    if (i.esc && i.esc.to === scopeLevel()) return 'Escalated to this level';
     if (i.status === 'new') return 'Needs an owner';
     if (stalled(i)) return 'Stalled';
     if (i.trend === 'worse') return 'Worsening';
@@ -1697,6 +1888,18 @@ main { padding-block: 32px 80px; }
               return '<li><span class="av">' + initials(d.who) + '</span><div><p class="agreed-t">' + esc(d.who) + ': ' + esc(d.text) + '</p><p class="agreed-o t-' + d.outcome[0] + '">' + esc(d.outcome[1]) + '</p></div></li>';
             }).join('') + '</ul>' : '<p class="muted-p">Nothing on record. This is the first Focus review for ' + esc(scopeLabel()) + '.</p>') +
           '</section>' +
+          (function () {
+            var sl = scopeLevel(), open = function (i) { return !i.closed && !i.dismissed; };
+            var incoming = INSIGHTS.filter(function (i) { return open(i) && i.esc && i.esc.to === sl; });
+            var held = INSIGHTS.filter(function (i) { return open(i) && i.level === sl && i.level !== i.home; });
+            var outgoing = INSIGHTS.filter(function (i) { return open(i) && i.esc && i.esc.from === sl; });
+            var li = function (i, text) { return '<li><button type="button" class="rlink" data-open="' + i.id + '">' + esc(i.title) + '</button><span>' + esc(text) + '</span></li>'; };
+            return '<section class="card rsec"><span class="label">4 · Escalations</span><div class="rcols">' +
+              '<div><h3><span class="badge info"><i></i>Escalated to this level</span></h3>' + (incoming.length ? '<ul class="rlist">' + incoming.map(function (i) { return li(i, 'From ' + nameOf(i.esc.by) + ' · ' + i.esc.reason); }).join('') + '</ul>' : '<p class="muted-p">None.</p>') + '</div>' +
+              '<div><h3><span class="tlabel">Held at this level</span></h3>' + (held.length ? '<ul class="rlist">' + held.map(function (i) { return li(i, 'Accepted from ' + levelName(i.home)); }).join('') + '</ul>' : '<p class="muted-p">None.</p>') + '</div>' +
+              '<div><h3><span class="tlabel">Passed up</span></h3>' + (outgoing.length ? '<ul class="rlist">' + outgoing.map(function (i) { return li(i, 'Waiting for ' + levelOwner(i.esc.to)); }).join('') + '</ul>' : '<p class="muted-p">None.</p>') + '</div>' +
+            '</div></section>';
+          })() +
         '</div>' +
         '<div class="meet-actions end"><button type="button" class="btn" id="copy-report">Copy report</button><button type="button" class="btn brand" data-mstep="3"' + (ag.length ? '' : ' disabled') + '>Walk through ' + lw(ag.length) + ' insights</button></div>';
       return;
@@ -1729,7 +1932,6 @@ main { padding-block: 32px 80px; }
           (ST.dismissing === cur.id ? dismissForm(cur.id, 'walk') : (          '<div class="walk-form">' +
             '<span class="fld"><label for="w-owner">Owner</label><select class="select" id="w-owner"><option value="">No owner</option>' + ow.map(function (o) { return '<option' + (o === cur.owner ? ' selected' : '') + '>' + esc(o) + '</option>'; }).join('') + '</select></span>' +
             '<span class="fld"><label for="w-status">Status</label><select class="select" id="w-status">' + [['new', 'New'], ['working', 'In progress'], ['resolved', 'Ready to close'], ['closed', 'Close it']].map(function (o) { return '<option value="' + o[0] + '"' + (o[0] === cur.status ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select></span>' +
-            '<label class="switch"><input type="checkbox" id="w-lead"' + (cur.lead ? ' checked' : '') + '>For leadership</label>' +
             '<label class="w-note-l" for="w-note">Decision or note</label><textarea id="w-note" class="w-note" rows="3" placeholder="What was agreed, by whom, by when">' + esc(entry.note || '') + '</textarea>' +
           '</div>' +
           '<div class="meet-actions end"><button type="button" class="btn" data-walk="back"' + (MT.idx ? '' : ' disabled') + '>Back</button><button type="button" class="btn" data-walk="skip">Skip</button><button type="button" class="btn brand" data-walk="save">' + (MT.idx === ids.length - 1 ? 'Save and finish' : 'Save and next') + '</button></div>' +
@@ -1759,13 +1961,12 @@ main { padding-block: 32px 80px; }
     var id = MT.items[MT.idx], cur = INSIGHTS.filter(function (x) { return x.id === id; })[0];
     var changes = [];
     if (!skip) {
-      var owner = $('w-owner').value, status = $('w-status').value, lead = $('w-lead').checked, note = $('w-note').value.trim();
+      var owner = $('w-owner').value, status = $('w-status').value, note = $('w-note').value.trim();
       if (owner !== cur.owner) { changes.push(owner ? 'Owner: ' + owner : 'Owner removed'); cur.owner = owner; }
       if (status === 'closed') { changes.push('Closed'); cur.closed = true; }
       else if (status !== cur.status) { changes.push('Status: ' + ({ new: 'New', working: 'In progress', resolved: 'Ready to close' })[status]); cur.status = status; }
       if (cur.owner && cur.status === 'new') { cur.status = 'working'; changes.push('Status: In progress'); }
       if (changes.length) cur.updated = 0;
-      if (lead !== cur.lead) { changes.push(lead ? 'Raised with leadership' : 'Removed from leadership'); cur.lead = lead; }
       MT.log[id] = { done: true, changes: changes, note: note };
       if (changes.length || note) logEvent(cur, 'Focus review', changes.join(' \u00b7 ') + (note ? (changes.length ? '. ' : '') + note : ''), 'Focus review');
       if (note) { cur.latest = note; cur.updated = 0; }
@@ -1845,9 +2046,12 @@ main { padding-block: 32px 80px; }
   ST.nudged = {}; ST.visitPlanned = ST.visitPlanned || {}; ST.mfDone = []; ST.mfWalk = -1; ST.mfSnap = null; ST.mfRes = {};
   function mySites() { var o = []; ORG.forEach(function (d) { if (d.div === MY_DIV) d.regions.forEach(function (r) { o = o.concat(r.sites); }); }); return o; }
   function myInsights() { var ids = mySites().map(function (x) { return x.id; }); return INSIGHTS.filter(function (i) { return !i.closed && !i.dismissed && i.sites.some(function (s) { return ids.indexOf(s) > -1; }); }); }
-  var MF_GROUPS = [['assign', 'Assign an owner'], ['chase', 'Chase up'], ['visit', 'Plan a visit'], ['update', 'Post an update'], ['close', 'Close'], ['agreed', 'Agreed at a Focus review']];
+  var MF_GROUPS = [['escalated', 'Escalated to you'], ['assign', 'Assign an owner'], ['chase', 'Chase up'], ['visit', 'Plan a visit'], ['update', 'Post an update'], ['close', 'Close'], ['agreed', 'Agreed at a Focus review']];
   function myFocusItems() {
     var items = [], ins = myInsights(), crit = function (i) { return i.sev === 'critical' ? 0 : 1; };
+    INSIGHTS.filter(function (i) { return !i.closed && !i.dismissed && i.esc && levelOwner(i.esc.to) === YOU; }).forEach(function (i) {
+      items.push({ kind: 'escalated', id: 'e-' + i.id, ins: i, sev: i.sev, title: i.title, why: 'From ' + nameOf(i.esc.by) + '. ' + i.esc.reason + (i.esc.note ? '. \u201c' + i.esc.note + '\u201d' : '.') });
+    });
     ins.filter(function (i) { return !i.owner; }).sort(function (a, b) { return crit(a) - crit(b); }).forEach(function (i) {
       items.push({ kind: 'assign', id: 'a-' + i.id, ins: i, sev: i.sev, title: i.title, why: 'Raised ' + i.since + '. Nobody owns it yet.' });
     });
@@ -1888,6 +2092,7 @@ main { padding-block: 32px 80px; }
       var ow = owners();
       return '<span class="fld"><label for="mfo-' + i.id + '" class="sr">Owner</label><select class="select" id="mfo-' + i.id + '" data-mf-assign="' + i.id + '"><option value="">Choose an owner</option>' + ow.map(function (o) { return '<option>' + esc(o) + '</option>'; }).join('') + '</select></span>';
     }
+    if (it.kind === 'escalated') return '<button type="button" class="btn brand" data-esc-accept="' + i.id + '">Accept</button><a class="btn" href="#insight/' + i.id + '">Send back or pass up</a>';
     if (it.kind === 'chase') return '<button type="button" class="btn brand" data-mf-nudge="' + i.id + '">Nudge ' + esc(i.owner) + '</button>';
     if (it.kind === 'visit') return '<button type="button" class="btn brand" data-mf-visit="' + it.site.id + '">Plan a visit</button>';
     if (it.kind === 'update') return '<a class="btn brand" href="#insight/' + i.id + '">Post an update</a>';
@@ -1982,12 +2187,357 @@ main { padding-block: 32px 80px; }
   });
 
   /* =============================================================
+     Forge Works Map: 15 systemic factors, scored from the feed
+     Source: The Forge Works blueprint (Forge Works Map, 2020).
+     Indicators per prism/fw-map-audit.md. Level text is summarised,
+     not verbatim, so it can later be written situationally by Prism.
+     ============================================================= */
+  var DOMAINS = [
+    ['guide', 'Guide', 'Direction and context'],
+    ['enable', 'Enable', 'Resources and systems'],
+    ['execute', 'Execute', 'Frontline and operations']
+  ];
+  var LEVELS = ['Compliant', 'Leading', 'Resilient'];
+  var EV_NAME = { Rec: 'Records', Ins: 'Insights', Mgmt: 'Management input' };
+  // [key, domain, name, question, [level names], [level summaries], [[indicator, C, L, R, evidence]]]
+  // null in C/L/R = the Blueprint doesn't describe that level for this indicator yet
+  var FACTORS = [
+    ['senior_leadership', 'guide', 'Senior leadership', 'How do senior leaders talk about safety and how are their actions perceived by others?',
+      ['Transactional leadership', 'Transformational leadership', 'Servant leadership'],
+      ['Leaders focus on safety work: incidents, audit findings and compliance, using rewards and discipline. Safety is a regulatory and legal risk, and leaders are seen to care about compliance.',
+       'Leaders set a vision for safety and consider it regularly, not just after incidents. They champion zero harm, respond decisively to known issues, and are seen to care about people.',
+       'Leaders serve the people who do the work, asking what they need and enabling it. Safety is a moral obligation, workers are partners, and leaders are seen to care about making work better.'],
+      [['Where leaders’ attention goes', 'Incidents, audit findings and compliance', 'A vision for safety, discussed regularly', 'Understanding and serving workers’ needs', 'Mgmt'],
+       ['What safety means to leaders', 'A compliance and legal liability issue', 'An aspiration: zero harm, safety first', 'A moral obligation', 'Mgmt'],
+       ['Connection to the organisation', 'The Chief Executive rarely attends safety meetings', 'Leaders drive change with a committed team', 'Connected to and helping people at all levels', 'Mgmt'],
+       ['How leaders drive change', 'Rewards and discipline', 'Vision and motivation', 'Asking, then facilitating and enabling', 'Mgmt Ins'],
+       ['How leaders are perceived', 'Caring about compliance', 'Caring about people', 'Caring about making work better', 'Mgmt']]],
+    ['strategy', 'guide', 'Strategy', 'What triggers safety improvements and what is the focus of plans and actions?',
+      ['Reactive safety work', 'Clear goals and strategies', 'Proactive safety of work'],
+      ['Improvement responds to incidents, non-conformances and regulation by adding requirements to the safety system. Actions are aimed at frontline supervisors and workers.',
+       'Clear goals and programs at every level reduce risk and create the conditions for reliable work. Pre-accident investigations find issues before they cause harm.',
+       'Safety emerges from how the organisation works. Strategic decisions are made with a clear view of safety, and improvements come from improving the work itself.'],
+      [['What triggers improvement', 'Incidents, non-conformances and regulation', 'Pre-accident investigations of key risks', 'Exploring how normal work happens', 'Ins Mgmt'],
+       ['What plans focus on', 'More safety work and administrative requirements', 'Safety work effectiveness and conditions for reliable work', 'Improving the work itself', 'Mgmt'],
+       ['Who improvement is aimed at', 'Frontline supervisors and workers', 'Leaders, the safety organisation and the safety system', 'Every strategic decision: growth, people, budgets', 'Mgmt'],
+       ['Where practices come from', 'Practices common across industry', null, 'Targeted, evidence-based and well governed', 'Mgmt'],
+       ['Safety in organisational decisions', null, 'Goals and strategies at all levels', 'All decisions made with a clear view of safety', 'Mgmt']]],
+    ['risk_management', 'guide', 'Risk management', 'What is the quality of risk information generated in the organisation and how is it used?',
+      ['Risk assessments', 'Risk information', 'Risk foresight'],
+      ['Risk assessments are done because regulation requires them, often documenting decisions already made. Risk information sits in registers and has little influence on decisions.',
+       'Risks are known and communicated, updated as context changes and joined up with other operational risks. Risk information shapes how work is planned and how resources are allocated.',
+       'The organisation looks beyond the register, anticipating future scenarios from real-time information. Diverse groups, including frontline workers, keep revising the shared picture of risk.'],
+      [['How risk assessments are used', 'Paperwork documenting decisions already made', 'Shaping how work is planned and done', 'Anticipating future operational scenarios', 'Rec Ins'],
+       ['How current risk information is', 'Stored in registers and plans', 'Updated in real time as context changes', 'Continuously revised as subtle signals appear', 'Rec'],
+       ['Influence on decisions and resources', 'Limited', 'Proactively shapes strategy and resourcing', 'Operations planned and adjusted to respond', 'Ins Mgmt'],
+       ['Who knows and shapes the risk picture', 'Held in documents', 'Known to those exposed and to responsible managers', 'Diverse groups, including the frontline, revise it', 'Rec Mgmt'],
+       ['Joining up risk types', null, 'Safety risk joined up with operational and commercial risk', 'One shared model of risk and work', 'Mgmt']]],
+    ['safety_organisation', 'guide', 'Safety organisation', 'How capable is your safety organisation and what is the focus of their activities?',
+      ['Compliance tasks', 'Risk reduction', 'Building operational capacity'],
+      ['Safety professionals are mostly administrative, monitoring compliance, and often left out of important decisions. They teach leaders about compliance and workers about safety processes.',
+       'Safety professionals have senior status and drive physical risk reduction, dropping low-value admin. They coach leaders and the frontline, including in-field assurance of critical controls.',
+       'Safety professionals are an integral link in running the organisation. They explore work-as-done, help leaders learn how work happens and support the frontline to build resilience.'],
+      [['Focus of safety work', 'Administration: audits, assessments, investigations', 'Physical risk reduction, using the hierarchy of controls', 'Supporting operational work; work-as-done', 'Rec Mgmt'],
+       ['Status and influence', 'Marginalised and left out of decisions', 'Formal senior status with dedicated resources', 'Integral to strategic and operational management', 'Mgmt'],
+       ['How they work with leaders', 'Educate on compliance', 'Coach safety leadership', 'Help leaders learn how work is done', 'Mgmt'],
+       ['How they work with the frontline', 'Teach safety processes', 'Coach risk assessment and in-field control assurance', 'Build resilience and learning from normal work', 'Rec Mgmt']]],
+    ['work_understanding', 'guide', 'Work understanding', 'What model of accident causation does your organisation use to set its direction and effort towards managing operational work and safety?',
+      ['Procedures prescribe work', 'Organisational factors drive work', 'Workers manage emergent risk'],
+      ['Accidents are seen as failures at the point of risk. Investigations look for unsafe behaviour, the answer is more rules, and people working outside procedure are treated as the problem.',
+       'Organisational factors upstream are seen to drive outcomes. Investigations look for failed defences and systemic causes, and improving the system matters as much as compliance.',
+       'Safety is an emergent property of complex work. Investigations use non-linear models, variability is accepted, and work is made error-tolerant with flexible procedures.'],
+      [['Belief about why accidents happen', 'Failures at the point of risk', 'Upstream organisational factors', 'An emergent property of complex work', 'Ins'],
+       ['How incidents are investigated', 'Linear models: domino, Swiss cheese', 'Multiple causation: ICAM, 5 whys, Taproot', 'Non-linear: STAMP, FRAM, CAST', 'Ins'],
+       ['Response to deviation', 'Employment consequences', 'Individuals may be held accountable, and the system is fixed too', 'Rarely blamed; error-tolerant operations', 'Ins Rec'],
+       ['How work and variability are controlled', 'More rules to reduce variation', 'Stronger barriers and defences', 'Flexible procedures; variability accepted', 'Ins Mgmt'],
+       ['Language people use', 'Deviation, non-compliance, human error', 'Root cause, just culture, defence in depth', 'Variability, normal work, adaptation', 'Rec Ins']]],
+    ['operational_management', 'enable', 'Operational management', 'What is the role of middle and frontline managers in delivering operational and safety outcomes?',
+      ['Delegate safety work', 'Participate in safety work', 'Facilitate safety through operations'],
+      ['Managers hand safety work to safety professionals and reinforce compliance. They don’t fully understand frontline needs and get involved mainly in serious incidents.',
+       'Managers take part in safety work: visits, inductions, investigations and audits. They are accountable, find issues with the frontline and ask for resources to fix them.',
+       'Safety is built into planning and running the work. Managers do little safety work as such, search for weak signals, and know that their response to incidents shapes trust and learning.'],
+      [['Managers’ relationship to safety work', 'Delegated to safety professionals', 'Take part: visits, inductions, investigations, audits', 'Minimal safety work; operations run with a safety lens', 'Rec Mgmt'],
+       ['Engagement with the frontline', 'Reinforce compliance; needs not understood', 'Field safety leadership; issues found together', 'Work planned and run together with the workforce', 'Rec'],
+       ['Accountability and commitment', 'Involved in serious and regulatory incidents', 'Accountable and genuinely committed', 'Safety as a moral responsibility', 'Mgmt'],
+       ['Looking for emerging risk', null, 'Issues identified proactively', 'Actively searching for weak signals', 'Rec Ins'],
+       ['Response to incidents', 'Manage serious incidents', null, 'Response builds trust and learning', 'Ins']]],
+    ['resource_allocation', 'enable', 'Resource allocation', 'How are safety needs identified and resources allocated to reduce risk?',
+      ['Compliance budget', 'Investment in known issues', 'Investment in operational slack'],
+      ['The minimum is spent to comply. Safety spending needs senior approval, efficiency programs dominate, and spare safety resource is seen as a cost.',
+       'The organisation invests to fix known risks, with a resourced improvement program and a review process that can fund issues outside the budget cycle.',
+       'Significant resources support operations to deliver safely. Spare capacity is designed in, and managers and workers re-plan and re-allocate resources as issues emerge.'],
+      [['Purpose of safety investment', 'The minimum needed to comply', 'Fixing known risks and issues', 'Supporting operations to deliver safely', 'Mgmt'],
+       ['View of spare capacity', 'Efficiency first; excess is a cost', null, 'Operational slack designed in', 'Mgmt'],
+       ['Who can allocate, and how', 'Safety needs senior approval', 'Investment review outside budget cycles', 'Managers and frontline re-plan and re-allocate', 'Rec Mgmt'],
+       ['Developing people and equipment', null, null, 'Personnel and equipment continually improved', 'Rec Ins']]],
+    ['management_systems', 'enable', 'Management systems', 'What is the focus and effectiveness of safety and work management systems?',
+      ['Regulatory compliance', 'Specific safety needs of work', 'Processes to support work as done'],
+      ['The safety system sits apart from how work is managed, built on regulation and run by safety professionals. Effectiveness is judged by audit, and people are held to account for non-conformance.',
+       'Systems target the specific needs of the work and known risks, are shaped with the frontline and judged on usefulness. Non-compliance is investigated to bring work back in line.',
+       'Processes are co-designed with workers from work-as-done, and local units have autonomy. When work deviates, the organisation inquires with curiosity and learns.'],
+      [['What the system is built on', 'Regulation and standards, apart from the work', 'The specific needs of the work and known risks', 'Work-as-done, co-designed with workers', 'Mgmt'],
+       ['Who designs it', 'Safety professionals', 'Needs identified with the frontline', 'Co-designed; local units have autonomy', 'Mgmt'],
+       ['How effectiveness is judged', 'Compliance and surveillance audits', 'Usefulness and impact; external certification', 'Performance standards; deference to expertise', 'Rec Mgmt'],
+       ['Response when work deviates', 'People held accountable for non-conformance', 'Investigated, and work brought back into line', 'Inquire with curiosity and learn', 'Ins Rec'],
+       ['Supporting technology', 'Incident, learning, document and action systems', 'Integrated control of work; in-field devices', 'Real-time risk information at the point of risk', 'Rec']]],
+    ['goal_conflict_tradeoffs', 'enable', 'Goal conflict and trade-offs', 'How are safety goals balanced with other business objectives?',
+      ['Production and injuries', 'Known issues sacrifice production', 'Budgets reset on weak signals'],
+      ['Production and cost come first. Safety wins after an incident or when life is clearly at risk, and stopping work needs a manager’s permission.',
+       'Safety is prioritised over significant known issues, and workers routinely use their authority to stop work. Good safety is seen as good business.',
+       'Conflicts are resolved before work starts. Targets and schedules are reset on weak signals, and workers are supported to stop and adapt.'],
+      [['When safety takes priority', 'After an incident or a clear risk to life', 'When there is a clear and present risk', 'On weak signals; targets and schedules reset', 'Rec Ins'],
+       ['Stop-work authority', 'Only with a manager’s permission', 'Exercised routinely', 'Stop and adapt to emerging risk, supported', 'Rec'],
+       ['How safety and business goals are framed', '“Safety first”; not incompatible', 'Good safety is good business; zero harm', 'Commercial goals can conflict with safety', 'Mgmt'],
+       ['Resolving conflicts before work starts', null, null, 'Identified and resolved before work, transparently', 'Ins Mgmt']]],
+    ['learning_development', 'enable', 'Learning and development', 'What is the approach to developing capability, operational learning and knowledge management?',
+      ['Competency management', 'Benchmarking and best practice', 'Sense-making processes'],
+      ['Formal training builds technical skills for each role. Learning is reactive, driven by incidents, audits and drills, and the capacity to change is limited.',
+       'Capability covers technical and non-technical skills through training, workplace learning and feedback. The organisation learns proactively and adopts recognised industry practice.',
+       'Teams make collective sense of normal work and events, and learning is built into planning, doing and reviewing work. Blame is understood to fix nothing.'],
+      [['What capability covers', 'Technical skills per role', 'Technical and non-technical skills', 'Active learning: simulation, micro-experiments', 'Mgmt'],
+       ['How learning happens', 'Periodic formal training', 'Training, workplace learning and feedback', 'Built into planning, doing and reviewing work', 'Rec Mgmt'],
+       ['What operational learning draws on', 'Incidents, audits and drills', 'Visits, control reviews and leading indicators', 'Sense-making of normal work and events', 'Ins Rec'],
+       ['Where practice comes from', null, 'Peer organisations and industry best practice', 'Peer roles and team problem-solving', 'Mgmt'],
+       ['Capacity to absorb change', 'Limited', null, 'Organisation-wide improvement', 'Ins']]],
+    ['frontline_workers', 'execute', 'Frontline workforce', 'What is the role of frontline workers in contributing to work and safety outcomes?',
+      ['Comply with safety processes', 'Active contribution to safety', 'Co-design of work'],
+      ['Workers stay competent, follow the rules and run frontline safety processes such as pre-starts and permits. They take part through formal consultation and report hazards.',
+       'Workers help identify and develop safety improvements, are expected to stop work when there’s risk, and are rewarded for suggestions.',
+       'Workers co-design the work as local experts and partners. They adapt to emerging situations, raise concerns openly and teach management how work is really done.'],
+      [['Workers’ role in safety', 'Comply and stay competent', 'Help identify and develop safety programs', 'Co-design the work', 'Rec Mgmt'],
+       ['How they take part', 'Formal consultation', 'Collective ownership; help design processes', 'Local experts who educate management', 'Mgmt'],
+       ['Stopping and adapting', 'Encouraged to stop for serious risk', 'Expected to stop, even at a cost to production', 'Adapt to emerging situations with flexible procedures', 'Rec'],
+       ['Raising issues and ideas', 'Report hazards and incidents', 'Suggestions, rewarded formally', 'Concerns raised openly; psychological safety', 'Rec']]],
+    ['communications_coordination', 'execute', 'Communication & coordination', 'How does information flow through the organisation and how coordinated are teams and activities?',
+      ['One-way communication', 'Two-way communication', 'Open communication'],
+      ['Information is broadcast top-down with standardised messages, and feedback comes through formal channels. Teams chase their own objectives and can work at cross-purposes.',
+       'Information flows down and back up, messages suit the audience, and people can raise issues formally and informally. Leaders work as one team, though unit targets limit collaboration.',
+       'Information flows freely up, down and across in a psychologically safe workplace. Relationships across teams are built on purpose, and teams anticipate each other’s needs.'],
+      [['Direction of information flow', 'Top-down broadcast', 'Top-down and back up', 'Freely up, down and across', 'Rec Mgmt'],
+       ['Voice and feedback channels', 'Formal: committees and reporting systems', 'Formal and informal ways to raise and resolve issues', 'Incidents, issues and ideas shared freely', 'Rec'],
+       ['How messages are delivered', 'Consistent and standardised', 'Engaging and suited to the audience', 'Built on trust, care and transparency', 'Mgmt'],
+       ['Relationships across roles and teams', 'Left to develop naturally', 'Encouraged for learning and sharing', 'Purposefully developed', 'Mgmt'],
+       ['Team coordination', 'Own objectives; others left out', 'One team, limited by unit targets', 'Teams anticipate each other’s needs', 'Rec Ins']]],
+    ['decision_making', 'execute', 'Decision-making', 'How are decisions made in relation to the management of work and safety?',
+      ['Management decision-making', 'Safety advisory support', 'Deference to expertise'],
+      ['Management makes safety decisions and refers them to safety professionals for compliance. Work decisions rarely involve safety, and improvement ideas go to senior leaders for approval.',
+       'Line managers decide with trusted safety advice and invest proactively when there’s a clear risk-based case. The organisation defers to protocol and seeks confirming evidence.',
+       'The most appropriate person or team decides, with safety input throughout. Investment follows weak signals, expertise is balanced with protocol, and decisions seek disconfirming evidence.'],
+      [['Who makes the decision', 'Management, referred to safety for compliance', 'The right level of line management, with safety advice', 'The most appropriate person or team', 'Rec Ins'],
+       ['Safety input to work decisions', 'Rarely, unless the impact is clear', 'Sometimes, when there is possible risk', 'Throughout planning and execution', 'Rec'],
+       ['Who approves improvement ideas', 'A senior leader', 'An operational manager', 'Local teams, supported by management', 'Mgmt'],
+       ['Basis for safety investment', null, 'Proactive, with a clear risk-based case', 'Predictive, on weak signals', 'Mgmt'],
+       ['How decisions are tested', null, 'Defer to protocol; seek confirming evidence', 'Balance expertise and protocol; seek disconfirming evidence', 'Ins Mgmt']]],
+    ['contractor_management', 'execute', 'Contractor management', 'How are contractors engaged and managed?',
+      ['Manage by contract', 'Delivery partnerships', 'Client in service role'],
+      ['Contractors are pre-qualified by desktop review and bound by contract terms. Assurance is reactive, after incidents, and issues are handled formally under the contract.',
+       'Every scope is risk-assessed and contractors are verified for it. Mobilisation aligns expectations, assurance is scheduled, and the aim is partnership.',
+       'The organisation is an informed buyer that works to make contractors succeed. Contractors are integrated with shared goals, supervision is active and issues are solved together.'],
+      [['Pre-qualification', 'Standard questions and desktop review', 'Scope-specific, with capability verified', 'Collaborative, understanding strengths and weaknesses', 'Rec'],
+       ['Alignment before work starts', 'Contract terms set obligations', 'Formal mobilisation aligns expectations', 'Formal and informal mechanisms build trust', 'Rec'],
+       ['Assurance and supervision', 'Reactive audits after incidents', 'Scheduled assurance', 'Active supervision; dynamic assurance on weak signals', 'Rec Ins'],
+       ['How issues are resolved', 'Formally, under the contract', 'Informally, then formally', 'Collaboratively', 'Ins'],
+       ['The relationship', 'Contractual', 'A mutually beneficial partnership', 'Integrated, with shared goals', 'Mgmt']]],
+    ['monitoring_metrics', 'execute', 'Monitoring and metrics', 'What sources of information are used to monitor and influence work and safety performance?',
+      ['Lagging indicators', 'Leading indicators', 'Predictive information'],
+      ['Lagging and compliance metrics, such as injury rates and training completion, count how often safety work is done. Operations are considered safe when nothing bad happens.',
+       'Lagging and leading indicators, including control assurance and safety climate, measure how effective safety work is. Safe means controls are assured and the climate is positive.',
+       'Operational data and stories from across the business show how safety margins might be eroding. Indicators raise questions, managers are preoccupied with failure, and weak signals get a strong response.'],
+      [['What is measured', 'Lagging and compliance metrics', 'Lagging and leading, including control assurance', 'Operational data from across the business', 'Rec'],
+       ['Activity or effectiveness', 'How often safety work is done', 'How effective safety work is', 'Planned versus actual work', 'Rec'],
+       ['What “safe” means to managers', 'No negative events', 'Controls assured and a positive climate', 'Never assumed; preoccupied with failure', 'Mgmt'],
+       ['Workers’ experience in the data', null, 'Culture and engagement surveys', 'Experiences and stories alongside the numbers', 'Mgmt'],
+       ['What indicators trigger', 'Trend reporting', 'Insight into current operations and known risks', 'Questions, discovery and a strong response to weak signals', 'Ins']]]
+  ];
+  var FACTOR = {};
+  FACTORS.forEach(function (f) { FACTOR[f[0]] = { key: f[0], domain: f[1], name: f[2], q: f[3], lnames: f[4], levels: f[5], ind: f[6], inds: f[6].map(function (x) { return x[0]; }) }; });
+  function factorByName(n) { var k = null; FACTORS.forEach(function (f) { if (f[2].toLowerCase() === String(n).toLowerCase()) k = f[0]; }); return k; }
+  function evOf(f, k) { return FACTOR[f].ind[k][4].split(' '); }
+  function mgmtOnly(f, k) { var e = evOf(f, k); return e.indexOf('Rec') < 0 && e.indexOf('Ins') < 0; }
+
+  // Which factor and indicator each insight gives evidence for (see fw-map-audit.md section 5)
+  var INS_FACTOR = { hand: ['communications_coordination', 4], fat: ['goal_conflict_tradeoffs', 0], load: ['resource_allocation', 3], pre: ['monitoring_metrics', 1],
+    tick: ['monitoring_metrics', 1], spot: ['operational_management', 1], edge: ['contractor_management', 2], house: ['operational_management', 3] };
+  // Records map to a factor through their insight, or by record type
+  var TYPE_FACTOR = { 'Pre-start': ['monitoring_metrics', 1], 'Inspection': ['monitoring_metrics', 1], 'Permit': ['decision_making', 1], 'Isolation permit': ['decision_making', 1],
+    'Observation': ['frontline_workers', 3], 'Near miss': ['frontline_workers', 3], 'Hazard': ['frontline_workers', 3], 'Induction': ['contractor_management', 1], 'Incident': ['learning_development', 2], 'Action': ['operational_management', 3] };
+  function recFactor(r) { var i = r.insights.filter(function (id) { return INS_FACTOR[id]; })[0]; return i ? INS_FACTOR[i] : TYPE_FACTOR[r.type] || null; }
+
+  // Per region, per indicator: { m: 1..3 or null, n: evidence, t: trend, mg: needs management input }
+  var REGIONS = []; ORG.forEach(function (d) { d.regions.forEach(function (r) { REGIONS.push({ name: r.name, div: d.div }); }); });
+  var SCORE = {};
+  REGIONS.forEach(function (r, ri) {
+    SCORE[r.name] = {};
+    FACTORS.forEach(function (f, fi) {
+      SCORE[r.name][f[0]] = f[6].map(function (_, k) {
+        if (mgmtOnly(f[0], k)) return { m: null, n: 0, t: 'steady', mg: true };
+        var h = (ri * 7 + fi * 13 + k * 5 + 3) % 10, t = h === 3 || h === 7 ? 'better' : 'steady';
+        if (f[1] === 'guide') return h < 6 ? { m: null, n: 0, t: 'steady' } : { m: 1.2 + (h % 2) * 0.5, n: 1 + (h % 2), t: 'steady' };
+        if (f[1] === 'enable') return { m: h < 4 ? 1 : h < 8 ? 1.8 : 2.2, n: 4 + h, t: t };
+        return { m: h < 3 ? 1.2 : h < 8 ? 2 : 2.6, n: 7 + h * 2, t: t };
+      });
+    });
+  });
+  function setScore(reg, f, k, m, n, t) { SCORE[reg][f][k] = { m: m, n: n, t: t }; }
+  // Align the Map with what the insights are saying
+  ['Northern', 'Southern'].forEach(function (r) {
+    setScore(r, 'communications_coordination', 4, 1, 14, 'worse'); setScore(r, 'communications_coordination', 1, 1.8, 11, 'steady'); setScore(r, 'communications_coordination', 0, 1.2, 9, 'steady');
+    setScore(r, 'work_understanding', 4, 1.1, 8, 'steady');
+  });
+  setScore('Northern', 'resource_allocation', 3, 1.2, 11, 'steady');
+  setScore('Southern', 'goal_conflict_tradeoffs', 0, 1.2, 9, 'steady'); setScore('Northern', 'goal_conflict_tradeoffs', 0, 1.3, 5, 'steady');
+  setScore('Southern', 'monitoring_metrics', 1, 1, 22, 'worse'); setScore('Northern', 'monitoring_metrics', 1, 1.1, 12, 'worse'); setScore('Coastal', 'monitoring_metrics', 1, 1, 24, 'steady');
+  setScore('Northern', 'operational_management', 1, 2.1, 16, 'better'); setScore('Southern', 'operational_management', 3, 1.9, 10, 'better');
+  setScore('Metro', 'contractor_management', 2, 1, 7, 'worse'); setScore('Northern', 'contractor_management', 2, 1.8, 6, 'steady');
+
+  function aggInd(regs, f, k) {
+    var sum = 0, n = 0, best = null, mg = false;
+    regs.forEach(function (r) { var c = SCORE[r][f][k]; if (c.mg) mg = true; if (c.m) { sum += c.m * c.n; n += c.n; if (!best || c.n > best.n) best = c; } });
+    return n ? { v: sum / n, n: n, t: best.t } : { v: null, n: 0, t: 'steady', mg: mg };
+  }
+  function lvlOf(v) { return v == null ? -1 : v < 1.75 ? 0 : v < 2.5 ? 1 : 2; }
+  // Maturity can be mixed: "Compliant, some Leading"
+  function lvlLabel(v) {
+    if (v == null) return 'Blind spot';
+    var l = lvlOf(v), p = v - 1, other = -1;
+    if (l === 0 && p > 0.4) other = 1; else if (l === 1 && p > 1.3) other = 2; else if (l === 1 && p < 0.95) other = 0; else if (l === 2 && p < 1.7) other = 1;
+    return LEVELS[l] + (other > -1 ? ', some ' + LEVELS[other] : '');
+  }
+  function scoreFactor(regs, f) {
+    var inds = FACTOR[f].inds.map(function (_, k) { return aggInd(regs, f, k); });
+    var known = inds.filter(function (x) { return x.v != null; });
+    var v = known.length ? known.reduce(function (a, x) { return a + x.v; }, 0) / known.length : null;
+    var weakest = null; inds.forEach(function (x, k) { if (x.v != null && (weakest == null || x.v < inds[weakest].v)) weakest = k; });
+    var n = inds.reduce(function (a, x) { return a + x.n; }, 0);
+    var worse = inds.filter(function (x) { return x.t === 'worse' && x.v != null; }).length, better = inds.filter(function (x) { return x.t === 'better' && x.v != null; }).length;
+    return { v: v, lvl: lvlOf(v), n: n, inds: inds, weakest: weakest, t: worse > better ? 'worse' : better > worse ? 'better' : 'steady',
+      mgmt: inds.filter(function (x) { return x.mg; }).length, blind: inds.length - known.length };
+  }
+  function regionsInScope() { return regionsInView().map(function (x) { return x.r.name; }); }
+  function childUnits() {
+    if (ST.reg) return [];
+    if (ST.div) return regionsInView().map(function (x) { return { label: x.r.name + ' region', regs: [x.r.name] }; });
+    return ORG.map(function (d) { return { label: d.div + ' division', regs: d.regions.map(function (r) { return r.name; }) }; });
+  }
+  // Three segments, filled continuously: a factor can sit between levels
+  function levelBar(v, small, label) {
+    if (v == null) return '<span class="lvl blind' + (small ? ' sm' : '') + '"><span class="lvl-bar"><i></i><i></i><i></i></span><span class="lvl-t">' + (label || 'Blind spot') + '</span></span>';
+    return '<span class="lvl' + (small ? ' sm' : '') + '" title="' + esc(lvlLabel(v)) + '"><span class="lvl-bar">' + [0, 1, 2].map(function (k) {
+      var fill = Math.max(0, Math.min(1, v - k)); return '<i><b style="width:' + Math.round(fill * 100) + '%"></b></i>';
+    }).join('') + '</span><span class="lvl-t">' + esc(label || lvlLabel(v)) + '</span></span>';
+  }
+  function cueAt(f, k, lvl) { var c = FACTOR[f].ind[k][1 + lvl]; return c == null ? null : c; }
+
+  ST.mapView = 'factors'; ST.openInd = {};
+  function renderMap() {
+    if (ST.factor) return renderFactor(ST.factor);
+    var regs = regionsInScope(), scores = {}, units = childUnits();
+    FACTORS.forEach(function (f) { scores[f[0]] = scoreFactor(regs, f[0]); });
+    var known = FACTORS.filter(function (f) { return scores[f[0]].v != null; });
+    var solid = known.filter(function (f) { return scores[f[0]].n >= 10; });
+    var weakest = solid.slice().sort(function (a, b) { return scores[a[0]].v - scores[b[0]].v || scores[b[0]].n - scores[a[0]].n; })[0];
+    var strongest = solid.slice().sort(function (a, b) { return scores[b[0]].v - scores[a[0]].v || scores[b[0]].n - scores[a[0]].n; })[0];
+    var blind = FACTORS.filter(function (f) { return scores[f[0]].v == null; });
+    var counts = [0, 0, 0]; known.forEach(function (f) { counts[scores[f[0]].lvl]++; });
+    var mostly = counts.indexOf(Math.max.apply(null, counts));
+    var worse = known.filter(function (f) { return scores[f[0]].t === 'worse'; });
+    var summary = '<b>' + esc(scopeLabel()) + ' operates mostly at ' + LEVELS[mostly] + '.</b> ' +
+      (weakest ? 'The clearest gap is <b>' + esc(FACTOR[weakest[0]].name.toLowerCase()) + '</b>' + (scores[weakest[0]].weakest != null ? ', held back by ' + esc(FACTOR[weakest[0]].inds[scores[weakest[0]].weakest].toLowerCase()) : '') + '. ' : '') +
+      (strongest && strongest !== weakest ? 'Strongest is ' + esc(FACTOR[strongest[0]].name.toLowerCase()) + '. ' : '') +
+      (worse.length ? '<b class="t-critical">' + word(worse.length) + (worse.length === 1 ? ' factor is' : ' factors are') + ' worsening.</b> ' : '') +
+      (blind.length ? word(blind.length) + (blind.length === 1 ? ' factor needs' : ' factors need') + ' management input before they can be rated, mostly in Guide.' : '');
+    var tabs = units.length > 1 ? '<div class="seg map-tabs" role="group" aria-label="Show"><button type="button" data-mapview="factors" aria-pressed="' + (ST.mapView !== 'compare') + '">Factors</button><button type="button" data-mapview="compare" aria-pressed="' + (ST.mapView === 'compare') + '">Compare ' + (ST.div ? 'regions' : 'divisions') + '</button></div>' : '';
+    var body;
+    if (ST.mapView === 'compare' && units.length > 1) {
+      body = '<div class="card map-compare"><div class="table-scroll"><table class="cmp"><thead><tr><th>Factor</th>' + units.map(function (u) { return '<th>' + esc(u.label) + '</th>'; }).join('') + '</tr></thead><tbody>' +
+        DOMAINS.map(function (d) {
+          return '<tr class="cmp-dom"><td colspan="' + (units.length + 1) + '">' + esc(d[1]) + ' · ' + esc(d[2]) + '</td></tr>' + FACTORS.filter(function (f) { return f[1] === d[0]; }).map(function (f) {
+            return '<tr><td><a href="#map/' + f[0] + '">' + esc(f[2]) + '</a></td>' + units.map(function (u) { var sc = scoreFactor(u.regs, f[0]); return '<td>' + levelBar(sc.v, true, sc.v == null ? 'Needs input' : null) + (sc.v != null ? trendHTML(sc.t) : '') + '</td>'; }).join('') + '</tr>';
+          }).join('');
+        }).join('') + '</tbody></table></div></div>';
+    } else {
+      body = '<div class="map-grid">' + DOMAINS.map(function (d) {
+        return '<section class="map-col"><div class="map-dom"><h2>' + esc(d[1]) + '</h2><span class="label">' + esc(d[2]) + '</span></div>' +
+          FACTORS.filter(function (f) { return f[1] === d[0]; }).map(function (f) {
+            var sc = scores[f[0]];
+            return '<a class="card fcard' + (sc.v == null ? ' blind' : '') + '" href="#map/' + f[0] + '"><span class="fc-name">' + esc(f[2]) + '</span>' +
+              levelBar(sc.v, false, sc.v == null ? 'Needs management input' : null) +
+              (sc.v != null ? '<span class="fc-named">' + esc(f[4][sc.lvl]) + '</span>' : '') +
+              '<span class="fc-meta">' + (sc.v == null ? '<span>Records don’t show this factor</span>' : '<span>' + sc.n + (sc.n === 1 ? ' signal' : ' signals') + '</span>' + trendHTML(sc.t)) + '</span>' +
+              (sc.weakest != null && sc.v != null ? '<span class="fc-held">Held back by ' + esc(FACTOR[f[0]].inds[sc.weakest].toLowerCase()) + '</span>' : '') + '</a>';
+          }).join('') + '</section>';
+      }).join('') + '</div>';
+    }
+    $('view').innerHTML =
+      '<div class="page-top"><div><h1>Forge Works Map</h1><p class="sub">Systemic maturity across ' + esc(scopeLabel()) + ' · scored by Prism from 90 days of enriched records and insights</p></div></div>' +
+      '<p class="pv-summary">' + summary + '</p>' +
+      '<div class="list-top">' + (tabs || '<span></span>') + '<div class="lvl-key"><button type="button" class="what" data-help="map">What the levels mean</button><span class="label">Maturity</span>' + [1, 2, 3].map(function (v) { return levelBar(v, true); }).join('') + levelBar(null, true, 'Needs input') + '</div></div>' +
+      body +
+      '<p class="map-note">The Forge Works Map® is Forge Works IP. Level summaries are written from the Forge Works blueprint.</p>';
+  }
+
+  function renderFactor(key) {
+    var f = FACTOR[key]; if (!f) { ST.factor = ''; return renderMap(); }
+    var regs = regionsInScope(), sc = scoreFactor(regs, key), units = childUnits();
+    var ins = INSIGHTS.filter(function (i) { return INS_FACTOR[i.id] && INS_FACTOR[i.id][0] === key && !i.dismissed; })
+      .filter(function (i) { return i.sites.some(function (s) { return regs.indexOf(SITE[s].region) > -1; }); });
+    var next = sc.lvl < 0 ? 0 : Math.min(2, sc.lvl + 1);
+    var dom = DOMAINS.filter(function (d) { return d[0] === f.domain; })[0];
+    $('view').innerHTML = '<a class="back" href="#map">← Map</a>' +
+      '<div class="ins-head"><div class="meta"><span class="tlabel">' + esc(dom[1]) + '</span><span class="label">' + esc(dom[2]) + '</span></div><h1 class="ins-title">' + esc(f.name) + '</h1><p class="sub">' + esc(f.q) + '</p></div>' +
+      '<div class="ins-grid"><div class="ins-main">' +
+        '<section class="card side-card f-rating"><span class="label">' + esc(scopeLabel()) + ' today</span><div class="f-rate-row">' + levelBar(sc.v, false, sc.v == null ? 'Needs management input' : null) + (sc.v != null ? trendHTML(sc.t) : '') + '</div>' +
+          (sc.v != null ? '<p class="f-named">' + esc(f.lnames[sc.lvl]) + '</p>' : '') +
+          '<p class="muted-p" style="color:var(--text)">' + (sc.v == null ? 'Records and insights don’t show this factor. Focus reviews, surveys and interviews fill it in.' : sc.n + ' signals in the last 90 days.' + (sc.weakest != null ? ' Held back by <b>' + esc(f.inds[sc.weakest].toLowerCase()) + '</b>.' : '') + (sc.mgmt ? ' ' + word(sc.mgmt) + (sc.mgmt === 1 ? ' indicator needs' : ' indicators need') + ' management input.' : '')) + '</p></section>' +
+        '<section class="ins-sec"><span class="label">Indicators · select one to see what each level looks like</span><div class="card ind-list">' + f.inds.map(function (name, k) {
+          var x = sc.inds[k], l = lvlOf(x.v), drivers = ins.filter(function (i) { return INS_FACTOR[i.id][1] === k; }), open = ST.openInd[key + k];
+          var ev = evOf(key, k).map(function (e) { return '<span class="ev-src">' + esc(EV_NAME[e]) + '</span>'; }).join('');
+          return '<div class="ind-row' + (open ? ' open' : '') + '"><button type="button" class="ind-btn" data-ind="' + key + k + '" aria-expanded="' + !!open + '"><span class="ind-main"><span class="ind-name">' + esc(name) + '</span>' +
+            '<span class="ind-drv' + (drivers.length ? '' : ' muted') + '">' + (drivers.length ? drivers.map(function (i) { return esc(i.title); }).join(' · ') : x.v == null ? (x.mg ? 'Needs management input' : 'No evidence yet') : x.n + ' signals, no open insight') + '</span></span>' +
+            '<span class="ind-rate">' + levelBar(x.v, true, x.v == null ? (x.mg ? 'Needs input' : 'Blind spot') : null) + (x.v != null ? trendHTML(x.t) : '') + '</span></button>' +
+            (open ? '<div class="ind-detail"><ol class="ind-levels">' + [0, 1, 2].map(function (lv) {
+                var c = cueAt(key, k, lv);
+                return '<li class="' + (lv === l ? 'now' : '') + (x.v != null && lv === l + 1 ? ' next' : '') + '"><span class="il-h">' + esc(LEVELS[lv]) + (lv === l ? ' · where you are' : x.v != null && lv === l + 1 ? ' · next step' : '') + '</span><span class="il-t' + (c == null ? ' gap' : '') + '">' + esc(c == null ? 'Not yet described in the Forge Works Map' : c) + '</span></li>';
+              }).join('') + '</ol><p class="ind-ev"><span class="label">Evidence from</span>' + ev + '</p>' +
+              (drivers.length ? '<p class="ind-links">' + drivers.map(function (i) { return '<button type="button" class="linkish" data-open="' + i.id + '">' + esc(i.title) + '</button>'; }).join(' · ') + '</p>' : '') + '</div>' : '') +
+          '</div>';
+        }).join('') + '</div></section>' +
+        (units.length > 1 ? '<section class="ins-sec"><span class="label">Across ' + esc(scopeLabel()) + '</span><div class="card ind-list">' + units.map(function (u) {
+          var us = scoreFactor(u.regs, key);
+          return '<div class="ind-row"><div class="ind-btn static"><span class="ind-main"><span class="ind-name">' + esc(u.label) + '</span><span class="ind-drv muted">' + (us.v == null ? 'Needs management input' : us.n + ' signals' + (us.weakest != null ? ' · held back by ' + esc(f.inds[us.weakest].toLowerCase()) : '')) + '</span></span><span class="ind-rate">' + levelBar(us.v, true, us.v == null ? 'Needs input' : null) + (us.v != null ? trendHTML(us.t) : '') + '</span></div></div>';
+        }).join('') + '</div></section>' : '') +
+        '<section class="ins-sec"><span class="label">Insights giving evidence for this factor</span>' + (ins.length ? '<div class="icards one">' + ins.map(row).join('') + '</div>' : '<p class="card empty-card">No open insights for this factor in ' + esc(scopeLabel()) + '.</p>') + '</section>' +
+      '</div><aside class="ins-side">' +
+        '<section class="card side-card"><h2>What each level looks like</h2><ol class="lvl-desc">' + LEVELS.map(function (l, k) {
+          return '<li class="' + (k === sc.lvl ? 'now' : '') + (k === next && k !== sc.lvl ? ' next' : '') + '"><span class="lvl-desc-h"><span><b>' + esc(l) + '</b> · ' + esc(f.lnames[k]) + '</span>' + (k === sc.lvl ? '<span class="tag-now">Where you are</span>' : k === next ? '<span class="tag-next">Next step</span>' : '') + '</span><p>' + esc(f.levels[k]) + '</p></li>';
+        }).join('') + '</ol><p class="muted-p">Summarised from the Forge Works blueprint. In the live product Prism would write these for your situation.</p></section>' +
+        '<section class="card side-card"><h2>How this is scored</h2><p class="muted-p" style="color:var(--text)">Prism links each enriched record and insight to the factor and indicator it gives evidence for. Insights count for more than single records. A factor is rated from its indicators, can sit between levels, and is held back by its weakest indicator. Indicators that only management can evidence wait for a Focus review, survey or interview.</p></section>' +
+      '</aside></div>';
+  }
+  // The Map's language, for any insight: where it sits and what the next level looks like
+  function mapCard(i) {
+    var fx = INS_FACTOR[i.id]; if (!fx) return '';
+    var f = FACTOR[fx[0]], k = fx[1], regs = []; i.sites.forEach(function (s) { if (regs.indexOf(SITE[s].region) < 0) regs.push(SITE[s].region); });
+    var x = aggInd(regs, fx[0], k), l = lvlOf(x.v), now = l > -1 ? cueAt(fx[0], k, l) : null, nx = l > -1 && l < 2 ? cueAt(fx[0], k, l + 1) : null;
+    return '<section class="card side-card"><h2>On the Forge Works Map</h2>' +
+      '<p class="mc-f"><a class="map-link" href="#map/' + fx[0] + '">' + esc(f.name) + '</a> · ' + esc(f.inds[k]) + '</p>' + levelBar(x.v, true) +
+      (now ? '<p class="mc-l"><span class="label">Now</span>' + esc(now) + '</p>' : '') +
+      (l > -1 && l < 2 ? '<p class="mc-l next"><span class="label">Towards ' + esc(f.lnames[l + 1]) + '</span>' + esc(nx || 'Not yet described in the Forge Works Map') + '</p>' : '') +
+      '</section>';
+  }
+  document.addEventListener('click', function (e) {
+    var t = e.target.closest('[data-mapview]'); if (t) { ST.mapView = t.getAttribute('data-mapview'); renderMap(); return; }
+    var d = e.target.closest('[data-ind]'); if (d) { var k = d.getAttribute('data-ind'); ST.openInd[k] = !ST.openInd[k]; renderFactor(ST.factor); var b = document.querySelector('[data-ind="' + k + '"]'); if (b) b.focus(); }
+  });
+
+  /* =============================================================
      Routing (in-page, so it works inside sandboxed frames)
      ============================================================= */
   function go(target) { try { history.replaceState(null, '', '#' + target); } catch (err) { /* ignore */ } route(target); }
   function route(target) {
     var h = (target || (location.hash || '').slice(1) || 'focus').split('/');
-    ST.view = ['focus', 'sites', 'site', 'sources', 'meeting', 'meetings', 'insight', 'myfocus'].indexOf(h[0]) > -1 ? h[0] : 'focus';
+    ST.view = ['focus', 'sites', 'site', 'sources', 'meeting', 'meetings', 'insight', 'myfocus', 'map'].indexOf(h[0]) > -1 ? h[0] : 'focus';
+    ST.factor = ST.view === 'map' ? (h[1] || '') : '';
     if (!ST.keepWalk) { ST.mfSnap = null; if (ST.view === 'myfocus') ST.mfWalk = -1; } ST.keepWalk = false;
     ST.insight = ST.view === 'insight' ? (h[1] || '') : '';
     ST.site = ST.view === 'site' ? (h[1] || '') : '';
@@ -2001,7 +2551,7 @@ main { padding-block: 32px 80px; }
     closeRec(); closeSheet(); render(); window.scrollTo(0, 0);
   }
   function render() { renderView(); renderMyFocusCount(); }
-  function renderView() { if (ST.view === 'myfocus') renderMyFocus(); else if (ST.view === 'sites') renderSites(); else if (ST.view === 'site') { if (ST.siteFeed) renderSiteFeed(ST.site); else renderSite(ST.site); } else if (ST.view === 'sources') renderSources(); else if (ST.view === 'meeting') renderMeeting(); else if (ST.view === 'meetings') renderMeetings(); else if (ST.view === 'insight') renderInsight(ST.insight); else renderFocus(); }
+  function renderView() { if (ST.view === 'map') renderMap(); else if (ST.view === 'myfocus') renderMyFocus(); else if (ST.view === 'sites') renderSites(); else if (ST.view === 'site') { if (ST.siteFeed) renderSiteFeed(ST.site); else renderSite(ST.site); } else if (ST.view === 'sources') renderSources(); else if (ST.view === 'meeting') renderMeeting(); else if (ST.view === 'meetings') renderMeetings(); else if (ST.view === 'insight') renderInsight(ST.insight); else renderFocus(); }
 
   document.addEventListener('click', function (e) {
     var a = e.target.closest('a[href^="#"]');
