@@ -172,7 +172,7 @@ main { padding-block: 32px 80px; }
 .owner { display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 700; min-width: 0; }
 .owner span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .trend { display: inline-flex; align-items: center; gap: 4px; font-size: 13.5px; font-weight: 800; }
-.trend.steady { color: var(--text-3); }
+.trend.steady { color: var(--info); }
 .empty-card { padding: 20px; color: var(--text-2); }
 
 /* ---------- Sheet ---------- */
@@ -542,14 +542,19 @@ main { padding-block: 32px 80px; }
 .fc-meta { display: flex; gap: 12px; align-items: center; font-size: 14px; font-weight: 700; color: var(--text-2); }
 .fc-held { font-size: 14px; color: var(--text-2); }
 .lvl { display: inline-flex; align-items: center; gap: 10px; }
-.lvl-bar { display: inline-flex; gap: 3px; }
+.lvl-bar { display: inline-flex; gap: 3px; position: relative; }
 .lvl-bar i { width: 26px; height: 8px; border-radius: 2px; background: var(--bg); border: 1.5px solid var(--text); overflow: hidden; display: block; }
+.lvl-was { position: absolute; top: -4px; bottom: -4px; width: 2px; margin-left: -1px; border-radius: 1px; text-decoration: none; }
+.lvl-was.up { background: var(--success); }
+.lvl-was.down { background: var(--critical); }
+.fc-chg { font-size: 14px; color: var(--text-2); }
+.fc-chg b { color: var(--text); }
 .lvl-bar i b { display: block; height: 100%; background: var(--text); }
 .lvl-t { font-size: 15px; font-weight: 800; }
 .lvl.sm .lvl-bar i { width: 16px; height: 7px; }
 .lvl.sm .lvl-t { font-size: 13.5px; }
-.lvl.blind .lvl-bar i { border-style: dashed; border-color: var(--info); }
-.lvl.blind .lvl-t { color: var(--info); }
+.lvl.blind .lvl-bar i { background: none; border: 1.5px dashed var(--border-2); }
+.lvl.blind .lvl-t { color: var(--text-3); }
 .lvl-key { display: flex; align-items: center; gap: 8px 16px; flex-wrap: wrap; }
 .map-tabs { margin: 0; }
 .map-note { margin-top: 24px; font-size: 13.5px; color: var(--text-3); }
@@ -575,12 +580,13 @@ main { padding-block: 32px 80px; }
 .ind-drv { font-size: 14.5px; }
 .ind-drv a { text-decoration: underline; text-underline-offset: 3px; }
 .ind-drv.muted { color: var(--text-3); font-weight: 600; }
-.ind-rate { display: flex; align-items: center; gap: 12px; justify-content: flex-end; }
-@media (max-width: 640px) { .ind-row { grid-template-columns: 1fr; } .ind-rate { justify-content: flex-start; } }
+.ind-rate { display: grid; grid-template-columns: auto 182px 96px; justify-content: start; align-items: center; column-gap: 10px; }
+.ind-rate .lvl { display: contents; }
+.ind-rate .trend { margin-left: 0 !important; }
+@media (max-width: 640px) { .ind-row { grid-template-columns: 1fr; } }
 .lvl-desc { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
 .lvl-desc li { display: grid; gap: 6px; padding: 12px 14px; border: 1px solid var(--border); border-radius: 10px; }
-.lvl-desc li.now { border-color: var(--text); }
-.lvl-desc li.next { background: var(--brand); border-color: #d9c200; }
+.lvl-desc li.now { border: 2px solid var(--text); padding: 11px 13px; }
 .lvl-desc p { font-size: 15px; line-height: 1.45; margin: 0; }
 .lvl-desc-h { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .fc-named, .f-named { font-size: 14px; font-weight: 700; color: var(--text-2); margin: 0; }
@@ -592,8 +598,7 @@ button.ind-btn:hover .ind-name { text-decoration: underline; text-underline-offs
 .ind-detail { padding: 0 18px 16px; display: grid; gap: 10px; }
 .ind-levels { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
 .ind-levels li { display: grid; gap: 4px; align-content: start; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; }
-.ind-levels li.now { border-color: var(--text); }
-.ind-levels li.next { background: var(--brand); border-color: #d9c200; }
+.ind-levels li.now { border: 2px solid var(--text); padding: 9px 11px; }
 .il-h { font-size: 12px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; }
 .il-t { font-size: 14.5px; line-height: 1.4; }
 .il-t.gap { color: var(--text-3); font-style: italic; }
@@ -603,11 +608,75 @@ button.ind-btn:hover .ind-name { text-decoration: underline; text-underline-offs
 .ind-links .linkish { font-weight: 700; color: inherit; text-decoration: underline; text-underline-offset: 3px; }
 .ind-links a { text-decoration: underline; text-underline-offset: 3px; font-weight: 700; }
 @media (max-width: 760px) { .ind-levels { grid-template-columns: 1fr; } }
-@media (max-width: 640px) { .ind-btn { grid-template-columns: 1fr; } .ind-rate { justify-content: flex-start; } }
-.mc-f { margin: 0; font-size: 15px; font-weight: 700; }
+@media (max-width: 640px) { .ind-btn { grid-template-columns: 1fr; } .ind-rate { justify-content: start; } }
+.mc-f { margin: 0; font-size: 15px; font-weight: 700; display: grid; gap: 2px; }
+.mc { display: grid; gap: 10px; align-content: start; }
+.linkish { color: inherit; text-align: left; }
+.plan { display: grid; gap: 12px; }
+.walk-plan { border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+.walk-plan.just { border: 2px solid var(--text); padding: 13px 15px; }
+.rlist.ra { gap: 16px; }
+.ra-i { gap: 8px !important; }
+.ra-acts { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.ra-acts li { display: grid; grid-template-columns: 118px minmax(0, 1fr); gap: 2px 12px; align-items: baseline; }
+.ra-acts .badge, .ra-acts .tlabel { justify-self: start; white-space: nowrap; }
+.rlist .ra-t { grid-column: 2; font-size: 15px; font-weight: 700; color: var(--text); }
+.rlist .ra-m { grid-column: 2; }
+.ra-h { font-size: 13px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-3); margin-top: 6px; }
+.w-acts { display: grid; gap: 10px; margin-top: 8px; }
+.w-p { display: grid; gap: 4px; }
+.w-p ul { margin: 0; padding-left: 34px; display: grid; gap: 4px; font-size: 15px; }
+.w-p li span { color: var(--text-3); font-size: 13.5px; font-weight: 600; }
+.ins-sec.card.plan { padding: 18px 20px; }
+.plan-head { display: flex; align-items: baseline; justify-content: space-between; gap: 6px 12px; flex-wrap: wrap; }
+.plan-state { font-size: 14px; font-weight: 700; color: var(--text-2); }
+.plan.prop .plan-state { color: var(--text); }
+.plan-acts { list-style: none; margin: 0; padding: 0; display: grid; }
+.pa { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px 14px; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); }
+.pa:first-child { border-top: 1px solid var(--border); }
+.pa-main { display: grid; gap: 4px; }
+.pa-t { font-size: 16px; font-weight: 700; line-height: 1.35; }
+.pa.st-done .pa-t { color: var(--text-3); text-decoration: line-through; text-decoration-thickness: 1px; }
+.pa-meta { display: flex; align-items: center; gap: 6px 12px; flex-wrap: wrap; font-size: 14px; font-weight: 600; color: var(--text-2); }
+.pa-meta .av { width: 22px; height: 22px; font-size: 10px; }
+.pa-none { color: var(--warning); font-weight: 700; }
+.pa.st-risk .pa-ci select { border-color: var(--warning); color: var(--warning); font-weight: 800; }
+.pa.st-done .pa-ci select { color: var(--success); font-weight: 800; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.pa-add { display: grid; grid-template-columns: minmax(0, 1fr) auto 110px auto; gap: 8px; align-items: center; }
+.pa-add .w-note { min-height: 0; padding: 8px 10px; }
+.plan-exp { margin: 0; display: grid; gap: 2px; font-size: 15px; }
+.plan-foot { display: flex; align-items: center; justify-content: space-between; gap: 10px 16px; flex-wrap: wrap; }
+.plan-foot .muted-p { margin: 0; }
+.icard-plan { font-size: 13.5px; font-weight: 800; }
+.icard-plan.prop { color: var(--text-2); }
+@media (max-width: 640px) { .pa-add { grid-template-columns: 1fr 1fr; } .pa-add .w-note:first-child { grid-column: 1 / -1; } }
+.inf { display: inline-block; font-size: 11px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-3); border: 1px dashed var(--border-2); border-radius: 999px; padding: 0 7px; vertical-align: 1px; cursor: help; }
+.fd-rate { display: grid; gap: 8px; }
+.fd-inds { list-style: none; margin: 0; padding: 0; display: grid; }
+.fd-inds li { display: grid; gap: 4px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+.fd-inds li:last-child { border-bottom: 0; }
+.fd-n { font-size: 15px; font-weight: 800; }
+button.link-item { font: inherit; color: inherit; background: none; text-align: left; cursor: pointer; width: 100%; }
+.mc-also { margin: 0; display: grid; gap: 2px; font-size: 14px; color: var(--text-2); }
+.icard-map { display: flex; gap: 8px; align-items: baseline; font-size: 14px; font-weight: 700; color: var(--text-2); }
+.walk-map { border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; }
+.rlist .rl-f { font-size: 16.5px; font-weight: 800; color: var(--text); }
+.rlist .rl-ev { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 12px; }
+.rlist .rl-ev .rlink { font-size: 14.5px; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
+.w-map { display: grid; gap: 4px; font-size: 15px; margin: 4px 0 0; }
+.lc { grid-column: 1 / -1; margin-top: 20px; }
+.lc-opts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.lc-opt { display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: start; padding: 12px 14px; border: 1px solid var(--border); border-radius: 10px; cursor: pointer; font-size: 15px; line-height: 1.4; }
+.lc-opt b { display: block; }
+.lc-opt:has(input:checked) { border: 2px solid var(--text); padding: 11px 13px; }
+@media (max-width: 760px) { .lc-opts { grid-template-columns: 1fr; } }
 .mc-l { margin: 0; display: grid; gap: 2px; font-size: 14.5px; line-height: 1.4; }
-.mc-l.next { background: var(--brand); padding: 8px 10px; border-radius: 8px; }
-.tag-now, .tag-next { font-size: 11.5px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; }
+.mc-l .tag-next, .mc-l .tag-now { justify-self: start; margin-bottom: 2px; }
+.tag-now, .tag-next { font-size: 11px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; white-space: nowrap; padding: 2px 8px; border-radius: 999px; line-height: 1.5; }
+.tag-now { background: var(--text); color: #fff; }
+.tag-next { background: var(--brand); color: var(--text); }
+.il-h { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
 .linkish { font: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
 @media (max-width: 760px) { .mf-row { grid-template-columns: 1fr; } .mf-act { justify-content: flex-start; } }
 @media (max-width: 1260px) { .mf-btn { padding: 0 10px; } }
@@ -814,6 +883,18 @@ button.ind-btn:hover .ind-name { text-decoration: underline; text-underline-offs
         { src: 'hammertech', n: 1, text: 'The same subcontractor is inducted at Hospital Fit-out for next week.', recs: [
           R('25 Sep', 'hf', 'Facade subcontractor · 8 workers booked for induction · 2 Oct', [['Context', '']]) ] }
       ] },
+    { id: 'volt', sev: 'critical', status: 'new', owner: '', trend: 'steady', lead: false, since: '25 Sep', short: 'an unverified contractor on a live board', oneOff: true,
+      sites: ['st'], hist: '0000000000000000000000000001',
+      title: 'An unverified contractor worked on a live switchboard',
+      story: 'One event, but it tests the Map. A new electrical subcontractor at Southern Tunnels worked inside a live board before anyone checked they could. Contractor management is rated Leading, and this shouldn\u2019t get past a Leading system.',
+      read: [['Could have been', 'Fatal', 'critical'], ['Control', 'Missing', 'critical'], ['Energy', 'Electrical', ''], ['Factor', 'Contractor management', ''], ['Why one event', 'Contradicts a Leading rating', 'warning']],
+      next: 'Find out how this subcontractor was pre-qualified, and whether the two other electrical contractors starting this quarter went through the same check.',
+      says: [
+        { src: 'servicenow', n: 1, text: 'The isolation permit was raised after the work started, by the subcontractor\u2019s own supervisor.', recs: [
+          R('25 Sep', 'st', 'ISO-41033 raised 10:42 · work start logged 09:15 · issuer: contractor supervisor', [['Control bypassed', 'critical'], ['Electrical', '']]) ] },
+        { src: 'intelex', n: 1, text: 'An arc at the board while terminating. The worker wasn\u2019t in arc-rated PPE.', recs: [
+          R('25 Sep', 'st', 'NM-2331 · "arc at MSB-2 while terminating, worker not in arc-rated PPE"', [['Energy released', 'critical'], ['Control missing', 'critical']]) ] }
+      ] },
     { id: 'tick', sev: 'warning', status: 'new', owner: '', trend: 'steady', lead: false, since: '23 Sep', short: 'copied inspections',
       sites: ['ca', 'mo'], hist: '1010101010101010101010101010',
       title: 'Inspections pass every item, with copied comments',
@@ -1007,11 +1088,11 @@ button.ind-btn:hover .ind-name { text-decoration: underline; text-underline-offs
     return '<button type="button" class="card icard" data-open="' + i.id + '">' +
       '<span class="icard-top"><span class="icard-sev">' + sevIcon(i.sev) + '<span class="sev-t t-' + i.sev + '">' + (i.sev === 'critical' ? 'Critical' : 'Warning') + '</span></span><span class="icard-status">' + escBadge(i) + statusBadge(i) + '</span></span>' +
       '<span class="icard-title">' + esc(i.title) + '</span>' +
-      '<span class="icard-story">' + esc(i.story) + '</span>' +
+      '<span class="icard-story">' + esc(i.story) + '</span>' + mapLine(i) +
       '<span class="icard-sites">' + sites.map(function (s) { return '<span class="chip">' + esc(s.name) + '</span>'; }).join('') + '</span>' +
       '<span class="icard-foot">' +
         '<span class="icard-ev">' + mgStack(srcIds) + '<span>' + recCount(i) + ' records from ' + srcIds.length + (srcIds.length === 1 ? ' system' : ' systems') + '</span></span>' +
-        trendHTML(i.trend) +
+        trendHTML(i.trend) + (i.plan && !i.closed ? '<span class="icard-plan' + (i.plan.state === 'proposed' ? ' prop' : '') + '">' + esc(planSummary(i)) + '</span>' : '') +
         '<span class="owner">' + (i.owner ? '<span class="av' + (i.owner === YOU ? ' me' : '') + '">' + initials(i.owner) + '</span><span>' + esc(i.owner) + '</span>' : '<span class="btn sm" data-assign="' + i.id + '">Assign owner</span>') + '</span>' +
       '</span>' +
     '</button>';
@@ -1056,7 +1137,11 @@ button.ind-btn:hover .ind-name { text-decoration: underline; text-underline-offs
   }
   function rerenderFor(id) {
     if (ST.sheet === id && !$('sheet').hidden) openSheet(id);
-    else if (ST.view === 'meeting') renderMeeting();
+    else if (ST.view === 'meeting') {
+      // keep unsaved walk-through choices when the plan re-renders
+      if (MT && $('w-note')) MT.draft = { id: MT.items[MT.idx], owner: $('w-owner').value, status: $('w-status').value, note: $('w-note').value };
+      var y = window.scrollY; renderMeeting(); window.scrollTo(0, y);
+    }
     else render();
   }
   document.addEventListener('click', function (e) {
@@ -1090,8 +1175,8 @@ button.ind-btn:hover .ind-name { text-decoration: underline; text-underline-offs
             return '<div class="card src-say"><div class="src-say-h"><span class="mg lg">' + esc(src.mg) + '</span><div><b>' + esc(src.name) + '</b> <span class="badge">' + s.n + ' records</span><p>' + esc(s.text) + '</p></div></div>' +
               '<div class="src-recs">' + s.recs.map(function (r) { return recRow(RECS[r.id]); }).join('') + (s.n > s.recs.length ? '<div class="rec"><span class="when">and ' + (s.n - s.recs.length) + ' more like these</span></div>' : '') + '</div></div>';
           }).join('') + '</section>' +
-        '<section class="ins-sec"><span class="label">How Prism read it</span><dl class="kv">' + i.read.map(function (r) { var fk = r[0] === 'Factor' ? factorByName(r[1]) : null, fx = fk && INS_FACTOR[i.id]; return '<div><dt>' + esc(r[0]) + '</dt><dd class="' + (r[2] ? 't-' + r[2] : '') + '">' + (fk ? '<a class="map-link" href="#map/' + fk + '">' + esc(r[1]) + '</a>' + (fx ? ' \u00b7 ' + esc(FACTOR[fx[0]].inds[fx[1]]) : '') : esc(r[1])) + '</dd></div>'; }).join('') + '</dl></section>' +
-        (gone ? '' : '<section class="ins-sec"><span class="label">Suggested next step</span><p class="next">' + esc(i.next) + '</p></section>') +
+        '<section class="ins-sec"><span class="label">How Prism read it</span><dl class="kv">' + i.read.map(function (r) { var fk = r[0] === 'Factor' ? factorByName(r[1]) : null, fx = fk && INS_FACTOR[i.id]; return '<div><dt>' + esc(r[0]) + '</dt><dd class="' + (r[2] ? 't-' + r[2] : '') + '">' + (fk ? factorBtn(fk) + (fx ? ' \u00b7 ' + esc(FACTOR[fx[0]].inds[fx[1]]) : '') : esc(r[1])) + '</dd></div>'; }).join('') + '</dl></section>' +
+        (gone ? '' : '<section class="ins-sec"><span class="label">Suggested next step</span><p class="next">' + esc(i.next) + '</p></section>' + planHTML(i, 'ins-sec card')) +
       '</div><aside class="ins-side">' +
         '<section class="card side-card"><h2>Owner and status</h2>' +
           (gone ? '<p class="muted-p">' + (i.dismissed ? 'Dismissed by ' + esc(i.dismissed.who) + '.' : 'Closed.') + '</p>' :
@@ -1111,10 +1196,11 @@ button.ind-btn:hover .ind-name { text-decoration: underline; text-underline-offs
   document.addEventListener('change', function (e) {
     if (ST.view !== 'insight') return;
     var i = insightById(ST.insight); if (!i) return;
-    if (e.target.id === 'i-owner') { i.owner = e.target.value; logEvent(i, i.owner ? 'Assigned to ' + i.owner : 'Owner removed'); if (i.owner && i.status === 'new') { i.status = 'working'; i.updated = 0; } render(); }
+    if (e.target.id === 'i-owner') { i.owner = e.target.value; logEvent(i, i.owner ? 'Assigned to ' + i.owner : 'Owner removed'); autoProgress(i); render(); }
     else if (e.target.id === 'i-status') {
       var v = e.target.value;
       if (v === 'closed') { i.closed = true; logEvent(i, 'Closed'); toast('Insight closed. Prism will reopen it if the pattern returns.'); }
+      else if (v === 'working' && !planAgreed(i)) { toast('Agree the plan first, here or at the next Focus review.'); }
       else { i.status = v; logEvent(i, 'Status: ' + ({ new: 'New', working: 'In progress', resolved: 'Ready to close' })[v]); }
       render();
     }
@@ -1231,7 +1317,7 @@ button.ind-btn:hover .ind-name { text-decoration: underline; text-underline-offs
           return '<div><dt>' + esc(row[0]) + '</dt><dd><span class="rd-v' + (row[2] && !fix ? ' t-' + row[2] : '') + '"' + (fix ? ' style="text-decoration:line-through;color:var(--text-3)"' : '') + '>' + esc(row[1]) + '</span>' +
             (fix ? '<span class="rd-fix">Corrected by you: <b>' + esc(fix.value) + '</b>' + (fix.note ? '. ' + esc(fix.note) : '') + '</span>' : '') +
             '<span class="rd-why">' + esc(row[3]) + '</span></dd></div>';
-        }).join('') + (function () { var fx = recFactor(r); return fx ? '<div><dt>Map</dt><dd><span class="rd-v"><a class="map-link" href="#map/' + fx[0] + '">' + esc(FACTOR[fx[0]].name) + '</a> \u00b7 ' + esc(FACTOR[fx[0]].inds[fx[1]]) + '</span><span class="rd-why">The Forge Works Map indicator this record gives evidence for.</span></dd></div>' : ''; })() + '</dl></section>' +
+        }).join('') + (function () { var fx = recFactor(r); return fx ? '<div><dt>Map</dt><dd><span class="rd-v">' + factorBtn(fx[0]) + ' \u00b7 ' + esc(FACTOR[fx[0]].inds[fx[1]]) + '</span><span class="rd-why">The Forge Works Map indicator this record gives evidence for.</span></dd></div>' : ''; })() + '</dl></section>' +
         (r.insights.length ? '<section class="sheet-sec"><span class="label">Part of</span><div class="links">' + r.insights.map(function (iid) {
           var i = insightById(iid); return i ? '<a class="link-item" href="#insight/' + iid + '"><b>' + esc(i.title) + '</b><span>' + statusText(i) + '</span></a>' : '';
         }).join('') + '</div></section>' : '<section class="sheet-sec"><span class="label">Part of</span><p class="muted-p">Not part of any insight. Prism set it aside as a one-off.</p></section>') +
@@ -1376,6 +1462,92 @@ button.ind-btn:hover .ind-name { text-decoration: underline; text-underline-offs
   function scopeLevel() { return ST.reg ? 'region:' + ST.reg : ST.div ? 'div:' + ST.div : 'org'; }
   function nameOf(n) { return n === YOU ? 'You' : n; }
   INSIGHTS.forEach(function (i) { i.home = homeLevel(i); i.level = i.home; i.esc = null; });
+
+  /* ---------- Plans: the few management actions agreed for an insight ---------- */
+  function A(t, who, due, st) { return { t: t, who: who, due: due, st: st || 'todo' }; }
+  var PLANS = {
+    hand: { state: 'proposed', expect: 'Handover-related control failures stop at Rail Stabling Yard, Ridge Road and Quarry Link.', actions: [
+      A('Standardise what gets handed over at shift change across the division, starting with isolation permits', '', '10 Oct'),
+      A('Make the traffic plan part of the night crew’s handover at Ridge Road', 'Priya Nair', '3 Oct')] },
+    fat: { state: 'proposed', expect: 'Fewer mentions of fatigue in night-shift reports, and no shifts over the limit.', actions: [
+      A('Set and publish roster limits for night shifts', 'Dana Brooks', '17 Oct')] },
+    volt: { state: 'proposed', expect: 'No electrical work starts before a verified isolation permit is raised.', actions: [
+      A('Re-check how electrical subcontractors are pre-qualified, before the next two start', 'Dana Brooks', '3 Oct'),
+      A('Make a verified isolation permit a condition of starting electrical work', 'Tom Walsh', '10 Oct')] },
+    load: { state: 'agreed', agreed: 'Agreed at the Focus review on 12 Sep', expect: 'Tag lines stop failing during steel lifts at North Yard and Harbour Bridge Deck.', actions: [
+      A('Rigging gear audit at North Yard and Harbour Bridge Deck', 'Priya Nair', '30 Sep', 'track'),
+      A('Issue one tag line standard to all steel crews', 'Priya Nair', '10 Oct')] },
+    pre: { state: 'agreed', agreed: 'Agreed at the Focus review on 12 Sep', expect: 'Pre-starts take longer than a minute and vary between shifts.', actions: [
+      A('Remind supervisors what the pre-start is for', 'Tom Walsh', '19 Sep', 'done'),
+      A('Rebuild the pre-start around the day’s actual tasks', 'Tom Walsh', '3 Oct', 'risk')] },
+    spot: { state: 'agreed', agreed: 'Agreed at the Focus review on 12 Sep', expect: 'No reversing plant without a spotter at North Yard or Ridge Road.', actions: [
+      A('Roll the spotter roster out to Ridge Road', 'Priya Nair', '19 Sep', 'done'),
+      A('Put the spotter roster in the Ridge Road induction pack', 'You', '26 Sep', 'risk')] },
+    house: { state: 'agreed', agreed: 'Agreed at the Focus review on 12 Sep', expect: 'Access routes at Creek Crossing stay clear.', actions: [
+      A('Mark out laydown areas at Creek Crossing', 'Tom Walsh', '19 Sep', 'done')] },
+    tick: { state: 'proposed', expect: 'Inspection results start to vary, the way real inspections do.', actions: [
+      A('Spot-check four copied inspections with the site manager', 'Jo Park', '10 Oct')] },
+    edge: { state: 'agreed', agreed: 'Agreed at the Focus review on 15 Sep', expect: 'Edge protection is back in place after every facade lift.', actions: [
+      A('Get a revised facade method from the subcontractor', 'Sam Ortiz', '29 Sep', 'track'),
+      A('Make the revised method a condition of starting at Hospital Fit-out', 'Sam Ortiz', '2 Oct')] }
+  };
+  INSIGHTS.forEach(function (i) { i.plan = PLANS[i.id] || null; });
+  var PA_ST = [['todo', 'Not started'], ['track', 'On track'], ['risk', 'At risk'], ['done', 'Done']];
+  function planAgreed(i) { return !i.plan || i.plan.state === 'agreed'; }
+  var MON = { Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5, Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11 };
+  function overdue(a) { var m = /^(\d+) (\w{3})/.exec(a.due || ''); return a.st !== 'done' && !!m && MON[m[2]] != null && new Date(2026, MON[m[2]], +m[1]) < new Date(2026, 8, 26); }
+  function actBadge(a) {
+    if (a.st === 'done') return '<span class="badge success"><i></i>Done</span>';
+    if (overdue(a)) return '<span class="badge critical"><i></i>Overdue</span>';
+    if (a.st === 'risk') return '<span class="badge warning"><i></i>At risk</span>';
+    return '<span class="tlabel">' + (a.st === 'track' ? 'On track' : 'Not started') + '</span>';
+  }
+  // An insight moves to In progress once it has an owner and an agreed plan
+  function autoProgress(i) { if (i.owner && i.status === 'new' && planAgreed(i)) { i.status = 'working'; i.updated = 0; } }
+  function planDone(i) { return i.plan ? i.plan.actions.filter(function (a) { return a.st === 'done'; }).length : 0; }
+  function planSummary(i) {
+    if (!i.plan) return '';
+    if (i.plan.state === 'proposed') return 'Plan to agree';
+    var n = i.plan.actions.length, d = planDone(i), r = i.plan.actions.filter(function (a) { return a.st === 'risk'; }).length;
+    return d === n ? 'All actions done' : d + ' of ' + n + ' actions done' + (r ? ' \u00b7 ' + r + ' at risk' : '');
+  }
+  function planHTML(i, cls) {
+    var pl = i.plan; if (!pl) return '';
+    var prop = pl.state === 'proposed', people = managersInView(); if (i.owner && people.indexOf(i.owner) < 0) people.unshift(i.owner);
+    var who = function (a) { return a.who ? '<span class="av' + (a.who === YOU ? ' me' : '') + '">' + initials(a.who) + '</span>' + esc(a.who) : '<span class="pa-none">No one yet</span>'; };
+    return '<section class="' + cls + ' plan' + (prop ? ' prop' : '') + '"><div class="plan-head"><span class="label">Plan</span><span class="plan-state">' + (prop ? 'Proposed by Prism \u00b7 not agreed yet' : esc(pl.agreed)) + '</span></div>' +
+      '<ol class="plan-acts">' + pl.actions.map(function (a, k) {
+        var st = PA_ST.filter(function (x) { return x[0] === a.st; })[0];
+        return '<li class="pa st-' + a.st + '"><div class="pa-main"><span class="pa-t">' + esc(a.t) + '</span><span class="pa-meta">' + who(a) + '<span>by ' + esc(a.due) + '</span></span></div>' +
+          (prop ? '<button type="button" class="btn sm" data-pa-remove="' + i.id + ':' + k + '" aria-label="Remove this action">Remove</button>'
+                : '<label class="pa-ci"><span class="sr">How\u2019s it going?</span><select class="select" data-pa="' + i.id + ':' + k + '">' + PA_ST.map(function (x) { return '<option value="' + x[0] + '"' + (x[0] === a.st ? ' selected' : '') + '>' + x[1] + '</option>'; }).join('') + '</select></label>') + '</li>';
+      }).join('') + '</ol>' +
+      (prop ? '<div class="pa-add"><input type="text" class="w-note" id="pa-t-' + i.id + '" placeholder="Add an action: what will be done"><select class="select" id="pa-w-' + i.id + '"><option value="">Who</option>' + people.map(function (o) { return '<option>' + esc(o) + '</option>'; }).join('') + '</select><input type="text" class="w-note pa-due" id="pa-d-' + i.id + '" placeholder="By when"><button type="button" class="btn" data-pa-add="' + i.id + '">Add</button></div>' : '') +
+      '<p class="plan-exp"><span class="label">Prism listens for</span>' + esc(pl.expect) + '</p>' +
+      (prop ? '<div class="plan-foot"><p class="muted-p">' + (ST.view === 'meeting' && MT ? 'Agree it here and the actions go into this review\u2019s summary.' : 'Plans are agreed together in the Focus review. Agree it now if it can\u2019t wait.') + '</p><button type="button" class="btn brand" data-pa-agree="' + i.id + '"' + (pl.actions.length ? '' : ' disabled') + '>Agree plan</button></div>' : '<p class="muted-p">' + esc(planSummary(i)) + '.</p>') +
+    '</section>';
+  }
+  document.addEventListener('click', function (e) {
+    var ag = e.target.closest('[data-pa-agree]');
+    if (ag) { var i = insightById(ag.getAttribute('data-pa-agree')), inReview = ST.view === 'meeting' && MT; i.plan.state = 'agreed'; i.plan.agreed = inReview ? 'Agreed at the Focus review on 26 Sep' : 'Agreed outside a review on 26 Sep \u00b7 shown at the next Focus review';
+      if (inReview) { MT.agreed[i.id] = true; rerenderFor(i.id); toast('Plan agreed. It moves to In progress when you save this insight.'); return; } logEvent(i, 'Plan agreed', i.plan.actions.length + (i.plan.actions.length === 1 ? ' action' : ' actions') + '. Prism is listening for: ' + i.plan.expect); autoProgress(i); toast(i.owner ? 'Plan agreed. The insight is now in progress.' : 'Plan agreed. Give it an owner to start.'); rerenderFor(i.id); return; }
+    var rm = e.target.closest('[data-pa-remove]');
+    if (rm) { var pr = rm.getAttribute('data-pa-remove').split(':'), ri = insightById(pr[0]); ri.plan.actions.splice(+pr[1], 1); rerenderFor(ri.id); return; }
+    var ad = e.target.closest('[data-pa-add]');
+    if (ad) {
+      var id = ad.getAttribute('data-pa-add'), ai = insightById(id), t = $('pa-t-' + id).value.trim();
+      if (!t) { $('pa-t-' + id).focus(); return; }
+      ai.plan.actions.push(A(t, $('pa-w-' + id).value, $('pa-d-' + id).value.trim() || 'no date')); rerenderFor(id);
+    }
+  });
+  document.addEventListener('change', function (e) {
+    var ref = e.target.getAttribute && e.target.getAttribute('data-pa'); if (!ref) return;
+    var pr = ref.split(':'), i = insightById(pr[0]), a = i.plan.actions[+pr[1]], lbl = PA_ST.filter(function (x) { return x[0] === e.target.value; })[0][1];
+    a.st = e.target.value; i.updated = 0; logEvent(i, 'Action ' + lbl.toLowerCase(), a.t, ST.view === 'meeting' && MT ? 'Focus review' : null);
+    if (ST.view === 'meeting' && MT) { MT.checks[i.id] = MT.checks[i.id] || {}; MT.checks[i.id][pr[1]] = lbl; }
+    toast(planDone(i) === i.plan.actions.length ? 'All actions done. Prism will watch for the change it expects before suggesting you close it.' : 'Checked in: ' + lbl);
+    rerenderFor(i.id);
+  });
   (function () {
     var l = insightById('load'), note = 'Replacing rigging gear across both sites needs budget I don’t hold.';
     l.esc = { from: l.level, to: parentLevel(l.level), reason: ESC_REASONS[0], note: note, by: 'Priya Nair', when: '25 Sep' };
@@ -1473,10 +1645,11 @@ button.ind-btn:hover .ind-name { text-decoration: underline; text-underline-offs
             '</div>';
           }).join('') + '</div></section>' +
         '<section class="sheet-sec"><span class="label">How Prism read it</span><dl class="kv">' + i.read.map(function (r) {
-          var fk = r[0] === 'Factor' ? factorByName(r[1]) : null, fx = fk && INS_FACTOR[i.id]; return '<div><dt>' + esc(r[0]) + '</dt><dd class="' + (r[2] ? 't-' + r[2] : '') + '">' + (fk ? '<a class="map-link" href="#map/' + fk + '">' + esc(r[1]) + '</a>' + (fx ? ' \u00b7 ' + esc(FACTOR[fx[0]].inds[fx[1]]) : '') : esc(r[1])) + '</dd></div>';
+          var fk = r[0] === 'Factor' ? factorByName(r[1]) : null, fx = fk && INS_FACTOR[i.id]; return '<div><dt>' + esc(r[0]) + '</dt><dd class="' + (r[2] ? 't-' + r[2] : '') + '">' + (fk ? factorBtn(fk) + (fx ? ' \u00b7 ' + esc(FACTOR[fx[0]].inds[fx[1]]) : '') : esc(r[1])) + '</dd></div>';
         }).join('') + '</dl></section>' +
         (i.latest ? '<section class="sheet-sec"><span class="label">Latest update · ' + i.updated + (i.updated === 1 ? ' day' : ' days') + ' ago' + (i.owner ? ' · ' + esc(i.owner) : '') + '</span><p class="update">' + (i.owner ? '<span class="av">' + initials(i.owner) + '</span>' : '') + '<span>' + esc(i.latest) + '</span></p></section>' : '') +
-        '<section class="sheet-sec"><span class="label">Suggested next step</span><p class="next">' + esc(i.next) + '</p></section>' +
+        (INS_FACTOR[i.id] ? '<section class="sheet-sec mc"><span class="label">On the Forge Works Map</span>' + mapBody(i) + '</section>' : '') +
+        '<section class="sheet-sec"><span class="label">Suggested next step</span><p class="next">' + esc(i.next) + '</p></section>' + planHTML(i, 'sheet-sec') +
       '</div>' +
       '<div class="sheet-foot">' +
         '<span class="fld"><label for="s-owner">Owner</label><select class="select" id="s-owner"><option value="">No owner</option>' + ow.map(function (o) { return '<option' + (o === i.owner ? ' selected' : '') + '>' + esc(o) + '</option>'; }).join('') + '</select></span>' +
@@ -1497,7 +1670,8 @@ button.ind-btn:hover .ind-name { text-decoration: underline; text-underline-offs
   });
   $('sheet').addEventListener('change', function (e) {
     var i = sheetInsight(); if (!i) return;
-    if (e.target.id === 's-owner') { i.owner = e.target.value; logEvent(i, i.owner ? 'Assigned to ' + i.owner : 'Owner removed'); if (i.owner && i.status === 'new') { i.status = 'working'; i.updated = 0; } toast(i.owner ? 'Assigned to ' + i.owner : 'Owner removed'); }
+    if (e.target.id === 's-owner') { i.owner = e.target.value; logEvent(i, i.owner ? 'Assigned to ' + i.owner : 'Owner removed'); autoProgress(i); toast(i.owner ? 'Assigned to ' + i.owner : 'Owner removed'); }
+    else if (e.target.id === 's-status' && e.target.value === 'working' && !planAgreed(i)) { toast('Agree the plan first, here or at the next Focus review.'); }
     else if (e.target.id === 's-status') { i.status = e.target.value; logEvent(i, 'Status: ' + ({ new: 'New', working: 'In progress', resolved: 'Ready to close' })[i.status]); if (i.status === 'working' && i.updated == null) i.updated = 0; }
     var top = $('sheet').querySelector('.sheet-body').scrollTop; openSheet(i.id); $('sheet').querySelector('.sheet-body').scrollTop = top; render();
   });
@@ -1798,7 +1972,7 @@ button.ind-btn:hover .ind-name { text-decoration: underline; text-underline-offs
   }
   function agendaReason(i) {
     if (i.esc && i.esc.to === scopeLevel()) return 'Escalated to this level';
-    if (i.status === 'new') return 'Needs an owner';
+    if (i.status === 'new') return i.owner ? 'Plan to agree' : 'Needs an owner';
     if (stalled(i)) return 'Stalled';
     if (i.trend === 'worse') return 'Worsening';
     if (i.status === 'resolved') return 'Ready to close';
@@ -1809,7 +1983,7 @@ button.ind-btn:hover .ind-name { text-decoration: underline; text-underline-offs
     var last = lastMeeting();
     var att = {};
     managersInView().forEach(function (m) { att[m] = !last || last.attendees.indexOf(m) > -1 || m === 'You'; });
-    MT = { step: 1, attendees: att, idx: 0, log: {}, notes: '', items: [] };
+    MT = { step: 1, attendees: att, idx: 0, log: {}, notes: '', items: [], agreed: {}, checks: {} };
     go('meeting');
   }
 
@@ -1845,7 +2019,7 @@ button.ind-btn:hover .ind-name { text-decoration: underline; text-underline-offs
           }).join('') + '</ul>' +
         '</section><section class="card meet-card">' +
           '<h2>What Prism will prepare</h2>' +
-          '<ul class="plain"><li><b>State of safety</b> across ' + esc(scopeLabel()) + ' right now.</li><li><b>Since last time</b>: what’s new, stalled, worse, better or ready to close ' + (last ? 'since ' + esc(last.short) : 'over the last four weeks') + '.</li><li><b>As discussed</b>: what was agreed last time, and whether it happened.</li></ul>' +
+          '<ul class="plain"><li><b>State of safety</b> across ' + esc(scopeLabel()) + ' right now.</li><li><b>On the Forge Works Map</b>: which factors moved over the last 90 days, and where the clearest gap is.</li><li><b>Since last time</b>: what’s new, stalled, worse, better or ready to close ' + (last ? 'since ' + esc(last.short) : 'over the last four weeks') + '.</li><li><b>Actions</b>: a check-in on every action agreed last time, and any plans agreed since.</li></ul>' +
           '<p class="muted-p">' + (last ? 'Last review: ' + esc(last.date) + ' with ' + esc(join(last.attendees)) + '.' : 'There’s no earlier Focus review for this purview.') + '</p>' +
           '<div class="meet-actions"><button type="button" class="btn brand" id="gen-report">Prepare the report</button></div>' +
         '</section></div>';
@@ -1876,25 +2050,22 @@ button.ind-btn:hover .ind-name { text-decoration: underline; text-underline-offs
             word(hold.length) + (hold.length === 1 ? ' is' : ' are') + ' holding. ' +
             'There ' + (list.length === 1 ? 'is one open insight' : 'are ' + lw(list.length) + ' open insights') + ', ' + lw(list.filter(function (i) { return i.sev === 'critical'; }).length) + ' of them critical.' +
           '</p>' + (failing.length ? '<p class="rnote"><span class="badge critical"><i></i>' + esc(failing[0].name) + ' failing</span> ' + esc(failing[0].impact) + '</p>' : '') + '</section>' +
-          '<section class="card rsec"><span class="label">2 · Since last time' + (last ? ' · ' + esc(last.short) : '') + '</span>' +
+          reportMap(list) +
+          '<section class="card rsec"><span class="label">3 · Insights since last time' + (last ? ' · ' + esc(last.short) : '') + '</span>' +
             '<div class="rcols">' +
               '<div><h3><span class="badge info"><i></i>New</span></h3>' + lines(fresh, 'info', function (i) { return 'No owner yet · ' + esc(join(i.sites.map(function (s) { return SITE[s].name; }))); }) + '</div>' +
               '<div><h3><span class="badge critical"><i></i>Worsening</span></h3>' + lines(worse, 'critical', function (i) { return 'With ' + esc(i.owner); }) + '</div>' +
               '<div><h3><span class="badge warning"><i></i>Stalled</span></h3>' + lines(stuck, 'warning', function (i) { return 'No update in ' + i.updated + ' days · ' + esc(i.owner); }) + '</div>' +
               '<div><h3><span class="badge success"><i></i>Improving or done</span></h3>' + lines(better.concat(ready), 'success', function (i) { return i.status === 'resolved' ? 'Ready to close' : 'Improving · ' + esc(i.owner); }) + '</div>' +
             '</div></section>' +
-          '<section class="card rsec"><span class="label">3 · As discussed' + (last ? ' on ' + esc(last.short) : '') + '</span>' +
-            (last ? '<ul class="agreed">' + last.decisions.map(function (d) {
-              return '<li><span class="av">' + initials(d.who) + '</span><div><p class="agreed-t">' + esc(d.who) + ': ' + esc(d.text) + '</p><p class="agreed-o t-' + d.outcome[0] + '">' + esc(d.outcome[1]) + '</p></div></li>';
-            }).join('') + '</ul>' : '<p class="muted-p">Nothing on record. This is the first Focus review for ' + esc(scopeLabel()) + '.</p>') +
-          '</section>' +
+          reportActions(list, last) +
           (function () {
             var sl = scopeLevel(), open = function (i) { return !i.closed && !i.dismissed; };
             var incoming = INSIGHTS.filter(function (i) { return open(i) && i.esc && i.esc.to === sl; });
             var held = INSIGHTS.filter(function (i) { return open(i) && i.level === sl && i.level !== i.home; });
             var outgoing = INSIGHTS.filter(function (i) { return open(i) && i.esc && i.esc.from === sl; });
             var li = function (i, text) { return '<li><button type="button" class="rlink" data-open="' + i.id + '">' + esc(i.title) + '</button><span>' + esc(text) + '</span></li>'; };
-            return '<section class="card rsec"><span class="label">4 · Escalations</span><div class="rcols">' +
+            return '<section class="card rsec"><span class="label">5 · Escalations</span><div class="rcols">' +
               '<div><h3><span class="badge info"><i></i>Escalated to this level</span></h3>' + (incoming.length ? '<ul class="rlist">' + incoming.map(function (i) { return li(i, 'From ' + nameOf(i.esc.by) + ' · ' + i.esc.reason); }).join('') + '</ul>' : '<p class="muted-p">None.</p>') + '</div>' +
               '<div><h3><span class="tlabel">Held at this level</span></h3>' + (held.length ? '<ul class="rlist">' + held.map(function (i) { return li(i, 'Accepted from ' + levelName(i.home)); }).join('') + '</ul>' : '<p class="muted-p">None.</p>') + '</div>' +
               '<div><h3><span class="tlabel">Passed up</span></h3>' + (outgoing.length ? '<ul class="rlist">' + outgoing.map(function (i) { return li(i, 'Waiting for ' + levelOwner(i.esc.to)); }).join('') + '</ul>' : '<p class="muted-p">None.</p>') + '</div>' +
@@ -1911,7 +2082,8 @@ button.ind-btn:hover .ind-name { text-decoration: underline; text-underline-offs
       var ids = MT.items, cur = INSIGHTS.filter(function (x) { return x.id === ids[MT.idx]; })[0];
       if (!cur) { MT.step = 4; return renderMeeting(); }
       var ow = managersInView(); if (cur.owner && ow.indexOf(cur.owner) < 0) ow.unshift(cur.owner);
-      var entry = MT.log[cur.id] || {};
+      var entry = MT.log[cur.id] || {}, dr = MT.draft && MT.draft.id === cur.id ? MT.draft : null;
+      var wOwner = dr ? dr.owner : cur.owner, wStatus = dr ? dr.status : cur.status, wNote = dr ? dr.note : (entry.note || '');
       $('view').innerHTML = meetingTop('Walk-through', head + ' · ' + (MT.idx + 1) + ' of ' + ids.length) +
         '<div class="walk"><ol class="walk-list">' + ids.map(function (id, k) {
           var it = INSIGHTS.filter(function (x) { return x.id === id; })[0], lg = MT.log[id];
@@ -1928,11 +2100,13 @@ button.ind-btn:hover .ind-name { text-decoration: underline; text-underline-offs
             return '<div class="walk-ev"><span class="label">' + (cur.status === 'new' ? 'Check the evidence before assigning' : 'Evidence') + '</span>' + ev.slice(0, 3).map(function (r) { return recRow(r, true); }).join('') + '</div>';
           })() +
           (cur.latest ? '<p class="walk-latest"><span class="label">Latest update</span>' + esc(cur.latest) + '</p>' : '') +
+          (INS_FACTOR[cur.id] ? '<div class="walk-map mc"><span class="label">On the Forge Works Map</span>' + mapBody(cur) + '</div>' : '') +
           '<p class="walk-next"><span class="label">Suggested</span>' + esc(cur.next) + '</p>' +
+          (cur.plan ? planHTML(cur, 'walk-plan' + (MT.agreed[cur.id] ? ' just' : '')) : '') +
           (ST.dismissing === cur.id ? dismissForm(cur.id, 'walk') : (          '<div class="walk-form">' +
-            '<span class="fld"><label for="w-owner">Owner</label><select class="select" id="w-owner"><option value="">No owner</option>' + ow.map(function (o) { return '<option' + (o === cur.owner ? ' selected' : '') + '>' + esc(o) + '</option>'; }).join('') + '</select></span>' +
-            '<span class="fld"><label for="w-status">Status</label><select class="select" id="w-status">' + [['new', 'New'], ['working', 'In progress'], ['resolved', 'Ready to close'], ['closed', 'Close it']].map(function (o) { return '<option value="' + o[0] + '"' + (o[0] === cur.status ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select></span>' +
-            '<label class="w-note-l" for="w-note">Decision or note</label><textarea id="w-note" class="w-note" rows="3" placeholder="What was agreed, by whom, by when">' + esc(entry.note || '') + '</textarea>' +
+            '<span class="fld"><label for="w-owner">Owner</label><select class="select" id="w-owner"><option value="">No owner</option>' + ow.map(function (o) { return '<option' + (o === wOwner ? ' selected' : '') + '>' + esc(o) + '</option>'; }).join('') + '</select></span>' +
+            '<span class="fld"><label for="w-status">Status</label><select class="select" id="w-status">' + [['new', 'New'], ['working', 'In progress'], ['resolved', 'Ready to close'], ['closed', 'Close it']].map(function (o) { return '<option value="' + o[0] + '"' + (o[0] === wStatus ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select></span>' +
+            '<label class="w-note-l" for="w-note">Note (optional)</label><textarea id="w-note" class="w-note" rows="2" placeholder="Anything the plan doesn\u2019t capture">' + esc(wNote) + '</textarea>' +
           '</div>' +
           '<div class="meet-actions end"><button type="button" class="btn" data-walk="back"' + (MT.idx ? '' : ' disabled') + '>Back</button><button type="button" class="btn" data-walk="skip">Skip</button><button type="button" class="btn brand" data-walk="save">' + (MT.idx === ids.length - 1 ? 'Save and finish' : 'Save and next') + '</button></div>' +
           '<div class="walk-dismiss"><button type="button" class="btn" data-dopen="' + cur.id + '">Dismiss\u2026</button></div>')) +
@@ -1948,24 +2122,86 @@ button.ind-btn:hover .ind-name { text-decoration: underline; text-underline-offs
       '<div class="meet-grid"><section class="card meet-card"><h2>Decisions</h2>' +
         (done.length ? '<ul class="agreed">' + done.map(function (id) {
           var it = INSIGHTS.filter(function (x) { return x.id === id; })[0], lg = MT.log[id];
-          return '<li><span class="av' + (it.owner === YOU ? ' me' : '') + '">' + (it.owner ? initials(it.owner) : '—') + '</span><div><p class="agreed-t">' + esc(it.title) + '</p><p class="agreed-o">' + esc(lg.changes.join(' · ') || 'Reviewed, no change') + '</p>' + (lg.note ? '<p class="agreed-note">“' + esc(lg.note) + '”</p>' : '') + '</div></li>';
+          return '<li><span class="av' + (it.owner === YOU ? ' me' : '') + '">' + (it.owner ? initials(it.owner) : '—') + '</span><div><p class="agreed-t">' + esc(it.title) + '</p><p class="agreed-o">' + esc(lg.changes.join(' · ') || (it.plan && it.plan.state === 'proposed' ? 'Reviewed. Plan still to agree' : 'Reviewed, no change')) + '</p>' + (lg.note ? '<p class="agreed-note">“' + esc(lg.note) + '”</p>' : '') + '</div></li>';
         }).join('') + '</ul>' : '<p class="muted-p">No insights were updated.</p>') +
+        (function () {
+          var per = {};
+          Object.keys(MT.agreed).forEach(function (id) { var it = insightById(id); it.plan.actions.forEach(function (a) { var w = a.who || 'No one yet'; (per[w] = per[w] || []).push({ a: a, it: it }); }); });
+          var ws = Object.keys(per); if (!ws.length) return '<p class="w-map"><span class="label">New actions</span>No plans were agreed in this review.</p>';
+          return '<div class="w-acts"><span class="label">New actions, by person</span>' + ws.map(function (w) {
+            return '<div class="w-p"><span class="person"><span class="av' + (w === YOU ? ' me' : '') + '">' + (w === 'No one yet' ? '?' : initials(w)) + '</span>' + esc(w) + '</span><ul>' + per[w].map(function (x) { return '<li>' + esc(x.a.t) + ' <span>by ' + esc(x.a.due) + ' \u00b7 ' + esc(x.it.title) + '</span></li>'; }).join('') + '</ul></div>';
+          }).join('') + '</div>';
+        })() +
+        (function () {
+          var by = {}; done.forEach(function (id) { var fx = INS_FACTOR[id]; if (!fx) return; var key = FACTOR[fx[0]].name + ' \u00b7 ' + FACTOR[fx[0]].inds[fx[1]].toLowerCase(); by[key] = (by[key] || 0) + 1; });
+          var keys = Object.keys(by); return keys.length ? '<p class="w-map"><span class="label">On the Forge Works Map, these decisions work on</span>' + keys.map(function (k) { return esc(k) + (by[k] > 1 ? ' (' + by[k] + ')' : ''); }).join('<br>') + '</p>' : '';
+        })() +
         (skipped.length ? '<p class="muted-p">Not covered: ' + esc(join(skipped.map(function (id) { return INSIGHTS.filter(function (x) { return x.id === id; })[0].title; }))) + '.</p>' : '') +
       '</section><section class="card meet-card"><h2>Attended</h2><div class="people">' + whoLine(att) + '</div>' +
         '<label class="w-note-l" for="m-notes">Review notes</label><textarea id="m-notes" class="w-note" rows="4" placeholder="Anything else worth recording">' + esc(MT.notes) + '</textarea>' +
         '<div class="meet-actions"><button type="button" class="btn" id="copy-summary">Copy summary</button><button type="button" class="btn brand" id="save-meeting">Save Focus review</button></div>' +
-      '</section></div>';
+      '</section></div>' +
+      (function () {
+        var c = leadCheck(); if (!c) return '';
+        var f = FACTOR[c.f], row = f.ind[c.k];
+        return '<section class="card meet-card lc"><h2>Leadership check</h2><p class="muted-p">Records can\u2019t show <b>' + esc(row[0].toLowerCase()) + '</b> (' + esc(f.name) + '). Which sounds most like ' + esc(scopeLabel()) + ' today? Prism adds the answer to the Map as management input.</p>' +
+          '<div class="lc-opts">' + [0, 1, 2].map(function (lv) { return '<label class="lc-opt"><input type="radio" name="lc" value="' + lv + '" data-lcf="' + c.f + '" data-lck="' + c.k + '"' + (MT.check && MT.check.lvl === lv ? ' checked' : '') + '><span><b>' + LEVELS[lv] + '</b>' + esc(cueAt(c.f, c.k, lv)) + '</span></label>'; }).join('') + '</div></section>';
+      })();
   }
 
+  // Report section: how every agreed action is going, grouped by insight
+  function reportActions(list, last) {
+    var withPlan = list.filter(function (i) { return i.plan && i.plan.state === 'agreed'; });
+    var fromLast = withPlan.filter(function (i) { return last && i.plan.agreed.indexOf(last.short) > -1; });
+    var outside = withPlan.filter(function (i) { return i.plan.agreed.indexOf('outside') > -1; });
+    var acts = [].concat.apply([], fromLast.concat(outside).map(function (i) { return i.plan.actions; }));
+    var n = function (f) { return acts.filter(f).length; };
+    var group = function (i) {
+      return '<li class="ra-i"><button type="button" class="rlink" data-open="' + i.id + '">' + esc(i.title) + '</button><ul class="ra-acts">' + i.plan.actions.map(function (a) {
+        return '<li>' + actBadge(a) + '<span class="ra-t">' + esc(a.t) + '</span><span class="ra-m">' + (a.who ? esc(a.who) : 'No one yet') + ' \u00b7 by ' + esc(a.due) + '</span></li>';
+      }).join('') + '</ul></li>';
+    };
+    return '<section class="card rsec"><span class="label">4 · Actions' + (last ? ' agreed on ' + esc(last.short) : '') + '</span>' +
+      (acts.length ? '<p class="rlead"><b>' + n(function (a) { return a.st === 'done'; }) + ' of ' + acts.length + ' actions done.</b> ' +
+        (n(overdue) ? word(n(overdue)) + ' overdue. ' : '') + (n(function (a) { return a.st === 'risk' && !overdue(a); }) ? word(n(function (a) { return a.st === 'risk' && !overdue(a); })) + ' at risk. ' : '') + '</p>' : '') +
+      (fromLast.length ? '<ul class="rlist ra">' + fromLast.map(group).join('') + '</ul>' : '<p class="muted-p">' + (last ? 'No plans were agreed on ' + esc(last.short) + '.' : 'Nothing on record. This is the first Focus review for ' + esc(scopeLabel()) + '.') + '</p>') +
+      (outside.length ? '<h3 class="ra-h">Agreed outside a review since then</h3><ul class="rlist ra">' + outside.map(group).join('') + '</ul>' : '') +
+      '</section>';
+  }
+  // Report section: the Map over the last 90 days, with the insights that give evidence for each move
+  function reportMap(list) {
+    var g = mapGap(regionsInScope()), sc = g.sc;
+    var ev = function (key) { var ii = list.filter(function (i) { return INS_FACTOR[i.id] && INS_FACTOR[i.id][0] === key; }); return ii.length ? '<span class="rl-ev"><span>Evidence</span>' + ii.map(function (i) { return '<button type="button" class="rlink" data-open="' + i.id + '">' + esc(i.title) + '</button>'; }).join('') + '</span>' : ''; };
+    var li = function (f) { var x = sc[f[0]], ch = lvlLabel(x.was) !== lvlLabel(x.v); return '<li><span class="rl-f">' + factorBtn(f[0]) + '</span><span>' + (ch ? 'From ' + esc(lvlLabel(x.was)) + ' to ' + esc(lvlLabel(x.v)) : 'Still ' + esc(lvlLabel(x.v)) + (x.t === 'worse' ? ', slipping' : ', rising')) + '</span>' + ev(f[0]) + '</li>'; };
+    var moved = function (t) { return FACTORS.filter(function (f) { return sc[f[0]].v != null && sc[f[0]].t === t; }); };
+    var worse = moved('worse'), better = moved('better');
+    var col = function (arr, badge, label) { return '<div><h3><span class="badge ' + badge + '"><i></i>' + label + '</span></h3>' + (arr.length ? '<ul class="rlist">' + arr.map(li).join('') + '</ul>' : '<p class="muted-p">None.</p>') + '</div>'; };
+    return '<section class="card rsec"><span class="label">2 · On the Forge Works Map · last 90 days</span>' +
+      '<p class="rlead">' + esc(scopeLabel()) + ' operates mostly at <b>' + g.mostly + '</b>.' + (g.gap ? ' The clearest gap is <b>' + esc(FACTOR[g.gap].name.toLowerCase()) + '</b>, held back by ' + esc(FACTOR[g.gap].inds[sc[g.gap].weakest].toLowerCase()) + '.' : '') + '</p>' +
+      '<div class="rcols">' + col(worse, 'critical', 'Worsening') + col(better, 'success', 'Improving') + '</div></section>';
+  }
+  // Wrap-up: one indicator records can't show, answered by the people in the room
+  function leadCheck() {
+    var g = mapGap(regionsInScope()), order = g.gap ? [g.gap] : [];
+    FACTORS.forEach(function (f) { if (order.indexOf(f[0]) < 0) order.push(f[0]); });
+    for (var a = 0; a < order.length; a++) {
+      var f = FACTOR[order[a]];
+      for (var k = 0; k < f.ind.length; k++) if (mgmtOnly(order[a], k) && [1, 2, 3].every(function (c) { return f.ind[k][c] != null; })) return { f: order[a], k: k };
+    }
+    return null;
+  }
   function saveWalkItem(skip) {
     var id = MT.items[MT.idx], cur = INSIGHTS.filter(function (x) { return x.id === id; })[0];
     var changes = [];
     if (!skip) {
       var owner = $('w-owner').value, status = $('w-status').value, note = $('w-note').value.trim();
       if (owner !== cur.owner) { changes.push(owner ? 'Owner: ' + owner : 'Owner removed'); cur.owner = owner; }
+      if (MT.agreed[id]) changes.push('Plan agreed: ' + cur.plan.actions.length + (cur.plan.actions.length === 1 ? ' action' : ' actions'));
+      if (MT.checks[id]) Object.keys(MT.checks[id]).forEach(function (k) { changes.push(cur.plan.actions[k].t + ': ' + MT.checks[id][k]); });
+      if (status === 'working' && !planAgreed(cur)) { status = cur.status; changes.push('Plan still to agree'); }
       if (status === 'closed') { changes.push('Closed'); cur.closed = true; }
       else if (status !== cur.status) { changes.push('Status: ' + ({ new: 'New', working: 'In progress', resolved: 'Ready to close' })[status]); cur.status = status; }
-      if (cur.owner && cur.status === 'new') { cur.status = 'working'; changes.push('Status: In progress'); }
+      if (cur.owner && cur.status === 'new' && planAgreed(cur)) { cur.status = 'working'; changes.push('Status: In progress'); }
       if (changes.length) cur.updated = 0;
       MT.log[id] = { done: true, changes: changes, note: note };
       if (changes.length || note) logEvent(cur, 'Focus review', changes.join(' \u00b7 ') + (note ? (changes.length ? '. ' : '') + note : ''), 'Focus review');
@@ -1973,6 +2209,7 @@ button.ind-btn:hover .ind-name { text-decoration: underline; text-underline-offs
     } else {
       MT.log[id] = { done: true, skipped: true, changes: [], note: '' };
     }
+    MT.draft = null;
     if (MT.idx < MT.items.length - 1) MT.idx++; else MT.step = 4;
     renderMeeting(); window.scrollTo(0, 0);
   }
@@ -1982,8 +2219,13 @@ button.ind-btn:hover .ind-name { text-decoration: underline; text-underline-offs
     var done = MT.items.filter(function (id) { return MT.log[id] && MT.log[id].done && !MT.log[id].skipped; });
     return 'Focus review · ' + scopeLabel() + ' · Friday 26 September\nAttended: ' + join(att) + '\n\n' +
       done.map(function (id) { var it = INSIGHTS.filter(function (x) { return x.id === id; })[0], lg = MT.log[id]; return '• ' + it.title + ': ' + (lg.changes.join(', ') || 'reviewed, no change') + (lg.note ? '. ' + lg.note : ''); }).join('\n') +
-      (MT.notes ? '\n\nNotes: ' + MT.notes : '') + '\n\nPrepared with Hiviz. Story written by Prism.';
+      (Object.keys(MT.agreed).length ? '\n\nNew actions:\n' + Object.keys(MT.agreed).map(function (id) { var it = insightById(id); return it.plan.actions.map(function (a) { return '• ' + (a.who || 'No one yet') + ': ' + a.t + ' (by ' + a.due + ')'; }).join('\n'); }).join('\n') : '') +
+      (MT.notes ? '\n\nNotes: ' + MT.notes : '') +
+      (function () { var lc = document.querySelector('input[name="lc"]:checked'); if (!lc) return ''; var f = FACTOR[lc.getAttribute('data-lcf')]; return '\n\nLeadership check: ' + f.ind[+lc.getAttribute('data-lck')][0] + ' (' + f.name + '): ' + LEVELS[+lc.value]; })() +
+      '\n\nPrepared with Hiviz. Story written by Prism.';
   }
+  var LEAD_CHECKS = [];
+  function logDecisionCheck(f, k, lv) { LEAD_CHECKS.unshift({ f: f, k: k, lvl: lv, scope: scopeLabel(), date: '26 Sep' }); }
   function reportText() {
     return 'State of safety · ' + scopeLabel() + ' · Friday 26 September\n\n' + $('view').querySelector('.report').innerText + '\n\nPrepared by Hiviz. Story written by Prism.';
   }
@@ -2029,13 +2271,19 @@ button.ind-btn:hover .ind-name { text-decoration: underline; text-underline-offs
     if (e.target.closest('#copy-summary')) { MT.notes = $('m-notes').value; copy(summaryText(), 'Summary copied'); return; }
     if (e.target.closest('#save-meeting')) {
       MT.notes = $('m-notes').value;
+      var lc = document.querySelector('input[name="lc"]:checked'), lcDone = false;
+      if (lc) {
+        var lf = lc.getAttribute('data-lcf'), lk = +lc.getAttribute('data-lck'), lv = +lc.value;
+        regionsInScope().forEach(function (r) { SCORE[r][lf][lk] = { m: lv + 1, n: 2, t: 'steady', d90: 0, d45: 0, rv: '26 Sep' }; });
+        logDecisionCheck(lf, lk, lv); lcDone = true;
+      }
       var att = Object.keys(MT.attendees).filter(function (k) { return MT.attendees[k]; });
       var decisions = MT.items.filter(function (id) { return MT.log[id] && MT.log[id].done && !MT.log[id].skipped; }).map(function (id) {
         var it = INSIGHTS.filter(function (x) { return x.id === id; })[0], lg = MT.log[id];
-        return { ins: id, who: it.owner || 'You', text: lg.note || lg.changes.join(', ') || 'Reviewed, no change', outcome: ['', 'Agreed today'] };
+        return { ins: id, who: it.owner || 'You', text: lg.changes.join(', ') || lg.note || 'Reviewed, no change', outcome: ['', 'Agreed today'] };
       });
       MEETINGS.unshift({ id: 'm-' + Date.now(), div: ST.div, reg: ST.reg, date: 'Friday 26 September', short: '26 Sep', attendees: att, notes: MT.notes, decisions: decisions });
-      MT = null; go('meetings'); toast('Focus review saved');
+      MT = null; go('meetings'); toast(lcDone ? 'Focus review saved. Leadership check added to the Map.' : 'Focus review saved');
     }
   });
 
@@ -2167,7 +2415,7 @@ button.ind-btn:hover .ind-name { text-decoration: underline; text-underline-offs
   }
   document.addEventListener('change', function (e) {
     var id = e.target.getAttribute && e.target.getAttribute('data-mf-assign'); if (!id || !e.target.value) return;
-    var i = insightById(id); i.owner = e.target.value; if (i.status === 'new') { i.status = 'working'; i.updated = 0; }
+    var i = insightById(id); i.owner = e.target.value; autoProgress(i);
     logEvent(i, 'Assigned to ' + i.owner); ST.mfRes['a-' + i.id] = 'Assigned to ' + i.owner; mfDone('Assigned “' + i.title + '” to ' + i.owner); toast('Assigned to ' + i.owner); mfRerender();
   });
   document.addEventListener('click', function (e) {
@@ -2220,8 +2468,8 @@ button.ind-btn:hover .ind-name { text-decoration: underline; text-underline-offs
       [['What triggers improvement', 'Incidents, non-conformances and regulation', 'Pre-accident investigations of key risks', 'Exploring how normal work happens', 'Ins Mgmt'],
        ['What plans focus on', 'More safety work and administrative requirements', 'Safety work effectiveness and conditions for reliable work', 'Improving the work itself', 'Mgmt'],
        ['Who improvement is aimed at', 'Frontline supervisors and workers', 'Leaders, the safety organisation and the safety system', 'Every strategic decision: growth, people, budgets', 'Mgmt'],
-       ['Where practices come from', 'Practices common across industry', null, 'Targeted, evidence-based and well governed', 'Mgmt'],
-       ['Safety in organisational decisions', null, 'Goals and strategies at all levels', 'All decisions made with a clear view of safety', 'Mgmt']]],
+       ['Where practices come from', 'Practices common across industry', '~Proven programs adopted from peers', 'Targeted, evidence-based and well governed', 'Mgmt'],
+       ['Safety in organisational decisions', '~Considered separately, after the decision is made', 'Goals and strategies at all levels', 'All decisions made with a clear view of safety', 'Mgmt']]],
     ['risk_management', 'guide', 'Risk management', 'What is the quality of risk information generated in the organisation and how is it used?',
       ['Risk assessments', 'Risk information', 'Risk foresight'],
       ['Risk assessments are done because regulation requires them, often documenting decisions already made. Risk information sits in registers and has little influence on decisions.',
@@ -2231,7 +2479,7 @@ button.ind-btn:hover .ind-name { text-decoration: underline; text-underline-offs
        ['How current risk information is', 'Stored in registers and plans', 'Updated in real time as context changes', 'Continuously revised as subtle signals appear', 'Rec'],
        ['Influence on decisions and resources', 'Limited', 'Proactively shapes strategy and resourcing', 'Operations planned and adjusted to respond', 'Ins Mgmt'],
        ['Who knows and shapes the risk picture', 'Held in documents', 'Known to those exposed and to responsible managers', 'Diverse groups, including the frontline, revise it', 'Rec Mgmt'],
-       ['Joining up risk types', null, 'Safety risk joined up with operational and commercial risk', 'One shared model of risk and work', 'Mgmt']]],
+       ['Joining up risk types', '~Safety risk kept in its own register', 'Safety risk joined up with operational and commercial risk', 'One shared model of risk and work', 'Mgmt']]],
     ['safety_organisation', 'guide', 'Safety organisation', 'How capable is your safety organisation and what is the focus of their activities?',
       ['Compliance tasks', 'Risk reduction', 'Building operational capacity'],
       ['Safety professionals are mostly administrative, monitoring compliance, and often left out of important decisions. They teach leaders about compliance and workers about safety processes.',
@@ -2259,17 +2507,17 @@ button.ind-btn:hover .ind-name { text-decoration: underline; text-underline-offs
       [['Managers’ relationship to safety work', 'Delegated to safety professionals', 'Take part: visits, inductions, investigations, audits', 'Minimal safety work; operations run with a safety lens', 'Rec Mgmt'],
        ['Engagement with the frontline', 'Reinforce compliance; needs not understood', 'Field safety leadership; issues found together', 'Work planned and run together with the workforce', 'Rec'],
        ['Accountability and commitment', 'Involved in serious and regulatory incidents', 'Accountable and genuinely committed', 'Safety as a moral responsibility', 'Mgmt'],
-       ['Looking for emerging risk', null, 'Issues identified proactively', 'Actively searching for weak signals', 'Rec Ins'],
-       ['Response to incidents', 'Manage serious incidents', null, 'Response builds trust and learning', 'Ins']]],
+       ['Looking for emerging risk', '~Issues found after something goes wrong', 'Issues identified proactively', 'Actively searching for weak signals', 'Rec Ins'],
+       ['Response to incidents', 'Manage serious incidents', '~Investigate, fix the system and share lessons', 'Response builds trust and learning', 'Ins']]],
     ['resource_allocation', 'enable', 'Resource allocation', 'How are safety needs identified and resources allocated to reduce risk?',
       ['Compliance budget', 'Investment in known issues', 'Investment in operational slack'],
       ['The minimum is spent to comply. Safety spending needs senior approval, efficiency programs dominate, and spare safety resource is seen as a cost.',
        'The organisation invests to fix known risks, with a resourced improvement program and a review process that can fund issues outside the budget cycle.',
        'Significant resources support operations to deliver safely. Spare capacity is designed in, and managers and workers re-plan and re-allocate resources as issues emerge.'],
       [['Purpose of safety investment', 'The minimum needed to comply', 'Fixing known risks and issues', 'Supporting operations to deliver safely', 'Mgmt'],
-       ['View of spare capacity', 'Efficiency first; excess is a cost', null, 'Operational slack designed in', 'Mgmt'],
+       ['View of spare capacity', 'Efficiency first; excess is a cost', '~Spare capacity funded where known risks need it', 'Operational slack designed in', 'Mgmt'],
        ['Who can allocate, and how', 'Safety needs senior approval', 'Investment review outside budget cycles', 'Managers and frontline re-plan and re-allocate', 'Rec Mgmt'],
-       ['Developing people and equipment', null, null, 'Personnel and equipment continually improved', 'Rec Ins']]],
+       ['Developing people and equipment', '~Replaced or retrained when it fails or falls out of compliance', '~Upgraded to fix known risks and gaps', 'Personnel and equipment continually improved', 'Rec Ins']]],
     ['management_systems', 'enable', 'Management systems', 'What is the focus and effectiveness of safety and work management systems?',
       ['Regulatory compliance', 'Specific safety needs of work', 'Processes to support work as done'],
       ['The safety system sits apart from how work is managed, built on regulation and run by safety professionals. Effectiveness is judged by audit, and people are held to account for non-conformance.',
@@ -2288,7 +2536,7 @@ button.ind-btn:hover .ind-name { text-decoration: underline; text-underline-offs
       [['When safety takes priority', 'After an incident or a clear risk to life', 'When there is a clear and present risk', 'On weak signals; targets and schedules reset', 'Rec Ins'],
        ['Stop-work authority', 'Only with a manager’s permission', 'Exercised routinely', 'Stop and adapt to emerging risk, supported', 'Rec'],
        ['How safety and business goals are framed', '“Safety first”; not incompatible', 'Good safety is good business; zero harm', 'Commercial goals can conflict with safety', 'Mgmt'],
-       ['Resolving conflicts before work starts', null, null, 'Identified and resolved before work, transparently', 'Ins Mgmt']]],
+       ['Resolving conflicts before work starts', '~They surface during the work, and production usually wins', '~Known conflicts planned for; others handled as they arise', 'Identified and resolved before work, transparently', 'Ins Mgmt']]],
     ['learning_development', 'enable', 'Learning and development', 'What is the approach to developing capability, operational learning and knowledge management?',
       ['Competency management', 'Benchmarking and best practice', 'Sense-making processes'],
       ['Formal training builds technical skills for each role. Learning is reactive, driven by incidents, audits and drills, and the capacity to change is limited.',
@@ -2297,8 +2545,8 @@ button.ind-btn:hover .ind-name { text-decoration: underline; text-underline-offs
       [['What capability covers', 'Technical skills per role', 'Technical and non-technical skills', 'Active learning: simulation, micro-experiments', 'Mgmt'],
        ['How learning happens', 'Periodic formal training', 'Training, workplace learning and feedback', 'Built into planning, doing and reviewing work', 'Rec Mgmt'],
        ['What operational learning draws on', 'Incidents, audits and drills', 'Visits, control reviews and leading indicators', 'Sense-making of normal work and events', 'Ins Rec'],
-       ['Where practice comes from', null, 'Peer organisations and industry best practice', 'Peer roles and team problem-solving', 'Mgmt'],
-       ['Capacity to absorb change', 'Limited', null, 'Organisation-wide improvement', 'Ins']]],
+       ['Where practice comes from', '~Regulation, standards and the training provider', 'Peer organisations and industry best practice', 'Peer roles and team problem-solving', 'Mgmt'],
+       ['Capacity to absorb change', 'Limited', '~Improvement programs adopted one at a time', 'Organisation-wide improvement', 'Ins']]],
     ['frontline_workers', 'execute', 'Frontline workforce', 'What is the role of frontline workers in contributing to work and safety outcomes?',
       ['Comply with safety processes', 'Active contribution to safety', 'Co-design of work'],
       ['Workers stay competent, follow the rules and run frontline safety processes such as pre-starts and permits. They take part through formal consultation and report hazards.',
@@ -2326,8 +2574,8 @@ button.ind-btn:hover .ind-name { text-decoration: underline; text-underline-offs
       [['Who makes the decision', 'Management, referred to safety for compliance', 'The right level of line management, with safety advice', 'The most appropriate person or team', 'Rec Ins'],
        ['Safety input to work decisions', 'Rarely, unless the impact is clear', 'Sometimes, when there is possible risk', 'Throughout planning and execution', 'Rec'],
        ['Who approves improvement ideas', 'A senior leader', 'An operational manager', 'Local teams, supported by management', 'Mgmt'],
-       ['Basis for safety investment', null, 'Proactive, with a clear risk-based case', 'Predictive, on weak signals', 'Mgmt'],
-       ['How decisions are tested', null, 'Defer to protocol; seek confirming evidence', 'Balance expertise and protocol; seek disconfirming evidence', 'Ins Mgmt']]],
+       ['Basis for safety investment', '~Reactive, after incidents or regulator attention', 'Proactive, with a clear risk-based case', 'Predictive, on weak signals', 'Mgmt'],
+       ['How decisions are tested', '~Decided by rank; rarely challenged', 'Defer to protocol; seek confirming evidence', 'Balance expertise and protocol; seek disconfirming evidence', 'Ins Mgmt']]],
     ['contractor_management', 'execute', 'Contractor management', 'How are contractors engaged and managed?',
       ['Manage by contract', 'Delivery partnerships', 'Client in service role'],
       ['Contractors are pre-qualified by desktop review and bound by contract terms. Assurance is reactive, after incidents, and issues are handled formally under the contract.',
@@ -2346,7 +2594,7 @@ button.ind-btn:hover .ind-name { text-decoration: underline; text-underline-offs
       [['What is measured', 'Lagging and compliance metrics', 'Lagging and leading, including control assurance', 'Operational data from across the business', 'Rec'],
        ['Activity or effectiveness', 'How often safety work is done', 'How effective safety work is', 'Planned versus actual work', 'Rec'],
        ['What “safe” means to managers', 'No negative events', 'Controls assured and a positive climate', 'Never assumed; preoccupied with failure', 'Mgmt'],
-       ['Workers’ experience in the data', null, 'Culture and engagement surveys', 'Experiences and stories alongside the numbers', 'Mgmt'],
+       ['Workers’ experience in the data', '~Not measured, beyond incident reports', 'Culture and engagement surveys', 'Experiences and stories alongside the numbers', 'Mgmt'],
        ['What indicators trigger', 'Trend reporting', 'Insight into current operations and known risks', 'Questions, discovery and a strong response to weak signals', 'Ins']]]
   ];
   var FACTOR = {};
@@ -2356,8 +2604,11 @@ button.ind-btn:hover .ind-name { text-decoration: underline; text-underline-offs
   function mgmtOnly(f, k) { var e = evOf(f, k); return e.indexOf('Rec') < 0 && e.indexOf('Ins') < 0; }
 
   // Which factor and indicator each insight gives evidence for (see fw-map-audit.md section 5)
-  var INS_FACTOR = { hand: ['communications_coordination', 4], fat: ['goal_conflict_tradeoffs', 0], load: ['resource_allocation', 3], pre: ['monitoring_metrics', 1],
+  var INS_FACTOR = { volt: ['contractor_management', 0], hand: ['communications_coordination', 4], fat: ['goal_conflict_tradeoffs', 0], load: ['resource_allocation', 3], pre: ['monitoring_metrics', 1],
     tick: ['monitoring_metrics', 1], spot: ['operational_management', 1], edge: ['contractor_management', 2], house: ['operational_management', 3] };
+  // Other indicators each insight would also move
+  var INS_ALSO = { volt: [['contractor_management', 1]], hand: [['communications_coordination', 0]], fat: [['resource_allocation', 1]], load: [['management_systems', 2]], pre: [['frontline_workers', 0]],
+    tick: [['management_systems', 2]], spot: [['frontline_workers', 2]], edge: [['contractor_management', 1]], house: [['monitoring_metrics', 1]] };
   // Records map to a factor through their insight, or by record type
   var TYPE_FACTOR = { 'Pre-start': ['monitoring_metrics', 1], 'Inspection': ['monitoring_metrics', 1], 'Permit': ['decision_making', 1], 'Isolation permit': ['decision_making', 1],
     'Observation': ['frontline_workers', 3], 'Near miss': ['frontline_workers', 3], 'Hazard': ['frontline_workers', 3], 'Induction': ['contractor_management', 1], 'Incident': ['learning_development', 2], 'Action': ['operational_management', 3] };
@@ -2388,12 +2639,19 @@ button.ind-btn:hover .ind-name { text-decoration: underline; text-underline-offs
   setScore('Southern', 'goal_conflict_tradeoffs', 0, 1.2, 9, 'steady'); setScore('Northern', 'goal_conflict_tradeoffs', 0, 1.3, 5, 'steady');
   setScore('Southern', 'monitoring_metrics', 1, 1, 22, 'worse'); setScore('Northern', 'monitoring_metrics', 1, 1.1, 12, 'worse'); setScore('Coastal', 'monitoring_metrics', 1, 1, 24, 'steady');
   setScore('Northern', 'operational_management', 1, 2.1, 16, 'better'); setScore('Southern', 'operational_management', 3, 1.9, 10, 'better');
-  setScore('Metro', 'contractor_management', 2, 1, 7, 'worse'); setScore('Northern', 'contractor_management', 2, 1.8, 6, 'steady');
+  setScore('Metro', 'contractor_management', 2, 1, 7, 'worse'); setScore('Southern', 'contractor_management', 0, 2.1, 12, 'steady'); setScore('Northern', 'contractor_management', 2, 1.8, 6, 'steady');
 
+  // How far each indicator has moved over 90 and 45 days. Worsening is recent; some improvement is older.
+  REGIONS.forEach(function (r, ri) { FACTORS.forEach(function (f, fi) { SCORE[r.name][f[0]].forEach(function (c, k) {
+    var d = c.t === 'better' ? 0.35 : c.t === 'worse' ? -0.35 : 0;
+    c.d90 = d; c.d45 = c.t === 'worse' ? d : d * [1, 0.5, 0][(ri + fi + k) % 3];
+  }); }); });
+  ST.mapPeriod = 90; // maturity moves slowly: one comparison window, used everywhere
+  function trendOf(d) { return d > 0.08 ? 'better' : d < -0.08 ? 'worse' : 'steady'; }
   function aggInd(regs, f, k) {
-    var sum = 0, n = 0, best = null, mg = false;
-    regs.forEach(function (r) { var c = SCORE[r][f][k]; if (c.mg) mg = true; if (c.m) { sum += c.m * c.n; n += c.n; if (!best || c.n > best.n) best = c; } });
-    return n ? { v: sum / n, n: n, t: best.t } : { v: null, n: 0, t: 'steady', mg: mg };
+    var sum = 0, was = 0, n = 0, mg = false, rv = null, key = 'd' + ST.mapPeriod;
+    regs.forEach(function (r) { var c = SCORE[r][f][k]; if (c.mg) mg = true; if (c.rv) rv = c.rv; if (c.m) { sum += c.m * c.n; was += Math.max(1, Math.min(3, c.m - c[key])) * c.n; n += c.n; } });
+    return n ? { v: sum / n, was: was / n, n: n, rv: rv, t: trendOf((sum - was) / n) } : { v: null, was: null, n: 0, t: 'steady', mg: mg };
   }
   function lvlOf(v) { return v == null ? -1 : v < 1.75 ? 0 : v < 2.5 ? 1 : 2; }
   // Maturity can be mixed: "Compliant, some Leading"
@@ -2409,8 +2667,8 @@ button.ind-btn:hover .ind-name { text-decoration: underline; text-underline-offs
     var v = known.length ? known.reduce(function (a, x) { return a + x.v; }, 0) / known.length : null;
     var weakest = null; inds.forEach(function (x, k) { if (x.v != null && (weakest == null || x.v < inds[weakest].v)) weakest = k; });
     var n = inds.reduce(function (a, x) { return a + x.n; }, 0);
-    var worse = inds.filter(function (x) { return x.t === 'worse' && x.v != null; }).length, better = inds.filter(function (x) { return x.t === 'better' && x.v != null; }).length;
-    return { v: v, lvl: lvlOf(v), n: n, inds: inds, weakest: weakest, t: worse > better ? 'worse' : better > worse ? 'better' : 'steady',
+    var was = known.length ? known.reduce(function (a, x) { return a + x.was; }, 0) / known.length : null;
+    return { v: v, was: was, lvl: lvlOf(v), n: n, inds: inds, weakest: weakest, t: v == null ? 'steady' : trendOf((v - was) * 2),
       mgmt: inds.filter(function (x) { return x.mg; }).length, blind: inds.length - known.length };
   }
   function regionsInScope() { return regionsInView().map(function (x) { return x.r.name; }); }
@@ -2420,13 +2678,20 @@ button.ind-btn:hover .ind-name { text-decoration: underline; text-underline-offs
     return ORG.map(function (d) { return { label: d.div + ' division', regs: d.regions.map(function (r) { return r.name; }) }; });
   }
   // Three segments, filled continuously: a factor can sit between levels
-  function levelBar(v, small, label) {
+  function levelBar(v, small, label, was) {
     if (v == null) return '<span class="lvl blind' + (small ? ' sm' : '') + '"><span class="lvl-bar"><i></i><i></i><i></i></span><span class="lvl-t">' + (label || 'Blind spot') + '</span></span>';
     return '<span class="lvl' + (small ? ' sm' : '') + '" title="' + esc(lvlLabel(v)) + '"><span class="lvl-bar">' + [0, 1, 2].map(function (k) {
       var fill = Math.max(0, Math.min(1, v - k)); return '<i><b style="width:' + Math.round(fill * 100) + '%"></b></i>';
-    }).join('') + '</span><span class="lvl-t">' + esc(label || lvlLabel(v)) + '</span></span>';
+    }).join('') + (was != null && Math.abs(was - v) > 0.08 ? '<s class="lvl-was ' + (was < v ? 'up' : 'down') + '" style="left:' + (was / 3 * 100).toFixed(1) + '%" title="' + ST.mapPeriod + ' days ago: ' + esc(lvlLabel(was)) + '"></s>' : '') + '</span><span class="lvl-t">' + esc(label || lvlLabel(v)) + '</span></span>';
   }
-  function cueAt(f, k, lvl) { var c = FACTOR[f].ind[k][1 + lvl]; return c == null ? null : c; }
+  function wasLine(sc) {
+    if (sc.v == null || sc.was == null) return '';
+    return lvlLabel(sc.was) !== lvlLabel(sc.v) ? '<span class="fc-chg">' + ST.mapPeriod + ' days ago: <b>' + esc(lvlLabel(sc.was)) + '</b></span>' : '';
+  }
+  function cueAt(f, k, lvl) { var c = FACTOR[f].ind[k][1 + lvl]; return c == null ? null : c.charAt(0) === '~' ? c.slice(1) : c; }
+  // '~' marks a level Prism inferred from the thread where the blueprint is silent
+  function cueInferred(f, k, lvl) { var c = FACTOR[f].ind[k][1 + lvl]; return !!c && c.charAt(0) === '~'; }
+  var INF_TAG = '<span class="inf" title="The Forge Works blueprint doesn\u2019t describe this level. Prism inferred it from the levels either side.">Inferred</span>';
 
   ST.mapView = 'factors'; ST.openInd = {};
   function renderMap() {
@@ -2444,15 +2709,15 @@ button.ind-btn:hover .ind-name { text-decoration: underline; text-underline-offs
     var summary = '<b>' + esc(scopeLabel()) + ' operates mostly at ' + LEVELS[mostly] + '.</b> ' +
       (weakest ? 'The clearest gap is <b>' + esc(FACTOR[weakest[0]].name.toLowerCase()) + '</b>' + (scores[weakest[0]].weakest != null ? ', held back by ' + esc(FACTOR[weakest[0]].inds[scores[weakest[0]].weakest].toLowerCase()) : '') + '. ' : '') +
       (strongest && strongest !== weakest ? 'Strongest is ' + esc(FACTOR[strongest[0]].name.toLowerCase()) + '. ' : '') +
-      (worse.length ? '<b class="t-critical">' + word(worse.length) + (worse.length === 1 ? ' factor is' : ' factors are') + ' worsening.</b> ' : '') +
+      (worse.length ? '<b class="t-critical">' + word(worse.length) + (worse.length === 1 ? ' factor is' : ' factors are') + ' worsening over ' + ST.mapPeriod + ' days.</b> ' : '') +
       (blind.length ? word(blind.length) + (blind.length === 1 ? ' factor needs' : ' factors need') + ' management input before they can be rated, mostly in Guide.' : '');
-    var tabs = units.length > 1 ? '<div class="seg map-tabs" role="group" aria-label="Show"><button type="button" data-mapview="factors" aria-pressed="' + (ST.mapView !== 'compare') + '">Factors</button><button type="button" data-mapview="compare" aria-pressed="' + (ST.mapView === 'compare') + '">Compare ' + (ST.div ? 'regions' : 'divisions') + '</button></div>' : '';
+    var tabs = (units.length > 1 ? '<div class="seg map-tabs" role="group" aria-label="Show"><button type="button" data-mapview="factors" aria-pressed="' + (ST.mapView !== 'compare') + '">Factors</button><button type="button" data-mapview="compare" aria-pressed="' + (ST.mapView === 'compare') + '">Compare ' + (ST.div ? 'regions' : 'divisions') + '</button></div>' : '');
     var body;
     if (ST.mapView === 'compare' && units.length > 1) {
       body = '<div class="card map-compare"><div class="table-scroll"><table class="cmp"><thead><tr><th>Factor</th>' + units.map(function (u) { return '<th>' + esc(u.label) + '</th>'; }).join('') + '</tr></thead><tbody>' +
         DOMAINS.map(function (d) {
           return '<tr class="cmp-dom"><td colspan="' + (units.length + 1) + '">' + esc(d[1]) + ' · ' + esc(d[2]) + '</td></tr>' + FACTORS.filter(function (f) { return f[1] === d[0]; }).map(function (f) {
-            return '<tr><td><a href="#map/' + f[0] + '">' + esc(f[2]) + '</a></td>' + units.map(function (u) { var sc = scoreFactor(u.regs, f[0]); return '<td>' + levelBar(sc.v, true, sc.v == null ? 'Needs input' : null) + (sc.v != null ? trendHTML(sc.t) : '') + '</td>'; }).join('') + '</tr>';
+            return '<tr><td><a href="#map/' + f[0] + '">' + esc(f[2]) + '</a></td>' + units.map(function (u) { var sc = scoreFactor(u.regs, f[0]); return '<td><span class="ind-rate">' + levelBar(sc.v, true, sc.v == null ? 'Needs input' : null, sc.was) + (sc.v != null ? trendHTML(sc.t) : '') + '</span></td>'; }).join('') + '</tr>';
           }).join('');
         }).join('') + '</tbody></table></div></div>';
     } else {
@@ -2461,8 +2726,8 @@ button.ind-btn:hover .ind-name { text-decoration: underline; text-underline-offs
           FACTORS.filter(function (f) { return f[1] === d[0]; }).map(function (f) {
             var sc = scores[f[0]];
             return '<a class="card fcard' + (sc.v == null ? ' blind' : '') + '" href="#map/' + f[0] + '"><span class="fc-name">' + esc(f[2]) + '</span>' +
-              levelBar(sc.v, false, sc.v == null ? 'Needs management input' : null) +
-              (sc.v != null ? '<span class="fc-named">' + esc(f[4][sc.lvl]) + '</span>' : '') +
+              levelBar(sc.v, false, sc.v == null ? 'Needs management input' : null, sc.was) +
+              (sc.v != null ? '<span class="fc-named">' + esc(f[4][sc.lvl]) + '</span>' : '') + wasLine(sc) +
               '<span class="fc-meta">' + (sc.v == null ? '<span>Records don’t show this factor</span>' : '<span>' + sc.n + (sc.n === 1 ? ' signal' : ' signals') + '</span>' + trendHTML(sc.t)) + '</span>' +
               (sc.weakest != null && sc.v != null ? '<span class="fc-held">Held back by ' + esc(FACTOR[f[0]].inds[sc.weakest].toLowerCase()) + '</span>' : '') + '</a>';
           }).join('') + '</section>';
@@ -2486,44 +2751,91 @@ button.ind-btn:hover .ind-name { text-decoration: underline; text-underline-offs
     $('view').innerHTML = '<a class="back" href="#map">← Map</a>' +
       '<div class="ins-head"><div class="meta"><span class="tlabel">' + esc(dom[1]) + '</span><span class="label">' + esc(dom[2]) + '</span></div><h1 class="ins-title">' + esc(f.name) + '</h1><p class="sub">' + esc(f.q) + '</p></div>' +
       '<div class="ins-grid"><div class="ins-main">' +
-        '<section class="card side-card f-rating"><span class="label">' + esc(scopeLabel()) + ' today</span><div class="f-rate-row">' + levelBar(sc.v, false, sc.v == null ? 'Needs management input' : null) + (sc.v != null ? trendHTML(sc.t) : '') + '</div>' +
-          (sc.v != null ? '<p class="f-named">' + esc(f.lnames[sc.lvl]) + '</p>' : '') +
+        '<section class="card side-card f-rating"><span class="label">' + esc(scopeLabel()) + ' today</span><div class="f-rate-row">' + levelBar(sc.v, false, sc.v == null ? 'Needs management input' : null, sc.was) + (sc.v != null ? trendHTML(sc.t) : '') + '</div>' +
+          (sc.v != null ? '<p class="f-named">' + esc(f.lnames[sc.lvl]) + '</p>' + wasLine(sc) : '') +
           '<p class="muted-p" style="color:var(--text)">' + (sc.v == null ? 'Records and insights don’t show this factor. Focus reviews, surveys and interviews fill it in.' : sc.n + ' signals in the last 90 days.' + (sc.weakest != null ? ' Held back by <b>' + esc(f.inds[sc.weakest].toLowerCase()) + '</b>.' : '') + (sc.mgmt ? ' ' + word(sc.mgmt) + (sc.mgmt === 1 ? ' indicator needs' : ' indicators need') + ' management input.' : '')) + '</p></section>' +
         '<section class="ins-sec"><span class="label">Indicators · select one to see what each level looks like</span><div class="card ind-list">' + f.inds.map(function (name, k) {
           var x = sc.inds[k], l = lvlOf(x.v), drivers = ins.filter(function (i) { return INS_FACTOR[i.id][1] === k; }), open = ST.openInd[key + k];
           var ev = evOf(key, k).map(function (e) { return '<span class="ev-src">' + esc(EV_NAME[e]) + '</span>'; }).join('');
           return '<div class="ind-row' + (open ? ' open' : '') + '"><button type="button" class="ind-btn" data-ind="' + key + k + '" aria-expanded="' + !!open + '"><span class="ind-main"><span class="ind-name">' + esc(name) + '</span>' +
-            '<span class="ind-drv' + (drivers.length ? '' : ' muted') + '">' + (drivers.length ? drivers.map(function (i) { return esc(i.title); }).join(' · ') : x.v == null ? (x.mg ? 'Needs management input' : 'No evidence yet') : x.n + ' signals, no open insight') + '</span></span>' +
-            '<span class="ind-rate">' + levelBar(x.v, true, x.v == null ? (x.mg ? 'Needs input' : 'Blind spot') : null) + (x.v != null ? trendHTML(x.t) : '') + '</span></button>' +
+            '<span class="ind-drv' + (drivers.length ? '' : ' muted') + '">' + (drivers.length ? drivers.map(function (i) { return esc(i.title); }).join(' · ') : x.v == null ? (x.mg ? 'Needs management input' : 'No evidence yet') : (x.rv ? 'Management input \u00b7 Focus review ' + x.rv : x.n + ' signals, no open insight')) + '</span></span>' +
+            '<span class="ind-rate">' + levelBar(x.v, true, x.v == null ? (x.mg ? 'Needs input' : 'Blind spot') : null, x.was) + (x.v != null ? trendHTML(x.t) : '') + '</span></button>' +
             (open ? '<div class="ind-detail"><ol class="ind-levels">' + [0, 1, 2].map(function (lv) {
                 var c = cueAt(key, k, lv);
-                return '<li class="' + (lv === l ? 'now' : '') + (x.v != null && lv === l + 1 ? ' next' : '') + '"><span class="il-h">' + esc(LEVELS[lv]) + (lv === l ? ' · where you are' : x.v != null && lv === l + 1 ? ' · next step' : '') + '</span><span class="il-t' + (c == null ? ' gap' : '') + '">' + esc(c == null ? 'Not yet described in the Forge Works Map' : c) + '</span></li>';
+                return '<li class="' + (lv === l ? 'now' : '') + (x.v != null && lv === l + 1 ? ' is-next' : '') + '"><span class="il-h">' + esc(LEVELS[lv]) + (lv === l ? '<span class="tag-now">Where you are</span>' : x.v != null && lv === l + 1 ? '<span class="tag-next">Next step</span>' : '') + '</span><span class="il-t' + (c == null ? ' gap' : '') + '">' + esc(c == null ? 'Not yet described in the Forge Works Map' : c) + (cueInferred(key, k, lv) ? ' ' + INF_TAG : '') + '</span></li>';
               }).join('') + '</ol><p class="ind-ev"><span class="label">Evidence from</span>' + ev + '</p>' +
               (drivers.length ? '<p class="ind-links">' + drivers.map(function (i) { return '<button type="button" class="linkish" data-open="' + i.id + '">' + esc(i.title) + '</button>'; }).join(' · ') + '</p>' : '') + '</div>' : '') +
           '</div>';
         }).join('') + '</div></section>' +
         (units.length > 1 ? '<section class="ins-sec"><span class="label">Across ' + esc(scopeLabel()) + '</span><div class="card ind-list">' + units.map(function (u) {
           var us = scoreFactor(u.regs, key);
-          return '<div class="ind-row"><div class="ind-btn static"><span class="ind-main"><span class="ind-name">' + esc(u.label) + '</span><span class="ind-drv muted">' + (us.v == null ? 'Needs management input' : us.n + ' signals' + (us.weakest != null ? ' · held back by ' + esc(f.inds[us.weakest].toLowerCase()) : '')) + '</span></span><span class="ind-rate">' + levelBar(us.v, true, us.v == null ? 'Needs input' : null) + (us.v != null ? trendHTML(us.t) : '') + '</span></div></div>';
+          return '<div class="ind-row"><div class="ind-btn static"><span class="ind-main"><span class="ind-name">' + esc(u.label) + '</span><span class="ind-drv muted">' + (us.v == null ? 'Needs management input' : us.n + ' signals' + (us.weakest != null ? ' · held back by ' + esc(f.inds[us.weakest].toLowerCase()) : '')) + '</span></span><span class="ind-rate">' + levelBar(us.v, true, us.v == null ? 'Needs input' : null, us.was) + (us.v != null ? trendHTML(us.t) : '') + '</span></div></div>';
         }).join('') + '</div></section>' : '') +
         '<section class="ins-sec"><span class="label">Insights giving evidence for this factor</span>' + (ins.length ? '<div class="icards one">' + ins.map(row).join('') + '</div>' : '<p class="card empty-card">No open insights for this factor in ' + esc(scopeLabel()) + '.</p>') + '</section>' +
       '</div><aside class="ins-side">' +
         '<section class="card side-card"><h2>What each level looks like</h2><ol class="lvl-desc">' + LEVELS.map(function (l, k) {
-          return '<li class="' + (k === sc.lvl ? 'now' : '') + (k === next && k !== sc.lvl ? ' next' : '') + '"><span class="lvl-desc-h"><span><b>' + esc(l) + '</b> · ' + esc(f.lnames[k]) + '</span>' + (k === sc.lvl ? '<span class="tag-now">Where you are</span>' : k === next ? '<span class="tag-next">Next step</span>' : '') + '</span><p>' + esc(f.levels[k]) + '</p></li>';
+          return '<li class="' + (k === sc.lvl ? 'now' : '') + (k === next && k !== sc.lvl ? ' is-next' : '') + '"><span class="lvl-desc-h"><span><b>' + esc(l) + '</b> · ' + esc(f.lnames[k]) + '</span>' + (k === sc.lvl ? '<span class="tag-now">Where you are</span>' : k === next ? '<span class="tag-next">Next step</span>' : '') + '</span><p>' + esc(f.levels[k]) + '</p></li>';
         }).join('') + '</ol><p class="muted-p">Summarised from the Forge Works blueprint. In the live product Prism would write these for your situation.</p></section>' +
         '<section class="card side-card"><h2>How this is scored</h2><p class="muted-p" style="color:var(--text)">Prism links each enriched record and insight to the factor and indicator it gives evidence for. Insights count for more than single records. A factor is rated from its indicators, can sit between levels, and is held back by its weakest indicator. Indicators that only management can evidence wait for a Focus review, survey or interview.</p></section>' +
       '</aside></div>';
   }
   // The Map's language, for any insight: where it sits and what the next level looks like
-  function mapCard(i) {
+  function factorBtn(key) { return '<button type="button" class="linkish map-link" data-factor="' + key + '">' + esc(FACTOR[key].name) + '</button>'; }
+  function mapBody(i) {
     var fx = INS_FACTOR[i.id]; if (!fx) return '';
     var f = FACTOR[fx[0]], k = fx[1], regs = []; i.sites.forEach(function (s) { if (regs.indexOf(SITE[s].region) < 0) regs.push(SITE[s].region); });
-    var x = aggInd(regs, fx[0], k), l = lvlOf(x.v), now = l > -1 ? cueAt(fx[0], k, l) : null, nx = l > -1 && l < 2 ? cueAt(fx[0], k, l + 1) : null;
-    return '<section class="card side-card"><h2>On the Forge Works Map</h2>' +
-      '<p class="mc-f"><a class="map-link" href="#map/' + fx[0] + '">' + esc(f.name) + '</a> · ' + esc(f.inds[k]) + '</p>' + levelBar(x.v, true) +
-      (now ? '<p class="mc-l"><span class="label">Now</span>' + esc(now) + '</p>' : '') +
-      (l > -1 && l < 2 ? '<p class="mc-l next"><span class="label">Towards ' + esc(f.lnames[l + 1]) + '</span>' + esc(nx || 'Not yet described in the Forge Works Map') + '</p>' : '') +
-      '</section>';
+    var x = aggInd(regs, fx[0], k), l = lvlOf(x.v), now = l > -1 ? cueAt(fx[0], k, l) : null, nl = -1, nx = null;
+    // Next step is the next level the Map describes for this indicator
+    for (var lv = l + 1; l > -1 && lv < 3 && nl < 0; lv++) if (cueAt(fx[0], k, lv)) { nl = lv; nx = cueAt(fx[0], k, lv); }
+    var nm = factorBtn;
+    var also = (INS_ALSO[i.id] || []).map(function (a) { return '<span>' + nm(a[0]) + ' \u00b7 ' + esc(FACTOR[a[0]].inds[a[1]].toLowerCase()) + '</span>'; });
+    return '<p class="mc-f"><span class="label">Improves</span><span>' + nm(fx[0]) + ' \u00b7 ' + esc(f.inds[k].toLowerCase()) + '</span></p>' + levelBar(x.v, true, null, x.was) +
+      (l > -1 ? '<p class="mc-l"><span class="tag-now">Where you are \u00b7 ' + LEVELS[l] + '</span>' + (now ? esc(now) + (cueInferred(fx[0], k, l) ? ' ' + INF_TAG : '') : '') + '</p>' : '') +
+      (nl > -1 ? '<p class="mc-l"><span class="tag-next">Next step \u00b7 ' + LEVELS[nl] + '</span>' + esc(nx) + (cueInferred(fx[0], k, nl) ? ' ' + INF_TAG : '') + '</p>' : '') +
+      (also.length ? '<p class="mc-also"><span class="label">Also moves</span>' + also.join('') + '</p>' : '');
+  }
+  function mapCard(i) { var b = mapBody(i); return b ? '<section class="card side-card mc"><h2>On the Forge Works Map</h2>' + b + '</section>' : ''; }
+  function mapLine(i) { var fx = INS_FACTOR[i.id]; return fx ? '<span class="icard-map"><span class="label">Improves</span>' + esc(FACTOR[fx[0]].name) + ' \u00b7 ' + esc(FACTOR[fx[0]].inds[fx[1]].toLowerCase()) + '</span>' : ''; }
+  // A factor at a glance, opened from insights, the record drawer and the Focus review
+  function openFactor(key, trigger) {
+    var f = FACTOR[key]; if (!f) return;
+    if (trigger) recTrigger = trigger;
+    var regs = regionsInScope(), sc = scoreFactor(regs, key), dom = DOMAINS.filter(function (d) { return d[0] === f.domain; })[0];
+    var ins = INSIGHTS.filter(function (i) { return INS_FACTOR[i.id] && INS_FACTOR[i.id][0] === key && !i.dismissed && !i.closed && i.sites.some(function (s) { return regs.indexOf(SITE[s].region) > -1; }); });
+    var nxt = sc.lvl < 0 ? -1 : sc.lvl < 2 ? sc.lvl + 1 : -1;
+    $('rec').innerHTML =
+      '<div class="sheet-head" style="position:relative"><button type="button" class="x" id="rec-x" aria-label="Close"><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 2l8 8M10 2l-8 8" stroke="currentColor" stroke-width="1.6"/></svg></button>' +
+        '<div class="meta"><span class="tlabel">' + esc(dom[1]) + '</span><span class="label">Forge Works Map factor</span></div>' +
+        '<h2 id="rec-title">' + esc(f.name) + '</h2><p class="muted-p">' + esc(f.q) + '</p></div>' +
+      '<div class="sheet-body">' +
+        '<section class="sheet-sec fd-rate"><span class="label">' + esc(scopeLabel()) + ' today</span><div class="f-rate-row">' + levelBar(sc.v, false, sc.v == null ? 'Needs management input' : null, sc.was) + (sc.v != null ? trendHTML(sc.t) : '') + '</div>' +
+          (sc.v != null ? '<p class="f-named">' + esc(f.lnames[sc.lvl]) + '</p>' + wasLine(sc) : '') +
+          (sc.weakest != null ? '<p class="muted-p" style="color:var(--text)">Held back by <b>' + esc(f.inds[sc.weakest].toLowerCase()) + '</b>.</p>' : '') + '</section>' +
+        '<section class="sheet-sec"><span class="label">Indicators</span><ul class="fd-inds">' + f.inds.map(function (name, k) {
+          var x = sc.inds[k];
+          return '<li><span class="fd-n">' + esc(name) + '</span><span class="ind-rate">' + levelBar(x.v, true, x.v == null ? (x.mg ? 'Needs input' : 'Blind spot') : null, x.was) + (x.v != null ? trendHTML(x.t) : '') + '</span></li>';
+        }).join('') + '</ul></section>' +
+        (sc.lvl > -1 ? '<section class="sheet-sec"><span class="label">What the levels look like</span><ol class="lvl-desc">' + [sc.lvl, nxt].filter(function (k) { return k > -1; }).map(function (k) {
+          return '<li class="' + (k === sc.lvl ? 'now' : 'is-next') + '"><span class="lvl-desc-h"><span><b>' + LEVELS[k] + '</b> \u00b7 ' + esc(f.lnames[k]) + '</span>' + (k === sc.lvl ? '<span class="tag-now">Where you are</span>' : '<span class="tag-next">Next step</span>') + '</span><p>' + esc(f.levels[k]) + '</p></li>';
+        }).join('') + '</ol></section>' : '') +
+        '<section class="sheet-sec"><span class="label">Insights giving evidence</span>' + (ins.length ? '<div class="links">' + ins.map(function (i) {
+          return '<button type="button" class="link-item" data-fopen="' + i.id + '"><b>' + esc(i.title) + '</b><span>' + esc(FACTOR[key].inds[INS_FACTOR[i.id][1]]) + ' \u00b7 ' + statusText(i) + '</span></button>';
+        }).join('') + '</div>' : '<p class="muted-p">No open insights for this factor in ' + esc(scopeLabel()) + '.</p>') + '</section>' +
+      '</div>' +
+      '<div class="sheet-foot"><a class="btn dark" href="#map/' + key + '">Open factor page</a></div>';
+    $('rec').hidden = false; $('scrim').hidden = false; $('rec-x').focus();
+  }
+  document.addEventListener('click', function (e) {
+    var fb = e.target.closest('[data-factor]'); if (fb) { e.preventDefault(); e.stopPropagation(); openFactor(fb.getAttribute('data-factor'), fb); return; }
+    var fo = e.target.closest('[data-fopen]'); if (fo) { var id = fo.getAttribute('data-fopen'); recTrigger = null; closeRec(); openSheet(id); }
+  }, true);
+  // The headline the Map and the Focus review share
+  function mapGap(regs) {
+    var sc = {}; FACTORS.forEach(function (f) { sc[f[0]] = scoreFactor(regs, f[0]); });
+    var known = FACTORS.filter(function (f) { return sc[f[0]].v != null; }), counts = [0, 0, 0];
+    known.forEach(function (f) { counts[sc[f[0]].lvl]++; });
+    var gap = known.filter(function (f) { return sc[f[0]].n >= 10; }).sort(function (a, b) { return sc[a[0]].v - sc[b[0]].v || sc[b[0]].n - sc[a[0]].n; })[0];
+    return { sc: sc, mostly: LEVELS[counts.indexOf(Math.max.apply(null, counts))], gap: gap ? gap[0] : null };
   }
   document.addEventListener('click', function (e) {
     var t = e.target.closest('[data-mapview]'); if (t) { ST.mapView = t.getAttribute('data-mapview'); renderMap(); return; }

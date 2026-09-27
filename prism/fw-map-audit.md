@@ -333,3 +333,25 @@ Also applied in the concept:
 - Indicators that only management can evidence are shown as "Needs management input", not scored from records.
 - Each indicator expands to show what it looks like at Compliant, Leading and Resilient. Gaps show as "Not yet described in the Forge Works Map".
 - Insights were re-mapped as in section 5.
+
+### Inferred level text (28 Sep 2026)
+
+Where the Blueprint doesn't describe an indicator at a level, the concept now shows text inferred from the levels either side, marked **Inferred**. These are for Forge Works to confirm or rewrite.
+
+| Factor · indicator | Level | Inferred text |
+|---|---|---|
+| Strategy · Where practices come from | Leading | Proven programs adopted from peers |
+| Strategy · Safety in organisational decisions | Compliant | Considered separately, after the decision is made |
+| Risk management · Joining up risk types | Compliant | Safety risk kept in its own register |
+| Operational management · Looking for emerging risk | Compliant | Issues found after something goes wrong |
+| Operational management · Response to incidents | Leading | Investigate, fix the system and share lessons |
+| Resource allocation · View of spare capacity | Leading | Spare capacity funded where known risks need it |
+| Resource allocation · Developing people and equipment | Compliant | Replaced or retrained when it fails or falls out of compliance |
+| Resource allocation · Developing people and equipment | Leading | Upgraded to fix known risks and gaps |
+| Goal conflict · Resolving conflicts before work starts | Compliant | They surface during the work, and production usually wins |
+| Goal conflict · Resolving conflicts before work starts | Leading | Known conflicts planned for; others handled as they arise |
+| Learning and development · Where practice comes from | Compliant | Regulation, standards and the training provider |
+| Learning and development · Capacity to absorb change | Leading | Improvement programs adopted one at a time |
+| Decision-making · Basis for safety investment | Compliant | Reactive, after incidents or regulator attention |
+| Decision-making · How decisions are tested | Compliant | Decided by rank; rarely challenged |
+| Monitoring and metrics · Workers' experience in the data | Compliant | Not measured, beyond incident reports |
