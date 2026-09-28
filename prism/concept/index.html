@@ -635,6 +635,7 @@ button.ind-btn:hover .ind-name { text-decoration: underline; text-underline-offs
 .st-cad { display: flex; align-items: flex-end; gap: 10px 22px; flex-wrap: wrap; font-size: 14.5px; font-weight: 700; }
 .st-cad > span { display: grid; gap: 2px; }
 .pl-h { font-size: 18px; margin: 22px 0 10px; }
+.st-go { display: flex; gap: 8px; flex-wrap: wrap; }
 .pl-list { display: grid; gap: 12px; }
 .pl-item { padding: 16px 18px; display: grid; gap: 12px; }
 .pl-item.out { opacity: 0.55; }
@@ -3178,13 +3179,13 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
 
     $('view').innerHTML =
       '<div class="page-top"><div><h1>Strategy</h1><p class="sub">' + esc(ORG_NAME) + ' objectives for ' + esc(STRAT.year) + ' · set at quarterly planning</p></div>' +
-        '<div class="st-cad"><span><span class="label">Quarterly planning</span>Next: ' + esc(STRAT.planning) + '</span><span><span class="label">Monthly progress</span>Next: ' + esc(STRAT.progress) + '</span><button type="button" class="what" data-help="strategy">How strategy works</button>' + (org ? '<button type="button" class="btn brand" data-plstart="1">Start quarterly planning</button>' : '') + '</div></div>' +
+        '<div class="st-cad"><span><span class="label">Quarterly planning</span>Next: ' + esc(STRAT.planning) + '</span><span><span class="label">Monthly progress</span>Next: ' + esc(STRAT.progress) + '</span><button type="button" class="what" data-help="strategy">How strategy works</button>' + (org ? '<span class="st-go"><button type="button" class="btn" data-pgstart="1">Start monthly progress</button><button type="button" class="btn brand" data-plstart="1">Start quarterly planning</button></span>' : '') + '</div></div>' +
       '<p class="pv-summary">' + lead + '</p>' +
       (org ? '' : '<p class="st-note">Objectives are set for all of ' + esc(ORG_NAME) + ' at quarterly planning. This shows the ones that include ' + esc(scopeLabel()) + ', measured across it.</p>') +
       '<div class="st-objs">' + objs.map(function (o, oi) {
         var f = FACTOR[o.f], orr = objRegs(o), sc = scoreFactor(orr, o.f), s = st[oi];
         var ins = insightsInView().filter(function (i) { return objFor(i) === o; });
-        return '<section class="card st-obj"><div class="st-top"><span class="badge ' + s[0] + '"><i></i>' + s[1] + '</span><span class="chip">' + esc(o.div ? o.div + ' division' : 'All of ' + ORG_NAME) + '</span><span class="st-own">Owner ' + esc(o.owner) + ' · set ' + esc(o.set || '1 Jul') + '</span></div>' +
+        return '<section class="card st-obj"><div class="st-top"><span class="badge ' + s[0] + '"><i></i>' + s[1] + '</span><span class="chip">' + esc(o.div ? o.div + ' division' : 'All of ' + ORG_NAME) + '</span>' + (o.flagged ? '<span class="tlabel">Flagged for planning</span>' : '') + '<span class="st-own">Owner ' + esc(o.owner) + ' · set ' + esc(o.set || '1 Jul') + '</span></div>' +
           '<h2 class="st-title">' + esc(objTitle(o)) + '</h2><p class="st-why">' + esc(o.why) + '</p>' +
           '<div class="st-now"><span class="label">Today' + (org || !o.div ? '' : '') + '</span>' + factorBtn(o.f) + levelBar(sc.v, true, null, sc.was) + trendHTML(sc.t) + '<span class="st-tgt">Target: <b>' + LEVELS[o.target] + '</b> \u00b7 ' + esc(f.lnames[o.target]) + '</span></div>' +
           '<div class="st-krs"><span class="label">Key results · ' + esc(o.div && org ? o.div + ' division' : scopeLabel()) + '</span>' + o.krs.map(function (kr) {
@@ -3301,7 +3302,7 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
         '<p class="pv-summary"><b>' + word(n) + (n === 1 ? ' objective' : ' objectives') + ' for next quarter.</b> ' + (n > 3 ? '<b class="t-warning">Hiviz recommends no more than three.</b> Retire one, or leave a candidate for the Focus reviews.' : 'Keep, adjust or retire each one, then choose any candidates to add.') + '</p>' +
         '<h2 class="pl-h">Current objectives</h2><div class="pl-list">' + OBJECTIVES.map(function (o) {
           var d = PL.obj[o.id], s = objStatus(o), adv = OBJ_ADVICE[o.id];
-          return '<section class="card pl-item' + (d.d === 'retire' ? ' out' : '') + '"><div class="pl-oh"><span class="badge ' + s[0] + '"><i></i>' + s[1] + '</span><h3>' + esc(objTitle(o)) + '</h3></div>' +
+          return '<section class="card pl-item' + (d.d === 'retire' ? ' out' : '') + '"><div class="pl-oh"><span class="badge ' + s[0] + '"><i></i>' + s[1] + '</span><h3>' + esc(objTitle(o)) + '</h3>' + (o.flagged ? '<span class="tlabel">Flagged at monthly progress</span>' : '') + '</div>' +
             (adv ? '<div class="st-sugg"><span class="label">Hiviz recommends</span><p>' + esc(adv[1]) + '</p></div>' : '') +
             '<div class="seg pl-seg" role="group" aria-label="Decision">' + [['keep', 'Keep'], ['adjust', 'Adjust'], ['retire', 'Retire']].map(function (x) { return '<button type="button" data-plobj="' + o.id + ':' + x[0] + '" aria-pressed="' + (d.d === x[0]) + '">' + x[1] + '</button>'; }).join('') + '</div>' +
             (d.d === 'adjust' ? '<div class="pl-form"><span class="fld"><label for="plt-' + o.id + '">Target</label>' + sel('plt-' + o.id, [[1, 'Leading'], [2, 'Resilient']], d.target) + '</span><span class="fld"><label for="plb-' + o.id + '">By</label>' + sel('plb-' + o.id, PL_BY, d.by) + '</span></div>' : '') +
@@ -3361,12 +3362,92 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
   document.addEventListener('change', function (e) { var a = e.target.getAttribute && e.target.getAttribute('data-platt'); if (a && PL) PL.att[a] = e.target.checked; });
 
   /* =============================================================
+     Monthly strategy progress: key results since last month, program
+     milestones, and anything that should go to quarterly planning.
+     ============================================================= */
+  var PG = null;
+  var PG_ADVICE = {
+    'o-comm': 'The trial starts on 6 Oct. Make sure both shifts at Rail Stabling Yard are in the room for the first handover under the new standard.',
+    'o-mon': 'The form rebuild is at risk and pre-starts are still being ticked. Flag this for quarterly planning: the program needs a different approach, not more time.',
+    'o-front': 'On track. Use the Ridge Road spotter stops as this month’s stop story.'
+  };
+  function sinceMonth(i) { var m = /^(\d+) (\w{3})/.exec(i.since || ''); return !!m && MON[m[2]] != null && new Date(2026, MON[m[2]], +m[1]) >= new Date(2026, 8, 1); }
+  // Key-result movement over roughly a month uses the 45-day window
+  function monthInd(regs, f, k) { var keep = ST.mapPeriod; ST.mapPeriod = 45; var x = aggInd(regs, f, k); ST.mapPeriod = keep; return x; }
+  function pgStepper() { return '<ol class="steps">' + ['Report', 'Wrap-up'].map(function (t, k) { var n = k + 1, cls = n === PG.step ? 'on' : n < PG.step ? 'done' : ''; return '<li class="' + cls + '"><span class="n">' + (n < PG.step ? '✓' : n) + '</span>' + t + '</li>'; }).join('') + '</ol>'; }
+  function startProgress() { ST.div = ''; ST.reg = ''; fillFilters(); PG = { step: 1, ms: {}, flag: {}, notes: '' }; go('progress'); }
+  function pgPeople() { var o = ['Morgan Hale']; OBJECTIVES.forEach(function (ob) { ob.programs.forEach(function (p) { var w = PROGRAMS[p].owner; if (o.indexOf(w) < 0) o.push(w); }); }); return o; }
+
+  function renderProgress() {
+    if (!PG) { ST.view = 'strategy'; return renderStrategy(); }
+    var head = esc(ORG_NAME) + ' · Friday 26 September · since ' + esc(STRAT.lastProgress);
+    var top = '<div class="meet-bar"><a class="back" href="#strategy">← Leave progress meeting</a>' + pgStepper() + '</div>';
+    if (PG.step === 1) {
+      var moved = 0, slipped = 0, msDone = 0, msRisk = 0;
+      OBJECTIVES.forEach(function (o) { var regs = objRegs(o); o.krs.forEach(function (kr) { var t = monthInd(regs, o.f, kr[0]).t; if (t === 'better') moved++; if (t === 'worse') slipped++; });
+        o.programs.forEach(function (p) { PROGRAMS[p].ms.forEach(function (m) { if (m.st === 'done') msDone++; if (m.st === 'risk' || overdue(m)) msRisk++; }); }); });
+      var regsAll = regionsInScope(), covered = OBJECTIVES.map(function (o) { return o.f; });
+      var watch = FACTORS.filter(function (f) { if (covered.indexOf(f[0]) > -1) return false; var sc = scoreFactor(regsAll, f[0]); return sc.v != null && sc.n >= 10 && sc.t === 'worse'; });
+      $('view').innerHTML = top + '<div class="page-top"><div><h1>Monthly progress</h1><p class="sub">' + head + '</p></div></div>' +
+        '<p class="pv-summary"><b>Since ' + esc(STRAT.lastProgress) + ':</b> ' + lw(moved) + (moved === 1 ? ' key result' : ' key results') + ' moved forward and ' + lw(slipped) + ' slipped. ' + word(msDone) + ' milestones done' + (msRisk ? ', ' + lw(msRisk) + ' at risk or overdue' : '') + '.</p>' +
+        '<div class="report">' + OBJECTIVES.map(function (o, oi) {
+          var regs = objRegs(o), s = objStatus(o), f = FACTOR[o.f];
+          var fresh = INSIGHTS.filter(function (i) { return !i.closed && !i.dismissed && sinceMonth(i) && INS_FACTOR[i.id] && INS_FACTOR[i.id][0] === o.f && i.sites.some(function (x) { return regs.indexOf(SITE[x].region) > -1; }); });
+          return '<section class="card rsec"><span class="label">' + (oi + 1) + ' · ' + esc(o.div ? o.div + ' division' : 'Whole company') + ' · owner ' + esc(o.owner) + '</span><div class="pl-oh"><span class="badge ' + s[0] + '"><i></i>' + s[1] + '</span><h2>' + esc(objTitle(o)) + '</h2></div>' +
+            '<div class="st-krs"><span class="label">Key results since last month</span>' + o.krs.map(function (kr) {
+              var x = monthInd(regs, o.f, kr[0]);
+              return '<div class="kr"><span class="kr-n">' + esc(f.inds[kr[0]]) + '</span><span class="ind-rate">' + levelBar(x.v, true, null, x.was) + trendHTML(x.t) + '</span><span class="kr-tg">Target ' + LEVELS[kr[1]] + '</span></div>';
+            }).join('') + '</div>' +
+            o.programs.map(function (pid) {
+              var p = PROGRAMS[pid];
+              return '<div class="st-prog"><div class="sp-head"><span class="label">Program · ' + esc(p.owner) + '</span><h3>' + esc(p.title) + '</h3></div><ul class="plan-acts">' + p.ms.map(function (m, k) {
+                return '<li class="pa st-' + m.st + '"><div class="pa-main"><span class="pa-t">' + esc(m.t) + '</span><span class="pa-meta"><span>' + esc(m.who) + '</span><span>by ' + esc(m.due) + '</span>' + (overdue(m) ? '<span class="t-critical">Overdue</span>' : '') + '</span></div>' +
+                  '<label class="pa-ci"><span class="sr">How’s it going?</span><select class="select" data-msck="' + pid + ':' + k + '">' + PA_ST.map(function (x) { return '<option value="' + x[0] + '"' + (x[0] === m.st ? ' selected' : '') + '>' + x[1] + '</option>'; }).join('') + '</select></label></li>';
+              }).join('') + '</ul><p class="plan-read"><span class="label">Prism’s read so far</span><span>' + readBadge(p.read) + ' ' + esc(p.read[1]) + '</span></p></div>';
+            }).join('') +
+            (fresh.length ? '<div class="st-ins"><span class="label">New insights this month</span><div class="links">' + fresh.map(function (i) { return '<button type="button" class="link-item" data-open="' + i.id + '"><b>' + esc(i.title) + '</b><span>' + esc(f.inds[INS_FACTOR[i.id][1]]) + ' · since ' + esc(i.since) + '</span></button>'; }).join('') + '</div></div>' : '') +
+            '<div class="st-sugg"><span class="label">Hiviz recommends</span><p>' + esc(PG_ADVICE[o.id] || 'Scope the program before the next progress meeting, and agree what Prism should listen for.') + '</p></div>' +
+            '<div class="meet-actions">' + (PG.flag[o.id] ? '<span class="sg-on">Flagged for quarterly planning</span> <button type="button" class="linkish rt-undo" data-pgflag="' + o.id + '">Undo</button>' : '<button type="button" class="btn sm" data-pgflag="' + o.id + '">Flag for quarterly planning</button>') + '</div>' +
+          '</section>';
+        }).join('') +
+        '<section class="card rsec"><span class="label">' + (OBJECTIVES.length + 1) + ' · Watch list</span>' +
+          (watch.length ? '<ul class="rlist">' + watch.map(function (f) { return '<li><span class="rl-f">' + factorBtn(f[0]) + '</span><span>Worsening with no objective</span></li>'; }).join('') + '</ul>' : '<p class="muted-p">No factor without an objective is worsening.</p>') +
+          '<p class="muted-p">Next quarterly planning: ' + esc(STRAT.planning) + '.</p></section>' +
+        '</div><div class="meet-actions end"><button type="button" class="btn brand" data-pgstep="2">Wrap up</button></div>';
+      return;
+    }
+    var chg = Object.keys(PG.ms), fl = Object.keys(PG.flag).filter(function (k) { return PG.flag[k]; });
+    $('view').innerHTML = top + '<div class="page-top"><div><h1>Wrap-up</h1><p class="sub">' + head + '</p></div></div>' +
+      '<div class="meet-grid"><section class="card meet-card"><h2>This month</h2>' +
+        (chg.length ? '<div class="w-acts"><span class="label">Milestone check-ins</span><ul class="w-rt">' + chg.map(function (k) { var pr = k.split(':'), m = PROGRAMS[pr[0]].ms[+pr[1]]; return '<li>' + actBadge(m) + ' ' + esc(m.t) + ' <span>' + esc(PROGRAMS[pr[0]].title) + '</span></li>'; }).join('') + '</ul></div>' : '<p class="muted-p">No milestone check-ins changed.</p>') +
+        (fl.length ? '<div class="w-acts"><span class="label">For quarterly planning on ' + esc(STRAT.planning) + '</span><ul class="w-rt">' + fl.map(function (id) { var o = OBJECTIVES.filter(function (x) { return x.id === id; })[0]; return '<li>' + esc(objTitle(o)) + '</li>'; }).join('') + '</ul></div>' : '') +
+      '</section><section class="card meet-card"><h2>Attended</h2><div class="people">' + whoLine(pgPeople()) + '</div>' +
+        '<label class="w-note-l" for="pg-notes">Notes</label><textarea id="pg-notes" class="w-note" rows="4" placeholder="Anything else worth recording">' + esc(PG.notes) + '</textarea>' +
+        '<div class="meet-actions"><button type="button" class="btn" data-pgstep="1">Back</button><button type="button" class="btn brand" id="pg-save">Save progress</button></div></section></div>';
+  }
+  document.addEventListener('click', function (e) {
+    if (e.target.closest('[data-pgstart]')) { startProgress(); return; }
+    if (!PG) return;
+    var st = e.target.closest('[data-pgstep]'); if (st) { if ($('pg-notes')) PG.notes = $('pg-notes').value; PG.step = +st.getAttribute('data-pgstep'); renderProgress(); window.scrollTo(0, 0); return; }
+    var fl = e.target.closest('[data-pgflag]'); if (fl) { var id = fl.getAttribute('data-pgflag'); PG.flag[id] = !PG.flag[id]; var y = window.scrollY; renderProgress(); window.scrollTo(0, y); return; }
+    if (e.target.closest('#pg-save')) {
+      PG.notes = $('pg-notes').value;
+      Object.keys(PG.flag).forEach(function (id) { if (PG.flag[id]) { var o = OBJECTIVES.filter(function (x) { return x.id === id; })[0]; if (o) o.flagged = true; } });
+      STRAT.lastProgress = '26 Sep'; STRAT.progress = 'Monday 27 October'; PG = null; go('strategy'); toast('Progress saved. Next progress meeting: Monday 27 October.');
+    }
+  });
+  document.addEventListener('change', function (e) {
+    var r = e.target.getAttribute && e.target.getAttribute('data-msck'); if (!r || !PG) return;
+    var pr = r.split(':'); PROGRAMS[pr[0]].ms[+pr[1]].st = e.target.value; PG.ms[r] = true; var y = window.scrollY; renderProgress(); window.scrollTo(0, y);
+  });
+
+  /* =============================================================
      Routing (in-page, so it works inside sandboxed frames)
      ============================================================= */
   function go(target) { try { history.replaceState(null, '', '#' + target); } catch (err) { /* ignore */ } route(target); }
   function route(target) {
     var h = (target || (location.hash || '').slice(1) || 'focus').split('/');
-    ST.view = ['focus', 'sites', 'site', 'sources', 'meeting', 'meetings', 'insight', 'myfocus', 'map', 'strategy', 'planning'].indexOf(h[0]) > -1 ? h[0] : 'focus';
+    ST.view = ['focus', 'sites', 'site', 'sources', 'meeting', 'meetings', 'insight', 'myfocus', 'map', 'strategy', 'planning', 'progress'].indexOf(h[0]) > -1 ? h[0] : 'focus';
     ST.factor = ST.view === 'map' ? (h[1] || '') : '';
     if (!ST.keepWalk) { ST.mfSnap = null; if (ST.view === 'myfocus') ST.mfWalk = -1; } ST.keepWalk = false;
     ST.insight = ST.view === 'insight' ? (h[1] || '') : '';
@@ -3374,7 +3455,8 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
     ST.dismissing = '';
     if (ST.view === 'meeting' && !MT) ST.view = 'focus';
     if (ST.view === 'planning' && !PL) ST.view = 'strategy';
-    var tab = ['meeting', 'meetings', 'insight'].indexOf(ST.view) > -1 ? 'focus' : ST.view === 'site' ? 'sites' : ST.view === 'planning' ? 'strategy' : ST.view;
+    if (ST.view === 'progress' && !PG) ST.view = 'strategy';
+    var tab = ['meeting', 'meetings', 'insight'].indexOf(ST.view) > -1 ? 'focus' : ST.view === 'site' ? 'sites' : ST.view === 'planning' || ST.view === 'progress' ? 'strategy' : ST.view;
     ST.src = ST.view === 'sources' ? (h[1] || '') : '';
     if (ST.src === 'feed') { ST.src = ''; ST.srcTab = 'feed'; } else if (ST.view === 'sources' && !ST.src) ST.srcTab = 'cards';
     ST.siteFeed = ST.view === 'site' && h[2] === 'feed';
@@ -3382,7 +3464,7 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
     closeRec(); closeSheet(); render(); window.scrollTo(0, 0);
   }
   function render() { renderView(); renderMyFocusCount(); }
-  function renderView() { if (ST.view === 'map') renderMap(); else if (ST.view === 'strategy') renderStrategy(); else if (ST.view === 'planning') renderPlanning(); else if (ST.view === 'myfocus') renderMyFocus(); else if (ST.view === 'sites') renderSites(); else if (ST.view === 'site') { if (ST.siteFeed) renderSiteFeed(ST.site); else renderSite(ST.site); } else if (ST.view === 'sources') renderSources(); else if (ST.view === 'meeting') renderMeeting(); else if (ST.view === 'meetings') renderMeetings(); else if (ST.view === 'insight') renderInsight(ST.insight); else renderFocus(); }
+  function renderView() { if (ST.view === 'map') renderMap(); else if (ST.view === 'strategy') renderStrategy(); else if (ST.view === 'planning') renderPlanning(); else if (ST.view === 'progress') renderProgress(); else if (ST.view === 'myfocus') renderMyFocus(); else if (ST.view === 'sites') renderSites(); else if (ST.view === 'site') { if (ST.siteFeed) renderSiteFeed(ST.site); else renderSite(ST.site); } else if (ST.view === 'sources') renderSources(); else if (ST.view === 'meeting') renderMeeting(); else if (ST.view === 'meetings') renderMeetings(); else if (ST.view === 'insight') renderInsight(ST.insight); else renderFocus(); }
 
   document.addEventListener('click', function (e) {
     var a = e.target.closest('a[href^="#"]');
