@@ -632,6 +632,52 @@ button.ind-btn:hover .ind-name { text-decoration: underline; text-underline-offs
 .pl-rest span { color: var(--text-3); }
 .pl-sug { margin: 0; font-size: 13.5px; color: var(--text-2); }
 .pl-use { font-weight: 800; text-decoration: underline; text-underline-offset: 3px; }
+.st-cad { display: flex; align-items: flex-end; gap: 10px 22px; flex-wrap: wrap; font-size: 14.5px; font-weight: 700; }
+.st-cad > span { display: grid; gap: 2px; }
+.st-note { margin: -8px 0 20px; font-size: 15px; color: var(--text-2); }
+.st-objs { display: grid; gap: 18px; }
+.st-obj { padding: 20px 22px; display: grid; gap: 14px; }
+.st-top { display: flex; align-items: center; gap: 8px 12px; flex-wrap: wrap; }
+.st-own { margin-left: auto; font-size: 14px; font-weight: 600; color: var(--text-2); }
+.st-title { font-size: 22px; line-height: 1.25; }
+.st-why { margin: -6px 0 0; font-size: 16px; color: var(--text-2); max-width: 75ch; }
+.st-now { display: flex; align-items: center; gap: 8px 14px; flex-wrap: wrap; font-weight: 700; }
+.st-now .label { flex-basis: 100%; }
+.st-tgt { margin-left: auto; font-size: 14px; font-weight: 600; color: var(--text-2); }
+.st-tgt b { color: var(--text); }
+.st-krs { display: grid; }
+.st-krs > .label { margin-bottom: 6px; }
+.kr { display: grid; grid-template-columns: minmax(0, 1fr) auto 130px; gap: 6px 16px; align-items: center; padding: 10px 0; border-top: 1px solid var(--border); }
+.kr-n { font-size: 15.5px; font-weight: 800; }
+.kr-tg { font-size: 13.5px; font-weight: 800; justify-self: end; }
+.kr-tg.hit { color: var(--success); }
+.st-prog { display: grid; gap: 10px; padding: 14px 16px; border: 1px solid var(--border); border-radius: 10px; }
+.sp-head { display: grid; gap: 2px; }
+.sp-ms .ra-t { grid-column: 2; font-size: 15px; font-weight: 700; }
+.sp-ms .ra-m { grid-column: 2; font-size: 13.5px; font-weight: 600; color: var(--text-3); }
+.sp-head h3 { font-size: 17px; }
+.sp-meta { font-size: 14px; font-weight: 600; color: var(--text-2); }
+.st-ins { display: grid; gap: 8px; }
+.st-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; margin-top: 18px; align-items: start; }
+@media (max-width: 1000px) { .st-grid { grid-template-columns: 1fr; } }
+.st-gaps { list-style: none; margin: 0; padding: 0; display: grid; }
+.st-gaps li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px 12px; align-items: center; padding: 12px 0; border-top: 1px solid var(--border); }
+.st-gaps li > div { display: grid; gap: 2px; font-weight: 800; }
+.st-gaps .ind-rate { grid-column: 1; }
+.st-gaps li > .btn, .st-gaps .sg-on { grid-column: 2; grid-row: 1 / span 2; }
+.sg-m { font-size: 13.5px; font-weight: 600; color: var(--text-2); }
+.sg-on { font-size: 13.5px; font-weight: 800; }
+.st-sugg { display: grid; gap: 6px; justify-items: start; margin-top: 12px; padding: 12px 14px; background: var(--brand); border-radius: 10px; }
+.st-sugg p { margin: 0; font-size: 15px; font-weight: 600; }
+.st-sugg .label { color: var(--text); }
+.st-kinds { list-style: none; margin: 0; padding: 0; display: grid; }
+.st-kinds li { display: grid; gap: 6px; padding: 10px 0; border-top: 1px solid var(--border); }
+.sk-k { font-size: 15px; font-weight: 800; }
+.sk-r { display: grid; gap: 4px; }
+.sk-b { display: flex; align-items: center; gap: 10px; font: inherit; font-size: 14.5px; background: none; border: 0; padding: 0; cursor: pointer; text-align: left; color: inherit; }
+.sk-b:hover span:last-child { text-decoration: underline; text-underline-offset: 3px; }
+.sk-b .badge, .sk-b .tlabel { flex: 0 0 auto; }
+@media (max-width: 640px) { .kr { grid-template-columns: 1fr; } .kr-tg { justify-self: start; } .st-own { margin-left: 0; } }
 .plan-read { margin: 0; display: grid; gap: 4px; font-size: 15px; }
 .plan-read .badge, .plan-read .tlabel { margin-right: 6px; }
 .rt-list { list-style: none; margin: 0; padding: 0; display: grid; }
@@ -743,6 +789,7 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
       <a href="#focus" data-view="focus">Insights</a>
       <a href="#sites" data-view="sites">Sites</a>
       <a href="#map" data-view="map">Map</a>
+      <a href="#strategy" data-view="strategy">Strategy</a>
       <a href="#sources" data-view="sources">Sources<span class="tab-dot" id="src-badge" hidden></span></a>
     </nav>
     <div class="hdr-right">
@@ -1877,6 +1924,14 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
       ['', 'Steady', 'About the same as the two weeks before.'],
       ['success', 'Improving', 'Less evidence, or evidence that controls are now holding.']
     ]],
+    ['strategy', 'Strategy', [
+      ['', 'Strategy', 'The few Forge Works Map factors the company has chosen to mature this year. Insights respond to what the records show; strategy is proactive.'],
+      ['', 'Objective', 'A factor, a target level and a date, for the whole company or one division. Only set or changed at quarterly planning, with company leadership in the room.'],
+      ['', 'Key result', 'An indicator with a target level. Prism scores it from the records, so progress shows every week, not once a quarter.'],
+      ['', 'Program', 'Planned work towards an objective, with an owner, milestones and resources. Like a plan, it says what Prism should listen for.'],
+      ['', 'Gap with no objective', 'A weak or worsening factor that nobody has chosen to act on. Raise it at the next quarterly planning.'],
+      ['', 'Cadence', 'Quarterly planning sets objectives. A monthly progress meeting checks key results and programs. Fortnightly Focus reviews work the insights.']
+    ]],
     ['map', 'Forge Works Map', [
       ['', 'Forge Works Map', '15 systemic factors in three domains (Guide, Enable, Execute) that describe how mature an organisation\u2019s safety capacity is. Forge Works IP.'],
       ['', 'Compliant', 'Safety comes from following the system: rules, procedures, compliance and lagging measures.'],
@@ -2981,7 +3036,8 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
     return '<p class="mc-f"><span class="label">Improves</span><span>' + nm(fx[0]) + ' \u00b7 ' + esc(f.inds[k].toLowerCase()) + '</span></p>' + levelBar(x.v, true, null, x.was) +
       (l > -1 ? '<p class="mc-l"><span class="tag-now">Where you are \u00b7 ' + LEVELS[l] + '</span>' + (now ? esc(now) + (cueInferred(fx[0], k, l) ? ' ' + INF_TAG : '') : '') + '</p>' : '') +
       (nl > -1 ? '<p class="mc-l"><span class="tag-next">Next step \u00b7 ' + LEVELS[nl] + '</span>' + esc(nx) + (cueInferred(fx[0], k, nl) ? ' ' + INF_TAG : '') + '</p>' : '') +
-      (also.length ? '<p class="mc-also"><span class="label">Also moves</span>' + also.join('') + '</p>' : '');
+      (also.length ? '<p class="mc-also"><span class="label">Also moves</span>' + also.join('') + '</p>' : '') +
+      (function () { var o = objFor(i); return o ? '<p class="mc-also"><span class="label">Contributes to objective</span><span><a class="map-link" href="#strategy">' + esc(objTitle(o)) + '</a></span></p>' : ''; })();
   }
   function mapCard(i) { var b = mapBody(i); return b ? '<section class="card side-card mc"><h2>On the Forge Works Map</h2>' + b + '</section>' : ''; }
   function mapLine(i) { var fx = INS_FACTOR[i.id]; return fx ? '<span class="icard-map"><span class="label">Improves</span>' + esc(FACTOR[fx[0]].name) + ' \u00b7 ' + esc(FACTOR[fx[0]].inds[fx[1]].toLowerCase()) + '</span>' : ''; }
@@ -3032,12 +3088,140 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
   });
 
   /* =============================================================
+     Strategy: the few Forge Works Map factors Tallowmere Group has chosen to mature.
+     Objectives are set only at company purview, at quarterly planning. Insights are
+     responsive; strategy is proactive.
+     ============================================================= */
+  var STRAT = { planning: 'Wednesday 1 October', lastPlanning: '1 Jul', progress: 'Monday 6 October', lastProgress: '1 Sep', year: 'the year to June 2027' };
+  // [key, factor, target level, by, division scope ('' = whole company), owner, why, key results [[indicator, target level]], program ids]
+  var OBJECTIVES = [
+    { id: 'o-comm', f: 'communications_coordination', target: 1, by: 'June 2027', div: 'Infrastructure', owner: 'Morgan Hale',
+      why: 'The clearest gap in Infrastructure. Controls that hold during the work fail when the work changes hands.',
+      krs: [[4, 1], [1, 1]], programs: ['p-hand'] },
+    { id: 'o-mon', f: 'monitoring_metrics', target: 1, by: 'June 2027', div: '', owner: 'Morgan Hale',
+      why: 'Completion rates look healthy while pre-starts and inspections are ticked, not done. The group can’t see what’s working.',
+      krs: [[1, 1], [0, 1]], programs: ['p-meas'] },
+    { id: 'o-front', f: 'frontline_workers', target: 1, by: 'March 2027', div: '', owner: 'Alex Chen',
+      why: 'Workers already stop for serious risk. Making stopping routine, and backed, is the quickest route to Leading.',
+      krs: [[2, 1], [3, 1]], programs: ['p-stop'] }
+  ];
+  var PROGRAMS = {
+    'p-hand': { title: 'Division handover standard', owner: 'Priya Nair', resources: 'Two site engineers, two days a week · $40k',
+      expect: 'Handover-related control failures fall across Infrastructure, and both shifts sign every handover.',
+      read: ['early', 'The trial starts at Rail Stabling Yard on 6 Oct.'],
+      ms: [A('Map every kind of handover across the division', 'Priya Nair', '15 Aug', 'done'), A('Draft the standard with site managers', 'Priya Nair', '12 Sep', 'done'),
+           A('Trial it at Rail Stabling Yard and Ridge Road', 'Tom Walsh', '31 Oct', 'track'), A('Roll it out to every Infrastructure site', 'Priya Nair', '15 Dec')] },
+    'p-meas': { title: 'Measure effectiveness, not activity', owner: 'Dana Brooks', resources: 'HSE team · Intelex and Mitti form changes',
+      expect: 'Pre-starts and inspections vary with the work and take a realistic time.',
+      read: ['continues', 'Pre-starts are still being ticked at Southern Tunnels and Harbour Bridge Deck.'],
+      ms: [A('Choose three effectiveness measures to replace completion rates', 'Dana Brooks', '29 Aug', 'done'), A('Rebuild the pre-start and inspection forms', 'Dana Brooks', '10 Oct', 'risk'),
+           A('Take completion-rate targets out of site reports', 'Morgan Hale', '30 Nov')] },
+    'p-stop': { title: 'Stopping work that sticks', owner: 'Alex Chen', resources: 'Supervisor coaching · four sessions per division',
+      expect: 'More stops are called, fewer problems repeat, and no stop is overruled for production.',
+      read: ['working', 'Stops called are up 30% since August, and spotters are calling stops at Ridge Road.'],
+      ms: [A('Coach supervisors to back every stop', 'Alex Chen', '22 Aug', 'done'), A('Log stops and restarts in Procore and Intelex', 'Dana Brooks', '19 Sep', 'done'),
+           A('Share one stop story a week across the group', 'Alex Chen', '31 Oct', 'track')] }
+  };
+  var RETRO_KIND = { 'r-dust': 'Equipment and engineering', 'r-lone': 'Rostering and resourcing', 'r-cone': 'Briefings', 'r-pre0': 'New paperwork or sign-offs', 'r-hot': 'New paperwork or sign-offs' };
+  ST.cand = {};
+
+  function objRegs(o) {
+    var all = []; ORG.forEach(function (d) { if (o.div && d.div !== o.div) return; d.regions.forEach(function (r) { all.push(r.name); }); });
+    var mine = regionsInScope(); return all.filter(function (r) { return mine.indexOf(r) > -1; });
+  }
+  function objsInView() { return OBJECTIVES.filter(function (o) { return objRegs(o).length; }); }
+  function objTitle(o) { return FACTOR[o.f].name + ' to ' + LEVELS[o.target] + ' by ' + o.by; }
+  function objStatus(o) {
+    var regs = objRegs(o), pr = o.programs.map(function (p) { return PROGRAMS[p]; });
+    var krWorse = o.krs.some(function (kr) { return aggInd(regs, o.f, kr[0]).t === 'worse'; });
+    var cont = pr.some(function (p) { return p.read[0] === 'continues'; }), slip = pr.some(function (p) { return p.ms.some(function (m) { return m.st === 'risk' || overdue(m); }); });
+    if (krWorse && cont) return ['critical', 'Off track'];
+    if (krWorse || cont || slip) return ['warning', 'At risk'];
+    return ['success', 'On track'];
+  }
+  // Which objective an insight contributes to, in the current purview
+  function objFor(i) {
+    var fx = INS_FACTOR[i.id]; if (!fx) return null;
+    return objsInView().filter(function (o) { return o.f === fx[0] && i.sites.some(function (s) { return objRegs(o).indexOf(SITE[s].region) > -1; }); })[0] || null;
+  }
+  function readBadge(r) { return r[0] === 'working' ? '<span class="badge success"><i></i>Working</span>' : r[0] === 'continues' ? '<span class="badge critical"><i></i>Pattern continues</span>' : '<span class="tlabel">Too early</span>'; }
+
+  function renderStrategy() {
+    var org = !ST.div && !ST.reg, objs = objsInView(), regs = regionsInScope();
+    var st = objs.map(objStatus), counts = {}; st.forEach(function (x) { counts[x[1]] = (counts[x[1]] || 0) + 1; });
+    var off = objs.filter(function (o, k) { return st[k][1] === 'Off track'; });
+    // Gaps: weak or worsening factors in this purview that no objective covers
+    var covered = objs.map(function (o) { return o.f; });
+    var gaps = FACTORS.map(function (f) { return { f: f[0], sc: scoreFactor(regs, f[0]) }; }).filter(function (g) { return covered.indexOf(g.f) < 0 && g.sc.v != null && g.sc.n >= 10 && (g.sc.t === 'worse' || g.sc.lvl === 0); })
+      .sort(function (a, b) { return (a.sc.t === 'worse' ? 0 : 1) - (b.sc.t === 'worse' ? 0 : 1) || a.sc.v - b.sc.v; });
+    var escOrg = INSIGHTS.filter(function (i) { return !i.closed && !i.dismissed && i.esc && i.esc.to === 'org'; });
+    // Hiviz recommends a program when agreed plans cluster on one factor that has no objective
+    var byF = {}; insightsInView().forEach(function (i) { if (!i.plan || i.plan.state !== 'agreed' || !INS_FACTOR[i.id]) return; var f = INS_FACTOR[i.id][0]; if (covered.indexOf(f) > -1) return; (byF[f] = byF[f] || []).push(i); });
+    var sugg = Object.keys(byF).filter(function (f) { return byF[f].length >= 2; });
+    var worsening = gaps.filter(function (g) { return g.sc.t === 'worse'; });
+
+    var lead = objs.length ? '<b>' + word(objs.length) + (objs.length === 1 ? ' objective' : ' objectives') + (org ? '' : ' include ' + esc(scopeLabel())) + '.</b> ' +
+      (function () { var t = ['On track', 'At risk', 'Off track'].filter(function (k) { return counts[k]; }).map(function (k) { return lw(counts[k]) + ' ' + k.toLowerCase(); }).join(', '); return t.charAt(0).toUpperCase() + t.slice(1); })() + '. ' +
+      (off.length ? esc(FACTOR[off[0].f].name) + ' is off track: ' + esc(PROGRAMS[off[0].programs[0]].read[1].charAt(0).toLowerCase() + PROGRAMS[off[0].programs[0]].read[1].slice(1)) + ' ' : '') +
+      (worsening.length ? '<b class="t-critical">' + esc(FACTOR[worsening[0].f].name) + ' is worsening with no objective.</b>' : '') : 'No objectives include ' + esc(scopeLabel()) + '.';
+
+    $('view').innerHTML =
+      '<div class="page-top"><div><h1>Strategy</h1><p class="sub">' + esc(ORG_NAME) + ' objectives for ' + esc(STRAT.year) + ' · set at quarterly planning</p></div>' +
+        '<div class="st-cad"><span><span class="label">Quarterly planning</span>Next: ' + esc(STRAT.planning) + '</span><span><span class="label">Monthly progress</span>Next: ' + esc(STRAT.progress) + '</span><button type="button" class="what" data-help="strategy">How strategy works</button></div></div>' +
+      '<p class="pv-summary">' + lead + '</p>' +
+      (org ? '' : '<p class="st-note">Objectives are set for all of ' + esc(ORG_NAME) + ' at quarterly planning. This shows the ones that include ' + esc(scopeLabel()) + ', measured across it.</p>') +
+      '<div class="st-objs">' + objs.map(function (o, oi) {
+        var f = FACTOR[o.f], orr = objRegs(o), sc = scoreFactor(orr, o.f), s = st[oi];
+        var ins = insightsInView().filter(function (i) { return objFor(i) === o; });
+        return '<section class="card st-obj"><div class="st-top"><span class="badge ' + s[0] + '"><i></i>' + s[1] + '</span><span class="chip">' + esc(o.div ? o.div + ' division' : 'All of ' + ORG_NAME) + '</span><span class="st-own">Owner ' + esc(o.owner) + ' · set ' + esc(STRAT.lastPlanning) + '</span></div>' +
+          '<h2 class="st-title">' + esc(objTitle(o)) + '</h2><p class="st-why">' + esc(o.why) + '</p>' +
+          '<div class="st-now"><span class="label">Today' + (org || !o.div ? '' : '') + '</span>' + factorBtn(o.f) + levelBar(sc.v, true, null, sc.was) + trendHTML(sc.t) + '<span class="st-tgt">Target: <b>' + LEVELS[o.target] + '</b> \u00b7 ' + esc(f.lnames[o.target]) + '</span></div>' +
+          '<div class="st-krs"><span class="label">Key results · ' + esc(o.div && org ? o.div + ' division' : scopeLabel()) + '</span>' + o.krs.map(function (kr) {
+            var x = aggInd(orr, o.f, kr[0]), hit = lvlOf(x.v) >= kr[1];
+            return '<div class="kr"><span class="kr-n">' + esc(f.inds[kr[0]]) + '</span><span class="ind-rate">' + levelBar(x.v, true, x.v == null ? 'Needs input' : null, x.was) + (x.v != null ? trendHTML(x.t) : '') + '</span><span class="kr-tg' + (hit ? ' hit' : '') + '">' + (hit ? 'Target reached' : 'Target ' + LEVELS[kr[1]]) + '</span></div>';
+          }).join('') + '</div>' +
+          o.programs.map(function (pid) {
+            var p = PROGRAMS[pid], d = p.ms.filter(function (m) { return m.st === 'done'; }).length;
+            return '<div class="st-prog"><div class="sp-head"><span class="label">Program</span><h3>' + esc(p.title) + '</h3><span class="sp-meta">' + esc(p.owner) + ' · ' + d + ' of ' + p.ms.length + ' milestones done · ' + esc(p.resources) + '</span></div>' +
+              '<ul class="ra-acts sp-ms">' + p.ms.map(function (m) { return '<li>' + actBadge(m) + '<span class="ra-t">' + esc(m.t) + '</span><span class="ra-m">' + esc(m.who) + ' · by ' + esc(m.due) + '</span></li>'; }).join('') + '</ul>' +
+              '<p class="plan-exp"><span class="label">Prism listens for</span>' + esc(p.expect) + '</p>' +
+              '<p class="plan-read"><span class="label">Prism’s read so far</span><span>' + readBadge(p.read) + ' ' + esc(p.read[1]) + '</span></p></div>';
+          }).join('') +
+          '<div class="st-ins"><span class="label">Insights contributing</span>' + (ins.length ? '<div class="links">' + ins.map(function (i) { return '<button type="button" class="link-item" data-open="' + i.id + '"><b>' + esc(i.title) + '</b><span>' + esc(FACTOR[o.f].inds[INS_FACTOR[i.id][1]]) + ' · ' + esc(planSummary(i) || statusText(i)) + '</span></button>'; }).join('') + '</div>' : '<p class="muted-p">No open insights on this factor right now.</p>') + '</div>' +
+        '</section>';
+      }).join('') + '</div>' +
+      '<div class="st-grid">' +
+        '<section class="card rsec"><span class="label">Gaps with no objective · ' + esc(scopeLabel()) + '</span>' +
+          (gaps.length ? '<ul class="st-gaps">' + gaps.slice(0, 4).map(function (g) {
+            var n = insightsInView().filter(function (i) { return INS_FACTOR[i.id] && INS_FACTOR[i.id][0] === g.f; }).length;
+            return '<li><div>' + factorBtn(g.f) + '<span class="sg-m">' + (g.sc.weakest != null ? 'Held back by ' + esc(FACTOR[g.f].inds[g.sc.weakest].toLowerCase()) : '') + (n ? ' · ' + n + (n === 1 ? ' insight' : ' insights') : '') + '</span></div><span class="ind-rate">' + levelBar(g.sc.v, true, null, g.sc.was) + trendHTML(g.sc.t) + '</span>' +
+              (ST.cand[g.f] ? '<span class="sg-on">On the planning agenda</span>' : '<button type="button" class="btn sm" data-cand="' + g.f + '">Raise at planning</button>') + '</li>';
+          }).join('') + '</ul>' + (gaps.length > 4 ? '<p class="muted-p">And ' + lw(gaps.length - 4) + ' more at Compliant.</p>' : '') : '<p class="muted-p">Every weak or worsening factor has an objective.</p>') +
+          (escOrg.length ? '<h3 class="ra-h">Escalated to ' + esc(ORG_NAME) + '</h3><ul class="rlist">' + escOrg.map(function (i) { return '<li><button type="button" class="rlink" data-open="' + i.id + '">' + esc(i.title) + '</button><span>A candidate for planning if it needs more than a plan</span></li>'; }).join('') + '</ul>' : '') +
+          (sugg.length ? sugg.map(function (fk) { var ii = byF[fk]; return '<div class="st-sugg"><span class="label">Hiviz recommends</span><p>' + word(ii.length) + ' agreed plans this quarter work on <b>' + esc(FACTOR[fk].name.toLowerCase()) + '</b> (' + esc(join(ii.map(function (i) { return FACTOR[fk].inds[INS_FACTOR[i.id][1]].toLowerCase(); }).filter(function (v, k, a) { return a.indexOf(v) === k; }))) + '). Make it a program, so the fixes add up.</p>' + (ST.cand['prog-' + fk] ? '<span class="sg-on">On the planning agenda</span>' : '<button type="button" class="btn sm" data-cand="prog-' + fk + '">Raise at planning</button>') + '</div>'; }).join('') : '') +
+        '</section>' +
+        (function () {
+          var rs = retrosInView(); if (!rs.length) return '';
+          var kinds = []; rs.forEach(function (r) { var k = RETRO_KIND[r.id]; if (kinds.indexOf(k) < 0) kinds.push(k); });
+          return '<section class="card rsec"><span class="label">What worked · 90-day retros by kind of action</span><ul class="st-kinds">' + kinds.map(function (k) {
+            return '<li><span class="sk-k">' + esc(k) + '</span><span class="sk-r">' + rs.filter(function (r) { return RETRO_KIND[r.id] === k; }).map(function (r) { return '<button type="button" class="sk-b" data-retro="' + r.id + '">' + outBadge(r.outcome) + '<span>' + esc(r.title) + '</span></button>'; }).join('') + '</span></li>';
+          }).join('') + '</ul><div class="st-sugg"><span class="label">Hiviz recommends</span><p>Favour changes to equipment and rostering over briefings and new paperwork. It follows the hierarchy of controls, and your own retros agree.</p></div></section>';
+        })() +
+      '</div>' +
+      '<p class="map-note">' + (org ? 'Objectives can only be changed at quarterly planning, with ' + esc(ORG_NAME) + ' leadership in the room. Next: ' + esc(STRAT.planning) + '.' : 'Want an objective changed? Raise it at quarterly planning on ' + esc(STRAT.planning) + '.') + '</p>';
+  }
+  document.addEventListener('click', function (e) {
+    var c = e.target.closest('[data-cand]'); if (!c) return;
+    ST.cand[c.getAttribute('data-cand')] = true; toast('Added to the agenda for quarterly planning on ' + STRAT.planning + '.'); var y = window.scrollY; renderStrategy(); window.scrollTo(0, y);
+  });
+
+  /* =============================================================
      Routing (in-page, so it works inside sandboxed frames)
      ============================================================= */
   function go(target) { try { history.replaceState(null, '', '#' + target); } catch (err) { /* ignore */ } route(target); }
   function route(target) {
     var h = (target || (location.hash || '').slice(1) || 'focus').split('/');
-    ST.view = ['focus', 'sites', 'site', 'sources', 'meeting', 'meetings', 'insight', 'myfocus', 'map'].indexOf(h[0]) > -1 ? h[0] : 'focus';
+    ST.view = ['focus', 'sites', 'site', 'sources', 'meeting', 'meetings', 'insight', 'myfocus', 'map', 'strategy'].indexOf(h[0]) > -1 ? h[0] : 'focus';
     ST.factor = ST.view === 'map' ? (h[1] || '') : '';
     if (!ST.keepWalk) { ST.mfSnap = null; if (ST.view === 'myfocus') ST.mfWalk = -1; } ST.keepWalk = false;
     ST.insight = ST.view === 'insight' ? (h[1] || '') : '';
@@ -3052,7 +3236,7 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
     closeRec(); closeSheet(); render(); window.scrollTo(0, 0);
   }
   function render() { renderView(); renderMyFocusCount(); }
-  function renderView() { if (ST.view === 'map') renderMap(); else if (ST.view === 'myfocus') renderMyFocus(); else if (ST.view === 'sites') renderSites(); else if (ST.view === 'site') { if (ST.siteFeed) renderSiteFeed(ST.site); else renderSite(ST.site); } else if (ST.view === 'sources') renderSources(); else if (ST.view === 'meeting') renderMeeting(); else if (ST.view === 'meetings') renderMeetings(); else if (ST.view === 'insight') renderInsight(ST.insight); else renderFocus(); }
+  function renderView() { if (ST.view === 'map') renderMap(); else if (ST.view === 'strategy') renderStrategy(); else if (ST.view === 'myfocus') renderMyFocus(); else if (ST.view === 'sites') renderSites(); else if (ST.view === 'site') { if (ST.siteFeed) renderSiteFeed(ST.site); else renderSite(ST.site); } else if (ST.view === 'sources') renderSources(); else if (ST.view === 'meeting') renderMeeting(); else if (ST.view === 'meetings') renderMeetings(); else if (ST.view === 'insight') renderInsight(ST.insight); else renderFocus(); }
 
   document.addEventListener('click', function (e) {
     var a = e.target.closest('a[href^="#"]');
