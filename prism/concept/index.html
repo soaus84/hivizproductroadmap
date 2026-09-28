@@ -636,6 +636,35 @@ button.ind-btn:hover .ind-name { text-decoration: underline; text-underline-offs
 .st-cad > span { display: grid; gap: 2px; }
 .pl-h { font-size: 18px; margin: 22px 0 10px; }
 .st-go { display: flex; gap: 8px; flex-wrap: wrap; }
+.pl-pv { display: flex; align-items: baseline; gap: 10px; margin: -8px 0 16px; font-size: 15px; }
+.ci-panel { padding: 18px 20px; display: grid; gap: 12px; margin-bottom: 18px; }
+.ci-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 8px 20px; flex-wrap: wrap; }
+.ci-head .rlead { margin: 4px 0 0; font-size: 17px; }
+.ci-head .muted-p { margin: 0; }
+.ci-mine { display: grid; gap: 8px; }
+.ci-form { display: grid; grid-template-columns: minmax(0, 1.2fr) auto minmax(0, 1.4fr) auto; gap: 8px 10px; align-items: center; padding-top: 10px; border-top: 1px solid var(--border); }
+.ci-form > div { display: grid; gap: 2px; }
+.ci-form .muted-p { margin: 0; font-size: 13.5px; }
+.ci-form .w-note { min-height: 0; padding: 8px 10px; }
+@media (max-width: 900px) { .ci-form { grid-template-columns: 1fr; } }
+.ci-list { list-style: none; margin: 0; padding: 0; display: grid; }
+.ci-list li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 14px; padding: 10px 0; border-top: 1px solid var(--border); align-items: start; }
+.ci-t { font-size: 15px; font-weight: 800; grid-column: 1; }
+.ci-t small { font-weight: 600; color: var(--text-3); }
+.ci-list .ci-line, .ci-list .ci-cm { grid-column: 1; }
+.ci-why { grid-column: 2; grid-row: 1 / span 3; justify-self: end; }
+.ci-noted { font-size: 13px; font-weight: 800; color: var(--text-3); }
+.ci-done .ci-t { color: var(--text-3); font-weight: 700; }
+.ci-line { display: flex; align-items: baseline; gap: 8px; font-size: 14.5px; }
+.ci-line .badge, .ci-line .tlabel, .ci-line .av { flex: 0 0 auto; }
+.ci-cm { list-style: none; margin: 4px 0 0; padding: 0 0 0 12px; border-left: 2px solid var(--border); display: grid; gap: 4px; font-size: 14px; }
+.ci-cm li { display: flex !important; gap: 8px; align-items: baseline; padding: 0 !important; border: 0 !important; }
+.ci-cm .av { width: 20px; height: 20px; font-size: 9px; }
+.ci-box { display: grid; gap: 6px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 10px; }
+.pg-noted li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; }
+.pg-noted .ci-line { grid-column: 1; }
+.pg-noted .rt-undo { grid-column: 2; grid-row: 1 / span 2; }
+.rlist .ci-q { grid-column: 2; font-style: normal; }
 .pl-list { display: grid; gap: 12px; }
 .pl-item { padding: 16px 18px; display: grid; gap: 12px; }
 .pl-item.out { opacity: 0.55; }
@@ -1715,6 +1744,10 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
     var t = e.target.closest('[data-palink]'); if (t) { var k = t.getAttribute('data-palink'); ST.openLink[k] = !ST.openLink[k]; rerenderFor(k.split(':')[0]); return; }
     var u = e.target.closest('[data-pause]'); if (u) { var pr = u.getAttribute('data-pause').split(':'), i = insightById(pr[0]), a = i.plan.actions[+pr[1]]; a.st = pr[2]; i.updated = 0; logEvent(i, 'Action ' + PA_ST.filter(function (x) { return x[0] === pr[2]; })[0][1].toLowerCase(), a.t + ' (from ' + SRC[LINKS[pr[0] + ':' + pr[1]].src].name + ')', 'Prism'); toast('Checked in from ' + SRC[LINKS[pr[0] + ':' + pr[1]].src].name); rerenderFor(i.id); }
   });
+  // Owners' check-ins on plan actions during the week before the Focus review: [insight, action, note, when]
+  [['load', 0, 'Audit booked with the rigging supplier for 30 Sep.', '24 Sep'], ['pre', 1, 'Waiting on Intelex to change the form.', '22 Sep'],
+   ['edge', 0, 'Subcontractor says the method is on track for 29 Sep.', '25 Sep'], ['pre', 0, '', '19 Sep'], ['spot', 0, '', '19 Sep'], ['house', 0, '', '19 Sep']
+  ].forEach(function (c) { var pl = PLANS[c[0]], a = pl && pl.actions[c[1]]; if (a) { a.note = c[2]; a.upd = c[3]; } });
   var PA_ST = [['todo', 'Not started'], ['track', 'On track'], ['risk', 'At risk'], ['done', 'Done']];
   function planAgreed(i) { return !i.plan || i.plan.state === 'agreed'; }
   function overdue(a) { var m = /^(\d+) (\w{3})/.exec(a.due || ''); return a.st !== 'done' && !!m && MON[m[2]] != null && new Date(2026, MON[m[2]], +m[1]) < new Date(2026, 8, 26); }
@@ -1767,7 +1800,7 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
   document.addEventListener('change', function (e) {
     var ref = e.target.getAttribute && e.target.getAttribute('data-pa'); if (!ref) return;
     var pr = ref.split(':'), i = insightById(pr[0]), a = i.plan.actions[+pr[1]], lbl = PA_ST.filter(function (x) { return x[0] === e.target.value; })[0][1];
-    a.st = e.target.value; i.updated = 0; logEvent(i, 'Action ' + lbl.toLowerCase(), a.t, ST.view === 'meeting' && MT ? 'Focus review' : null);
+    a.st = e.target.value; a.upd = '26 Sep'; i.updated = 0; logEvent(i, 'Action ' + lbl.toLowerCase(), a.t, ST.view === 'meeting' && MT ? 'Focus review' : null);
     if (ST.view === 'meeting' && MT) { MT.checks[i.id] = MT.checks[i.id] || {}; MT.checks[i.id][pr[1]] = lbl; }
     toast(planDone(i) === i.plan.actions.length ? 'All actions done. Prism is listening for the change it expects, and Hiviz will recommend closing it once it sees it.' : 'Checked in: ' + lbl);
     rerenderFor(i.id);
@@ -2239,14 +2272,14 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
     if (!MT) { MT = null; return renderFocus(); }
     var last = lastMeeting();
     var sinceTxt = last ? 'since ' + last.short : 'first Focus review for this purview';
-    var head = esc(scopeLabel()) + ' · Friday 26 September · ' + esc(sinceTxt);
+    var head = esc(scopeLabel()) + ' · today, Friday 26 September · ' + esc(sinceTxt);
 
     // Step 1: set up
     if (MT.step === 1) {
       var people = managersInView();
       $('view').innerHTML = meetingTop('Start a Focus review', head) +
         '<div class="meet-grid"><section class="card meet-card">' +
-          '<h2>Who’s here</h2><p class="muted-p">Managers with responsibility in ' + esc(scopeLabel()) + '. To change the purview, use the selector in the header.</p>' +
+          '<h2>Who’s here</h2><p class="muted-p">Managers with responsibility in ' + esc(scopeLabel()) + '. To change the purview, use the selector in the header.</p><p class="pl-pv"><span class="label">Purview</span><b>' + esc(scopeLabel()) + '</b></p>' +
           '<ul class="att">' + people.map(function (p) {
             return '<li><label class="att-row"><input type="checkbox" data-att="' + esc(p) + '"' + (MT.attendees[p] ? ' checked' : '') + '><span class="av' + (p === YOU ? ' me' : '') + '">' + initials(p) + '</span><span class="att-name">' + esc(p === YOU ? 'You' : p) + '<small>' + esc(ROLE[p] || '') + '</small></span></label></li>';
           }).join('') + '</ul>' +
@@ -2395,11 +2428,11 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
     var n = function (f) { return acts.filter(f).length; };
     var group = function (i) {
       return '<li class="ra-i"><button type="button" class="rlink" data-open="' + i.id + '">' + esc(i.title) + '</button><ul class="ra-acts">' + i.plan.actions.map(function (a) {
-        return '<li>' + actBadge(a) + '<span class="ra-t">' + esc(a.t) + '</span><span class="ra-m">' + (a.who ? esc(a.who) : 'No one yet') + ' \u00b7 by ' + esc(a.due) + (function () { var l = LINKS[i.id + ':' + i.plan.actions.indexOf(a)]; return l ? ' \u00b7 ' + esc(SRC[l.src].name) + ': ' + l.closed + ' of ' + l.total + ' closed' : ''; })() + '</span></li>';
+        return '<li>' + actBadge(a) + '<span class="ra-t">' + esc(a.t) + '</span>' + (a.st === 'done' ? '' : a.upd ? '<span class="ra-m ci-q">Checked in ' + esc(a.upd) + (a.note ? ': \u201c' + esc(a.note) + '\u201d' : '') + '</span>' : '<span class="ra-m ci-q"><b class="t-warning">No check-in this week</b></span>') + '<span class="ra-m">' + (a.who ? esc(a.who) : 'No one yet') + ' \u00b7 by ' + esc(a.due) + (function () { var l = LINKS[i.id + ':' + i.plan.actions.indexOf(a)]; return l ? ' \u00b7 ' + esc(SRC[l.src].name) + ': ' + l.closed + ' of ' + l.total + ' closed' : ''; })() + '</span></li>';
       }).join('') + '</ul></li>';
     };
     return '<section class="card rsec"><span class="label">4 · Actions' + (last ? ' agreed on ' + esc(last.short) : '') + '</span>' +
-      (acts.length ? '<p class="rlead"><b>' + n(function (a) { return a.st === 'done'; }) + ' of ' + acts.length + ' actions done.</b> ' +
+      (acts.length ? '<p class="rlead"><b>' + n(function (a) { return a.st === 'done'; }) + ' of ' + acts.length + ' actions done.</b> ' + (n(function (a) { return a.st !== 'done' && !a.upd; }) ? word(n(function (a) { return a.st !== 'done' && !a.upd; })) + ' with no check-in this week. ' : '') +
         (n(overdue) ? word(n(overdue)) + ' overdue. ' : '') + (n(function (a) { return a.st === 'risk' && !overdue(a); }) ? word(n(function (a) { return a.st === 'risk' && !overdue(a); })) + ' at risk. ' : '') + '</p>' : '') +
       (fromLast.length ? '<ul class="rlist ra">' + fromLast.map(group).join('') + '</ul>' : '<p class="muted-p">' + (last ? 'No plans were agreed on ' + esc(last.short) + '.' : 'Nothing on record. This is the first Focus review for ' + esc(scopeLabel()) + '.') + '</p>') +
       (outside.length ? '<h3 class="ra-h">Agreed outside a review since then</h3><ul class="rlist ra">' + outside.map(group).join('') + '</ul>' : '') +
@@ -3182,6 +3215,7 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
         '<div class="st-cad"><span><span class="label">Quarterly planning</span>Next: ' + esc(STRAT.planning) + '</span><span><span class="label">Monthly progress</span>Next: ' + esc(STRAT.progress) + '</span><button type="button" class="what" data-help="strategy">How strategy works</button>' + (org ? '<span class="st-go"><button type="button" class="btn" data-pgstart="1">Start monthly progress</button><button type="button" class="btn brand" data-plstart="1">Start quarterly planning</button></span>' : '') + '</div></div>' +
       '<p class="pv-summary">' + lead + '</p>' +
       (org ? '' : '<p class="st-note">Objectives are set for all of ' + esc(ORG_NAME) + ' at quarterly planning. This shows the ones that include ' + esc(scopeLabel()) + ', measured across it.</p>') +
+      checkinPanel() +
       '<div class="st-objs">' + objs.map(function (o, oi) {
         var f = FACTOR[o.f], orr = objRegs(o), sc = scoreFactor(orr, o.f), s = st[oi];
         var ins = insightsInView().filter(function (i) { return objFor(i) === o; });
@@ -3234,7 +3268,14 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
   var PL = null;
   var PL_PEOPLE = ['Morgan Hale', 'You', 'Alex Chen', 'Dana Brooks', 'Priya Nair', 'Tom Walsh', 'Sam Ortiz', 'Jo Park'];
   var PL_BY = ['December 2026', 'March 2027', 'June 2027', 'December 2027'];
-  var PL_STEPS = ['Set up', 'Look back', 'Decide', 'Wrap-up'];
+  var PL_STEPS = ['Set up', 'Report', 'Decide', 'Wrap-up'];
+  // Written by each program owner in the week before planning: where we are, what I'd change
+  var PRE_NOTES = {
+    'o-comm': ['Priya Nair', '24 Sep', 'The standard is drafted; the trial is the real test. Keep the objective and the date.'],
+    'o-mon': ['Dana Brooks', '25 Sep', 'The forms aren\u2019t the problem. I\u2019d change the program to build the checks into the work, and give it until December 2027.'],
+    'o-front': ['Alex Chen', '23 Sep', 'On track. I\u2019d keep it, and aim for Resilient next year.']
+  };
+  function preNote(o) { var n = PRE_NOTES[o.id]; return n ? '<div class="ci-box"><span class="label">Owner\u2019s pre-read</span><span class="ci-line"><span class="av">' + initials(n[0]) + '</span><span><b>' + esc(n[0]) + '</b> \u00b7 ' + esc(n[1]) + ': \u201c' + esc(n[2]) + '\u201d</span></span></div>' : '<div class="ci-box"><span class="label">Owner\u2019s pre-read</span><span class="ci-line"><span class="tlabel">No pre-read</span><span>New this quarter</span></span></div>'; }
   var OBJ_ADVICE = {
     'o-comm': ['keep', 'Keep it. The handover trial starts in October, and team coordination is the clearest gap in Infrastructure.'],
     'o-mon': ['adjust', 'Keep the objective, change the program. New forms and sign-offs haven’t worked in your retros. Build the checks into the work itself, and move the date to December 2027.'],
@@ -3274,21 +3315,22 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
 
   function renderPlanning() {
     if (!PL) { ST.view = 'strategy'; return renderStrategy(); }
-    var head = esc(ORG_NAME) + ' · Wednesday 1 October · last planning ' + esc(STRAT.lastPlanning);
+    var head = esc(ORG_NAME) + ' · today, Friday 26 September · since ' + esc(STRAT.lastPlanning);
     if (PL.step === 1) {
       $('view').innerHTML = plTop('Quarterly planning', head) +
-        '<div class="meet-grid"><section class="card meet-card"><h2>Who’s here</h2><p class="muted-p">Objectives are set for the whole company, so the group executive has to be in the room.</p><ul class="att">' +
+        '<p class="pl-pv"><span class="label">Purview</span><b>' + esc(ORG_NAME) + '</b> \u00b7 required for this meeting</p>' +
+        '<div class="meet-grid"><section class="card meet-card"><h2>Who\u2019s here</h2><p class="muted-p">Objectives are set for the whole company, so the group executive has to be in the room. ' + Object.keys(PRE_NOTES).length + ' of ' + OBJECTIVES.length + ' owners sent a pre-read.</p><ul class="att">' +
           PL_PEOPLE.map(function (p) { var req = p === 'Morgan Hale'; return '<li><label class="att-row"><input type="checkbox" data-platt="' + esc(p) + '"' + (PL.att[p] ? ' checked' : '') + (req ? ' disabled' : '') + '><span class="av' + (p === YOU ? ' me' : '') + '">' + initials(p) + '</span><span class="att-name">' + esc(p) + '<small>' + esc(ROLE[p] || '') + (req ? ' · required' : '') + '</small></span></label></li>'; }).join('') + '</ul></section>' +
-        '<section class="card meet-card"><h2>What Hiviz will prepare</h2><ul class="plain"><li><b>Look back</b>: how each objective, key result and program went this quarter, and what the 90-day retros say worked.</li><li><b>Decide</b>: keep, adjust or retire each objective, and which candidates become objectives.</li><li><b>Candidates</b>: ' + lw(PL.cands.length) + ' factors with no objective, raised by managers or recommended by Hiviz.</li></ul>' +
-          '<p class="muted-p">Hiviz recommends no more than three objectives. Anything else stays with the Focus reviews.</p><div class="meet-actions"><button type="button" class="btn brand" data-plstep="2">Look back</button></div></section></div>';
+        '<section class="card meet-card"><h2>What Hiviz will prepare</h2><ul class="plain"><li><b>Report</b>: how each objective, key result and program went this quarter, and what the 90-day retros say worked.</li><li><b>Decide</b>: keep, adjust or retire each objective, and which candidates become objectives.</li><li><b>Candidates</b>: ' + lw(PL.cands.length) + ' factors with no objective, raised by managers or recommended by Hiviz.</li></ul>' +
+          '<p class="muted-p">Hiviz recommends no more than three objectives. Anything else stays with the Focus reviews.</p><div class="meet-actions"><button type="button" class="btn brand" data-plstep="2">Prepare the report</button></div></section></div>';
       return;
     }
     if (PL.step === 2) {
       var rs = retrosInView(), rc = {}; rs.forEach(function (r) { rc[r.outcome] = (rc[r.outcome] || 0) + 1; });
-      $('view').innerHTML = plTop('Look back', head + ' · this quarter') +
+      $('view').innerHTML = plTop('Report', head + ' · this quarter') +
         '<div class="report">' + OBJECTIVES.map(function (o, k) {
           var regs = objRegs(o), s = objStatus(o), f = FACTOR[o.f];
-          return '<section class="card rsec"><span class="label">' + (k + 1) + ' · ' + esc(o.div ? o.div + ' division' : 'Whole company') + '</span><div class="pl-oh"><span class="badge ' + s[0] + '"><i></i>' + s[1] + '</span><h2>' + esc(objTitle(o)) + '</h2></div>' +
+          return '<section class="card rsec"><span class="label">' + (k + 1) + ' · ' + esc(o.div ? o.div + ' division' : 'Whole company') + '</span><div class="pl-oh"><span class="badge ' + s[0] + '"><i></i>' + s[1] + '</span><h2>' + esc(objTitle(o)) + '</h2></div>' + preNote(o) +
             '<ul class="rlist pl-krs">' + o.krs.map(function (kr) { var x = aggInd(regs, o.f, kr[0]); return '<li><span class="rl-f">' + esc(f.inds[kr[0]]) + '</span><span>' + (lvlLabel(x.was) !== lvlLabel(x.v) ? 'From ' + esc(lvlLabel(x.was)) + ' to ' + esc(lvlLabel(x.v)) : 'Still ' + esc(lvlLabel(x.v))) + ' · target ' + LEVELS[kr[1]] + '</span></li>'; }).join('') + '</ul>' +
             o.programs.map(function (pid) { var p = PROGRAMS[pid], d = p.ms.filter(function (m) { return m.st === 'done'; }).length; return '<p class="plan-read"><span class="label">' + esc(p.title) + ' · ' + d + ' of ' + p.ms.length + ' milestones done</span><span>' + readBadge(p.read) + ' ' + esc(p.read[1]) + '</span></p>'; }).join('') + '</section>';
         }).join('') +
@@ -3303,7 +3345,7 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
         '<h2 class="pl-h">Current objectives</h2><div class="pl-list">' + OBJECTIVES.map(function (o) {
           var d = PL.obj[o.id], s = objStatus(o), adv = OBJ_ADVICE[o.id];
           return '<section class="card pl-item' + (d.d === 'retire' ? ' out' : '') + '"><div class="pl-oh"><span class="badge ' + s[0] + '"><i></i>' + s[1] + '</span><h3>' + esc(objTitle(o)) + '</h3>' + (o.flagged ? '<span class="tlabel">Flagged at monthly progress</span>' : '') + '</div>' +
-            (adv ? '<div class="st-sugg"><span class="label">Hiviz recommends</span><p>' + esc(adv[1]) + '</p></div>' : '') +
+            preNote(o) + (adv ? '<div class="st-sugg"><span class="label">Hiviz recommends</span><p>' + esc(adv[1]) + '</p></div>' : '') +
             '<div class="seg pl-seg" role="group" aria-label="Decision">' + [['keep', 'Keep'], ['adjust', 'Adjust'], ['retire', 'Retire']].map(function (x) { return '<button type="button" data-plobj="' + o.id + ':' + x[0] + '" aria-pressed="' + (d.d === x[0]) + '">' + x[1] + '</button>'; }).join('') + '</div>' +
             (d.d === 'adjust' ? '<div class="pl-form"><span class="fld"><label for="plt-' + o.id + '">Target</label>' + sel('plt-' + o.id, [[1, 'Leading'], [2, 'Resilient']], d.target) + '</span><span class="fld"><label for="plb-' + o.id + '">By</label>' + sel('plb-' + o.id, PL_BY, d.by) + '</span></div>' : '') +
           '</section>';
@@ -3341,14 +3383,14 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
     OBJECTIVES = OBJECTIVES.filter(function (o) { return PL.obj[o.id].d !== 'retire'; });
     OBJECTIVES.forEach(function (o) { var d = PL.obj[o.id]; if (d.d === 'adjust') { o.target = d.target; o.by = d.by; o.krs.forEach(function (kr) { kr[1] = Math.max(kr[1], d.target); }); } });
     PL.cands.filter(function (c) { return PL.cand[c.f].d === 'add'; }).forEach(function (c) {
-      var d = PL.cand[c.f], id = 'o-' + c.f, pid = 'p-' + c.f, o = { id: id, f: c.f, target: d.target, by: d.by, div: d.div, owner: d.owner, why: c.why, krs: [], programs: [pid], set: '1 Oct' };
+      var d = PL.cand[c.f], id = 'o-' + c.f, pid = 'p-' + c.f, o = { id: id, f: c.f, target: d.target, by: d.by, div: d.div, owner: d.owner, why: c.why, krs: [], programs: [pid], set: '26 Sep' };
       var regs = objRegs(o), inds = FACTOR[c.f].inds.map(function (_, k) { return { k: k, x: aggInd(regs, c.f, k) }; }).filter(function (y) { return y.x.v != null && !mgmtOnly(c.f, y.k); }).sort(function (a, b) { return a.x.v - b.x.v; });
       o.krs = inds.slice(0, 2).map(function (y) { return [y.k, d.target]; });
       PROGRAMS[pid] = { title: 'Program to be scoped', owner: d.owner, resources: 'To be agreed', expect: 'To be set when the program is scoped.', read: ['early', 'Starts next quarter.'],
         ms: [A('Scope the program and bring it to the monthly progress meeting', d.owner, '6 Oct')] };
       OBJECTIVES.push(o);
     });
-    STRAT.lastPlanning = '1 Oct'; STRAT.planning = 'Wednesday 7 January'; ST.cand = {};
+    STRAT.lastPlanning = '26 Sep'; STRAT.planning = 'Wednesday 7 January'; ST.cand = {};
     PL = null; go('strategy'); toast('Plan saved. Objectives for next quarter are on the Strategy page.');
   }
   document.addEventListener('click', function (e) {
@@ -3362,83 +3404,181 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
   document.addEventListener('change', function (e) { var a = e.target.getAttribute && e.target.getAttribute('data-platt'); if (a && PL) PL.att[a] = e.target.checked; });
 
   /* =============================================================
-     Monthly strategy progress: key results since last month, program
-     milestones, and anything that should go to quarterly planning.
+     Monthly strategy progress. Async first: owners check in on their
+     milestones during the week before; the meeting only discusses what
+     needs it (disagreements, help, missing check-ins).
      ============================================================= */
   var PG = null;
+  var PG_STEPS = ['Set up', 'Report', 'Discuss', 'Wrap-up'];
+  var CHECKIN = { opens: '19 Sep', closes: 'Sunday 5 October' };
+  // Owner check-ins made during the window: [program, milestone, status, note, when, comments]
+  [['p-hand', 2, 'track', 'Both shifts are booked for the first handover under the new standard on 6 Oct.', '24 Sep', [['Priya Nair', 'I can lend a site engineer for the first week.']]],
+   ['p-meas', 1, 'track', 'Mitti form is rebuilt. Intelex form goes live next week.', '25 Sep', []],
+   ['p-meas', 2, 'risk', 'I need the divisions to agree which measures replace completion rates before I can take the targets out.', '24 Sep', [['Alex Chen', 'Building can trial two of them in October.']]],
+   ['p-stop', 2, 'track', 'Two stop stories shared so far. Ridge Road’s spotters are next.', '22 Sep', []]
+  ].forEach(function (c) { var m = PROGRAMS[c[0]].ms[c[1]]; m.st = c[2]; m.note = c[3]; m.upd = c[4]; m.cm = c[5]; });
+  PROGRAMS['p-hand'].ms[3].who = 'You';
   var PG_ADVICE = {
     'o-comm': 'The trial starts on 6 Oct. Make sure both shifts at Rail Stabling Yard are in the room for the first handover under the new standard.',
-    'o-mon': 'The form rebuild is at risk and pre-starts are still being ticked. Flag this for quarterly planning: the program needs a different approach, not more time.',
+    'o-mon': 'The owner and the records disagree. Ask what the owner is seeing that the records aren’t. If the records are right, change the approach, not the date.',
     'o-front': 'On track. Use the Ridge Road spotter stops as this month’s stop story.'
   };
+  var WHY = {
+    disagree: ['critical', 'Owner and Prism disagree', 'Ask what the owner is seeing that the records aren’t. If the records are right, change the approach, not the date.'],
+    help: ['warning', 'Needs help', 'Agree who helps, with what, and by when.'],
+    missing: ['', 'No check-in', 'Get a quick update in the room, and ask for a written check-in by tomorrow.'],
+    raised: ['', 'Raised for discussion', 'Hear why it was raised, then agree, adjust or take it to planning.']
+  };
+  // Every open milestone under an objective, sorted into what needs the room and what doesn't
+  function pgItems() {
+    var out = [];
+    OBJECTIVES.forEach(function (o) { o.programs.forEach(function (pid) { var p = PROGRAMS[pid]; p.ms.forEach(function (m, k) {
+      if (m.st === 'done' && !m.upd) return;
+      var key = pid + ':' + k, r = !m.upd ? 'missing' : p.read[0] === 'continues' && (m.st === 'track' || m.st === 'done') ? 'disagree' : m.st === 'risk' || overdue(m) ? 'help' : 'noted';
+      if (r === 'noted' && PG && PG.raise[key]) r = 'raised';
+      out.push({ key: key, o: o, p: p, m: m, why: r });
+    }); }); });
+    return out;
+  }
+  function ciLine(m) {
+    return m.upd ? '<span class="ci-line">' + actBadge(m) + '<span><b>' + esc(m.who) + '</b> · ' + esc(m.upd) + (m.note ? ': “' + esc(m.note) + '”' : '') + '</span></span>'
+      : '<span class="ci-line"><span class="tlabel">No check-in</span><span><b>' + esc(m.who) + '</b> ' + (m.who === YOU ? 'haven’t' : 'hasn’t') + ' checked in yet</span></span>';
+  }
+  function cmHTML(m) { return (m.cm || []).length ? '<ul class="ci-cm">' + m.cm.map(function (c) { return '<li><span class="av' + (c[0] === YOU ? ' me' : '') + '">' + initials(c[0]) + '</span><span><b>' + esc(c[0]) + '</b> ' + esc(c[1]) + '</span></li>'; }).join('') + '</ul>' : ''; }
   function sinceMonth(i) { var m = /^(\d+) (\w{3})/.exec(i.since || ''); return !!m && MON[m[2]] != null && new Date(2026, MON[m[2]], +m[1]) >= new Date(2026, 8, 1); }
-  // Key-result movement over roughly a month uses the 45-day window
   function monthInd(regs, f, k) { var keep = ST.mapPeriod; ST.mapPeriod = 45; var x = aggInd(regs, f, k); ST.mapPeriod = keep; return x; }
-  function pgStepper() { return '<ol class="steps">' + ['Report', 'Wrap-up'].map(function (t, k) { var n = k + 1, cls = n === PG.step ? 'on' : n < PG.step ? 'done' : ''; return '<li class="' + cls + '"><span class="n">' + (n < PG.step ? '✓' : n) + '</span>' + t + '</li>'; }).join('') + '</ol>'; }
-  function startProgress() { ST.div = ''; ST.reg = ''; fillFilters(); PG = { step: 1, ms: {}, flag: {}, notes: '' }; go('progress'); }
-  function pgPeople() { var o = ['Morgan Hale']; OBJECTIVES.forEach(function (ob) { ob.programs.forEach(function (p) { var w = PROGRAMS[p].owner; if (o.indexOf(w) < 0) o.push(w); }); }); return o; }
+  function pgStepper() { return '<ol class="steps">' + PG_STEPS.map(function (t, k) { var n = k + 1, cls = n === PG.step ? 'on' : n < PG.step ? 'done' : ''; return '<li class="' + cls + '"><span class="n">' + (n < PG.step ? '✓' : n) + '</span>' + t + '</li>'; }).join('') + '</ol>'; }
+  function pgPeople() { var o = ['Morgan Hale']; OBJECTIVES.forEach(function (ob) { ob.programs.forEach(function (p) { PROGRAMS[p].ms.forEach(function (m) { if (o.indexOf(m.who) < 0) o.push(m.who); }); if (o.indexOf(PROGRAMS[p].owner) < 0) o.push(PROGRAMS[p].owner); }); }); return o; }
+  function startProgress() {
+    ST.div = ''; ST.reg = ''; fillFilters();
+    var att = {}; PL_PEOPLE.forEach(function (p) { att[p] = pgPeople().indexOf(p) > -1; });
+    PG = { step: 1, att: att, raise: {}, dec: {}, notes: '' }; go('progress');
+  }
+  function ciSummary(items) {
+    var open = items.filter(function (x) { return !(x.m.st === 'done' && !x.m.upd); }), inn = open.filter(function (x) { return x.m.upd; }).length;
+    return { total: open.length, inn: inn, missing: open.filter(function (x) { return !x.m.upd; }) };
+  }
 
   function renderProgress() {
     if (!PG) { ST.view = 'strategy'; return renderStrategy(); }
-    var head = esc(ORG_NAME) + ' · Friday 26 September · since ' + esc(STRAT.lastProgress);
+    var head = esc(ORG_NAME) + ' · today, Friday 26 September · since ' + esc(STRAT.lastProgress);
     var top = '<div class="meet-bar"><a class="back" href="#strategy">← Leave progress meeting</a>' + pgStepper() + '</div>';
+    var items = pgItems(), disc = items.filter(function (x) { return x.why !== 'noted'; }), noted = items.filter(function (x) { return x.why === 'noted'; }), cs = ciSummary(items);
+    var title = function (t) { return top + '<div class="page-top"><div><h1>' + esc(t) + '</h1><p class="sub">' + head + '</p></div></div>'; };
+
     if (PG.step === 1) {
-      var moved = 0, slipped = 0, msDone = 0, msRisk = 0;
-      OBJECTIVES.forEach(function (o) { var regs = objRegs(o); o.krs.forEach(function (kr) { var t = monthInd(regs, o.f, kr[0]).t; if (t === 'better') moved++; if (t === 'worse') slipped++; });
-        o.programs.forEach(function (p) { PROGRAMS[p].ms.forEach(function (m) { if (m.st === 'done') msDone++; if (m.st === 'risk' || overdue(m)) msRisk++; }); }); });
-      var regsAll = regionsInScope(), covered = OBJECTIVES.map(function (o) { return o.f; });
-      var watch = FACTORS.filter(function (f) { if (covered.indexOf(f[0]) > -1) return false; var sc = scoreFactor(regsAll, f[0]); return sc.v != null && sc.n >= 10 && sc.t === 'worse'; });
-      $('view').innerHTML = top + '<div class="page-top"><div><h1>Monthly progress</h1><p class="sub">' + head + '</p></div></div>' +
-        '<p class="pv-summary"><b>Since ' + esc(STRAT.lastProgress) + ':</b> ' + lw(moved) + (moved === 1 ? ' key result' : ' key results') + ' moved forward and ' + lw(slipped) + ' slipped. ' + word(msDone) + ' milestones done' + (msRisk ? ', ' + lw(msRisk) + ' at risk or overdue' : '') + '.</p>' +
+      $('view').innerHTML = title('Monthly progress') +
+        '<p class="pl-pv"><span class="label">Purview</span><b>' + esc(ORG_NAME) + '</b> · required for this meeting</p>' +
+        '<div class="meet-grid"><section class="card meet-card"><h2>Who’s here</h2><p class="muted-p">The group executive, and everyone who owns a milestone.</p><ul class="att">' +
+          PL_PEOPLE.map(function (p) { var req = p === 'Morgan Hale'; return '<li><label class="att-row"><input type="checkbox" data-pgatt="' + esc(p) + '"' + (PG.att[p] ? ' checked' : '') + (req ? ' disabled' : '') + '><span class="av' + (p === YOU ? ' me' : '') + '">' + initials(p) + '</span><span class="att-name">' + esc(p) + '<small>' + esc(ROLE[p] || '') + (req ? ' · required' : '') + '</small></span></label></li>'; }).join('') + '</ul></section>' +
+        '<section class="card meet-card"><h2>Check-ins</h2><p class="rlead"><b>' + cs.inn + ' of ' + cs.total + '</b> milestone owners checked in between ' + esc(CHECKIN.opens) + ' and ' + esc(CHECKIN.closes) + '.</p>' +
+          (cs.missing.length ? '<ul class="rlist">' + cs.missing.map(function (x) { return '<li><span class="rl-f">' + esc(x.m.who) + '</span><span>' + esc(x.m.t) + '</span></li>'; }).join('') + '</ul>' : '') +
+          '<h2>What Hiviz will prepare</h2><ul class="plain"><li><b>Report</b>: key results since last month, and every owner’s check-in.</li><li><b>Discuss</b>: only what needs the room. Disagreements with Prism, requests for help, and missing check-ins.</li><li><b>Noted</b>: the rest, agreed without discussion.</li></ul>' +
+          '<div class="meet-actions"><button type="button" class="btn brand" data-pgstep="2">Prepare the report</button></div></section></div>';
+      return;
+    }
+    if (PG.step === 2) {
+      var moved = 0, slipped = 0; OBJECTIVES.forEach(function (o) { var regs = objRegs(o); o.krs.forEach(function (kr) { var t = monthInd(regs, o.f, kr[0]).t; if (t === 'better') moved++; if (t === 'worse') slipped++; }); });
+      var n = function (w) { return disc.filter(function (x) { return x.why === w; }).length; };
+      $('view').innerHTML = title('Report') +
+        '<p class="pv-summary"><b>Since ' + esc(STRAT.lastProgress) + ':</b> ' + lw(moved) + (moved === 1 ? ' key result' : ' key results') + ' moved forward and ' + lw(slipped) + ' slipped. ' + cs.inn + ' of ' + cs.total + ' owners checked in. <b>' + word(disc.length) + (disc.length === 1 ? ' item needs' : ' items need') + ' discussion</b>' +
+          (disc.length ? ': ' + join([['disagree', 'where the owner and Prism disagree'], ['help', 'needing help'], ['missing', 'with no check-in'], ['raised', 'raised']].filter(function (w) { return n(w[0]); }).map(function (w) { return lw(n(w[0])) + ' ' + w[1]; })) : '') + '. The rest are noted.</p>' +
         '<div class="report">' + OBJECTIVES.map(function (o, oi) {
           var regs = objRegs(o), s = objStatus(o), f = FACTOR[o.f];
           var fresh = INSIGHTS.filter(function (i) { return !i.closed && !i.dismissed && sinceMonth(i) && INS_FACTOR[i.id] && INS_FACTOR[i.id][0] === o.f && i.sites.some(function (x) { return regs.indexOf(SITE[x].region) > -1; }); });
           return '<section class="card rsec"><span class="label">' + (oi + 1) + ' · ' + esc(o.div ? o.div + ' division' : 'Whole company') + ' · owner ' + esc(o.owner) + '</span><div class="pl-oh"><span class="badge ' + s[0] + '"><i></i>' + s[1] + '</span><h2>' + esc(objTitle(o)) + '</h2></div>' +
-            '<div class="st-krs"><span class="label">Key results since last month</span>' + o.krs.map(function (kr) {
-              var x = monthInd(regs, o.f, kr[0]);
-              return '<div class="kr"><span class="kr-n">' + esc(f.inds[kr[0]]) + '</span><span class="ind-rate">' + levelBar(x.v, true, null, x.was) + trendHTML(x.t) + '</span><span class="kr-tg">Target ' + LEVELS[kr[1]] + '</span></div>';
-            }).join('') + '</div>' +
+            '<div class="st-krs"><span class="label">Key results since last month</span>' + o.krs.map(function (kr) { var x = monthInd(regs, o.f, kr[0]); return '<div class="kr"><span class="kr-n">' + esc(f.inds[kr[0]]) + '</span><span class="ind-rate">' + levelBar(x.v, true, null, x.was) + trendHTML(x.t) + '</span><span class="kr-tg">Target ' + LEVELS[kr[1]] + '</span></div>'; }).join('') + '</div>' +
             o.programs.map(function (pid) {
               var p = PROGRAMS[pid];
-              return '<div class="st-prog"><div class="sp-head"><span class="label">Program · ' + esc(p.owner) + '</span><h3>' + esc(p.title) + '</h3></div><ul class="plan-acts">' + p.ms.map(function (m, k) {
-                return '<li class="pa st-' + m.st + '"><div class="pa-main"><span class="pa-t">' + esc(m.t) + '</span><span class="pa-meta"><span>' + esc(m.who) + '</span><span>by ' + esc(m.due) + '</span>' + (overdue(m) ? '<span class="t-critical">Overdue</span>' : '') + '</span></div>' +
-                  '<label class="pa-ci"><span class="sr">How’s it going?</span><select class="select" data-msck="' + pid + ':' + k + '">' + PA_ST.map(function (x) { return '<option value="' + x[0] + '"' + (x[0] === m.st ? ' selected' : '') + '>' + x[1] + '</option>'; }).join('') + '</select></label></li>';
+              return '<div class="st-prog"><div class="sp-head"><span class="label">Program · ' + esc(p.owner) + '</span><h3>' + esc(p.title) + '</h3></div><ul class="ci-list">' + p.ms.map(function (m, k) {
+                var it = items.filter(function (x) { return x.key === pid + ':' + k; })[0];
+                if (!it) return '<li class="ci-done"><span class="ci-t">' + esc(m.t) + '</span><span class="ci-line">' + actBadge(m) + '<span>' + esc(m.who) + '</span></span></li>';
+                return '<li><span class="ci-t">' + esc(m.t) + ' <small>by ' + esc(m.due) + '</small></span>' + ciLine(m) + cmHTML(m) + (it.why !== 'noted' ? '<span class="ci-why">' + (WHY[it.why][0] ? '<span class="badge ' + WHY[it.why][0] + '"><i></i>' + WHY[it.why][1] + '</span>' : '<span class="tlabel">' + WHY[it.why][1] + '</span>') + '</span>' : '<span class="ci-why"><span class="ci-noted">Noted</span></span>') + '</li>';
               }).join('') + '</ul><p class="plan-read"><span class="label">Prism’s read so far</span><span>' + readBadge(p.read) + ' ' + esc(p.read[1]) + '</span></p></div>';
             }).join('') +
             (fresh.length ? '<div class="st-ins"><span class="label">New insights this month</span><div class="links">' + fresh.map(function (i) { return '<button type="button" class="link-item" data-open="' + i.id + '"><b>' + esc(i.title) + '</b><span>' + esc(f.inds[INS_FACTOR[i.id][1]]) + ' · since ' + esc(i.since) + '</span></button>'; }).join('') + '</div></div>' : '') +
             '<div class="st-sugg"><span class="label">Hiviz recommends</span><p>' + esc(PG_ADVICE[o.id] || 'Scope the program before the next progress meeting, and agree what Prism should listen for.') + '</p></div>' +
-            '<div class="meet-actions">' + (PG.flag[o.id] ? '<span class="sg-on">Flagged for quarterly planning</span> <button type="button" class="linkish rt-undo" data-pgflag="' + o.id + '">Undo</button>' : '<button type="button" class="btn sm" data-pgflag="' + o.id + '">Flag for quarterly planning</button>') + '</div>' +
           '</section>';
-        }).join('') +
-        '<section class="card rsec"><span class="label">' + (OBJECTIVES.length + 1) + ' · Watch list</span>' +
-          (watch.length ? '<ul class="rlist">' + watch.map(function (f) { return '<li><span class="rl-f">' + factorBtn(f[0]) + '</span><span>Worsening with no objective</span></li>'; }).join('') + '</ul>' : '<p class="muted-p">No factor without an objective is worsening.</p>') +
-          '<p class="muted-p">Next quarterly planning: ' + esc(STRAT.planning) + '.</p></section>' +
-        '</div><div class="meet-actions end"><button type="button" class="btn brand" data-pgstep="2">Wrap up</button></div>';
+        }).join('') + '</div>' +
+        '<div class="meet-actions end"><button type="button" class="btn" data-pgstep="1">Back</button><button type="button" class="btn brand" data-pgstep="3">Discuss ' + lw(disc.length) + (disc.length === 1 ? ' item' : ' items') + '</button></div>';
       return;
     }
-    var chg = Object.keys(PG.ms), fl = Object.keys(PG.flag).filter(function (k) { return PG.flag[k]; });
-    $('view').innerHTML = top + '<div class="page-top"><div><h1>Wrap-up</h1><p class="sub">' + head + '</p></div></div>' +
-      '<div class="meet-grid"><section class="card meet-card"><h2>This month</h2>' +
-        (chg.length ? '<div class="w-acts"><span class="label">Milestone check-ins</span><ul class="w-rt">' + chg.map(function (k) { var pr = k.split(':'), m = PROGRAMS[pr[0]].ms[+pr[1]]; return '<li>' + actBadge(m) + ' ' + esc(m.t) + ' <span>' + esc(PROGRAMS[pr[0]].title) + '</span></li>'; }).join('') + '</ul></div>' : '<p class="muted-p">No milestone check-ins changed.</p>') +
-        (fl.length ? '<div class="w-acts"><span class="label">For quarterly planning on ' + esc(STRAT.planning) + '</span><ul class="w-rt">' + fl.map(function (id) { var o = OBJECTIVES.filter(function (x) { return x.id === id; })[0]; return '<li>' + esc(objTitle(o)) + '</li>'; }).join('') + '</ul></div>' : '') +
-      '</section><section class="card meet-card"><h2>Attended</h2><div class="people">' + whoLine(pgPeople()) + '</div>' +
+    if (PG.step === 3) {
+      $('view').innerHTML = title('Discuss') +
+        '<p class="pv-summary"><b>' + word(disc.length) + (disc.length === 1 ? ' item needs' : ' items need') + ' the room.</b> Everything else was checked in and agrees with Prism, so it’s noted.</p>' +
+        '<div class="pl-list">' + disc.map(function (x) {
+          var w = WHY[x.why], d = PG.dec[x.key] || {};
+          return '<section class="card pl-item"><div class="pl-oh">' + (w[0] ? '<span class="badge ' + w[0] + '"><i></i>' + w[1] + '</span>' : '<span class="tlabel">' + w[1] + '</span>') + '<h3>' + esc(x.m.t) + '</h3></div>' +
+            '<p class="muted-p">' + esc(x.p.title) + ' · ' + esc(objTitle(x.o)) + ' · by ' + esc(x.m.due) + '</p>' +
+            '<div class="ci-box"><span class="label">Owner’s check-in</span>' + ciLine(x.m) + cmHTML(x.m) + '</div>' +
+            '<p class="plan-read"><span class="label">Prism’s read so far</span><span>' + readBadge(x.p.read) + ' ' + esc(x.p.read[1]) + '</span></p>' +
+            '<div class="st-sugg"><span class="label">Hiviz recommends</span><p>' + esc(w[2]) + '</p></div>' +
+            '<div class="seg pl-seg" role="group" aria-label="Decision">' + [['agreed', 'Agreed'], ['adjust', 'Adjust'], ['plan', 'Take to planning']].map(function (o) { return '<button type="button" data-pgdec="' + x.key + ':' + o[0] + '" aria-pressed="' + (d.d === o[0]) + '">' + o[1] + '</button>'; }).join('') + '</div>' +
+            '<input type="text" class="w-note" id="pgn-' + x.key.replace(':', '__') + '" placeholder="What was agreed, by whom, by when" value="' + esc(d.note || '') + '">' +
+          '</section>';
+        }).join('') + '</div>' +
+        (noted.length ? '<h2 class="pl-h">Noted</h2><ul class="rlist pg-noted">' + noted.map(function (x) { return '<li><span class="rl-f">' + esc(x.m.t) + '</span>' + ciLine(x.m) + '<button type="button" class="linkish rt-undo" data-pgraise="' + x.key + '">Discuss this</button></li>'; }).join('') + '</ul>' : '') +
+        '<div class="meet-actions end"><button type="button" class="btn" data-pgstep="2">Back</button><button type="button" class="btn brand" data-pgstep="4">Wrap up</button></div>';
+      return;
+    }
+    // Wrap-up
+    var decided = disc.filter(function (x) { return PG.dec[x.key] && PG.dec[x.key].d; }), att = Object.keys(PG.att).filter(function (k) { return PG.att[k]; });
+    var next = {}; decided.forEach(function (x) { var d = PG.dec[x.key]; if (d.d === 'agreed') return; var w = d.d === 'plan' ? x.o.owner : x.m.who; (next[w] = next[w] || []).push(d.d === 'plan' ? 'Bring “' + objTitle(x.o) + '” to quarterly planning' : 'Adjust: ' + x.m.t + (d.note ? ' (' + d.note + ')' : '')); });
+    disc.filter(function (x) { return x.why === 'missing'; }).forEach(function (x) { (next[x.m.who] = next[x.m.who] || []).push('Check in on: ' + x.m.t); });
+    $('view').innerHTML = title('Wrap-up') +
+      '<div class="meet-grid"><section class="card meet-card"><h2>What was decided</h2>' +
+        (decided.length ? '<ul class="agreed">' + decided.map(function (x) { var d = PG.dec[x.key]; return '<li><span class="av">' + initials(x.m.who) + '</span><div><p class="agreed-t">' + esc(x.m.t) + '</p><p class="agreed-o">' + ({ agreed: 'Agreed', adjust: 'Adjust', plan: 'Take to planning' })[d.d] + (d.note ? ' · ' + esc(d.note) : '') + '</p></div></li>'; }).join('') + '</ul>' : '<p class="muted-p">Nothing decided yet.</p>') +
+        '<p class="muted-p">' + word(noted.length) + (noted.length === 1 ? ' milestone' : ' milestones') + ' noted without discussion.</p>' +
+        (Object.keys(next).length ? '<div class="w-acts"><span class="label">What happens next, by person</span>' + Object.keys(next).map(function (w) { return '<div class="w-p"><span class="person"><span class="av' + (w === YOU ? ' me' : '') + '">' + initials(w) + '</span>' + esc(w) + '</span><ul>' + next[w].map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul></div>'; }).join('') + '</div>' : '') +
+      '</section><section class="card meet-card"><h2>Attended</h2><div class="people">' + whoLine(att) + '</div>' +
         '<label class="w-note-l" for="pg-notes">Notes</label><textarea id="pg-notes" class="w-note" rows="4" placeholder="Anything else worth recording">' + esc(PG.notes) + '</textarea>' +
-        '<div class="meet-actions"><button type="button" class="btn" data-pgstep="1">Back</button><button type="button" class="btn brand" id="pg-save">Save progress</button></div></section></div>';
+        '<div class="meet-actions"><button type="button" class="btn" data-pgstep="3">Back</button><button type="button" class="btn" id="pg-copy">Copy summary</button><button type="button" class="btn brand" id="pg-save">Save progress</button></div></section></div>';
+  }
+  function pgRead() {
+    if ($('pg-notes')) PG.notes = $('pg-notes').value;
+    document.querySelectorAll('[id^="pgn-"]').forEach(function (el) { var k = el.id.slice(4).replace('__', ':'); PG.dec[k] = PG.dec[k] || {}; PG.dec[k].note = el.value.trim(); });
+  }
+  function pgSummary() {
+    var items = pgItems(), disc = items.filter(function (x) { return x.why !== 'noted'; });
+    return 'Monthly progress · ' + ORG_NAME + ' · Friday 26 September\n\n' + disc.map(function (x) { var d = PG.dec[x.key] || {}; return '• ' + x.m.t + ' (' + WHY[x.why][1] + '): ' + (d.d ? ({ agreed: 'Agreed', adjust: 'Adjust', plan: 'Take to planning' })[d.d] : 'Not decided') + (d.note ? '. ' + d.note : ''); }).join('\n') +
+      '\n\nNoted: ' + items.filter(function (x) { return x.why === 'noted'; }).length + ' milestones.' + (PG.notes ? '\n\nNotes: ' + PG.notes : '') + '\n\nPrepared with Hiviz.';
   }
   document.addEventListener('click', function (e) {
     if (e.target.closest('[data-pgstart]')) { startProgress(); return; }
     if (!PG) return;
-    var st = e.target.closest('[data-pgstep]'); if (st) { if ($('pg-notes')) PG.notes = $('pg-notes').value; PG.step = +st.getAttribute('data-pgstep'); renderProgress(); window.scrollTo(0, 0); return; }
-    var fl = e.target.closest('[data-pgflag]'); if (fl) { var id = fl.getAttribute('data-pgflag'); PG.flag[id] = !PG.flag[id]; var y = window.scrollY; renderProgress(); window.scrollTo(0, y); return; }
+    var st = e.target.closest('[data-pgstep]'); if (st) { pgRead(); PG.step = +st.getAttribute('data-pgstep'); renderProgress(); window.scrollTo(0, 0); return; }
+    var dc = e.target.closest('[data-pgdec]'); if (dc) { pgRead(); var p = dc.getAttribute('data-pgdec').split(':'), k = p[0] + ':' + p[1]; PG.dec[k] = PG.dec[k] || {}; PG.dec[k].d = p[2]; var y = window.scrollY; renderProgress(); window.scrollTo(0, y); return; }
+    var rs = e.target.closest('[data-pgraise]'); if (rs) { pgRead(); PG.raise[rs.getAttribute('data-pgraise')] = true; var y2 = window.scrollY; renderProgress(); window.scrollTo(0, y2); return; }
+    if (e.target.closest('#pg-copy')) { pgRead(); copy(pgSummary(), 'Summary copied'); return; }
     if (e.target.closest('#pg-save')) {
-      PG.notes = $('pg-notes').value;
-      Object.keys(PG.flag).forEach(function (id) { if (PG.flag[id]) { var o = OBJECTIVES.filter(function (x) { return x.id === id; })[0]; if (o) o.flagged = true; } });
-      STRAT.lastProgress = '26 Sep'; STRAT.progress = 'Monday 27 October'; PG = null; go('strategy'); toast('Progress saved. Next progress meeting: Monday 27 October.');
+      pgRead();
+      pgItems().forEach(function (x) { var d = PG.dec[x.key]; if (d && d.d === 'plan') x.o.flagged = true; });
+      STRAT.lastProgress = '26 Sep'; STRAT.progress = 'Monday 27 October'; PG = null; go('strategy'); toast('Progress saved. Check-ins for the next meeting open on 20 Oct.');
     }
   });
-  document.addEventListener('change', function (e) {
-    var r = e.target.getAttribute && e.target.getAttribute('data-msck'); if (!r || !PG) return;
-    var pr = r.split(':'); PROGRAMS[pr[0]].ms[+pr[1]].st = e.target.value; PG.ms[r] = true; var y = window.scrollY; renderProgress(); window.scrollTo(0, y);
+  document.addEventListener('change', function (e) { var a = e.target.getAttribute && e.target.getAttribute('data-pgatt'); if (a && PG) PG.att[a] = e.target.checked; });
+
+  // Check in from the Strategy page, before the meeting
+  function myCheckins() {
+    var out = []; OBJECTIVES.forEach(function (o) { o.programs.forEach(function (pid) { PROGRAMS[pid].ms.forEach(function (m, k) { if (m.who === YOU && m.st !== 'done') out.push({ key: pid + ':' + k, m: m, p: PROGRAMS[pid] }); }); }); });
+    return out;
+  }
+  function checkinPanel() {
+    var items = pgItems(), cs = ciSummary(items), mine = myCheckins();
+    return '<section class="card ci-panel"><div class="ci-head"><div><span class="label">Check-ins for monthly progress</span><p class="rlead"><b>' + cs.inn + ' of ' + cs.total + '</b> owners have checked in. Closes ' + esc(CHECKIN.closes) + '.</p></div>' +
+        (cs.missing.length ? '<p class="muted-p">Waiting on ' + esc(join(cs.missing.map(function (x) { return x.m.who === YOU ? 'you' : x.m.who; }).filter(function (v, i, a) { return a.indexOf(v) === i; }))) + '. <button type="button" class="linkish rt-undo" data-nudge="1">Send a reminder</button></p>' : '') + '</div>' +
+      (mine.length ? '<div class="ci-mine"><span class="label">Your check-ins</span>' + mine.map(function (x) {
+        return '<div class="ci-form"><div><b>' + esc(x.m.t) + '</b><span class="muted-p">' + esc(x.p.title) + ' · by ' + esc(x.m.due) + (x.m.upd ? ' · checked in ' + esc(x.m.upd) : '') + '</span></div>' +
+          '<select class="select" id="ci-s-' + x.key.replace(':', '-') + '">' + PA_ST.map(function (s) { return '<option value="' + s[0] + '"' + (s[0] === x.m.st ? ' selected' : '') + '>' + s[1] + '</option>'; }).join('') + '</select>' +
+          '<input type="text" class="w-note" id="ci-n-' + x.key.replace(':', '-') + '" placeholder="What changed, what’s blocking, what you need" value="' + esc(x.m.note || '') + '">' +
+          '<button type="button" class="btn" data-myci="' + x.key + '">' + (x.m.upd ? 'Update' : 'Check in') + '</button></div>';
+      }).join('') + '</div>' : '') +
+    '</section>';
+  }
+  document.addEventListener('click', function (e) {
+    var c = e.target.closest('[data-myci]');
+    if (c) { var k = c.getAttribute('data-myci'), pr = k.split(':'), m = PROGRAMS[pr[0]].ms[+pr[1]], id = k.replace(':', '-'); m.st = $('ci-s-' + id).value; m.note = $('ci-n-' + id).value.trim(); m.upd = '26 Sep'; toast('Checked in. It’s in the pre-read for the monthly progress meeting.'); var y = window.scrollY; renderStrategy(); window.scrollTo(0, y); return; }
+    if (e.target.closest('[data-nudge]')) toast('Hiviz sent a reminder to everyone still to check in.');
   });
 
   /* =============================================================
