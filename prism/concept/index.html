@@ -190,6 +190,7 @@ main { padding-block: 32px 80px; }
 .owner span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .trend { display: inline-flex; align-items: center; gap: 4px; font-size: 13.5px; font-weight: 800; }
 .trend.steady { color: var(--info); }
+.act { font-size: 13.5px; font-weight: 700; color: var(--text-2); white-space: nowrap; }
 .empty-card { padding: 20px; color: var(--text-2); }
 
 /* ---------- Sheet ---------- */
@@ -653,6 +654,17 @@ button.ind-btn:hover .ind-name { text-decoration: underline; text-underline-offs
 .st-cad > span { display: grid; gap: 2px; }
 .pl-h { font-size: 18px; margin: 22px 0 10px; }
 .st-go { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+.dc { gap: 12px; }
+.dc-ctx { margin: 0; display: flex; gap: 10px; flex-wrap: wrap; font-size: 12.5px; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; color: var(--text-3); }
+.dc-ctx span { color: var(--text); }
+.dc-head { display: flex; align-items: baseline; justify-content: space-between; gap: 6px 16px; flex-wrap: wrap; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+.dc-head h3 { font-size: 21px; line-height: 1.25; margin: 0; }
+.dc-own { display: inline-flex; align-items: center; gap: 8px; font-size: 14.5px; font-weight: 700; color: var(--text-2); }
+.dc-own .av { width: 24px; height: 24px; font-size: 10px; }
+.dc-why { margin: 0; display: flex; align-items: center; gap: 8px 10px; flex-wrap: wrap; }
+.dc-upd { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 8px; align-items: center; margin-top: 4px; }
+.dc-upd .w-note { min-height: 0; padding: 8px 10px; }
+@media (max-width: 640px) { .dc-upd { grid-template-columns: 1fr; } }
 .st-rhythm { display: flex; align-items: flex-end; gap: 10px 28px; flex-wrap: wrap; margin: -8px 0 20px; padding: 12px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); font-size: 15px; font-weight: 700; }
 .st-rhythm > span { display: grid; gap: 2px; }
 .st-rhythm .what { margin-left: auto; }
@@ -1151,10 +1163,18 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
     if (t === 'better') return '<span class="trend t-success"><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 9 9 2M4 2h5v5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>Improving</span>';
     return '<span class="trend steady"><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M1.5 6h9M7 2.5 10.5 6 7 9.5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>Steady</span>';
   }
+  function activity(i) {
+    var h = (i.hist || '').split('').map(Number), last = -1; h.forEach(function (v, k) { if (v) last = k; });
+    var week = h.slice(-7).reduce(function (a, v) { return a + v; }, 0), ago = last < 0 ? null : h.length - 1 - last;
+    var t = ago == null ? 'No records yet' : week ? (ago === 0 ? 'Last record today' : ago === 1 ? 'Last record yesterday' : 'Last record ' + ago + ' days ago') + ' \u00b7 ' + week + ' this week' : 'Quiet for ' + ago + ' days';
+    return '<span class="act">' + t + '</span>';
+  }
+  function planRead(i) { return i.plan && i.plan.state === 'agreed' && i.plan.read ? i.plan.read[0] : ''; }
   function statusBadge(i) {
     if (i.dismissed) return '<span class="badge"><i></i>Dismissed</span>';
     if (i.closed) return '<span class="badge success"><i></i>Closed</span>';
     if (i.status === 'new') return '<span class="badge info"><i></i>New</span>';
+    if (i.status === 'plan') return '<span class="badge"><i></i>Agree to plan</span>';
     if (i.status === 'resolved') return '<span class="badge success"><i></i>Ready to close</span>';
     if (stalled(i)) return '<span class="badge warning"><i></i>Stalled ' + i.updated + 'd</span>';
     return '<span class="badge"><i></i>In progress</span>';
@@ -1195,7 +1215,7 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
     var done = list.filter(function (i) { return i.status === 'resolved'; });
     var out = [];
     if (fresh.length) out.push('<b>' + esc(cap(fresh[0].title.toLowerCase().replace(/^./, function (c) { return c; }))) + '</b> across ' + lw(fresh[0].sites.length) + ' sites, and nobody owns it yet' + (fresh.length > 1 ? '. ' + word(fresh.length - 1) + ' more new ' + (fresh.length - 1 === 1 ? 'insight needs' : 'insights need') + ' an owner' : '') + '.');
-    hot.forEach(function (i) { out.push('<b>' + esc(i.owner) + '</b> is on ' + esc(i.short) + (i.trend === 'worse' ? ', and it’s worsening.' : i.trend === 'better' ? ', and it’s improving.' : ', and it hasn’t got worse.')); });
+    hot.forEach(function (i) { out.push('<b>' + esc(i.owner) + '</b> is on ' + esc(i.short) + (planRead(i) === 'continues' ? ', but the pattern continues.' : planRead(i) === 'working' ? ', and the plan is working.' : planRead(i) === 'early' ? '. It’s too early to tell if the plan is working.' : '.')); });
     stuck.forEach(function (i) { out.push('Work on ' + esc(i.short) + ' has <b>stalled</b>, with no update in ' + i.updated + ' days.'); });
     if (done.length) out.push(esc(cap(join(done.map(function (i) { return i.short; })))) + ' can be closed.');
     return out.join(' ') || 'Nothing new or stalled right now.';
@@ -1205,7 +1225,7 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
     ['all', 'All', function () { return true; }],
     ['owner', 'Needs owner', function (i) { return !i.owner; }],
     ['stalled', 'Stalled', stalled],
-    ['worse', 'Worsening', function (i) { return i.trend === 'worse'; }],
+    ['continues', 'Pattern continues', function (i) { return planRead(i) === 'continues'; }],
     ['esc', 'Escalated', function (i) { return !!i.esc || i.level !== i.home; }]
   ];
 
@@ -1217,6 +1237,7 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
 
     var order = [
       ['Needs an owner', function (i) { return i.status === 'new'; }],
+      ['Agree to plan', function (i) { return i.status === 'plan'; }],
       ['Stalled', stalled],
       ['In progress', function (i) { return i.status === 'working' && !stalled(i); }],
       ['Ready to close', function (i) { return i.status === 'resolved'; }]
@@ -1251,7 +1272,7 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
       '<span class="icard-sites">' + sites.map(function (s) { return '<span class="chip">' + esc(s.name) + '</span>'; }).join('') + '</span>' +
       '<span class="icard-foot">' +
         '<span class="icard-ev">' + mgStack(srcIds) + '<span>' + recCount(i) + ' records from ' + srcIds.length + (srcIds.length === 1 ? ' system' : ' systems') + '</span></span>' +
-        trendHTML(i.trend) + (i.plan && !i.closed ? '<span class="icard-plan' + (i.plan.state === 'proposed' ? ' prop' : '') + '">' + esc(planSummary(i)) + '</span>' : '') +
+        activity(i) + (i.plan && i.plan.state === 'agreed' && !i.closed ? '<span class="icard-plan">' + esc(planSummary(i)) + '</span>' : '') +
         '<span class="owner">' + (i.owner ? '<span class="av' + (i.owner === YOU ? ' me' : '') + '">' + initials(i.owner) + '</span><span>' + esc(i.owner) + '</span>' : '<span class="btn sm" data-assign="' + i.id + '">Assign owner</span>') + '</span>' +
       '</span>' +
     '</button>';
@@ -1262,13 +1283,13 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
   /* ---------- History, dismissal and the insight page ---------- */
   function insightById(id) { return INSIGHTS.filter(function (x) { return x.id === id; })[0]; }
   var SEED_HISTORY = {
-    hand: [['22 Sep', 'Prism', 'Raised', 'Linked records from ServiceNow, Procore and Mitti across three sites.'], ['23 Sep', 'Prism', 'Four more records linked', 'Traffic setups at Ridge Road changed after the night crew took over.'], ['26 Sep', 'Prism', 'Worsening', 'A second isolation at Rail Stabling Yard was closed before it was tested.']],
+    hand: [['22 Sep', 'Prism', 'Raised', 'Linked records from ServiceNow, Procore and Mitti across three sites.'], ['23 Sep', 'Prism', 'Four more records linked', 'Traffic setups at Ridge Road changed after the night crew took over.'], ['26 Sep', 'Prism', 'Happened again', 'A second isolation at Rail Stabling Yard was closed before it was tested.']],
     fat: [['24 Sep', 'Prism', 'Raised', 'Nine night-shift reports mentioning fatigue in four weeks.']],
     load: [['12 Sep', 'Prism', 'Raised', 'Four suspended load events across North Yard and Harbour Bridge Deck.'], ['12 Sep', 'Focus review', 'Assigned to Priya Nair', 'Agreed: book a rigging gear audit at both sites.'], ['15 Sep', 'Priya Nair', 'Update', 'Worn tag lines replaced at North Yard.'], ['23 Sep', 'Priya Nair', 'Update', 'Rigging gear audit booked for 30 September.']],
     pre: [['1 Sep', 'Prism', 'Raised', 'Pre-starts completed in under a minute, with identical answers.'], ['2 Sep', 'You', 'Assigned to Tom Walsh', ''], ['10 Sep', 'Tom Walsh', 'Update', 'Supervisors reminded of the purpose of the pre-start.'], ['12 Sep', 'Focus review', 'Agreed', 'Tom to remind supervisors what the pre-start is for.'], ['26 Sep', 'Prism', 'Stalled', 'No update for 16 days, and the pattern hasn’t changed.']],
     spot: [['18 Aug', 'Prism', 'Raised', 'Three near misses with reversing plant in August.'], ['19 Aug', 'You', 'Assigned to Priya Nair', ''], ['12 Sep', 'Focus review', 'Agreed', 'Roll the spotter roster out to Ridge Road.'], ['21 Sep', 'Priya Nair', 'Update', 'Spotter roster in place on both sites.'], ['24 Sep', 'Prism', 'Improving', 'No repeats in two weeks, and spotters are calling stops.']],
     house: [['4 Aug', 'Prism', 'Raised', 'Six findings of materials stored in access routes.'], ['5 Aug', 'You', 'Assigned to Tom Walsh', ''], ['12 Sep', 'Focus review', 'Agreed', 'Mark out laydown areas at Creek Crossing.'], ['24 Sep', 'Tom Walsh', 'Ready to close', 'No repeat for four weeks since the laydown plan changed.']],
-    edge: [['9 Sep', 'Prism', 'Raised', 'Edge protection removed and not reinstated on level 14.'], ['9 Sep', 'Alex Chen', 'Assigned to Sam Ortiz', ''], ['15 Sep', 'Focus review', 'Agreed', 'Meet the facade subcontractor’s supervisor.'], ['22 Sep', 'Sam Ortiz', 'Update', 'Met the supervisor. Revised method due 29 September.'], ['25 Sep', 'Prism', 'Worsening', 'The same subcontractor is booked to start at Hospital Fit-out.']],
+    edge: [['9 Sep', 'Prism', 'Raised', 'Edge protection removed and not reinstated on level 14.'], ['9 Sep', 'Alex Chen', 'Assigned to Sam Ortiz', ''], ['15 Sep', 'Focus review', 'Agreed', 'Meet the facade subcontractor’s supervisor.'], ['22 Sep', 'Sam Ortiz', 'Update', 'Met the supervisor. Revised method due 29 September.'], ['25 Sep', 'Prism', 'Spreading', 'The same subcontractor is booked to start at Hospital Fit-out.']],
     tick: [['23 Sep', 'Prism', 'Raised', 'Twenty-four inspections with every item passed and copied comments.']]
   };
   INSIGHTS.forEach(function (i) { i.history = (SEED_HISTORY[i.id] || []).map(function (h) { return { when: h[0], who: h[1], what: h[2], text: h[3] }; }); });
@@ -1321,7 +1342,7 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
     var ow = owners(); if (i.owner && ow.indexOf(i.owner) < 0) ow.unshift(i.owner);
     var gone = i.dismissed || i.closed;
     $('view').innerHTML = '<a class="back" href="#focus">← Insights</a>' +
-      '<div class="ins-head"><div class="meta"><span class="icard-sev">' + sevIcon(i.sev) + '<span class="sev-t t-' + i.sev + '">' + (i.sev === 'critical' ? 'Critical' : 'Warning') + '</span></span>' + statusBadge(i) + escBadge(i) + trendHTML(i.trend) + '<span class="label">Raised ' + esc(i.since) + '</span></div>' +
+      '<div class="ins-head"><div class="meta"><span class="icard-sev">' + sevIcon(i.sev) + '<span class="sev-t t-' + i.sev + '">' + (i.sev === 'critical' ? 'Critical' : 'Warning') + '</span></span>' + statusBadge(i) + escBadge(i) + activity(i) + '<span class="label">Raised ' + esc(i.since) + '</span></div>' +
         '<h1 class="ins-title">' + esc(i.title) + '</h1>' +
         '<div class="meta">' + i.sites.map(function (s) { return '<a class="chip link" href="#site/' + s + '">' + esc(SITE[s].name) + '</a>'; }).join('') + '</div></div>' +
       (i.dismissed ? '<div class="banner info"><b>Dismissed: ' + esc(i.dismissed.reason) + '</b>' + (i.dismissed.note ? '<p>' + esc(i.dismissed.note) + '</p>' : '') + '<p>Prism won’t raise this again unless the pattern changes.</p></div>' : '') +
@@ -1341,7 +1362,7 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
           (gone ? '<p class="muted-p">' + (i.dismissed ? 'Dismissed by ' + esc(i.dismissed.who) + '.' : 'Closed.') + '</p>' :
           (ST.dismissing === i.id ? dismissForm(i.id, 'page') :
             '<span class="fld col"><label for="i-owner">Owner</label><select class="select wide" id="i-owner"><option value="">No owner</option>' + ow.map(function (o) { return '<option' + (o === i.owner ? ' selected' : '') + '>' + esc(o) + '</option>'; }).join('') + '</select></span>' +
-            '<span class="fld col"><label for="i-status">Status</label><select class="select wide" id="i-status">' + [['new', 'New'], ['working', 'In progress'], ['resolved', 'Ready to close'], ['closed', 'Close it']].map(function (o) { return '<option value="' + o[0] + '"' + (o[0] === i.status ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select></span>' +
+            '<span class="fld col"><label for="i-status">Status</label><select class="select wide" id="i-status">' + [['new', 'New'], ['plan', 'Agree to plan'], ['working', 'In progress'], ['resolved', 'Ready to close'], ['closed', 'Close it']].map(function (o) { return '<option value="' + o[0] + '"' + (o[0] === i.status ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select></span>' +
             '<label class="w-note-l" for="i-note">Add an update</label><textarea class="w-note" id="i-note" rows="2" placeholder="What’s happened since the last update"></textarea>' +
             '<div class="meet-actions"><button type="button" class="btn brand" id="i-post">Post update</button><button type="button" class="btn" data-dopen="' + i.id + '">Dismiss…</button></div>')) +
         '</section>' +
@@ -1360,7 +1381,7 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
       var v = e.target.value;
       if (v === 'closed') { i.closed = true; logEvent(i, 'Closed'); toast('Insight closed. Prism will reopen it if the pattern returns.'); }
       else if (v === 'working' && !planAgreed(i)) { toast('Agree the plan first, here or at the next Focus review.'); }
-      else { i.status = v; logEvent(i, 'Status: ' + ({ new: 'New', working: 'In progress', resolved: 'Ready to close' })[v]); }
+      else { i.status = v; logEvent(i, 'Status: ' + ({ new: 'New', plan: 'Agree to plan', working: 'In progress', resolved: 'Ready to close' })[v]); }
       render();
     }
   });
@@ -1491,7 +1512,7 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
     $('rec').hidden = false; $('scrim').hidden = false;
     if (ST.correcting === id) $('rc-value').focus(); else $('rec-x').focus();
   }
-  function statusText(i) { return i.dismissed ? 'Dismissed' : i.closed ? 'Closed' : i.status === 'new' ? 'New · no owner' : stalled(i) ? 'Stalled · ' + i.owner : i.status === 'resolved' ? 'Ready to close' : 'In progress · ' + i.owner; }
+  function statusText(i) { return i.dismissed ? 'Dismissed' : i.closed ? 'Closed' : i.status === 'new' ? 'New · no owner' : i.status === 'plan' ? 'Agree to plan · ' + i.owner : stalled(i) ? 'Stalled · ' + i.owner : i.status === 'resolved' ? 'Ready to close' : 'In progress · ' + i.owner; }
   function closeRec() {
     if ($('rec').hidden) return;
     $('rec').hidden = true; ST.correcting = '';
@@ -1662,6 +1683,8 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
   INSIGHTS.forEach(function (i) { i.plan = PLANS[i.id] || null; if (i.plan && READS[i.id]) i.plan.read = READS[i.id]; });
   INSIGHTS.forEach(function (i) { if (i.id === 'pre') i.follows = 'r-pre0'; });
   function addDays(d, n) { var m = /^(\d+) (\w{3})/.exec(d || ''); if (!m) return ''; var t = new Date(2026, MON[m[2]], +m[1] + n); return t.getDate() + ' ' + Object.keys(MON)[t.getMonth()]; }
+  INSIGHTS.forEach(function (i) { var pl = i.plan; if (pl && pl.state === 'agreed' && !pl.approvedBy) { pl.approvedBy = i.owner; pl.approvedAt = (/on (\d+ \w{3})/.exec(pl.agreed) || [])[1]; } });
+  function approvedLine(pl) { return 'Approved by ' + (pl.approvedBy === YOU ? 'you' : pl.approvedBy) + ' on ' + pl.approvedAt + (pl.agreed.indexOf('Focus review') > -1 ? ' at the Focus review' : ' \u00b7 shown at the next Focus review'); }
   function agreedDate(pl) { var m = /on (\d+ \w{3})/.exec(pl.agreed || ''); return m ? m[1] : ''; }
 
   /* ---------- 90-day retros: did the plan make a difference? ---------- */
@@ -1787,11 +1810,16 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
     return '<span class="tlabel">' + (a.st === 'track' ? 'On track' : 'Not started') + '</span>';
   }
   // An insight moves to In progress once it has an owner and an agreed plan
-  function autoProgress(i) { if (i.owner && i.status === 'new' && planAgreed(i)) { i.status = 'working'; i.updated = 0; } }
+  // New = nobody owns it. With an owner it waits on the plan (Agree to plan), then moves to In progress
+  function autoProgress(i) {
+    if (i.status !== 'new' && i.status !== 'plan') return;
+    var was = i.status; i.status = !i.owner ? 'new' : planAgreed(i) ? 'working' : 'plan';
+    if (i.status === 'working' && was !== 'working') i.updated = 0;
+  }
   function planDone(i) { return i.plan ? i.plan.actions.filter(function (a) { return a.st === 'done'; }).length : 0; }
   function planSummary(i) {
     if (!i.plan) return '';
-    if (i.plan.state === 'proposed') return 'Plan to agree';
+    if (i.plan.state === 'proposed') return 'Agree to plan';
     var n = i.plan.actions.length, d = planDone(i), r = i.plan.actions.filter(function (a) { return a.st === 'risk'; }).length;
     return d === n ? 'All actions done' : d + ' of ' + n + ' actions done' + (r ? ' \u00b7 ' + r + ' at risk' : '');
   }
@@ -1799,7 +1827,7 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
     var pl = i.plan; if (!pl) return '';
     var prop = pl.state === 'proposed', people = managersInView(); if (i.owner && people.indexOf(i.owner) < 0) people.unshift(i.owner);
     var who = function (a) { return a.who ? '<span class="av' + (a.who === YOU ? ' me' : '') + '">' + initials(a.who) + '</span>' + esc(a.who) : '<span class="pa-none">No one yet</span>'; };
-    return '<section class="' + cls + ' plan' + (prop ? ' prop' : '') + '"><div class="plan-head"><span class="label">Plan</span><span class="plan-state">' + (prop ? 'Proposed by Hiviz \u00b7 not agreed yet' : esc(pl.agreed)) + '</span></div>' +
+    return '<section class="' + cls + ' plan' + (prop ? ' prop' : '') + '"><div class="plan-head"><span class="label">Plan</span><span class="plan-state">' + (prop ? 'Proposed by Hiviz \u00b7 waiting for the owner\u2019s approval' : esc(approvedLine(pl))) + '</span></div>' +
       '<ol class="plan-acts">' + pl.actions.map(function (a, k) {
         var st = PA_ST.filter(function (x) { return x[0] === a.st; })[0];
         return '<li class="pa st-' + a.st + '"><div class="pa-main"><span class="pa-t">' + esc(a.t) + '</span><span class="pa-meta">' + who(a) + '<span>by ' + esc(a.due) + '</span></span>' + linkHTML(i, k, a) + '</div>' +
@@ -1810,13 +1838,24 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
       '<p class="plan-exp"><span class="label">Prism listens for</span>' + esc(pl.expect) + '</p>' +
       (pl.read ? '<p class="plan-read"><span class="label">Prism\u2019s read so far</span><span>' + (pl.read[0] === 'working' ? '<span class="badge success"><i></i>Working</span>' : pl.read[0] === 'continues' ? '<span class="badge critical"><i></i>Pattern continues</span>' : '<span class="tlabel">Too early</span>') + ' ' + esc(pl.read[1]) + '</span></p>' : '') +
       (i.follows && RETRO[i.follows] ? '<p class="plan-read"><span class="label">Follows on from</span><span><button type="button" class="linkish map-link" data-retro="' + i.follows + '">' + esc(RETRO[i.follows].title) + '</button> \u00b7 closed ' + esc(RETRO[i.follows].closed) + ' \u00b7 retro: ' + OUT[RETRO[i.follows].outcome][1] + '</span></p>' : '') +
-      (prop ? '<div class="plan-foot"><p class="muted-p">' + (ST.view === 'meeting' && MT ? 'Agree it here and the actions go into this review\u2019s summary.' : 'Plans are agreed together in the Focus review. Agree it now if it can\u2019t wait.') + '</p><button type="button" class="btn brand" data-pa-agree="' + i.id + '"' + (pl.actions.length ? '' : ' disabled') + '>Agree plan</button></div>' : '<p class="muted-p">' + esc(planSummary(i)) + '.' + (agreedDate(pl) ? ' 90-day retro on ' + esc(addDays(agreedDate(pl), 90)) + '.' : '') + '</p>') +
+      (prop ? (function () {
+        var own = ST.view === 'meeting' && MT && MT.draft && MT.draft.id === i.id ? MT.draft.owner : i.owner;
+        var note = !own ? 'Assign an owner first. The insight owner approves the plan.' : own === YOU ? 'You own this insight, so you approve the plan.' + (ST.view === 'meeting' && MT ? ' Approve it here and the actions go into this review\u2019s summary.' : '') : esc(own) + ' owns this insight and approves the plan.';
+        return '<div class="plan-foot"><p class="muted-p">' + note + '</p><button type="button" class="btn brand" data-pa-agree="' + i.id + '"' + (pl.actions.length && own ? '' : ' disabled') + '>' + (!own || own === YOU ? 'Approve plan' : 'Approve as ' + esc(own) + ' (demo)') + '</button></div>';
+      })() : '<p class="muted-p">' + esc(planSummary(i)) + '.' + (agreedDate(pl) ? ' 90-day retro on ' + esc(addDays(agreedDate(pl), 90)) + '.' : '') + '</p>') +
     '</section>';
   }
   document.addEventListener('click', function (e) {
     var ag = e.target.closest('[data-pa-agree]');
-    if (ag) { var i = insightById(ag.getAttribute('data-pa-agree')), inReview = ST.view === 'meeting' && MT; i.plan.state = 'agreed'; i.plan.agreed = inReview ? 'Agreed at the Focus review on 26 Sep' : 'Agreed outside a review on 26 Sep \u00b7 shown at the next Focus review';
-      if (inReview) { MT.agreed[i.id] = true; rerenderFor(i.id); toast('Plan agreed. It moves to In progress when you save this insight.'); return; } logEvent(i, 'Plan agreed', i.plan.actions.length + (i.plan.actions.length === 1 ? ' action' : ' actions') + '. Prism is listening for: ' + i.plan.expect); autoProgress(i); toast(i.owner ? 'Plan agreed. The insight is now in progress.' : 'Plan agreed. Give it an owner to start.'); rerenderFor(i.id); return; }
+    if (ag) {
+      var i = insightById(ag.getAttribute('data-pa-agree')), inReview = ST.view === 'meeting' && MT;
+      var by = i.owner || (inReview && $('w-owner') ? $('w-owner').value : ''); if (!by) { toast('Assign an owner first. The owner approves the plan.'); return; }
+      i.plan.state = 'agreed'; i.plan.approvedBy = by; i.plan.approvedAt = '26 Sep';
+      i.plan.agreed = inReview ? 'Agreed at the Focus review on 26 Sep' : 'Agreed outside a review on 26 Sep';
+      logEvent(i, 'Plan approved', i.plan.actions.length + (i.plan.actions.length === 1 ? ' action' : ' actions') + '. Prism is listening for: ' + i.plan.expect, by === YOU ? null : by);
+      if (inReview) { MT.agreed[i.id] = true; rerenderFor(i.id); toast('Plan approved by ' + (by === YOU ? 'you' : by) + '. It moves to In progress when you save this insight.'); return; }
+      autoProgress(i); toast('Plan approved by ' + (by === YOU ? 'you' : by) + '. The insight is now in progress.'); rerenderFor(i.id); return;
+    }
     var rm = e.target.closest('[data-pa-remove]');
     if (rm) { var pr = rm.getAttribute('data-pa-remove').split(':'), ri = insightById(pr[0]); ri.plan.actions.splice(+pr[1], 1); rerenderFor(ri.id); return; }
     var ad = e.target.closest('[data-pa-add]');
@@ -1912,7 +1951,7 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
     var ow = owners(); if (i.owner && ow.indexOf(i.owner) < 0) ow.unshift(i.owner);
     $('sheet').innerHTML =
       '<div class="sheet-head" style="position:relative"><button type="button" class="x" id="sheet-x" aria-label="Close"><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 2l8 8M10 2l-8 8" stroke="currentColor" stroke-width="1.6"/></svg></button>' +
-        '<div class="meta">' + sevIcon(i.sev) + statusBadge(i) + escBadge(i) + trendHTML(i.trend) + '<span class="label">· since ' + esc(i.since) + '</span></div>' +
+        '<div class="meta">' + sevIcon(i.sev) + statusBadge(i) + escBadge(i) + activity(i) + '<span class="label">· since ' + esc(i.since) + '</span></div>' +
         '<h2 id="sheet-title">' + esc(i.title) + '</h2>' +
         '<a class="open-page" href="#insight/' + i.id + '">Open insight page \u2192</a>' +
         '<div class="meta">' + sites.map(function (n) { return '<span class="chip">' + esc(n) + '</span>'; }).join('') + '</div></div>' +
@@ -1939,7 +1978,7 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
       '</div>' +
       '<div class="sheet-foot">' +
         '<span class="fld"><label for="s-owner">Owner</label><select class="select" id="s-owner"><option value="">No owner</option>' + ow.map(function (o) { return '<option' + (o === i.owner ? ' selected' : '') + '>' + esc(o) + '</option>'; }).join('') + '</select></span>' +
-        '<span class="fld"><label for="s-status">Status</label><select class="select" id="s-status">' + [['new', 'New'], ['working', 'In progress'], ['resolved', 'Ready to close']].map(function (o) { return '<option value="' + o[0] + '"' + (o[0] === i.status ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select></span>' +
+        '<span class="fld"><label for="s-status">Status</label><select class="select" id="s-status">' + [['new', 'New'], ['plan', 'Agree to plan'], ['working', 'In progress'], ['resolved', 'Ready to close']].map(function (o) { return '<option value="' + o[0] + '"' + (o[0] === i.status ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select></span>' +
         (i.status === 'resolved' ? '<button type="button" class="btn dark" id="s-close">Close insight</button>' : '') +
         '<button type="button" class="btn" data-dopen="' + i.id + '">Dismiss\u2026</button>' +
       '</div>';
@@ -1958,7 +1997,7 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
     var i = sheetInsight(); if (!i) return;
     if (e.target.id === 's-owner') { i.owner = e.target.value; logEvent(i, i.owner ? 'Assigned to ' + i.owner : 'Owner removed'); autoProgress(i); toast(i.owner ? 'Assigned to ' + i.owner : 'Owner removed'); }
     else if (e.target.id === 's-status' && e.target.value === 'working' && !planAgreed(i)) { toast('Agree the plan first, here or at the next Focus review.'); }
-    else if (e.target.id === 's-status') { i.status = e.target.value; logEvent(i, 'Status: ' + ({ new: 'New', working: 'In progress', resolved: 'Ready to close' })[i.status]); if (i.status === 'working' && i.updated == null) i.updated = 0; }
+    else if (e.target.id === 's-status') { i.status = e.target.value; logEvent(i, 'Status: ' + ({ new: 'New', plan: 'Agree to plan', working: 'In progress', resolved: 'Ready to close' })[i.status]); if (i.status === 'working' && i.updated == null) i.updated = 0; }
     var top = $('sheet').querySelector('.sheet-body').scrollTop; openSheet(i.id); $('sheet').querySelector('.sheet-body').scrollTop = top; render();
   });
 
@@ -1983,7 +2022,8 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
     ]],
     ['insights', 'Insight status', [
       ['info', 'New', 'Prism has raised it and nobody owns it yet.'],
-      ['', 'In progress', 'Someone owns it and it’s being worked on.'],
+      ['', 'Agree to plan', 'It has an owner, and Hiviz has drafted a plan. The owner approves the actions, usually at the Focus review, and the work starts. Hiviz records who approved it and when.'],
+      ['', 'In progress', 'Someone owns it, the plan is agreed and it’s being worked on.'],
       ['warning', 'Stalled', 'It has an owner, but there’s been no update for 14 days or more.'],
       ['success', 'Ready to close', 'The pattern has stopped. Close it, or keep watching for a little longer.'],
       ['success', 'Closed', 'Finished. Prism reopens it if the pattern comes back.'],
@@ -1991,12 +2031,18 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
       ['', 'Held at\u2026', 'Accepted by a higher level, which now owns it as part of its duty of care.'],
       ['', 'Dismissed', 'A manager decided it isn’t worth acting on and recorded why. Prism uses the reason to tune what it raises.']
     ]],
-    ['severity', 'Severity and trend', [
+    ['severity', 'Severity and activity', [
       ['critical', 'Critical', 'Could lead to a fatality or serious injury, or a critical control has failed.'],
       ['warning', 'Warning', 'A real pattern that isn’t critical yet.'],
-      ['critical', 'Worsening', 'More evidence, or more serious evidence, than the two weeks before.'],
-      ['', 'Steady', 'About the same as the two weeks before.'],
-      ['success', 'Improving', 'Less evidence, or evidence that controls are now holding.']
+      ['', 'Last record \u2026 this week', 'Plain facts about how often it’s showing up. Insights don’t judge improvement; the plan’s read and the 90-day retro do.']
+    ]],
+    ['words', 'Words we use', [
+      ['', 'Is it handled?', 'Insight status: New, Agree to plan, In progress, Stalled, Ready to close, Closed.'],
+      ['', 'Is the work getting done?', 'Each action or milestone: Not started, On track, At risk, Done. Overdue when it passes its date. Owners can update any time; the check-in before a meeting just confirms it.'],
+      ['', 'Is it having an effect?', 'Prism’s read on a plan or program: Too early, Working, Pattern continues.'],
+      ['', 'Did it make a difference?', 'The 90-day retro: Worked, Quiet, Partly, Didn’t work, Can’t tell.'],
+      ['', 'Are we getting more mature?', 'Map factors and indicators: Improving, Steady, Worsening over 90 days. Objectives: On track, At risk, Off track.'],
+      ['', 'Why is it on the agenda?', 'In monthly progress: Owner and Prism disagree, Needs help, No check-in, Raised. Everything else is Noted.']
     ]],
     ['strategy', 'Strategy', [
       ['', 'Strategy', 'The few Forge Works Map factors the company has chosen to mature this year. Insights respond to what the records show; strategy is proactive.'],
@@ -2258,8 +2304,9 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
     function rank(i) {
       if (i.esc && i.esc.to === scopeLevel()) return -1;
       if (i.status === 'new') return 0;
+      if (i.status === 'plan') return 0.5;
       if (stalled(i)) return 1;
-      if (i.trend === 'worse') return 2;
+      if (planRead(i) === 'continues') return 2;
       if (i.status === 'resolved') return 3;
       return 4;
     }
@@ -2267,9 +2314,10 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
   }
   function agendaReason(i) {
     if (i.esc && i.esc.to === scopeLevel()) return 'Escalated to this level';
-    if (i.status === 'new') return i.owner ? 'Plan to agree' : 'Needs an owner';
+    if (i.status === 'new') return 'Needs an owner';
+    if (i.status === 'plan') return 'Agree to plan';
     if (stalled(i)) return 'Stalled';
-    if (i.trend === 'worse') return 'Worsening';
+    if (planRead(i) === 'continues') return 'Pattern continues despite the plan';
     if (i.status === 'resolved') return 'Ready to close';
     return 'Check progress';
   }
@@ -2331,10 +2379,10 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
       function lines(arr, tone, fmt) {
         return arr.length ? '<ul class="rlist">' + arr.map(function (i) { return '<li><button type="button" class="rlink" data-open="' + i.id + '">' + esc(i.title) + '</button><span>' + fmt(i) + '</span></li>'; }).join('') + '</ul>' : '<p class="muted-p">None.</p>';
       }
-      var fresh = list.filter(function (i) { return i.status === 'new'; });
-      var worse = list.filter(function (i) { return i.trend === 'worse' && i.status !== 'new' && !stalled(i); });
+      var fresh = list.filter(function (i) { return i.status === 'new' || i.status === 'plan'; });
+      var worse = list.filter(function (i) { return planRead(i) === 'continues' && !stalled(i); });
       var stuck = list.filter(stalled);
-      var better = list.filter(function (i) { return i.trend === 'better' && i.status !== 'resolved'; });
+      var better = list.filter(function (i) { return planRead(i) === 'working' && i.status !== 'resolved'; });
       var ready = list.filter(function (i) { return i.status === 'resolved'; });
       var ag = agenda();
       $('view').innerHTML = meetingTop('State of safety', head) +
@@ -2348,10 +2396,10 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
           reportMap(list) +
           '<section class="card rsec"><span class="label">3 · Insights since last time' + (last ? ' · ' + esc(last.short) : '') + '</span>' +
             '<div class="rcols">' +
-              '<div><h3><span class="badge info"><i></i>New</span></h3>' + lines(fresh, 'info', function (i) { return 'No owner yet · ' + esc(join(i.sites.map(function (s) { return SITE[s].name; }))); }) + '</div>' +
-              '<div><h3><span class="badge critical"><i></i>Worsening</span></h3>' + lines(worse, 'critical', function (i) { return 'With ' + esc(i.owner); }) + '</div>' +
+              '<div><h3><span class="badge info"><i></i>New</span></h3>' + lines(fresh, 'info', function (i) { return (i.status === 'plan' ? 'Agree to plan · ' + esc(i.owner) + ' · ' : 'No owner yet · ') + '' + esc(join(i.sites.map(function (s) { return SITE[s].name; }))); }) + '</div>' +
+              '<div><h3><span class="badge critical"><i></i>Pattern continues</span></h3>' + lines(worse, 'critical', function (i) { return 'Despite the plan · ' + esc(i.owner); }) + '</div>' +
               '<div><h3><span class="badge warning"><i></i>Stalled</span></h3>' + lines(stuck, 'warning', function (i) { return 'No update in ' + i.updated + ' days · ' + esc(i.owner); }) + '</div>' +
-              '<div><h3><span class="badge success"><i></i>Improving or done</span></h3>' + lines(better.concat(ready), 'success', function (i) { return i.status === 'resolved' ? 'Ready to close' : 'Improving · ' + esc(i.owner); }) + '</div>' +
+              '<div><h3><span class="badge success"><i></i>Working or ready to close</span></h3>' + lines(better.concat(ready), 'success', function (i) { return i.status === 'resolved' ? 'Ready to close' : 'Plan working · ' + esc(i.owner); }) + '</div>' +
             '</div></section>' +
           reportActions(list, last) + reportRetros() +
           (function () {
@@ -2386,7 +2434,7 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
           return '<li class="' + (k === MT.idx ? 'on' : '') + '"><button type="button" data-goto="' + k + '"><span class="wl-n">' + (lg && lg.done ? '✓' : k + 1) + '</span><span class="wl-t">' + esc(it.title) + '<small>' + esc(lg && lg.done ? (lg.skipped ? 'Skipped' : (lg.changes[0] || '').indexOf('Dismissed') === 0 ? 'Dismissed' : 'Updated') : agendaReason(it)) + '</small></span></button></li>';
         }).join('') + '</ol>' +
         '<section class="card walk-card">' +
-          '<div class="walk-head"><span class="icard-sev">' + sevIcon(cur.sev) + '<span class="sev-t t-' + cur.sev + '">' + (cur.sev === 'critical' ? 'Critical' : 'Warning') + '</span></span>' + statusBadge(cur) + trendHTML(cur.trend) + '<span class="why-here">' + esc(agendaReason(cur)) + '</span></div>' +
+          '<div class="walk-head"><span class="icard-sev">' + sevIcon(cur.sev) + '<span class="sev-t t-' + cur.sev + '">' + (cur.sev === 'critical' ? 'Critical' : 'Warning') + '</span></span>' + statusBadge(cur) + activity(cur) + '<span class="why-here">' + esc(agendaReason(cur)) + '</span></div>' +
           '<h2 class="walk-title">' + esc(cur.title) + '</h2><p class="walk-story">' + esc(cur.story) + '</p>' +
           '<div class="walk-sites">' + cur.sites.map(function (s) { return '<span class="chip">' + esc(SITE[s].name) + '</span>'; }).join('') + '</div>' +
           '<div class="walk-says"><span class="label">What each source says</span><ul>' + cur.says.map(function (s) { return '<li><span class="mg">' + esc(SRC[s.src].mg) + '</span><span><b>' + esc(SRC[s.src].name) + ' · ' + s.n + '</b> ' + esc(s.text) + '</span></li>'; }).join('') + '</ul></div>' +
@@ -2401,7 +2449,7 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
           (cur.plan ? planHTML(cur, 'walk-plan' + (MT.agreed[cur.id] ? ' just' : '')) : '') +
           (ST.dismissing === cur.id ? dismissForm(cur.id, 'walk') : (          '<div class="walk-form">' +
             '<span class="fld"><label for="w-owner">Owner</label><select class="select" id="w-owner"><option value="">No owner</option>' + ow.map(function (o) { return '<option' + (o === wOwner ? ' selected' : '') + '>' + esc(o) + '</option>'; }).join('') + '</select></span>' +
-            '<span class="fld"><label for="w-status">Status</label><select class="select" id="w-status">' + [['new', 'New'], ['working', 'In progress'], ['resolved', 'Ready to close'], ['closed', 'Close it']].map(function (o) { return '<option value="' + o[0] + '"' + (o[0] === wStatus ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select></span>' +
+            '<span class="fld"><label for="w-status">Status</label><select class="select" id="w-status">' + [['new', 'New'], ['plan', 'Agree to plan'], ['working', 'In progress'], ['resolved', 'Ready to close'], ['closed', 'Close it']].map(function (o) { return '<option value="' + o[0] + '"' + (o[0] === wStatus ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select></span>' +
             '<label class="w-note-l" for="w-note">Note (optional)</label><textarea id="w-note" class="w-note" rows="2" placeholder="Anything the plan doesn\u2019t capture">' + esc(wNote) + '</textarea>' +
           '</div>' +
           '<div class="meet-actions end"><button type="button" class="btn" data-walk="back"' + (MT.idx ? '' : ' disabled') + '>Back</button><button type="button" class="btn" data-walk="skip">Skip</button><button type="button" class="btn brand" data-walk="save">' + (MT.idx === ids.length - 1 ? 'Save and finish' : 'Save and next') + '</button></div>' +
@@ -2501,18 +2549,20 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
     }
     return null;
   }
+  // Choosing an owner in the walk-through lets them approve the plan straight away
+  document.addEventListener('change', function (e) { if (e.target.id === 'w-owner' && MT && ST.view === 'meeting') rerenderFor(MT.items[MT.idx]); });
   function saveWalkItem(skip) {
     var id = MT.items[MT.idx], cur = INSIGHTS.filter(function (x) { return x.id === id; })[0];
     var changes = [];
     if (!skip) {
       var owner = $('w-owner').value, status = $('w-status').value, note = $('w-note').value.trim();
       if (owner !== cur.owner) { changes.push(owner ? 'Owner: ' + owner : 'Owner removed'); cur.owner = owner; }
-      if (MT.agreed[id]) changes.push('Plan agreed: ' + cur.plan.actions.length + (cur.plan.actions.length === 1 ? ' action' : ' actions'));
+      if (MT.agreed[id]) changes.push('Plan approved by ' + cur.plan.approvedBy + ': ' + cur.plan.actions.length + (cur.plan.actions.length === 1 ? ' action' : ' actions'));
       if (MT.checks[id]) Object.keys(MT.checks[id]).forEach(function (k) { changes.push(cur.plan.actions[k].t + ': ' + MT.checks[id][k]); });
       if (status === 'working' && !planAgreed(cur)) { status = cur.status; changes.push('Plan still to agree'); }
       if (status === 'closed') { changes.push('Closed'); cur.closed = true; }
-      else if (status !== cur.status) { changes.push('Status: ' + ({ new: 'New', working: 'In progress', resolved: 'Ready to close' })[status]); cur.status = status; }
-      if (cur.owner && cur.status === 'new' && planAgreed(cur)) { cur.status = 'working'; changes.push('Status: In progress'); }
+      else if (status !== cur.status) { changes.push('Status: ' + ({ new: 'New', plan: 'Agree to plan', working: 'In progress', resolved: 'Ready to close' })[status]); cur.status = status; }
+      var before = cur.status; autoProgress(cur); if (cur.status !== before) changes.push('Status: ' + ({ new: 'New', plan: 'Agree to plan', working: 'In progress' })[cur.status]);
       if (changes.length) cur.updated = 0;
       MT.log[id] = { done: true, changes: changes, note: note };
       if (changes.length || note) logEvent(cur, 'Focus review', changes.join(' \u00b7 ') + (note ? (changes.length ? '. ' : '') + note : ''), 'Focus review');
@@ -3527,14 +3577,15 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
     var out = [];
     OBJECTIVES.forEach(function (o) { o.programs.forEach(function (pid) { var p = PROGRAMS[pid]; p.ms.forEach(function (m, k) {
       if (m.st === 'done' && !m.upd) return;
-      var key = pid + ':' + k, r = !m.upd ? 'missing' : p.read[0] === 'continues' && (m.st === 'track' || m.st === 'done') ? 'disagree' : m.st === 'risk' || overdue(m) ? 'help' : 'noted';
+      var key = pid + ':' + k, r = !m.upd ? 'missing' : p.read[0] === 'continues' && (m.st === 'track' || m.st === 'done') ? 'disagree' : m.st === 'risk' || overdue(m) ? 'help' : 'noted', fresh = r;
       if (r === 'noted' && PG && PG.raise[key]) r = 'raised';
-      out.push({ key: key, o: o, p: p, m: m, why: r });
+      if (PG && PG.reason && PG.reason[key]) r = PG.reason[key]; // an item stays on the list once discussion starts
+      out.push({ key: key, o: o, p: p, m: m, why: r, fresh: fresh });
     }); }); });
     return out;
   }
   function ciLine(m) {
-    return m.upd ? '<span class="ci-line">' + actBadge(m) + '<span><b>' + esc(m.who) + '</b> · ' + esc(m.upd) + (m.note ? ': “' + esc(m.note) + '”' : '') + '</span></span>'
+    return m.upd ? '<span class="ci-line">' + actBadge(m) + '<span><b>' + esc(m.who) + '</b> · ' + (m.inMeeting ? 'in the meeting' : esc(m.upd)) + (m.note ? ': “' + esc(m.note) + '”' : '') + '</span></span>'
       : '<span class="ci-line"><span class="tlabel">No check-in</span><span><b>' + esc(m.who) + '</b> ' + (m.who === YOU ? 'haven’t' : 'hasn’t') + ' checked in yet</span></span>';
   }
   function cmHTML(m) { return (m.cm || []).length ? '<ul class="ci-cm">' + m.cm.map(function (c) { return '<li><span class="av' + (c[0] === YOU ? ' me' : '') + '">' + initials(c[0]) + '</span><span><b>' + esc(c[0]) + '</b> ' + esc(c[1]) + '</span></li>'; }).join('') + '</ul>' : ''; }
@@ -3545,7 +3596,7 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
   function startProgress() {
     ST.div = ''; ST.reg = ''; fillFilters();
     var att = {}; PL_PEOPLE.forEach(function (p) { att[p] = pgPeople().indexOf(p) > -1; });
-    PG = { step: 1, att: att, raise: {}, dec: {}, notes: '' }; go('progress');
+    PG = { step: 1, att: att, raise: {}, dec: {}, edit: {}, notes: '' }; go('progress');
   }
   function ciSummary(items) {
     var open = items.filter(function (x) { return !(x.m.st === 'done' && !x.m.upd); }), inn = open.filter(function (x) { return x.m.upd; }).length;
@@ -3599,11 +3650,14 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
     if (PG.step === 3) {
       $('view').innerHTML = title('Discuss') +
         '<p class="pv-summary"><b>' + word(disc.length) + (disc.length === 1 ? ' item needs' : ' items need') + ' the room.</b> Everything else was checked in and agrees with Prism, so it’s noted.</p>' +
-        '<div class="pl-list">' + disc.map(function (x) {
-          var w = WHY[x.why], d = PG.dec[x.key] || {};
-          return '<section class="card pl-item"><div class="pl-oh">' + (w[0] ? '<span class="badge ' + w[0] + '"><i></i>' + w[1] + '</span>' : '<span class="tlabel">' + w[1] + '</span>') + '<h3>' + esc(x.m.t) + '</h3></div>' +
-            '<p class="muted-p">' + esc(x.p.title) + ' · ' + esc(objTitle(x.o)) + ' · by ' + esc(x.m.due) + '</p>' +
-            '<div class="ci-box"><span class="label">Owner’s check-in</span>' + ciLine(x.m) + cmHTML(x.m) + '</div>' +
+        '<div class="pl-list">' + disc.map(function (x, n) {
+          var w = WHY[x.why], d = PG.dec[x.key] || {}, id = x.key.replace(':', '__'), editing = !x.m.upd || PG.edit[x.key];
+          return '<section class="card pl-item dc"><p class="dc-ctx"><span>' + (n + 1) + ' of ' + disc.length + '</span>' + esc(objTitle(x.o)) + ' · ' + esc(x.p.title) + '</p>' +
+            '<div class="dc-head"><h3>' + esc(x.m.t) + '</h3><span class="dc-own"><span class="av' + (x.m.who === YOU ? ' me' : '') + '">' + initials(x.m.who) + '</span>' + esc(x.m.who) + ' · by ' + esc(x.m.due) + '</span></div>' +
+            '<p class="dc-why"><span class="label">Why it’s here</span>' + (w[0] ? '<span class="badge ' + w[0] + '"><i></i>' + w[1] + '</span>' : '<span class="tlabel">' + w[1] + '</span>') + (x.m.inMeeting ? '<span class="tlabel">Updated in the meeting</span>' : '') + '</p>' +
+            '<div class="ci-box"><span class="label">' + (x.m.upd ? 'Owner’s update' : (x.m.who === YOU ? 'No check-in yet: give your update' : 'No check-in: ask ' + esc(x.m.who.split(' ')[0]) + ' for an update')) + '</span>' + (x.m.upd ? ciLine(x.m) : '') + cmHTML(x.m) +
+              (editing ? '<div class="dc-upd"><select class="select" id="pgu-s-' + id + '">' + PA_ST.map(function (o) { return '<option value="' + o[0] + '"' + (o[0] === x.m.st ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select><input type="text" class="w-note" id="pgu-n-' + id + '" placeholder="What changed, what’s blocking, what’s needed" value="' + esc(x.m.note || '') + '"><button type="button" class="btn" data-pgupd="' + x.key + '">Record update</button></div>'
+                : '<button type="button" class="linkish rt-undo" data-pgedit="' + x.key + '">Update in the meeting</button>') + '</div>' +
             '<p class="plan-read"><span class="label">Prism’s read so far</span><span>' + readBadge(x.p.read) + ' ' + esc(x.p.read[1]) + '</span></p>' +
             '<div class="st-sugg"><span class="label">Hiviz recommends</span><p>' + esc(w[2]) + '</p></div>' +
             '<span class="label dec-l">Decision</span><div class="seg pl-seg" role="group" aria-label="Decision">' + [['agreed', 'Agreed'], ['adjust', 'Adjust'], ['plan', 'Take to planning']].map(function (o) { return '<button type="button" data-pgdec="' + x.key + ':' + o[0] + '" aria-pressed="' + (d.d === o[0]) + '">' + o[1] + '</button>'; }).join('') + '</div>' +
@@ -3617,10 +3671,11 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
     // Wrap-up
     var decided = disc.filter(function (x) { return PG.dec[x.key] && PG.dec[x.key].d; }), att = Object.keys(PG.att).filter(function (k) { return PG.att[k]; });
     var next = {}; decided.forEach(function (x) { var d = PG.dec[x.key]; if (d.d === 'agreed') return; var w = d.d === 'plan' ? x.o.owner : x.m.who; (next[w] = next[w] || []).push(d.d === 'plan' ? 'Bring “' + objTitle(x.o) + '” to quarterly planning' : 'Adjust: ' + x.m.t + (d.note ? ' (' + d.note + ')' : '')); });
-    disc.filter(function (x) { return x.why === 'missing'; }).forEach(function (x) { (next[x.m.who] = next[x.m.who] || []).push('Check in on: ' + x.m.t); });
+    disc.filter(function (x) { return x.fresh === 'missing'; }).forEach(function (x) { (next[x.m.who] = next[x.m.who] || []).push('Check in on: ' + x.m.t); });
     $('view').innerHTML = title('Wrap-up') +
       '<div class="meet-grid"><section class="card meet-card"><h2>What was decided</h2>' +
         (decided.length ? '<ul class="agreed">' + decided.map(function (x) { var d = PG.dec[x.key]; return '<li><span class="av">' + initials(x.m.who) + '</span><div><p class="agreed-t">' + esc(x.m.t) + '</p><p class="agreed-o">' + ({ agreed: 'Agreed', adjust: 'Adjust', plan: 'Take to planning' })[d.d] + (d.note ? ' · ' + esc(d.note) : '') + '</p></div></li>'; }).join('') + '</ul>' : '<p class="muted-p">Nothing decided yet.</p>') +
+        (function () { var u = items.filter(function (x) { return x.m.inMeeting; }); return u.length ? '<div class="w-acts"><span class="label">Updated in the meeting</span><ul class="w-rt">' + u.map(function (x) { return '<li>' + actBadge(x.m) + ' ' + esc(x.m.t) + ' <span>' + esc(x.m.who) + (x.m.note ? ': \u201c' + esc(x.m.note) + '\u201d' : '') + '</span></li>'; }).join('') + '</ul></div>' : ''; })() +
         '<p class="muted-p">' + word(noted.length) + (noted.length === 1 ? ' milestone' : ' milestones') + ' noted without discussion.</p>' +
         (Object.keys(next).length ? '<div class="w-acts"><span class="label">What happens next, by person</span>' + Object.keys(next).map(function (w) { return '<div class="w-p"><span class="person"><span class="av' + (w === YOU ? ' me' : '') + '">' + initials(w) + '</span>' + esc(w) + '</span><ul>' + next[w].map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul></div>'; }).join('') + '</div>' : '') +
       '</section><section class="card meet-card"><h2>Attended</h2><div class="people">' + whoLine(att) + '</div>' +
@@ -3639,9 +3694,17 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
   document.addEventListener('click', function (e) {
     if (e.target.closest('[data-pgstart]')) { startProgress(); return; }
     if (!PG) return;
-    var st = e.target.closest('[data-pgstep]'); if (st) { pgRead(); PG.step = +st.getAttribute('data-pgstep'); renderProgress(); window.scrollTo(0, 0); return; }
+    var st = e.target.closest('[data-pgstep]');
+    if (st) { pgRead(); PG.step = +st.getAttribute('data-pgstep'); if (PG.step === 3 && !PG.reason) { PG.reason = {}; pgItems().forEach(function (x) { if (x.why !== 'noted') PG.reason[x.key] = x.why; }); } renderProgress(); window.scrollTo(0, 0); return; }
+    var ed = e.target.closest('[data-pgedit]'); if (ed) { pgRead(); PG.edit[ed.getAttribute('data-pgedit')] = true; var ye = window.scrollY; renderProgress(); window.scrollTo(0, ye); return; }
+    var up = e.target.closest('[data-pgupd]');
+    if (up) {
+      pgRead(); var uk = up.getAttribute('data-pgupd'), ur = uk.split(':'), um = PROGRAMS[ur[0]].ms[+ur[1]], uid = uk.replace(':', '__');
+      um.st = $('pgu-s-' + uid).value; um.note = $('pgu-n-' + uid).value.trim(); um.upd = '26 Sep'; um.inMeeting = true; PG.edit[uk] = false;
+      toast('Update recorded for ' + um.who + '.'); var yu = window.scrollY; renderProgress(); window.scrollTo(0, yu); return;
+    }
     var dc = e.target.closest('[data-pgdec]'); if (dc) { pgRead(); var p = dc.getAttribute('data-pgdec').split(':'), k = p[0] + ':' + p[1]; PG.dec[k] = PG.dec[k] || {}; PG.dec[k].d = p[2]; var y = window.scrollY; renderProgress(); window.scrollTo(0, y); return; }
-    var rs = e.target.closest('[data-pgraise]'); if (rs) { pgRead(); PG.raise[rs.getAttribute('data-pgraise')] = true; var y2 = window.scrollY; renderProgress(); window.scrollTo(0, y2); return; }
+    var rs = e.target.closest('[data-pgraise]'); if (rs) { pgRead(); PG.raise[rs.getAttribute('data-pgraise')] = true; if (PG.reason) PG.reason[rs.getAttribute('data-pgraise')] = 'raised'; var y2 = window.scrollY; renderProgress(); window.scrollTo(0, y2); return; }
     if (e.target.closest('#pg-copy')) { pgRead(); copy(pgSummary(), 'Summary copied'); return; }
     if (e.target.closest('#pg-save')) {
       pgRead();
