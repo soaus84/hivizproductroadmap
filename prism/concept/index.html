@@ -932,6 +932,8 @@ button.pv-node:hover .pv-t { text-decoration: underline; text-underline-offset: 
 .st-sugg .label, .walk-next .label { color: var(--text); }
 .mc-l .inf, .il-t .inf { justify-self: start; width: max-content; }
 /* ---------- Batch 3: next step first, evidence and milestones folded ---------- */
+.rt-sec { padding: 18px 20px; display: grid; gap: 10px; }
+.rt-row { display: flex; align-items: center; gap: 10px 16px; flex-wrap: wrap; }
 .nxt { display: grid; gap: 6px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 10px; justify-items: start; }
 .nxt p { margin: 0; font-size: 15px; line-height: 1.4; }
 .st-change summary, .walk-evd summary, .sp-det summary { cursor: pointer; font-size: 14.5px; font-weight: 800; text-decoration: underline; text-underline-offset: 3px; }
@@ -1124,12 +1126,12 @@ button.pv-node:hover .pv-t { text-decoration: underline; text-underline-offset: 
         { src: 'procore', n: 7, text: 'Spotters now calling stops on reversing plant. One repeat on 2 September.', recs: [
           R('24 Sep', 'rr', 'OB-7741 · "spotter stopped the reversing grader when ped walked behind"', [['Positive performance', 'success'], ['Control held', 'success']]) ] }
       ] },
-    { id: 'house', sev: 'warning', status: 'resolved', owner: 'Tom Walsh', trend: 'better', lead: false, since: '4 Aug', updated: 2, short: 'blocked access routes',
-      sites: ['cc', 'st'], hist: '1110110100000000000000000000',
+    { id: 'house', sev: 'warning', status: 'resolved', owner: 'Tom Walsh', trend: 'better', lead: false, since: '20 Jun', updated: 2, short: 'blocked access routes',
+      sites: ['cc', 'st'], hist: '0000000000000000000000000000',
       title: 'Blocked access routes',
-      story: 'Materials stored in access routes were a repeat finding in August. No repeat in four weeks since the laydown plan changed.',
+      story: 'Materials stored in access routes were a repeat finding in June. No repeat since the laydown areas were marked in early July.',
       read: [['Control', 'Held', 'success'], ['Factor', 'Operational management', '']],
-      latest: 'Laydown plan changed and marked on site. No repeat for four weeks.',
+      latest: 'Laydown areas marked on 3 Jul. No repeat since.',
       next: 'Close it. Prism reopens it if the pattern comes back.',
       says: [
         { src: 'intelex', n: 5, text: 'No blocked access routes reported since the laydown plan changed.', recs: [
@@ -1262,7 +1264,7 @@ button.pv-node:hover .pv-t { text-decoration: underline; text-underline-offset: 
   function activity(i) {
     var h = (i.hist || '').split('').map(Number), last = -1; h.forEach(function (v, k) { if (v) last = k; });
     var week = h.slice(-7).reduce(function (a, v) { return a + v; }, 0), ago = last < 0 ? null : h.length - 1 - last;
-    var t = ago == null ? 'No records yet' : week ? (ago === 0 ? 'Last record today' : ago === 1 ? 'Last record yesterday' : 'Last record ' + ago + ' days ago') + ' \u00b7 ' + week + ' this week' : 'Quiet for ' + ago + ' days';
+    var t = ago == null ? 'Quiet for 4 weeks or more' : week ? (ago === 0 ? 'Last record today' : ago === 1 ? 'Last record yesterday' : 'Last record ' + ago + ' days ago') + ' \u00b7 ' + week + ' this week' : 'Quiet for ' + ago + ' days';
     return '<span class="act">' + t + '</span>';
   }
   function planRead(i) { return i.plan && i.plan.state === 'agreed' && i.plan.read ? i.plan.read[0] : ''; }
@@ -1275,6 +1277,7 @@ button.pv-node:hover .pv-t { text-decoration: underline; text-underline-offset: 
     var r = planRead(i);
     return r === 'continues' ? 'The actions aren\u2019t changing the pattern yet. Review the plan.' : 'Check in on the actions as they progress.';
   }
+  function retroTag(i) { return retroDue(i) ? '<span class="tlabel">Retro due</span>' : ''; }
   function statusBadge(i) {
     if (i.dismissed) return '<span class="badge"><i></i>Dismissed</span>';
     if (i.closed) return '<span class="badge success"><i></i>Closed</span>';
@@ -1377,7 +1380,7 @@ button.pv-node:hover .pv-t { text-decoration: underline; text-underline-offset: 
       '<span class="icard-sites">' + sites.map(function (s) { return '<span class="chip">' + esc(s.name) + '</span>'; }).join('') + '</span>' +
       '<span class="icard-foot">' +
         '<span class="icard-ev">' + mgStack(srcIds) + '<span>' + recCount(i) + ' records from ' + srcIds.length + (srcIds.length === 1 ? ' system' : ' systems') + '</span></span>' +
-        activity(i) + (i.plan && i.plan.state === 'agreed' && !i.closed ? '<span class="icard-plan">' + esc(planSummary(i)) + '</span>' : '') +
+        activity(i) + retroTag(i) + (i.plan && i.plan.state === 'agreed' && !i.closed ? '<span class="icard-plan">' + esc(planSummary(i)) + '</span>' : '') +
         '<span class="owner">' + (i.owner ? '<span class="av' + (i.owner === YOU ? ' me' : '') + '">' + initials(i.owner) + '</span><span>' + esc(i.owner) + '</span>' : '<span class="btn sm" data-assign="' + i.id + '">Assign owner</span>') + '</span>' +
       '</span>' +
     '</button>';
@@ -1393,7 +1396,7 @@ button.pv-node:hover .pv-t { text-decoration: underline; text-underline-offset: 
     load: [['12 Sep', 'Prism', 'Raised', 'Four suspended load events across North Yard and Harbour Bridge Deck.'], ['12 Sep', 'Focus review', 'Assigned to Priya Nair', 'Agreed: book a rigging gear audit at both sites.'], ['15 Sep', 'Priya Nair', 'Update', 'Worn tag lines replaced at North Yard.'], ['23 Sep', 'Priya Nair', 'Update', 'Rigging gear audit booked for 30 September.']],
     pre: [['1 Sep', 'Prism', 'Raised', 'Pre-starts completed in under a minute, with identical answers.'], ['2 Sep', 'You', 'Assigned to Tom Walsh', ''], ['10 Sep', 'Tom Walsh', 'Update', 'Supervisors reminded of the purpose of the pre-start.'], ['12 Sep', 'Focus review', 'Agreed', 'Tom to remind supervisors what the pre-start is for.'], ['26 Sep', 'Prism', 'Stalled', 'No update for 16 days, and the pattern hasn’t changed.']],
     spot: [['18 Aug', 'Prism', 'Raised', 'Three near misses with reversing plant in August.'], ['19 Aug', 'You', 'Assigned to Priya Nair', ''], ['12 Sep', 'Focus review', 'Agreed', 'Roll the spotter roster out to Ridge Road.'], ['21 Sep', 'Priya Nair', 'Update', 'Spotter roster in place on both sites.'], ['24 Sep', 'Prism', 'Improving', 'No repeats in two weeks, and spotters are calling stops.']],
-    house: [['4 Aug', 'Prism', 'Raised', 'Six findings of materials stored in access routes.'], ['5 Aug', 'You', 'Assigned to Tom Walsh', ''], ['12 Sep', 'Focus review', 'Agreed', 'Mark out laydown areas at Creek Crossing.'], ['24 Sep', 'Tom Walsh', 'Ready to close', 'No repeat for four weeks since the laydown plan changed.']],
+    house: [['20 Jun', 'Prism', 'Raised', 'Six findings of materials stored in access routes.'], ['23 Jun', 'You', 'Assigned to Tom Walsh', ''], ['27 Jun', 'Tom Walsh', 'Plan approved', 'Mark out laydown areas at Creek Crossing.'], ['12 Sep', 'Focus review', 'Checked in', 'Laydown areas marked on 3 Jul. No repeats.'], ['24 Sep', 'Tom Walsh', 'Ready to close', 'No repeat since the laydown areas were marked.'], ['25 Sep', 'Prism', '90-day retro ready', 'Worked: no blocked routes since the laydown areas were marked.']],
     edge: [['9 Sep', 'Prism', 'Raised', 'Edge protection removed and not reinstated on level 14.'], ['9 Sep', 'Alex Chen', 'Assigned to Sam Ortiz', ''], ['15 Sep', 'Focus review', 'Agreed', 'Meet the facade subcontractor’s supervisor.'], ['22 Sep', 'Sam Ortiz', 'Update', 'Met the supervisor. Revised method due 29 September.'], ['25 Sep', 'Prism', 'Spreading', 'The same subcontractor is booked to start at Hospital Fit-out.']],
     tick: [['23 Sep', 'Prism', 'Raised', 'Twenty-four inspections with every item passed and copied comments.']]
   };
@@ -1449,7 +1452,7 @@ button.pv-node:hover .pv-t { text-decoration: underline; text-underline-offset: 
     $('view').innerHTML = '<a class="back" href="#focus">← Insights</a>' +
       '<div class="ins-head"><p class="kind"><span class="kind-t">Insight</span>' + '<span class="icard-sev">' + sevIcon(i.sev) + '<span class="sev-t t-' + i.sev + '">' + (i.sev === 'critical' ? 'Critical' : 'Warning') + '</span></span>' + '<span>Raised ' + esc(i.since) + '</span></p>' +
         '<h1 class="ins-title">' + esc(i.title) + '</h1>' +
-        '<div class="meta">' + statusBadge(i) + escBadge(i) + activity(i) + '</div>' +
+        '<div class="meta">' + statusBadge(i) + escBadge(i) + activity(i) + retroTag(i) + '</div>' +
         '<div class="meta ins-sites">' + i.sites.map(function (s) { return '<a class="chip link" href="#site/' + s + '">' + esc(SITE[s].name) + '</a>'; }).join('') + '<button type="button" class="btn sm pv-btn" data-pv="insight:' + i.id + '"><svg width="14" height="14" viewBox="0 0 22 22" aria-hidden="true"><path d="M11 2.5 20 19H2z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></svg>View through Prism</button>' + '</div></div>' +
       (i.dismissed ? '<div class="banner info"><b>Dismissed: ' + esc(i.dismissed.reason) + '</b>' + (i.dismissed.note ? '<p>' + esc(i.dismissed.note) + '</p>' : '') + '<p>Prism won’t raise this again unless the pattern changes.</p></div>' : '') +
       (i.closed ? '<div class="banner info"><b>Closed</b><p>Prism will reopen it if the pattern returns.</p></div>' : '') +
@@ -1463,6 +1466,7 @@ button.pv-node:hover .pv-t { text-decoration: underline; text-underline-offset: 
               '<div class="src-recs">' + s.recs.map(function (r) { return recRow(RECS[r.id]); }).join('') + (s.n > s.recs.length ? '<div class="rec"><span class="when">and ' + (s.n - s.recs.length) + ' more like these</span></div>' : '') + '</div></div>';
           }).join('') + '</section>' +
         '<section class="ins-sec"><span class="label">How Prism read it</span><dl class="kv">' + i.read.filter(function (r) { return r[0] !== 'Factor'; }).map(function (r) { var fk = r[0] === 'Factor' ? factorByName(r[1]) : null, fx = fk && INS_FACTOR[i.id]; return '<div><dt>' + esc(r[0]) + '</dt><dd class="' + (r[2] ? 't-' + r[2] : '') + '">' + (fk ? factorBtn(fk) + (fx ? ' \u00b7 ' + esc(FACTOR[fx[0]].inds[fx[1]]) : '') : esc(r[1])) + '</dd></div>'; }).join('') + '</dl></section>' +
+        (i.retro ? (function () { var r = RETRO[i.retro]; return '<section class="ins-sec card rt-sec"><span class="label">90-day retro</span><p class="kind"><span>Due ' + esc(r.due) + '</span>' + outBadge(r.outcome) + '</p><p class="rt-sum">' + esc(r.summary) + '</p><p class="pc-l">Prism listened for: ' + esc(r.expect) + ' \u00b7 before: ' + esc(r.before) + ' \u00b7 since: ' + esc(r.after) + ' \u00b7 reporting ' + esc(r.reporting[0].toLowerCase()) + '</p><div class="rt-row">' + retroReview(r) + '<button type="button" class="linkish rt-undo" data-retro="' + r.id + '">Open the retro</button></div></section>'; })() : '') +
       '</div><aside class="ins-side">' +
         '<section class="card side-card"><h2>Owner and status</h2>' +
           (gone ? '' : '<div class="nxt">' + statusBadge(i) + '<p>' + esc(nextStep(i)) + '</p></div>') +
@@ -1771,8 +1775,8 @@ button.pv-node:hover .pv-t { text-decoration: underline; text-underline-offset: 
     spot: { state: 'agreed', agreed: 'Agreed at the Focus review on 12 Sep', expect: 'No reversing plant without a spotter at North Yard or Ridge Road.', actions: [
       A('Roll the spotter roster out to Ridge Road', 'Priya Nair', '19 Sep', 'done'),
       A('Put the spotter roster in the Ridge Road induction pack', 'You', '26 Sep', 'risk')] },
-    house: { state: 'agreed', agreed: 'Agreed at the Focus review on 12 Sep', expect: 'Access routes at Creek Crossing stay clear.', actions: [
-      A('Mark out laydown areas at Creek Crossing', 'Tom Walsh', '19 Sep', 'done')] },
+    house: { state: 'agreed', agreed: 'Agreed at the Focus review on 27 Jun', expect: 'Access routes at Creek Crossing stay clear.', actions: [
+      A('Mark out laydown areas at Creek Crossing', 'Tom Walsh', '3 Jul', 'done')] },
     tick: { state: 'proposed', expect: 'Inspection results start to vary, the way real inspections do.', actions: [
       A('Spot-check four copied inspections with the site manager', 'Jo Park', '10 Oct')] },
     edge: { state: 'agreed', agreed: 'Agreed at the Focus review on 15 Sep', expect: 'Edge protection is back in place after every facade lift.', actions: [
@@ -1829,22 +1833,47 @@ button.pv-node:hover .pv-t { text-decoration: underline; text-underline-offset: 
       actions: [['Make the pre-start a condition of starting the shift', 'Tom Walsh']],
       summary: 'Pre-starts stopped being skipped and started being ticked. Prism raised a follow-on insight.', link: 'pre' }
   ];
+  // Live insights get a retro 90 days after their plan was approved, open or closed. Prism writes it; the owner or the room confirms.
+  var LIVE_RETRO = {
+    house: { outcome: 'worked', before: '6 findings of blocked access routes', after: 'None', reporting: ['Steady', 'Creek Crossing and Southern Tunnels reported at their usual rate.'], moved: 'From Compliant to Compliant, some Leading',
+      summary: 'No blocked routes since the laydown areas were marked on 3 Jul. Hiviz recommends closing it.' }
+  };
+  INSIGHTS.forEach(function (i) {
+    var pl = i.plan, lr = LIVE_RETRO[i.id]; if (!pl || pl.state !== 'agreed' || !lr) return;
+    var due = addDays(pl.approvedAt || agreedDate(pl), 90);
+    var dm = /^(\d+) (\w{3})/.exec(due); if (!dm || new Date(2026, MON[dm[2]], +dm[1]) > new Date(2026, 8, 26)) return;
+    RETROS.unshift({ id: 'r-' + i.id, live: true, ins: i.id, title: i.title, sites: i.sites, agreed: pl.approvedAt || agreedDate(pl), closed: '', outcome: lr.outcome, expect: pl.expect,
+      before: lr.before, after: lr.after, reporting: lr.reporting, ind: null, moved: lr.moved, actions: pl.actions.map(function (a) { return [a.t, a.who]; }), summary: lr.summary });
+    i.retro = 'r-' + i.id;
+  });
+  function retroDue(i) { var r = i.retro && RETRO[i.retro]; return !!r && !r.review; }
+  // What a confirmed retro does to the live insight
+  function applyRetro(r) {
+    var i = insightById(r.ins); if (!i) return;
+    if (r.review === 'challenged') { logEvent(i, 'Retro challenged', 'Prism will look again and bring it back to the next Focus review.'); return; }
+    var o = r.outcome, what = 'Retro confirmed: ' + OUT[o][1];
+    if (o === 'worked' || o === 'quiet') { if (!i.closed) { i.closed = true; logEvent(i, what, 'Closed. Counts towards what worked. Prism reopens it if the pattern returns.'); } else logEvent(i, what, 'Counts towards what worked.'); }
+    else if (o === 'partly') logEvent(i, what, 'Stays open. Hiviz recommends adjusting the plan.');
+    else if (o === 'didnt') { if (i.closed) i.closed = false; i.status = 'working'; logEvent(i, what, 'Reopened. The plan didn\u2019t change the pattern.'); }
+    else logEvent(i, what, 'Check reporting from the site before judging the plan.');
+  }
   var RETRO = {}; RETROS.forEach(function (r) { r.due = addDays(r.agreed, 90); r.review = null; RETRO[r.id] = r; });
   function retrosInView() { var regs = regionsInScope(); return RETROS.filter(function (r) { return r.sites.some(function (s) { return regs.indexOf(SITE[s].region) > -1; }); }); }
   function outBadge(k) { var o = OUT[k]; return o[0] ? '<span class="badge ' + o[0] + '"><i></i>' + o[1] + '</span>' : '<span class="tlabel">' + o[1] + '</span>'; }
   function retroReview(r) {
-    if (!(ST.view === 'meeting' && MT)) return r.review ? '<span class="rt-rv">' + (r.review === 'confirmed' ? 'Confirmed' : 'Challenged') + ' at a Focus review</span>' : '<span class="rt-rv">For the next Focus review</span>';
+    if (!(ST.view === 'meeting' && MT) && !r.live) return r.review ? '<span class="rt-rv">' + (r.review === 'confirmed' ? 'Confirmed' : 'Challenged') + ' at a Focus review</span>' : '<span class="rt-rv">For the next Focus review</span>';
     if (r.review) return '<span class="rt-state"><span class="rt-rv on">' + (r.review === 'confirmed' ? 'Confirmed' : 'Challenged: Prism will look again') + '</span><button type="button" class="linkish rt-undo" data-rundo="' + r.id + '">Undo</button></span>';
     return '<span class="rt-btns"><button type="button" class="btn sm" data-rset="' + r.id + ':confirmed">Confirm</button><button type="button" class="btn sm" data-rset="' + r.id + ':challenged">Challenge</button></span>';
   }
   function openRetro(id, trigger) {
     var r = RETRO[id]; if (!r) return;
     if (trigger) recTrigger = trigger;
+    if (!r.ind) r.ind = INS_FACTOR[r.ins];
     var f = FACTOR[r.ind[0]], lk = r.link && insightById(r.link);
     $('rec').innerHTML =
       '<div class="sheet-head" style="position:relative"><button type="button" class="x" id="rec-x" aria-label="Close"><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 2l8 8M10 2l-8 8" stroke="currentColor" stroke-width="1.6"/></svg></button>' +
         '<p class="kind"><span class="kind-t">90-day retro</span><span>Due ' + esc(r.due) + '</span></p>' +
-        '<h2 id="rec-title">' + esc(r.title) + '</h2><div class="meta">' + outBadge(r.outcome) + '</div><p class="muted-p">Plan agreed ' + esc(r.agreed) + ' \u00b7 closed ' + esc(r.closed) + ' \u00b7 ' + esc(join(r.sites.map(function (s) { return SITE[s].name; }))) + '</p></div>' +
+        '<h2 id="rec-title">' + esc(r.title) + '</h2><div class="meta">' + outBadge(r.outcome) + '</div><p class="muted-p">Plan agreed ' + esc(r.agreed) + ' \u00b7 ' + (r.live ? (insightById(r.ins).closed ? 'closed' : 'still open') : 'closed ' + esc(r.closed)) + ' \u00b7 ' + esc(join(r.sites.map(function (s) { return SITE[s].name; }))) + '</p></div>' +
       '<div class="sheet-body">' +
         '<section class="sheet-sec"><span class="label">Prism\u2019s verdict</span><p class="rt-sum">' + esc(r.summary) + '</p><p class="muted-p">' + esc(OUT[r.outcome][2]) + '</p></section>' +
         '<section class="sheet-sec"><span class="label">Prism listened for</span><p>' + esc(r.expect) + '</p>' +
@@ -1863,7 +1892,9 @@ button.pv-node:hover .pv-t { text-decoration: underline; text-underline-offset: 
     if (rs || ru) {
       e.stopPropagation();
       var pr = rs ? rs.getAttribute('data-rset').split(':') : [ru.getAttribute('data-rundo'), null], r = RETRO[pr[0]];
-      r.review = pr[1]; if (MT) MT.retros[r.id] = pr[1];
+      var was = r.review; r.review = pr[1]; if (MT) MT.retros[r.id] = pr[1];
+      if (r.live && pr[1] && !was) { applyRetro(r); toast(pr[1] === 'confirmed' ? 'Retro confirmed: ' + OUT[r.outcome][1] + '.' : 'Retro challenged. Prism will look again.'); }
+      if (ST.view !== 'meeting') { var yy = window.scrollY; render(); window.scrollTo(0, yy); }
       if (!$('rec').hidden && $('rec').querySelector('.rt-sum')) openRetro(r.id);
       var y = window.scrollY; if (ST.view === 'meeting') { renderMeeting(); window.scrollTo(0, y); }
     }
@@ -2061,7 +2092,7 @@ button.pv-node:hover .pv-t { text-decoration: underline; text-underline-offset: 
       '<div class="sheet-head" style="position:relative"><button type="button" class="x" id="sheet-x" aria-label="Close"><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 2l8 8M10 2l-8 8" stroke="currentColor" stroke-width="1.6"/></svg></button>' +
         '<p class="kind"><span class="kind-t">Insight</span>' + '<span class="icard-sev">' + sevIcon(i.sev) + '<span class="sev-t t-' + i.sev + '">' + (i.sev === 'critical' ? 'Critical' : 'Warning') + '</span></span>' + '<span>Raised ' + esc(i.since) + '</span></p>' +
         '<h2 id="sheet-title">' + esc(i.title) + '</h2>' +
-        '<div class="meta">' + statusBadge(i) + escBadge(i) + activity(i) + '</div>' +
+        '<div class="meta">' + statusBadge(i) + escBadge(i) + activity(i) + retroTag(i) + '</div>' +
         '<div class="meta ins-sites">' + sites.map(function (n) { return '<span class="chip">' + esc(n) + '</span>'; }).join('') + '<span class="hd-acts"><a class="open-page" href="#insight/' + i.id + '">Open page \u2192</a>' + '<button type="button" class="btn sm pv-btn" data-pv="insight:' + i.id + '"><svg width="14" height="14" viewBox="0 0 22 22" aria-hidden="true"><path d="M11 2.5 20 19H2z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></svg>View through Prism</button>' + '</span></div></div>' +
       '<div class="sheet-body">' +
         (ST.dismissing === i.id ? '<section class="sheet-sec">' + dismissForm(i.id, 'sheet') + '</section>' : '') +
@@ -2767,7 +2798,7 @@ button.pv-node:hover .pv-t { text-decoration: underline; text-underline-offset: 
   ST.nudged = {}; ST.visitPlanned = ST.visitPlanned || {}; ST.mfDone = []; ST.mfWalk = -1; ST.mfSnap = null; ST.mfRes = {};
   function mySites() { var o = []; ORG.forEach(function (d) { if (d.div === MY_DIV) d.regions.forEach(function (r) { o = o.concat(r.sites); }); }); return o; }
   function myInsights() { var ids = mySites().map(function (x) { return x.id; }); return INSIGHTS.filter(function (i) { return !i.closed && !i.dismissed && i.sites.some(function (s) { return ids.indexOf(s) > -1; }); }); }
-  var MF_GROUPS = [['checkin', 'Check in before a meeting'], ['escalated', 'Escalated to you'], ['assign', 'Assign an owner'], ['chase', 'Chase up'], ['visit', 'Plan a visit'], ['update', 'Post an update'], ['close', 'Close'], ['agreed', 'Agreed at a Focus review']];
+  var MF_GROUPS = [['retro', 'Confirm a 90-day retro'], ['checkin', 'Check in before a meeting'], ['escalated', 'Escalated to you'], ['assign', 'Assign an owner'], ['chase', 'Chase up'], ['visit', 'Plan a visit'], ['update', 'Post an update'], ['close', 'Close'], ['agreed', 'Agreed at a Focus review']];
   function myFocusItems() {
     var items = [], ins = myInsights(), crit = function (i) { return i.sev === 'critical' ? 0 : 1; };
     INSIGHTS.filter(function (i) { return !i.closed && !i.dismissed && i.esc && levelOwner(i.esc.to) === YOU; }).forEach(function (i) {
@@ -2785,7 +2816,7 @@ button.pv-node:hover .pv-t { text-decoration: underline; text-underline-offset: 
     ins.filter(function (i) { return i.owner === YOU && (i.updated == null || i.updated >= 7); }).forEach(function (i) {
       items.push({ kind: 'update', id: 'u-' + i.id, ins: i, sev: i.sev, title: i.title, why: 'Yours. ' + (i.updated == null ? 'No update yet.' : 'Last update ' + i.updated + ' days ago.') });
     });
-    ins.filter(function (i) { return i.status === 'resolved'; }).forEach(function (i) {
+    ins.filter(function (i) { return i.status === 'resolved' && !retroDue(i); }).forEach(function (i) {
       items.push({ kind: 'close', id: 'x-' + i.id, ins: i, sev: 'success', title: i.title, why: 'The pattern has stopped. ' + (i.latest || '') });
     });
     MEETINGS.filter(function (m) { return m.div === MY_DIV; }).forEach(function (m) {
@@ -2793,6 +2824,8 @@ button.pv-node:hover .pv-t { text-decoration: underline; text-underline-offset: 
         if (d.who === YOU && !d.doneByYou) items.push({ kind: 'agreed', id: 'g-' + m.id + '-' + k, dec: d, meeting: m, ins: insightById(d.ins), sev: 'warning', title: d.text, why: 'Agreed at the Focus review on ' + m.short + '.' });
       });
     });
+    // Retros ready in your division: Prism has written them; someone needs to confirm or challenge
+    ins.forEach(function (i) { if (retroDue(i)) { var r = RETRO[i.retro]; items.push({ kind: 'retro', id: 'rt-' + i.id, ins: i, sev: 'warning', title: i.title, why: 'Prism\u2019s verdict: ' + OUT[r.outcome][1] + '. ' + r.summary }); } });
     // Check-ins due before the next meeting: program milestones and plan actions you own
     OBJECTIVES.forEach(function (o) { o.programs.forEach(function (pid) { PROGRAMS[pid].ms.forEach(function (m, k) {
       if (m.who === YOU && m.st !== 'done' && !m.upd) items.push({ kind: 'checkin', id: 'k-' + pid + '-' + k, sev: 'warning', title: m.t, why: PROGRAMS[pid].title + '. Check in before monthly progress; check-ins close ' + CHECKIN.closes + '.' });
@@ -2813,6 +2846,7 @@ button.pv-node:hover .pv-t { text-decoration: underline; text-underline-offset: 
     if (it.kind === 'close') return '<span class="badge success"><i></i>Ready to close</span>';
     if (it.kind === 'agreed') return '<span class="badge"><i></i>Agreed</span>';
     if (it.kind === 'checkin') return '<span class="tlabel">Check-in due</span>';
+    if (it.kind === 'retro') return outBadge(RETRO[it.ins.retro].outcome);
     return sevIcon(it.sev === 'critical' ? 'critical' : 'warning');
   }
   function mfAction(it, big) {
@@ -2827,6 +2861,7 @@ button.pv-node:hover .pv-t { text-decoration: underline; text-underline-offset: 
     if (it.kind === 'update') return '<a class="btn brand" href="#insight/' + i.id + '">Post an update</a>';
     if (it.kind === 'close') return '<button type="button" class="btn brand" data-mf-close="' + i.id + '">Close it</button>';
     if (it.kind === 'agreed') return '<button type="button" class="btn brand" data-mf-agreed="' + it.id + '">Mark as done</button>';
+    if (it.kind === 'retro') return '<button type="button" class="btn brand" data-retro="' + i.retro + '">Review the retro</button>';
     if (it.kind === 'checkin') return i ? '<a class="btn brand" href="#insight/' + i.id + '">Check in</a>' : '<a class="btn brand" href="#strategy">Check in</a>';
     return '';
   }
