@@ -170,7 +170,7 @@ main { padding-block: 32px 80px; }
 /* Insight cards */
 .list-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
 .igroup-sec { margin-bottom: 28px; }
-.igroup-h { font-size: 13px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text); margin-bottom: 12px; }
+.igroup-h { font-size: 19px; font-weight: 800; letter-spacing: -0.01em; color: var(--text); margin-bottom: 12px; }
 .igroup-h .tnum { color: var(--text-3); margin-left: 4px; }
 .icards { display: grid; grid-template-columns: repeat(auto-fill, minmax(440px, 1fr)); gap: 16px; }
 @media (max-width: 520px) { .icards { grid-template-columns: 1fr; } }
@@ -903,6 +903,48 @@ button.pv-node:hover .pv-t { text-decoration: underline; text-underline-offset: 
   .pv-canvas { gap: 44px; }
   .pv-node { min-width: 0; max-width: none; width: 100%; }
 }
+/* ---------- Orientation and headings: easy to scan ---------- */
+.kind { margin: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; font-size: 14px; font-weight: 700; color: var(--text-2); }
+.kind-t { font-size: 12.5px; font-weight: 900; letter-spacing: 0.02em; color: var(--text); padding: 2px 8px; border: 1.5px solid var(--text); border-radius: 6px; }
+.kind .mg { width: 22px; height: 22px; font-size: 11px; }
+.ins-sites { align-items: center; }
+.ins-sites .pv-btn { margin-left: auto; }
+.hd-acts { margin-left: auto; display: inline-flex; align-items: center; gap: 12px; }
+.hd-acts .pv-btn { margin-left: 0; }
+.mc-dl { margin: 0; display: grid; gap: 8px; }
+.mc-dl > div { display: grid; gap: 2px; }
+.mc-dl dt { font-size: 13.5px; font-weight: 800; color: var(--text-2); }
+.mc-dl dd { margin: 0; font-size: 15px; line-height: 1.4; }
+.mc-dl .nx { padding-left: 10px; border-left: 3px solid var(--brand); }
+.mc-dl .nx dt { color: var(--text); }
+.inf-t { color: var(--text-3); font-size: 13px; font-weight: 600; cursor: help; }
+.plan-check { display: grid; gap: 6px; padding: 12px 14px; border: 1px solid var(--border); border-radius: 10px; }
+.plan-check p { margin: 0; font-size: 15px; line-height: 1.45; }
+.plan-check .badge, .plan-check .tlabel { margin-right: 6px; }
+.plan-check .pc-l { font-size: 14px; color: var(--text-2); }
+.plan-check > .label { font-size: 14px; font-weight: 800; letter-spacing: 0; text-transform: none; color: var(--text-2); }
+.ins-sec > .label:first-child, .sheet-sec > .label:first-child, .rsec > .label:first-child, .plan-head > .label {
+  font-size: 18px; font-weight: 800; letter-spacing: -0.01em; text-transform: none; color: var(--text); }
+.plan-exp .label, .plan-read .label, .mc-f .label, .mc-also .label, .ci-box > .label, .dc-why .label, .st-krs > .label, .st-ins > .label, .st-now > .label,
+.sp-head .label, .ind-ev .label, .rt-ba .label, .rt-rep .label, .walk-says .label, .walk-ev .label, .walk-latest .label, .w-acts > .label, .w-map .label,
+.dec-l, .pl-pv .label, .walk-map > .label, .st-sugg .label, .walk-next .label {
+  font-size: 14px; font-weight: 800; letter-spacing: 0; text-transform: none; color: var(--text-2); }
+.st-sugg .label, .walk-next .label { color: var(--text); }
+.mc-l .inf, .il-t .inf { justify-self: start; width: max-content; }
+/* ---------- Batch 3: next step first, evidence and milestones folded ---------- */
+.nxt { display: grid; gap: 6px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 10px; justify-items: start; }
+.nxt p { margin: 0; font-size: 15px; line-height: 1.4; }
+.st-change summary, .walk-evd summary, .sp-det summary { cursor: pointer; font-size: 14.5px; font-weight: 800; text-decoration: underline; text-underline-offset: 3px; }
+.st-change { display: grid; gap: 8px; }
+.st-change[open] summary { margin-bottom: 6px; }
+.walk-evd { display: grid; gap: 10px; padding: 12px 14px; border: 1px solid var(--border); border-radius: 10px; }
+.walk-evd[open] > summary { margin-bottom: 8px; }
+.walk-says { list-style: none; margin: 0 0 8px; padding: 0; display: grid; gap: 6px; font-size: 15px; }
+.walk-says li { display: flex; gap: 8px; align-items: baseline; }
+.walk-dec { font-size: 18px; margin: 6px 0 0; padding-top: 14px; border-top: 1px solid var(--border); }
+.st-sum { margin: -4px 0 0; display: grid; gap: 2px; font-size: 16px; font-weight: 600; line-height: 1.45; }
+.st-sum .label { font-size: 14px; font-weight: 800; letter-spacing: 0; text-transform: none; color: var(--text-2); }
+.sp-det[open] summary { margin-bottom: 8px; }
 </style>
 </head>
 <body>
@@ -1224,6 +1266,15 @@ button.pv-node:hover .pv-t { text-decoration: underline; text-underline-offset: 
     return '<span class="act">' + t + '</span>';
   }
   function planRead(i) { return i.plan && i.plan.state === 'agreed' && i.plan.read ? i.plan.read[0] : ''; }
+  // What the owner (or manager) should do next, in one sentence
+  function nextStep(i) {
+    if (i.status === 'new') return 'Give it an owner. Hiviz has drafted a plan for them to approve.';
+    if (i.status === 'plan') return (i.owner === YOU ? 'You' : i.owner) + (i.owner === YOU ? ' need' : ' needs') + ' to approve the plan, below, to start the work.';
+    if (i.status === 'resolved') return 'The pattern has stopped. Close it, or keep watching a little longer.';
+    if (stalled(i)) return 'No update in ' + i.updated + ' days. Check in on the actions or post an update.';
+    var r = planRead(i);
+    return r === 'continues' ? 'The actions aren\u2019t changing the pattern yet. Review the plan.' : 'Check in on the actions as they progress.';
+  }
   function statusBadge(i) {
     if (i.dismissed) return '<span class="badge"><i></i>Dismissed</span>';
     if (i.closed) return '<span class="badge success"><i></i>Closed</span>';
@@ -1396,27 +1447,29 @@ button.pv-node:hover .pv-t { text-decoration: underline; text-underline-offset: 
     var ow = owners(); if (i.owner && ow.indexOf(i.owner) < 0) ow.unshift(i.owner);
     var gone = i.dismissed || i.closed;
     $('view').innerHTML = '<a class="back" href="#focus">← Insights</a>' +
-      '<div class="ins-head"><div class="meta"><span class="icard-sev">' + sevIcon(i.sev) + '<span class="sev-t t-' + i.sev + '">' + (i.sev === 'critical' ? 'Critical' : 'Warning') + '</span></span>' + statusBadge(i) + escBadge(i) + activity(i) + '<span class="label">Raised ' + esc(i.since) + '</span>' + '<button type="button" class="btn sm pv-btn" data-pv="insight:' + i.id + '"><svg width="14" height="14" viewBox="0 0 22 22" aria-hidden="true"><path d="M11 2.5 20 19H2z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></svg>View through Prism</button>' + '</div>' +
+      '<div class="ins-head"><p class="kind"><span class="kind-t">Insight</span>' + '<span class="icard-sev">' + sevIcon(i.sev) + '<span class="sev-t t-' + i.sev + '">' + (i.sev === 'critical' ? 'Critical' : 'Warning') + '</span></span>' + '<span>Raised ' + esc(i.since) + '</span></p>' +
         '<h1 class="ins-title">' + esc(i.title) + '</h1>' +
-        '<div class="meta">' + i.sites.map(function (s) { return '<a class="chip link" href="#site/' + s + '">' + esc(SITE[s].name) + '</a>'; }).join('') + '</div></div>' +
+        '<div class="meta">' + statusBadge(i) + escBadge(i) + activity(i) + '</div>' +
+        '<div class="meta ins-sites">' + i.sites.map(function (s) { return '<a class="chip link" href="#site/' + s + '">' + esc(SITE[s].name) + '</a>'; }).join('') + '<button type="button" class="btn sm pv-btn" data-pv="insight:' + i.id + '"><svg width="14" height="14" viewBox="0 0 22 22" aria-hidden="true"><path d="M11 2.5 20 19H2z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></svg>View through Prism</button>' + '</div></div>' +
       (i.dismissed ? '<div class="banner info"><b>Dismissed: ' + esc(i.dismissed.reason) + '</b>' + (i.dismissed.note ? '<p>' + esc(i.dismissed.note) + '</p>' : '') + '<p>Prism won’t raise this again unless the pattern changes.</p></div>' : '') +
       (i.closed ? '<div class="banner info"><b>Closed</b><p>Prism will reopen it if the pattern returns.</p></div>' : '') +
       '<div class="ins-grid"><div class="ins-main">' +
         '<section class="ins-sec"><span class="label">The story</span><p class="ins-story">' + esc(i.story) + '</p></section>' +
+        (gone ? '' : '<section class="ins-sec"><span class="label">Hiviz recommends</span><p class="next">' + esc(i.next) + '</p>' + recSrc(i) + '</section>' + planHTML(i, 'ins-sec card')) +
         '<section class="ins-sec"><span class="label">What each source says · ' + recCount(i) + ' records from ' + i.says.length + (i.says.length === 1 ? ' system' : ' systems') + '</span>' +
           i.says.map(function (s) {
             var src = SRC[s.src];
             return '<div class="card src-say"><div class="src-say-h"><span class="mg lg">' + esc(src.mg) + '</span><div><b>' + esc(src.name) + '</b> <span class="badge">' + s.n + ' records</span><p>' + esc(s.text) + '</p></div></div>' +
               '<div class="src-recs">' + s.recs.map(function (r) { return recRow(RECS[r.id]); }).join('') + (s.n > s.recs.length ? '<div class="rec"><span class="when">and ' + (s.n - s.recs.length) + ' more like these</span></div>' : '') + '</div></div>';
           }).join('') + '</section>' +
-        '<section class="ins-sec"><span class="label">How Prism read it</span><dl class="kv">' + i.read.map(function (r) { var fk = r[0] === 'Factor' ? factorByName(r[1]) : null, fx = fk && INS_FACTOR[i.id]; return '<div><dt>' + esc(r[0]) + '</dt><dd class="' + (r[2] ? 't-' + r[2] : '') + '">' + (fk ? factorBtn(fk) + (fx ? ' \u00b7 ' + esc(FACTOR[fx[0]].inds[fx[1]]) : '') : esc(r[1])) + '</dd></div>'; }).join('') + '</dl></section>' +
-        (gone ? '' : '<section class="ins-sec"><span class="label">Hiviz recommends</span><p class="next">' + esc(i.next) + '</p>' + recSrc(i) + '</section>' + planHTML(i, 'ins-sec card')) +
+        '<section class="ins-sec"><span class="label">How Prism read it</span><dl class="kv">' + i.read.filter(function (r) { return r[0] !== 'Factor'; }).map(function (r) { var fk = r[0] === 'Factor' ? factorByName(r[1]) : null, fx = fk && INS_FACTOR[i.id]; return '<div><dt>' + esc(r[0]) + '</dt><dd class="' + (r[2] ? 't-' + r[2] : '') + '">' + (fk ? factorBtn(fk) + (fx ? ' \u00b7 ' + esc(FACTOR[fx[0]].inds[fx[1]]) : '') : esc(r[1])) + '</dd></div>'; }).join('') + '</dl></section>' +
       '</div><aside class="ins-side">' +
         '<section class="card side-card"><h2>Owner and status</h2>' +
+          (gone ? '' : '<div class="nxt">' + statusBadge(i) + '<p>' + esc(nextStep(i)) + '</p></div>') +
           (gone ? '<p class="muted-p">' + (i.dismissed ? 'Dismissed by ' + esc(i.dismissed.who) + '.' : 'Closed.') + '</p>' :
           (ST.dismissing === i.id ? dismissForm(i.id, 'page') :
             '<span class="fld col"><label for="i-owner">Owner</label><select class="select wide" id="i-owner"><option value="">No owner</option>' + ow.map(function (o) { return '<option' + (o === i.owner ? ' selected' : '') + '>' + esc(o) + '</option>'; }).join('') + '</select></span>' +
-            '<span class="fld col"><label for="i-status">Status</label><select class="select wide" id="i-status">' + [['new', 'New'], ['plan', 'Agree to plan'], ['working', 'In progress'], ['resolved', 'Ready to close'], ['closed', 'Close it']].map(function (o) { return '<option value="' + o[0] + '"' + (o[0] === i.status ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select></span>' +
+            '<details class="st-change"><summary>Change status</summary>' + '<span class="fld col"><label for="i-status">Status</label><select class="select wide" id="i-status">' + [['new', 'New'], ['plan', 'Agree to plan'], ['working', 'In progress'], ['resolved', 'Ready to close'], ['closed', 'Close it']].map(function (o) { return '<option value="' + o[0] + '"' + (o[0] === i.status ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select></span>' + '</details>' +
             '<label class="w-note-l" for="i-note">Add an update</label><textarea class="w-note" id="i-note" rows="2" placeholder="What’s happened since the last update"></textarea>' +
             '<div class="meet-actions"><button type="button" class="btn brand" id="i-post">Post update</button><button type="button" class="btn" data-dopen="' + i.id + '">Dismiss…</button></div>')) +
         '</section>' +
@@ -1542,7 +1595,7 @@ button.pv-node:hover .pv-t { text-decoration: underline; text-underline-offset: 
     var src = SRC[r.src], site = SITE[r.site], rows = r.reading || derivedReading(r);
     $('rec').innerHTML =
       '<div class="sheet-head" style="position:relative"><button type="button" class="x" id="rec-x" aria-label="Close"><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 2l8 8M10 2l-8 8" stroke="currentColor" stroke-width="1.6"/></svg></button>' +
-        '<div class="meta"><span class="mg lg">' + esc(src.mg) + '</span><span class="rd-src"><b>' + esc(src.name) + '</b><small>' + esc(r.type) + (r.ref ? ' · ' + esc(r.ref) : '') + '</small></span></div>' +
+        '<p class="kind"><span class="kind-t">Record</span><span class="mg">' + esc(src.mg) + '</span><span>' + esc(src.name) + ' \u00b7 ' + esc(r.type) + (r.ref ? ' \u00b7 ' + esc(r.ref) : '') + '</span></p>' +
         '<h2 id="rec-title">' + esc(r.type) + ' at ' + esc(site ? site.name : 'an unknown site') + '</h2>' +
         '<div class="meta"><span class="label">Received ' + esc(recWhen(r)) + '</span>' + (site ? '<a class="chip link" href="#site/' + site.id + '">' + esc(site.name) + '</a>' : '') + '</div></div>' +
       '<div class="sheet-body">' +
@@ -1790,8 +1843,8 @@ button.pv-node:hover .pv-t { text-decoration: underline; text-underline-offset: 
     var f = FACTOR[r.ind[0]], lk = r.link && insightById(r.link);
     $('rec').innerHTML =
       '<div class="sheet-head" style="position:relative"><button type="button" class="x" id="rec-x" aria-label="Close"><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 2l8 8M10 2l-8 8" stroke="currentColor" stroke-width="1.6"/></svg></button>' +
-        '<div class="meta">' + outBadge(r.outcome) + '<span class="label">90-day retro \u00b7 due ' + esc(r.due) + '</span></div>' +
-        '<h2 id="rec-title">' + esc(r.title) + '</h2><p class="muted-p">Plan agreed ' + esc(r.agreed) + ' \u00b7 closed ' + esc(r.closed) + ' \u00b7 ' + esc(join(r.sites.map(function (s) { return SITE[s].name; }))) + '</p></div>' +
+        '<p class="kind"><span class="kind-t">90-day retro</span><span>Due ' + esc(r.due) + '</span></p>' +
+        '<h2 id="rec-title">' + esc(r.title) + '</h2><div class="meta">' + outBadge(r.outcome) + '</div><p class="muted-p">Plan agreed ' + esc(r.agreed) + ' \u00b7 closed ' + esc(r.closed) + ' \u00b7 ' + esc(join(r.sites.map(function (s) { return SITE[s].name; }))) + '</p></div>' +
       '<div class="sheet-body">' +
         '<section class="sheet-sec"><span class="label">Prism\u2019s verdict</span><p class="rt-sum">' + esc(r.summary) + '</p><p class="muted-p">' + esc(OUT[r.outcome][2]) + '</p></section>' +
         '<section class="sheet-sec"><span class="label">Prism listened for</span><p>' + esc(r.expect) + '</p>' +
@@ -1889,8 +1942,9 @@ button.pv-node:hover .pv-t { text-decoration: underline; text-underline-offset: 
                 : '<label class="pa-ci"><span class="sr">How\u2019s it going?</span><select class="select" data-pa="' + i.id + ':' + k + '">' + PA_ST.map(function (x) { return '<option value="' + x[0] + '"' + (x[0] === a.st ? ' selected' : '') + '>' + x[1] + '</option>'; }).join('') + '</select></label>') + '</li>';
       }).join('') + '</ol>' +
       (prop ? '<div class="pa-add"><input type="text" class="w-note" id="pa-t-' + i.id + '" placeholder="Add an action: what will be done"><select class="select" id="pa-w-' + i.id + '"><option value="">Who</option>' + people.map(function (o) { return '<option>' + esc(o) + '</option>'; }).join('') + '</select><input type="text" class="w-note pa-due" id="pa-d-' + i.id + '" placeholder="By when"><button type="button" class="btn" data-pa-add="' + i.id + '">Add</button></div>' : '') +
-      '<p class="plan-exp"><span class="label">Prism listens for</span>' + esc(pl.expect) + '</p>' +
-      (pl.read ? '<p class="plan-read"><span class="label">Prism\u2019s read so far</span><span>' + (pl.read[0] === 'working' ? '<span class="badge success"><i></i>Working</span>' : pl.read[0] === 'continues' ? '<span class="badge critical"><i></i>Pattern continues</span>' : '<span class="tlabel">Too early</span>') + ' ' + esc(pl.read[1]) + '</span></p>' : '') +
+      '<div class="plan-check"><span class="label">Is it working?</span>' +
+        (pl.read ? '<p>' + (pl.read[0] === 'working' ? '<span class="badge success"><i></i>Working</span>' : pl.read[0] === 'continues' ? '<span class="badge critical"><i></i>Pattern continues</span>' : '<span class="tlabel">Too early</span>') + ' ' + esc(pl.read[1]) + '</p>' : '<p class="pc-l">Prism starts reading once the plan is approved.</p>') +
+        '<p class="pc-l">Prism listens for: ' + esc(pl.expect) + '</p></div>' +
       (i.follows && RETRO[i.follows] ? '<p class="plan-read"><span class="label">Follows on from</span><span><button type="button" class="linkish map-link" data-retro="' + i.follows + '">' + esc(RETRO[i.follows].title) + '</button> \u00b7 closed ' + esc(RETRO[i.follows].closed) + ' \u00b7 retro: ' + OUT[RETRO[i.follows].outcome][1] + '</span></p>' : '') +
       (prop ? (function () {
         var own = ST.view === 'meeting' && MT && MT.draft && MT.draft.id === i.id ? MT.draft.owner : i.owner;
@@ -2005,13 +2059,16 @@ button.pv-node:hover .pv-t { text-decoration: underline; text-underline-offset: 
     var ow = owners(); if (i.owner && ow.indexOf(i.owner) < 0) ow.unshift(i.owner);
     $('sheet').innerHTML =
       '<div class="sheet-head" style="position:relative"><button type="button" class="x" id="sheet-x" aria-label="Close"><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 2l8 8M10 2l-8 8" stroke="currentColor" stroke-width="1.6"/></svg></button>' +
-        '<div class="meta">' + sevIcon(i.sev) + statusBadge(i) + escBadge(i) + activity(i) + '<span class="label">· since ' + esc(i.since) + '</span></div>' +
+        '<p class="kind"><span class="kind-t">Insight</span>' + '<span class="icard-sev">' + sevIcon(i.sev) + '<span class="sev-t t-' + i.sev + '">' + (i.sev === 'critical' ? 'Critical' : 'Warning') + '</span></span>' + '<span>Raised ' + esc(i.since) + '</span></p>' +
         '<h2 id="sheet-title">' + esc(i.title) + '</h2>' +
-        '<span class="open-row"><a class="open-page" href="#insight/' + i.id + '">Open insight page \u2192</a>' + '<button type="button" class="btn sm pv-btn" data-pv="insight:' + i.id + '"><svg width="14" height="14" viewBox="0 0 22 22" aria-hidden="true"><path d="M11 2.5 20 19H2z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></svg>View through Prism</button>' + '</span>' +
-        '<div class="meta">' + sites.map(function (n) { return '<span class="chip">' + esc(n) + '</span>'; }).join('') + '</div></div>' +
+        '<div class="meta">' + statusBadge(i) + escBadge(i) + activity(i) + '</div>' +
+        '<div class="meta ins-sites">' + sites.map(function (n) { return '<span class="chip">' + esc(n) + '</span>'; }).join('') + '<span class="hd-acts"><a class="open-page" href="#insight/' + i.id + '">Open page \u2192</a>' + '<button type="button" class="btn sm pv-btn" data-pv="insight:' + i.id + '"><svg width="14" height="14" viewBox="0 0 22 22" aria-hidden="true"><path d="M11 2.5 20 19H2z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></svg>View through Prism</button>' + '</span></div></div>' +
       '<div class="sheet-body">' +
         (ST.dismissing === i.id ? '<section class="sheet-sec">' + dismissForm(i.id, 'sheet') + '</section>' : '') +
         '<section class="sheet-sec"><span class="label">The story</span><p>' + esc(i.story) + '</p></section>' +
+        (i.latest ? '<section class="sheet-sec"><span class="label">Latest update · ' + i.updated + (i.updated === 1 ? ' day' : ' days') + ' ago' + (i.owner ? ' · ' + esc(i.owner) : '') + '</span><p class="update">' + (i.owner ? '<span class="av">' + initials(i.owner) + '</span>' : '') + '<span>' + esc(i.latest) + '</span></p></section>' : '') +
+        '<section class="sheet-sec"><span class="label">Hiviz recommends</span><p class="next">' + esc(i.next) + '</p>' + recSrc(i) + '</section>' + planHTML(i, 'sheet-sec') +
+        (INS_FACTOR[i.id] ? '<section class="sheet-sec mc"><span class="label">On the Forge Works Map</span>' + mapBody(i) + '</section>' : '') +
         '<section class="sheet-sec"><span class="label">What each source says · ' + recCount(i) + ' records from ' + i.says.length + (i.says.length === 1 ? ' system' : ' systems') + '</span><div class="says">' +
           i.says.map(function (s, k) {
             var key = i.id + ':' + k, open = !!ST.openSay[key], src = SRC[s.src];
@@ -2023,12 +2080,9 @@ button.pv-node:hover .pv-t { text-decoration: underline; text-underline-offset: 
               (open ? '<div class="recs">' + s.recs.map(function (r) { return recRow(RECS[r.id]); }).join('') + (s.n > s.recs.length ? '<div class="rec"><span class="when">and ' + (s.n - s.recs.length) + ' more like these</span></div>' : '') + '</div>' : '') +
             '</div>';
           }).join('') + '</div></section>' +
-        '<section class="sheet-sec"><span class="label">How Prism read it</span><dl class="kv">' + i.read.map(function (r) {
+        '<section class="sheet-sec"><span class="label">How Prism read it</span><dl class="kv">' + i.read.filter(function (r) { return r[0] !== 'Factor'; }).map(function (r) {
           var fk = r[0] === 'Factor' ? factorByName(r[1]) : null, fx = fk && INS_FACTOR[i.id]; return '<div><dt>' + esc(r[0]) + '</dt><dd class="' + (r[2] ? 't-' + r[2] : '') + '">' + (fk ? factorBtn(fk) + (fx ? ' \u00b7 ' + esc(FACTOR[fx[0]].inds[fx[1]]) : '') : esc(r[1])) + '</dd></div>';
         }).join('') + '</dl></section>' +
-        (i.latest ? '<section class="sheet-sec"><span class="label">Latest update · ' + i.updated + (i.updated === 1 ? ' day' : ' days') + ' ago' + (i.owner ? ' · ' + esc(i.owner) : '') + '</span><p class="update">' + (i.owner ? '<span class="av">' + initials(i.owner) + '</span>' : '') + '<span>' + esc(i.latest) + '</span></p></section>' : '') +
-        (INS_FACTOR[i.id] ? '<section class="sheet-sec mc"><span class="label">On the Forge Works Map</span>' + mapBody(i) + '</section>' : '') +
-        '<section class="sheet-sec"><span class="label">Hiviz recommends</span><p class="next">' + esc(i.next) + '</p>' + recSrc(i) + '</section>' + planHTML(i, 'sheet-sec') +
       '</div>' +
       '<div class="sheet-foot">' +
         '<span class="fld"><label for="s-owner">Owner</label><select class="select" id="s-owner"><option value="">No owner</option>' + ow.map(function (o) { return '<option' + (o === i.owner ? ' selected' : '') + '>' + esc(o) + '</option>'; }).join('') + '</select></span>' +
@@ -2212,7 +2266,7 @@ button.pv-node:hover .pv-t { text-decoration: underline; text-underline-offset: 
     var nRecs = feedCount(function (r) { return r.site === id; });
     var planned = ST.visitPlanned && ST.visitPlanned[id];
     $('view').innerHTML = '<a class="back" href="#sites">← Sites</a>' +
-      '<div class="ins-head"><div class="meta"><span class="badge ' + st[0] + '"><i></i>' + st[1] + '</span><span class="label">' + esc(x.region) + ' region' + (region ? ' · ' + esc(region.rm) + ', regional manager' : '') + '</span></div>' +
+      '<div class="ins-head"><p class="kind"><span class="kind-t">Site</span><span class="badge ' + st[0] + '"><i></i>' + st[1] + '</span><span>' + esc(x.region) + ' region' + (region ? ' \u00b7 ' + esc(region.rm) + ', regional manager' : '') + '</span></p>' +
         '<h1 class="ins-title">' + esc(x.name) + '</h1></div>' +
       '<p class="ins-story" style="margin-bottom:28px">' + esc(x.why) + '</p>' +
       '<div class="ins-grid"><div class="ins-main">' +
@@ -2488,19 +2542,22 @@ button.pv-node:hover .pv-t { text-decoration: underline; text-underline-offset: 
           return '<li class="' + (k === MT.idx ? 'on' : '') + '"><button type="button" data-goto="' + k + '"><span class="wl-n">' + (lg && lg.done ? '✓' : k + 1) + '</span><span class="wl-t">' + esc(it.title) + '<small>' + esc(lg && lg.done ? (lg.skipped ? 'Skipped' : (lg.changes[0] || '').indexOf('Dismissed') === 0 ? 'Dismissed' : 'Updated') : agendaReason(it)) + '</small></span></button></li>';
         }).join('') + '</ol>' +
         '<section class="card walk-card">' +
-          '<div class="walk-head"><span class="icard-sev">' + sevIcon(cur.sev) + '<span class="sev-t t-' + cur.sev + '">' + (cur.sev === 'critical' ? 'Critical' : 'Warning') + '</span></span>' + statusBadge(cur) + activity(cur) + '<span class="why-here">' + esc(agendaReason(cur)) + '</span></div>' +
-          '<h2 class="walk-title">' + esc(cur.title) + '</h2><p class="walk-story">' + esc(cur.story) + '</p>' +
-          '<div class="walk-sites">' + cur.sites.map(function (s) { return '<span class="chip">' + esc(SITE[s].name) + '</span>'; }).join('') + '</div>' +
-          '<div class="walk-says"><span class="label">What each source says</span><ul>' + cur.says.map(function (s) { return '<li><span class="mg">' + esc(SRC[s.src].mg) + '</span><span><b>' + esc(SRC[s.src].name) + ' · ' + s.n + '</b> ' + esc(s.text) + '</span></li>'; }).join('') + '</ul></div>' +
+          '<p class="kind"><span class="kind-t">Insight ' + (MT.idx + 1) + ' of ' + ids.length + '</span><span class="icard-sev">' + sevIcon(cur.sev) + '<span class="sev-t t-' + cur.sev + '">' + (cur.sev === 'critical' ? 'Critical' : 'Warning') + '</span></span><span>On the agenda: <b>' + esc(agendaReason(cur)) + '</b></span></p>' +
+          '<h2 class="walk-title">' + esc(cur.title) + '</h2>' +
+          '<div class="meta">' + statusBadge(cur) + activity(cur) + cur.sites.map(function (s) { return '<span class="chip">' + esc(SITE[s].name) + '</span>'; }).join('') + '</div>' +
+          '<p class="walk-story">' + esc(cur.story) + '</p>' +
+          (cur.latest ? '<p class="walk-latest"><span class="label">Latest update</span>' + esc(cur.latest) + '</p>' : '') +
+          '<p class="walk-next"><span class="label">Hiviz recommends</span>' + esc(cur.next) + '</p>' + recSrc(cur) +
+          (cur.plan ? planHTML(cur, 'walk-plan' + (MT.agreed[cur.id] ? ' just' : '')) : '') +
+          (INS_FACTOR[cur.id] ? '<div class="walk-map mc"><span class="label">On the Forge Works Map</span>' + mapBody(cur) + '</div>' : '') +
           (function () {
             var ev = []; cur.says.forEach(function (sy) { sy.recs.forEach(function (r) { ev.push(RECS[r.id]); }); });
             ev.sort(function (a, b) { var t = function (x) { return x.tags.some(function (g) { return g[1] === 'critical'; }) ? 0 : 1; }; return t(a) - t(b); });
-            return '<div class="walk-ev"><span class="label">' + (cur.status === 'new' ? 'Check the evidence before assigning' : 'Evidence') + '</span>' + ev.slice(0, 3).map(function (r) { return recRow(r, true); }).join('') + '</div>';
+            return '<details class="walk-evd"' + (cur.status === 'new' ? ' open' : '') + '><summary>Evidence \u00b7 ' + recCount(cur) + ' records from ' + cur.says.length + (cur.says.length === 1 ? ' system' : ' systems') + '</summary>' +
+              '<ul class="walk-says">' + cur.says.map(function (s) { return '<li><span class="mg">' + esc(SRC[s.src].mg) + '</span><span><b>' + esc(SRC[s.src].name) + ' \u00b7 ' + s.n + '</b> ' + esc(s.text) + '</span></li>'; }).join('') + '</ul>' +
+              '<div class="walk-ev">' + ev.slice(0, 3).map(function (r) { return recRow(r, true); }).join('') + '</div></details>';
           })() +
-          (cur.latest ? '<p class="walk-latest"><span class="label">Latest update</span>' + esc(cur.latest) + '</p>' : '') +
-          (INS_FACTOR[cur.id] ? '<div class="walk-map mc"><span class="label">On the Forge Works Map</span>' + mapBody(cur) + '</div>' : '') +
-          '<p class="walk-next"><span class="label">Hiviz recommends</span>' + esc(cur.next) + '</p>' + recSrc(cur) +
-          (cur.plan ? planHTML(cur, 'walk-plan' + (MT.agreed[cur.id] ? ' just' : '')) : '') +
+          '<h3 class="walk-dec">Decision</h3>' +
           (ST.dismissing === cur.id ? dismissForm(cur.id, 'walk') : (          '<div class="walk-form">' +
             '<span class="fld"><label for="w-owner">Owner</label><select class="select" id="w-owner"><option value="">No owner</option>' + ow.map(function (o) { return '<option' + (o === wOwner ? ' selected' : '') + '>' + esc(o) + '</option>'; }).join('') + '</select></span>' +
             '<span class="fld"><label for="w-status">Status</label><select class="select" id="w-status">' + [['new', 'New'], ['plan', 'Agree to plan'], ['working', 'In progress'], ['resolved', 'Ready to close'], ['closed', 'Close it']].map(function (o) { return '<option value="' + o[0] + '"' + (o[0] === wStatus ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select></span>' +
@@ -3221,11 +3278,15 @@ button.pv-node:hover .pv-t { text-decoration: underline; text-underline-offset: 
     for (var lv = l + 1; l > -1 && lv < 3 && nl < 0; lv++) if (cueAt(fx[0], k, lv)) { nl = lv; nx = cueAt(fx[0], k, lv); }
     var nm = factorBtn;
     var also = (INS_ALSO[i.id] || []).map(function (a) { return '<span>' + nm(a[0]) + ' \u00b7 ' + esc(FACTOR[a[0]].inds[a[1]].toLowerCase()) + '</span>'; });
+    var inf = function (lv) { return cueInferred(fx[0], k, lv) ? ' <span class="inf-t" title="The Forge Works blueprint doesn\u2019t describe this level. Prism inferred it from the levels either side.">(inferred)</span>' : ''; };
+    var o = objFor(i);
     return '<p class="mc-f"><span class="label">Improves</span><span>' + nm(fx[0]) + ' \u00b7 ' + esc(f.inds[k].toLowerCase()) + '</span></p>' + levelBar(x.v, true, null, x.was) +
-      (l > -1 ? '<p class="mc-l"><span class="tag-now">Where you are \u00b7 ' + LEVELS[l] + '</span>' + (now ? esc(now) + (cueInferred(fx[0], k, l) ? ' ' + INF_TAG : '') : '') + '</p>' : '') +
-      (nl > -1 ? '<p class="mc-l"><span class="tag-next">Next step \u00b7 ' + LEVELS[nl] + '</span>' + esc(nx) + (cueInferred(fx[0], k, nl) ? ' ' + INF_TAG : '') + '</p>' : '') +
-      (also.length ? '<p class="mc-also"><span class="label">Also moves</span>' + also.join('') + '</p>' : '') +
-      (function () { var o = objFor(i); return o ? '<p class="mc-also"><span class="label">Contributes to objective</span><span><a class="map-link" href="#strategy">' + esc(objTitle(o)) + '</a></span></p>' : ''; })();
+      '<dl class="mc-dl">' +
+        (l > -1 ? '<div><dt>Now \u00b7 ' + LEVELS[l] + '</dt><dd>' + (now ? esc(now) + inf(l) : 'Not described for this level') + '</dd></div>' : '') +
+        (nl > -1 ? '<div class="nx"><dt>Next \u00b7 ' + LEVELS[nl] + '</dt><dd>' + esc(nx) + inf(nl) + '</dd></div>' : '') +
+      '</dl>' +
+      (also.length ? '<p class="mc-also"><span class="label">Also moves</span><span>' + also.join('') + '</span></p>' : '') +
+      (o ? '<p class="mc-also"><span class="label">Contributes to</span><span><a class="map-link" href="#strategy">' + esc(objTitle(o)) + '</a></span></p>' : '');
   }
   function mapCard(i) { var b = mapBody(i); return b ? '<section class="card side-card mc"><h2>On the Forge Works Map</h2>' + b + '</section>' : ''; }
   function mapLine(i) { var fx = INS_FACTOR[i.id]; return fx ? '<span class="icard-map"><span class="label">Improves</span>' + esc(FACTOR[fx[0]].name) + ' \u00b7 ' + esc(FACTOR[fx[0]].inds[fx[1]].toLowerCase()) + '</span>' : ''; }
@@ -3238,7 +3299,7 @@ button.pv-node:hover .pv-t { text-decoration: underline; text-underline-offset: 
     var nxt = sc.lvl < 0 ? -1 : sc.lvl < 2 ? sc.lvl + 1 : -1;
     $('rec').innerHTML =
       '<div class="sheet-head" style="position:relative"><button type="button" class="x" id="rec-x" aria-label="Close"><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 2l8 8M10 2l-8 8" stroke="currentColor" stroke-width="1.6"/></svg></button>' +
-        '<div class="meta"><span class="tlabel">' + esc(dom[1]) + '</span><span class="label">Forge Works Map factor</span></div>' +
+        '<p class="kind"><span class="kind-t">Factor</span><span>' + esc(dom[1]) + ' \u00b7 ' + esc(dom[2]) + '</span><span>Forge Works Map</span></p>' +
         '<h2 id="rec-title">' + esc(f.name) + '</h2><p class="muted-p">' + esc(f.q) + '</p></div>' +
       '<div class="sheet-body">' +
         '<section class="sheet-sec fd-rate"><span class="label">' + esc(scopeLabel()) + ' today</span><div class="f-rate-row">' + levelBar(sc.v, false, sc.v == null ? 'Needs management input' : null, sc.was) + (sc.v != null ? trendHTML(sc.t) : '') + '</div>' +
@@ -3313,8 +3374,10 @@ button.pv-node:hover .pv-t { text-decoration: underline; text-underline-offset: 
   var RETRO_KIND = { 'r-dust': 'Equipment and engineering', 'r-lone': 'Rostering and resourcing', 'r-cone': 'Briefings', 'r-pre0': 'New paperwork or sign-offs', 'r-hot': 'New paperwork or sign-offs' };
   ST.cand = {};
 
+  function regionDiv(name) { var v = ''; ORG.forEach(function (d) { d.regions.forEach(function (r) { if (r.name === name) v = d.div; }); }); return v; }
+  function objScope(o) { return o.reg ? o.reg + ' region' : o.div ? o.div + ' division' : 'Whole company'; }
   function objRegs(o) {
-    var all = []; ORG.forEach(function (d) { if (o.div && d.div !== o.div) return; d.regions.forEach(function (r) { all.push(r.name); }); });
+    var all = []; ORG.forEach(function (d) { if (o.div && d.div !== o.div) return; d.regions.forEach(function (r) { if (!o.reg || r.name === o.reg) all.push(r.name); }); });
     var mine = regionsInScope(); return all.filter(function (r) { return mine.indexOf(r) > -1; });
   }
   function objsInView() { return OBJECTIVES.filter(function (o) { return objRegs(o).length; }); }
@@ -3354,7 +3417,7 @@ button.pv-node:hover .pv-t { text-decoration: underline; text-underline-offset: 
   function openStratPast(trigger) {
     if (trigger) recTrigger = trigger;
     $('rec').innerHTML = '<div class="sheet-head" style="position:relative"><button type="button" class="x" id="rec-x" aria-label="Close"><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 2l8 8M10 2l-8 8" stroke="currentColor" stroke-width="1.6"/></svg></button>' +
-      '<div class="meta"><span class="label">Strategy</span></div><h2 id="rec-title">Past meetings</h2><p class="muted-p">Monthly progress and quarterly planning for ' + esc(ORG_NAME) + '.</p></div>' +
+      '<p class="kind"><span class="kind-t">Meeting records</span><span>Strategy</span></p><h2 id="rec-title">Past meetings</h2><p class="muted-p">Monthly progress and quarterly planning for ' + esc(ORG_NAME) + '.</p></div>' +
       '<div class="sheet-body">' + STRAT_LOG.map(function (m) {
         return '<section class="sheet-sec"><span class="label">' + esc(m.type) + ' \u00b7 ' + esc(m.date) + '</span><ul class="plain">' + m.lines.map(function (l) { return '<li>' + esc(l) + '</li>'; }).join('') + '</ul><div class="people">' + whoLine(m.who) + '</div></section>';
       }).join('') + '</div>';
@@ -3407,8 +3470,13 @@ button.pv-node:hover .pv-t { text-decoration: underline; text-underline-offset: 
       '<div class="st-objs">' + objs.map(function (o, oi) {
         var f = FACTOR[o.f], orr = objRegs(o), sc = scoreFactor(orr, o.f), s = st[oi];
         var ins = insightsInView().filter(function (i) { return objFor(i) === o; });
-        return '<section class="card st-obj"><div class="st-top"><span class="badge ' + s[0] + '"><i></i>' + s[1] + '</span><span class="chip">' + esc(o.div ? o.div + ' division' : 'All of ' + ORG_NAME) + '</span>' + (o.flagged ? '<span class="tlabel">Flagged for planning</span>' : '') + '<button type="button" class="btn sm pv-btn" data-pv="objective:' + o.id + '"><svg width="14" height="14" viewBox="0 0 22 22" aria-hidden="true"><path d="M11 2.5 20 19H2z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></svg>View through Prism</button>' + '<span class="st-own">Owner ' + esc(o.owner) + ' · set ' + esc(o.set || '1 Jul') + '</span></div>' +
+        return '<section class="card st-obj"><div class="st-top"><span class="badge ' + s[0] + '"><i></i>' + s[1] + '</span><span class="chip">Applies to ' + esc(objScope(o)) + '</span>' + (o.flagged ? '<span class="tlabel">Flagged for planning</span>' : '') + '<button type="button" class="btn sm pv-btn" data-pv="objective:' + o.id + '"><svg width="14" height="14" viewBox="0 0 22 22" aria-hidden="true"><path d="M11 2.5 20 19H2z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></svg>View through Prism</button>' + '<span class="st-own">Set by ' + esc(ORG_NAME) + ' on ' + esc(o.set || '1 Jul') + ' · owner ' + esc(o.owner) + '</span></div>' +
           '<h2 class="st-title">' + esc(objTitle(o)) + '</h2><p class="st-why">' + esc(o.why) + '</p>' +
+          (function () {
+            var worse = o.krs.filter(function (kr) { return aggInd(orr, o.f, kr[0]).t === 'worse'; }).map(function (kr) { return f.inds[kr[0]].toLowerCase(); });
+            var reads = o.programs.map(function (pid) { return PROGRAMS[pid].read[1]; });
+            return '<p class="st-sum"><span class="label">Where it stands</span>' + (worse.length ? esc(cap(join(worse))) + (worse.length === 1 ? ' is' : ' are') + ' worsening. ' : 'Key results are holding or improving. ') + esc(reads.join(' ')) + '</p>';
+          })() +
           '<div class="st-now"><span class="label">Today' + (org || !o.div ? '' : '') + '</span>' + factorBtn(o.f) + levelBar(sc.v, true, null, sc.was) + trendHTML(sc.t) + '<span class="st-tgt">Target: <b>' + LEVELS[o.target] + '</b> \u00b7 ' + esc(f.lnames[o.target]) + '</span></div>' +
           '<div class="st-krs"><span class="label">Key results · ' + esc(o.div && org ? o.div + ' division' : scopeLabel()) + '</span>' + o.krs.map(function (kr) {
             var x = aggInd(orr, o.f, kr[0]), hit = lvlOf(x.v) >= kr[1];
@@ -3417,9 +3485,8 @@ button.pv-node:hover .pv-t { text-decoration: underline; text-underline-offset: 
           o.programs.map(function (pid) {
             var p = PROGRAMS[pid], d = p.ms.filter(function (m) { return m.st === 'done'; }).length;
             return '<div class="st-prog"><div class="sp-head"><span class="label">Program</span><h3>' + esc(p.title) + '</h3><span class="sp-meta">' + esc(p.owner) + ' · ' + d + ' of ' + p.ms.length + ' milestones done · ' + esc(p.resources) + '</span></div>' +
-              '<ul class="ra-acts sp-ms">' + p.ms.map(function (m) { return '<li>' + actBadge(m) + '<span class="ra-t">' + esc(m.t) + '</span><span class="ra-m">' + esc(m.who) + ' · by ' + esc(m.due) + '</span></li>'; }).join('') + '</ul>' +
-              '<p class="plan-exp"><span class="label">Prism listens for</span>' + esc(p.expect) + '</p>' +
-              '<p class="plan-read"><span class="label">Prism’s read so far</span><span>' + readBadge(p.read) + ' ' + esc(p.read[1]) + '</span></p></div>';
+              '<details class="sp-det"><summary>' + p.ms.length + ' milestones</summary><ul class="ra-acts sp-ms">' + p.ms.map(function (m) { return '<li>' + actBadge(m) + '<span class="ra-t">' + esc(m.t) + '</span><span class="ra-m">' + esc(m.who) + ' · by ' + esc(m.due) + '</span></li>'; }).join('') + '</ul></details>' +
+              '<div class="plan-check"><span class="label">Is it working?</span><p>' + readBadge(p.read) + ' ' + esc(p.read[1]) + '</p><p class="pc-l">Prism listens for: ' + esc(p.expect) + '</p></div></div>';
           }).join('') +
           '<div class="st-ins"><span class="label">Insights contributing</span>' + (ins.length ? '<div class="links">' + ins.map(function (i) { return '<button type="button" class="link-item" data-open="' + i.id + '"><b>' + esc(i.title) + '</b><span>' + esc(FACTOR[o.f].inds[INS_FACTOR[i.id][1]]) + ' · ' + esc(planSummary(i) || statusText(i)) + '</span></button>'; }).join('') + '</div>' : '<p class="muted-p">No open insights on this factor right now.</p>') + '</div>' +
         '</section>';
@@ -3518,7 +3585,7 @@ button.pv-node:hover .pv-t { text-decoration: underline; text-underline-offset: 
       $('view').innerHTML = plTop('Report', head + ' · this quarter') +
         '<div class="report">' + OBJECTIVES.map(function (o, k) {
           var regs = objRegs(o), s = objStatus(o), f = FACTOR[o.f];
-          return '<section class="card rsec"><span class="label">' + (k + 1) + ' · ' + esc(o.div ? o.div + ' division' : 'Whole company') + '</span><div class="pl-oh"><span class="badge ' + s[0] + '"><i></i>' + s[1] + '</span><h2>' + esc(objTitle(o)) + '</h2></div>' + preNote(o) +
+          return '<section class="card rsec"><span class="label">' + (k + 1) + ' · ' + esc(objScope(o)) + '</span><div class="pl-oh"><span class="badge ' + s[0] + '"><i></i>' + s[1] + '</span><h2>' + esc(objTitle(o)) + '</h2></div>' + preNote(o) +
             '<ul class="rlist pl-krs">' + o.krs.map(function (kr) { var x = aggInd(regs, o.f, kr[0]); return '<li><span class="rl-f">' + esc(f.inds[kr[0]]) + '</span><span>' + (lvlLabel(x.was) !== lvlLabel(x.v) ? 'From ' + esc(lvlLabel(x.was)) + ' to ' + esc(lvlLabel(x.v)) : 'Still ' + esc(lvlLabel(x.v))) + ' · target ' + LEVELS[kr[1]] + '</span></li>'; }).join('') + '</ul>' +
             o.programs.map(function (pid) { var p = PROGRAMS[pid], d = p.ms.filter(function (m) { return m.st === 'done'; }).length; return '<p class="plan-read"><span class="label">' + esc(p.title) + ' · ' + d + ' of ' + p.ms.length + ' milestones done</span><span>' + readBadge(p.read) + ' ' + esc(p.read[1]) + '</span></p>'; }).join('') + '</section>';
         }).join('') +
@@ -3542,7 +3609,7 @@ button.pv-node:hover .pv-t { text-decoration: underline; text-underline-offset: 
           var d = PL.cand[c.f], sc = scoreFactor(regionsInScope(), c.f);
           return '<section class="card pl-item' + (d.d === 'skip' ? ' out' : '') + '"><div class="pl-oh"><span class="tlabel">' + esc(c.src) + '</span><h3>' + factorBtn(c.f) + '</h3><span class="ind-rate">' + levelBar(sc.v, true, null, sc.was) + trendHTML(sc.t) + '</span></div><p class="muted-p" style="color:var(--text)">' + esc(c.why) + '</p>' +
             '<span class="label dec-l">Decision</span><div class="seg pl-seg" role="group" aria-label="Decision"><button type="button" data-plcand="' + c.f + ':add" aria-pressed="' + (d.d === 'add') + '">Make it an objective</button><button type="button" data-plcand="' + c.f + ':skip" aria-pressed="' + (d.d === 'skip') + '">Not this quarter</button></div>' +
-            (d.d === 'add' ? '<div class="pl-form"><span class="fld"><label for="pct-' + c.f + '">Target</label>' + sel('pct-' + c.f, [[1, 'Leading'], [2, 'Resilient']], d.target) + '</span><span class="fld"><label for="pcb-' + c.f + '">By</label>' + sel('pcb-' + c.f, PL_BY, d.by) + '</span><span class="fld"><label for="pcs-' + c.f + '">For</label>' + sel('pcs-' + c.f, [['', 'Whole company']].concat(ORG.map(function (x) { return [x.div, x.div + ' division']; })), d.div) + '</span><span class="fld"><label for="pco-' + c.f + '">Owner</label>' + sel('pco-' + c.f, PL_PEOPLE, d.owner) + '</span></div>' : '') +
+            (d.d === 'add' ? '<div class="pl-form"><span class="fld"><label for="pct-' + c.f + '">Target</label>' + sel('pct-' + c.f, [[1, 'Leading'], [2, 'Resilient']], d.target) + '</span><span class="fld"><label for="pcb-' + c.f + '">By</label>' + sel('pcb-' + c.f, PL_BY, d.by) + '</span><span class="fld"><label for="pcs-' + c.f + '">For</label>' + sel('pcs-' + c.f, [['', 'Whole company']].concat([].concat.apply([], ORG.map(function (x) { return [[x.div, x.div + ' division']].concat(x.regions.map(function (r) { return ['reg:' + r.name, '\u2003' + r.name + ' region']; })); }))), d.div) + '</span><span class="fld"><label for="pco-' + c.f + '">Owner</label>' + sel('pco-' + c.f, PL_PEOPLE, d.owner) + '</span></div>' : '') +
           '</section>';
         }).join('') : '<p class="muted-p">No candidates. Every weak factor already has an objective.</p>') + '</div>' +
         '<div class="meet-actions end"><button type="button" class="btn" data-plstep="2">Back</button><button type="button" class="btn brand" data-plstep="4">Wrap up</button></div>';
@@ -3553,8 +3620,8 @@ button.pv-node:hover .pv-t { text-decoration: underline; text-underline-offset: 
     var adds = PL.cands.filter(function (c) { return PL.cand[c.f].d === 'add'; }), att = Object.keys(PL.att).filter(function (k) { return PL.att[k]; });
     $('view').innerHTML = plTop('Wrap-up', head) +
       '<div class="meet-grid"><section class="card meet-card"><h2>Objectives for next quarter</h2><ul class="agreed">' +
-        keep.map(function (o) { var d = PL.obj[o.id], t = d.d === 'adjust' ? FACTOR[o.f].name + ' to ' + LEVELS[+d.target] + ' by ' + d.by : objTitle(o); return '<li><span class="av">' + initials(o.owner) + '</span><div><p class="agreed-t">' + esc(t) + '</p><p class="agreed-o">' + (d.d === 'adjust' ? 'Adjusted' : 'Kept') + ' · ' + esc(o.div ? o.div + ' division' : 'Whole company') + '</p></div></li>'; }).join('') +
-        adds.map(function (c) { var d = PL.cand[c.f]; return '<li><span class="av">' + initials(d.owner) + '</span><div><p class="agreed-t">' + esc(FACTOR[c.f].name + ' to ' + LEVELS[+d.target] + ' by ' + d.by) + '</p><p class="agreed-o">New · ' + esc(d.div ? d.div + ' division' : 'Whole company') + ' · ' + esc(d.owner) + ' to scope a program by the monthly progress meeting</p></div></li>'; }).join('') + '</ul>' +
+        keep.map(function (o) { var d = PL.obj[o.id], t = d.d === 'adjust' ? FACTOR[o.f].name + ' to ' + LEVELS[+d.target] + ' by ' + d.by : objTitle(o); return '<li><span class="av">' + initials(o.owner) + '</span><div><p class="agreed-t">' + esc(t) + '</p><p class="agreed-o">' + (d.d === 'adjust' ? 'Adjusted' : 'Kept') + ' · ' + esc(objScope(o)) + '</p></div></li>'; }).join('') +
+        adds.map(function (c) { var d = PL.cand[c.f]; return '<li><span class="av">' + initials(d.owner) + '</span><div><p class="agreed-t">' + esc(FACTOR[c.f].name + ' to ' + LEVELS[+d.target] + ' by ' + d.by) + '</p><p class="agreed-o">New · ' + esc(d.div ? (d.div.indexOf('reg:') === 0 ? d.div.slice(4) + ' region' : d.div + ' division') : 'Whole company') + ' · ' + esc(d.owner) + ' to scope a program by the monthly progress meeting</p></div></li>'; }).join('') + '</ul>' +
         (gone.length ? '<p class="muted-p">Retired: ' + esc(join(gone.map(objTitle))) + '.</p>' : '') +
         (keep.length + adds.length > 3 ? '<p class="t-warning" style="font-weight:700">That’s ' + lw(keep.length + adds.length) + ' objectives. Hiviz recommends no more than three.</p>' : '') +
       '</section><section class="card meet-card"><h2>Attended</h2><div class="people">' + whoLine(att) + '</div><label class="w-note-l" for="pl-notes">Planning notes</label><textarea id="pl-notes" class="w-note" rows="4" placeholder="Anything else worth recording">' + esc(PL.notes) + '</textarea>' +
@@ -3579,7 +3646,7 @@ button.pv-node:hover .pv-t { text-decoration: underline; text-underline-offset: 
     OBJECTIVES = OBJECTIVES.filter(function (o) { return PL.obj[o.id].d !== 'retire'; });
     OBJECTIVES.forEach(function (o) { var d = PL.obj[o.id]; if (d.d === 'adjust') { o.target = d.target; o.by = d.by; o.krs.forEach(function (kr) { kr[1] = Math.max(kr[1], d.target); }); } });
     PL.cands.filter(function (c) { return PL.cand[c.f].d === 'add'; }).forEach(function (c) {
-      var d = PL.cand[c.f], id = 'o-' + c.f, pid = 'p-' + c.f, o = { id: id, f: c.f, target: d.target, by: d.by, div: d.div, owner: d.owner, why: c.why, krs: [], programs: [pid], set: '26 Sep' };
+      var d = PL.cand[c.f], id = 'o-' + c.f, pid = 'p-' + c.f, o = { id: id, f: c.f, target: d.target, by: d.by, div: d.div.indexOf('reg:') === 0 ? regionDiv(d.div.slice(4)) : d.div, reg: d.div.indexOf('reg:') === 0 ? d.div.slice(4) : '', owner: d.owner, why: c.why, krs: [], programs: [pid], set: '26 Sep' };
       var regs = objRegs(o), inds = FACTOR[c.f].inds.map(function (_, k) { return { k: k, x: aggInd(regs, c.f, k) }; }).filter(function (y) { return y.x.v != null && !mgmtOnly(c.f, y.k); }).sort(function (a, b) { return a.x.v - b.x.v; });
       o.krs = inds.slice(0, 2).map(function (y) { return [y.k, d.target]; });
       PROGRAMS[pid] = { title: 'Program to be scoped', owner: d.owner, resources: 'To be agreed', expect: 'To be set when the program is scoped.', read: ['early', 'Starts next quarter.'],
@@ -3684,7 +3751,7 @@ button.pv-node:hover .pv-t { text-decoration: underline; text-underline-offset: 
         '<div class="report">' + OBJECTIVES.map(function (o, oi) {
           var regs = objRegs(o), s = objStatus(o), f = FACTOR[o.f];
           var fresh = INSIGHTS.filter(function (i) { return !i.closed && !i.dismissed && sinceMonth(i) && INS_FACTOR[i.id] && INS_FACTOR[i.id][0] === o.f && i.sites.some(function (x) { return regs.indexOf(SITE[x].region) > -1; }); });
-          return '<section class="card rsec"><span class="label">' + (oi + 1) + ' · ' + esc(o.div ? o.div + ' division' : 'Whole company') + ' · owner ' + esc(o.owner) + '</span><div class="pl-oh"><span class="badge ' + s[0] + '"><i></i>' + s[1] + '</span><h2>' + esc(objTitle(o)) + '</h2></div>' +
+          return '<section class="card rsec"><span class="label">' + (oi + 1) + ' · ' + esc(objScope(o)) + ' · owner ' + esc(o.owner) + '</span><div class="pl-oh"><span class="badge ' + s[0] + '"><i></i>' + s[1] + '</span><h2>' + esc(objTitle(o)) + '</h2></div>' +
             '<div class="st-krs"><span class="label">Key results since last month</span>' + o.krs.map(function (kr) { var x = monthInd(regs, o.f, kr[0]); return '<div class="kr"><span class="kr-n">' + esc(f.inds[kr[0]]) + '</span><span class="ind-rate">' + levelBar(x.v, true, null, x.was) + trendHTML(x.t) + '</span><span class="kr-tg">Target ' + LEVELS[kr[1]] + '</span></div>'; }).join('') + '</div>' +
             o.programs.map(function (pid) {
               var p = PROGRAMS[pid];
@@ -3794,7 +3861,7 @@ button.pv-node:hover .pv-t { text-decoration: underline; text-underline-offset: 
 
   /* =============================================================
      View through Prism: how one insight or objective connects upward,
-     from records to safer work. Read bottom to top.
+     from records to the goal of improving the safety of work. Read bottom to top.
      ============================================================= */
   var PV = null;
   function pvNode(id, layer, title, sub, badge, attrs) { return { id: id, layer: layer, title: title, sub: sub || '', badge: badge || '', attrs: attrs || '' }; }
@@ -3804,8 +3871,10 @@ button.pv-node:hover .pv-t { text-decoration: underline; text-underline-offset: 
     return pvNode(id, 'Indicator', FACTOR[f].inds[k], FACTOR[f].name + (extra ? ' · ' + extra : ''), '<span class="ind-rate">' + levelBar(x.v, true, x.v == null ? 'Needs input' : null, x.was) + (x.v != null ? trendHTML(x.t) : '') + '</span>', 'data-factor="' + f + '"');
   }
   function factorNode(id, regs, f) { var sc = scoreFactor(regs, f); return pvNode(id, 'Factor', FACTOR[f].name, sc.v != null ? FACTOR[f].lnames[sc.lvl] : 'Needs management input', '<span class="ind-rate">' + levelBar(sc.v, true, null, sc.was) + (sc.v != null ? trendHTML(sc.t) : '') + '</span>', 'data-factor="' + f + '"'); }
-  function objNode(id, o) { var s = objStatus(o); return pvNode(id, 'Objective', objTitle(o), o.div ? o.div + ' division' : 'Whole company', '<span class="badge ' + s[0] + '"><i></i>' + s[1] + '</span>', 'data-pvgo="strategy"'); }
-  var SAFER = function (label) { return pvNode('safer', 'Outcome', 'Safer work', label, ''); };
+  function objNode(id, o) { var s = objStatus(o); return pvNode(id, 'Objective', objTitle(o), 'Applies to ' + objScope(o), '<span class="badge ' + s[0] + '"><i></i>' + s[1] + '</span>', 'data-pvgo="strategy"'); }
+  // One goal for the whole company, the same at every purview. An organisation could set its own wording.
+  var ORG_GOAL = 'Improve the safety of work'; // the Forge Works blueprint's own framing
+  var SAFER = function () { return pvNode('safer', 'Goal', ORG_GOAL, ORG_NAME, ''); };
 
   function graphForInsight(i) {
     var regs = []; i.sites.forEach(function (s) { if (regs.indexOf(SITE[s].region) < 0) regs.push(SITE[s].region); });
@@ -3828,7 +3897,7 @@ button.pv-node:hover .pv-t { text-decoration: underline; text-underline-offset: 
       if (o) { nodes.push(objNode('obj', o)); edges.push(['fac', 'obj', 'target of']); edges.push(['obj', 'safer', 'adds up to']); }
       else edges.push(['fac', 'safer', 'adds up to']);
     } else edges.push([from, 'safer', '']);
-    nodes.push(SAFER(scopeLabel()));
+    nodes.push(SAFER());
     return { title: i.title, kicker: 'Insight', nodes: nodes, edges: edges };
   }
   function graphForObjective(o) {
@@ -3839,15 +3908,15 @@ button.pv-node:hover .pv-t { text-decoration: underline; text-underline-offset: 
     });
     o.programs.forEach(function (pid, k) { var p = PROGRAMS[pid], d = p.ms.filter(function (m) { return m.st === 'done'; }).length; nodes.unshift(pvNode('p' + k, 'Work', p.title, 'Program · ' + p.owner + ' · ' + d + ' of ' + p.ms.length + ' milestones done', readTag(p.read[0]))); o.krs.forEach(function (_, r) { edges.push(['p' + k, 'kr' + r, r ? '' : 'should move']); }); });
     o.krs.forEach(function (kr, r) { nodes.push(indNode('kr' + r, regs, o.f, kr[0], 'target ' + LEVELS[kr[1]])); edges.push(['kr' + r, 'fac', r ? '' : 'part of']); });
-    nodes.push(factorNode('fac', regs, o.f)); nodes.push(objNode('obj', o)); nodes.push(SAFER(ORG_NAME));
+    nodes.push(factorNode('fac', regs, o.f)); nodes.push(objNode('obj', o)); nodes.push(SAFER());
     edges.push(['fac', 'obj', 'target of']); edges.push(['obj', 'safer', 'adds up to']);
     return { title: objTitle(o), kicker: 'Objective', nodes: nodes, edges: edges };
   }
-  var PV_LAYERS = ['Outcome', 'Objective', 'Factor', 'Indicator', 'Plan', 'Work', 'Insight', 'Records'];
+  var PV_LAYERS = ['Goal', 'Objective', 'Factor', 'Indicator', 'Plan', 'Work', 'Insight', 'Records'];
   function openPrismView(g) {
     PV = g; var el = $('pv');
     var layers = PV_LAYERS.filter(function (l) { return g.nodes.some(function (n) { return n.layer === l; }); });
-    el.innerHTML = '<div class="pv-top"><div><span class="label">View through Prism · ' + esc(g.kicker) + '</span><h2>' + esc(g.title) + '</h2><p class="muted-p">Read from the bottom up: what the records show, what’s being done about it, and what it improves.</p></div><button type="button" class="x" id="pv-x" aria-label="Close"><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 2l8 8M10 2l-8 8" stroke="currentColor" stroke-width="1.6"/></svg></button></div>' +
+    el.innerHTML = '<div class="pv-top"><div><p class="kind"><span class="kind-t">View through Prism</span><span>' + esc(g.kicker) + '</span><span>' + esc(scopeLabel()) + '</span></p><h2>' + esc(g.title) + '</h2><p class="muted-p">Read from the bottom up: what the records show, what’s being done about it, and what it improves.</p></div><button type="button" class="x" id="pv-x" aria-label="Close"><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 2l8 8M10 2l-8 8" stroke="currentColor" stroke-width="1.6"/></svg></button></div>' +
       '<div class="pv-canvas" id="pv-canvas"><svg class="pv-lines" id="pv-lines" aria-hidden="true"></svg>' + layers.map(function (l) {
         return '<div class="pv-row"><span class="pv-layer">' + esc(l) + '</span><div class="pv-nodes">' + g.nodes.filter(function (n) { return n.layer === l; }).map(function (n) {
           var tag = n.attrs ? 'button type="button"' : 'div';
