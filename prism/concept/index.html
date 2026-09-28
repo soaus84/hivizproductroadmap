@@ -68,6 +68,7 @@ h3 { font-size: 17px; font-weight: 800; letter-spacing: -0.01em; }
 .pick { appearance: none; border: 0; background: transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='14' viewBox='0 0 10 14'%3E%3Cpath d='M2 5l3-3 3 3M2 9l3 3 3-3' fill='none' stroke='%238f8f8f' stroke-width='1.4'/%3E%3C/svg%3E") no-repeat right 6px center; padding: 6px 24px 6px 8px; border-radius: 6px; font-weight: 800; font-size: 16px; cursor: pointer; }
 .pick:hover { text-decoration: underline; text-underline-offset: 3px; }
 .tabs { display: flex; gap: 2px; margin-left: 8px; }
+.nav-toggle { display: none; }
 .tabs a { padding: 7px 13px; border-radius: 8px; font-size: 16px; color: var(--text); font-weight: 700; }
 .tabs a:hover { text-decoration: underline; text-underline-offset: 4px; }
 .tabs a[aria-current="page"]:hover { text-decoration: none; }
@@ -75,6 +76,9 @@ h3 { font-size: 17px; font-weight: 800; letter-spacing: -0.01em; }
 .hdr-right { margin-left: auto; display: flex; align-items: center; justify-content: flex-end; gap: 10px; min-width: 0; flex: 1 1 auto; }
 .live { display: flex; align-items: center; gap: 8px; height: 34px; padding: 0 12px; border: 1px solid var(--border-2); border-radius: 999px; font-size: 14px; color: var(--text); min-width: 0; max-width: 380px; cursor: pointer; background: var(--bg); flex: 0 1 auto; }
 .live .lbl { font-weight: 800; flex: none; }
+.live-alert { order: 9; flex: none; display: inline-grid; place-items: center; width: 18px; height: 18px; border-radius: 50%; background: var(--warning); color: #fff; font-size: 12px; font-weight: 900; line-height: 1; }
+.live.bad .live-alert { background: var(--critical); }
+.live[aria-current="page"] { background: var(--brand); border-color: #d9c200; }
 .live:hover { border-color: var(--border-2); }
 .live .dot { flex: none; width: 9px; height: 9px; border-radius: 50%; background: #16a34a; box-shadow: 0 0 0 0 rgba(34,197,94,0.5); animation: live 2s infinite; }
 @keyframes live { 0% { box-shadow: 0 0 0 0 rgba(34,197,94,0.45); } 70% { box-shadow: 0 0 0 7px rgba(34,197,94,0); } 100% { box-shadow: 0 0 0 0 rgba(34,197,94,0); } }
@@ -92,7 +96,20 @@ h3 { font-size: 17px; font-weight: 800; letter-spacing: -0.01em; }
 }
 @media (max-width: 720px) {
   .hdr { position: static; }
+  .hdr .wrap { flex-wrap: wrap; gap: 10px 8px; padding-block: 10px 0; min-height: 0; }
+  .logo { order: 1; }
+  .hdr-right { order: 2; flex: 0 0 auto; gap: 6px; }
+  .crumb { order: 3; width: 100%; }
   .crumb .slash:first-child { display: none; }
+  .nav-toggle { display: flex; order: 4; width: 100%; align-items: center; gap: 10px; padding: 2px 0 12px; background: none; border: 0; font: inherit; font-size: 17px; font-weight: 800; color: var(--text); cursor: pointer; text-align: left; }
+  .nav-toggle .nav-chev { margin-left: 4px; color: var(--text-2); }
+  .hdr .wrap { position: relative; }
+  .nav-toggle { width: auto; align-self: flex-start; }
+  .tabs { order: 5; display: none; position: absolute; left: 16px; top: calc(100% - 6px); z-index: 40; width: max-content; min-width: 200px; flex-direction: column; gap: 2px; margin: 0; padding: 6px; border: 1px solid var(--border-2); border-radius: 12px; background: #fff; box-shadow: 0 8px 24px rgba(13,15,18,0.14); }
+  .hdr.nav-open .tabs { display: flex; }
+  .tabs a { padding: 11px 12px; font-size: 16px; }
+  .live { padding: 0 10px; gap: 6px; } .live .lbl { display: none; }
+  .mf-btn { padding: 0 10px; } .mf-lbl { display: none; }
 }
 @media (prefers-reduced-motion: reduce) { .live .dot, .live .txt.in, .fresh { animation: none !important; } }
 
@@ -635,7 +652,17 @@ button.ind-btn:hover .ind-name { text-decoration: underline; text-underline-offs
 .st-cad { display: flex; align-items: flex-end; gap: 10px 22px; flex-wrap: wrap; font-size: 14.5px; font-weight: 700; }
 .st-cad > span { display: grid; gap: 2px; }
 .pl-h { font-size: 18px; margin: 22px 0 10px; }
-.st-go { display: flex; gap: 8px; flex-wrap: wrap; }
+.st-go { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+.st-rhythm { display: flex; align-items: flex-end; gap: 10px 28px; flex-wrap: wrap; margin: -8px 0 20px; padding: 12px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); font-size: 15px; font-weight: 700; }
+.st-rhythm > span { display: grid; gap: 2px; }
+.st-rhythm .what { margin-left: auto; }
+@media (max-width: 640px) { .st-go { justify-content: flex-start; } .st-rhythm .what { margin-left: 0; } }
+.dec-l { margin-bottom: -6px; }
+.fo-list li { display: grid; grid-template-columns: 170px minmax(0, 1fr); gap: 2px 14px; }
+.fo-list .fo-src { grid-row: 1 / span 2; font-size: 12.5px; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; color: var(--text-3); }
+.fo-list .fo-t { font-size: 15.5px; font-weight: 800; color: var(--text); }
+.fo-list li > span:last-child:not(.fo-t) { grid-column: 2; }
+@media (max-width: 640px) { .fo-list li { grid-template-columns: 1fr; } .fo-list .fo-src { grid-row: auto; } }
 .pl-pv { display: flex; align-items: baseline; gap: 10px; margin: -8px 0 16px; font-size: 15px; }
 .ci-panel { padding: 18px 20px; display: grid; gap: 12px; margin-bottom: 18px; }
 .ci-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 8px 20px; flex-wrap: wrap; }
@@ -826,16 +853,16 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
       <span class="slash" aria-hidden="true">/</span>
       <select class="pick" id="f-reg" aria-label="Region"></select>
     </div>
-    <nav class="tabs" aria-label="Views">
+    <button type="button" class="nav-toggle" id="nav-toggle" aria-expanded="false" aria-controls="nav-tabs"><svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M2.5 4.5h13M2.5 9h13M2.5 13.5h13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span id="nav-cur">Insights</span><svg class="nav-chev" width="10" height="14" viewBox="0 0 10 14" aria-hidden="true"><path d="M2 5l3-3 3 3M2 9l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    <nav class="tabs" id="nav-tabs" aria-label="Views">
       <a href="#focus" data-view="focus">Insights</a>
       <a href="#sites" data-view="sites">Sites</a>
       <a href="#map" data-view="map">Map</a>
       <a href="#strategy" data-view="strategy">Strategy</a>
-      <a href="#sources" data-view="sources">Sources<span class="tab-dot" id="src-badge" hidden></span></a>
     </nav>
     <div class="hdr-right">
-      <a class="live" href="#sources" aria-label="Live data arriving"><span class="dot" aria-hidden="true"></span><span class="lbl">Live</span><span class="txt" id="live-txt" aria-live="polite"></span></a>
-      <a class="mf-btn" id="mf-btn" href="#myfocus"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.2" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="8" cy="8" r="2.4" fill="currentColor"/></svg>My Focus<span class="mf-count" id="mf-count" hidden></span></a>
+      <a class="live" id="live-pill" href="#sources" aria-label="Sources: live data arriving"><span class="dot" aria-hidden="true"></span><span class="lbl">Live</span><span class="live-alert" id="src-alert" hidden></span><span class="txt" id="live-txt" aria-live="polite"></span></a>
+      <a class="mf-btn" id="mf-btn" href="#myfocus"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.2" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="8" cy="8" r="2.4" fill="currentColor"/></svg><span class="mf-lbl">My Focus</span><span class="mf-count" id="mf-count" hidden></span></a>
       <button type="button" class="help-btn" data-help="ideas" aria-label="Help and definitions">?</button>
       <span class="avatar-me" title="You, division manager">DM</span>
     </div>
@@ -1149,11 +1176,13 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
   $('f-div').addEventListener('change', function (e) { ST.div = e.target.value; ST.reg = ''; fillFilters(); if (ST.view === 'meeting') { startMeeting(); return; } render(); });
   $('f-reg').addEventListener('change', function (e) { ST.reg = e.target.value; if (ST.reg) ORG.forEach(function (d) { d.regions.forEach(function (g) { if (g.name === ST.reg) ST.div = d.div; }); }); fillFilters(); if (ST.view === 'meeting') { startMeeting(); return; } render(); });
   function sourceIssues() { return SOURCES.filter(function (s) { return ['failing', 'delayed', 'partial'].indexOf(s.status) > -1; }); }
+  // The Live pill carries source health: amber when a source is late, red when one is failing
   function renderIssues() {
-    var n = sourceIssues().length, b = $('src-badge');
-    b.hidden = !n;
-    b.setAttribute('aria-label', n ? 'Sources need attention' : '');
-    b.setAttribute('role', 'img');
+    var iss = sourceIssues(), fail = iss.filter(function (s) { return s.status === 'failing'; }), pill = $('live-pill'), al = $('src-alert');
+    pill.classList.toggle('bad', !!fail.length); pill.classList.toggle('warn', !fail.length && !!iss.length);
+    al.hidden = !iss.length; al.textContent = '!';
+    var msg = fail.length === 1 ? fail[0].name + ' failing' : fail.length ? fail.length + ' sources failing' : iss.length === 1 ? iss[0].name + ' ' + iss[0].status : iss.length + ' sources need a look';
+    al.title = msg; pill.setAttribute('aria-label', 'Sources: live data arriving' + (iss.length ? ', ' + msg : ''));
   }
 
   /* =============================================================
@@ -2337,6 +2366,7 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
               '<div><h3><span class="tlabel">Passed up</span></h3>' + (outgoing.length ? '<ul class="rlist">' + outgoing.map(function (i) { return li(i, 'Waiting for ' + levelOwner(i.esc.to)); }).join('') + '</ul>' : '<p class="muted-p">None.</p>') + '</div>' +
             '</div></section>';
           })() +
+        fromOther('focus') +
         '</div>' +
         '<div class="meet-actions end"><button type="button" class="btn" id="copy-report">Copy report</button><button type="button" class="btn brand" data-mstep="3"' + (ag.length ? '' : ' disabled') + '>Walk through ' + lw(ag.length) + ' insights</button></div>';
       return;
@@ -2576,7 +2606,7 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
   ST.nudged = {}; ST.visitPlanned = ST.visitPlanned || {}; ST.mfDone = []; ST.mfWalk = -1; ST.mfSnap = null; ST.mfRes = {};
   function mySites() { var o = []; ORG.forEach(function (d) { if (d.div === MY_DIV) d.regions.forEach(function (r) { o = o.concat(r.sites); }); }); return o; }
   function myInsights() { var ids = mySites().map(function (x) { return x.id; }); return INSIGHTS.filter(function (i) { return !i.closed && !i.dismissed && i.sites.some(function (s) { return ids.indexOf(s) > -1; }); }); }
-  var MF_GROUPS = [['escalated', 'Escalated to you'], ['assign', 'Assign an owner'], ['chase', 'Chase up'], ['visit', 'Plan a visit'], ['update', 'Post an update'], ['close', 'Close'], ['agreed', 'Agreed at a Focus review']];
+  var MF_GROUPS = [['checkin', 'Check in before a meeting'], ['escalated', 'Escalated to you'], ['assign', 'Assign an owner'], ['chase', 'Chase up'], ['visit', 'Plan a visit'], ['update', 'Post an update'], ['close', 'Close'], ['agreed', 'Agreed at a Focus review']];
   function myFocusItems() {
     var items = [], ins = myInsights(), crit = function (i) { return i.sev === 'critical' ? 0 : 1; };
     INSIGHTS.filter(function (i) { return !i.closed && !i.dismissed && i.esc && levelOwner(i.esc.to) === YOU; }).forEach(function (i) {
@@ -2602,6 +2632,13 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
         if (d.who === YOU && !d.doneByYou) items.push({ kind: 'agreed', id: 'g-' + m.id + '-' + k, dec: d, meeting: m, ins: insightById(d.ins), sev: 'warning', title: d.text, why: 'Agreed at the Focus review on ' + m.short + '.' });
       });
     });
+    // Check-ins due before the next meeting: program milestones and plan actions you own
+    OBJECTIVES.forEach(function (o) { o.programs.forEach(function (pid) { PROGRAMS[pid].ms.forEach(function (m, k) {
+      if (m.who === YOU && m.st !== 'done' && !m.upd) items.push({ kind: 'checkin', id: 'k-' + pid + '-' + k, sev: 'warning', title: m.t, why: PROGRAMS[pid].title + '. Check in before monthly progress; check-ins close ' + CHECKIN.closes + '.' });
+    }); }); });
+    ins.forEach(function (i) { if (i.plan && i.plan.state === 'agreed') i.plan.actions.forEach(function (a, k) {
+      if (a.who === YOU && a.st !== 'done' && !a.upd) items.push({ kind: 'checkin', id: 'k-' + i.id + '-' + k, ins: i, sev: 'warning', title: a.t, why: 'From \u201c' + i.title + '\u201d. Check in before the next Focus review.' });
+    }); });
     return items;
   }
   function renderMyFocusCount() {
@@ -2614,6 +2651,7 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
   function mfSev(it) {
     if (it.kind === 'close') return '<span class="badge success"><i></i>Ready to close</span>';
     if (it.kind === 'agreed') return '<span class="badge"><i></i>Agreed</span>';
+    if (it.kind === 'checkin') return '<span class="tlabel">Check-in due</span>';
     return sevIcon(it.sev === 'critical' ? 'critical' : 'warning');
   }
   function mfAction(it, big) {
@@ -2628,6 +2666,7 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
     if (it.kind === 'update') return '<a class="btn brand" href="#insight/' + i.id + '">Post an update</a>';
     if (it.kind === 'close') return '<button type="button" class="btn brand" data-mf-close="' + i.id + '">Close it</button>';
     if (it.kind === 'agreed') return '<button type="button" class="btn brand" data-mf-agreed="' + it.id + '">Mark as done</button>';
+    if (it.kind === 'checkin') return i ? '<a class="btn brand" href="#insight/' + i.id + '">Check in</a>' : '<a class="btn brand" href="#strategy">Check in</a>';
     return '';
   }
   function mfOpen(it) {
@@ -3191,6 +3230,50 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
   }
   function readBadge(r) { return r[0] === 'working' ? '<span class="badge success"><i></i>Working</span>' : r[0] === 'continues' ? '<span class="badge critical"><i></i>Pattern continues</span>' : '<span class="tlabel">Too early</span>'; }
 
+  // Header actions mirror Insights: past meetings, then start; the next meeting due is the primary
+  function dayOf(t) { var M = { January: 0, February: 1, March: 2, April: 3, May: 4, June: 5, July: 6, August: 7, September: 8, October: 9, November: 10, December: 11 }, m = /(\d+) (\w+)/.exec(t || ''); return m ? new Date(m[2] === 'January' ? 2027 : 2026, M[m[2]], +m[1]) : new Date(2099, 0, 1); }
+  function stActions(org) {
+    var planFirst = dayOf(STRAT.planning) <= dayOf(STRAT.progress);
+    var pg = '<button type="button" class="btn' + (planFirst ? '' : ' brand') + '" data-pgstart="1">Start monthly progress</button>', pl = '<button type="button" class="btn' + (planFirst ? ' brand' : '') + '" data-plstart="1">Start quarterly planning</button>';
+    return '<div class="st-go"><button type="button" class="btn" data-stpast="1">Past meetings</button>' + (org ? (planFirst ? pg + pl : pl + pg) : '') + '</div>';
+  }
+  function stRhythm() {
+    var rows = [['Check-ins close', CHECKIN.closes], ['Monthly progress', STRAT.progress], ['Quarterly planning', STRAT.planning]].sort(function (a, b) { return dayOf(a[1]) - dayOf(b[1]); });
+    return '<div class="st-rhythm">' + rows.map(function (r) { return '<span><span class="label">' + esc(r[0]) + '</span>' + esc(r[1]) + '</span>'; }).join('') + '<button type="button" class="what" data-help="strategy">How strategy works</button></div>';
+  }
+  // Records of strategy meetings, like Past Focus reviews
+  var STRAT_LOG = [
+    { type: 'Monthly progress', date: '1 Sep', who: ['Morgan Hale', 'Priya Nair', 'Dana Brooks', 'Alex Chen'], lines: ['Handover standard: mapping done, draft due 12 Sep.', 'Forms rebuild: agreed, owner Dana Brooks, by 10 Oct.', 'Stop stories: start sharing one a week from September.'] },
+    { type: 'Monthly progress', date: '4 Aug', who: ['Morgan Hale', 'Priya Nair', 'Dana Brooks', 'Alex Chen'], lines: ['First check-in on the three objectives. All on track.'] },
+    { type: 'Quarterly planning', date: '1 Jul', who: ['Morgan Hale', 'You', 'Alex Chen', 'Dana Brooks'], lines: ['Set three objectives: Communication & coordination (Infrastructure), Monitoring and metrics, Frontline workforce.', 'Retired: none. First planning with Hiviz.'] }
+  ];
+  function openStratPast(trigger) {
+    if (trigger) recTrigger = trigger;
+    $('rec').innerHTML = '<div class="sheet-head" style="position:relative"><button type="button" class="x" id="rec-x" aria-label="Close"><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 2l8 8M10 2l-8 8" stroke="currentColor" stroke-width="1.6"/></svg></button>' +
+      '<div class="meta"><span class="label">Strategy</span></div><h2 id="rec-title">Past meetings</h2><p class="muted-p">Monthly progress and quarterly planning for ' + esc(ORG_NAME) + '.</p></div>' +
+      '<div class="sheet-body">' + STRAT_LOG.map(function (m) {
+        return '<section class="sheet-sec"><span class="label">' + esc(m.type) + ' \u00b7 ' + esc(m.date) + '</span><ul class="plain">' + m.lines.map(function (l) { return '<li>' + esc(l) + '</li>'; }).join('') + '</ul><div class="people">' + whoLine(m.who) + '</div></section>';
+      }).join('') + '</div>';
+    $('rec').hidden = false; $('scrim').hidden = false; $('rec-x').focus();
+  }
+  document.addEventListener('click', function (e) { var t = e.target.closest('[data-stpast]'); if (t) { openStratPast(t); } });
+  // Each ritual's report shows what the others handed it
+  function fromOther(kind) {
+    var li = [];
+    if (kind === 'focus') {
+      objsInView().forEach(function (o) { var s = objStatus(o), n = insightsInView().filter(function (i) { return objFor(i) === o; }).length; li.push(['Strategy', '<a class="map-link" href="#strategy">' + esc(objTitle(o)) + '</a>', s[1] + (n ? ' \u00b7 ' + n + (n === 1 ? ' insight here contributes' : ' insights here contribute') : '') + (o.flagged ? ' \u00b7 flagged for planning' : '')]); });
+      if (STRAT_LOG[0]) li.push([STRAT_LOG[0].type + ' \u00b7 ' + STRAT_LOG[0].date, esc(STRAT_LOG[0].lines[0]), '']);
+    } else {
+      var since = kind === 'progress' ? new Date(2026, 8, 1) : new Date(2026, 6, 1);
+      MEETINGS.forEach(function (m) { var d = dayOf(m.date); if (d < since) return; var onObj = m.decisions.filter(function (x) { var i = insightById(x.ins); return i && objFor(i); }).length; li.push(['Focus review \u00b7 ' + m.short, esc(m.div + ' division'), m.decisions.length + (m.decisions.length === 1 ? ' decision' : ' decisions') + (onObj ? ', ' + lw(onObj) + ' on ' + (onObj === 1 ? 'an objective factor' : 'objective factors') : '')]); });
+      INSIGHTS.filter(function (i) { return !i.closed && !i.dismissed && i.esc && i.esc.to === 'org'; }).forEach(function (i) { li.push(['Escalated to ' + ORG_NAME, '<button type="button" class="rlink" data-open="' + i.id + '">' + esc(i.title) + '</button>', 'From ' + nameOf(i.esc.by)]); });
+      if (kind === 'planning') {
+        OBJECTIVES.filter(function (o) { return o.flagged; }).forEach(function (o) { li.push(['Monthly progress', esc(objTitle(o)), 'Flagged for planning']); });
+        var nc = Object.keys(ST.cand).length; if (nc) li.push(['Strategy page', esc(word(nc) + (nc === 1 ? ' gap raised' : ' gaps raised') + ' for planning'), 'In Decide']);
+      }
+    }
+    return '<section class="card rsec"><span class="label">From other meetings</span>' + (li.length ? '<ul class="rlist fo-list">' + li.map(function (x) { return '<li><span class="fo-src">' + esc(x[0]) + '</span><span class="fo-t">' + x[1] + '</span>' + (x[2] ? '<span>' + esc(x[2]) + '</span>' : '') + '</li>'; }).join('') + '</ul>' : '<p class="muted-p">Nothing handed over since last time.</p>') + '</section>';
+  }
   function renderStrategy() {
     var org = !ST.div && !ST.reg, objs = objsInView(), regs = regionsInScope();
     var st = objs.map(objStatus), counts = {}; st.forEach(function (x) { counts[x[1]] = (counts[x[1]] || 0) + 1; });
@@ -3212,7 +3295,8 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
 
     $('view').innerHTML =
       '<div class="page-top"><div><h1>Strategy</h1><p class="sub">' + esc(ORG_NAME) + ' objectives for ' + esc(STRAT.year) + ' · set at quarterly planning</p></div>' +
-        '<div class="st-cad"><span><span class="label">Quarterly planning</span>Next: ' + esc(STRAT.planning) + '</span><span><span class="label">Monthly progress</span>Next: ' + esc(STRAT.progress) + '</span><button type="button" class="what" data-help="strategy">How strategy works</button>' + (org ? '<span class="st-go"><button type="button" class="btn" data-pgstart="1">Start monthly progress</button><button type="button" class="btn brand" data-plstart="1">Start quarterly planning</button></span>' : '') + '</div></div>' +
+        stActions(org) + '</div>' +
+        stRhythm() +
       '<p class="pv-summary">' + lead + '</p>' +
       (org ? '' : '<p class="st-note">Objectives are set for all of ' + esc(ORG_NAME) + ' at quarterly planning. This shows the ones that include ' + esc(scopeLabel()) + ', measured across it.</p>') +
       checkinPanel() +
@@ -3335,7 +3419,7 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
             o.programs.map(function (pid) { var p = PROGRAMS[pid], d = p.ms.filter(function (m) { return m.st === 'done'; }).length; return '<p class="plan-read"><span class="label">' + esc(p.title) + ' · ' + d + ' of ' + p.ms.length + ' milestones done</span><span>' + readBadge(p.read) + ' ' + esc(p.read[1]) + '</span></p>'; }).join('') + '</section>';
         }).join('') +
         (rs.length ? '<section class="card rsec"><span class="label">' + (OBJECTIVES.length + 1) + ' · 90-day retros this quarter</span><p class="rlead"><b>' + word(rs.length) + ' plans reached 90 days.</b> ' + ['worked', 'quiet', 'partly', 'didnt', 'cant'].filter(function (k) { return rc[k]; }).map(function (k) { return lw(rc[k]) + ' ' + ({ worked: 'worked', quiet: 'went quiet', partly: 'partly worked', didnt: 'didn\u2019t work', cant: 'can\u2019t be judged yet' })[k]; }).join(', ').replace(/^./, function (c) { return c.toUpperCase(); }) + '.</p><div class="st-sugg"><span class="label">Hiviz recommends</span><p>Favour changes to equipment and rostering over briefings and new paperwork. It follows the hierarchy of controls, and your own retros agree.</p></div></section>' : '') +
-        '</div><div class="meet-actions end"><button type="button" class="btn" data-plstep="1">Back</button><button type="button" class="btn brand" data-plstep="3">Decide</button></div>';
+        fromOther('planning') + '</div><div class="meet-actions end"><button type="button" class="btn" data-plstep="1">Back</button><button type="button" class="btn brand" data-plstep="3">Decide</button></div>';
       return;
     }
     if (PL.step === 3) {
@@ -3346,14 +3430,14 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
           var d = PL.obj[o.id], s = objStatus(o), adv = OBJ_ADVICE[o.id];
           return '<section class="card pl-item' + (d.d === 'retire' ? ' out' : '') + '"><div class="pl-oh"><span class="badge ' + s[0] + '"><i></i>' + s[1] + '</span><h3>' + esc(objTitle(o)) + '</h3>' + (o.flagged ? '<span class="tlabel">Flagged at monthly progress</span>' : '') + '</div>' +
             preNote(o) + (adv ? '<div class="st-sugg"><span class="label">Hiviz recommends</span><p>' + esc(adv[1]) + '</p></div>' : '') +
-            '<div class="seg pl-seg" role="group" aria-label="Decision">' + [['keep', 'Keep'], ['adjust', 'Adjust'], ['retire', 'Retire']].map(function (x) { return '<button type="button" data-plobj="' + o.id + ':' + x[0] + '" aria-pressed="' + (d.d === x[0]) + '">' + x[1] + '</button>'; }).join('') + '</div>' +
+            '<span class="label dec-l">Decision</span><div class="seg pl-seg" role="group" aria-label="Decision">' + [['keep', 'Keep'], ['adjust', 'Adjust'], ['retire', 'Retire']].map(function (x) { return '<button type="button" data-plobj="' + o.id + ':' + x[0] + '" aria-pressed="' + (d.d === x[0]) + '">' + x[1] + '</button>'; }).join('') + '</div>' +
             (d.d === 'adjust' ? '<div class="pl-form"><span class="fld"><label for="plt-' + o.id + '">Target</label>' + sel('plt-' + o.id, [[1, 'Leading'], [2, 'Resilient']], d.target) + '</span><span class="fld"><label for="plb-' + o.id + '">By</label>' + sel('plb-' + o.id, PL_BY, d.by) + '</span></div>' : '') +
           '</section>';
         }).join('') + '</div>' +
         '<h2 class="pl-h">Candidates</h2><div class="pl-list">' + (PL.cands.length ? PL.cands.map(function (c) {
           var d = PL.cand[c.f], sc = scoreFactor(regionsInScope(), c.f);
           return '<section class="card pl-item' + (d.d === 'skip' ? ' out' : '') + '"><div class="pl-oh"><span class="tlabel">' + esc(c.src) + '</span><h3>' + factorBtn(c.f) + '</h3><span class="ind-rate">' + levelBar(sc.v, true, null, sc.was) + trendHTML(sc.t) + '</span></div><p class="muted-p" style="color:var(--text)">' + esc(c.why) + '</p>' +
-            '<div class="seg pl-seg" role="group" aria-label="Decision"><button type="button" data-plcand="' + c.f + ':add" aria-pressed="' + (d.d === 'add') + '">Make it an objective</button><button type="button" data-plcand="' + c.f + ':skip" aria-pressed="' + (d.d === 'skip') + '">Not this quarter</button></div>' +
+            '<span class="label dec-l">Decision</span><div class="seg pl-seg" role="group" aria-label="Decision"><button type="button" data-plcand="' + c.f + ':add" aria-pressed="' + (d.d === 'add') + '">Make it an objective</button><button type="button" data-plcand="' + c.f + ':skip" aria-pressed="' + (d.d === 'skip') + '">Not this quarter</button></div>' +
             (d.d === 'add' ? '<div class="pl-form"><span class="fld"><label for="pct-' + c.f + '">Target</label>' + sel('pct-' + c.f, [[1, 'Leading'], [2, 'Resilient']], d.target) + '</span><span class="fld"><label for="pcb-' + c.f + '">By</label>' + sel('pcb-' + c.f, PL_BY, d.by) + '</span><span class="fld"><label for="pcs-' + c.f + '">For</label>' + sel('pcs-' + c.f, [['', 'Whole company']].concat(ORG.map(function (x) { return [x.div, x.div + ' division']; })), d.div) + '</span><span class="fld"><label for="pco-' + c.f + '">Owner</label>' + sel('pco-' + c.f, PL_PEOPLE, d.owner) + '</span></div>' : '') +
           '</section>';
         }).join('') : '<p class="muted-p">No candidates. Every weak factor already has an objective.</p>') + '</div>' +
@@ -3371,15 +3455,23 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
         (keep.length + adds.length > 3 ? '<p class="t-warning" style="font-weight:700">That’s ' + lw(keep.length + adds.length) + ' objectives. Hiviz recommends no more than three.</p>' : '') +
       '</section><section class="card meet-card"><h2>Attended</h2><div class="people">' + whoLine(att) + '</div><label class="w-note-l" for="pl-notes">Planning notes</label><textarea id="pl-notes" class="w-note" rows="4" placeholder="Anything else worth recording">' + esc(PL.notes) + '</textarea>' +
         '<p class="muted-p">Next: the monthly progress meeting on ' + esc(STRAT.progress) + '. Quarterly planning after that: Wednesday 7 January.</p>' +
-        '<div class="meet-actions"><button type="button" class="btn" data-plstep="3">Back</button><button type="button" class="btn brand" id="pl-save">Save the plan</button></div></section></div>';
+        '<div class="meet-actions"><button type="button" class="btn" data-plstep="3">Back</button><button type="button" class="btn" id="pl-copy">Copy summary</button><button type="button" class="btn brand" id="pl-save">Save the plan</button></div></section></div>';
   }
   function plRead() {
     OBJECTIVES.forEach(function (o) { var t = $('plt-' + o.id), b = $('plb-' + o.id); if (t) PL.obj[o.id].target = +t.value; if (b) PL.obj[o.id].by = b.value; });
     (PL.cands || []).forEach(function (c) { var d = PL.cand[c.f]; ['t', 'b', 's', 'o'].forEach(function (x) { var el = $('pc' + x + '-' + c.f); if (el) d[{ t: 'target', b: 'by', s: 'div', o: 'owner' }[x]] = x === 't' ? +el.value : el.value; }); });
     if ($('pl-notes')) PL.notes = $('pl-notes').value;
   }
+  function plLines() {
+    var out = [];
+    OBJECTIVES.forEach(function (o) { var d = PL.obj[o.id]; out.push((d.d === 'retire' ? 'Retired: ' : d.d === 'adjust' ? 'Adjusted: ' + FACTOR[o.f].name + ' to ' + LEVELS[+d.target] + ' by ' + d.by : 'Kept: ' + objTitle(o)) + (d.d === 'retire' ? objTitle(o) : '')); });
+    PL.cands.filter(function (c) { return PL.cand[c.f].d === 'add'; }).forEach(function (c) { var d = PL.cand[c.f]; out.push('New: ' + FACTOR[c.f].name + ' to ' + LEVELS[+d.target] + ' by ' + d.by + ' (' + d.owner + ' to scope a program)'); });
+    return out;
+  }
+  function plSummary() { plRead(); return 'Quarterly planning \u00b7 ' + ORG_NAME + ' \u00b7 Friday 26 September\nAttended: ' + join(Object.keys(PL.att).filter(function (k) { return PL.att[k]; })) + '\n\n' + plLines().map(function (l) { return '\u2022 ' + l; }).join('\n') + (PL.notes ? '\n\nNotes: ' + PL.notes : '') + '\n\nPrepared with Hiviz.'; }
+  document.addEventListener('click', function (e) { if (e.target.closest('#pl-copy') && PL) copy(plSummary(), 'Summary copied'); });
   function plSave() {
-    plRead();
+    plRead(); var lines = plLines();
     OBJECTIVES = OBJECTIVES.filter(function (o) { return PL.obj[o.id].d !== 'retire'; });
     OBJECTIVES.forEach(function (o) { var d = PL.obj[o.id]; if (d.d === 'adjust') { o.target = d.target; o.by = d.by; o.krs.forEach(function (kr) { kr[1] = Math.max(kr[1], d.target); }); } });
     PL.cands.filter(function (c) { return PL.cand[c.f].d === 'add'; }).forEach(function (c) {
@@ -3390,6 +3482,7 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
         ms: [A('Scope the program and bring it to the monthly progress meeting', d.owner, '6 Oct')] };
       OBJECTIVES.push(o);
     });
+    STRAT_LOG.unshift({ type: 'Quarterly planning', date: '26 Sep', who: Object.keys(PL.att).filter(function (k) { return PL.att[k]; }), lines: lines });
     STRAT.lastPlanning = '26 Sep'; STRAT.planning = 'Wednesday 7 January'; ST.cand = {};
     PL = null; go('strategy'); toast('Plan saved. Objectives for next quarter are on the Strategy page.');
   }
@@ -3499,7 +3592,7 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
             (fresh.length ? '<div class="st-ins"><span class="label">New insights this month</span><div class="links">' + fresh.map(function (i) { return '<button type="button" class="link-item" data-open="' + i.id + '"><b>' + esc(i.title) + '</b><span>' + esc(f.inds[INS_FACTOR[i.id][1]]) + ' · since ' + esc(i.since) + '</span></button>'; }).join('') + '</div></div>' : '') +
             '<div class="st-sugg"><span class="label">Hiviz recommends</span><p>' + esc(PG_ADVICE[o.id] || 'Scope the program before the next progress meeting, and agree what Prism should listen for.') + '</p></div>' +
           '</section>';
-        }).join('') + '</div>' +
+        }).join('') + fromOther('progress') + '</div>' +
         '<div class="meet-actions end"><button type="button" class="btn" data-pgstep="1">Back</button><button type="button" class="btn brand" data-pgstep="3">Discuss ' + lw(disc.length) + (disc.length === 1 ? ' item' : ' items') + '</button></div>';
       return;
     }
@@ -3513,7 +3606,7 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
             '<div class="ci-box"><span class="label">Owner’s check-in</span>' + ciLine(x.m) + cmHTML(x.m) + '</div>' +
             '<p class="plan-read"><span class="label">Prism’s read so far</span><span>' + readBadge(x.p.read) + ' ' + esc(x.p.read[1]) + '</span></p>' +
             '<div class="st-sugg"><span class="label">Hiviz recommends</span><p>' + esc(w[2]) + '</p></div>' +
-            '<div class="seg pl-seg" role="group" aria-label="Decision">' + [['agreed', 'Agreed'], ['adjust', 'Adjust'], ['plan', 'Take to planning']].map(function (o) { return '<button type="button" data-pgdec="' + x.key + ':' + o[0] + '" aria-pressed="' + (d.d === o[0]) + '">' + o[1] + '</button>'; }).join('') + '</div>' +
+            '<span class="label dec-l">Decision</span><div class="seg pl-seg" role="group" aria-label="Decision">' + [['agreed', 'Agreed'], ['adjust', 'Adjust'], ['plan', 'Take to planning']].map(function (o) { return '<button type="button" data-pgdec="' + x.key + ':' + o[0] + '" aria-pressed="' + (d.d === o[0]) + '">' + o[1] + '</button>'; }).join('') + '</div>' +
             '<input type="text" class="w-note" id="pgn-' + x.key.replace(':', '__') + '" placeholder="What was agreed, by whom, by when" value="' + esc(d.note || '') + '">' +
           '</section>';
         }).join('') + '</div>' +
@@ -3553,6 +3646,7 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
     if (e.target.closest('#pg-save')) {
       pgRead();
       pgItems().forEach(function (x) { var d = PG.dec[x.key]; if (d && d.d === 'plan') x.o.flagged = true; });
+      STRAT_LOG.unshift({ type: 'Monthly progress', date: '26 Sep', who: Object.keys(PG.att).filter(function (k) { return PG.att[k]; }), lines: pgItems().filter(function (x) { return PG.dec[x.key] && PG.dec[x.key].d; }).map(function (x) { var d = PG.dec[x.key]; return x.m.t + ': ' + ({ agreed: 'Agreed', adjust: 'Adjust', plan: 'Take to planning' })[d.d] + (d.note ? '. ' + d.note : ''); }).concat([pgItems().filter(function (x) { return x.why === 'noted'; }).length + ' milestones noted without discussion.']) });
       STRAT.lastProgress = '26 Sep'; STRAT.progress = 'Monday 27 October'; PG = null; go('strategy'); toast('Progress saved. Check-ins for the next meeting open on 20 Oct.');
     }
   });
@@ -3584,9 +3678,14 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
   /* =============================================================
      Routing (in-page, so it works inside sandboxed frames)
      ============================================================= */
+  // Mobile: the views collapse into a dropdown under the purview pickers
+  function setNav(open) { document.querySelector('.hdr').classList.toggle('nav-open', open); $('nav-toggle').setAttribute('aria-expanded', String(open)); }
+  $('nav-toggle').addEventListener('click', function () { setNav(!document.querySelector('.hdr').classList.contains('nav-open')); });
+  document.addEventListener('click', function (e) { if (!e.target.closest('#nav-toggle') && !e.target.closest('#nav-tabs')) setNav(false); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && document.querySelector('.hdr').classList.contains('nav-open')) { setNav(false); $('nav-toggle').focus(); } });
   function go(target) { try { history.replaceState(null, '', '#' + target); } catch (err) { /* ignore */ } route(target); }
   function route(target) {
-    var h = (target || (location.hash || '').slice(1) || 'focus').split('/');
+    var h = (target || (location.hash || '').slice(1) || (ST.div || ST.reg ? 'focus' : 'strategy')).split('/');
     ST.view = ['focus', 'sites', 'site', 'sources', 'meeting', 'meetings', 'insight', 'myfocus', 'map', 'strategy', 'planning', 'progress'].indexOf(h[0]) > -1 ? h[0] : 'focus';
     ST.factor = ST.view === 'map' ? (h[1] || '') : '';
     if (!ST.keepWalk) { ST.mfSnap = null; if (ST.view === 'myfocus') ST.mfWalk = -1; } ST.keepWalk = false;
@@ -3601,6 +3700,8 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
     if (ST.src === 'feed') { ST.src = ''; ST.srcTab = 'feed'; } else if (ST.view === 'sources' && !ST.src) ST.srcTab = 'cards';
     ST.siteFeed = ST.view === 'site' && h[2] === 'feed';
     document.querySelectorAll('.tabs a').forEach(function (a) { if (a.getAttribute('data-view') === tab) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
+    var curTab = document.querySelector('.tabs a[aria-current="page"]'); $('nav-cur').textContent = curTab ? curTab.textContent.trim() : ST.view === 'myfocus' ? 'My Focus' : ST.view === 'sources' ? 'Sources' : 'Menu'; setNav(false);
+    $('live-pill').setAttribute('aria-current', ST.view === 'sources' ? 'page' : 'false');
     closeRec(); closeSheet(); render(); window.scrollTo(0, 0);
   }
   function render() { renderView(); renderMyFocusCount(); }
