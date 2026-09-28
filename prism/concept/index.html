@@ -204,6 +204,8 @@ main { padding-block: 32px 80px; }
 .kv div { border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; display: grid; gap: 2px; }
 .kv dt { font-size: 12px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-3); }
 .kv dd { margin: 0; font-weight: 800; font-size: 17px; }
+.rec-src, .sheet-sec p.rec-src, .ins-sec p.rec-src { margin: 6px 0 0; font-size: 13.5px; font-weight: 600; line-height: 1.4; color: var(--text-3); }
+.walk-next + .rec-src { margin: -4px 0 0; }
 .next { border: 0; background: var(--brand); border-radius: 10px; padding: 14px 16px; font-size: 17px; font-weight: 600; color: var(--text); }
 .update { font-size: 16px; color: var(--text); display: flex; gap: 10px; align-items: flex-start; }
 .sheet-foot { border-top: 1px solid var(--border); padding: 12px 20px; display: flex; gap: 10px 14px; align-items: center; flex-wrap: wrap; background: var(--bg); }
@@ -1216,7 +1218,7 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
               '<div class="src-recs">' + s.recs.map(function (r) { return recRow(RECS[r.id]); }).join('') + (s.n > s.recs.length ? '<div class="rec"><span class="when">and ' + (s.n - s.recs.length) + ' more like these</span></div>' : '') + '</div></div>';
           }).join('') + '</section>' +
         '<section class="ins-sec"><span class="label">How Prism read it</span><dl class="kv">' + i.read.map(function (r) { var fk = r[0] === 'Factor' ? factorByName(r[1]) : null, fx = fk && INS_FACTOR[i.id]; return '<div><dt>' + esc(r[0]) + '</dt><dd class="' + (r[2] ? 't-' + r[2] : '') + '">' + (fk ? factorBtn(fk) + (fx ? ' \u00b7 ' + esc(FACTOR[fx[0]].inds[fx[1]]) : '') : esc(r[1])) + '</dd></div>'; }).join('') + '</dl></section>' +
-        (gone ? '' : '<section class="ins-sec"><span class="label">Suggested next step</span><p class="next">' + esc(i.next) + '</p></section>' + planHTML(i, 'ins-sec card')) +
+        (gone ? '' : '<section class="ins-sec"><span class="label">Hiviz recommends</span><p class="next">' + esc(i.next) + '</p>' + recSrc(i) + '</section>' + planHTML(i, 'ins-sec card')) +
       '</div><aside class="ins-side">' +
         '<section class="card side-card"><h2>Owner and status</h2>' +
           (gone ? '<p class="muted-p">' + (i.dismissed ? 'Dismissed by ' + esc(i.dismissed.who) + '.' : 'Closed.') + '</p>' :
@@ -1537,7 +1539,7 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
     load: ['early', 'The audit is on 30 Sep, and tag line failures are still arriving at the same rate.'],
     pre: ['continues', '22 pre-starts were completed in under a minute since the reminder on 19 Sep.'],
     spot: ['working', 'At Ridge Road, no reversing without a spotter in two weeks. One repeat at North Yard.'],
-    house: ['working', 'No blocked routes at Creek Crossing since the laydown areas were marked. Prism suggests closing it.'],
+    house: ['working', 'No blocked routes at Creek Crossing since the laydown areas were marked. Hiviz recommends closing it.'],
     edge: ['continues', 'Edge protection was left off twice more since 15 Sep.']
   };
   INSIGHTS.forEach(function (i) { i.plan = PLANS[i.id] || null; if (i.plan && READS[i.id]) i.plan.read = READS[i.id]; });
@@ -1647,7 +1649,7 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
       (open ? '<ul class="pl-items">' + l.items.map(function (x) {
         return '<li class="pl-' + x[3] + '"><span class="pl-ref">' + esc(x[0]) + '</span><span>' + esc(x[2]) + ' <small>' + esc(SITE[x[1]].name) + '</small></span><span class="pl-st">' + esc(x[4]) + '</span></li>';
       }).join('') + (l.total > l.items.length ? '<li class="pl-rest"><span></span><span>and ' + (l.total - l.items.length) + ' more, all closed</span><span></span></li>' : '') + '</ul>' : '') +
-      '<p class="pl-sug">' + (sg === a.st ? 'Matches ' + esc(src.name) + ': ' + esc(sgl.toLowerCase()) : 'From ' + esc(src.name) + ', Prism suggests <b>' + esc(sgl) + '</b> <button type="button" class="linkish pl-use" data-pause="' + key + ':' + sg + '">Use this</button>') + ' \u00b7 synced ' + esc(l.synced) + '</p>' +
+      '<p class="pl-sug">' + (sg === a.st ? 'Matches ' + esc(src.name) + ': ' + esc(sgl.toLowerCase()) : 'From ' + esc(src.name) + ', Prism reads this as <b>' + esc(sgl) + '</b> <button type="button" class="linkish pl-use" data-pause="' + key + ':' + sg + '">Use this</button>') + ' \u00b7 synced ' + esc(l.synced) + '</p>' +
     '</div>';
   }
   document.addEventListener('click', function (e) {
@@ -1676,7 +1678,7 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
     var pl = i.plan; if (!pl) return '';
     var prop = pl.state === 'proposed', people = managersInView(); if (i.owner && people.indexOf(i.owner) < 0) people.unshift(i.owner);
     var who = function (a) { return a.who ? '<span class="av' + (a.who === YOU ? ' me' : '') + '">' + initials(a.who) + '</span>' + esc(a.who) : '<span class="pa-none">No one yet</span>'; };
-    return '<section class="' + cls + ' plan' + (prop ? ' prop' : '') + '"><div class="plan-head"><span class="label">Plan</span><span class="plan-state">' + (prop ? 'Proposed by Prism \u00b7 not agreed yet' : esc(pl.agreed)) + '</span></div>' +
+    return '<section class="' + cls + ' plan' + (prop ? ' prop' : '') + '"><div class="plan-head"><span class="label">Plan</span><span class="plan-state">' + (prop ? 'Proposed by Hiviz \u00b7 not agreed yet' : esc(pl.agreed)) + '</span></div>' +
       '<ol class="plan-acts">' + pl.actions.map(function (a, k) {
         var st = PA_ST.filter(function (x) { return x[0] === a.st; })[0];
         return '<li class="pa st-' + a.st + '"><div class="pa-main"><span class="pa-t">' + esc(a.t) + '</span><span class="pa-meta">' + who(a) + '<span>by ' + esc(a.due) + '</span></span>' + linkHTML(i, k, a) + '</div>' +
@@ -1708,7 +1710,7 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
     var pr = ref.split(':'), i = insightById(pr[0]), a = i.plan.actions[+pr[1]], lbl = PA_ST.filter(function (x) { return x[0] === e.target.value; })[0][1];
     a.st = e.target.value; i.updated = 0; logEvent(i, 'Action ' + lbl.toLowerCase(), a.t, ST.view === 'meeting' && MT ? 'Focus review' : null);
     if (ST.view === 'meeting' && MT) { MT.checks[i.id] = MT.checks[i.id] || {}; MT.checks[i.id][pr[1]] = lbl; }
-    toast(planDone(i) === i.plan.actions.length ? 'All actions done. Prism will watch for the change it expects before suggesting you close it.' : 'Checked in: ' + lbl);
+    toast(planDone(i) === i.plan.actions.length ? 'All actions done. Prism is listening for the change it expects, and Hiviz will recommend closing it once it sees it.' : 'Checked in: ' + lbl);
     rerenderFor(i.id);
   });
   (function () {
@@ -1812,7 +1814,7 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
         }).join('') + '</dl></section>' +
         (i.latest ? '<section class="sheet-sec"><span class="label">Latest update · ' + i.updated + (i.updated === 1 ? ' day' : ' days') + ' ago' + (i.owner ? ' · ' + esc(i.owner) : '') + '</span><p class="update">' + (i.owner ? '<span class="av">' + initials(i.owner) + '</span>' : '') + '<span>' + esc(i.latest) + '</span></p></section>' : '') +
         (INS_FACTOR[i.id] ? '<section class="sheet-sec mc"><span class="label">On the Forge Works Map</span>' + mapBody(i) + '</section>' : '') +
-        '<section class="sheet-sec"><span class="label">Suggested next step</span><p class="next">' + esc(i.next) + '</p></section>' + planHTML(i, 'sheet-sec') +
+        '<section class="sheet-sec"><span class="label">Hiviz recommends</span><p class="next">' + esc(i.next) + '</p>' + recSrc(i) + '</section>' + planHTML(i, 'sheet-sec') +
       '</div>' +
       '<div class="sheet-foot">' +
         '<span class="fld"><label for="s-owner">Owner</label><select class="select" id="s-owner"><option value="">No owner</option>' + ow.map(function (o) { return '<option' + (o === i.owner ? ' selected' : '') + '>' + esc(o) + '</option>'; }).join('') + '</select></span>' +
@@ -1844,6 +1846,7 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
     ['ideas', 'The main ideas', [
       ['', 'Hiviz', 'The platform. It connects to the systems you already use, tracks every insight, and runs Focus reviews.'],
       ['', 'Prism', 'The AI enrichment layer inside Hiviz. It reads every record, links them into insights and writes the story, with a reason for everything it concludes.'],
+      ['', 'Hiviz recommends', 'Advice in the voice of Forge Works. It draws on the Forge Works Map and Forge Works guidance for your situation, with Prism\u2019s evidence behind it.'],
       ['', 'Insight', 'A pattern Prism finds by linking records across sources and sites. Every insight says why it was raised.'],
       ['', 'Purview', 'The division, region and sites you’re responsible for. Change it in the header.'],
       ['', 'Source', 'A system the organisation already uses, such as Procore or Intelex. Hiviz connects to it and Prism reads what comes in. Neither replaces it.'],
@@ -2181,7 +2184,7 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
             return '<li><label class="att-row"><input type="checkbox" data-att="' + esc(p) + '"' + (MT.attendees[p] ? ' checked' : '') + '><span class="av' + (p === YOU ? ' me' : '') + '">' + initials(p) + '</span><span class="att-name">' + esc(p === YOU ? 'You' : p) + '<small>' + esc(ROLE[p] || '') + '</small></span></label></li>';
           }).join('') + '</ul>' +
         '</section><section class="card meet-card">' +
-          '<h2>What Prism will prepare</h2>' +
+          '<h2>What Hiviz will prepare</h2>' +
           '<ul class="plain"><li><b>State of safety</b> across ' + esc(scopeLabel()) + ' right now.</li><li><b>On the Forge Works Map</b>: which factors moved over the last 90 days, and where the clearest gap is.</li><li><b>Since last time</b>: what’s new, stalled, worse, better or ready to close ' + (last ? 'since ' + esc(last.short) : 'over the last four weeks') + '.</li><li><b>Actions</b>: a check-in on every action agreed last time, and any plans agreed since.</li><li><b>90-day retros</b>: whether plans that reached 90 days made a difference.</li></ul>' +
           '<p class="muted-p">' + (last ? 'Last review: ' + esc(last.date) + ' with ' + esc(join(last.attendees)) + '.' : 'There’s no earlier Focus review for this purview.') + '</p>' +
           '<div class="meet-actions"><button type="button" class="btn brand" id="gen-report">Prepare the report</button></div>' +
@@ -2264,7 +2267,7 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
           })() +
           (cur.latest ? '<p class="walk-latest"><span class="label">Latest update</span>' + esc(cur.latest) + '</p>' : '') +
           (INS_FACTOR[cur.id] ? '<div class="walk-map mc"><span class="label">On the Forge Works Map</span>' + mapBody(cur) + '</div>' : '') +
-          '<p class="walk-next"><span class="label">Suggested</span>' + esc(cur.next) + '</p>' +
+          '<p class="walk-next"><span class="label">Hiviz recommends</span>' + esc(cur.next) + '</p>' + recSrc(cur) +
           (cur.plan ? planHTML(cur, 'walk-plan' + (MT.agreed[cur.id] ? ' just' : '')) : '') +
           (ST.dismissing === cur.id ? dismissForm(cur.id, 'walk') : (          '<div class="walk-form">' +
             '<span class="fld"><label for="w-owner">Owner</label><select class="select" id="w-owner"><option value="">No owner</option>' + ow.map(function (o) { return '<option' + (o === wOwner ? ' selected' : '') + '>' + esc(o) + '</option>'; }).join('') + '</select></span>' +
@@ -2954,11 +2957,18 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
       '</div><aside class="ins-side">' +
         '<section class="card side-card"><h2>What each level looks like</h2><ol class="lvl-desc">' + LEVELS.map(function (l, k) {
           return '<li class="' + (k === sc.lvl ? 'now' : '') + (k === next && k !== sc.lvl ? ' is-next' : '') + '"><span class="lvl-desc-h"><span><b>' + esc(l) + '</b> · ' + esc(f.lnames[k]) + '</span>' + (k === sc.lvl ? '<span class="tag-now">Where you are</span>' : k === next ? '<span class="tag-next">Next step</span>' : '') + '</span><p>' + esc(f.levels[k]) + '</p></li>';
-        }).join('') + '</ol><p class="muted-p">Summarised from the Forge Works blueprint. In the live product Prism would write these for your situation.</p></section>' +
+        }).join('') + '</ol><p class="muted-p">Summarised from the Forge Works blueprint. In the live product Hiviz would write these for your situation.</p></section>' +
         '<section class="card side-card"><h2>How this is scored</h2><p class="muted-p" style="color:var(--text)">Prism links each enriched record and insight to the factor and indicator it gives evidence for. Insights count for more than single records. A factor is rated from its indicators, can sit between levels, and is held back by its weakest indicator. Indicators that only management can evidence wait for a Focus review, survey or interview.</p></section>' +
       '</aside></div>';
   }
   // The Map's language, for any insight: where it sits and what the next level looks like
+  // Where a recommendation comes from: the indicator it moves, and Forge Works guidance for its next level
+  function recSrc(i) {
+    var fx = INS_FACTOR[i.id]; if (!fx) return '';
+    var regs = []; i.sites.forEach(function (s) { if (regs.indexOf(SITE[s].region) < 0) regs.push(SITE[s].region); });
+    var l = lvlOf(aggInd(regs, fx[0], fx[1]).v), to = l > -1 && l < 2 ? ' towards ' + LEVELS[l + 1] : '';
+    return '<p class="rec-src">Drawing on Forge Works guidance for ' + esc(FACTOR[fx[0]].inds[fx[1]].toLowerCase()) + to + ' \u00b7 ' + esc(FACTOR[fx[0]].name) + '</p>';
+  }
   function factorBtn(key) { return '<button type="button" class="linkish map-link" data-factor="' + key + '">' + esc(FACTOR[key].name) + '</button>'; }
   function mapBody(i) {
     var fx = INS_FACTOR[i.id]; if (!fx) return '';
