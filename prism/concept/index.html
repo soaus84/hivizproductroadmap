@@ -850,6 +850,59 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
 @media (max-width: 1260px) { .mf-btn { padding: 0 10px; } }
 .foot { border-top: 1px solid var(--border); padding-block: 24px 40px; color: var(--text-3); font-size: 14px; }
 .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--text); color: #fff; border-radius: 8px; padding: 8px 14px; font-size: 13.5px; z-index: 60; box-shadow: var(--shadow-lg); }
+/* ---------- Phone width: nothing wider than the screen ---------- */
+@media (max-width: 640px) {
+  .icard-top, .icard-status, .icard-foot { flex-wrap: wrap; min-width: 0; }
+  .badge, .tlabel { white-space: normal; }
+  .ind-rate, .cmp .ind-rate { grid-template-columns: auto minmax(0, 1fr) auto; column-gap: 8px; }
+  .ind-rate .lvl-t { min-width: 0; }
+  .kr { grid-template-columns: 1fr; }
+  .ra-acts li, .rt-list li { grid-template-columns: 1fr; }
+  .rlist .ra-t, .rlist .ra-m, .sp-ms .ra-t, .sp-ms .ra-m { grid-column: 1; }
+  .ci-list li { grid-template-columns: 1fr; }
+  .ci-why { grid-column: 1; grid-row: auto; justify-self: start; }
+  .st-now .st-tgt { margin-left: 0; }
+  .st-gaps li { grid-template-columns: 1fr; }
+  .st-gaps li > .btn, .st-gaps .sg-on { grid-column: 1; grid-row: auto; justify-self: start; }
+  .pl-items li { grid-template-columns: 1fr; }
+  .rt-ba { grid-template-columns: 1fr; }
+  .card, .rsec, .st-obj, .pl-item { min-width: 0; }
+  .ind-levels li, .lvl-desc li { min-width: 0; }
+  h1, h2, h3, .st-title, .icard-title { overflow-wrap: anywhere; }
+}
+/* ---------- View through Prism ---------- */
+.pvw { position: fixed; inset: 0; z-index: 49; background: var(--bg); overflow: auto; padding: 24px 28px 48px; }
+body.pv-open { overflow: hidden; }
+.pv-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; max-width: 1200px; margin: 0 auto; }
+.pv-top h2 { font-size: 26px; line-height: 1.2; margin: 4px 0 6px; }
+.pv-top .muted-p { margin: 0; }
+.pv-top .x { flex: none; width: 34px; height: 34px; border-radius: 8px; border: 1px solid var(--border-2); background: var(--bg); cursor: pointer; display: grid; place-items: center; }
+.pv-canvas { position: relative; display: grid; gap: 56px; max-width: 1200px; margin: 28px auto 0; padding-bottom: 12px; }
+.pv-lines { position: absolute; left: 0; top: 0; pointer-events: none; overflow: visible; }
+.pv-lines path { fill: none; stroke: var(--border-2); stroke-width: 1.6; }
+.pv-lines marker path { fill: var(--text-2); stroke: none; }
+.pv-lines text { font-size: 11px; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; fill: var(--text-3); }
+.pv-row { display: grid; grid-template-columns: 110px minmax(0, 1fr); gap: 16px; align-items: center; }
+.pv-layer { font-size: 12px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-3); }
+.pv-nodes { display: flex; gap: 14px 18px; flex-wrap: wrap; justify-content: center; }
+.pv-node { position: relative; z-index: 1; display: grid; gap: 4px; min-width: 190px; max-width: 320px; padding: 12px 14px; border: 1px solid var(--border-2); border-radius: 12px; background: var(--bg); text-align: left; font: inherit; color: inherit; }
+button.pv-node { cursor: pointer; }
+button.pv-node:hover { border-color: var(--text); }
+button.pv-node:hover .pv-t { text-decoration: underline; text-underline-offset: 3px; }
+.pv-node.safer { background: var(--brand); border-color: #d9c200; min-width: 240px; text-align: center; }
+.pv-t { font-size: 15px; font-weight: 800; line-height: 1.3; }
+.pv-s { font-size: 13px; font-weight: 600; color: var(--text-2); }
+.pv-b { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 2px; }
+.pv-b .ind-rate { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: center; }
+.pv-b .ind-rate .lvl { display: inline-flex; }
+.pv-btn { display: inline-flex; align-items: center; gap: 6px; }
+.open-row { display: flex; align-items: center; gap: 10px 16px; flex-wrap: wrap; }
+@media (max-width: 640px) {
+  .pvw { padding: 16px 16px 40px; }
+  .pv-row { grid-template-columns: 1fr; gap: 8px; }
+  .pv-canvas { gap: 44px; }
+  .pv-node { min-width: 0; max-width: none; width: 100%; }
+}
 </style>
 </head>
 <body>
@@ -886,6 +939,7 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
 <div class="scrim" id="scrim" hidden></div>
 <aside class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title" hidden></aside>
 <aside class="sheet help" id="help" role="dialog" aria-modal="true" aria-labelledby="help-title" hidden></aside>
+<div class="pvw" id="pv" role="dialog" aria-modal="true" aria-label="View through Prism" hidden></div>
 <aside class="sheet rec-sheet" id="rec" role="dialog" aria-modal="true" aria-labelledby="rec-title" hidden></aside>
 <div class="toast" id="toast" role="status" hidden></div>
 
@@ -1342,7 +1396,7 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
     var ow = owners(); if (i.owner && ow.indexOf(i.owner) < 0) ow.unshift(i.owner);
     var gone = i.dismissed || i.closed;
     $('view').innerHTML = '<a class="back" href="#focus">← Insights</a>' +
-      '<div class="ins-head"><div class="meta"><span class="icard-sev">' + sevIcon(i.sev) + '<span class="sev-t t-' + i.sev + '">' + (i.sev === 'critical' ? 'Critical' : 'Warning') + '</span></span>' + statusBadge(i) + escBadge(i) + activity(i) + '<span class="label">Raised ' + esc(i.since) + '</span></div>' +
+      '<div class="ins-head"><div class="meta"><span class="icard-sev">' + sevIcon(i.sev) + '<span class="sev-t t-' + i.sev + '">' + (i.sev === 'critical' ? 'Critical' : 'Warning') + '</span></span>' + statusBadge(i) + escBadge(i) + activity(i) + '<span class="label">Raised ' + esc(i.since) + '</span>' + '<button type="button" class="btn sm pv-btn" data-pv="insight:' + i.id + '"><svg width="14" height="14" viewBox="0 0 22 22" aria-hidden="true"><path d="M11 2.5 20 19H2z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></svg>View through Prism</button>' + '</div>' +
         '<h1 class="ins-title">' + esc(i.title) + '</h1>' +
         '<div class="meta">' + i.sites.map(function (s) { return '<a class="chip link" href="#site/' + s + '">' + esc(SITE[s].name) + '</a>'; }).join('') + '</div></div>' +
       (i.dismissed ? '<div class="banner info"><b>Dismissed: ' + esc(i.dismissed.reason) + '</b>' + (i.dismissed.note ? '<p>' + esc(i.dismissed.note) + '</p>' : '') + '<p>Prism won’t raise this again unless the pattern changes.</p></div>' : '') +
@@ -1953,7 +2007,7 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
       '<div class="sheet-head" style="position:relative"><button type="button" class="x" id="sheet-x" aria-label="Close"><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 2l8 8M10 2l-8 8" stroke="currentColor" stroke-width="1.6"/></svg></button>' +
         '<div class="meta">' + sevIcon(i.sev) + statusBadge(i) + escBadge(i) + activity(i) + '<span class="label">· since ' + esc(i.since) + '</span></div>' +
         '<h2 id="sheet-title">' + esc(i.title) + '</h2>' +
-        '<a class="open-page" href="#insight/' + i.id + '">Open insight page \u2192</a>' +
+        '<span class="open-row"><a class="open-page" href="#insight/' + i.id + '">Open insight page \u2192</a>' + '<button type="button" class="btn sm pv-btn" data-pv="insight:' + i.id + '"><svg width="14" height="14" viewBox="0 0 22 22" aria-hidden="true"><path d="M11 2.5 20 19H2z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></svg>View through Prism</button>' + '</span>' +
         '<div class="meta">' + sites.map(function (n) { return '<span class="chip">' + esc(n) + '</span>'; }).join('') + '</div></div>' +
       '<div class="sheet-body">' +
         (ST.dismissing === i.id ? '<section class="sheet-sec">' + dismissForm(i.id, 'sheet') + '</section>' : '') +
@@ -3353,7 +3407,7 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
       '<div class="st-objs">' + objs.map(function (o, oi) {
         var f = FACTOR[o.f], orr = objRegs(o), sc = scoreFactor(orr, o.f), s = st[oi];
         var ins = insightsInView().filter(function (i) { return objFor(i) === o; });
-        return '<section class="card st-obj"><div class="st-top"><span class="badge ' + s[0] + '"><i></i>' + s[1] + '</span><span class="chip">' + esc(o.div ? o.div + ' division' : 'All of ' + ORG_NAME) + '</span>' + (o.flagged ? '<span class="tlabel">Flagged for planning</span>' : '') + '<span class="st-own">Owner ' + esc(o.owner) + ' · set ' + esc(o.set || '1 Jul') + '</span></div>' +
+        return '<section class="card st-obj"><div class="st-top"><span class="badge ' + s[0] + '"><i></i>' + s[1] + '</span><span class="chip">' + esc(o.div ? o.div + ' division' : 'All of ' + ORG_NAME) + '</span>' + (o.flagged ? '<span class="tlabel">Flagged for planning</span>' : '') + '<button type="button" class="btn sm pv-btn" data-pv="objective:' + o.id + '"><svg width="14" height="14" viewBox="0 0 22 22" aria-hidden="true"><path d="M11 2.5 20 19H2z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></svg>View through Prism</button>' + '<span class="st-own">Owner ' + esc(o.owner) + ' · set ' + esc(o.set || '1 Jul') + '</span></div>' +
           '<h2 class="st-title">' + esc(objTitle(o)) + '</h2><p class="st-why">' + esc(o.why) + '</p>' +
           '<div class="st-now"><span class="label">Today' + (org || !o.div ? '' : '') + '</span>' + factorBtn(o.f) + levelBar(sc.v, true, null, sc.was) + trendHTML(sc.t) + '<span class="st-tgt">Target: <b>' + LEVELS[o.target] + '</b> \u00b7 ' + esc(f.lnames[o.target]) + '</span></div>' +
           '<div class="st-krs"><span class="label">Key results · ' + esc(o.div && org ? o.div + ' division' : scopeLabel()) + '</span>' + o.krs.map(function (kr) {
@@ -3739,6 +3793,94 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
   });
 
   /* =============================================================
+     View through Prism: how one insight or objective connects upward,
+     from records to safer work. Read bottom to top.
+     ============================================================= */
+  var PV = null;
+  function pvNode(id, layer, title, sub, badge, attrs) { return { id: id, layer: layer, title: title, sub: sub || '', badge: badge || '', attrs: attrs || '' }; }
+  function readTag(r) { return r === 'working' ? '<span class="badge success"><i></i>Working</span>' : r === 'continues' ? '<span class="badge critical"><i></i>Pattern continues</span>' : r === 'early' ? '<span class="tlabel">Too early</span>' : ''; }
+  function indNode(id, regs, f, k, extra) {
+    var x = aggInd(regs, f, k);
+    return pvNode(id, 'Indicator', FACTOR[f].inds[k], FACTOR[f].name + (extra ? ' · ' + extra : ''), '<span class="ind-rate">' + levelBar(x.v, true, x.v == null ? 'Needs input' : null, x.was) + (x.v != null ? trendHTML(x.t) : '') + '</span>', 'data-factor="' + f + '"');
+  }
+  function factorNode(id, regs, f) { var sc = scoreFactor(regs, f); return pvNode(id, 'Factor', FACTOR[f].name, sc.v != null ? FACTOR[f].lnames[sc.lvl] : 'Needs management input', '<span class="ind-rate">' + levelBar(sc.v, true, null, sc.was) + (sc.v != null ? trendHTML(sc.t) : '') + '</span>', 'data-factor="' + f + '"'); }
+  function objNode(id, o) { var s = objStatus(o); return pvNode(id, 'Objective', objTitle(o), o.div ? o.div + ' division' : 'Whole company', '<span class="badge ' + s[0] + '"><i></i>' + s[1] + '</span>', 'data-pvgo="strategy"'); }
+  var SAFER = function (label) { return pvNode('safer', 'Outcome', 'Safer work', label, ''); };
+
+  function graphForInsight(i) {
+    var regs = []; i.sites.forEach(function (s) { if (regs.indexOf(SITE[s].region) < 0) regs.push(SITE[s].region); });
+    var fx = INS_FACTOR[i.id], nodes = [], edges = [];
+    i.says.forEach(function (sy, k) { nodes.push(pvNode('r' + k, 'Records', SRC[sy.src].name, sy.n + (sy.n === 1 ? ' record' : ' records'), '')); edges.push(['r' + k, 'ins', k ? '' : 'linked by Prism']); });
+    nodes.push(pvNode('ins', 'Insight', i.title, statusText(i), statusBadge(i), 'data-open="' + i.id + '"'));
+    var from = 'ins';
+    if (i.plan) {
+      var pl = i.plan, d = planDone(i);
+      nodes.push(pvNode('plan', 'Plan', pl.state === 'agreed' ? 'Plan · ' + d + ' of ' + pl.actions.length + ' actions done' : 'Plan waiting for approval', pl.state === 'agreed' ? 'Approved by ' + (pl.approvedBy === YOU ? 'you' : pl.approvedBy) : 'Drafted by Hiviz', readTag(planRead(i)), 'data-open="' + i.id + '"'));
+      edges.push(['ins', 'plan', 'answered by']); from = 'plan';
+    }
+    if (fx) {
+      nodes.push(indNode('ind', regs, fx[0], fx[1], 'improves'));
+      edges.push([from, 'ind', from === 'plan' ? 'should move' : 'evidence for']);
+      (INS_ALSO[i.id] || []).forEach(function (a, k) { var id = 'also' + k; nodes.push(indNode(id, regs, a[0], a[1], 'also moves')); edges.push([from, id, '']); });
+      nodes.push(factorNode('fac', regs, fx[0])); edges.push(['ind', 'fac', 'part of']);
+      (INS_ALSO[i.id] || []).forEach(function (a, k) { if (a[0] !== fx[0]) { var fid = 'fac' + k; nodes.push(factorNode(fid, regs, a[0])); edges.push(['also' + k, fid, '']); edges.push([fid, 'safer', '']); } else edges.push(['also' + k, 'fac', '']); });
+      var o = objFor(i);
+      if (o) { nodes.push(objNode('obj', o)); edges.push(['fac', 'obj', 'target of']); edges.push(['obj', 'safer', 'adds up to']); }
+      else edges.push(['fac', 'safer', 'adds up to']);
+    } else edges.push([from, 'safer', '']);
+    nodes.push(SAFER(scopeLabel()));
+    return { title: i.title, kicker: 'Insight', nodes: nodes, edges: edges };
+  }
+  function graphForObjective(o) {
+    var regs = objRegs(o), nodes = [], edges = [];
+    insightsInView().filter(function (i) { return objFor(i) === o; }).forEach(function (i, k) {
+      var id = 'i' + k; nodes.push(pvNode(id, 'Work', i.title, 'Insight · ' + statusText(i), readTag(planRead(i)) || statusBadge(i), 'data-open="' + i.id + '"'));
+      var kr = o.krs.filter(function (r) { return r[0] === INS_FACTOR[i.id][1]; })[0]; edges.push([id, kr ? 'kr' + o.krs.indexOf(kr) : 'fac', k ? '' : 'evidence for']);
+    });
+    o.programs.forEach(function (pid, k) { var p = PROGRAMS[pid], d = p.ms.filter(function (m) { return m.st === 'done'; }).length; nodes.unshift(pvNode('p' + k, 'Work', p.title, 'Program · ' + p.owner + ' · ' + d + ' of ' + p.ms.length + ' milestones done', readTag(p.read[0]))); o.krs.forEach(function (_, r) { edges.push(['p' + k, 'kr' + r, r ? '' : 'should move']); }); });
+    o.krs.forEach(function (kr, r) { nodes.push(indNode('kr' + r, regs, o.f, kr[0], 'target ' + LEVELS[kr[1]])); edges.push(['kr' + r, 'fac', r ? '' : 'part of']); });
+    nodes.push(factorNode('fac', regs, o.f)); nodes.push(objNode('obj', o)); nodes.push(SAFER(ORG_NAME));
+    edges.push(['fac', 'obj', 'target of']); edges.push(['obj', 'safer', 'adds up to']);
+    return { title: objTitle(o), kicker: 'Objective', nodes: nodes, edges: edges };
+  }
+  var PV_LAYERS = ['Outcome', 'Objective', 'Factor', 'Indicator', 'Plan', 'Work', 'Insight', 'Records'];
+  function openPrismView(g) {
+    PV = g; var el = $('pv');
+    var layers = PV_LAYERS.filter(function (l) { return g.nodes.some(function (n) { return n.layer === l; }); });
+    el.innerHTML = '<div class="pv-top"><div><span class="label">View through Prism · ' + esc(g.kicker) + '</span><h2>' + esc(g.title) + '</h2><p class="muted-p">Read from the bottom up: what the records show, what’s being done about it, and what it improves.</p></div><button type="button" class="x" id="pv-x" aria-label="Close"><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 2l8 8M10 2l-8 8" stroke="currentColor" stroke-width="1.6"/></svg></button></div>' +
+      '<div class="pv-canvas" id="pv-canvas"><svg class="pv-lines" id="pv-lines" aria-hidden="true"></svg>' + layers.map(function (l) {
+        return '<div class="pv-row"><span class="pv-layer">' + esc(l) + '</span><div class="pv-nodes">' + g.nodes.filter(function (n) { return n.layer === l; }).map(function (n) {
+          var tag = n.attrs ? 'button type="button"' : 'div';
+          return '<' + tag + ' class="pv-node' + (n.id === 'safer' ? ' safer' : '') + '" data-pvid="' + n.id + '" ' + n.attrs + '><span class="pv-t">' + esc(n.title) + '</span>' + (n.sub ? '<span class="pv-s">' + esc(n.sub) + '</span>' : '') + (n.badge ? '<span class="pv-b">' + n.badge + '</span>' : '') + '</' + tag.split(' ')[0] + '>';
+        }).join('') + '</div></div>';
+      }).join('') + '</div>';
+    el.hidden = false; document.body.classList.add('pv-open'); drawPV(); $('pv-x').focus();
+  }
+  function drawPV() {
+    if (!PV || $('pv').hidden) return;
+    var cv = $('pv-canvas'), svg = $('pv-lines'), cr = cv.getBoundingClientRect(), paths = '';
+    svg.setAttribute('width', cv.scrollWidth); svg.setAttribute('height', cv.scrollHeight);
+    PV.edges.forEach(function (e) {
+      var a = cv.querySelector('[data-pvid="' + e[0] + '"]'), b = cv.querySelector('[data-pvid="' + e[1] + '"]'); if (!a || !b) return;
+      var ra = a.getBoundingClientRect(), rb = b.getBoundingClientRect();
+      var x1 = ra.left + ra.width / 2 - cr.left, y1 = ra.top - cr.top, x2 = rb.left + rb.width / 2 - cr.left, y2 = rb.bottom - cr.top, my = (y1 + y2) / 2;
+      paths += '<path d="M' + x1 + ' ' + y1 + ' C ' + x1 + ' ' + my + ', ' + x2 + ' ' + my + ', ' + x2 + ' ' + (y2 + 6) + '" marker-end="url(#pv-arrow)"/>';
+      if (e[2]) paths += '<text x="' + ((x1 + x2) / 2 + 6) + '" y="' + (my + 4) + '">' + esc(e[2]) + '</text>';
+    });
+    svg.innerHTML = '<defs><marker id="pv-arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z"/></marker></defs>' + paths;
+  }
+  function closePrismView() { if (!PV) return; PV = null; $('pv').hidden = true; document.body.classList.remove('pv-open'); }
+  window.addEventListener('resize', drawPV);
+  document.addEventListener('click', function (e) {
+    var t = e.target.closest('[data-pv]');
+    if (t) { var v = t.getAttribute('data-pv').split(':'); openPrismView(v[0] === 'insight' ? graphForInsight(insightById(v[1])) : graphForObjective(OBJECTIVES.filter(function (o) { return o.id === v[1]; })[0])); return; }
+    if (e.target.closest('#pv-x')) { closePrismView(); return; }
+    var g = e.target.closest('[data-pvgo]'); if (g) { closePrismView(); go(g.getAttribute('data-pvgo')); }
+  });
+  // capture phase, so a drawer open over the graph closes first and the graph stays
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && PV && $('rec').hidden && $('sheet').hidden && $('help').hidden) closePrismView(); }, true);
+
+  /* =============================================================
      Routing (in-page, so it works inside sandboxed frames)
      ============================================================= */
   // Mobile: the views collapse into a dropdown under the purview pickers
@@ -3765,7 +3907,7 @@ button.link-item { font: inherit; color: inherit; background: none; text-align: 
     document.querySelectorAll('.tabs a').forEach(function (a) { if (a.getAttribute('data-view') === tab) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
     var curTab = document.querySelector('.tabs a[aria-current="page"]'); $('nav-cur').textContent = curTab ? curTab.textContent.trim() : ST.view === 'myfocus' ? 'My Focus' : ST.view === 'sources' ? 'Sources' : 'Menu'; setNav(false);
     $('live-pill').setAttribute('aria-current', ST.view === 'sources' ? 'page' : 'false');
-    closeRec(); closeSheet(); render(); window.scrollTo(0, 0);
+    closeRec(); closeSheet(); closePrismView(); render(); window.scrollTo(0, 0);
   }
   function render() { renderView(); renderMyFocusCount(); }
   function renderView() { if (ST.view === 'map') renderMap(); else if (ST.view === 'strategy') renderStrategy(); else if (ST.view === 'planning') renderPlanning(); else if (ST.view === 'progress') renderProgress(); else if (ST.view === 'myfocus') renderMyFocus(); else if (ST.view === 'sites') renderSites(); else if (ST.view === 'site') { if (ST.siteFeed) renderSiteFeed(ST.site); else renderSite(ST.site); } else if (ST.view === 'sources') renderSources(); else if (ST.view === 'meeting') renderMeeting(); else if (ST.view === 'meetings') renderMeetings(); else if (ST.view === 'insight') renderInsight(ST.insight); else renderFocus(); }
