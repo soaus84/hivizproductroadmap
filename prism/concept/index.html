@@ -947,6 +947,18 @@ button.pv-node:hover .pv-t { text-decoration: underline; text-underline-offset: 
 .st-sum { margin: -4px 0 0; display: grid; gap: 2px; font-size: 16px; font-weight: 600; line-height: 1.45; }
 .st-sum .label { font-size: 14px; font-weight: 800; letter-spacing: 0; text-transform: none; color: var(--text-2); }
 .sp-det[open] summary { margin-bottom: 8px; }
+/* ---------- History lists ---------- */
+.area-tabs { margin: -6px 0 20px; }
+.hl { list-style: none; margin: 0; padding: 0; overflow: hidden; }
+.hl li + li { border-top: 1px solid var(--border); }
+.hl-row { display: grid; grid-template-columns: 64px 150px minmax(0, 1fr) auto; gap: 4px 16px; align-items: center; width: 100%; padding: 14px 18px; background: none; border: 0; font: inherit; color: inherit; text-align: left; cursor: pointer; }
+.hl-row:hover b { text-decoration: underline; text-underline-offset: 3px; }
+.hl-d { font-size: 14px; font-weight: 800; color: var(--text-2); }
+.hl-k { justify-self: start; font-size: 12.5px; font-weight: 800; padding: 2px 8px; border: 1px solid var(--border-2); border-radius: 6px; }
+.hl-m { display: grid; gap: 2px; min-width: 0; }
+.hl-m b { font-size: 16px; font-weight: 800; }
+.hl-m span { font-size: 14px; color: var(--text-2); }
+@media (max-width: 640px) { .hl-row { grid-template-columns: 1fr; } .hl-b:empty { display: none; } }
 </style>
 </head>
 <body>
@@ -1338,6 +1350,7 @@ button.pv-node:hover .pv-t { text-decoration: underline; text-underline-offset: 
   ];
 
   function renderFocus() {
+    if (ST.insTab === 'history') return renderInsightHistory();
     var all = insightsInView();
     var f = FILTERS.filter(function (x) { return x[0] === ST.filter; })[0] || FILTERS[0];
     var list = all.filter(f[2]);
@@ -1358,7 +1371,8 @@ button.pv-node:hover .pv-t { text-decoration: underline; text-underline-offset: 
 
     $('view').innerHTML =
       '<div class="page-top"><div><h1>Insights</h1><p class="sub">' + esc(scopeLabel()) + ' · right now, updated as records arrive</p></div>' +
-        '<div class="actions"><button type="button" class="btn" data-go="meetings">Past Focus reviews</button><button type="button" class="btn brand" id="start-meeting">Start a Focus review</button></div></div>' +
+        '<div class="actions"><button type="button" class="btn" data-hjump="ins:review">Past Focus reviews</button><button type="button" class="btn brand" id="start-meeting">Start a Focus review</button></div></div>' +
+      tabsHTML('ins') +
 
       '<div class="card brief"><div class="brief-head"><span class="who"><svg width="16" height="16" viewBox="0 0 22 22" aria-hidden="true"><path d="M11 2.5 20 19H2z" fill="none" stroke="#0d0f12" stroke-width="2" stroke-linejoin="round"/><path d="M11 9.5 15.2 17H6.8z" fill="#ffe500"/></svg><h2>The story right now</h2></span><span class="label">Written by Prism from ' + linked + ' linked records</span></div>' +
         '<p class="story">' + storyFor(all) + '</p></div>' +
@@ -1424,6 +1438,7 @@ button.pv-node:hover .pv-t { text-decoration: underline; text-underline-offset: 
     return { reason: reason, note: note };
   }
   function rerenderFor(id) {
+    if (PROGRAMS[id] && ST.prog === id && !$('rec').hidden) { openProgram(id); render(); return; }
     if (ST.sheet === id && !$('sheet').hidden) openSheet(id);
     else if (ST.view === 'meeting') {
       // keep unsaved walk-through choices when the plan re-renders
@@ -1795,7 +1810,10 @@ button.pv-node:hover .pv-t { text-decoration: underline; text-underline-offset: 
   INSIGHTS.forEach(function (i) { if (i.id === 'pre') i.follows = 'r-pre0'; });
   function addDays(d, n) { var m = /^(\d+) (\w{3})/.exec(d || ''); if (!m) return ''; var t = new Date(2026, MON[m[2]], +m[1] + n); return t.getDate() + ' ' + Object.keys(MON)[t.getMonth()]; }
   INSIGHTS.forEach(function (i) { var pl = i.plan; if (pl && pl.state === 'agreed' && !pl.approvedBy) { pl.approvedBy = i.owner; pl.approvedAt = (/on (\d+ \w{3})/.exec(pl.agreed) || [])[1]; } });
-  function approvedLine(pl) { return 'Approved by ' + (pl.approvedBy === YOU ? 'you' : pl.approvedBy) + ' on ' + pl.approvedAt + (pl.agreed.indexOf('Focus review') > -1 ? ' at the Focus review' : ' \u00b7 shown at the next Focus review'); }
+  function approvedLine(pl) {
+    if (pl.approvedBy === 'Quarterly planning') return 'Approved at quarterly planning on ' + pl.approvedAt;
+    return 'Approved by ' + (pl.approvedBy === YOU ? 'you' : pl.approvedBy) + ' on ' + pl.approvedAt + (pl.agreed.indexOf('Focus review') > -1 ? ' at the Focus review' : pl.agreed.indexOf('progress') > -1 ? ' at monthly progress' : ' \u00b7 shown at the next review');
+  }
   function agreedDate(pl) { var m = /on (\d+ \w{3})/.exec(pl.agreed || ''); return m ? m[1] : ''; }
 
   /* ---------- 90-day retros: did the plan make a difference? ---------- */
@@ -1932,7 +1950,7 @@ button.pv-node:hover .pv-t { text-decoration: underline; text-underline-offset: 
   }
   document.addEventListener('click', function (e) {
     var t = e.target.closest('[data-palink]'); if (t) { var k = t.getAttribute('data-palink'); ST.openLink[k] = !ST.openLink[k]; rerenderFor(k.split(':')[0]); return; }
-    var u = e.target.closest('[data-pause]'); if (u) { var pr = u.getAttribute('data-pause').split(':'), i = insightById(pr[0]), a = i.plan.actions[+pr[1]]; a.st = pr[2]; i.updated = 0; logEvent(i, 'Action ' + PA_ST.filter(function (x) { return x[0] === pr[2]; })[0][1].toLowerCase(), a.t + ' (from ' + SRC[LINKS[pr[0] + ':' + pr[1]].src].name + ')', 'Prism'); toast('Checked in from ' + SRC[LINKS[pr[0] + ':' + pr[1]].src].name); rerenderFor(i.id); }
+    var u = e.target.closest('[data-pause]'); if (u) { var pr = u.getAttribute('data-pause').split(':'), i = workById(pr[0]), a = i.plan.actions[+pr[1]]; a.st = pr[2]; i.updated = 0; logEvent(i, 'Action ' + PA_ST.filter(function (x) { return x[0] === pr[2]; })[0][1].toLowerCase(), a.t + ' (from ' + SRC[LINKS[pr[0] + ':' + pr[1]].src].name + ')', 'Prism'); toast('Checked in from ' + SRC[LINKS[pr[0] + ':' + pr[1]].src].name); rerenderFor(i.id); }
   });
   // Owners' check-ins on plan actions during the week before the Focus review: [insight, action, note, when]
   [['load', 0, 'Audit booked with the rigging supplier for 30 Sep.', '24 Sep'], ['pre', 1, 'Waiting on Intelex to change the form.', '22 Sep'],
@@ -1981,13 +1999,13 @@ button.pv-node:hover .pv-t { text-decoration: underline; text-underline-offset: 
         var own = ST.view === 'meeting' && MT && MT.draft && MT.draft.id === i.id ? MT.draft.owner : i.owner;
         var note = !own ? 'Assign an owner first. The insight owner approves the plan.' : own === YOU ? 'You own this insight, so you approve the plan.' + (ST.view === 'meeting' && MT ? ' Approve it here and the actions go into this review\u2019s summary.' : '') : esc(own) + ' owns this insight and approves the plan.';
         return '<div class="plan-foot"><p class="muted-p">' + note + '</p><button type="button" class="btn brand" data-pa-agree="' + i.id + '"' + (pl.actions.length && own ? '' : ' disabled') + '>' + (!own || own === YOU ? 'Approve plan' : 'Approve as ' + esc(own) + ' (demo)') + '</button></div>';
-      })() : '<p class="muted-p">' + esc(planSummary(i)) + '.' + (agreedDate(pl) ? ' 90-day retro on ' + esc(addDays(agreedDate(pl), 90)) + '.' : '') + '</p>') +
+      })() : '<p class="muted-p">' + esc(planSummary(i)) + '.' + (agreedDate(pl) && i.kind !== 'program' ? ' 90-day retro on ' + esc(addDays(agreedDate(pl), 90)) + '.' : '') + '</p>') +
     '</section>';
   }
   document.addEventListener('click', function (e) {
     var ag = e.target.closest('[data-pa-agree]');
     if (ag) {
-      var i = insightById(ag.getAttribute('data-pa-agree')), inReview = ST.view === 'meeting' && MT;
+      var i = workById(ag.getAttribute('data-pa-agree')), inReview = ST.view === 'meeting' && MT;
       var by = i.owner || (inReview && $('w-owner') ? $('w-owner').value : ''); if (!by) { toast('Assign an owner first. The owner approves the plan.'); return; }
       i.plan.state = 'agreed'; i.plan.approvedBy = by; i.plan.approvedAt = '26 Sep';
       i.plan.agreed = inReview ? 'Agreed at the Focus review on 26 Sep' : 'Agreed outside a review on 26 Sep';
@@ -1996,17 +2014,17 @@ button.pv-node:hover .pv-t { text-decoration: underline; text-underline-offset: 
       autoProgress(i); toast('Plan approved by ' + (by === YOU ? 'you' : by) + '. The insight is now in progress.'); rerenderFor(i.id); return;
     }
     var rm = e.target.closest('[data-pa-remove]');
-    if (rm) { var pr = rm.getAttribute('data-pa-remove').split(':'), ri = insightById(pr[0]); ri.plan.actions.splice(+pr[1], 1); rerenderFor(ri.id); return; }
+    if (rm) { var pr = rm.getAttribute('data-pa-remove').split(':'), ri = workById(pr[0]); ri.plan.actions.splice(+pr[1], 1); rerenderFor(ri.id); return; }
     var ad = e.target.closest('[data-pa-add]');
     if (ad) {
-      var id = ad.getAttribute('data-pa-add'), ai = insightById(id), t = $('pa-t-' + id).value.trim();
+      var id = ad.getAttribute('data-pa-add'), ai = workById(id), t = $('pa-t-' + id).value.trim();
       if (!t) { $('pa-t-' + id).focus(); return; }
       ai.plan.actions.push(A(t, $('pa-w-' + id).value, $('pa-d-' + id).value.trim() || 'no date')); rerenderFor(id);
     }
   });
   document.addEventListener('change', function (e) {
     var ref = e.target.getAttribute && e.target.getAttribute('data-pa'); if (!ref) return;
-    var pr = ref.split(':'), i = insightById(pr[0]), a = i.plan.actions[+pr[1]], lbl = PA_ST.filter(function (x) { return x[0] === e.target.value; })[0][1];
+    var pr = ref.split(':'), i = workById(pr[0]), a = i.plan.actions[+pr[1]], lbl = PA_ST.filter(function (x) { return x[0] === e.target.value; })[0][1];
     a.st = e.target.value; a.upd = '26 Sep'; i.updated = 0; logEvent(i, 'Action ' + lbl.toLowerCase(), a.t, ST.view === 'meeting' && MT ? 'Focus review' : null);
     if (ST.view === 'meeting' && MT) { MT.checks[i.id] = MT.checks[i.id] || {}; MT.checks[i.id][pr[1]] = lbl; }
     toast(planDone(i) === i.plan.actions.length ? 'All actions done. Prism is listening for the change it expects, and Hiviz will recommend closing it once it sees it.' : 'Checked in: ' + lbl);
@@ -2798,7 +2816,7 @@ button.pv-node:hover .pv-t { text-decoration: underline; text-underline-offset: 
   ST.nudged = {}; ST.visitPlanned = ST.visitPlanned || {}; ST.mfDone = []; ST.mfWalk = -1; ST.mfSnap = null; ST.mfRes = {};
   function mySites() { var o = []; ORG.forEach(function (d) { if (d.div === MY_DIV) d.regions.forEach(function (r) { o = o.concat(r.sites); }); }); return o; }
   function myInsights() { var ids = mySites().map(function (x) { return x.id; }); return INSIGHTS.filter(function (i) { return !i.closed && !i.dismissed && i.sites.some(function (s) { return ids.indexOf(s) > -1; }); }); }
-  var MF_GROUPS = [['retro', 'Confirm a 90-day retro'], ['checkin', 'Check in before a meeting'], ['escalated', 'Escalated to you'], ['assign', 'Assign an owner'], ['chase', 'Chase up'], ['visit', 'Plan a visit'], ['update', 'Post an update'], ['close', 'Close'], ['agreed', 'Agreed at a Focus review']];
+  var MF_GROUPS = [['retro', 'Confirm a 90-day retro'], ['action', 'Your actions'], ['escalated', 'Escalated to you'], ['assign', 'Assign an owner'], ['chase', 'Chase up'], ['visit', 'Plan a visit'], ['update', 'Post an update'], ['close', 'Close'], ['agreed', 'Agreed at a Focus review']];
   function myFocusItems() {
     var items = [], ins = myInsights(), crit = function (i) { return i.sev === 'critical' ? 0 : 1; };
     INSIGHTS.filter(function (i) { return !i.closed && !i.dismissed && i.esc && levelOwner(i.esc.to) === YOU; }).forEach(function (i) {
@@ -2826,12 +2844,13 @@ button.pv-node:hover .pv-t { text-decoration: underline; text-underline-offset: 
     });
     // Retros ready in your division: Prism has written them; someone needs to confirm or challenge
     ins.forEach(function (i) { if (retroDue(i)) { var r = RETRO[i.retro]; items.push({ kind: 'retro', id: 'rt-' + i.id, ins: i, sev: 'warning', title: i.title, why: 'Prism\u2019s verdict: ' + OUT[r.outcome][1] + '. ' + r.summary }); } });
-    // Check-ins due before the next meeting: program milestones and plan actions you own
-    OBJECTIVES.forEach(function (o) { o.programs.forEach(function (pid) { PROGRAMS[pid].ms.forEach(function (m, k) {
-      if (m.who === YOU && m.st !== 'done' && !m.upd) items.push({ kind: 'checkin', id: 'k-' + pid + '-' + k, sev: 'warning', title: m.t, why: PROGRAMS[pid].title + '. Check in before monthly progress; check-ins close ' + CHECKIN.closes + '.' });
-    }); }); });
-    ins.forEach(function (i) { if (i.plan && i.plan.state === 'agreed') i.plan.actions.forEach(function (a, k) {
-      if (a.who === YOU && a.st !== 'done' && !a.upd) items.push({ kind: 'checkin', id: 'k-' + i.id + '-' + k, ins: i, sev: 'warning', title: a.t, why: 'From \u201c' + i.title + '\u201d. Check in before the next Focus review.' });
+    // Every open action you own, from insight plans and programs alike. Update any time; a check-in before a meeting just confirms it.
+    var work = ins.filter(function (i) { return i.plan && i.plan.state === 'agreed'; }).map(function (i) { return { w: i, from: 'Insight', meet: 'the next Focus review' }; })
+      .concat(Object.keys(PROGRAMS).map(function (pid) { return { w: PROGRAMS[pid], from: 'Program', meet: 'monthly progress' }; }).filter(function (x) { return x.w.plan.state === 'agreed' && progObjective(x.w.id); }));
+    work.forEach(function (x) { x.w.plan.actions.forEach(function (a, k) {
+      if (a.who !== YOU || a.st === 'done') return;
+      items.push({ kind: 'action', id: 'a-' + x.w.id + '-' + k, work: x.w, ak: k, act: a, ins: x.from === 'Insight' ? x.w : null, sev: 'warning', title: a.t,
+        why: x.from + ': ' + x.w.title + ' \u00b7 by ' + a.due + (a.upd ? ' \u00b7 checked in ' + a.upd : ' \u00b7 check in before ' + x.meet) });
     }); });
     return items;
   }
@@ -2845,7 +2864,7 @@ button.pv-node:hover .pv-t { text-decoration: underline; text-underline-offset: 
   function mfSev(it) {
     if (it.kind === 'close') return '<span class="badge success"><i></i>Ready to close</span>';
     if (it.kind === 'agreed') return '<span class="badge"><i></i>Agreed</span>';
-    if (it.kind === 'checkin') return '<span class="tlabel">Check-in due</span>';
+    if (it.kind === 'action') return it.act.upd ? actBadge(it.act) : '<span class="tlabel">Check-in due</span>';
     if (it.kind === 'retro') return outBadge(RETRO[it.ins.retro].outcome);
     return sevIcon(it.sev === 'critical' ? 'critical' : 'warning');
   }
@@ -2862,11 +2881,12 @@ button.pv-node:hover .pv-t { text-decoration: underline; text-underline-offset: 
     if (it.kind === 'close') return '<button type="button" class="btn brand" data-mf-close="' + i.id + '">Close it</button>';
     if (it.kind === 'agreed') return '<button type="button" class="btn brand" data-mf-agreed="' + it.id + '">Mark as done</button>';
     if (it.kind === 'retro') return '<button type="button" class="btn brand" data-retro="' + i.retro + '">Review the retro</button>';
-    if (it.kind === 'checkin') return i ? '<a class="btn brand" href="#insight/' + i.id + '">Check in</a>' : '<a class="btn brand" href="#strategy">Check in</a>';
+    if (it.kind === 'action') return '<label class="pa-ci"><span class="sr">How\u2019s it going?</span><select class="select" data-pa="' + it.work.id + ':' + it.ak + '">' + PA_ST.map(function (x) { return '<option value="' + x[0] + '"' + (x[0] === it.act.st ? ' selected' : '') + '>' + x[1] + '</option>'; }).join('') + '</select></label>';
     return '';
   }
   function mfOpen(it) {
     if (it.site) return '<a class="mf-open" href="#site/' + it.site.id + '">Open site</a>';
+    if (it.kind === 'action' && !it.ins) return '<button type="button" class="linkish mf-open" data-prog="' + it.work.id + '">Open program</button>';
     if (it.ins) return '<a class="mf-open" href="#insight/' + it.ins.id + '">Open insight</a>';
     return '';
   }
@@ -3321,7 +3341,9 @@ button.pv-node:hover .pv-t { text-decoration: underline; text-underline-offset: 
         (nl > -1 ? '<div class="nx"><dt>Next \u00b7 ' + LEVELS[nl] + '</dt><dd>' + esc(nx) + inf(nl) + '</dd></div>' : '') +
       '</dl>' +
       (also.length ? '<p class="mc-also"><span class="label">Also moves</span><span>' + also.join('') + '</span></p>' : '') +
-      (o ? '<p class="mc-also"><span class="label">Contributes to</span><span><a class="map-link" href="#strategy">' + esc(objTitle(o)) + '</a></span></p>' : '');
+      (o ? '<p class="mc-also"><span class="label">Contributes to</span><span><a class="map-link" href="#strategy">' + esc(objTitle(o)) + '</a></span></p>' : '') +
+      // If a program already targets this indicator, say so. Changes to the program stay with strategy meetings.
+      (o && o.krs.some(function (kr) { return kr[0] === k; }) ? '<p class="mc-also"><span class="label">Already being addressed</span>' + o.programs.map(function (pid) { var pg = PROGRAMS[pid]; return '<span><button type="button" class="linkish map-link" data-prog="' + pid + '">' + esc(pg.title) + '</button> \u00b7 program led by ' + esc(pg.owner) + '</span>'; }).join('') + '</p>' : '');
   }
   function mapCard(i) { var b = mapBody(i); return b ? '<section class="card side-card mc"><h2>On the Forge Works Map</h2>' + b + '</section>' : ''; }
   function mapLine(i) { var fx = INS_FACTOR[i.id]; return fx ? '<span class="icard-map"><span class="label">Improves</span>' + esc(FACTOR[fx[0]].name) + ' \u00b7 ' + esc(FACTOR[fx[0]].inds[fx[1]].toLowerCase()) + '</span>' : ''; }
@@ -3406,6 +3428,38 @@ button.pv-node:hover .pv-t { text-decoration: underline; text-underline-offset: 
       ms: [A('Coach supervisors to back every stop', 'Alex Chen', '22 Aug', 'done'), A('Log stops and restarts in Procore and Intelex', 'Dana Brooks', '19 Sep', 'done'),
            A('Share one stop story a week across the group', 'Alex Chen', '31 Oct', 'track')] }
   };
+  // A program is work, like an insight: a plan of actions (its milestones), a lifecycle and a recorded approval.
+  function progWrap(pid, proposed) {
+    var p = PROGRAMS[pid]; p.id = pid; p.kind = 'program'; p.history = p.history || [];
+    p.status = p.status || (proposed ? 'plan' : 'working');
+    p.plan = p.plan || (proposed ? { state: 'proposed', expect: p.expect, actions: p.ms } :
+      { state: 'agreed', agreed: 'Agreed at quarterly planning on 1 Jul', approvedBy: 'Quarterly planning', approvedAt: '1 Jul', expect: p.expect, actions: p.ms, read: p.read });
+    return p;
+  }
+  Object.keys(PROGRAMS).forEach(function (pid) { progWrap(pid); });
+  function workById(id) { return insightById(id) || PROGRAMS[id] || null; }
+  function progObjective(pid) { return OBJECTIVES.filter(function (o) { return o.programs.indexOf(pid) > -1; })[0]; }
+  function openProgram(pid, trigger) {
+    var p = PROGRAMS[pid]; if (!p) return; var o = progObjective(pid);
+    if (trigger) recTrigger = trigger; ST.prog = pid;
+    var orr = o ? objRegs(o) : regionsInScope(), f = o ? FACTOR[o.f] : null;
+    var ins = o ? insightsInView().filter(function (i) { return objFor(i) === o; }) : [];
+    var allDone = p.plan.actions.length && p.plan.actions.every(function (a) { return a.st === 'done'; });
+    $('rec').innerHTML = drawerHead('Program', o ? [objTitle(o), 'Applies to ' + objScope(o)] : [], p.title, 'Owner ' + p.owner + ' \u00b7 ' + p.resources) +
+      '<div class="sheet-body"><div class="meta">' + statusBadge(p) + '</div>' +
+        (o ? '<section class="sheet-sec"><span class="label">Why this program</span><p>' + esc(o.why) + '</p></section>' : '') +
+        planHTML(p, 'sheet-sec') +
+        (o ? '<section class="sheet-sec"><span class="label">What it should move</span>' + o.krs.map(function (kr) { var x = aggInd(orr, o.f, kr[0]); return '<div class="kr"><span class="kr-n">' + esc(f.inds[kr[0]]) + '</span><span class="ind-rate">' + levelBar(x.v, true, null, x.was) + trendHTML(x.t) + '</span><span class="kr-tg">Target ' + LEVELS[kr[1]] + '</span></div>'; }).join('') + '</section>' : '') +
+        '<section class="sheet-sec"><span class="label">Insights on the same factor</span>' + (ins.length ? '<div class="links">' + ins.map(function (i) { return '<button type="button" class="link-item" data-fopen="' + i.id + '"><b>' + esc(i.title) + '</b><span>' + esc(statusText(i)) + '</span></button>'; }).join('') + '</div>' : '<p class="muted-p">None open right now.</p>') + '</section>' +
+        '<section class="sheet-sec"><span class="label">Retro</span><p class="muted-p">Prism writes a retro when the program closes, and a read of it at each quarterly planning, using the same outcomes as insight retros.</p>' +
+          (p.status === 'working' && allDone ? '<button type="button" class="btn" data-progclose="' + pid + '">All actions done: mark ready to close</button>' : '') + '</section>' +
+      '</div>';
+    $('rec').hidden = false; $('scrim').hidden = false; $('rec-x').focus();
+  }
+  document.addEventListener('click', function (e) {
+    var t = e.target.closest('[data-prog]'); if (t) { e.preventDefault(); openProgram(t.getAttribute('data-prog'), t); return; }
+    var c = e.target.closest('[data-progclose]'); if (c) { var p = PROGRAMS[c.getAttribute('data-progclose')]; p.status = 'resolved'; logEvent(p, 'Ready to close', 'All actions done. Prism writes the retro when it closes.'); toast('Program marked ready to close. It closes at the next quarterly planning.'); openProgram(p.id); render(); }
+  }, true);
   var RETRO_KIND = { 'r-dust': 'Equipment and engineering', 'r-lone': 'Rostering and resourcing', 'r-cone': 'Briefings', 'r-pre0': 'New paperwork or sign-offs', 'r-hot': 'New paperwork or sign-offs' };
   ST.cand = {};
 
@@ -3458,7 +3512,10 @@ button.pv-node:hover .pv-t { text-decoration: underline; text-underline-offset: 
       }).join('') + '</div>';
     $('rec').hidden = false; $('scrim').hidden = false; $('rec-x').focus();
   }
-  document.addEventListener('click', function (e) { var t = e.target.closest('[data-stpast]'); if (t) { openStratPast(t); } });
+  document.addEventListener('click', function (e) {
+    var t = e.target.closest('[data-stpast]'); if (t) { ST.stTab = 'history'; ST.hf = 'all'; render(); window.scrollTo(0, 0); return; }
+    var j = e.target.closest('[data-hjump]'); if (j) { var a = j.getAttribute('data-hjump').split(':'); if (a[0] === 'ins') ST.insTab = 'history'; else ST.stTab = 'history'; ST.hf = a[1]; render(); window.scrollTo(0, 0); }
+  });
   // Each ritual's report shows what the others handed it
   function fromOther(kind) {
     var li = [];
@@ -3477,6 +3534,7 @@ button.pv-node:hover .pv-t { text-decoration: underline; text-underline-offset: 
     return '<section class="card rsec"><span class="label">From other meetings</span>' + (li.length ? '<ul class="rlist fo-list">' + li.map(function (x) { return '<li><span class="fo-src">' + esc(x[0]) + '</span><span class="fo-t">' + x[1] + '</span>' + (x[2] ? '<span>' + esc(x[2]) + '</span>' : '') + '</li>'; }).join('') + '</ul>' : '<p class="muted-p">Nothing handed over since last time.</p>') + '</section>';
   }
   function renderStrategy() {
+    if (ST.stTab === 'history') return renderStrategyHistory();
     var org = !ST.div && !ST.reg, objs = objsInView(), regs = regionsInScope();
     var st = objs.map(objStatus), counts = {}; st.forEach(function (x) { counts[x[1]] = (counts[x[1]] || 0) + 1; });
     var off = objs.filter(function (o, k) { return st[k][1] === 'Off track'; });
@@ -3498,7 +3556,7 @@ button.pv-node:hover .pv-t { text-decoration: underline; text-underline-offset: 
     $('view').innerHTML =
       '<div class="page-top"><div><h1>Strategy</h1><p class="sub">' + esc(ORG_NAME) + ' objectives for ' + esc(STRAT.year) + ' · set at quarterly planning</p></div>' +
         stActions(org) + '</div>' +
-        stRhythm() +
+        stRhythm() + tabsHTML('st') +
       '<p class="pv-summary">' + lead + '</p>' +
       (org ? '' : '<p class="st-note">Objectives are set for all of ' + esc(ORG_NAME) + ' at quarterly planning. This shows the ones that include ' + esc(scopeLabel()) + ', measured across it.</p>') +
       checkinPanel() +
@@ -3519,8 +3577,8 @@ button.pv-node:hover .pv-t { text-decoration: underline; text-underline-offset: 
           }).join('') + '</div>' +
           o.programs.map(function (pid) {
             var p = PROGRAMS[pid], d = p.ms.filter(function (m) { return m.st === 'done'; }).length;
-            return '<div class="st-prog"><div class="sp-head"><span class="label">Program</span><h3>' + esc(p.title) + '</h3><span class="sp-meta">' + esc(p.owner) + ' · ' + d + ' of ' + p.ms.length + ' milestones done · ' + esc(p.resources) + '</span></div>' +
-              '<details class="sp-det"><summary>' + p.ms.length + ' milestones</summary><ul class="ra-acts sp-ms">' + p.ms.map(function (m) { return '<li>' + actBadge(m) + '<span class="ra-t">' + esc(m.t) + '</span><span class="ra-m">' + esc(m.who) + ' · by ' + esc(m.due) + '</span></li>'; }).join('') + '</ul></details>' +
+            return '<div class="st-prog"><div class="sp-head"><span class="label">Program</span><h3><button type="button" class="linkish map-link" data-prog="' + pid + '">' + esc(p.title) + '</button></h3><span class="sp-meta">' + statusBadge(p) + ' ' + esc(p.owner) + ' · ' + d + ' of ' + p.ms.length + ' actions done · ' + esc(p.resources) + '</span></div>' +
+              '<details class="sp-det"><summary>' + p.ms.length + ' actions</summary><ul class="ra-acts sp-ms">' + p.ms.map(function (m) { return '<li>' + actBadge(m) + '<span class="ra-t">' + esc(m.t) + '</span><span class="ra-m">' + esc(m.who) + ' · by ' + esc(m.due) + '</span></li>'; }).join('') + '</ul></details>' +
               '<div class="plan-check"><span class="label">Is it working?</span><p>' + readBadge(p.read) + ' ' + esc(p.read[1]) + '</p><p class="pc-l">Prism listens for: ' + esc(p.expect) + '</p></div></div>';
           }).join('') +
           '<div class="st-ins"><span class="label">Insights contributing</span>' + (ins.length ? '<div class="links">' + ins.map(function (i) { return '<button type="button" class="link-item" data-open="' + i.id + '"><b>' + esc(i.title) + '</b><span>' + esc(FACTOR[o.f].inds[INS_FACTOR[i.id][1]]) + ' · ' + esc(planSummary(i) || statusText(i)) + '</span></button>'; }).join('') + '</div>' : '<p class="muted-p">No open insights on this factor right now.</p>') + '</div>' +
@@ -3686,6 +3744,7 @@ button.pv-node:hover .pv-t { text-decoration: underline; text-underline-offset: 
       o.krs = inds.slice(0, 2).map(function (y) { return [y.k, d.target]; });
       PROGRAMS[pid] = { title: 'Program to be scoped', owner: d.owner, resources: 'To be agreed', expect: 'To be set when the program is scoped.', read: ['early', 'Starts next quarter.'],
         ms: [A('Scope the program and bring it to the monthly progress meeting', d.owner, '6 Oct')] };
+      progWrap(pid, true);
       OBJECTIVES.push(o);
     });
     STRAT_LOG.unshift({ type: 'Quarterly planning', date: '26 Sep', who: Object.keys(PL.att).filter(function (k) { return PL.att[k]; }), lines: lines });
@@ -3941,7 +4000,7 @@ button.pv-node:hover .pv-t { text-decoration: underline; text-underline-offset: 
       var id = 'i' + k; nodes.push(pvNode(id, 'Work', i.title, 'Insight · ' + statusText(i), readTag(planRead(i)) || statusBadge(i), 'data-open="' + i.id + '"'));
       var kr = o.krs.filter(function (r) { return r[0] === INS_FACTOR[i.id][1]; })[0]; edges.push([id, kr ? 'kr' + o.krs.indexOf(kr) : 'fac', k ? '' : 'evidence for']);
     });
-    o.programs.forEach(function (pid, k) { var p = PROGRAMS[pid], d = p.ms.filter(function (m) { return m.st === 'done'; }).length; nodes.unshift(pvNode('p' + k, 'Work', p.title, 'Program · ' + p.owner + ' · ' + d + ' of ' + p.ms.length + ' milestones done', readTag(p.read[0]))); o.krs.forEach(function (_, r) { edges.push(['p' + k, 'kr' + r, r ? '' : 'should move']); }); });
+    o.programs.forEach(function (pid, k) { var p = PROGRAMS[pid], d = p.ms.filter(function (m) { return m.st === 'done'; }).length; nodes.unshift(pvNode('p' + k, 'Work', p.title, 'Program · ' + p.owner + ' · ' + d + ' of ' + p.ms.length + ' actions done', readTag(p.read[0]), 'data-prog="' + pid + '"')); o.krs.forEach(function (_, r) { edges.push(['p' + k, 'kr' + r, r ? '' : 'should move']); }); });
     o.krs.forEach(function (kr, r) { nodes.push(indNode('kr' + r, regs, o.f, kr[0], 'target ' + LEVELS[kr[1]])); edges.push(['kr' + r, 'fac', r ? '' : 'part of']); });
     nodes.push(factorNode('fac', regs, o.f)); nodes.push(objNode('obj', o)); nodes.push(SAFER());
     edges.push(['fac', 'obj', 'target of']); edges.push(['obj', 'safer', 'adds up to']);
@@ -3985,6 +4044,98 @@ button.pv-node:hover .pv-t { text-decoration: underline; text-underline-offset: 
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && PV && $('rec').hidden && $('sheet').hidden && $('help').hidden) closePrismView(); }, true);
 
   /* =============================================================
+     History: one pattern for everything that's finished.
+     A Current | History switch on Insights and Strategy; History is a
+     dated list with filters, and every row opens in a drawer.
+     ============================================================= */
+  ST.insTab = 'current'; ST.stTab = 'current'; ST.hf = 'all';
+  function histTs(d) { var m = /(\d+) (\w{3})/.exec(d || ''); return m && MON[m[2]] != null ? new Date(2026, MON[m[2]], +m[1]).getTime() : 0; }
+  function tabsHTML(area) {
+    var cur = area === 'ins' ? ST.insTab : ST.stTab;
+    return '<div class="seg area-tabs" role="group" aria-label="Show">' + [['current', 'Current'], ['history', 'History']].map(function (t) { return '<button type="button" data-atab="' + area + ':' + t[0] + '" aria-pressed="' + (cur === t[0]) + '">' + t[1] + '</button>'; }).join('') + '</div>';
+  }
+  function inPurview(sites) { var regs = regionsInScope(); return sites.some(function (s) { return regs.indexOf(SITE[s].region) > -1; }); }
+  function histRow(x) {
+    return '<li><button type="button" class="hl-row" ' + x.open + '><span class="hl-d">' + esc(x.date) + '</span><span class="hl-k">' + esc(x.kind) + '</span><span class="hl-m"><b>' + esc(x.title) + '</b><span>' + esc(x.sub) + '</span></span><span class="hl-b">' + (x.badge || '') + '</span></button></li>';
+  }
+  function histList(items, filters) {
+    var f = filters.filter(function (x) { return x[0] === ST.hf; })[0] ? ST.hf : 'all';
+    var shown = items.filter(function (x) { return f === 'all' || x.f === f; }).sort(function (a, b) { return b.ts - a.ts; });
+    return '<div class="list-top"><div class="seg" role="group" aria-label="Filter history">' + filters.map(function (x) {
+        var n = x[0] === 'all' ? items.length : items.filter(function (i) { return i.f === x[0]; }).length;
+        return '<button type="button" data-hf="' + x[0] + '" aria-pressed="' + (f === x[0]) + '">' + esc(x[1]) + ' <span class="tnum">' + n + '</span></button>';
+      }).join('') + '</div></div>' +
+      (shown.length ? '<ul class="card hl">' + shown.map(histRow).join('') + '</ul>' : '<p class="card empty-card">Nothing here yet.</p>');
+  }
+  // Insights: past Focus reviews, closed and dismissed insights, and 90-day retros
+  function insightHistory() {
+    var items = [];
+    MEETINGS.filter(function (m) { return (!ST.div || m.div === ST.div) && (!ST.reg || m.reg === ST.reg); }).forEach(function (m) {
+      var label = m.reg ? m.reg + ' region' : m.div ? m.div + ' division' : ORG_NAME;
+      items.push({ f: 'review', ts: histTs(m.short), date: m.short, kind: 'Focus review', title: label + ' Focus review', sub: m.decisions.length + (m.decisions.length === 1 ? ' decision' : ' decisions') + ' · ' + join(m.attendees), open: 'data-hreview="' + m.id + '"' });
+    });
+    RETROS.forEach(function (r) {
+      if (!inPurview(r.sites)) return;
+      if (r.live) { var st = r.review ? (r.review === 'confirmed' ? 'Confirmed' : 'Challenged') : 'Waiting to be confirmed'; items.push({ f: 'retro', ts: histTs(r.due), date: r.due, kind: '90-day retro', title: r.title, sub: st, badge: outBadge(r.outcome), open: 'data-retro="' + r.id + '"' }); }
+      else items.push({ f: 'closed', ts: histTs(r.closed), date: r.closed, kind: 'Closed insight', title: r.title, sub: 'Closed ' + r.closed + ' · retro ' + OUT[r.outcome][1].toLowerCase(), badge: outBadge(r.outcome), open: 'data-retro="' + r.id + '"' });
+    });
+    INSIGHTS.filter(function (i) { return (i.closed || i.dismissed) && inPurview(i.sites); }).forEach(function (i) {
+      items.push({ f: i.dismissed ? 'dismissed' : 'closed', ts: histTs('26 Sep'), date: '26 Sep', kind: i.dismissed ? 'Dismissed insight' : 'Closed insight', title: i.title, sub: i.dismissed ? 'Dismissed: ' + i.dismissed.reason : 'Closed today', badge: '', open: 'data-open="' + i.id + '"' });
+    });
+    return items;
+  }
+  function renderInsightHistory() {
+    $('view').innerHTML =
+      '<div class="page-top"><div><h1>Insights</h1><p class="sub">' + esc(scopeLabel()) + ' · everything that’s finished, newest first</p></div>' +
+        '<div class="actions"><button type="button" class="btn brand" id="start-meeting">Start a Focus review</button></div></div>' +
+      tabsHTML('ins') +
+      histList(insightHistory(), [['all', 'All'], ['review', 'Focus reviews'], ['closed', 'Closed insights'], ['retro', '90-day retros'], ['dismissed', 'Dismissed']]);
+  }
+  // Strategy: monthly progress and quarterly planning records
+  function renderStrategyHistory() {
+    var org = !ST.div && !ST.reg;
+    var items = STRAT_LOG.map(function (m, k) { return { f: m.type === 'Quarterly planning' ? 'planning' : 'progress', ts: histTs(m.date), date: m.date, kind: m.type, title: m.type + ' \u00b7 ' + ORG_NAME, sub: m.lines[0] || '', open: 'data-hstrat="' + k + '"' }; });
+    Object.keys(PROGRAMS).forEach(function (pid) { var p = PROGRAMS[pid]; if (p.status === 'resolved' || p.closed) items.push({ f: 'program', ts: histTs('26 Sep'), date: '26 Sep', kind: 'Program', title: p.title, sub: p.closed ? 'Closed' : 'Ready to close at the next quarterly planning', open: 'data-prog="' + pid + '"' }); });
+    $('view').innerHTML =
+      '<div class="page-top"><div><h1>Strategy</h1><p class="sub">' + esc(ORG_NAME) + ' · strategy meetings, newest first</p></div>' + stActions(org).replace('<button type="button" class="btn" data-stpast="1">Past meetings</button>', '') + '</div>' +
+      tabsHTML('st') +
+      histList(items, [['all', 'All'], ['progress', 'Monthly progress'], ['planning', 'Quarterly planning'], ['program', 'Programs']]);
+  }
+  // Drawers for history rows
+  function drawerHead(kind, ctx, title, sub) {
+    return '<div class="sheet-head" style="position:relative"><button type="button" class="x" id="rec-x" aria-label="Close"><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 2l8 8M10 2l-8 8" stroke="currentColor" stroke-width="1.6"/></svg></button>' +
+      '<p class="kind"><span class="kind-t">' + esc(kind) + '</span>' + ctx.map(function (c) { return '<span>' + esc(c) + '</span>'; }).join('') + '</p><h2 id="rec-title">' + esc(title) + '</h2>' + (sub ? '<p class="muted-p">' + esc(sub) + '</p>' : '') + '</div>';
+  }
+  function openReviewRecord(id, trigger) {
+    var m = MEETINGS.filter(function (x) { return x.id === id; })[0]; if (!m) return;
+    if (trigger) recTrigger = trigger;
+    var label = m.reg ? m.reg + ' region' : m.div ? m.div + ' division' : ORG_NAME;
+    $('rec').innerHTML = drawerHead('Focus review', [m.date, label], label + ' Focus review', m.decisions.length + (m.decisions.length === 1 ? ' decision' : ' decisions')) +
+      '<div class="sheet-body"><section class="sheet-sec"><span class="label">Decisions</span><ul class="agreed">' + m.decisions.map(function (d) {
+        var it = insightById(d.ins);
+        return '<li><span class="av' + (d.who === YOU ? ' me' : '') + '">' + initials(d.who) + '</span><div><p class="agreed-t">' + (it ? '<button type="button" class="linkish map-link" data-fopen="' + it.id + '">' + esc(it.title) + '</button>' : '') + '</p><p class="agreed-o">' + esc(d.who) + ': ' + esc(d.text) + '</p>' + (d.outcome && d.outcome[1] ? '<p class="agreed-note">' + esc(d.outcome[1]) + '</p>' : '') + '</div></li>';
+      }).join('') + '</ul></section>' +
+      (m.notes ? '<section class="sheet-sec"><span class="label">Notes</span><p>' + esc(m.notes) + '</p></section>' : '') +
+      '<section class="sheet-sec"><span class="label">Attended</span><div class="people">' + whoLine(m.attendees) + '</div></section></div>';
+    $('rec').hidden = false; $('scrim').hidden = false; $('rec-x').focus();
+  }
+  function openStratMeeting(k, trigger) {
+    var m = STRAT_LOG[k]; if (!m) return;
+    if (trigger) recTrigger = trigger;
+    $('rec').innerHTML = drawerHead(m.type, [m.date, ORG_NAME], m.type + ' · ' + m.date, '') +
+      '<div class="sheet-body"><section class="sheet-sec"><span class="label">' + (m.type === 'Quarterly planning' ? 'What was decided' : 'What was discussed') + '</span><ul class="plain">' + m.lines.map(function (l) { return '<li>' + esc(l) + '</li>'; }).join('') + '</ul></section>' +
+      '<section class="sheet-sec"><span class="label">Attended</span><div class="people">' + whoLine(m.who) + '</div></section></div>';
+    $('rec').hidden = false; $('scrim').hidden = false; $('rec-x').focus();
+  }
+  document.addEventListener('click', function (e) {
+    var t = e.target.closest('[data-atab]');
+    if (t) { var a = t.getAttribute('data-atab').split(':'); if (a[0] === 'ins') ST.insTab = a[1]; else ST.stTab = a[1]; ST.hf = 'all'; render(); window.scrollTo(0, 0); return; }
+    var hf = e.target.closest('[data-hf]'); if (hf) { ST.hf = hf.getAttribute('data-hf'); render(); return; }
+    var hr = e.target.closest('[data-hreview]'); if (hr) { openReviewRecord(hr.getAttribute('data-hreview'), hr); return; }
+    var hs = e.target.closest('[data-hstrat]'); if (hs) { openStratMeeting(+hs.getAttribute('data-hstrat'), hs); return; }
+  });
+
+  /* =============================================================
      Routing (in-page, so it works inside sandboxed frames)
      ============================================================= */
   // Mobile: the views collapse into a dropdown under the purview pickers
@@ -3995,6 +4146,7 @@ button.pv-node:hover .pv-t { text-decoration: underline; text-underline-offset: 
   function go(target) { try { history.replaceState(null, '', '#' + target); } catch (err) { /* ignore */ } route(target); }
   function route(target) {
     var h = (target || (location.hash || '').slice(1) || (ST.div || ST.reg ? 'focus' : 'strategy')).split('/');
+    var prevView = ST.view;
     ST.view = ['focus', 'sites', 'site', 'sources', 'meeting', 'meetings', 'insight', 'myfocus', 'map', 'strategy', 'planning', 'progress'].indexOf(h[0]) > -1 ? h[0] : 'focus';
     ST.factor = ST.view === 'map' ? (h[1] || '') : '';
     if (!ST.keepWalk) { ST.mfSnap = null; if (ST.view === 'myfocus') ST.mfWalk = -1; } ST.keepWalk = false;
@@ -4002,6 +4154,8 @@ button.pv-node:hover .pv-t { text-decoration: underline; text-underline-offset: 
     ST.site = ST.view === 'site' ? (h[1] || '') : '';
     ST.dismissing = '';
     if (ST.view === 'meeting' && !MT) ST.view = 'focus';
+    if (prevView && prevView !== ST.view && ['insight', 'meeting'].indexOf(prevView) < 0) { ST.insTab = 'current'; }
+    if (prevView && prevView !== ST.view && ['planning', 'progress'].indexOf(prevView) < 0) { ST.stTab = 'current'; }
     if (ST.view === 'planning' && !PL) ST.view = 'strategy';
     if (ST.view === 'progress' && !PG) ST.view = 'strategy';
     var tab = ['meeting', 'meetings', 'insight'].indexOf(ST.view) > -1 ? 'focus' : ST.view === 'site' ? 'sites' : ST.view === 'planning' || ST.view === 'progress' ? 'strategy' : ST.view;
