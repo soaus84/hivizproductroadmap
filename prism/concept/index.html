@@ -2727,8 +2727,8 @@ body.rv-mode main { padding-top: 0; }
       }).join('') + '</ol>' +
       (MT.step === 'receipt' ? '' : '<button type="button" class="btn" id="rv-end">End review</button>') + '</div></div>';
   }
-  function rvPage(kind, title, sub, body, nav) {
-    $('view').innerHTML = rvBar() + '<div class="rv"><p class="kind"><span class="kind-t">' + esc(kind) + '</span></p><h1 class="rv-h">' + title + '</h1>' + (sub ? '<p class="rv-sub">' + sub + '</p>' : '') + body + (nav ? '<div class="rv-nav">' + nav + '</div>' : '') + '</div>';
+  function rvPage(kind, title, sub, body, nav, bar) {
+    $('view').innerHTML = (bar || rvBar()) + '<div class="rv"><p class="kind"><span class="kind-t">' + esc(kind) + '</span></p><h1 class="rv-h">' + title + '</h1>' + (sub ? '<p class="rv-sub">' + sub + '</p>' : '') + body + (nav ? '<div class="rv-nav">' + nav + '</div>' : '') + '</div>';
   }
   function rvQ(q, lbl) { return '<p class="rv-q"><span class="rv-q-l">' + esc(lbl || 'Ask the room') + '</span><span class="rv-q-t">“' + esc(q) + '”</span></p>'; }
   // The leadership check, asked plainly: how it actually is today, not how it should be
@@ -2762,7 +2762,7 @@ body.rv-mode main { padding-top: 0; }
     'monitoring_metrics:3': 'How much of workers’ real experience shows up in our data?'
   };
   function rvRow(title, sub, ctl, id, done) {
-    return '<li class="rv-row' + (done ? ' is-done' : '') + '"><div class="rv-m">' + (id ? '<button type="button" class="rv-title linkish" ' + (/^r-/.test(id) ? 'data-retro' : 'data-open') + '="' + id + '">' + esc(title) + '</button>' : '<span class="rv-title">' + esc(title) + '</span>') + (sub ? '<span class="rv-s">' + sub + '</span>' : '') + '</div><div class="rv-c">' + ctl + '</div></li>';
+    return '<li class="rv-row' + (done ? ' is-done' : '') + '"><div class="rv-m">' + (id ? '<button type="button" class="rv-title linkish" ' + (/^r-/.test(id) ? 'data-retro' : /^p-/.test(id) ? 'data-prog' : /^o-/.test(id) ? 'data-obj' : 'data-open') + '="' + id + '">' + esc(title) + '</button>' : '<span class="rv-title">' + esc(title) + '</span>') + (sub ? '<span class="rv-s">' + sub + '</span>' : '') + '</div><div class="rv-c">' + ctl + '</div></li>';
   }
   function rvChoice(key, opts, cur) {
     return '<span class="rv-ch">' + opts.map(function (o) { return '<button type="button" class="btn' + (cur === o ? ' is-on' : '') + '" data-rvdec="' + esc(key) + '" data-rvval="' + esc(o) + '" aria-pressed="' + (cur === o) + '">' + esc(o) + '</button>'; }).join('') + '</span>';
@@ -4087,127 +4087,185 @@ body.rv-mode main { padding-top: 0; }
   function monthInd(regs, f, k) { var keep = ST.mapPeriod; ST.mapPeriod = 45; var x = aggInd(regs, f, k); ST.mapPeriod = keep; return x; }
   function pgStepper() { return '<ol class="steps">' + PG_STEPS.map(function (t, k) { var n = k + 1, cls = n === PG.step ? 'on' : n < PG.step ? 'done' : ''; return '<li class="' + cls + '"><span class="n">' + (n < PG.step ? '✓' : n) + '</span>' + t + '</li>'; }).join('') + '</ol>'; }
   function pgPeople() { var o = ['Morgan Hale']; OBJECTIVES.forEach(function (ob) { ob.programs.forEach(function (p) { PROGRAMS[p].ms.forEach(function (m) { if (o.indexOf(m.who) < 0) o.push(m.who); }); if (o.indexOf(PROGRAMS[p].owner) < 0) o.push(PROGRAMS[p].owner); }); }); return o; }
-  function startProgress() {
-    ST.div = ''; ST.reg = ''; fillFilters();
-    var att = {}; PL_PEOPLE.forEach(function (p) { att[p] = pgPeople().indexOf(p) > -1; });
-    PG = { step: 1, att: att, raise: {}, dec: {}, edit: {}, notes: '' }; go('progress');
-  }
   function ciSummary(items) {
     var open = items.filter(function (x) { return !(x.m.st === 'done' && !x.m.upd); }), inn = open.filter(function (x) { return x.m.upd; }).length;
     return { total: open.length, inn: inn, missing: open.filter(function (x) { return !x.m.upd; }) };
   }
 
+  /* =============================================================
+     Monthly progress: the same stepped, full-screen ritual as the Focus review.
+     Who’s here → Check-ins → Decide (one group per screen) → Summary.
+     ============================================================= */
+  var PG_GROUPS = [
+    ['disagree', 'Owner and Prism disagree', 'You say it’s on track, but the records say otherwise. What are you seeing that the records aren’t?'],
+    ['help', 'Needs help', 'Who can help, with what, and by when?'],
+    ['obj', 'Objectives', 'Looking at the key results and Prism’s read, is each objective still on course?'],
+    ['noted', 'Noted', 'Checked in and in line with Prism. No discussion needed unless someone raises it.']
+  ];
+  var PG_CHOICES = { disagree: ['Keep the plan', 'Adjust the plan', 'Take to planning', 'Carry forward'], help: ['Help agreed', 'Adjust the plan', 'Take to planning', 'Carry forward'], obj: ['On course', 'Take to planning', 'Carry forward'], noted: ['Agree it’s on track', 'Carry forward'] };
+  function pgLast() { return STRAT_LOG.filter(function (m) { return m.type === 'Monthly progress'; })[0] || null; }
+  function pgOpen() { return pgItems().filter(function (x) { return !(x.m.st === 'done' && !x.m.upd); }); }
+  // Milestones sorted by what they need; a milestone with no check-in is handled in check-ins, not here
+  function pgGroups() {
+    var g = {}, carried = (pgLast() || {}).carried || [];
+    PG_GROUPS.forEach(function (x) { g[x[0]] = []; });
+    pgOpen().forEach(function (x) { if (!x.m.upd) return; var r = x.fresh; g[r === 'disagree' ? 'disagree' : r === 'help' ? 'help' : 'noted'].push(x.key); });
+    OBJECTIVES.forEach(function (o) { g.obj.push(o.id); });
+    Object.keys(g).forEach(function (k) { g[k].sort(function (a, b) { return (carried.indexOf(b) > -1) - (carried.indexOf(a) > -1); }); });
+    return g;
+  }
+  function pgMs(key) { var pr = key.split(':'), p = PROGRAMS[pr[0]]; return { p: p, m: p.ms[+pr[1]], o: progObjective(pr[0]) }; }
+  function pgTitle(key) { return /^o-/.test(key) ? objTitle(OBJECTIVES.filter(function (o) { return o.id === key; })[0]) : pgMs(key).m.t; }
+  function pgDecided(k, id) { return PG.done[id + ':' + k] || ''; }
+  function pgLeft(k) { return PG.groups[k].filter(function (id) { return !pgDecided(k, id); }).length; }
+  function pgGroupsOn() { return PG_GROUPS.filter(function (g) { return PG.groups[g[0]].length; }); }
+  function pgChoice(key, opts) {
+    var cur = PG.done[key];
+    return '<span class="rv-ch">' + opts.map(function (o) { return '<button type="button" class="btn' + (cur === o ? ' is-on' : '') + '" data-pgdec="' + esc(key) + '" data-pgval="' + esc(o) + '" aria-pressed="' + (cur === o) + '">' + esc(o) + '</button>'; }).join('') + '</span>';
+  }
+  function pgBar() {
+    var at = RV_STEPS.map(function (s) { return s[0]; }).indexOf(PG.step);
+    return '<div class="rv-bar"><div class="rv-bar-in"><span class="rv-t"><b>Monthly progress</b><span>' + esc(ORG_NAME) + ' · Fri 26 Sep</span></span>' +
+      '<ol class="rv-rail">' + RV_STEPS.map(function (s, k) {
+        return '<li class="' + (k === at ? 'on' : k < at ? 'done' : '') + '">' + (k < at && !PG.early ? '<button type="button" data-pgstep="' + s[0] + '">' : '<span>') + '<i>' + (k < at ? '✓' : k + 1) + '</i>' + s[1] + (k < at && !PG.early ? '</button>' : '</span>') + '</li>';
+      }).join('') + '</ol>' + (PG.step === 'receipt' ? '' : '<button type="button" class="btn" id="pg-end">End meeting</button>') + '</div></div>';
+  }
+  function pgHere(n) { return !n || n === YOU || !!PG.att[n]; }
+  function msSub(x, tag) {
+    return tag + '<span class="rv-who"><span class="av' + (x.m.who === YOU ? ' me' : '') + '">' + initials(x.m.who) + '</span>' + esc(x.m.who) + (pgHere(x.m.who) ? '' : ' · <b>not here</b>') + '</span> · ' + esc(x.p.title) + ' · by ' + esc(x.m.due) +
+      (x.m.upd ? '<br>' + actBadge(x.m) + ' ' + (x.m.note ? '“' + esc(x.m.note) + '”' : 'Checked in ' + esc(x.m.upd)) : '');
+  }
+  function startProgress() {
+    ST.div = ''; ST.reg = ''; fillFilters();
+    var att = {}; PL_PEOPLE.forEach(function (p) { att[p] = pgPeople().indexOf(p) > -1; });
+    PG = { step: 'here', att: att, raise: {}, ci: {}, done: {}, g: 0, reach: 0, notes: '' }; go('progress');
+  }
   function renderProgress() {
     if (!PG) { ST.view = 'strategy'; return renderStrategy(); }
-    var head = esc(ORG_NAME) + ' · today, Friday 26 September · since ' + esc(STRAT.lastProgress);
-    var top = '<div class="meet-bar"><a class="back" href="#strategy">← Leave progress meeting</a>' + pgStepper() + '</div>';
-    var items = pgItems(), disc = items.filter(function (x) { return x.why !== 'noted'; }), noted = items.filter(function (x) { return x.why === 'noted'; }), cs = ciSummary(items);
-    var title = function (t) { return top + '<div class="page-top"><div><h1>' + esc(t) + '</h1><p class="sub">' + head + '</p></div></div>'; };
+    var last = pgLast(), carried = (last || {}).carried || [], bar = pgBar();
+    var tagOf = function (id) { return carried.indexOf(id) > -1 ? '<span class="rv-carry">Carried from ' + esc(last.date) + '</span> ' : ''; };
 
-    if (PG.step === 1) {
-      $('view').innerHTML = title('Monthly progress') +
-        '<p class="pl-pv"><span class="label">Purview</span><b>' + esc(ORG_NAME) + '</b> · required for this meeting</p>' +
-        '<div class="meet-grid"><section class="card meet-card"><h2>Who’s here</h2><p class="muted-p">The group executive, and everyone who owns a milestone.</p><ul class="att">' +
-          PL_PEOPLE.map(function (p) { var req = p === 'Morgan Hale'; return '<li><label class="att-row"><input type="checkbox" data-pgatt="' + esc(p) + '"' + (PG.att[p] ? ' checked' : '') + (req ? ' disabled' : '') + '><span class="av' + (p === YOU ? ' me' : '') + '">' + initials(p) + '</span><span class="att-name">' + esc(p) + '<small>' + esc(ROLE[p] || '') + (req ? ' · required' : '') + '</small></span></label></li>'; }).join('') + '</ul></section>' +
-        '<section class="card meet-card"><h2>Check-ins</h2><p class="rlead"><b>' + cs.inn + ' of ' + cs.total + '</b> milestone owners checked in between ' + esc(CHECKIN.opens) + ' and ' + esc(CHECKIN.closes) + '.</p>' +
-          (cs.missing.length ? '<ul class="rlist">' + cs.missing.map(function (x) { return '<li><span class="rl-f">' + esc(x.m.who) + '</span><span>' + esc(x.m.t) + '</span></li>'; }).join('') + '</ul>' : '') +
-          '<h2>What Hiviz will prepare</h2><ul class="plain"><li><b>Report</b>: key results since last month, and every owner’s check-in.</li><li><b>Discuss</b>: only what needs the room. Disagreements with Prism, requests for help, and missing check-ins.</li><li><b>Noted</b>: the rest, agreed without discussion.</li></ul>' +
-          '<div class="meet-actions"><button type="button" class="btn brand" data-pgstep="2">Prepare the report</button></div></section></div>';
+    // 1 · Who’s here, and what’s on today
+    if (PG.step === 'here') {
+      var gs = pgGroups(), open = pgOpen(), moved = 0, slipped = 0;
+      OBJECTIVES.forEach(function (o) { var regs = objRegs(o); o.krs.forEach(function (kr) { var t = monthInd(regs, o.f, kr[0]).t; if (t === 'better') moved++; if (t === 'worse') slipped++; }); });
+      rvPage('Step 1 of 4', 'Who’s here', 'Since ' + esc(STRAT.lastProgress) + ' · ' + esc(ORG_NAME) + ' · ' + lw(moved) + (moved === 1 ? ' key result' : ' key results') + ' moved forward, ' + lw(slipped) + ' slipped',
+        '<ul class="rv-att">' + PL_PEOPLE.map(function (p) { var req = p === 'Morgan Hale'; return '<li><label class="rv-p' + (PG.att[p] ? ' on' : '') + '"><input type="checkbox" data-pgatt="' + esc(p) + '"' + (PG.att[p] ? ' checked' : '') + (req ? ' disabled' : '') + '><span class="av' + (p === YOU ? ' me' : '') + '">' + initials(p) + '</span><span>' + esc(p) + '<small>' + esc(ROLE[p] || '') + (req ? ' · required' : '') + '</small></span></label></li>'; }).join('') + '</ul>' +
+        '<h2 class="rv-h2">On today</h2><ol class="rv-agenda"><li><b>Check-ins</b><span>' + open.length + ' milestones · ' + open.filter(function (x) { return !x.m.upd; }).length + ' not checked in yet</span></li>' +
+          PG_GROUPS.filter(function (g) { return gs[g[0]].length; }).map(function (g) { return '<li><b>' + esc(g[1]) + '</b><span>' + gs[g[0]].length + '</span></li>'; }).join('') + '</ol>',
+        '<span></span><button type="button" class="btn brand lg" data-pgstep="check">Start with check-ins</button>', bar);
       return;
     }
-    if (PG.step === 2) {
-      var moved = 0, slipped = 0; OBJECTIVES.forEach(function (o) { var regs = objRegs(o); o.krs.forEach(function (kr) { var t = monthInd(regs, o.f, kr[0]).t; if (t === 'better') moved++; if (t === 'worse') slipped++; }); });
-      var n = function (w) { return disc.filter(function (x) { return x.why === w; }).length; };
-      $('view').innerHTML = title('Report') +
-        '<p class="pv-summary"><b>Since ' + esc(STRAT.lastProgress) + ':</b> ' + lw(moved) + (moved === 1 ? ' key result' : ' key results') + ' moved forward and ' + lw(slipped) + ' slipped. ' + cs.inn + ' of ' + cs.total + ' owners checked in. <b>' + word(disc.length) + (disc.length === 1 ? ' item needs' : ' items need') + ' discussion</b>' +
-          (disc.length ? ': ' + join([['disagree', 'where the owner and Prism disagree'], ['help', 'needing help'], ['missing', 'with no check-in'], ['raised', 'raised']].filter(function (w) { return n(w[0]); }).map(function (w) { return lw(n(w[0])) + ' ' + w[1]; })) : '') + '. The rest are noted.</p>' +
-        '<div class="report">' + OBJECTIVES.map(function (o, oi) {
-          var regs = objRegs(o), s = objStatus(o), f = FACTOR[o.f];
-          var fresh = INSIGHTS.filter(function (i) { return !i.closed && !i.dismissed && sinceMonth(i) && INS_FACTOR[i.id] && INS_FACTOR[i.id][0] === o.f && i.sites.some(function (x) { return regs.indexOf(SITE[x].region) > -1; }); });
-          return '<section class="card rsec"><span class="label">' + (oi + 1) + ' · ' + esc(objScope(o)) + ' · owner ' + esc(o.owner) + '</span><div class="pl-oh"><span class="badge ' + s[0] + '"><i></i>' + s[1] + '</span><h2>' + esc(objTitle(o)) + '</h2></div>' +
-            '<div class="st-krs"><span class="label">Key results since last month</span>' + o.krs.map(function (kr) { var x = monthInd(regs, o.f, kr[0]); return '<div class="kr"><span class="kr-n">' + esc(f.inds[kr[0]]) + '</span><span class="ind-rate">' + levelBar(x.v, true, null, x.was) + trendHTML(x.t) + '</span><span class="kr-tg">Target ' + LEVELS[kr[1]] + '</span></div>'; }).join('') + '</div>' +
-            o.programs.map(function (pid) {
-              var p = PROGRAMS[pid];
-              return '<div class="st-prog"><div class="sp-head"><span class="label">Program · ' + esc(p.owner) + '</span><h3>' + esc(p.title) + '</h3></div><ul class="ci-list">' + p.ms.map(function (m, k) {
-                var it = items.filter(function (x) { return x.key === pid + ':' + k; })[0];
-                if (!it) return '<li class="ci-done"><span class="ci-t">' + esc(m.t) + '</span><span class="ci-line">' + actBadge(m) + '<span>' + esc(m.who) + '</span></span></li>';
-                return '<li><span class="ci-t">' + esc(m.t) + ' <small>by ' + esc(m.due) + '</small></span>' + ciLine(m) + cmHTML(m) + (it.why !== 'noted' ? '<span class="ci-why">' + (WHY[it.why][0] ? '<span class="badge ' + WHY[it.why][0] + '"><i></i>' + WHY[it.why][1] + '</span>' : '<span class="tlabel">' + WHY[it.why][1] + '</span>') + '</span>' : '<span class="ci-why"><span class="ci-noted">Noted</span></span>') + '</li>';
-              }).join('') + '</ul><p class="plan-read"><span class="label">Prism’s read so far</span><span>' + readBadge(p.read) + ' ' + esc(p.read[1]) + '</span></p></div>';
-            }).join('') +
-            (fresh.length ? '<div class="st-ins"><span class="label">New insights this month</span><div class="links">' + fresh.map(function (i) { return '<button type="button" class="link-item" data-open="' + i.id + '"><b>' + esc(i.title) + '</b><span>' + esc(f.inds[INS_FACTOR[i.id][1]]) + ' · since ' + esc(i.since) + '</span></button>'; }).join('') + '</div></div>' : '') +
-            '<div class="st-sugg"><span class="label">Hiviz recommends</span><p>' + esc(PG_ADVICE[o.id] || 'Scope the program before the next progress meeting, and agree what Prism should listen for.') + '</p></div>' +
-          '</section>';
-        }).join('') + fromOther('progress') + '</div>' +
-        '<div class="meet-actions end"><button type="button" class="btn" data-pgstep="1">Back</button><button type="button" class="btn brand" data-pgstep="3">Discuss ' + lw(disc.length) + (disc.length === 1 ? ' item' : ' items') + '</button></div>';
+
+    // 2 · Check-ins, before any decisions
+    if (PG.step === 'check') {
+      var list = pgOpen(), before = list.filter(function (x) { return x.m.upd && x.m.upd !== '26 Sep'; }).length, todo = list.filter(function (x) { return !x.m.upd && !PG.ci[x.key]; }).length;
+      rvPage('Step 2 of 4', 'Check-ins', list.length + ' open milestones · ' + before + ' checked in before the meeting' + (todo ? ' · <b>' + todo + ' to go</b>' : ''),
+        rvQ('What’s changed since your last update, and is anything in the way?') +
+        '<ul class="rv-list">' + list.map(function (x) {
+          var sk = PG.ci[x.key] === 'skip', pr = x.key.split(':');
+          var ctl = sk ? '<span class="rv-miss">Missed · recorded</span><button type="button" class="linkish" data-pgci="' + x.key + '">Undo</button>'
+            : '<span class="rv-ci">' + (x.m.upd ? '<small>' + (x.m.upd === '26 Sep' ? 'Checked in now' : 'Checked in ' + esc(x.m.upd)) + '</small>' : '<small>No check-in yet</small>') +
+              '<select class="select" data-pa="' + pr[0] + ':' + pr[1] + '" aria-label="How’s it going?">' + PA_ST.map(function (s) { return '<option value="' + s[0] + '"' + (s[0] === x.m.st ? ' selected' : '') + '>' + s[1] + '</option>'; }).join('') + '</select>' +
+              (x.m.upd ? '' : '<button type="button" class="btn" data-pgci="' + x.key + '">Skip</button>') + '</span>';
+          return rvRow(x.m.t, msSub(x, tagOf(x.key)), ctl, pr[0], sk || !!x.m.upd);
+        }).join('') + '</ul>',
+        '<button type="button" class="btn lg" data-pgstep="here">Back</button><span class="rv-nav-r">' + (todo ? '<small>' + todo + ' not checked in will be recorded as missed</small>' : '') + '<button type="button" class="btn brand lg" data-pgstep="decide">Continue to decisions</button></span>', bar);
       return;
     }
-    if (PG.step === 3) {
-      $('view').innerHTML = title('Discuss') +
-        '<p class="pv-summary"><b>' + word(disc.length) + (disc.length === 1 ? ' item needs' : ' items need') + ' the room.</b> Everything else was checked in and agrees with Prism, so it’s noted.</p>' +
-        '<div class="pl-list">' + disc.map(function (x, n) {
-          var w = WHY[x.why], d = PG.dec[x.key] || {}, id = x.key.replace(':', '__'), editing = !x.m.upd || PG.edit[x.key];
-          return '<section class="card pl-item dc"><p class="dc-ctx"><span>' + (n + 1) + ' of ' + disc.length + '</span>' + esc(objTitle(x.o)) + ' · ' + esc(x.p.title) + '</p>' +
-            '<div class="dc-head"><h3>' + esc(x.m.t) + '</h3><span class="dc-own"><span class="av' + (x.m.who === YOU ? ' me' : '') + '">' + initials(x.m.who) + '</span>' + esc(x.m.who) + ' · by ' + esc(x.m.due) + '</span></div>' +
-            '<p class="dc-why"><span class="label">Why it’s here</span>' + (w[0] ? '<span class="badge ' + w[0] + '"><i></i>' + w[1] + '</span>' : '<span class="tlabel">' + w[1] + '</span>') + (x.m.inMeeting ? '<span class="tlabel">Updated in the meeting</span>' : '') + '</p>' +
-            '<div class="ci-box"><span class="label">' + (x.m.upd ? 'Owner’s update' : (x.m.who === YOU ? 'No check-in yet: give your update' : 'No check-in: ask ' + esc(x.m.who.split(' ')[0]) + ' for an update')) + '</span>' + (x.m.upd ? ciLine(x.m) : '') + cmHTML(x.m) +
-              (editing ? '<div class="dc-upd"><select class="select" id="pgu-s-' + id + '">' + PA_ST.map(function (o) { return '<option value="' + o[0] + '"' + (o[0] === x.m.st ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select><input type="text" class="w-note" id="pgu-n-' + id + '" placeholder="What changed, what’s blocking, what’s needed" value="' + esc(x.m.note || '') + '"><button type="button" class="btn" data-pgupd="' + x.key + '">Record update</button></div>'
-                : '<button type="button" class="linkish rt-undo" data-pgedit="' + x.key + '">Update in the meeting</button>') + '</div>' +
-            '<p class="plan-read"><span class="label">Prism’s read so far</span><span>' + readBadge(x.p.read) + ' ' + esc(x.p.read[1]) + '</span></p>' +
-            '<div class="st-sugg"><span class="label">Hiviz recommends</span><p>' + esc(w[2]) + '</p></div>' +
-            '<span class="label dec-l">Decision</span><div class="seg pl-seg" role="group" aria-label="Decision">' + [['agreed', 'Agreed'], ['adjust', 'Adjust'], ['plan', 'Take to planning']].map(function (o) { return '<button type="button" data-pgdec="' + x.key + ':' + o[0] + '" aria-pressed="' + (d.d === o[0]) + '">' + o[1] + '</button>'; }).join('') + '</div>' +
-            '<input type="text" class="w-note" id="pgn-' + x.key.replace(':', '__') + '" placeholder="What was agreed, by whom, by when" value="' + esc(d.note || '') + '">' +
-          '</section>';
-        }).join('') + '</div>' +
-        (noted.length ? '<h2 class="pl-h">Noted</h2><ul class="rlist pg-noted">' + noted.map(function (x) { return '<li><span class="rl-f">' + esc(x.m.t) + '</span>' + ciLine(x.m) + '<button type="button" class="linkish rt-undo" data-pgraise="' + x.key + '">Discuss this</button></li>'; }).join('') + '</ul>' : '') +
-        '<div class="meet-actions end"><button type="button" class="btn" data-pgstep="2">Back</button><button type="button" class="btn brand" data-pgstep="4">Wrap up</button></div>';
+
+    // 3 · Decide: one group per screen, every item needs a decision
+    if (PG.step === 'decide') {
+      if (!PG.groups) PG.groups = pgGroups();
+      var gsOn = pgGroupsOn(); if (!gsOn.length) { PG.step = 'receipt'; return renderProgress(); }
+      if (PG.g >= gsOn.length) PG.g = gsOn.length - 1;
+      PG.reach = Math.max(PG.reach, PG.g);
+      var g = gsOn[PG.g], key = g[0], ids = PG.groups[key], left = pgLeft(key), lastG = PG.g === gsOn.length - 1;
+      var openG = gsOn.filter(function (x) { return pgLeft(x[0]); }), total = gsOn.reduce(function (a, x) { return a + PG.groups[x[0]].length; }, 0);
+      var wait = left ? left + ' still to decide here' : lastG && openG.length ? openG.map(function (x) { return x[1]; }).join(', ') + ' still to decide' : '';
+      var rows = ids.map(function (id) {
+        var dec = pgDecided(key, id);
+        if (key === 'obj') {
+          var o = OBJECTIVES.filter(function (x) { return x.id === id; })[0], s = objStatus(o), regs = objRegs(o), f = FACTOR[o.f];
+          var krs = o.krs.map(function (kr) { var t = monthInd(regs, o.f, kr[0]).t; return esc(f.inds[kr[0]]) + ' ' + (t === 'better' ? 'moved forward' : t === 'worse' ? 'slipped' : 'held'); }).join(' · ');
+          var reads = o.programs.map(function (pid) { return PROGRAMS[pid].read[1]; }).join(' ');
+          return rvRow(objTitle(o), tagOf(id) + '<span class="badge ' + s[0] + '"><i></i>' + s[1] + '</span> ' + esc(objScope(o)) + '<br>This month: ' + krs + '. ' + esc(reads), pgChoice(id + ':obj', PG_CHOICES.obj), id, !!dec);
+        }
+        var x = pgMs(id), mx = { m: x.m, p: x.p };
+        var extra = key === 'disagree' ? '<br>Prism: ' + esc(x.p.read[1]) : '';
+        return rvRow(x.m.t, msSub(mx, tagOf(id)) + extra + cmHTML(x.m), pgChoice(id + ':' + key, PG_CHOICES[key]), id.split(':')[0], !!dec);
+      });
+      rvPage('Step 3 of 4 · Decide · ' + total + ' items in ' + gsOn.length + ' groups', esc(g[1]) + ' <span class="rv-n">' + ids.length + '</span>', '',
+        '<ol class="rv-groups">' + gsOn.map(function (x, k) { var all = !pgLeft(x[0]), can = k <= PG.reach || (k === PG.g + 1 && !left); return '<li class="' + (k === PG.g ? 'on' : all && k <= PG.reach ? 'done' : '') + '"><button type="button" data-pgg="' + k + '"' + (can ? '' : ' disabled') + '>' + (all && k !== PG.g && k <= PG.reach ? '✓ ' : '') + esc(x[1]) + ' <span>' + PG.groups[x[0]].length + '</span></button></li>'; }).join('') + '</ol>' +
+        rvQ(g[2]) + (key === 'noted' && left ? '<p class="rv-all"><button type="button" class="btn" data-pgall="noted">Agree they’re all on track</button></p>' : '') + '<ul class="rv-list">' + rows.join('') + '</ul>',
+        '<button type="button" class="btn lg" data-pgg="' + (PG.g - 1) + '">Back</button><span class="rv-nav-r">' + (wait ? '<small>' + esc(wait) + '</small>' : '') + (!lastG ? '<button type="button" class="btn brand lg" data-pgg="' + (PG.g + 1) + '"' + (left ? ' disabled' : '') + '>Next: ' + esc(gsOn[PG.g + 1][1]) + '</button>' : '<button type="button" class="btn brand lg" data-pgstep="receipt"' + (wait ? ' disabled' : '') + '>Finish and summarise</button>') + '</span>', bar);
       return;
     }
-    // Wrap-up
-    var decided = disc.filter(function (x) { return PG.dec[x.key] && PG.dec[x.key].d; }), att = Object.keys(PG.att).filter(function (k) { return PG.att[k]; });
-    var next = {}; decided.forEach(function (x) { var d = PG.dec[x.key]; if (d.d === 'agreed') return; var w = d.d === 'plan' ? x.o.owner : x.m.who; (next[w] = next[w] || []).push(d.d === 'plan' ? 'Bring “' + objTitle(x.o) + '” to quarterly planning' : 'Adjust: ' + x.m.t + (d.note ? ' (' + d.note + ')' : '')); });
-    disc.filter(function (x) { return x.fresh === 'missing'; }).forEach(function (x) { (next[x.m.who] = next[x.m.who] || []).push('Check in on: ' + x.m.t); });
-    $('view').innerHTML = title('Wrap-up') +
-      '<div class="meet-grid"><section class="card meet-card"><h2>What was decided</h2>' +
-        (decided.length ? '<ul class="agreed">' + decided.map(function (x) { var d = PG.dec[x.key]; return '<li><span class="av">' + initials(x.m.who) + '</span><div><p class="agreed-t">' + esc(x.m.t) + '</p><p class="agreed-o">' + ({ agreed: 'Agreed', adjust: 'Adjust', plan: 'Take to planning' })[d.d] + (d.note ? ' · ' + esc(d.note) : '') + '</p></div></li>'; }).join('') + '</ul>' : '<p class="muted-p">Nothing decided yet.</p>') +
-        (function () { var u = items.filter(function (x) { return x.m.inMeeting; }); return u.length ? '<div class="w-acts"><span class="label">Updated in the meeting</span><ul class="w-rt">' + u.map(function (x) { return '<li>' + actBadge(x.m) + ' ' + esc(x.m.t) + ' <span>' + esc(x.m.who) + (x.m.note ? ': \u201c' + esc(x.m.note) + '\u201d' : '') + '</span></li>'; }).join('') + '</ul></div>' : ''; })() +
-        '<p class="muted-p">' + word(noted.length) + (noted.length === 1 ? ' milestone' : ' milestones') + ' noted without discussion.</p>' +
-        (Object.keys(next).length ? '<div class="w-acts"><span class="label">What happens next, by person</span>' + Object.keys(next).map(function (w) { return '<div class="w-p"><span class="person"><span class="av' + (w === YOU ? ' me' : '') + '">' + initials(w) + '</span>' + esc(w) + '</span><ul>' + next[w].map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul></div>'; }).join('') + '</div>' : '') +
-      '</section><section class="card meet-card"><h2>Attended</h2><div class="people">' + whoLine(att) + '</div>' +
-        '<label class="w-note-l" for="pg-notes">Notes</label><textarea id="pg-notes" class="w-note" rows="4" placeholder="Anything else worth recording">' + esc(PG.notes) + '</textarea>' +
-        '<div class="meet-actions"><button type="button" class="btn" data-pgstep="3">Back</button><button type="button" class="btn" id="pg-copy">Copy summary</button><button type="button" class="btn brand" id="pg-save">Save progress</button></div></section></div>';
+
+    // 4 · Summary, grouped by outcome
+    if (!PG.groups) PG.groups = pgGroups();
+    var dec = [], carriedOut = [], planning = [], missed = [];
+    PG_GROUPS.forEach(function (g) {
+      if (g[0] === 'noted') return;
+      PG.groups[g[0]].forEach(function (id) {
+        var d = pgDecided(g[0], id), t = pgTitle(id);
+        if (d === 'Take to planning') planning.push([t, g[0] === 'obj' ? 'The objective goes on the quarterly planning agenda' : 'From ' + objTitle(pgMs(id).o), id]);
+        else if (d && d !== 'Carry forward') dec.push([t, d, id]);
+        else carriedOut.push([id, t, g[1] + (d ? ' · carried forward by the room' : ' · not reached')]);
+      });
+    });
+    pgOpen().forEach(function (x) { if (PG.ci[x.key] === 'skip' || (!x.m.upd && PG.visitedDecide)) missed.push(x); });
+    var checkedNow = pgOpen().filter(function (x) { return x.m.upd === '26 Sep'; }).length;
+    var blk = function (h, items, note) { return items.length ? '<section class="rv-rc"><h2 class="rv-h2">' + h + ' <span class="rv-n">' + items.length + '</span></h2>' + (note ? '<p class="rv-s">' + note + '</p>' : '') + '<ul class="rv-list">' + items.join('') + '</ul></section>' : ''; };
+    var openOf = function (id) { return /^o-/.test(id) ? id : id.split(':')[0]; };
+    rvPage('Step 4 of 4', 'Summary', (PG.early ? 'Ended early · ' : '') + esc(ORG_NAME) + ' · Friday 26 September · ' + esc(join(PL_PEOPLE.filter(function (p) { return PG.att[p]; }))),
+      blk('Decided', dec.map(function (x) { return rvRow(x[0], esc(x[1]), '', openOf(x[2]), false); })) +
+      (checkedNow ? '<p class="rv-line">' + checkedNow + (checkedNow === 1 ? ' milestone' : ' milestones') + ' checked in during the meeting.</p>' : '') +
+      blk('Taken to quarterly planning', planning.map(function (x) { return rvRow(x[0], esc(x[1]), '', openOf(x[2]), false); }), 'Quarterly planning is on ' + esc(STRAT.planning) + '.') +
+      blk('Missed check-ins', missed.map(function (x) { return rvRow(x.m.t, esc(x.m.who) + ' · ' + esc(x.p.title), '<span class="rv-miss">Recorded as missed</span>', x.key.split(':')[0], false); })) +
+      blk('Carried forward to next month', carriedOut.map(function (x) { return rvRow(x[1], esc(x[2]), '', openOf(x[0]), false); }), 'These go first on the agenda next time.') +
+      '<section class="rv-rc"><h2 class="rv-h2">Coming back</h2><ul class="rv-list">' + rvRow('Next monthly progress', 'Monday 27 October · check-ins open 20 Oct', '', '', false) + '</ul></section>' +
+      '<label class="w-note-l" for="pg-notes">Meeting notes</label><textarea id="pg-notes" class="w-note" rows="3" placeholder="Anything else worth recording">' + esc(PG.notes) + '</textarea>',
+      (PG.early ? '<span></span>' : '<button type="button" class="btn lg" data-pgstep="decide">Back</button>') + '<button type="button" class="btn brand lg" id="pg-save">Close the meeting</button>', bar);
   }
-  function pgRead() {
-    if ($('pg-notes')) PG.notes = $('pg-notes').value;
-    document.querySelectorAll('[id^="pgn-"]').forEach(function (el) { var k = el.id.slice(4).replace('__', ':'); PG.dec[k] = PG.dec[k] || {}; PG.dec[k].note = el.value.trim(); });
-  }
-  function pgSummary() {
-    var items = pgItems(), disc = items.filter(function (x) { return x.why !== 'noted'; });
-    return 'Monthly progress · ' + ORG_NAME + ' · Friday 26 September\n\n' + disc.map(function (x) { var d = PG.dec[x.key] || {}; return '• ' + x.m.t + ' (' + WHY[x.why][1] + '): ' + (d.d ? ({ agreed: 'Agreed', adjust: 'Adjust', plan: 'Take to planning' })[d.d] : 'Not decided') + (d.note ? '. ' + d.note : ''); }).join('\n') +
-      '\n\nNoted: ' + items.filter(function (x) { return x.why === 'noted'; }).length + ' milestones.' + (PG.notes ? '\n\nNotes: ' + PG.notes : '') + '\n\nPrepared with Hiviz.';
+  // Formal close: flag objectives for planning, record misses, carry the rest forward
+  function pgClose() {
+    PG.notes = $('pg-notes') ? $('pg-notes').value : PG.notes;
+    if (!PG.groups) PG.groups = pgGroups();
+    var lines = [], carried = [];
+    PG_GROUPS.forEach(function (g) {
+      if (g[0] === 'noted') return;
+      PG.groups[g[0]].forEach(function (id) {
+        var d = pgDecided(g[0], id);
+        if (!d || d === 'Carry forward') { carried.push(id); return; }
+        if (d === 'Take to planning') { var ob = g[0] === 'obj' ? OBJECTIVES.filter(function (o) { return o.id === id; })[0] : pgMs(id).o; if (ob) ob.flagged = true; }
+        lines.push(pgTitle(id) + ': ' + d);
+        if (g[0] !== 'obj') logEvent(pgMs(id).p, 'Monthly progress', pgMs(id).m.t + ': ' + d, 'Monthly progress');
+      });
+    });
+    pgOpen().forEach(function (x) { if (PG.ci[x.key] === 'skip' || (!x.m.upd && PG.visitedDecide)) { lines.push('Missed check-in: ' + x.m.t + ' (' + x.m.who + ')'); logEvent(x.p, 'Check-in missed', x.m.t + ' · ' + x.m.who, 'Monthly progress'); } });
+    var noted = PG.groups.noted.filter(function (id) { return pgDecided('noted', id) === 'Agree it’s on track'; }).length;
+    if (noted) lines.push(noted + (noted === 1 ? ' milestone' : ' milestones') + ' agreed on track without discussion.');
+    if (PG.early) lines.unshift('Ended early. ' + carried.length + (carried.length === 1 ? ' item carries' : ' items carry') + ' forward to next month.');
+    else if (carried.length) lines.push(carried.length + (carried.length === 1 ? ' item carries' : ' items carry') + ' forward to next month.');
+    STRAT_LOG.unshift({ type: 'Monthly progress', date: '26 Sep', who: Object.keys(PG.att).filter(function (k) { return PG.att[k]; }), lines: lines, notes: PG.notes, carried: carried });
+    STRAT.lastProgress = '26 Sep'; STRAT.progress = 'Monday 27 October'; PG = null; go('strategy');
+    toast('Monthly progress closed' + (carried.length ? '. ' + carried.length + (carried.length === 1 ? ' item carries' : ' items carry') + ' forward.' : '.') + ' Check-ins for the next meeting open on 20 Oct.');
   }
   document.addEventListener('click', function (e) {
     if (e.target.closest('[data-pgstart]')) { startProgress(); return; }
-    if (!PG) return;
-    var st = e.target.closest('[data-pgstep]');
-    if (st) { pgRead(); PG.step = +st.getAttribute('data-pgstep'); if (PG.step === 3 && !PG.reason) { PG.reason = {}; pgItems().forEach(function (x) { if (x.why !== 'noted') PG.reason[x.key] = x.why; }); } renderProgress(); window.scrollTo(0, 0); return; }
-    var ed = e.target.closest('[data-pgedit]'); if (ed) { pgRead(); PG.edit[ed.getAttribute('data-pgedit')] = true; var ye = window.scrollY; renderProgress(); window.scrollTo(0, ye); return; }
-    var up = e.target.closest('[data-pgupd]');
-    if (up) {
-      pgRead(); var uk = up.getAttribute('data-pgupd'), ur = uk.split(':'), um = PROGRAMS[ur[0]].ms[+ur[1]], uid = uk.replace(':', '__');
-      um.st = $('pgu-s-' + uid).value; um.note = $('pgu-n-' + uid).value.trim(); um.upd = '26 Sep'; um.inMeeting = true; PG.edit[uk] = false;
-      toast('Update recorded for ' + um.who + '.'); var yu = window.scrollY; renderProgress(); window.scrollTo(0, yu); return;
-    }
-    var dc = e.target.closest('[data-pgdec]'); if (dc) { pgRead(); var p = dc.getAttribute('data-pgdec').split(':'), k = p[0] + ':' + p[1]; PG.dec[k] = PG.dec[k] || {}; PG.dec[k].d = p[2]; var y = window.scrollY; renderProgress(); window.scrollTo(0, y); return; }
-    var rs = e.target.closest('[data-pgraise]'); if (rs) { pgRead(); PG.raise[rs.getAttribute('data-pgraise')] = true; if (PG.reason) PG.reason[rs.getAttribute('data-pgraise')] = 'raised'; var y2 = window.scrollY; renderProgress(); window.scrollTo(0, y2); return; }
-    if (e.target.closest('#pg-copy')) { pgRead(); copy(pgSummary(), 'Summary copied'); return; }
-    if (e.target.closest('#pg-save')) {
-      pgRead();
-      pgItems().forEach(function (x) { var d = PG.dec[x.key]; if (d && d.d === 'plan') x.o.flagged = true; });
-      STRAT_LOG.unshift({ type: 'Monthly progress', date: '26 Sep', who: Object.keys(PG.att).filter(function (k) { return PG.att[k]; }), lines: pgItems().filter(function (x) { return PG.dec[x.key] && PG.dec[x.key].d; }).map(function (x) { var d = PG.dec[x.key]; return x.m.t + ': ' + ({ agreed: 'Agreed', adjust: 'Adjust', plan: 'Take to planning' })[d.d] + (d.note ? '. ' + d.note : ''); }).concat([pgItems().filter(function (x) { return x.why === 'noted'; }).length + ' milestones noted without discussion.']) });
-      STRAT.lastProgress = '26 Sep'; STRAT.progress = 'Monday 27 October'; PG = null; go('strategy'); toast('Progress saved. Check-ins for the next meeting open on 20 Oct.');
-    }
+    if (!PG || ST.view !== 'progress') return;
+    var y = window.scrollY, t;
+    if ((t = e.target.closest('[data-pgstep]'))) { var to = t.getAttribute('data-pgstep'); if (to === 'decide' || to === 'receipt') PG.visitedDecide = true; if (to === 'decide' && PG.step === 'receipt' && PG.groups) PG.g = pgGroupsOn().length - 1; PG.step = to; renderProgress(); window.scrollTo(0, 0); return; }
+    if ((t = e.target.closest('[data-pgg]'))) { if (t.disabled) return; var gi = +t.getAttribute('data-pgg'); if (gi < 0) PG.step = 'check'; else PG.g = gi; renderProgress(); window.scrollTo(0, 0); return; }
+    if ((t = e.target.closest('[data-pgci]'))) { var ck = t.getAttribute('data-pgci'); PG.ci[ck] = PG.ci[ck] ? '' : 'skip'; renderProgress(); window.scrollTo(0, y); return; }
+    if ((t = e.target.closest('[data-pgdec]'))) { var dk = t.getAttribute('data-pgdec'), v = t.getAttribute('data-pgval'); PG.done[dk] = PG.done[dk] === v ? '' : v; renderProgress(); window.scrollTo(0, y); return; }
+    if ((t = e.target.closest('[data-pgall]'))) { var ak = t.getAttribute('data-pgall'); PG.groups[ak].forEach(function (id) { if (!PG.done[id + ':' + ak]) PG.done[id + ':' + ak] = 'Agree it’s on track'; }); renderProgress(); window.scrollTo(0, y); return; }
+    if (e.target.closest('#pg-end')) { PG.early = PG.step; PG.visitedDecide = PG.visitedDecide || PG.step === 'decide'; PG.step = 'receipt'; renderProgress(); window.scrollTo(0, 0); return; }
+    if (e.target.closest('#pg-save')) { pgClose(); return; }
   });
-  document.addEventListener('change', function (e) { var a = e.target.getAttribute && e.target.getAttribute('data-pgatt'); if (a && PG) PG.att[a] = e.target.checked; });
+  document.addEventListener('change', function (e) { var a = e.target.getAttribute && e.target.getAttribute('data-pgatt'); if (a && PG) { PG.att[a] = e.target.checked; renderProgress(); } });
+
 
   // Check in from the Strategy page, before the meeting
   function myCheckins() {
@@ -4447,7 +4505,7 @@ body.rv-mode main { padding-top: 0; }
     closeRec(); closeSheet(); closePrismView(); render(); window.scrollTo(0, 0);
   }
   function render() { renderView(); renderMyFocusCount(); }
-  function renderView() { document.body.classList.toggle('rv-mode', ST.view === 'meeting' && !!MT); if (ST.view === 'map') renderMap(); else if (ST.view === 'strategy') renderStrategy(); else if (ST.view === 'planning') renderPlanning(); else if (ST.view === 'progress') renderProgress(); else if (ST.view === 'myfocus') renderMyFocus(); else if (ST.view === 'sites') renderSites(); else if (ST.view === 'site') { if (ST.siteFeed) renderSiteFeed(ST.site); else renderSite(ST.site); } else if (ST.view === 'sources') renderSources(); else if (ST.view === 'meeting') renderMeeting();  else if (ST.view === 'insight') renderInsight(ST.insight); else renderFocus(); }
+  function renderView() { document.body.classList.toggle('rv-mode', (ST.view === 'meeting' && !!MT) || (ST.view === 'progress' && !!PG)); if (ST.view === 'map') renderMap(); else if (ST.view === 'strategy') renderStrategy(); else if (ST.view === 'planning') renderPlanning(); else if (ST.view === 'progress') renderProgress(); else if (ST.view === 'myfocus') renderMyFocus(); else if (ST.view === 'sites') renderSites(); else if (ST.view === 'site') { if (ST.siteFeed) renderSiteFeed(ST.site); else renderSite(ST.site); } else if (ST.view === 'sources') renderSources(); else if (ST.view === 'meeting') renderMeeting();  else if (ST.view === 'insight') renderInsight(ST.insight); else renderFocus(); }
 
   document.addEventListener('click', function (e) {
     var a = e.target.closest('a[href^="#"]');
