@@ -1078,6 +1078,19 @@ body.rv-mode main { padding-top: 0; }
 .f-hint { margin: -6px 0 2px; font-size: 14.5px; color: var(--text-3); }
 .kr-tag { display: inline-flex; align-items: center; height: 20px; padding: 0 7px; margin-left: 6px; border: 1px solid var(--border-2); border-radius: 999px; font-size: 12px; font-weight: 700; color: var(--text-2); vertical-align: 1px; white-space: nowrap; }
 .fc-obj { justify-self: start; display: inline-flex; align-items: center; height: 22px; padding: 0 8px; margin-top: -4px; border: 1px solid var(--border-2); border-radius: 999px; font-size: 12.5px; font-weight: 700; color: var(--text-2); }
+/* Review pass: one colour rule, sentence case, quieter empties */
+.seg button[aria-pressed="true"] { background: var(--bg-3); color: var(--text); border-color: var(--text); }
+.tag-now { background: var(--brand); color: var(--text); }
+.tag-next { background: var(--bg); color: var(--text-2); border: 1px solid var(--border-2); }
+.mf-open { text-decoration-color: var(--border-2); } .mf-open:hover { text-decoration-color: currentColor; }
+.label, .kv dt, .fld label, .w-note-l, .why-here, .il-h, .ra-h, .help-sec h3, .fhead, .fhead2, .cmp th, .cmp tr.cmp-dom td, .pv-layer, .dc-ctx, .tag-now, .tag-next { text-transform: none; letter-spacing: 0; }
+.label, .kv dt, .fld label, .w-note-l { font-size: 13px; font-weight: 700; }
+.empty-card { padding: 0; border: 0; box-shadow: none; background: none; color: var(--text-3); font-size: 15px; }
+.st-kind { margin: 0 0 -4px; }
+.st-title .linkish { font: inherit; color: inherit; text-decoration: underline; text-decoration-color: var(--border-2); text-underline-offset: 4px; }
+.st-title .linkish:hover { text-decoration-color: currentColor; }
+.sp-read { margin: 6px 0 0; display: flex; align-items: center; gap: 6px 10px; flex-wrap: wrap; font-size: 15px; }
+.sp-read > span:first-child { font-size: 13px; font-weight: 700; color: var(--text-3); }
 </style>
 </head>
 <body>
@@ -1490,7 +1503,7 @@ body.rv-mode main { padding-top: 0; }
 
     $('view').innerHTML =
       '<div class="page-top"><div><h1>Insights</h1><p class="sub">' + esc(scopeLabel()) + ' · right now, updated as records arrive</p></div>' +
-        '<div class="actions"><button type="button" class="btn" data-hjump="ins:review">Past Focus reviews</button><button type="button" class="btn brand" id="start-meeting">Start a Focus review</button></div></div>' +
+        '<div class="actions"><button type="button" class="btn brand" id="start-meeting">Start a Focus review</button></div></div>' +
       tabsHTML('ins') +
 
       '<div class="card brief"><div class="brief-head"><span class="who"><svg width="16" height="16" viewBox="0 0 22 22" aria-hidden="true"><path d="M11 2.5 20 19H2z" fill="none" stroke="#0d0f12" stroke-width="2" stroke-linejoin="round"/><path d="M11 9.5 15.2 17H6.8z" fill="#ffe500"/></svg><h2>The story right now</h2></span><span class="label">Written by Prism from ' + linked + ' linked records</span></div>' +
@@ -2477,6 +2490,13 @@ body.rv-mode main { padding-top: 0; }
           (x.visit > 30 ? '<p class="muted-p">Sites without a leadership visit for over a month are flagged.</p>' : '') +
           (planned ? '<p style="font-weight:700">Visit planned for next week.</p>' : '<div class="meet-actions"><button type="button" class="btn brand" data-plan-visit="' + id + '">Plan a visit</button></div>') +
         '</section>' +
+        (function () {
+          var objs = objsInView().filter(function (o) { return objRegs(o).indexOf(x.region) > -1; }), g = mapGap([x.region]);
+          if (!objs.length && !g.gap) return '';
+          return '<section class="card side-card"><h2>Strategy and the Map</h2>' +
+            (objs.length ? '<p class="f-strat-l"><span>Objectives that include this site</span>' + objs.map(function (o) { return '<span><button type="button" class="linkish map-link" data-obj="' + o.id + '">' + esc(objTitle(o)) + '</button> · ' + objStatus(o)[1].toLowerCase() + '</span>'; }).join('') + '</p>' : '') +
+            (g.gap ? '<p class="f-strat-l"><span>Clearest gap in ' + esc(x.region) + ' region</span><span>' + factorBtn(g.gap) + '</span></p>' : '') + '</section>';
+        })() +
         '<section class="card side-card"><h2>Sources for this site</h2>' +
           (x.src.length ? '<ul class="site-srcs">' + x.src.map(function (sid) {
             var so = SRC[sid], ss = SRC_STATUS[so.status];
@@ -3109,13 +3129,13 @@ body.rv-mode main { padding-top: 0; }
       var ow = owners();
       return '<span class="fld"><label for="mfo-' + i.id + '" class="sr">Owner</label><select class="select" id="mfo-' + i.id + '" data-mf-assign="' + i.id + '"><option value="">Choose an owner</option>' + ow.map(function (o) { return '<option>' + esc(o) + '</option>'; }).join('') + '</select></span>';
     }
-    if (it.kind === 'escalated') return '<button type="button" class="btn brand" data-esc-accept="' + i.id + '">Accept</button><a class="btn" href="#insight/' + i.id + '">Send back or pass up</a>';
-    if (it.kind === 'chase') return '<button type="button" class="btn brand" data-mf-nudge="' + i.id + '">Nudge ' + esc(i.owner) + '</button>';
-    if (it.kind === 'visit') return '<button type="button" class="btn brand" data-mf-visit="' + it.site.id + '">Plan a visit</button>';
-    if (it.kind === 'update') return '<a class="btn brand" href="#insight/' + i.id + '">Post an update</a>';
-    if (it.kind === 'close') return '<button type="button" class="btn brand" data-mf-close="' + i.id + '">Close it</button>';
-    if (it.kind === 'agreed') return '<button type="button" class="btn brand" data-mf-agreed="' + it.id + '">Mark as done</button>';
-    if (it.kind === 'retro') return '<button type="button" class="btn brand" data-retro="' + i.retro + '">Review the retro</button>';
+    if (it.kind === 'escalated') return '<button type="button" class="btn" data-esc-accept="' + i.id + '">Accept</button><a class="btn" href="#insight/' + i.id + '">Send back or pass up</a>';
+    if (it.kind === 'chase') return '<button type="button" class="btn" data-mf-nudge="' + i.id + '">Nudge ' + esc(i.owner) + '</button>';
+    if (it.kind === 'visit') return '<button type="button" class="btn" data-mf-visit="' + it.site.id + '">Plan a visit</button>';
+    if (it.kind === 'update') return '<a class="btn" href="#insight/' + i.id + '">Post an update</a>';
+    if (it.kind === 'close') return '<button type="button" class="btn" data-mf-close="' + i.id + '">Close it</button>';
+    if (it.kind === 'agreed') return '<button type="button" class="btn" data-mf-agreed="' + it.id + '">Mark as done</button>';
+    if (it.kind === 'retro') return '<button type="button" class="btn" data-retro="' + i.retro + '">Review the retro</button>';
     if (it.kind === 'action') return '<label class="pa-ci"><span class="sr">Check in</span><select class="select" data-pa="' + it.work.id + ':' + it.ak + '">' + PA_ST.map(function (x) { return '<option value="' + x[0] + '"' + (x[0] === it.act.st ? ' selected' : '') + '>' + x[1] + '</option>'; }).join('') + '</select></label>';
     return '';
   }
@@ -3529,7 +3549,7 @@ body.rv-mode main { padding-top: 0; }
           (sc.v != null ? '<p class="f-named">' + esc(f.lnames[sc.lvl]) + '</p>' + wasLine(sc) : '') +
           '<p class="muted-p" style="color:var(--text)">' + (sc.v == null ? 'Records and insights don’t show this factor. Focus reviews, surveys and interviews fill it in.' : sc.n + ' signals in the last 90 days.' + (sc.weakest != null ? ' Held back by <b>' + esc(f.inds[sc.weakest].toLowerCase()) + '</b>.' : '') + (sc.mgmt ? ' ' + word(sc.mgmt) + (sc.mgmt === 1 ? ' indicator needs' : ' indicators need') + ' management input.' : '')) + '</p></section>' +
         (obj ? (function () { var st = objStatus(obj); return '<section class="card side-card f-strat"><span class="label">In the strategy</span>' +
-          '<p class="f-strat-t"><a class="map-link" href="#strategy">' + esc(objTitle(obj)) + '</a></p>' +
+          '<p class="f-strat-t"><button type="button" class="linkish map-link" data-obj="' + obj.id + '">' + esc(objTitle(obj)) + '</button></p>' +
           '<div class="meta"><span class="badge ' + st[0] + '"><i></i>' + st[1] + '</span><span class="chip">' + esc(objScope(obj)) + '</span></div>' +
           '<p class="f-strat-l"><span>Key results</span>' + obj.krs.map(function (kr) { return esc(f.inds[kr[0]]) + ' to ' + LEVELS[kr[1]]; }).join(' · ') + '</p>' +
           (obj.programs.length ? '<p class="f-strat-l"><span>' + (obj.programs.length === 1 ? 'Program' : 'Programs') + '</span>' + obj.programs.map(function (pid) { return '<span><button type="button" class="linkish map-link" data-prog="' + pid + '">' + esc(PROGRAMS[pid].title) + '</button> · led by ' + esc(PROGRAMS[pid].owner) + '</span>'; }).join('') + '</p>' : '') + '</section>'; })() : '') +
@@ -3681,6 +3701,26 @@ body.rv-mode main { padding-top: 0; }
   Object.keys(PROGRAMS).forEach(function (pid) { progWrap(pid); });
   function workById(id) { return insightById(id) || PROGRAMS[id] || null; }
   function progObjective(pid) { return OBJECTIVES.filter(function (o) { return o.programs.indexOf(pid) > -1; })[0]; }
+  function openObjective(oid, trigger) {
+    var o = OBJECTIVES.filter(function (x) { return x.id === oid; })[0]; if (!o) return;
+    if (trigger) recTrigger = trigger;
+    var f = FACTOR[o.f], orr = objRegs(o), sc = scoreFactor(orr, o.f), st = objStatus(o);
+    var ins = insightsInView().filter(function (i) { return objFor(i) === o; });
+    $('rec').innerHTML = drawerHead('Objective', [objScope(o), 'Set at quarterly planning on ' + STRAT.lastPlanning], objTitle(o), 'Owner ' + o.owner + ' · checked at monthly progress, changed only at quarterly planning') +
+      '<div class="sheet-body"><div class="meta"><span class="badge ' + st[0] + '"><i></i>' + st[1] + '</span></div>' +
+        '<section class="sheet-sec"><span class="label">Why this objective</span><p>' + esc(o.why) + '</p></section>' +
+        '<section class="sheet-sec"><div class="plan-head"><span class="label">Where it stands</span><span class="plan-state">Target ' + LEVELS[o.target] + ' by ' + esc(o.by) + '</span></div>' +
+          '<div class="st-now">' + factorBtn(o.f) + levelBar(sc.v, true, null, sc.was) + trendHTML(sc.t) + '</div></section>' +
+        '<section class="sheet-sec"><span class="label">Key results</span>' + o.krs.map(function (kr) {
+          var x = aggInd(orr, o.f, kr[0]), hit = lvlOf(x.v) >= kr[1];
+          return '<div class="kr"><span class="kr-n">' + esc(f.inds[kr[0]]) + '</span><span class="ind-rate">' + levelBar(x.v, true, x.v == null ? 'Needs input' : null, x.was) + (x.v != null ? trendHTML(x.t) : '') + '</span><span class="kr-tg' + (hit ? ' hit' : '') + '">' + (hit ? 'Target reached' : 'Target ' + LEVELS[kr[1]]) + '</span></div>';
+        }).join('') + '</section>' +
+        '<section class="sheet-sec"><span class="label">' + (o.programs.length === 1 ? 'Program' : 'Programs') + '</span><div class="links">' + o.programs.map(function (pid) { var p = PROGRAMS[pid]; return '<button type="button" class="link-item" data-prog="' + pid + '"><b>' + esc(p.title) + '</b><span>' + esc(p.owner) + ' · ' + esc(planSummary(p)) + ' · ' + ({ working: 'working', continues: 'pattern continues', early: 'too early to tell' })[p.read[0]] + '</span></button>'; }).join('') + '</div></section>' +
+        '<section class="sheet-sec"><span class="label">Insights contributing</span>' + (ins.length ? '<div class="links">' + ins.map(function (i) { return '<button type="button" class="link-item" data-fopen="' + i.id + '"><b>' + esc(i.title) + '</b><span>' + esc(f.inds[INS_FACTOR[i.id][1]]) + ' · ' + esc(planSummary(i) || statusText(i)) + '</span></button>'; }).join('') + '</div>' : '<p class="muted-p">No open insights on this factor right now.</p>') + '</section>' +
+      '</div>';
+    $('rec').hidden = false; $('scrim').hidden = false; $('rec-x').focus();
+  }
+  document.addEventListener('click', function (e) { var t = e.target.closest('[data-obj]'); if (t) { e.preventDefault(); e.stopPropagation(); openObjective(t.getAttribute('data-obj'), t); } }, true);
   function openProgram(pid, trigger) {
     var p = PROGRAMS[pid]; if (!p) return; var o = progObjective(pid);
     if (trigger) recTrigger = trigger; ST.prog = pid;
@@ -3689,7 +3729,7 @@ body.rv-mode main { padding-top: 0; }
     var allDone = p.plan.actions.length && p.plan.actions.every(function (a) { return a.st === 'done'; });
     $('rec').innerHTML = drawerHead('Program', o ? [objTitle(o), 'Applies to ' + objScope(o)] : [], p.title, 'Owner ' + p.owner + ' \u00b7 ' + p.resources) +
       '<div class="sheet-body"><div class="meta">' + statusBadge(p) + '</div>' +
-        (o ? '<section class="sheet-sec"><span class="label">Why this program</span><p>' + esc(o.why) + '</p></section>' : '') +
+        (o ? '<section class="sheet-sec"><span class="label">Why this program</span><p>' + esc(o.why) + '</p><p class="f-strat-l"><span>Objective</span><span><button type="button" class="linkish map-link" data-obj="' + o.id + '">' + esc(objTitle(o)) + '</button></span></p></section>' : '') +
         planHTML(p, 'sheet-sec', { split: true }) + checkHTML(p, 'sheet-sec') +
         '<section class="sheet-sec phase"><div class="plan-head"><span class="label">Retro' + nowTag(p, 'retro') + '</span><span class="plan-state">' + (p.status === 'resolved' ? 'Ready to close \u00b7 closes at the next quarterly planning' : allDone ? 'All actions done \u00b7 ready to close' : 'When the program closes') + '</span></div>' +
           '<p class="ph-l">Prism writes a retro when the program closes, and a read of it at each quarterly planning, using the same outcomes as insight retros.</p>' +
@@ -3735,7 +3775,7 @@ body.rv-mode main { padding-top: 0; }
   function stActions(org) {
     var planFirst = dayOf(STRAT.planning) <= dayOf(STRAT.progress);
     var pg = '<button type="button" class="btn' + (planFirst ? '' : ' brand') + '" data-pgstart="1">Start monthly progress</button>', pl = '<button type="button" class="btn' + (planFirst ? ' brand' : '') + '" data-plstart="1">Start quarterly planning</button>';
-    return '<div class="st-go"><button type="button" class="btn" data-stpast="1">Past meetings</button>' + (org ? (planFirst ? pg + pl : pl + pg) : '') + '</div>';
+    return '<div class="st-go">' + (org ? (planFirst ? pg + pl : pl + pg) : '') + '</div>';
   }
   function stRhythm() {
     var rows = [['Check-ins close', CHECKIN.closes], ['Monthly progress', STRAT.progress], ['Quarterly planning', STRAT.planning]].sort(function (a, b) { return dayOf(a[1]) - dayOf(b[1]); });
@@ -3807,13 +3847,8 @@ body.rv-mode main { padding-top: 0; }
       '<div class="st-objs">' + objs.map(function (o, oi) {
         var f = FACTOR[o.f], orr = objRegs(o), sc = scoreFactor(orr, o.f), s = st[oi];
         var ins = insightsInView().filter(function (i) { return objFor(i) === o; });
-        return '<section class="card st-obj"><div class="st-top"><span class="badge ' + s[0] + '"><i></i>' + s[1] + '</span><span class="chip">Applies to ' + esc(objScope(o)) + '</span>' + (o.flagged ? '<span class="tlabel">Flagged for planning</span>' : '') + '<button type="button" class="btn sm pv-btn" data-pv="objective:' + o.id + '"><svg width="14" height="14" viewBox="0 0 22 22" aria-hidden="true"><path d="M11 2.5 20 19H2z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></svg>View through Prism</button>' + '<span class="st-own">Set by ' + esc(ORG_NAME) + ' on ' + esc(o.set || '1 Jul') + ' · owner ' + esc(o.owner) + '</span></div>' +
-          '<h2 class="st-title">' + esc(objTitle(o)) + '</h2><p class="st-why">' + esc(o.why) + '</p>' +
-          (function () {
-            var worse = o.krs.filter(function (kr) { return aggInd(orr, o.f, kr[0]).t === 'worse'; }).map(function (kr) { return f.inds[kr[0]].toLowerCase(); });
-            var reads = o.programs.map(function (pid) { return PROGRAMS[pid].read[1]; });
-            return '<p class="st-sum"><span class="label">Where it stands</span>' + (worse.length ? esc(cap(join(worse))) + (worse.length === 1 ? ' is' : ' are') + ' worsening. ' : 'Key results are holding or improving. ') + esc(reads.join(' ')) + '</p>';
-          })() +
+        return '<section class="card st-obj"><div class="st-top"><span class="kind-t">Objective</span><span class="badge ' + s[0] + '"><i></i>' + s[1] + '</span><span class="chip">Applies to ' + esc(objScope(o)) + '</span>' + (o.flagged ? '<span class="tlabel">Flagged for planning</span>' : '') + '<button type="button" class="btn sm pv-btn" data-pv="objective:' + o.id + '"><svg width="14" height="14" viewBox="0 0 22 22" aria-hidden="true"><path d="M11 2.5 20 19H2z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></svg>View through Prism</button>' + '<span class="st-own">Set by ' + esc(ORG_NAME) + ' on ' + esc(o.set || '1 Jul') + ' · owner ' + esc(o.owner) + '</span></div>' +
+          '<h2 class="st-title"><button type="button" class="linkish" data-obj="' + o.id + '">' + esc(objTitle(o)) + '</button></h2><p class="st-why">' + esc(o.why) + '</p>' +
           '<div class="st-now"><span class="label">Today' + (org || !o.div ? '' : '') + '</span>' + factorBtn(o.f) + levelBar(sc.v, true, null, sc.was) + trendHTML(sc.t) + '<span class="st-tgt">Target: <b>' + LEVELS[o.target] + '</b> \u00b7 ' + esc(f.lnames[o.target]) + '</span></div>' +
           '<div class="st-krs"><span class="label">Key results · ' + esc(o.div && org ? o.div + ' division' : scopeLabel()) + '</span>' + o.krs.map(function (kr) {
             var x = aggInd(orr, o.f, kr[0]), hit = lvlOf(x.v) >= kr[1];
@@ -3823,7 +3858,7 @@ body.rv-mode main { padding-top: 0; }
             var p = PROGRAMS[pid], d = p.ms.filter(function (m) { return m.st === 'done'; }).length;
             return '<div class="st-prog"><div class="sp-head"><span class="label">Program</span><h3><button type="button" class="linkish map-link" data-prog="' + pid + '">' + esc(p.title) + '</button></h3><span class="sp-meta">' + statusBadge(p) + ' ' + esc(p.owner) + ' · ' + d + ' of ' + p.ms.length + ' actions done · ' + esc(p.resources) + '</span></div>' +
               '<details class="sp-det"><summary>' + p.ms.length + ' actions</summary><ul class="ra-acts sp-ms">' + p.ms.map(function (m) { return '<li>' + actBadge(m) + '<span class="ra-t">' + esc(m.t) + '</span><span class="ra-m">' + esc(m.who) + ' · by ' + esc(m.due) + '</span></li>'; }).join('') + '</ul></details>' +
-              '<div class="plan-check"><span class="label">Is it working?</span><p>' + readBadge(p.read) + ' ' + esc(p.read[1]) + '</p><p class="pc-l">Prism listens for: ' + esc(p.expect) + '</p></div></div>';
+              '<p class="sp-read"><span>Is it working?</span>' + (p.read[0] === 'working' ? '<span class="badge success"><i></i>Working</span>' : p.read[0] === 'continues' ? '<span class="badge critical"><i></i>Pattern continues</span>' : '<b>Too early to tell</b>') + ' ' + esc(p.read[1]) + '</p></div>';
           }).join('') +
           '<div class="st-ins"><span class="label">Insights contributing</span>' + (ins.length ? '<div class="links">' + ins.map(function (i) { return '<button type="button" class="link-item" data-open="' + i.id + '"><b>' + esc(i.title) + '</b><span>' + esc(FACTOR[o.f].inds[INS_FACTOR[i.id][1]]) + ' · ' + esc(planSummary(i) || statusText(i)) + '</span></button>'; }).join('') + '</div>' : '<p class="muted-p">No open insights on this factor right now.</p>') + '</div>' +
         '</section>';
