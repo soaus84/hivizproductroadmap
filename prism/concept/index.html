@@ -123,12 +123,13 @@ main { padding-block: 32px 80px; }
 .btn.dark { background: var(--text); color: #fff; border-color: var(--text); }
 .btn.dark:hover { background: #262626; }
 .btn.sm { height: 32px; padding: 0 12px; font-size: 14px; }
-.btn.brand { background: var(--brand); border-color: #d9c200; }
+.btn.brand { background: var(--text); border-color: var(--text); color: #fff; }
+.btn.brand:hover { background: #2b2f36; border-color: #2b2f36; }
 .card { border: 1px solid var(--border); border-radius: 12px; background: var(--bg); box-shadow: 0 1px 2px rgba(13,15,18,0.04); }
 .label { font-size: 12px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-3); }
 .seg { display: inline-flex; padding: 0; gap: 6px; flex-wrap: wrap; }
 .seg button { border: 1px solid var(--border-2); background: var(--bg); height: 36px; padding: 0 14px; border-radius: 999px; font-size: 15px; font-weight: 700; color: var(--text); cursor: pointer; white-space: nowrap; }
-.seg button[aria-pressed="true"] { background: var(--text); color: #fff; border-color: var(--text); }
+.seg button[aria-pressed="true"] { background: var(--brand); color: var(--text); border-color: #d9c200; }
 .seg button .c { margin-left: 6px; font-variant-numeric: tabular-nums; opacity: 0.7; }
 
 /* Badges */
@@ -809,14 +810,14 @@ button.ind-btn:hover .ind-name { text-decoration: underline; text-underline-offs
 .pa.st-risk .pa-ci select { border-color: var(--warning); color: var(--warning); font-weight: 800; }
 .pa.st-done .pa-ci select { color: var(--success); font-weight: 800; }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-.pa-add { display: grid; grid-template-columns: minmax(0, 1fr) auto 110px auto; gap: 8px; align-items: center; }
+.pa-add { display: grid; grid-template-columns: minmax(0, 1fr) auto auto auto; gap: 8px; align-items: center; }
 .pa-add .w-note { min-height: 0; padding: 8px 10px; }
 .plan-exp { margin: 0; display: grid; gap: 2px; font-size: 15px; }
 .plan-foot { display: flex; align-items: center; justify-content: space-between; gap: 10px 16px; flex-wrap: wrap; }
 .plan-foot .muted-p { margin: 0; }
 .icard-plan { font-size: 13.5px; font-weight: 800; }
 .icard-plan.prop { color: var(--text-2); }
-@media (max-width: 640px) { .pa-add { grid-template-columns: 1fr 1fr; } .pa-add .w-note:first-child { grid-column: 1 / -1; } }
+@media (max-width: 640px) { .pa-add { grid-template-columns: 1fr 1fr auto; } .pa-add .w-note:first-child { grid-column: 1 / -1; } .pa-add .select { max-width: none; } }
 .inf { display: inline-block; font-size: 11px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-3); border: 1px dashed var(--border-2); border-radius: 999px; padding: 0 7px; vertical-align: 1px; cursor: help; }
 .fd-rate { display: grid; gap: 8px; }
 .fd-inds { list-style: none; margin: 0; padding: 0; display: grid; }
@@ -957,6 +958,126 @@ button.pv-node:hover .pv-t { text-decoration: underline; text-underline-offset: 
 .hl-m b { font-size: 16px; font-weight: 800; }
 .hl-m span { font-size: 14px; color: var(--text-2); }
 @media (max-width: 640px) { .hl-row { grid-template-columns: 1fr; } .hl-b:empty { display: none; } }
+/* ---------- Insight rejig: chunked phases, quieter controls ---------- */
+/* A rule above each section heading, never between a heading and its content */
+.ins-main { gap: 0; }
+.ins-main > .ins-sec + .ins-sec, .sheet-body > .sheet-sec + .sheet-sec { border-top: 1px solid var(--border); padding-top: 22px; }
+.ins-main > .ins-sec { padding-bottom: 26px; }
+.plan-head { align-items: center; }
+.plan-state { text-align: right; }
+.plan-state .badge { vertical-align: middle; }
+.phase { gap: 8px; }
+.phase .ph-p { margin: 0; font-size: 16px; line-height: 1.5; }
+.phase .ph-p .badge { margin-right: 6px; }
+.phase .ph-l { margin: 0; font-size: 14.5px; line-height: 1.45; color: var(--text-3); }
+.phase .rt-row { margin-top: 4px; }
+/* Plan actions: lines between actions only */
+.pa { border-bottom: 0; }
+.pa:first-child { border-top: 0; padding-top: 2px; }
+.pa + .pa { border-top: 1px solid var(--border); }
+/* The check-in reads as a control you can use */
+.pa-ci { display: grid; gap: 3px; justify-items: stretch; }
+.pa-ci .sr { position: static; width: auto; height: auto; clip: auto; overflow: visible; font-size: 12.5px; font-weight: 700; color: var(--text-3); }
+.pa-ci select { background-color: var(--bg-2); border-color: var(--border); min-width: 132px; }
+.pa-ci select:hover { border-color: var(--border-2); }
+/* Links: grey underline, darker on hover */
+.map-link, .linkish, .open-page, .say-more, .st-change summary { text-decoration-color: var(--border-2); }
+.map-link:hover, .linkish:hover, .open-page:hover, .say-more:hover, .st-change summary:hover { text-decoration-color: currentColor; }
+/* Latest update: a note under the story */
+.upd-note { display: grid; gap: 3px; padding: 10px 12px; background: var(--bg-2); border-radius: 10px; }
+.upd-note .upd-l { font-size: 13.5px; font-weight: 700; color: var(--text-3); }
+.sheet-sec .upd-note p { margin: 0; font-size: 15.5px; line-height: 1.45; }
+/* Forge Works Map: grey labels, plain values, rules between the parts */
+.mc .mc-f { display: grid; gap: 2px; font-weight: 400; }
+.mc .mc-f .label, .mc .mc-also .label, .mc .mc-dl dt { font-size: 13px; font-weight: 700; letter-spacing: 0; text-transform: none; color: var(--text-3); }
+.mc .mc-fac { font-size: 16px; font-weight: 800; }
+.mc .mc-ind { font-size: 15px; color: var(--text-2); margin-bottom: 6px; }
+.mc .mc-dl { padding-top: 12px; border-top: 1px solid var(--border); gap: 10px; }
+.mc .mc-dl dd { font-weight: 400; }
+.mc .mc-dl .nx dt { color: var(--text-3); }
+.mc .mc-rel { display: grid; gap: 10px; padding-top: 12px; border-top: 1px solid var(--border); }
+.mc .mc-rel:empty { display: none; }
+.mc .mc-also { font-size: 14.5px; color: var(--text); }
+.now-tag { display: inline-flex; align-items: center; height: 22px; padding: 0 8px; margin-left: 10px; border-radius: 999px; background: var(--brand); font-size: 12.5px; font-weight: 800; letter-spacing: 0.02em; vertical-align: 2px; }
+/* ---------- Focus review: full screen, stepped, readable on a projector ---------- */
+body.rv-mode .hdr, body.rv-mode .open-page { display: none; }
+body.rv-mode main { padding-top: 0; }
+.rv-bar { position: sticky; top: 0; z-index: 30; background: var(--bg); border-bottom: 1px solid var(--border); margin-inline: -24px; }
+.rv-bar-in { max-width: 1120px; margin: 0 auto; padding: 12px 24px; display: flex; align-items: center; gap: 12px 16px; flex-wrap: wrap; }
+.rv-t { display: grid; } .rv-t b { font-size: 17px; font-weight: 800; } .rv-t span { font-size: 13.5px; color: var(--text-3); }
+.rv-rail { list-style: none; display: flex; gap: 6px; margin: 0 0 0 auto; padding: 0; flex-wrap: wrap; }
+.rv-rail li > * { display: inline-flex; align-items: center; gap: 7px; height: 34px; padding: 0 12px 0 6px; border-radius: 999px; border: 1px solid var(--border); font: inherit; font-size: 14px; font-weight: 700; color: var(--text-3); background: none; }
+.rv-rail li > button { cursor: pointer; }
+.rv-rail i { font-style: normal; width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font-size: 12px; border: 1px solid var(--border-2); }
+.rv-rail li.on > * { background: var(--brand); border-color: #d9c200; color: var(--text); }
+.rv-rail li.on i { background: var(--text); color: #fff; border-color: var(--text); }
+.rv-rail li.done i { background: var(--text-2); color: #fff; border-color: var(--text-2); }
+.rv { max-width: 1120px; margin: 0 auto; padding: 36px 0 40px; display: grid; gap: 18px; }
+.rv > .kind { margin: 0; }
+.rv-h { font-size: 40px; line-height: 1.1; letter-spacing: -0.02em; margin: 0; }
+.rv-n { display: inline-grid; place-items: center; min-width: 1.5em; height: 1.5em; padding: 0 0.35em; border-radius: 999px; background: var(--bg-3); font-size: 0.5em; vertical-align: 0.35em; }
+.rv-sub { margin: -8px 0 0; font-size: 18px; color: var(--text-3); }
+.rv-sub b { color: var(--text); }
+.rv-h2 { font-size: 22px; margin: 8px 0 0; }
+.rv-h2 .rv-n { font-size: 0.7em; vertical-align: 0.15em; }
+.rv-q { position: relative; justify-self: start; max-width: 880px; margin: 4px 0 14px; padding: 16px 22px 18px; background: var(--bg); border: 1px solid var(--border-2); border-radius: 18px; display: grid; gap: 6px; }
+.rv-q::after { content: ""; position: absolute; left: 34px; bottom: -9px; width: 16px; height: 16px; background: var(--bg); border-right: 1px solid var(--border-2); border-bottom: 1px solid var(--border-2); transform: rotate(45deg); }
+.rv-q-l { font-size: 13px; font-weight: 800; color: var(--text-3); }
+.rv-q-t { font-size: 24px; line-height: 1.35; font-style: italic; font-weight: 600; color: var(--text); }
+.rv-lc-how { margin: 0; font-size: 17px; font-weight: 700; }
+.rv .lc { margin-top: 12px; }
+.rv .lc-opt { padding: 16px 18px; font-size: 17px; line-height: 1.4; color: var(--text); border-color: var(--border-2); border-radius: 12px; }
+.rv .lc-opt input { width: 18px; height: 18px; margin-top: 2px; accent-color: var(--text); }
+.rv .lc-opt:has(input:checked) { background: var(--brand); border: 1px solid #d9c200; padding: 16px 18px; }
+.rv-list { list-style: none; margin: 0; padding: 0; }
+.rv-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px 24px; align-items: center; padding: 18px 0; border-top: 1px solid var(--border); }
+.rv-row:last-child { border-bottom: 1px solid var(--border); }
+.rv-row.is-done .rv-title { color: var(--text-3); }
+.rv-m { display: grid; gap: 4px; min-width: 0; }
+.rv-title { font-size: 20px; font-weight: 800; line-height: 1.3; text-align: left; }
+.rv-s { font-size: 16px; line-height: 1.45; color: var(--text-3); }
+.rv-s .badge { vertical-align: 1px; margin-right: 4px; }
+.rv-who { display: inline-flex; align-items: center; gap: 6px; color: var(--text-2); font-weight: 700; } .rv-who .av { width: 22px; height: 22px; font-size: 10px; }
+.rv-c { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
+.rv-ci { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; } .rv-ci small { font-size: 13.5px; color: var(--text-3); font-weight: 700; }
+.rv-ch { display: inline-flex; gap: 8px; flex-wrap: wrap; }
+.rv-ch .btn.is-on { background: var(--brand); color: var(--text); border-color: #d9c200; }
+.rv-dec { font-size: 15px; font-weight: 800; }
+.rv-miss { font-size: 14.5px; font-weight: 800; color: var(--warning); }
+.rv-carry { display: inline-flex; height: 22px; align-items: center; padding: 0 8px; border-radius: 999px; border: 1px solid var(--border-2); font-size: 12.5px; font-weight: 800; color: var(--text-2); margin-right: 4px; }
+.rv-groups { list-style: none; margin: 0; padding: 0; display: flex; gap: 6px; flex-wrap: wrap; }
+.rv-groups button { height: 32px; padding: 0 12px; border-radius: 999px; border: 1px solid var(--border); background: none; font: inherit; font-size: 14px; font-weight: 700; color: var(--text-3); cursor: pointer; }
+.rv-groups button span { font-weight: 600; margin-left: 2px; }
+.rv-groups .on button { background: var(--brand); border-color: #d9c200; color: var(--text); }
+.rv-groups .done button { color: var(--text-2); }
+.rv-nav { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; padding-top: 22px; margin-top: 8px; border-top: 1px solid var(--border); }
+.rv-nav-r { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-left: auto; } .rv-nav-r small { font-size: 14px; color: var(--text-3); font-weight: 700; }
+.btn.lg { height: 46px; padding: 0 20px; font-size: 16.5px; }
+.rv-att { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 10px; }
+.rv-p { display: flex; align-items: center; gap: 10px; padding: 10px 16px 10px 10px; border: 1px solid var(--border-2); border-radius: 12px; cursor: pointer; font-size: 17px; font-weight: 700; color: var(--text-3); }
+.rv-p.on { border-color: var(--text); color: var(--text); }
+.rv-p small { display: block; font-size: 13px; font-weight: 600; color: var(--text-3); }
+.rv-p input { width: 18px; height: 18px; accent-color: var(--text); }
+.rv-agenda { list-style: none; margin: 0; padding: 0; } .rv-agenda li { display: flex; justify-content: space-between; gap: 14px; padding: 14px 0; border-top: 1px solid var(--border); font-size: 19px; } .rv-agenda li span { color: var(--text-3); font-weight: 700; }
+.rv-plan-row { grid-template-columns: minmax(0, 1fr); }
+.rv-plan { display: grid; gap: 12px; padding: 14px 16px; border: 1px solid var(--border); border-radius: 12px; }
+.rv-line { margin: 0; font-size: 17px; }
+.rv-empty { font-size: 18px; color: var(--text-3); margin: 0; }
+.rv-all { margin: 0; }
+.rv-c-plan { justify-content: flex-start; }
+.rv-groups button[disabled] { opacity: 0.45; cursor: default; }
+.rv-rc { display: grid; gap: 8px; }
+@media (max-width: 720px) { .rv-h { font-size: 30px; } .rv-q { font-size: 18px; } .rv-row { grid-template-columns: minmax(0, 1fr); } .rv-c { justify-content: flex-start; } .rv-rail { margin-left: 0; } .rv-bar { margin-inline: -16px; } }
+/* Factor page: spacing after the rating card, and the strategy call-out */
+.ins-main > .card { margin-bottom: 26px; }
+.ins-main > .card + .card { margin-top: -12px; }
+.f-strat { gap: 8px; }
+.f-strat-t { margin: 0; font-size: 18px; font-weight: 800; }
+.f-strat-l { margin: 0; display: grid; gap: 2px; font-size: 15px; line-height: 1.45; }
+.f-strat-l > span:first-child { font-size: 13px; font-weight: 700; color: var(--text-3); }
+.f-hint { margin: -6px 0 2px; font-size: 14.5px; color: var(--text-3); }
+.kr-tag { display: inline-flex; align-items: center; height: 20px; padding: 0 7px; margin-left: 6px; border: 1px solid var(--border-2); border-radius: 999px; font-size: 12px; font-weight: 700; color: var(--text-2); vertical-align: 1px; white-space: nowrap; }
+.fc-obj { justify-self: start; display: inline-flex; align-items: center; height: 22px; padding: 0 8px; margin-top: -4px; border: 1px solid var(--border-2); border-radius: 999px; font-size: 12.5px; font-weight: 700; color: var(--text-2); }
 </style>
 </head>
 <body>
@@ -1471,7 +1592,8 @@ button.pv-node:hover .pv-t { text-decoration: underline; text-underline-offset: 
       (i.closed ? '<div class="banner info"><b>Closed</b><p>Prism will reopen it if the pattern returns.</p></div>' : '') +
       '<div class="ins-grid"><div class="ins-main">' +
         '<section class="ins-sec"><span class="label">The story</span><p class="ins-story">' + esc(i.story) + '</p></section>' +
-        (gone ? '' : '<section class="ins-sec"><span class="label">Hiviz recommends</span><p class="next">' + esc(i.next) + '</p>' + recSrc(i) + '</section>' + planHTML(i, 'ins-sec card')) +
+        (gone ? '' : '<section class="ins-sec"><span class="label">Hiviz recommends</span><p class="next">' + esc(i.next) + '</p>' + recSrc(i) + '</section>') +
+        (i.dismissed ? '' : planHTML(i, 'ins-sec', { split: true }) + checkHTML(i, 'ins-sec') + retroSecHTML(i, 'ins-sec')) +
         '<section class="ins-sec"><span class="label">What each source says · ' + recCount(i) + ' records from ' + i.says.length + (i.says.length === 1 ? ' system' : ' systems') + '</span>' +
           i.says.map(function (s) {
             var src = SRC[s.src];
@@ -1479,7 +1601,6 @@ button.pv-node:hover .pv-t { text-decoration: underline; text-underline-offset: 
               '<div class="src-recs">' + s.recs.map(function (r) { return recRow(RECS[r.id]); }).join('') + (s.n > s.recs.length ? '<div class="rec"><span class="when">and ' + (s.n - s.recs.length) + ' more like these</span></div>' : '') + '</div></div>';
           }).join('') + '</section>' +
         '<section class="ins-sec"><span class="label">How Prism read it</span><dl class="kv">' + i.read.filter(function (r) { return r[0] !== 'Factor'; }).map(function (r) { var fk = r[0] === 'Factor' ? factorByName(r[1]) : null, fx = fk && INS_FACTOR[i.id]; return '<div><dt>' + esc(r[0]) + '</dt><dd class="' + (r[2] ? 't-' + r[2] : '') + '">' + (fk ? factorBtn(fk) + (fx ? ' \u00b7 ' + esc(FACTOR[fx[0]].inds[fx[1]]) : '') : esc(r[1])) + '</dd></div>'; }).join('') + '</dl></section>' +
-        (i.retro ? (function () { var r = RETRO[i.retro]; return '<section class="ins-sec card rt-sec"><span class="label">90-day retro</span><p class="kind"><span>Due ' + esc(r.due) + '</span>' + outBadge(r.outcome) + '</p><p class="rt-sum">' + esc(r.summary) + '</p><p class="pc-l">Prism listened for: ' + esc(r.expect) + ' \u00b7 before: ' + esc(r.before) + ' \u00b7 since: ' + esc(r.after) + ' \u00b7 reporting ' + esc(r.reporting[0].toLowerCase()) + '</p><div class="rt-row">' + retroReview(r) + '<button type="button" class="linkish rt-undo" data-retro="' + r.id + '">Open the retro</button></div></section>'; })() : '') +
       '</div><aside class="ins-side">' +
         '<section class="card side-card"><h2>Owner and status</h2>' +
           (gone ? '' : '<div class="nxt">' + statusBadge(i) + '<p>' + esc(nextStep(i)) + '</p></div>') +
@@ -1897,6 +2018,7 @@ button.pv-node:hover .pv-t { text-decoration: underline; text-underline-offset: 
           '<p class="rt-rep' + (r.reporting[0] === 'Dropped' ? ' drop' : '') + '"><span class="label">Reporting from these sites</span><b>' + esc(r.reporting[0]) + '.</b> ' + esc(r.reporting[1]) + '</p></section>' +
         '<section class="sheet-sec"><span class="label">On the Forge Works Map</span><p>' + factorBtn(r.ind[0]) + ' \u00b7 ' + esc(f.inds[r.ind[1]].toLowerCase()) + '</p><p class="muted-p">' + esc(r.moved) + ' over the 90 days.</p></section>' +
         '<section class="sheet-sec"><span class="label">The plan</span><ul class="rt-acts">' + r.actions.map(function (a) { return '<li><span class="badge success"><i></i>Done</span><span>' + esc(a[0]) + ' <small>' + esc(a[1]) + '</small></span></li>'; }).join('') + '</ul></section>' +
+        (r.live && insightById(r.ins) ? '<section class="sheet-sec"><span class="label">The insight</span><div class="links"><button type="button" class="link-item" data-fopen="' + r.ins + '"><b>' + esc(insightById(r.ins).title) + '</b><span>' + esc(statusText(insightById(r.ins))) + '</span></button></div></section>' : '') +
         (lk ? '<section class="sheet-sec"><span class="label">' + (r.outcome === 'didnt' ? 'Follow-on insight' : 'Carried into') + '</span><div class="links"><button type="button" class="link-item" data-fopen="' + lk.id + '"><b>' + esc(lk.title) + '</b><span>' + statusText(lk) + '</span></button></div></section>' : '') +
       '</div>' +
       '<div class="sheet-foot">' + retroReview(r) + '</div>';
@@ -1977,27 +2099,54 @@ button.pv-node:hover .pv-t { text-decoration: underline; text-underline-offset: 
     var n = i.plan.actions.length, d = planDone(i), r = i.plan.actions.filter(function (a) { return a.st === 'risk'; }).length;
     return d === n ? 'All actions done' : d + ' of ' + n + ' actions done' + (r ? ' \u00b7 ' + r + ' at risk' : '');
   }
-  function planHTML(i, cls) {
+  // Insight page and drawer: the phases after the plan, each headed with where it stands
+  // Which phase needs doing now: the plan until its actions are done, then watching, then the retro
+  function nowPhase(i) {
+    var pl = i.plan, r = i.retro && RETRO[i.retro];
+    if (i.dismissed || !pl) return '';
+    if (i.kind === 'program') return i.status === 'resolved' ? '' : pl.state !== 'agreed' || planDone(i) < pl.actions.length ? 'plan' : 'retro';
+    if (r) return r.review ? '' : 'retro';
+    if (i.closed) return '';
+    if (pl.state !== 'agreed' || planDone(i) < pl.actions.length) return 'plan';
+    return 'check';
+  }
+  function nowTag(i, ph) { return nowPhase(i) === ph ? '<span class="now-tag">Now</span>' : ''; }
+  function checkHTML(i, cls) {
     var pl = i.plan; if (!pl) return '';
+    var rd = pl.read, on = pl.state === 'agreed';
+    var st = !on ? 'Starts once the plan is approved' : !rd ? 'Listening' : rd[0] === 'working' ? '<span class="badge success"><i></i>Working</span>' : rd[0] === 'continues' ? '<span class="badge critical"><i></i>Pattern continues</span>' : 'Too early to tell';
+    return '<section class="' + cls + ' phase"><div class="plan-head"><span class="label">Is it working?' + nowTag(i, 'check') + '</span><span class="plan-state">' + st + '</span></div>' +
+      (on && rd ? '<p class="ph-p">' + esc(rd[1]) + '</p>' : '') + '<p class="ph-l">Prism listens for: ' + esc(pl.expect) + '</p></section>';
+  }
+  function retroSecHTML(i, cls) {
+    var pl = i.plan, r = i.retro && RETRO[i.retro]; if (!pl && !r) return '';
+    var due = pl && pl.state === 'agreed' ? addDays(pl.approvedAt || agreedDate(pl), 90) : '';
+    var st = r ? (r.review ? (r.review === 'confirmed' ? 'Confirmed' : 'Challenged \u00b7 Prism will look again') : 'Ready \u00b7 waiting to be confirmed') : due ? 'Due ' + esc(due) : '90 days after the plan is approved';
+    var body = r ? '<p class="ph-p">' + outBadge(r.outcome) + ' ' + esc(r.summary) + '</p><p class="ph-l">Before: ' + esc(r.before) + ' \u00b7 since: ' + esc(r.after) + ' \u00b7 reporting ' + esc(r.reporting[0].toLowerCase()) + '</p><div class="rt-row">' + (r.review ? '' : retroReview(r)) + '<button type="button" class="linkish rt-undo" data-retro="' + r.id + '">Open the retro</button></div>'
+      : '<p class="ph-l">Prism compares the 90 days before and after the plan was approved. ' + (i.owner ? (i.owner === YOU ? 'You confirm' : esc(i.owner) + ' confirms') : 'The owner confirms') + ' or challenges its verdict.</p>';
+    return '<section class="' + cls + ' phase"><div class="plan-head"><span class="label">90-day retro' + nowTag(i, 'retro') + '</span><span class="plan-state">' + st + '</span></div>' + body + '</section>';
+  }
+  function planHTML(i, cls, o) {
+    var pl = i.plan; if (!pl) return ''; o = o || {};
     var prop = pl.state === 'proposed', people = managersInView(); if (i.owner && people.indexOf(i.owner) < 0) people.unshift(i.owner);
     var who = function (a) { return a.who ? '<span class="av' + (a.who === YOU ? ' me' : '') + '">' + initials(a.who) + '</span>' + esc(a.who) : '<span class="pa-none">No one yet</span>'; };
-    return '<section class="' + cls + ' plan' + (prop ? ' prop' : '') + '"><div class="plan-head"><span class="label">Plan</span><span class="plan-state">' + (prop ? 'Proposed by Hiviz \u00b7 waiting for the owner\u2019s approval' : esc(approvedLine(pl))) + '</span></div>' +
+    return '<section class="' + cls + ' plan' + (prop ? ' prop' : '') + '"><div class="plan-head"><span class="label">Plan' + (o.split && !o.bare ? nowTag(i, 'plan') : '') + '</span><span class="plan-state">' + (prop ? 'Proposed by Hiviz \u00b7 ' + (o.split ? (!i.owner ? 'needs an owner to approve it' : 'waiting for ' + (i.owner === YOU ? 'your' : esc(i.owner) + '\u2019s') + ' approval') : 'waiting for the owner\u2019s approval') : esc(approvedLine(pl)) + (o.split ? ' \u00b7 ' + esc(planSummary(i).replace(/^All/, 'all')) : '')) + '</span></div>' +
       '<ol class="plan-acts">' + pl.actions.map(function (a, k) {
         var st = PA_ST.filter(function (x) { return x[0] === a.st; })[0];
         return '<li class="pa st-' + a.st + '"><div class="pa-main"><span class="pa-t">' + esc(a.t) + '</span><span class="pa-meta">' + who(a) + '<span>by ' + esc(a.due) + '</span></span>' + linkHTML(i, k, a) + '</div>' +
           (prop ? '<button type="button" class="btn sm" data-pa-remove="' + i.id + ':' + k + '" aria-label="Remove this action">Remove</button>'
-                : '<label class="pa-ci"><span class="sr">How\u2019s it going?</span><select class="select" data-pa="' + i.id + ':' + k + '">' + PA_ST.map(function (x) { return '<option value="' + x[0] + '"' + (x[0] === a.st ? ' selected' : '') + '>' + x[1] + '</option>'; }).join('') + '</select></label>') + '</li>';
+                : '<label class="pa-ci"><span class="sr">Check in</span><select class="select" data-pa="' + i.id + ':' + k + '">' + PA_ST.map(function (x) { return '<option value="' + x[0] + '"' + (x[0] === a.st ? ' selected' : '') + '>' + x[1] + '</option>'; }).join('') + '</select></label>') + '</li>';
       }).join('') + '</ol>' +
-      (prop ? '<div class="pa-add"><input type="text" class="w-note" id="pa-t-' + i.id + '" placeholder="Add an action: what will be done"><select class="select" id="pa-w-' + i.id + '"><option value="">Who</option>' + people.map(function (o) { return '<option>' + esc(o) + '</option>'; }).join('') + '</select><input type="text" class="w-note pa-due" id="pa-d-' + i.id + '" placeholder="By when"><button type="button" class="btn" data-pa-add="' + i.id + '">Add</button></div>' : '') +
-      '<div class="plan-check"><span class="label">Is it working?</span>' +
+      (prop ? '<div class="pa-add"><input type="text" class="w-note" id="pa-t-' + i.id + '" placeholder="Add an action: what will be done"><select class="select" id="pa-w-' + i.id + '"><option value="">Who</option>' + people.map(function (o) { return '<option>' + esc(o) + '</option>'; }).join('') + '</select><select class="select pa-due" id="pa-d-' + i.id + '" aria-label="By when"><option value="">By when</option>' + [[0, 'Immediately'], [3, 'In 3 days'], [7, 'In 7 days'], [30, 'In 30 days']].map(function (d) { return '<option value="' + addDays('26 Sep', d[0]) + '">' + d[1] + '</option>'; }).join('') + '</select><button type="button" class="btn" data-pa-add="' + i.id + '">Add</button></div>' : '') +
+      (o.split ? '' : '<div class="plan-check"><span class="label">Is it working?</span>' +
         (pl.read ? '<p>' + (pl.read[0] === 'working' ? '<span class="badge success"><i></i>Working</span>' : pl.read[0] === 'continues' ? '<span class="badge critical"><i></i>Pattern continues</span>' : '<span class="tlabel">Too early</span>') + ' ' + esc(pl.read[1]) + '</p>' : '<p class="pc-l">Prism starts reading once the plan is approved.</p>') +
-        '<p class="pc-l">Prism listens for: ' + esc(pl.expect) + '</p></div>' +
+        '<p class="pc-l">Prism listens for: ' + esc(pl.expect) + '</p></div>') +
       (i.follows && RETRO[i.follows] ? '<p class="plan-read"><span class="label">Follows on from</span><span><button type="button" class="linkish map-link" data-retro="' + i.follows + '">' + esc(RETRO[i.follows].title) + '</button> \u00b7 closed ' + esc(RETRO[i.follows].closed) + ' \u00b7 retro: ' + OUT[RETRO[i.follows].outcome][1] + '</span></p>' : '') +
       (prop ? (function () {
         var own = ST.view === 'meeting' && MT && MT.draft && MT.draft.id === i.id ? MT.draft.owner : i.owner;
         var note = !own ? 'Assign an owner first. The insight owner approves the plan.' : own === YOU ? 'You own this insight, so you approve the plan.' + (ST.view === 'meeting' && MT ? ' Approve it here and the actions go into this review\u2019s summary.' : '') : esc(own) + ' owns this insight and approves the plan.';
         return '<div class="plan-foot"><p class="muted-p">' + note + '</p><button type="button" class="btn brand" data-pa-agree="' + i.id + '"' + (pl.actions.length && own ? '' : ' disabled') + '>' + (!own || own === YOU ? 'Approve plan' : 'Approve as ' + esc(own) + ' (demo)') + '</button></div>';
-      })() : '<p class="muted-p">' + esc(planSummary(i)) + '.' + (agreedDate(pl) && i.kind !== 'program' ? ' 90-day retro on ' + esc(addDays(agreedDate(pl), 90)) + '.' : '') + '</p>') +
+      })() : o.split ? '' : '<p class="muted-p">' + esc(planSummary(i)) + '.' + (agreedDate(pl) && i.kind !== 'program' ? ' 90-day retro on ' + esc(addDays(agreedDate(pl), 90)) + '.' : '') + '</p>') +
     '</section>';
   }
   document.addEventListener('click', function (e) {
@@ -2008,8 +2157,8 @@ button.pv-node:hover .pv-t { text-decoration: underline; text-underline-offset: 
       i.plan.state = 'agreed'; i.plan.approvedBy = by; i.plan.approvedAt = '26 Sep';
       i.plan.agreed = inReview ? 'Agreed at the Focus review on 26 Sep' : 'Agreed outside a review on 26 Sep';
       logEvent(i, 'Plan approved', i.plan.actions.length + (i.plan.actions.length === 1 ? ' action' : ' actions') + '. Prism is listening for: ' + i.plan.expect, by === YOU ? null : by);
-      if (inReview) { MT.agreed[i.id] = true; rerenderFor(i.id); toast('Plan approved by ' + (by === YOU ? 'you' : by) + '. It moves to In progress when you save this insight.'); return; }
-      autoProgress(i); toast('Plan approved by ' + (by === YOU ? 'you' : by) + '. The insight is now in progress.'); rerenderFor(i.id); return;
+      if (inReview) { MT.agreed[i.id] = true; rerenderFor(i.id); toast('Plan approved by ' + (by === YOU ? 'you' : by) + '. Action owners are notified when the review closes.'); return; }
+      autoProgress(i); toast('Plan approved by ' + (by === YOU ? 'you' : by) + '. Action owners have been notified.'); rerenderFor(i.id); return;
     }
     var rm = e.target.closest('[data-pa-remove]');
     if (rm) { var pr = rm.getAttribute('data-pa-remove').split(':'), ri = workById(pr[0]); ri.plan.actions.splice(+pr[1], 1); rerenderFor(ri.id); return; }
@@ -2112,9 +2261,10 @@ button.pv-node:hover .pv-t { text-decoration: underline; text-underline-offset: 
         '<div class="meta ins-sites">' + sites.map(function (n) { return '<span class="chip">' + esc(n) + '</span>'; }).join('') + '<span class="hd-acts"><a class="open-page" href="#insight/' + i.id + '">Open page \u2192</a>' + '<button type="button" class="btn sm pv-btn" data-pv="insight:' + i.id + '"><svg width="14" height="14" viewBox="0 0 22 22" aria-hidden="true"><path d="M11 2.5 20 19H2z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></svg>View through Prism</button>' + '</span></div></div>' +
       '<div class="sheet-body">' +
         (ST.dismissing === i.id ? '<section class="sheet-sec">' + dismissForm(i.id, 'sheet') + '</section>' : '') +
-        '<section class="sheet-sec"><span class="label">The story</span><p>' + esc(i.story) + '</p></section>' +
-        (i.latest ? '<section class="sheet-sec"><span class="label">Latest update · ' + i.updated + (i.updated === 1 ? ' day' : ' days') + ' ago' + (i.owner ? ' · ' + esc(i.owner) : '') + '</span><p class="update">' + (i.owner ? '<span class="av">' + initials(i.owner) + '</span>' : '') + '<span>' + esc(i.latest) + '</span></p></section>' : '') +
-        '<section class="sheet-sec"><span class="label">Hiviz recommends</span><p class="next">' + esc(i.next) + '</p>' + recSrc(i) + '</section>' + planHTML(i, 'sheet-sec') +
+        '<section class="sheet-sec"><span class="label">The story</span><p>' + esc(i.story) + '</p>' +
+          (i.latest ? '<div class="upd-note"><span class="upd-l">Latest update \u00b7 ' + (i.owner ? esc(i.owner) + ' \u00b7 ' : '') + i.updated + (i.updated === 1 ? ' day' : ' days') + ' ago</span><p>' + esc(i.latest) + '</p></div>' : '') + '</section>' +
+        (i.dismissed || i.closed ? '' : '<section class="sheet-sec"><span class="label">Hiviz recommends</span><p class="next">' + esc(i.next) + '</p>' + recSrc(i) + '</section>') +
+        (i.dismissed ? '' : planHTML(i, 'sheet-sec', { split: true }) + checkHTML(i, 'sheet-sec') + retroSecHTML(i, 'sheet-sec')) +
         (INS_FACTOR[i.id] ? '<section class="sheet-sec mc"><span class="label">On the Forge Works Map</span>' + mapBody(i) + '</section>' : '') +
         '<section class="sheet-sec"><span class="label">What each source says · ' + recCount(i) + ' records from ' + i.says.length + (i.says.length === 1 ? ' system' : ' systems') + '</span><div class="says">' +
           i.says.map(function (s, k) {
@@ -2149,7 +2299,7 @@ button.pv-node:hover .pv-t { text-decoration: underline; text-underline-offset: 
     if (e.target.closest('#s-close')) { sheetInsight().closed = true; logEvent(sheetInsight(), 'Closed'); closeSheet(); render(); toast('Insight closed. Prism will reopen it if the pattern returns.'); }
   });
   $('sheet').addEventListener('change', function (e) {
-    var i = sheetInsight(); if (!i) return;
+    var i = sheetInsight(); if (!i || (e.target.id !== 's-owner' && e.target.id !== 's-status')) return;
     if (e.target.id === 's-owner') { i.owner = e.target.value; logEvent(i, i.owner ? 'Assigned to ' + i.owner : 'Owner removed'); autoProgress(i); toast(i.owner ? 'Assigned to ' + i.owner : 'Owner removed'); }
     else if (e.target.id === 's-status' && e.target.value === 'working' && !planAgreed(i)) { toast('Agree the plan first, here or at the next Focus review.'); }
     else if (e.target.id === 's-status') { i.status = e.target.value; logEvent(i, 'Status: ' + ({ new: 'New', plan: 'Agree to plan', working: 'In progress', resolved: 'Ready to close' })[i.status]); if (i.status === 'working' && i.updated == null) i.updated = 0; }
@@ -2177,7 +2327,7 @@ button.pv-node:hover .pv-t { text-decoration: underline; text-underline-offset: 
     ]],
     ['insights', 'Insight status', [
       ['info', 'New', 'Prism has raised it and nobody owns it yet.'],
-      ['', 'Agree to plan', 'It has an owner, and Hiviz has drafted a plan. The owner approves the actions, usually at the Focus review, and the work starts. Hiviz records who approved it and when.'],
+      ['', 'Agree to plan', 'It has an owner, and Hiviz has drafted a plan. The owner approves the actions, usually at the Focus review, and the work starts. Hiviz records who approved it and when. Once it\u2019s approved, the managers assigned to each action are notified of their actions.'],
       ['', 'In progress', 'Someone owns it, the plan is agreed and it’s being worked on.'],
       ['warning', 'Stalled', 'It has an owner, but there’s been no update for 14 days or more.'],
       ['success', 'Ready to close', 'The pattern has stopped. Close it, or keep watching for a little longer.'],
@@ -2481,7 +2631,8 @@ button.pv-node:hover .pv-t { text-decoration: underline; text-underline-offset: 
     var last = lastMeeting();
     var att = {};
     managersInView().forEach(function (m) { att[m] = !last || last.attendees.indexOf(m) > -1 || m === 'You'; });
-    MT = { step: 1, attendees: att, idx: 0, log: {}, notes: '', items: [], agreed: {}, checks: {}, retros: {} };
+    MT = { step: 'here', attendees: att, idx: 0, log: {}, notes: '', items: [], agreed: {}, checks: {}, retros: {}, ci: {}, done: {}, g: 0 };
+    MT.groups = rvItems();
     go('meeting');
   }
 
@@ -2500,160 +2651,258 @@ button.pv-node:hover .pv-t { text-decoration: underline; text-underline-offset: 
     return names.map(function (n) { return '<span class="person"><span class="av' + (n === YOU ? ' me' : '') + '">' + initials(n) + '</span>' + esc(n) + '</span>'; }).join('');
   }
 
+  /* =============================================================
+     Focus review: a stepped, full-screen ritual, easy to follow on a projector.
+     Who’s here → Check-ins → Decide (one group per screen) → Receipt.
+     Ending early is a formal close: what was decided is kept, the rest carries forward.
+     ============================================================= */
+  var RV_STEPS = [['here', 'Who’s here'], ['check', 'Check-ins'], ['decide', 'Decide'], ['receipt', 'Summary']];
+  var RV_GROUPS = [
+    ['esc', 'Escalated to this level', 'Can this level decide it or resource it, or does it need to go higher?'],
+    ['assign', 'Assign an owner', 'Whose purview is this in, and can they take it on now?'],
+    ['plan', 'Approve a plan', 'Are these the right one to three actions, with the right people and dates?'],
+    ['stalled', 'Stalled', 'No update in two weeks or more. What’s in the way, and does the owner need help?'],
+    ['moving', 'Pattern continues', 'The work is happening but the pattern isn’t moving. Is it the wrong plan, or too early to tell?'],
+    ['retro', 'Confirm a 90-day retro', 'Does Prism’s verdict match what you’ve seen on site?'],
+    ['close', 'Ready to close', 'Has it stayed stopped long enough to close?'],
+    ['noted', 'Noted', 'On track. No discussion needed unless someone raises it.']
+  ];
+  function rvGroup(k) { return RV_GROUPS.filter(function (g) { return g[0] === k; })[0]; }
+  // What’s on the agenda, by the decision it needs. Items carried from the last review go first.
+  function rvItems() {
+    var sl = scopeLevel(), carried = (lastMeeting() || {}).carried || [], g = {};
+    RV_GROUPS.forEach(function (x) { g[x[0]] = []; });
+    insightsInView().forEach(function (i) {
+      var k = i.esc && i.esc.to === sl ? 'esc' : i.status === 'new' ? 'assign' : i.status === 'plan' ? 'plan' : retroDue(i) ? 'retro' : stalled(i) ? 'stalled' : planRead(i) === 'continues' ? 'moving' : i.status === 'resolved' ? 'close' : 'noted';
+      g[k].push(i.id);
+      if (k === 'esc' && MT) { MT.escWas = MT.escWas || {}; MT.escWas[i.id] = i.esc; }
+    });
+    retrosInView().forEach(function (r) { if (!r.live && !r.review) g.retro.push(r.id); });
+    Object.keys(g).forEach(function (k) { g[k].sort(function (a, b) { return (carried.indexOf(b) > -1) - (carried.indexOf(a) > -1); }); });
+    return g;
+  }
+  function rvGroupsOn() { return RV_GROUPS.filter(function (g) { return MT.groups[g[0]].length; }); }
+  // Check-ins: every open action on an agreed plan in the purview
+  function rvActions() {
+    var out = [];
+    insightsInView().forEach(function (i) {
+      if (!i.plan || i.plan.state !== 'agreed' || MT.agreed[i.id]) return;
+      i.plan.actions.forEach(function (a, k) { if (a.st !== 'done' || MT.checks[i.id] && MT.checks[i.id][k]) out.push({ i: i, a: a, k: k, key: i.id + ':' + k }); });
+    });
+    return out;
+  }
+  function rvDecided(k, id) {
+    if (k === 'retro') { var r = RETRO[id] || RETRO[(insightById(id) || {}).retro]; if (r && MT.retros[r.id]) return MT.retros[r.id] === 'confirmed' ? 'Retro confirmed: ' + OUT[r.outcome][1] : 'Retro challenged: Prism will look again'; }
+    if (k === 'plan' && MT.agreed[id]) { var p = insightById(id).plan; return 'Plan approved by ' + (p.approvedBy === YOU ? 'you' : p.approvedBy) + ' · ' + p.actions.length + (p.actions.length === 1 ? ' action' : ' actions'); }
+    return MT.done[id + ':' + k] || '';
+  }
+  function rvLeft(k) { return MT.groups[k].filter(function (id) { return !rvDecided(k, id); }).length; }
+  function rvCarry(key) { var on = MT.done[key] === 'Carry forward'; return '<button type="button" class="btn' + (on ? ' is-on' : '') + '" data-rvdec="' + esc(key) + '" data-rvval="Carry forward" aria-pressed="' + on + '">Carry forward</button>'; }
+  function rvHere(n) { return !n || n === YOU || !!MT.attendees[n]; }
+  function rvBar() {
+    var at = RV_STEPS.map(function (s) { return s[0]; }).indexOf(MT.step);
+    return '<div class="rv-bar"><div class="rv-bar-in"><span class="rv-t"><b>Focus review</b><span>' + esc(scopeLabel()) + ' · Fri 26 Sep</span></span>' +
+      '<ol class="rv-rail">' + RV_STEPS.map(function (s, k) {
+        return '<li class="' + (k === at ? 'on' : k < at ? 'done' : '') + '">' + (k < at && !MT.early ? '<button type="button" data-rvstep="' + s[0] + '">' : '<span>') + '<i>' + (k < at ? '✓' : k + 1) + '</i>' + s[1] + (k < at && !MT.early ? '</button>' : '</span>') + '</li>';
+      }).join('') + '</ol>' +
+      (MT.step === 'receipt' ? '' : '<button type="button" class="btn" id="rv-end">End review</button>') + '</div></div>';
+  }
+  function rvPage(kind, title, sub, body, nav) {
+    $('view').innerHTML = rvBar() + '<div class="rv"><p class="kind"><span class="kind-t">' + esc(kind) + '</span></p><h1 class="rv-h">' + title + '</h1>' + (sub ? '<p class="rv-sub">' + sub + '</p>' : '') + body + (nav ? '<div class="rv-nav">' + nav + '</div>' : '') + '</div>';
+  }
+  function rvQ(q, lbl) { return '<p class="rv-q"><span class="rv-q-l">' + esc(lbl || 'Ask the room') + '</span><span class="rv-q-t">“' + esc(q) + '”</span></p>'; }
+  // The leadership check, asked plainly: how it actually is today, not how it should be
+  var LC_Q = {
+    'senior_leadership:0': 'When our senior leaders talk about safety, what do they spend most of their time on?',
+    'senior_leadership:1': 'Going by what they do, what does safety mean to our senior leaders?',
+    'senior_leadership:2': 'How connected are our senior leaders to the people doing the work?',
+    'senior_leadership:4': 'How do people on our sites see our leaders?',
+    'strategy:1': 'What do our safety plans mostly focus on?',
+    'strategy:2': 'Who are our safety improvements really aimed at?',
+    'strategy:3': 'Where do our safety practices come from?',
+    'strategy:4': 'When big decisions get made here, where does safety come in?',
+    'risk_management:4': 'Do we manage different kinds of risk together, or each on its own?',
+    'safety_organisation:1': 'How much say does the safety team really have?',
+    'safety_organisation:2': 'How does the safety team work with leaders?',
+    'operational_management:2': 'Who holds themselves accountable for safety on our sites?',
+    'resource_allocation:0': 'What is our safety spending really for?',
+    'resource_allocation:1': 'How do we treat spare time, people and equipment on a job?',
+    'management_systems:0': 'What is our safety system built on?',
+    'management_systems:1': 'Who designs our safety system?',
+    'goal_conflict_tradeoffs:2': 'When safety and getting the job done pull against each other, how do we talk about it?',
+    'learning_development:0': 'What does our safety training actually cover?',
+    'learning_development:3': 'Where do people learn how to do the work safely?',
+    'frontline_workers:1': 'How do frontline workers take part in safety here?',
+    'communications_coordination:2': 'When something important has to reach the crews, how does it actually get there?',
+    'communications_coordination:3': 'How well do different roles and teams work together?',
+    'decision_making:2': 'Who gets to approve an idea to make work safer?',
+    'decision_making:3': 'What decides whether we spend money on safety?',
+    'contractor_management:4': 'What is our relationship with contractors really like?',
+    'monitoring_metrics:2': 'When our managers say a site is safe, what do they mean?',
+    'monitoring_metrics:3': 'How much of workers’ real experience shows up in our data?'
+  };
+  function rvRow(title, sub, ctl, id, done) {
+    return '<li class="rv-row' + (done ? ' is-done' : '') + '"><div class="rv-m">' + (id ? '<button type="button" class="rv-title linkish" ' + (/^r-/.test(id) ? 'data-retro' : 'data-open') + '="' + id + '">' + esc(title) + '</button>' : '<span class="rv-title">' + esc(title) + '</span>') + (sub ? '<span class="rv-s">' + sub + '</span>' : '') + '</div><div class="rv-c">' + ctl + '</div></li>';
+  }
+  function rvChoice(key, opts, cur) {
+    return '<span class="rv-ch">' + opts.map(function (o) { return '<button type="button" class="btn' + (cur === o ? ' is-on' : '') + '" data-rvdec="' + esc(key) + '" data-rvval="' + esc(o) + '" aria-pressed="' + (cur === o) + '">' + esc(o) + '</button>'; }).join('') + '</span>';
+  }
   function renderMeeting() {
-    if (!MT) { MT = null; return renderFocus(); }
-    var last = lastMeeting();
-    var sinceTxt = last ? 'since ' + last.short : 'first Focus review for this purview';
-    var head = esc(scopeLabel()) + ' · today, Friday 26 September · ' + esc(sinceTxt);
+    if (!MT) return renderFocus();
+    if (!MT.groups) MT.groups = rvItems();
+    var last = lastMeeting(), since = last ? 'Since ' + last.short : 'First Focus review for this purview';
 
-    // Step 1: set up
-    if (MT.step === 1) {
-      var people = managersInView();
-      $('view').innerHTML = meetingTop('Start a Focus review', head) +
-        '<div class="meet-grid"><section class="card meet-card">' +
-          '<h2>Who’s here</h2><p class="muted-p">Managers with responsibility in ' + esc(scopeLabel()) + '. To change the purview, use the selector in the header.</p><p class="pl-pv"><span class="label">Purview</span><b>' + esc(scopeLabel()) + '</b></p>' +
-          '<ul class="att">' + people.map(function (p) {
-            return '<li><label class="att-row"><input type="checkbox" data-att="' + esc(p) + '"' + (MT.attendees[p] ? ' checked' : '') + '><span class="av' + (p === YOU ? ' me' : '') + '">' + initials(p) + '</span><span class="att-name">' + esc(p === YOU ? 'You' : p) + '<small>' + esc(ROLE[p] || '') + '</small></span></label></li>';
-          }).join('') + '</ul>' +
-        '</section><section class="card meet-card">' +
-          '<h2>What Hiviz will prepare</h2>' +
-          '<ul class="plain"><li><b>State of safety</b> across ' + esc(scopeLabel()) + ' right now.</li><li><b>On the Forge Works Map</b>: which factors moved over the last 90 days, and where the clearest gap is.</li><li><b>Since last time</b>: what’s new, stalled, worse, better or ready to close ' + (last ? 'since ' + esc(last.short) : 'over the last four weeks') + '.</li><li><b>Actions</b>: a check-in on every action agreed last time, and any plans agreed since.</li><li><b>90-day retros</b>: whether plans that reached 90 days made a difference.</li></ul>' +
-          '<p class="muted-p">' + (last ? 'Last review: ' + esc(last.date) + ' with ' + esc(join(last.attendees)) + '.' : 'There’s no earlier Focus review for this purview.') + '</p>' +
-          '<div class="meet-actions"><button type="button" class="btn brand" id="gen-report">Prepare the report</button></div>' +
-        '</section></div>';
+    // 1 · Who’s here, and what’s on today
+    if (MT.step === 'here') {
+      var on = rvGroupsOn(), acts = rvActions();
+      rvPage('Step 1 of 4', 'Who’s here', esc(since) + ' · ' + esc(scopeLabel()),
+        '<ul class="rv-att">' + managersInView().map(function (p) {
+          return '<li><label class="rv-p' + (MT.attendees[p] ? ' on' : '') + '"><input type="checkbox" data-att="' + esc(p) + '"' + (MT.attendees[p] ? ' checked' : '') + (p === YOU ? ' disabled' : '') + '><span class="av' + (p === YOU ? ' me' : '') + '">' + initials(p) + '</span><span>' + esc(p === YOU ? 'You' : p) + '<small>' + esc(ROLE[p] || '') + '</small></span></label></li>';
+        }).join('') + '</ul>' +
+        '<h2 class="rv-h2">On today</h2><ol class="rv-agenda"><li><b>Check-ins</b><span>' + acts.length + (acts.length === 1 ? ' action' : ' actions') + ' · ' + acts.filter(function (x) { return !x.a.upd; }).length + ' not checked in yet</span></li>' +
+          on.map(function (g) { return '<li><b>' + esc(g[1]) + '</b><span>' + MT.groups[g[0]].length + '</span></li>'; }).join('') + '</ol>',
+        '<span></span><button type="button" class="btn brand lg" data-rvstep="check">Start with check-ins</button>');
       return;
     }
 
-    if (MT.step === 1.5) { $('view').innerHTML = genView(head); return; }
-
-    // Step 2: the report
-    if (MT.step === 2) {
-      var list = insightsInView(), sites = sitesInView();
-      var risk = sites.filter(function (s) { return s.state === 'risk'; }), quiet = sites.filter(function (s) { return s.state === 'quiet' || s.state === 'none'; }), hold = sites.filter(function (s) { return s.state === 'hold'; });
-      var failing = SOURCES.filter(function (s) { return s.status === 'failing'; });
-      function lines(arr, tone, fmt) {
-        return arr.length ? '<ul class="rlist">' + arr.map(function (i) { return '<li><button type="button" class="rlink" data-open="' + i.id + '">' + esc(i.title) + '</button><span>' + fmt(i) + '</span></li>'; }).join('') + '</ul>' : '<p class="muted-p">None.</p>';
-      }
-      var fresh = list.filter(function (i) { return i.status === 'new' || i.status === 'plan'; });
-      var worse = list.filter(function (i) { return planRead(i) === 'continues' && !stalled(i); });
-      var stuck = list.filter(stalled);
-      var better = list.filter(function (i) { return planRead(i) === 'working' && i.status !== 'resolved'; });
-      var ready = list.filter(function (i) { return i.status === 'resolved'; });
-      var ag = agenda();
-      $('view').innerHTML = meetingTop('State of safety', head) +
-        '<div class="report">' +
-          '<section class="card rsec"><span class="label">1 · State of safety</span><p class="rlead">' +
-            '<b>' + word(risk.length) + (risk.length === 1 ? ' site is' : ' sites are') + ' at risk</b>' + (risk.length ? ' (' + esc(join(risk.map(function (s) { return s.name; }))) + ')' : '') + '. ' +
-            (quiet.length ? word(quiet.length) + (quiet.length === 1 ? ' is' : ' are') + ' out of sight: ' + esc(join(quiet.map(function (s) { return s.name; }))) + '. ' : '') +
-            word(hold.length) + (hold.length === 1 ? ' is' : ' are') + ' holding. ' +
-            'There ' + (list.length === 1 ? 'is one open insight' : 'are ' + lw(list.length) + ' open insights') + ', ' + lw(list.filter(function (i) { return i.sev === 'critical'; }).length) + ' of them critical.' +
-          '</p>' + (failing.length ? '<p class="rnote"><span class="badge critical"><i></i>' + esc(failing[0].name) + ' failing</span> ' + esc(failing[0].impact) + '</p>' : '') + '</section>' +
-          reportMap(list) +
-          '<section class="card rsec"><span class="label">3 · Insights since last time' + (last ? ' · ' + esc(last.short) : '') + '</span>' +
-            '<div class="rcols">' +
-              '<div><h3><span class="badge info"><i></i>New</span></h3>' + lines(fresh, 'info', function (i) { return (i.status === 'plan' ? 'Agree to plan · ' + esc(i.owner) + ' · ' : 'No owner yet · ') + '' + esc(join(i.sites.map(function (s) { return SITE[s].name; }))); }) + '</div>' +
-              '<div><h3><span class="badge critical"><i></i>Pattern continues</span></h3>' + lines(worse, 'critical', function (i) { return 'Despite the plan · ' + esc(i.owner); }) + '</div>' +
-              '<div><h3><span class="badge warning"><i></i>Stalled</span></h3>' + lines(stuck, 'warning', function (i) { return 'No update in ' + i.updated + ' days · ' + esc(i.owner); }) + '</div>' +
-              '<div><h3><span class="badge success"><i></i>Working or ready to close</span></h3>' + lines(better.concat(ready), 'success', function (i) { return i.status === 'resolved' ? 'Ready to close' : 'Plan working · ' + esc(i.owner); }) + '</div>' +
-            '</div></section>' +
-          reportActions(list, last) + reportRetros() +
-          (function () {
-            var sl = scopeLevel(), open = function (i) { return !i.closed && !i.dismissed; };
-            var incoming = INSIGHTS.filter(function (i) { return open(i) && i.esc && i.esc.to === sl; });
-            var held = INSIGHTS.filter(function (i) { return open(i) && i.level === sl && i.level !== i.home; });
-            var outgoing = INSIGHTS.filter(function (i) { return open(i) && i.esc && i.esc.from === sl; });
-            var li = function (i, text) { return '<li><button type="button" class="rlink" data-open="' + i.id + '">' + esc(i.title) + '</button><span>' + esc(text) + '</span></li>'; };
-            return '<section class="card rsec"><span class="label">6 · Escalations</span><div class="rcols">' +
-              '<div><h3><span class="badge info"><i></i>Escalated to this level</span></h3>' + (incoming.length ? '<ul class="rlist">' + incoming.map(function (i) { return li(i, 'From ' + nameOf(i.esc.by) + ' · ' + i.esc.reason); }).join('') + '</ul>' : '<p class="muted-p">None.</p>') + '</div>' +
-              '<div><h3><span class="tlabel">Held at this level</span></h3>' + (held.length ? '<ul class="rlist">' + held.map(function (i) { return li(i, 'Accepted from ' + levelName(i.home)); }).join('') + '</ul>' : '<p class="muted-p">None.</p>') + '</div>' +
-              '<div><h3><span class="tlabel">Passed up</span></h3>' + (outgoing.length ? '<ul class="rlist">' + outgoing.map(function (i) { return li(i, 'Waiting for ' + levelOwner(i.esc.to)); }).join('') + '</ul>' : '<p class="muted-p">None.</p>') + '</div>' +
-            '</div></section>';
-          })() +
-        fromOther('focus') +
-        '</div>' +
-        '<div class="meet-actions end"><button type="button" class="btn" id="copy-report">Copy report</button><button type="button" class="btn brand" data-mstep="3"' + (ag.length ? '' : ' disabled') + '>Walk through ' + lw(ag.length) + ' insights</button></div>';
+    // 2 · Check-ins, before any decisions
+    if (MT.step === 'check') {
+      var list = rvActions(), before = list.filter(function (x) { return x.a.upd && x.a.upd !== '26 Sep'; }).length, open = list.filter(function (x) { return !x.a.upd && !MT.ci[x.key]; }).length;
+      rvPage('Step 2 of 4', 'Check-ins', list.length + (list.length === 1 ? ' open action' : ' open actions') + ' · ' + before + ' checked in before the review' + (open ? ' · <b>' + open + ' to go</b>' : ''),
+        rvQ('What’s changed since your last update, and is anything in the way?') +
+        (list.length ? '<ul class="rv-list">' + list.map(function (x) {
+          var here = rvHere(x.a.who), sk = MT.ci[x.key] === 'skip', st = PA_ST.filter(function (s) { return s[0] === x.a.st; })[0];
+          var sub = '<span class="rv-who"><span class="av' + (x.a.who === YOU ? ' me' : '') + '">' + initials(x.a.who || '?') + '</span>' + esc(x.a.who || 'No one yet') + (here ? '' : ' · <b>not here</b>') + '</span> · ' + esc(x.i.title) + ' · by ' + esc(x.a.due);
+          var ctl = sk ? '<span class="rv-miss">Missed · counts towards stalled</span><button type="button" class="linkish" data-rvci="' + x.key + '">Undo</button>'
+            : '<span class="rv-ci">' + (x.a.upd ? '<small>' + (x.a.upd === '26 Sep' ? 'Checked in now' : 'Checked in ' + esc(x.a.upd)) + '</small>' : '<small>No check-in yet</small>') +
+              '<select class="select" data-pa="' + x.i.id + ':' + x.k + '" aria-label="How’s it going?">' + PA_ST.map(function (s) { return '<option value="' + s[0] + '"' + (s[0] === x.a.st ? ' selected' : '') + '>' + s[1] + '</option>'; }).join('') + '</select>' +
+              (x.a.upd ? '' : '<button type="button" class="btn" data-rvci="' + x.key + '">Skip</button>') + '</span>';
+          return rvRow(x.a.t, sub, ctl, x.i.id, sk || !!x.a.upd);
+        }).join('') + '</ul>' : '<p class="rv-empty">No open actions to check in on.</p>'),
+        '<button type="button" class="btn lg" data-rvstep="here">Back</button><span class="rv-nav-r">' + (open ? '<small>' + open + ' not checked in will be recorded as missed</small>' : '') + '<button type="button" class="btn brand lg" data-rvstep="decide">Continue to decisions</button></span>');
       return;
     }
 
-    // Step 3: walk-through, one insight at a time
-    if (MT.step === 3) {
-      if (!MT.items.length) MT.items = agenda().map(function (i) { return i.id; });
-      var ids = MT.items, cur = INSIGHTS.filter(function (x) { return x.id === ids[MT.idx]; })[0];
-      if (!cur) { MT.step = 4; return renderMeeting(); }
-      var ow = managersInView(); if (cur.owner && ow.indexOf(cur.owner) < 0) ow.unshift(cur.owner);
-      var entry = MT.log[cur.id] || {}, dr = MT.draft && MT.draft.id === cur.id ? MT.draft : null;
-      var wOwner = dr ? dr.owner : cur.owner, wStatus = dr ? dr.status : cur.status, wNote = dr ? dr.note : (entry.note || '');
-      $('view').innerHTML = meetingTop('Walk-through', head + ' · ' + (MT.idx + 1) + ' of ' + ids.length) +
-        '<div class="walk"><ol class="walk-list">' + ids.map(function (id, k) {
-          var it = INSIGHTS.filter(function (x) { return x.id === id; })[0], lg = MT.log[id];
-          return '<li class="' + (k === MT.idx ? 'on' : '') + '"><button type="button" data-goto="' + k + '"><span class="wl-n">' + (lg && lg.done ? '✓' : k + 1) + '</span><span class="wl-t">' + esc(it.title) + '<small>' + esc(lg && lg.done ? (lg.skipped ? 'Skipped' : (lg.changes[0] || '').indexOf('Dismissed') === 0 ? 'Dismissed' : 'Updated') : agendaReason(it)) + '</small></span></button></li>';
-        }).join('') + '</ol>' +
-        '<section class="card walk-card">' +
-          '<p class="kind"><span class="kind-t">Insight ' + (MT.idx + 1) + ' of ' + ids.length + '</span><span class="icard-sev">' + sevIcon(cur.sev) + '<span class="sev-t t-' + cur.sev + '">' + (cur.sev === 'critical' ? 'Critical' : 'Warning') + '</span></span><span>On the agenda: <b>' + esc(agendaReason(cur)) + '</b></span></p>' +
-          '<h2 class="walk-title">' + esc(cur.title) + '</h2>' +
-          '<div class="meta">' + statusBadge(cur) + activity(cur) + cur.sites.map(function (s) { return '<span class="chip">' + esc(SITE[s].name) + '</span>'; }).join('') + '</div>' +
-          '<p class="walk-story">' + esc(cur.story) + '</p>' +
-          (cur.latest ? '<p class="walk-latest"><span class="label">Latest update</span>' + esc(cur.latest) + '</p>' : '') +
-          '<p class="walk-next"><span class="label">Hiviz recommends</span>' + esc(cur.next) + '</p>' + recSrc(cur) +
-          (cur.plan ? planHTML(cur, 'walk-plan' + (MT.agreed[cur.id] ? ' just' : '')) : '') +
-          (INS_FACTOR[cur.id] ? '<div class="walk-map mc"><span class="label">On the Forge Works Map</span>' + mapBody(cur) + '</div>' : '') +
-          (function () {
-            var ev = []; cur.says.forEach(function (sy) { sy.recs.forEach(function (r) { ev.push(RECS[r.id]); }); });
-            ev.sort(function (a, b) { var t = function (x) { return x.tags.some(function (g) { return g[1] === 'critical'; }) ? 0 : 1; }; return t(a) - t(b); });
-            return '<details class="walk-evd"' + (cur.status === 'new' ? ' open' : '') + '><summary>Evidence \u00b7 ' + recCount(cur) + ' records from ' + cur.says.length + (cur.says.length === 1 ? ' system' : ' systems') + '</summary>' +
-              '<ul class="walk-says">' + cur.says.map(function (s) { return '<li><span class="mg">' + esc(SRC[s.src].mg) + '</span><span><b>' + esc(SRC[s.src].name) + ' \u00b7 ' + s.n + '</b> ' + esc(s.text) + '</span></li>'; }).join('') + '</ul>' +
-              '<div class="walk-ev">' + ev.slice(0, 3).map(function (r) { return recRow(r, true); }).join('') + '</div></details>';
-          })() +
-          '<h3 class="walk-dec">Decision</h3>' +
-          (ST.dismissing === cur.id ? dismissForm(cur.id, 'walk') : (          '<div class="walk-form">' +
-            '<span class="fld"><label for="w-owner">Owner</label><select class="select" id="w-owner"><option value="">No owner</option>' + ow.map(function (o) { return '<option' + (o === wOwner ? ' selected' : '') + '>' + esc(o) + '</option>'; }).join('') + '</select></span>' +
-            '<span class="fld"><label for="w-status">Status</label><select class="select" id="w-status">' + [['new', 'New'], ['plan', 'Agree to plan'], ['working', 'In progress'], ['resolved', 'Ready to close'], ['closed', 'Close it']].map(function (o) { return '<option value="' + o[0] + '"' + (o[0] === wStatus ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select></span>' +
-            '<label class="w-note-l" for="w-note">Note (optional)</label><textarea id="w-note" class="w-note" rows="2" placeholder="Anything the plan doesn\u2019t capture">' + esc(wNote) + '</textarea>' +
-          '</div>' +
-          '<div class="meet-actions end"><button type="button" class="btn" data-walk="back"' + (MT.idx ? '' : ' disabled') + '>Back</button><button type="button" class="btn" data-walk="skip">Skip</button><button type="button" class="btn brand" data-walk="save">' + (MT.idx === ids.length - 1 ? 'Save and finish' : 'Save and next') + '</button></div>' +
-          '<div class="walk-dismiss"><button type="button" class="btn" data-dopen="' + cur.id + '">Dismiss\u2026</button></div>')) +
-        '</section></div>';
+    // 3 · Decide: one group per screen
+    if (MT.step === 'decide') {
+      var gs = rvGroupsOn(); if (!gs.length) { MT.step = 'receipt'; return renderMeeting(); }
+      if (MT.g >= gs.length) MT.g = gs.length - 1;
+      var g = gs[MT.g], key = g[0], ids = MT.groups[key], carried = (last || {}).carried || [];
+      var rows = ids.map(function (id) {
+        var dec = rvDecided(key, id), i = insightById(id), tag = carried.indexOf(id) > -1 ? '<span class="rv-carry">Carried from ' + esc(last.short) + '</span> ' : '';
+        if (key === 'retro') {
+          var r = RETRO[id] || RETRO[i.retro];
+          return rvRow(r.title, tag + outBadge(r.outcome) + ' ' + esc(r.summary), '<span class="rv-ch">' + retroReview(r) + (MT.retros[r.id] ? '' : rvCarry(id + ':retro')) + '</span>', i ? i.id : r.id, !!dec);
+        }
+        var ow = i.owner ? esc(i.owner === YOU ? 'You' : i.owner) : 'No owner';
+        var en = key === 'esc' ? i.esc || MT.escWas[id] : null;
+        if (key === 'esc') return rvRow(i.title, tag + esc(nameOf(en.by)) + ' escalated this: ' + esc(en.reason) + (en.note ? '. “' + esc(en.note) + '”' : ''), dec && dec !== 'Carry forward' ? '<span class="rv-dec">' + esc(dec) + '</span>' : '<span class="rv-ch"><button type="button" class="btn" data-esc-back="' + i.id + '">Send back</button><button type="button" class="btn" data-esc-accept="' + i.id + '">Accept</button>' + rvCarry(id + ':esc') + '</span>', i.id, !!dec);
+        if (key === 'assign') return rvRow(i.title, tag + esc(i.story), '<select class="select" data-rvowner="' + i.id + '" aria-label="Owner"><option value="">Choose an owner</option>' + managersInView().map(function (o) { return '<option' + (o === i.owner ? ' selected' : '') + '>' + esc(o) + '</option>'; }).join('') + '</select><span class="rv-ch">' + rvCarry(id + ':assign') + '</span>', i.id, !!dec);
+        if (key === 'plan') return '<li class="rv-row rv-plan-row' + (dec ? ' is-done' : '') + '"><div class="rv-m"><button type="button" class="rv-title linkish" data-open="' + i.id + '">' + esc(i.title) + '</button><span class="rv-s">' + tag + 'Owner ' + ow + ' · ' + esc(i.next) + '</span></div>' + planHTML(i, 'rv-plan', { split: true, bare: true }) + (MT.agreed[id] ? '' : '<div class="rv-c rv-c-plan"><span class="rv-ch">' + rvCarry(id + ':plan') + '</span></div>') + '</li>';
+        if (key === 'stalled') return rvRow(i.title, tag + ow + ' · no update in ' + i.updated + ' days' + (i.latest ? ' · last: “' + esc(i.latest) + '”' : ''), rvChoice(id + ':' + key, ['Chase the owner', 'Owner needs help', 'Carry forward'], dec), i.id, !!dec);
+        if (key === 'moving') return rvRow(i.title, tag + ow + ' · ' + esc(planSummary(i)) + (i.plan && i.plan.read ? ' · ' + esc(i.plan.read[1]) : ''), rvChoice(id + ':' + key, ['Keep the plan', 'Revise the plan', 'Carry forward'], dec), i.id, !!dec);
+        if (key === 'close') return rvRow(i.title, tag + ow + (i.latest ? ' · ' + esc(i.latest) : ''), rvChoice(id + ':' + key, ['Keep watching', 'Close it'], dec), i.id, !!dec);
+        return rvRow(i.title, ow + ' · ' + esc(planSummary(i) || statusText(i)) + (planRead(i) === 'working' ? ' · Prism reads it as working' : ''), rvChoice(id + ':' + key, ['Agree it’s on track', 'Carry forward'], dec), i.id, !!dec);
+      });
+      var left = rvLeft(key), total = gs.reduce(function (a, x) { return a + MT.groups[x[0]].length; }, 0);
+      MT.reach = Math.max(MT.reach || 0, MT.g);
+      var openG = gs.filter(function (x) { return rvLeft(x[0]); }), last2 = MT.g === gs.length - 1;
+      var wait = left ? left + ' still to decide here' : last2 && openG.length ? openG.map(function (x) { return x[1]; }).join(', ') + ' still to decide' : '';
+      rvPage('Step 3 of 4 · Decide · ' + total + ' items in ' + gs.length + ' groups', esc(g[1]) + ' <span class="rv-n">' + ids.length + '</span>', '',
+        '<ol class="rv-groups">' + gs.map(function (x, k) { var all = !rvLeft(x[0]), can = k <= MT.reach || (k === MT.g + 1 && !left); return '<li class="' + (k === MT.g ? 'on' : all && k <= MT.reach ? 'done' : '') + '"><button type="button" data-rvg="' + k + '"' + (can ? '' : ' disabled') + '>' + (all && k !== MT.g && k <= MT.reach ? '✓ ' : '') + esc(x[1]) + ' <span>' + MT.groups[x[0]].length + '</span></button></li>'; }).join('') + '</ol>' +
+        rvQ(g[2]) + (key === 'noted' && left ? '<p class="rv-all"><button type="button" class="btn" data-rvall="noted">Agree they’re all on track</button></p>' : '') + '<ul class="rv-list">' + rows.join('') + '</ul>',
+        '<button type="button" class="btn lg" data-rvg="' + (MT.g - 1) + '">Back</button><span class="rv-nav-r">' + (wait ? '<small>' + esc(wait) + '</small>' : '') + (!last2 ? '<button type="button" class="btn brand lg" data-rvg="' + (MT.g + 1) + '"' + (left ? ' disabled' : '') + '>Next: ' + esc(gs[MT.g + 1][1]) + '</button>' : '<button type="button" class="btn brand lg" data-rvstep="receipt"' + (wait ? ' disabled' : '') + '>Finish and summarise</button>') + '</span>');
       return;
     }
 
-    // Step 4: wrap-up
-    var att = Object.keys(MT.attendees).filter(function (k) { return MT.attendees[k]; });
-    var done = MT.items.filter(function (id) { return MT.log[id] && MT.log[id].done && !MT.log[id].skipped; });
-    var skipped = MT.items.filter(function (id) { return !MT.log[id] || MT.log[id].skipped; });
-    $('view').innerHTML = meetingTop('Wrap-up', head) +
-      '<div class="meet-grid"><section class="card meet-card"><h2>Decisions</h2>' +
-        (done.length ? '<ul class="agreed">' + done.map(function (id) {
-          var it = INSIGHTS.filter(function (x) { return x.id === id; })[0], lg = MT.log[id];
-          return '<li><span class="av' + (it.owner === YOU ? ' me' : '') + '">' + (it.owner ? initials(it.owner) : '—') + '</span><div><p class="agreed-t">' + esc(it.title) + '</p><p class="agreed-o">' + esc(lg.changes.join(' · ') || (it.plan && it.plan.state === 'proposed' ? 'Reviewed. Plan still to agree' : 'Reviewed, no change')) + '</p>' + (lg.note ? '<p class="agreed-note">“' + esc(lg.note) + '”</p>' : '') + '</div></li>';
-        }).join('') + '</ul>' : '<p class="muted-p">No insights were updated.</p>') +
-        (function () {
-          var ks = Object.keys(MT.retros).filter(function (k) { return MT.retros[k]; }); if (!ks.length) return '';
-          return '<div class="w-acts"><span class="label">90-day retros</span><ul class="w-rt">' + ks.map(function (k) { var r = RETRO[k]; return '<li>' + outBadge(r.outcome) + ' ' + esc(r.title) + ' <span>' + (MT.retros[k] === 'confirmed' ? 'Confirmed' : 'Challenged: Prism will look again') + '</span></li>'; }).join('') + '</ul></div>';
-        })() +
-        (function () {
-          var per = {};
-          Object.keys(MT.agreed).forEach(function (id) { var it = insightById(id); it.plan.actions.forEach(function (a) { var w = a.who || 'No one yet'; (per[w] = per[w] || []).push({ a: a, it: it }); }); });
-          var ws = Object.keys(per); if (!ws.length) return '<p class="w-map"><span class="label">New actions</span>No plans were agreed in this review.</p>';
-          return '<div class="w-acts"><span class="label">New actions, by person</span>' + ws.map(function (w) {
-            return '<div class="w-p"><span class="person"><span class="av' + (w === YOU ? ' me' : '') + '">' + (w === 'No one yet' ? '?' : initials(w)) + '</span>' + esc(w) + '</span><ul>' + per[w].map(function (x) { return '<li>' + esc(x.a.t) + ' <span>by ' + esc(x.a.due) + ' \u00b7 ' + esc(x.it.title) + '</span></li>'; }).join('') + '</ul></div>';
-          }).join('') + '</div>';
-        })() +
-        (function () {
-          var by = {}; done.forEach(function (id) { var fx = INS_FACTOR[id]; if (!fx) return; var key = FACTOR[fx[0]].name + ' \u00b7 ' + FACTOR[fx[0]].inds[fx[1]].toLowerCase(); by[key] = (by[key] || 0) + 1; });
-          var keys = Object.keys(by); return keys.length ? '<p class="w-map"><span class="label">On the Forge Works Map, these decisions work on</span>' + keys.map(function (k) { return esc(k) + (by[k] > 1 ? ' (' + by[k] + ')' : ''); }).join('<br>') + '</p>' : '';
-        })() +
-        (skipped.length ? '<p class="muted-p">Not covered: ' + esc(join(skipped.map(function (id) { return INSIGHTS.filter(function (x) { return x.id === id; })[0].title; }))) + '.</p>' : '') +
-      '</section><section class="card meet-card"><h2>Attended</h2><div class="people">' + whoLine(att) + '</div>' +
-        '<label class="w-note-l" for="m-notes">Review notes</label><textarea id="m-notes" class="w-note" rows="4" placeholder="Anything else worth recording">' + esc(MT.notes) + '</textarea>' +
-        '<div class="meet-actions"><button type="button" class="btn" id="copy-summary">Copy summary</button><button type="button" class="btn brand" id="save-meeting">Save Focus review</button></div>' +
-      '</section></div>' +
+    // 4 · Receipt: what the room decided, grouped by outcome
+    var dec = [], carriedOut = [], missed = [], back = [];
+    RV_GROUPS.forEach(function (g) {
+      if (g[0] === 'noted') return;
+      MT.groups[g[0]].forEach(function (id) {
+        var d = rvDecided(g[0], id), i = insightById(id), t = i ? i.title : RETRO[id].title;
+        var had = dec.filter(function (x) { return x[0] === t; })[0];
+        if (d && d !== 'Carry forward') { if (had) had[1] += ' · ' + d; else dec.push([t, d, id]); } else if (!had) carriedOut.push([id, t, g[1] + (d ? ' · carried forward by the room' : ' · not reached')]);
+        if (g[0] === 'plan' && MT.agreed[id]) back.push([t, '90-day retro due ' + addDays('26 Sep', 90), id]);
+      });
+    });
+    rvActions().forEach(function (x) { if (MT.ci[x.key] === 'skip' || (!x.a.upd && MT.visitedDecide)) missed.push(x); });
+    var notified = []; Object.keys(MT.agreed).forEach(function (id) { insightById(id).plan.actions.forEach(function (a) { if (a.who && notified.indexOf(a.who) < 0) notified.push(a.who); }); });
+    var checkedNow = rvActions().filter(function (x) { return x.a.upd === '26 Sep'; }).length;
+    var blk = function (h, items, note) { return items.length ? '<section class="rv-rc"><h2 class="rv-h2">' + h + ' <span class="rv-n">' + items.length + '</span></h2>' + (note ? '<p class="rv-s">' + note + '</p>' : '') + '<ul class="rv-list">' + items.join('') + '</ul></section>' : ''; };
+    rvPage('Step 4 of 4', 'Summary', (MT.early ? 'Ended early · ' : '') + esc(scopeLabel()) + ' · Friday 26 September · ' + esc(join(managersInView().filter(function (p) { return MT.attendees[p]; }).map(function (p) { return p === YOU ? 'You' : p; }))),
+      blk('Decided', dec.map(function (x) { return rvRow(x[0], esc(x[1]), '', x[2], false); })) +
+      (checkedNow ? '<p class="rv-line">' + checkedNow + (checkedNow === 1 ? ' action' : ' actions') + ' checked in during the review.</p>' : '') +
+      (notified.length ? '<p class="rv-line">Notified of their new actions: ' + esc(join(notified.map(function (w) { return w === YOU ? 'you' : w; }))) + '.</p>' : '') +
+      blk('Missed check-ins', missed.map(function (x) { return rvRow(x.a.t, esc(x.a.who || 'No one yet') + ' · ' + esc(x.i.title), '<span class="rv-miss">Counts towards stalled</span>', x.i.id, false); })) +
+      blk('Carried forward to the next review', carriedOut.map(function (x) { return rvRow(x[1], esc(x[2]), '', x[0], false); }), 'These go first on the agenda next time.') +
+      blk('Coming back', back.map(function (x) { return rvRow(x[0], esc(x[1]), '', x[2], false); })) +
+      (dec.length || carriedOut.length || missed.length ? '' : '<p class="rv-empty">Nothing was decided or carried forward.</p>') +
       (function () {
         var c = leadCheck(); if (!c) return '';
-        var f = FACTOR[c.f], row = f.ind[c.k];
-        return '<section class="card meet-card lc"><h2>Leadership check</h2><p class="muted-p">Records can\u2019t show <b>' + esc(row[0].toLowerCase()) + '</b> (' + esc(f.name) + '). Which sounds most like ' + esc(scopeLabel()) + ' today? Prism adds the answer to the Map as management input.</p>' +
-          '<div class="lc-opts">' + [0, 1, 2].map(function (lv) { return '<label class="lc-opt"><input type="radio" name="lc" value="' + lv + '" data-lcf="' + c.f + '" data-lck="' + c.k + '"' + (MT.check && MT.check.lvl === lv ? ' checked' : '') + '><span><b>' + LEVELS[lv] + '</b>' + esc(cueAt(c.f, c.k, lv)) + '</span></label>'; }).join('') + '</div></section>';
-      })();
+        var f = FACTOR[c.f], row = f.ind[c.k], q = LC_Q[c.f + ':' + c.k] || 'Thinking about ' + row[0].toLowerCase() + ', which is closest to how it is here?';
+        // Options without level names, in a mixed order, so the answer isn’t led
+        var order = [[1, 2, 0], [2, 0, 1], [0, 2, 1]][c.k % 3];
+        return '<section class="rv-rc lc"><h2 class="rv-h2">One question for the room</h2>' + rvQ(q, 'Ask the room') +
+          '<p class="rv-lc-how">Pick the one closest to how it actually is in ' + esc(scopeLabel()) + ' today, not how it should be.</p>' +
+          '<div class="lc-opts">' + order.map(function (lv) { return '<label class="lc-opt"><input type="radio" name="lc" value="' + lv + '" data-lcf="' + c.f + '" data-lck="' + c.k + '"' + (MT.check && MT.check.lvl === lv ? ' checked' : '') + '><span>' + esc(cueAt(c.f, c.k, lv)) + '</span></label>'; }).join('') + '</div>' +
+          '<p class="rv-s">The answer is added to the Forge Works Map as the room’s view of ' + esc(f.name) + '.</p></section>';
+      })() +
+      '<label class="w-note-l" for="m-notes">Review notes</label><textarea id="m-notes" class="w-note" rows="3" placeholder="Anything else worth recording">' + esc(MT.notes) + '</textarea>',
+      (MT.early ? '<span></span>' : '<button type="button" class="btn lg" data-rvstep="decide">Back</button>') + '<button type="button" class="btn brand lg" id="rv-close">Close the review</button>');
   }
+  // Formal close: apply what the room decided, record misses, carry the rest forward
+  function rvClose() {
+    MT.notes = $('m-notes') ? $('m-notes').value : MT.notes;
+    var lc = document.querySelector('input[name="lc"]:checked'), lcDone = false;
+    if (lc) {
+      var lf = lc.getAttribute('data-lcf'), lk = +lc.getAttribute('data-lck'), lv = +lc.value;
+      regionsInScope().forEach(function (r) { SCORE[r][lf][lk] = { m: lv + 1, n: 2, t: 'steady', d90: 0, d45: 0, rv: '26 Sep' }; });
+      logDecisionCheck(lf, lk, lv); lcDone = true;
+    }
+    rvActions().forEach(function (x) {
+      if (MT.ci[x.key] === 'skip' || (!x.a.upd && MT.visitedDecide)) { x.i.updated = Math.max(x.i.updated || 0, 14); logEvent(x.i, 'Check-in missed', x.a.t + (x.a.who ? ' · ' + x.a.who : ''), 'Focus review'); }
+    });
+    var decisions = [], carried = [];
+    RV_GROUPS.forEach(function (g) {
+      if (g[0] === 'noted') return;
+      MT.groups[g[0]].forEach(function (id) {
+        var d = rvDecided(g[0], id), i = insightById(id);
+        if (!d || d === 'Carry forward') { carried.push(id); return; }
+        if (i) {
+          if (g[0] === 'plan') autoProgress(i);
+          if (MT.done[id + ':close'] === 'Close it') i.closed = true;
+          logEvent(i, 'Focus review', d, 'Focus review'); i.updated = 0;
+        }
+        decisions.push({ ins: i ? id : (RETRO[id] || {}).ins || id, who: i && i.owner || 'You', text: d, outcome: ['', 'Agreed today'] });
+      });
+    });
+    var att = Object.keys(MT.attendees).filter(function (k) { return MT.attendees[k]; });
+    MEETINGS.unshift({ id: 'm-' + Date.now(), div: ST.div, reg: ST.reg, date: 'Friday 26 September', short: '26 Sep', attendees: att, notes: MT.notes, decisions: decisions, carried: carried, early: !!MT.early });
+    MT = null; ST.insTab = 'history'; ST.hf = 'review'; go('focus'); ST.insTab = 'history'; ST.hf = 'review'; render();
+    toast('Focus review closed' + (carried.length ? '. ' + carried.length + (carried.length === 1 ? ' item carries' : ' items carry') + ' forward to the next one.' : '.') + (lcDone ? ' Leadership check added to the Map.' : ''));
+  }
+  document.addEventListener('click', function (e) {
+    if (!MT || ST.view !== 'meeting') return;
+    var y = window.scrollY, t;
+    if ((t = e.target.closest('[data-rvstep]'))) { var to = t.getAttribute('data-rvstep'); if (to === 'decide' || to === 'receipt') MT.visitedDecide = true; if (to === 'decide' && MT.step === 'receipt') MT.g = rvGroupsOn().length - 1; MT.step = to; renderMeeting(); window.scrollTo(0, 0); return; }
+    if ((t = e.target.closest('[data-rvg]'))) { if (t.disabled) return; var gi = +t.getAttribute('data-rvg'); if (gi < 0) { MT.step = 'check'; } else MT.g = gi; renderMeeting(); window.scrollTo(0, 0); return; }
+    if ((t = e.target.closest('[data-rvall]'))) { var ak = t.getAttribute('data-rvall'); MT.groups[ak].forEach(function (id) { if (!MT.done[id + ':' + ak]) MT.done[id + ':' + ak] = 'Agree it’s on track'; }); renderMeeting(); window.scrollTo(0, y); return; }
+    if ((t = e.target.closest('[data-rvci]'))) { var ck = t.getAttribute('data-rvci'); MT.ci[ck] = MT.ci[ck] ? '' : 'skip'; renderMeeting(); window.scrollTo(0, y); return; }
+    if ((t = e.target.closest('[data-rvdec]'))) { var dk = t.getAttribute('data-rvdec'), v = t.getAttribute('data-rvval'); MT.done[dk] = MT.done[dk] === v ? '' : v; renderMeeting(); window.scrollTo(0, y); return; }
+    if ((t = e.target.closest('[data-esc-accept],[data-esc-back]'))) { var eid = t.getAttribute('data-esc-accept') || t.getAttribute('data-esc-back'); if (ST.mfRes['e-' + eid]) { MT.done[eid + ':esc'] = ST.mfRes['e-' + eid]; renderMeeting(); window.scrollTo(0, y); } return; }
+    if (e.target.closest('#rv-end')) { MT.early = MT.step; MT.visitedDecide = MT.visitedDecide || MT.step === 'decide'; MT.step = 'receipt'; renderMeeting(); window.scrollTo(0, 0); return; }
+    if (e.target.closest('#rv-close')) { rvClose(); return; }
+  });
+  document.addEventListener('change', function (e) {
+    if (MT && e.target.name === 'lc') { MT.check = { lvl: +e.target.value }; return; }
+    if (MT && ST.view === 'meeting' && e.target.hasAttribute && e.target.hasAttribute('data-att')) { MT.attendees[e.target.getAttribute('data-att')] = e.target.checked; renderMeeting(); return; }
+    var id = MT && e.target.getAttribute && e.target.getAttribute('data-rvowner'); if (!id) return;
+    var i = insightById(id), y = window.scrollY; i.owner = e.target.value; autoProgress(i);
+    MT.done[id + ':assign'] = i.owner ? 'Owner: ' + (i.owner === YOU ? 'you' : i.owner) : '';
+    if (i.owner && i.plan && i.plan.state === 'proposed' && MT.groups.plan.indexOf(id) < 0) MT.groups.plan.push(id);
+    renderMeeting(); window.scrollTo(0, y);
+  });
 
   // Report section: how every agreed action is going, grouped by insight
   function reportActions(list, last) {
@@ -2867,7 +3116,7 @@ button.pv-node:hover .pv-t { text-decoration: underline; text-underline-offset: 
     if (it.kind === 'close') return '<button type="button" class="btn brand" data-mf-close="' + i.id + '">Close it</button>';
     if (it.kind === 'agreed') return '<button type="button" class="btn brand" data-mf-agreed="' + it.id + '">Mark as done</button>';
     if (it.kind === 'retro') return '<button type="button" class="btn brand" data-retro="' + i.retro + '">Review the retro</button>';
-    if (it.kind === 'action') return '<label class="pa-ci"><span class="sr">How\u2019s it going?</span><select class="select" data-pa="' + it.work.id + ':' + it.ak + '">' + PA_ST.map(function (x) { return '<option value="' + x[0] + '"' + (x[0] === it.act.st ? ' selected' : '') + '>' + x[1] + '</option>'; }).join('') + '</select></label>';
+    if (it.kind === 'action') return '<label class="pa-ci"><span class="sr">Check in</span><select class="select" data-pa="' + it.work.id + ':' + it.ak + '">' + PA_ST.map(function (x) { return '<option value="' + x[0] + '"' + (x[0] === it.act.st ? ' selected' : '') + '>' + x[1] + '</option>'; }).join('') + '</select></label>';
     return '';
   }
   function mfOpen(it) {
@@ -3248,7 +3497,8 @@ button.pv-node:hover .pv-t { text-decoration: underline; text-underline-offset: 
         return '<section class="map-col"><div class="map-dom"><h2>' + esc(d[1]) + '</h2><span class="label">' + esc(d[2]) + '</span></div>' +
           FACTORS.filter(function (f) { return f[1] === d[0]; }).map(function (f) {
             var sc = scores[f[0]];
-            return '<a class="card fcard' + (sc.v == null ? ' blind' : '') + '" href="#map/' + f[0] + '"><span class="fc-name">' + esc(f[2]) + '</span>' +
+            var ob = objOnFactor(f[0]);
+            return '<a class="card fcard' + (sc.v == null ? ' blind' : '') + '" href="#map/' + f[0] + '"><span class="fc-name">' + esc(f[2]) + '</span>' + (ob ? '<span class="fc-obj">Strategy · ' + esc(LEVELS[ob.target]) + ' by ' + esc(ob.by) + '</span>' : '') +
               levelBar(sc.v, false, sc.v == null ? 'Needs management input' : null, sc.was) +
               (sc.v != null ? '<span class="fc-named">' + esc(f[4][sc.lvl]) + '</span>' : '') + wasLine(sc) +
               '<span class="fc-meta">' + (sc.v == null ? '<span>Records don’t show this factor</span>' : '<span>' + sc.n + (sc.n === 1 ? ' signal' : ' signals') + '</span>' + trendHTML(sc.t)) + '</span>' +
@@ -3270,17 +3520,23 @@ button.pv-node:hover .pv-t { text-decoration: underline; text-underline-offset: 
     var ins = INSIGHTS.filter(function (i) { return INS_FACTOR[i.id] && INS_FACTOR[i.id][0] === key && !i.dismissed; })
       .filter(function (i) { return i.sites.some(function (s) { return regs.indexOf(SITE[s].region) > -1; }); });
     var next = sc.lvl < 0 ? 0 : Math.min(2, sc.lvl + 1);
-    var dom = DOMAINS.filter(function (d) { return d[0] === f.domain; })[0];
+    var dom = DOMAINS.filter(function (d) { return d[0] === f.domain; })[0], obj = objOnFactor(key);
+    var krOf = function (k) { return obj ? obj.krs.filter(function (kr) { return kr[0] === k; })[0] : null; };
     $('view').innerHTML = '<a class="back" href="#map">← Map</a>' +
       '<div class="ins-head"><div class="meta"><span class="tlabel">' + esc(dom[1]) + '</span><span class="label">' + esc(dom[2]) + '</span></div><h1 class="ins-title">' + esc(f.name) + '</h1><p class="sub">' + esc(f.q) + '</p></div>' +
       '<div class="ins-grid"><div class="ins-main">' +
         '<section class="card side-card f-rating"><span class="label">' + esc(scopeLabel()) + ' today</span><div class="f-rate-row">' + levelBar(sc.v, false, sc.v == null ? 'Needs management input' : null, sc.was) + (sc.v != null ? trendHTML(sc.t) : '') + '</div>' +
           (sc.v != null ? '<p class="f-named">' + esc(f.lnames[sc.lvl]) + '</p>' + wasLine(sc) : '') +
           '<p class="muted-p" style="color:var(--text)">' + (sc.v == null ? 'Records and insights don’t show this factor. Focus reviews, surveys and interviews fill it in.' : sc.n + ' signals in the last 90 days.' + (sc.weakest != null ? ' Held back by <b>' + esc(f.inds[sc.weakest].toLowerCase()) + '</b>.' : '') + (sc.mgmt ? ' ' + word(sc.mgmt) + (sc.mgmt === 1 ? ' indicator needs' : ' indicators need') + ' management input.' : '')) + '</p></section>' +
-        '<section class="ins-sec"><span class="label">Indicators · select one to see what each level looks like</span><div class="card ind-list">' + f.inds.map(function (name, k) {
+        (obj ? (function () { var st = objStatus(obj); return '<section class="card side-card f-strat"><span class="label">In the strategy</span>' +
+          '<p class="f-strat-t"><a class="map-link" href="#strategy">' + esc(objTitle(obj)) + '</a></p>' +
+          '<div class="meta"><span class="badge ' + st[0] + '"><i></i>' + st[1] + '</span><span class="chip">' + esc(objScope(obj)) + '</span></div>' +
+          '<p class="f-strat-l"><span>Key results</span>' + obj.krs.map(function (kr) { return esc(f.inds[kr[0]]) + ' to ' + LEVELS[kr[1]]; }).join(' · ') + '</p>' +
+          (obj.programs.length ? '<p class="f-strat-l"><span>' + (obj.programs.length === 1 ? 'Program' : 'Programs') + '</span>' + obj.programs.map(function (pid) { return '<span><button type="button" class="linkish map-link" data-prog="' + pid + '">' + esc(PROGRAMS[pid].title) + '</button> · led by ' + esc(PROGRAMS[pid].owner) + '</span>'; }).join('') + '</p>' : '') + '</section>'; })() : '') +
+        '<section class="ins-sec"><span class="label">Indicators</span><p class="f-hint">Select one to see what each level looks like.</p><div class="card ind-list">' + f.inds.map(function (name, k) {
           var x = sc.inds[k], l = lvlOf(x.v), drivers = ins.filter(function (i) { return INS_FACTOR[i.id][1] === k; }), open = ST.openInd[key + k];
           var ev = evOf(key, k).map(function (e) { return '<span class="ev-src">' + esc(EV_NAME[e]) + '</span>'; }).join('');
-          return '<div class="ind-row' + (open ? ' open' : '') + '"><button type="button" class="ind-btn" data-ind="' + key + k + '" aria-expanded="' + !!open + '"><span class="ind-main"><span class="ind-name">' + esc(name) + '</span>' +
+          return '<div class="ind-row' + (open ? ' open' : '') + '"><button type="button" class="ind-btn" data-ind="' + key + k + '" aria-expanded="' + !!open + '"><span class="ind-main"><span class="ind-name">' + esc(name) + (krOf(k) ? ' <span class="kr-tag">Key result · target ' + LEVELS[krOf(k)[1]] + '</span>' : '') + '</span>' +
             '<span class="ind-drv' + (drivers.length ? '' : ' muted') + '">' + (drivers.length ? drivers.map(function (i) { return esc(i.title); }).join(' · ') : x.v == null ? (x.mg ? 'Needs management input' : 'No evidence yet') : (x.rv ? 'Management input \u00b7 Focus review ' + x.rv : x.n + ' signals, no open insight')) + '</span></span>' +
             '<span class="ind-rate">' + levelBar(x.v, true, x.v == null ? (x.mg ? 'Needs input' : 'Blind spot') : null, x.was) + (x.v != null ? trendHTML(x.t) : '') + '</span></button>' +
             (open ? '<div class="ind-detail"><ol class="ind-levels">' + [0, 1, 2].map(function (lv) {
@@ -3321,15 +3577,15 @@ button.pv-node:hover .pv-t { text-decoration: underline; text-underline-offset: 
     var also = (INS_ALSO[i.id] || []).map(function (a) { return '<span>' + nm(a[0]) + ' \u00b7 ' + esc(FACTOR[a[0]].inds[a[1]].toLowerCase()) + '</span>'; });
     var inf = function (lv) { return cueInferred(fx[0], k, lv) ? ' <span class="inf-t" title="The Forge Works blueprint doesn\u2019t describe this level. Prism inferred it from the levels either side.">(inferred)</span>' : ''; };
     var o = objFor(i);
-    return '<p class="mc-f"><span class="label">Improves</span><span>' + nm(fx[0]) + ' \u00b7 ' + esc(f.inds[k].toLowerCase()) + '</span></p>' + levelBar(x.v, true, null, x.was) +
+    return '<div class="mc-f"><span class="label">Improves</span><span class="mc-fac">' + nm(fx[0]) + '</span><span class="mc-ind">' + esc(f.inds[k]) + '</span>' + levelBar(x.v, true, null, x.was) + '</div>' +
       '<dl class="mc-dl">' +
-        (l > -1 ? '<div><dt>Now \u00b7 ' + LEVELS[l] + '</dt><dd>' + (now ? esc(now) + inf(l) : 'Not described for this level') + '</dd></div>' : '') +
+        (l > -1 ? '<div><dt>Now</dt><dd>' + (now ? esc(now) + inf(l) : 'Not described for this level') + '</dd></div>' : '') +
         (nl > -1 ? '<div class="nx"><dt>Next \u00b7 ' + LEVELS[nl] + '</dt><dd>' + esc(nx) + inf(nl) + '</dd></div>' : '') +
-      '</dl>' +
+      '</dl>' + '<div class="mc-rel">' +
       (also.length ? '<p class="mc-also"><span class="label">Also moves</span><span>' + also.join('') + '</span></p>' : '') +
       (o ? '<p class="mc-also"><span class="label">Contributes to</span><span><a class="map-link" href="#strategy">' + esc(objTitle(o)) + '</a></span></p>' : '') +
       // If a program already targets this indicator, say so. Changes to the program stay with strategy meetings.
-      (o && o.krs.some(function (kr) { return kr[0] === k; }) ? '<p class="mc-also"><span class="label">Already being addressed</span>' + o.programs.map(function (pid) { var pg = PROGRAMS[pid]; return '<span><button type="button" class="linkish map-link" data-prog="' + pid + '">' + esc(pg.title) + '</button> \u00b7 program led by ' + esc(pg.owner) + '</span>'; }).join('') + '</p>' : '');
+      (o && o.krs.some(function (kr) { return kr[0] === k; }) ? '<p class="mc-also"><span class="label">Already being addressed</span>' + o.programs.map(function (pid) { var pg = PROGRAMS[pid]; return '<span><button type="button" class="linkish map-link" data-prog="' + pid + '">' + esc(pg.title) + '</button> \u00b7 program led by ' + esc(pg.owner) + '</span>'; }).join('') + '</p>' : '') + '</div>';
   }
   function mapCard(i) { var b = mapBody(i); return b ? '<section class="card side-card mc"><h2>On the Forge Works Map</h2>' + b + '</section>' : ''; }
   function mapLine(i) { var fx = INS_FACTOR[i.id]; return fx ? '<span class="icard-map"><span class="label">Improves</span>' + esc(FACTOR[fx[0]].name) + ' \u00b7 ' + esc(FACTOR[fx[0]].inds[fx[1]].toLowerCase()) + '</span>' : ''; }
@@ -3434,11 +3690,12 @@ button.pv-node:hover .pv-t { text-decoration: underline; text-underline-offset: 
     $('rec').innerHTML = drawerHead('Program', o ? [objTitle(o), 'Applies to ' + objScope(o)] : [], p.title, 'Owner ' + p.owner + ' \u00b7 ' + p.resources) +
       '<div class="sheet-body"><div class="meta">' + statusBadge(p) + '</div>' +
         (o ? '<section class="sheet-sec"><span class="label">Why this program</span><p>' + esc(o.why) + '</p></section>' : '') +
-        planHTML(p, 'sheet-sec') +
+        planHTML(p, 'sheet-sec', { split: true }) + checkHTML(p, 'sheet-sec') +
+        '<section class="sheet-sec phase"><div class="plan-head"><span class="label">Retro' + nowTag(p, 'retro') + '</span><span class="plan-state">' + (p.status === 'resolved' ? 'Ready to close \u00b7 closes at the next quarterly planning' : allDone ? 'All actions done \u00b7 ready to close' : 'When the program closes') + '</span></div>' +
+          '<p class="ph-l">Prism writes a retro when the program closes, and a read of it at each quarterly planning, using the same outcomes as insight retros.</p>' +
+          (p.status === 'working' && allDone ? '<div class="rt-row"><button type="button" class="btn brand" data-progclose="' + pid + '">Mark ready to close</button></div>' : '') + '</section>' +
         (o ? '<section class="sheet-sec"><span class="label">What it should move</span>' + o.krs.map(function (kr) { var x = aggInd(orr, o.f, kr[0]); return '<div class="kr"><span class="kr-n">' + esc(f.inds[kr[0]]) + '</span><span class="ind-rate">' + levelBar(x.v, true, null, x.was) + trendHTML(x.t) + '</span><span class="kr-tg">Target ' + LEVELS[kr[1]] + '</span></div>'; }).join('') + '</section>' : '') +
         '<section class="sheet-sec"><span class="label">Insights on the same factor</span>' + (ins.length ? '<div class="links">' + ins.map(function (i) { return '<button type="button" class="link-item" data-fopen="' + i.id + '"><b>' + esc(i.title) + '</b><span>' + esc(statusText(i)) + '</span></button>'; }).join('') + '</div>' : '<p class="muted-p">None open right now.</p>') + '</section>' +
-        '<section class="sheet-sec"><span class="label">Retro</span><p class="muted-p">Prism writes a retro when the program closes, and a read of it at each quarterly planning, using the same outcomes as insight retros.</p>' +
-          (p.status === 'working' && allDone ? '<button type="button" class="btn" data-progclose="' + pid + '">All actions done: mark ready to close</button>' : '') + '</section>' +
       '</div>';
     $('rec').hidden = false; $('scrim').hidden = false; $('rec-x').focus();
   }
@@ -3455,6 +3712,7 @@ button.pv-node:hover .pv-t { text-decoration: underline; text-underline-offset: 
     var all = []; ORG.forEach(function (d) { if (o.div && d.div !== o.div) return; d.regions.forEach(function (r) { if (!o.reg || r.name === o.reg) all.push(r.name); }); });
     var mine = regionsInScope(); return all.filter(function (r) { return mine.indexOf(r) > -1; });
   }
+  function objOnFactor(key) { return objsInView().filter(function (o) { return o.f === key; })[0] || null; }
   function objsInView() { return OBJECTIVES.filter(function (o) { return objRegs(o).length; }); }
   function objTitle(o) { return FACTOR[o.f].name + ' to ' + LEVELS[o.target] + ' by ' + o.by; }
   function objStatus(o) {
@@ -4154,7 +4412,7 @@ button.pv-node:hover .pv-t { text-decoration: underline; text-underline-offset: 
     closeRec(); closeSheet(); closePrismView(); render(); window.scrollTo(0, 0);
   }
   function render() { renderView(); renderMyFocusCount(); }
-  function renderView() { if (ST.view === 'map') renderMap(); else if (ST.view === 'strategy') renderStrategy(); else if (ST.view === 'planning') renderPlanning(); else if (ST.view === 'progress') renderProgress(); else if (ST.view === 'myfocus') renderMyFocus(); else if (ST.view === 'sites') renderSites(); else if (ST.view === 'site') { if (ST.siteFeed) renderSiteFeed(ST.site); else renderSite(ST.site); } else if (ST.view === 'sources') renderSources(); else if (ST.view === 'meeting') renderMeeting();  else if (ST.view === 'insight') renderInsight(ST.insight); else renderFocus(); }
+  function renderView() { document.body.classList.toggle('rv-mode', ST.view === 'meeting' && !!MT); if (ST.view === 'map') renderMap(); else if (ST.view === 'strategy') renderStrategy(); else if (ST.view === 'planning') renderPlanning(); else if (ST.view === 'progress') renderProgress(); else if (ST.view === 'myfocus') renderMyFocus(); else if (ST.view === 'sites') renderSites(); else if (ST.view === 'site') { if (ST.siteFeed) renderSiteFeed(ST.site); else renderSite(ST.site); } else if (ST.view === 'sources') renderSources(); else if (ST.view === 'meeting') renderMeeting();  else if (ST.view === 'insight') renderInsight(ST.insight); else renderFocus(); }
 
   document.addEventListener('click', function (e) {
     var a = e.target.closest('a[href^="#"]');

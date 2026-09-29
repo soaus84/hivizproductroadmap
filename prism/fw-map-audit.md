@@ -355,3 +355,11 @@ Where the Blueprint doesn't describe an indicator at a level, the concept now sh
 | Decision-making · Basis for safety investment | Compliant | Reactive, after incidents or regulator attention |
 | Decision-making · How decisions are tested | Compliant | Decided by rank; rarely challenged |
 | Monitoring and metrics · Workers' experience in the data | Compliant | Not measured, beyond incident reports |
+
+## 8. To do: audit the room questions and answers (29 Sep 2026)
+
+The Focus review ends with one question for the room, taken from an indicator that only management can evidence (27 in all, in `LC_Q` in the concept). The room picks one of the indicator's three level descriptions, shown without level names. Before this goes further, audit each question and its answers:
+
+- **Answers should be observable.** Some level descriptions are hard to judge from what people see. For example, Communication & coordination · How messages are delivered offers "Consistent and standardised", "Built on trust, care and transparency" and "Engaging and suited to the audience". "Built on trust and care" can't really be measured. Something like General / Transparent / Specific may work better.
+- **Questions should be plain and specific.** For example, "When something important needs to be communicated to the crews, how is it done?" rather than "how does it actually get there?".
+- **The three answers should read as parallel choices**, similar in length and form, so none stands out as the "right" one.
