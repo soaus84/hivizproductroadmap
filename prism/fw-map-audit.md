@@ -356,10 +356,335 @@ Where the Blueprint doesn't describe an indicator at a level, the concept now sh
 | Decision-making · How decisions are tested | Compliant | Decided by rank; rarely challenged |
 | Monitoring and metrics · Workers' experience in the data | Compliant | Not measured, beyond incident reports |
 
-## 8. To do: audit the room questions and answers (29 Sep 2026)
 
-The Focus review ends with one question for the room, taken from an indicator that only management can evidence (27 in all, in `LC_Q` in the concept). The room picks one of the indicator's three level descriptions, shown without level names. Before this goes further, audit each question and its answers:
+## 8. Management poll: questions and answers audit (30 Sep 2026)
 
-- **Answers should be observable.** Some level descriptions are hard to judge from what people see. For example, Communication & coordination · How messages are delivered offers "Consistent and standardised", "Built on trust, care and transparency" and "Engaging and suited to the audience". "Built on trust and care" can't really be measured. Something like General / Transparent / Specific may work better.
-- **Questions should be plain and specific.** For example, "When something important needs to be communicated to the crews, how is it done?" rather than "how does it actually get there?".
-- **The three answers should read as parallel choices**, similar in length and form, so none stands out as the "right" one.
+27 indicators can't be read from records, only from management. Until now they were asked as one question for the room at the end of a Focus review. Two decisions (30 Sep):
+
+- **They become a personal poll, not a room question.** Each manager gets one or two in My Focus each fortnight, rotating so every indicator is refreshed about once a quarter. Answering alone avoids anchoring on whoever speaks first. It also gives a spread rather than one agreed answer, and the gap between levels is itself a finding.
+- **Managers only, and anonymous.** Results show only for groups of three or more, broken down by level (executive, division, region). Participation is visible; individual answers are not.
+
+**Who counts as a manager (30 Sep).** For now, "managers" is a general term: anyone who should see this level of information. That includes senior leaders, even if they only join some meetings. Hiviz is the tip of a wider insight iceberg, and it should replace the reports leaders read today. There's no separate leader class yet.
+
+**Parked for later**
+- **Polls will probably target leaders and managers separately.** The Guide questions are about senior leaders, so asking only leaders would be self-assessment. Asking both and showing the gap ("leaders say…, managers say…") answers the blueprint's own question: how are leaders' actions perceived by others?
+- **Leader attendance is a feature.** Hiviz already records who attends each ritual. Marking which attendees are leaders turns that into evidence for Senior leadership · connection to the organisation. The blueprint uses it directly: at Compliant, "the Chief Executive rarely attends safety specific meetings"; at Leading, safety is "considered by the Chief Executive at high-level meetings on a regular basis".
+
+A poll has nobody to ask "what do you mean?", so every question and answer was checked against four rules:
+
+1. **The question is plain and specific.** It names a situation a manager has actually seen.
+2. **Answers are observable.** They describe what you'd see or hear, not a value ("trust", "moral", "integral") or jargon ("slack", "micro-experiments").
+3. **Answers are parallel.** They have a similar length and grammatical form, so none stands out as the right one.
+4. **No leading.** No level names, and the answers appear in a mixed order. Every question also offers **Don't know**, which is a signal in its own right.
+
+The answers still map to Compliant (C), Leading (L) and Resilient (R). The blueprint's level text is unchanged on the factor pages. These are the poll's own wording.
+
+⚑ marks indicators where managers are guessing at someone else's view. Keep them for now, but they would read better from supervisors or the frontline later.
+~ marks a level Prism inferred where the blueprint is silent. These need Forge Works to confirm the meaning, not just the wording.
+
+### Senior leadership
+
+**Where leaders' attention goes**
+- Was: "When our senior leaders talk about safety, what do they spend most of their time on?" C Incidents, audit findings and compliance · L A vision for safety, discussed regularly · R Understanding and serving workers' needs
+- Issue: "A vision for safety" can't be observed; R is a value.
+- **Q: When senior leaders talk about safety, what do they mostly talk about?**
+  - C: Incidents, audit findings and compliance
+  - L: Goals and progress on known risks
+  - R: What crews need to do the work well
+
+**What safety means to leaders**
+- Was: "Going by what they do, what does safety mean to our senior leaders?" C A compliance and legal liability issue · L An aspiration: zero harm, safety first · R A moral obligation
+- Issue: all three are motives, and "moral obligation" is the obvious right answer. Ask what they say instead.
+- **Q: What reason do senior leaders give most often for working safely?**
+  - C: The law, and our liability
+  - L: Our zero harm goal
+  - R: What we owe the people doing the work
+
+**Connection to the organisation**
+- Was: "How connected are our senior leaders to the people doing the work?" C The Chief Executive rarely attends safety meetings · L Leaders drive change with a committed team · R Connected to and helping people at all levels
+- Issue: the three answers describe different things (a meeting, a team, a feeling).
+- **Q: How often do senior leaders spend time where the work is done?**
+  - C: Rarely; they hear about it in reports
+  - L: Regularly, to push safety initiatives
+  - R: Often, asking crews what gets in the way
+
+**How leaders are perceived** ⚑
+- Was: "How do people on our sites see our leaders?" C Caring about compliance · L Caring about people · R Caring about making work better
+- Issue: parallel, but managers are guessing at the frontline's view.
+- **Q: If you asked a crew what our leaders care about most, what would they say?**
+  - C: That we follow the rules
+  - L: That nobody gets hurt
+  - R: That the work gets easier to do safely
+
+### Strategy
+
+**What plans focus on**
+- Was: "What do our safety plans mostly focus on?" C More safety work and administrative requirements · L Safety work effectiveness and conditions for reliable work · R Improving the work itself
+- Issue: L is jargon, and the answers are uneven in length.
+- **Q: What do most actions in our safety plans ask people to do?**
+  - C: Complete more checks, forms and training
+  - L: Make existing controls work more reliably
+  - R: Change how the work itself is done
+
+**Who improvement is aimed at**
+- Was: "Who are our safety improvements really aimed at?" C Frontline supervisors and workers · L Leaders, the safety organisation and the safety system · R Every strategic decision: growth, people, budgets
+- Issue: R names decisions, not people.
+- **Q: Whose behaviour do our safety improvements mostly try to change?**
+  - C: Frontline workers and supervisors
+  - L: Leaders and the safety team
+  - R: Everyone whose decisions shape the work
+
+**Where practices come from** ~L
+- Was: "Where do our safety practices come from?" C Practices common across industry · L Proven programs adopted from peers · R Targeted, evidence-based and well governed
+- Issue: R is praise, not a source.
+- **Q: When we bring in a new safety practice, where does it usually come from?**
+  - C: What's common across the industry
+  - L: A program that worked for a peer
+  - R: Our own evidence about our own work
+
+**Safety in organisational decisions** ~C
+- Was: "When big decisions get made here, where does safety come in?" C Considered separately, after the decision is made · L Goals and strategies at all levels · R All decisions made with a clear view of safety
+- Issue: L doesn't answer "where".
+- **Q: When a big business decision is made, when does safety come into it?**
+  - C: Afterwards, once the decision is made
+  - L: As one of the goals set for it
+  - R: From the start, in how it's shaped
+
+### Risk management
+
+**Joining up risk types** ~C
+- Was: "Do we manage different kinds of risk together, or each on its own?" C Safety risk kept in its own register · L Safety risk joined up with operational and commercial risk · R One shared model of risk and work
+- Issue: the question is yes/no and leads towards "together"; R is abstract.
+- **Q: Where are safety risks recorded and reviewed?**
+  - C: In a separate safety register
+  - L: With operational and commercial risks
+  - R: In one plan for how the work runs
+
+### Safety organisation
+
+**Status and influence**
+- Was: "How much say does the safety team really have?" C Marginalised and left out of decisions · L Formal senior status with dedicated resources · R Integral to strategic and operational management
+- Issue: "marginalised" and "integral" are loaded words.
+- **Q: When operational decisions are made, where is the safety team?**
+  - C: Told afterwards
+  - L: Consulted, through a formal senior role
+  - R: At the table, as part of running the business
+
+**How they work with leaders**
+- Was: "How does the safety team work with leaders?" C Educate on compliance · L Coach safety leadership · R Help leaders learn how work is done
+- Issue: close, but the answers are verb fragments.
+- **Q: What does the safety team mostly do with our leaders?**
+  - C: Explain the rules and what compliance needs
+  - L: Coach them to lead on safety
+  - R: Help them see how the work is really done
+
+### Operational management
+
+**Accountability and commitment**
+- Was: "Who holds themselves accountable for safety on our sites?" C Involved in serious and regulatory incidents · L Accountable and genuinely committed · R Safety as a moral responsibility
+- Issue: the answers don't answer "who", and "genuinely" and "moral" lead.
+- **Q: When do operational managers get personally involved in safety?**
+  - C: After a serious or reportable incident
+  - L: Regularly, through their own safety goals
+  - R: Every day, as part of running the work
+
+### Resource allocation
+
+**Purpose of safety investment**
+- Was: "What is our safety spending really for?" C The minimum needed to comply · L Fixing known risks and issues · R Supporting operations to deliver safely
+- Issue: "the minimum" is loaded.
+- **Q: What is most of our safety budget spent on?**
+  - C: Meeting what the law requires
+  - L: Fixing risks we already know about
+  - R: Giving crews what they need to work safely
+
+**View of spare capacity** ~L
+- Was: "How do we treat spare time, people and equipment on a job?" C Efficiency first; excess is a cost · L Spare capacity funded where known risks need it · R Operational slack designed in
+- Issue: "slack" is jargon.
+- **Q: When a job has spare time, people or equipment, what usually happens?**
+  - C: It's cut as a cost
+  - L: It's kept where a known risk needs it
+  - R: It's planned in, so crews can adapt
+
+### Management systems
+
+**What the system is built on**
+- Was: "What is our safety system built on?" C Regulation and standards, apart from the work · L The specific needs of the work and known risks · R Work-as-done, co-designed with workers
+- Issue: "work-as-done" is jargon, and R mixes two ideas.
+- **Q: What are most of our safety procedures written from?**
+  - C: Regulations and standards
+  - L: The risks of the specific job
+  - R: How crews actually do the work
+
+**Who designs it**
+- Was: "Who designs our safety system?" C Safety professionals · L Needs identified with the frontline · R Co-designed; local units have autonomy
+- Issue: L isn't a "who".
+- **Q: Who writes our safety procedures?**
+  - C: Safety professionals, on their own
+  - L: Safety professionals, after asking the frontline
+  - R: The crews who use them, with support
+
+### Goal conflict and trade-offs
+
+**How safety and business goals are framed**
+- Was: "When safety and getting the job done pull against each other, how do we talk about it?" C "Safety first"; not incompatible · L Good safety is good business; zero harm · R Commercial goals can conflict with safety
+- Issue: hard to read as written; R is a statement, not what people say.
+- **Q: When safety and production pull against each other, what do leaders usually say?**
+  - C: "Safety first", and it isn't discussed further
+  - L: "Good safety is good business"
+  - R: That the conflict is real, and how to handle it
+
+### Learning and development
+
+**What capability covers**
+- Was: "What does our safety training actually cover?" C Technical skills per role · L Technical and non-technical skills · R Active learning: simulation, micro-experiments
+- Issue: R describes a method, not content, and "micro-experiments" is jargon.
+- **Q: What does our safety training mostly teach?**
+  - C: The technical skills for each role
+  - L: Technical skills, plus teamwork and judgement
+  - R: How to handle real situations, through practice
+
+**Where practice comes from** ~C
+- Was: "Where do people learn how to do the work safely?" C Regulation, standards and the training provider · L Peer organisations and industry best practice · R Peer roles and team problem-solving
+- Issue: "peer" in both L and R blurs them.
+- **Q: Where do people mostly learn how to do their work safely?**
+  - C: From courses and the training provider
+  - L: From other companies and industry practice
+  - R: From each other, solving problems as a team
+
+### Frontline workforce
+
+**How they take part** ⚑
+- Was: "How do frontline workers take part in safety here?" C Formal consultation · L Collective ownership; help design processes · R Local experts who educate management
+- Issue: uneven lengths, and "collective ownership" is abstract.
+- **Q: How do frontline workers take part in safety decisions?**
+  - C: Through formal consultation, like committees
+  - L: They help design the processes they use
+  - R: They teach managers how the work is done
+
+### Communication & coordination
+
+**How messages are delivered**
+- Was: "When something important has to reach the crews, how does it actually get there?" C Consistent and standardised · L Engaging and suited to the audience · R Built on trust, care and transparency
+- Issue: R can't be measured (your example). Reworded along your General / Specific / Transparent line.
+- **Q: When something important needs to be communicated to the crews, how is it done?**
+  - C: The same message, the same way, for everyone
+  - L: Tailored to each crew and its work
+  - R: Explained openly, with the reasons, and questions welcome
+
+**Relationships across roles and teams**
+- Was: "How well do different roles and teams work together?" C Left to develop naturally · L Encouraged for learning and sharing · R Purposefully developed
+- Issue: "how well" invites a rating, not a choice.
+- **Q: How do people in different roles and teams get to know each other's work?**
+  - C: It's left to chance
+  - L: We encourage it, to share what works
+  - R: We plan it, through joint planning and site visits
+
+### Decision-making
+
+**Who approves improvement ideas**
+- Was: "Who gets to approve an idea to make work safer?" C A senior leader · L An operational manager · R Local teams, supported by management
+- Issue: good already; the question just needs to be concrete.
+- **Q: Who has to approve a crew's idea to make its work safer?**
+  - C: A senior leader
+  - L: Their operational manager
+  - R: The crew itself, with management's support
+
+**Basis for safety investment** ~C
+- Was: "What decides whether we spend money on safety?" C Reactive, after incidents or regulator attention · L Proactive, with a clear risk-based case · R Predictive, on weak signals
+- Issue: the labels (reactive, proactive, predictive) give the ladder away.
+- **Q: What usually triggers spending on safety?**
+  - C: An incident, or the regulator
+  - L: A risk assessment that makes the case
+  - R: Early warning signs, before anything happens
+
+### Contractor management
+
+**The relationship**
+- Was: "What is our relationship with contractors really like?" C Contractual · L A mutually beneficial partnership · R Integrated, with shared goals
+- Issue: one-word C against longer L and R.
+- **Q: How do we work with our main contractors on safety?**
+  - C: We manage them through the contract
+  - L: We work with them as partners
+  - R: We plan and run the work as one team
+
+### Monitoring and metrics
+
+**What "safe" means to managers**
+- Was: "When our managers say a site is safe, what do they mean?" C No negative events · L Controls assured and a positive climate · R Never assumed; preoccupied with failure
+- Issue: R is jargon and reads as the clever answer.
+- **Q: When a manager says a site is safe, what are they usually going on?**
+  - C: Nothing bad has happened lately
+  - L: Controls are checked and people feel positive
+  - R: They don't assume it, and keep looking for weak spots
+
+**Workers' experience in the data** ⚑ ~C
+- Was: "How much of workers' real experience shows up in our data?" C Not measured, beyond incident reports · L Culture and engagement surveys · R Experiences and stories alongside the numbers
+- Issue: "how much" invites a rating.
+- **Q: Where do we hear about workers' day-to-day experience?**
+  - C: Only in incident reports
+  - L: In culture and engagement surveys
+  - R: In stories and conversations, alongside the numbers
+
+### For the build
+
+- Store these as their own poll set (question, three answers mapped to levels, and flags), separate from the blueprint text.
+- Every question offers **Don't know** and an optional "why".
+- Answers are shown in a mixed order per person.
+- Results show only for groups of three or more, by level. Participation shows by role and region, not by name.
+- ⚑ and ~ items are asked like the rest, but the factor page notes them. ⚑ reads "managers' view of the frontline"; ~ reads "wording to be confirmed by Forge Works".
+
+## 9. Hiviz as evidence: what the platform's own activity shows (30 Sep 2026)
+
+Hiviz records how the organisation behaves: who turns up, who decides, what gets acted on, and what gets left. That is genuine evidence of maturity, or of its lack. It becomes a fourth evidence source next to Records, Insights and Management input. On the factor pages it shows as a **Hiviz** chip under "Evidence from".
+
+### What the platform records
+
+- **Rituals:** Focus reviews, monthly progress and quarterly planning. Who attended, including whether they are a leader (parked in section 8), how often each ritual runs, meetings ended early, and items carried forward again and again.
+- **Check-ins:** on time, done in the room, or missed.
+- **Insights:** time to an owner, time stalled, and dismissals with their reasons. Escalations: where they go, how fast they're answered, and whether they're accepted, sent back or passed up.
+- **Plans:** who approves and at what level, and how long approval takes. What kind of action each is, as classified by Prism: more checks, forms or training / making existing controls work / changing the work. Whose behaviour each action targets.
+- **90-day retros:** outcomes, confirmed or challenged, and approaches that keep being repeated after they didn't work.
+- **Strategy:** whether objectives are set and checked monthly, flagged items, key-result movement, programs scoped on time, and gaps raised for planning.
+- **Polls:** response rates by role and region, and how often people answer "Don't know".
+- **Leadership visits:** how often, by whom, whether they go to at-risk sites, and what follows them. Field observations arrive as records from the source systems (Procore, Intelex and others). They join up with visits to show what leaders see and raise on site.
+
+### Indicators the platform can evidence
+
+The *Reads as* column says what the signal points to. Both directions count: a pattern of behaviour is evidence of a level, and its absence is evidence of the level below.
+
+| Factor · indicator | Platform signal | Reads as | Strength |
+|---|---|---|---|
+| Senior leadership · Connection to the organisation | Leader attendance at rituals; leadership visits and whether they reach at-risk sites; speed of answers to company-level escalations | Rarely present, visits only after incidents → C. Regular attendance → L. Visits follow the risk, crews' issues get answered → R | Strong |
+| Senior leadership · Where leaders' attention goes | What leaders open and act on: incident insights vs objectives and programs vs crews' requests | Incident-led → C. Objective-led → L. Requests from the work → R | Good |
+| Senior leadership · How leaders drive change | Programs led or resourced by leaders; escalations accepted and resourced | Change handed down → C. Leaders drive programs → L. Change shaped with the work → R | Good |
+| Strategy · What triggers improvement | Whether plans start from incidents, from objectives, or from Prism's early warnings | Reactive → C. Planned → L. Early warnings acted on → R | Strong |
+| Strategy · What plans focus on | Action kinds across all plans (Prism's classification; the retros already use it) | Mostly checks, forms, training → C. Making controls work → L. Changing the work → R | Strong |
+| Strategy · Who improvement is aimed at | Whose behaviour actions target | Frontline only → C. Leaders and systems → L. Every decision that shapes the work → R | Good |
+| Strategy · Safety in organisational decisions | Objectives set and checked monthly; gaps raised for planning; how often monthly progress runs | No objectives, or never checked → C. Set and checked → L | Partial |
+| Risk management · Influence on decisions and resources | Escalations for resources and what happened to them | Resourcing refused or ignored → C. Answered with a risk case → L | Good |
+| Safety organisation · Status and influence | Whether the safety lead attends planning and progress, and what role they play: advisor, approver, or absent | Absent from decisions → C. Formally present → L | Partial |
+| Operational management · Accountability and commitment | Check-in rates, stalled insights, and whether managers engage steadily or only after a critical insight | Activity spikes after serious incidents only → C. Steady ownership and check-ins → L | Strong |
+| Operational management · Response to incidents | Time from a critical insight to an owner and an approved plan | Slow, or ownerless → C. Owned within days → L | Strong |
+| Resource allocation · Purpose of safety investment | Budget escalations and programs' stated resources | Compliance-only spend → C. Spend on known risks → L | Partial |
+| Resource allocation · Who can allocate, and how | Level at which plans needing resources are approved | Only the top → C. Line managers → L. Local, with support → R | Good |
+| Management systems · How effectiveness is judged | Retros confirmed vs challenged; closures on "went quiet" vs "worked" | Closed when quiet → C. Judged on the retro → L | Good |
+| Management systems · Response when work deviates | Dismissal reasons, and repeat plans after a failed retro | New paperwork after each failure → C. Controls redesigned → L | Good |
+| Learning and development · What operational learning draws on | Retros reused ("follows on from"), and cross-site plans | Each insight on its own → C. Learning carried between plans → L | Good |
+| Communication & coordination · Relationships across roles and teams | Help offered across regions on shared insights and check-ins | Left to chance → C. Regular cross-site help → L | Partial |
+| Communication & coordination · Team coordination | Multi-site insights with one shared plan vs parallel local plans | Separate plans → C. One shared plan → L | Good |
+| Decision-making · Who approves improvement ideas | Plan approver's level | Senior leader → C. Operational manager → L. Local team → R | Strong |
+| Decision-making · Basis for safety investment | Trigger of each funded plan or program | After incidents or the regulator → C. Risk case → L. Early warnings → R | Strong |
+| Decision-making · How decisions are tested | Retros challenged; plans changed after "pattern continues" | Never challenged → C. Tested against the evidence → L | Good |
+| Monitoring and metrics · What "safe" means to managers | What insights get closed on; how "ready to close" is used | Closed on no news → C. Closed on a confirmed retro → L. Kept watching after quiet → R | Good |
+| Monitoring and metrics · What indicators trigger | Share of plans started from Prism's leading insights | Lagging only → C. Leading indicators acted on → L | Strong |
+
+Of the 27 poll indicators, 12 now also have a platform signal: 5 strong, 3 good and 4 partial. Management input stays the only source for the other 15. Examples: what safety means to leaders, how leaders are perceived, where practices come from, what the system is built on, and how messages are delivered. Where a platform signal exists, the poll becomes a cross-check. Where the platform and the poll disagree, that's a finding. For example: managers say leaders spend time on site, but visit records show none at the at-risk sites.
+
+### Guards
+
+- **Behaviour, not the tool.** Having Hiviz never raises a score. Only what people do with it counts: retros confirmed, early warnings acted on, leaders present.
+- **Absence counts only where the data path exists.** No visits recorded means little leadership presence only if visits are recorded in Hiviz for that purview. Otherwise it's a blind spot, not a finding.
+- **Enough history.** A signal needs at least a quarter of activity and enough events before it moves a rating. Before that, Prism shows it as "early".
+- **Aggregate, not personal.** Signals are read at the level of the purview or role, never as a scorecard for one person. That matches the poll's anonymity.
+- **Say where it came from.** Every platform-evidenced rating names the signal ("7 of 9 plans approved by a senior leader"), so it can be challenged like any other Prism read.
