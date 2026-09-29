@@ -362,8 +362,6 @@ main { padding-block: 32px 80px; }
 .w-note:focus-visible { outline: 2px solid var(--text); outline-offset: 1px; }
 .people { display: flex; gap: 8px 14px; flex-wrap: wrap; }
 .person { display: inline-flex; align-items: center; gap: 8px; font-weight: 700; font-size: 15px; }
-.mlist { display: grid; gap: 16px; }
-.mhead { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; align-items: flex-start; }
 
 /* ---------- Generation, dismissal, insight page ---------- */
 .gen { padding: 26px 28px; display: grid; gap: 20px; max-width: 720px; }
@@ -2757,19 +2755,7 @@ button.pv-node:hover .pv-t { text-decoration: underline; text-underline-offset: 
   }
 
   // Past meetings
-  function renderMeetings() {
-    var mine = MEETINGS.filter(function (m) { return (!ST.div || m.div === ST.div) && (!ST.reg || m.reg === ST.reg); });
-    $('view').innerHTML = '<a class="back" href="#focus">← Insights</a>' +
-      '<div class="page-top"><div><h1>Past Focus reviews</h1><p class="sub">' + esc(scopeLabel()) + '</p></div><div class="actions"><button type="button" class="btn brand" id="start-meeting">Start a Focus review</button></div></div>' +
-      (mine.length ? '<div class="mlist">' + mine.map(function (m) {
-        var label = m.reg ? m.reg + ' region' : m.div ? m.div + ' division' : ORG_NAME;
-        return '<article class="card meet-card"><div class="mhead"><div><h2>' + esc(m.date) + '</h2><p class="muted-p">' + esc(label) + ' · ' + m.decisions.length + (m.decisions.length === 1 ? ' decision' : ' decisions') + '</p></div><div class="people">' + whoLine(m.attendees) + '</div></div>' +
-          '<ul class="agreed">' + m.decisions.map(function (d) {
-            var it = INSIGHTS.filter(function (x) { return x.id === d.ins; })[0];
-            return '<li><span class="av' + (d.who === YOU ? ' me' : '') + '">' + initials(d.who) + '</span><div><p class="agreed-t">' + esc(it ? it.title : '') + '</p><p class="agreed-o">' + esc(d.who) + ': ' + esc(d.text) + '</p></div></li>';
-          }).join('') + '</ul>' + (m.notes ? '<p class="agreed-note">' + esc(m.notes) + '</p>' : '') + '</article>';
-      }).join('') + '</div>' : '<p class="card empty-card">No Focus reviews on record for ' + esc(scopeLabel()) + ' yet.</p>');
-  }
+
 
   document.addEventListener('change', function (e) {
     var t = e.target;
@@ -2805,7 +2791,7 @@ button.pv-node:hover .pv-t { text-decoration: underline; text-underline-offset: 
         return { ins: id, who: it.owner || 'You', text: lg.changes.join(', ') || lg.note || 'Reviewed, no change', outcome: ['', 'Agreed today'] };
       });
       MEETINGS.unshift({ id: 'm-' + Date.now(), div: ST.div, reg: ST.reg, date: 'Friday 26 September', short: '26 Sep', attendees: att, notes: MT.notes, decisions: decisions });
-      MT = null; go('meetings'); toast(lcDone ? 'Focus review saved. Leadership check added to the Map.' : 'Focus review saved');
+      MT = null; ST.insTab = 'history'; ST.hf = 'review'; go('focus'); ST.insTab = 'history'; ST.hf = 'review'; render(); toast(lcDone ? 'Focus review saved. Leadership check added to the Map.' : 'Focus review saved');
     }
   });
 
@@ -4147,7 +4133,7 @@ button.pv-node:hover .pv-t { text-decoration: underline; text-underline-offset: 
   function route(target) {
     var h = (target || (location.hash || '').slice(1) || (ST.div || ST.reg ? 'focus' : 'strategy')).split('/');
     var prevView = ST.view;
-    ST.view = ['focus', 'sites', 'site', 'sources', 'meeting', 'meetings', 'insight', 'myfocus', 'map', 'strategy', 'planning', 'progress'].indexOf(h[0]) > -1 ? h[0] : 'focus';
+    ST.view = ['focus', 'sites', 'site', 'sources', 'meeting', 'insight', 'myfocus', 'map', 'strategy', 'planning', 'progress'].indexOf(h[0]) > -1 ? h[0] : 'focus';
     ST.factor = ST.view === 'map' ? (h[1] || '') : '';
     if (!ST.keepWalk) { ST.mfSnap = null; if (ST.view === 'myfocus') ST.mfWalk = -1; } ST.keepWalk = false;
     ST.insight = ST.view === 'insight' ? (h[1] || '') : '';
@@ -4158,7 +4144,7 @@ button.pv-node:hover .pv-t { text-decoration: underline; text-underline-offset: 
     if (prevView && prevView !== ST.view && ['planning', 'progress'].indexOf(prevView) < 0) { ST.stTab = 'current'; }
     if (ST.view === 'planning' && !PL) ST.view = 'strategy';
     if (ST.view === 'progress' && !PG) ST.view = 'strategy';
-    var tab = ['meeting', 'meetings', 'insight'].indexOf(ST.view) > -1 ? 'focus' : ST.view === 'site' ? 'sites' : ST.view === 'planning' || ST.view === 'progress' ? 'strategy' : ST.view;
+    var tab = ['meeting', 'insight'].indexOf(ST.view) > -1 ? 'focus' : ST.view === 'site' ? 'sites' : ST.view === 'planning' || ST.view === 'progress' ? 'strategy' : ST.view;
     ST.src = ST.view === 'sources' ? (h[1] || '') : '';
     if (ST.src === 'feed') { ST.src = ''; ST.srcTab = 'feed'; } else if (ST.view === 'sources' && !ST.src) ST.srcTab = 'cards';
     ST.siteFeed = ST.view === 'site' && h[2] === 'feed';
@@ -4168,7 +4154,7 @@ button.pv-node:hover .pv-t { text-decoration: underline; text-underline-offset: 
     closeRec(); closeSheet(); closePrismView(); render(); window.scrollTo(0, 0);
   }
   function render() { renderView(); renderMyFocusCount(); }
-  function renderView() { if (ST.view === 'map') renderMap(); else if (ST.view === 'strategy') renderStrategy(); else if (ST.view === 'planning') renderPlanning(); else if (ST.view === 'progress') renderProgress(); else if (ST.view === 'myfocus') renderMyFocus(); else if (ST.view === 'sites') renderSites(); else if (ST.view === 'site') { if (ST.siteFeed) renderSiteFeed(ST.site); else renderSite(ST.site); } else if (ST.view === 'sources') renderSources(); else if (ST.view === 'meeting') renderMeeting(); else if (ST.view === 'meetings') renderMeetings(); else if (ST.view === 'insight') renderInsight(ST.insight); else renderFocus(); }
+  function renderView() { if (ST.view === 'map') renderMap(); else if (ST.view === 'strategy') renderStrategy(); else if (ST.view === 'planning') renderPlanning(); else if (ST.view === 'progress') renderProgress(); else if (ST.view === 'myfocus') renderMyFocus(); else if (ST.view === 'sites') renderSites(); else if (ST.view === 'site') { if (ST.siteFeed) renderSiteFeed(ST.site); else renderSite(ST.site); } else if (ST.view === 'sources') renderSources(); else if (ST.view === 'meeting') renderMeeting();  else if (ST.view === 'insight') renderInsight(ST.insight); else renderFocus(); }
 
   document.addEventListener('click', function (e) {
     var a = e.target.closest('a[href^="#"]');
