@@ -2715,6 +2715,7 @@ body.rv-mode main { padding-top: 0; }
     ['moving', 'Pattern continues', 'The work is happening but the pattern isn’t moving. Is it the wrong plan, or too early to tell?'],
     ['retro', 'Confirm a 90-day retro', 'Does Prism’s verdict match what you’ve seen on site?'],
     ['close', 'Ready to close', 'Has it stayed stopped long enough to close?'],
+    ['views', 'Views differ', 'Managers answered this differently. What are you each seeing that the others might not be?'],
     ['noted', 'Noted', 'On track. No discussion needed unless someone raises it.']
   ];
   function rvGroup(k) { return RV_GROUPS.filter(function (g) { return g[0] === k; })[0]; }
@@ -2728,9 +2729,17 @@ body.rv-mode main { padding-top: 0; }
       if (k === 'esc' && MT) { MT.escWas = MT.escWas || {}; MT.escWas[i.id] = i.esc; }
     });
     retrosInView().forEach(function (r) { if (!r.live && !r.review) g.retro.push(r.id); });
+    pollSplits().forEach(function (k) { g.views.push('v:' + k); });
     Object.keys(g).forEach(function (k) { g[k].sort(function (a, b) { return (carried.indexOf(b) > -1) - (carried.indexOf(a) > -1); }); });
     return g;
   }
+  // Poll questions where managers split: three or more answers and no majority, most divided first
+  function pollSplits() {
+    return Object.keys(POLL).map(function (k) { var r = POLL_RESP[k], c = r[0] + r[1] + r[2]; return { k: k, c: c, top: c ? Math.max(r[0], r[1], r[2]) / c : 1, wide: r[0] && r[2] }; })
+      .filter(function (x) { return x.c >= 3 && x.top <= 0.5; })
+      .sort(function (a, b) { return a.top - b.top || (b.wide ? 1 : 0) - (a.wide ? 1 : 0); }).slice(0, 2).map(function (x) { return x.k; });
+  }
+  function splitLine(k) { var P = POLL[k], r = POLL_RESP[k]; return [0, 1, 2].filter(function (lv) { return r[lv]; }).map(function (lv) { return r[lv] + ' said “' + esc(P.a[lv]) + '”'; }).join(' · ') + (r[3] ? ' · ' + r[3] + ' didn’t know' : ''); }
   function rvGroupsOn() { return RV_GROUPS.filter(function (g) { return MT.groups[g[0]].length; }); }
   // Check-ins: every open action on an agreed plan in the purview
   function rvActions() {
@@ -2792,7 +2801,7 @@ body.rv-mode main { padding-top: 0; }
     'monitoring_metrics:3': 'How much of workers’ real experience shows up in our data?'
   };
   function rvRow(title, sub, ctl, id, done) {
-    return '<li class="rv-row' + (done ? ' is-done' : '') + '"><div class="rv-m">' + (id ? '<button type="button" class="rv-title linkish" ' + (/^f:/.test(id) ? 'data-factor="' + id.slice(2) : (/^r-/.test(id) ? 'data-retro' : /^p-/.test(id) ? 'data-prog' : /^o-/.test(id) ? 'data-obj' : 'data-open') + '="' + id) + '">' + esc(title) + '</button>' : '<span class="rv-title">' + esc(title) + '</span>') + (sub ? '<span class="rv-s">' + sub + '</span>' : '') + '</div><div class="rv-c">' + ctl + '</div></li>';
+    return '<li class="rv-row' + (done ? ' is-done' : '') + '"><div class="rv-m">' + (id ? '<button type="button" class="rv-title linkish" ' + (/^f:/.test(id) ? 'data-factor="' + id.slice(2) : /^v:/.test(id) ? 'data-factor="' + id.slice(2).split(':')[0] : (/^r-/.test(id) ? 'data-retro' : /^p-/.test(id) ? 'data-prog' : /^o-/.test(id) ? 'data-obj' : 'data-open') + '="' + id) + '">' + esc(title) + '</button>' : '<span class="rv-title">' + esc(title) + '</span>') + (sub ? '<span class="rv-s">' + sub + '</span>' : '') + '</div><div class="rv-c">' + ctl + '</div></li>';
   }
   function rvChoice(key, opts, cur) {
     return '<span class="rv-ch">' + opts.map(function (o) { return '<button type="button" class="btn' + (cur === o ? ' is-on' : '') + '" data-rvdec="' + esc(key) + '" data-rvval="' + esc(o) + '" aria-pressed="' + (cur === o) + '">' + esc(o) + '</button>'; }).join('') + '</span>';
@@ -2840,6 +2849,10 @@ body.rv-mode main { padding-top: 0; }
       var g = gs[MT.g], key = g[0], ids = MT.groups[key], carried = (last || {}).carried || [];
       var rows = ids.map(function (id) {
         var dec = rvDecided(key, id), i = insightById(id), tag = carried.indexOf(id) > -1 ? '<span class="rv-carry">Carried from ' + esc(last.short) + '</span> ' : '';
+        if (key === 'views') {
+          var pk = id.slice(2);
+          return rvRow(POLL[pk].q, tag + FACTOR[pk.split(':')[0]].name + ' · anonymous, across all managers polled<br>' + splitLine(pk), rvChoice(id + ':' + key, ['Heard both sides', 'Find more evidence', 'Carry forward'], dec), 'v:' + pk, !!dec);
+        }
         if (key === 'retro') {
           var r = RETRO[id] || RETRO[i.retro];
           return rvRow(r.title, tag + outBadge(r.outcome) + ' ' + esc(r.summary), '<span class="rv-ch">' + retroReview(r) + (MT.retros[r.id] ? '' : rvCarry(id + ':retro')) + '</span>', i ? i.id : r.id, !!dec);
@@ -2870,7 +2883,7 @@ body.rv-mode main { padding-top: 0; }
     RV_GROUPS.forEach(function (g) {
       if (g[0] === 'noted') return;
       MT.groups[g[0]].forEach(function (id) {
-        var d = rvDecided(g[0], id), i = insightById(id), t = i ? i.title : RETRO[id].title;
+        var d = rvDecided(g[0], id), i = insightById(id), t = i ? i.title : RETRO[id] ? RETRO[id].title : POLL[id.slice(2)] ? POLL[id.slice(2)].q : id;
         var had = dec.filter(function (x) { return x[0] === t; })[0];
         if (d && d !== 'Carry forward') { if (had) had[1] += ' · ' + d; else dec.push([t, d, id]); } else if (!had) carriedOut.push([id, t, g[1] + (d ? ' · carried forward by the room' : ' · not reached')]);
         if (g[0] === 'plan' && MT.agreed[id]) back.push([t, '90-day retro due ' + addDays('26 Sep', 90), id]);
@@ -2888,16 +2901,6 @@ body.rv-mode main { padding-top: 0; }
       blk('Carried forward to the next review', carriedOut.map(function (x) { return rvRow(x[1], esc(x[2]), '', x[0], false); }), 'These go first on the agenda next time.') +
       blk('Coming back', back.map(function (x) { return rvRow(x[0], esc(x[1]), '', x[2], false); })) +
       (dec.length || carriedOut.length || missed.length ? '' : '<p class="rv-empty">Nothing was decided or carried forward.</p>') +
-      (function () {
-        var c = leadCheck(); if (!c) return '';
-        var f = FACTOR[c.f], row = f.ind[c.k], q = LC_Q[c.f + ':' + c.k] || 'Thinking about ' + row[0].toLowerCase() + ', which is closest to how it is here?';
-        // Options without level names, in a mixed order, so the answer isn’t led
-        var order = [[1, 2, 0], [2, 0, 1], [0, 2, 1]][c.k % 3];
-        return '<section class="rv-rc lc"><h2 class="rv-h2">One question for the room</h2>' + rvQ(q, 'Ask the room') +
-          '<p class="rv-lc-how">Pick the one closest to how it actually is in ' + esc(scopeLabel()) + ' today, not how it should be.</p>' +
-          '<div class="lc-opts">' + order.map(function (lv) { return '<label class="lc-opt"><input type="radio" name="lc" value="' + lv + '" data-lcf="' + c.f + '" data-lck="' + c.k + '"' + (MT.check && MT.check.lvl === lv ? ' checked' : '') + '><span>' + esc(cueAt(c.f, c.k, lv)) + '</span></label>'; }).join('') + '</div>' +
-          '<p class="rv-s">The answer is added to the Forge Works Map as the room’s view of ' + esc(f.name) + '.</p></section>';
-      })() +
       '<label class="w-note-l" for="m-notes">Review notes</label><textarea id="m-notes" class="w-note" rows="3" placeholder="Anything else worth recording">' + esc(MT.notes) + '</textarea>',
       (MT.early ? '<span></span>' : '<button type="button" class="btn lg" data-rvstep="decide">Back</button>') + '<button type="button" class="btn brand lg" id="rv-close">Close the review</button>');
   }
