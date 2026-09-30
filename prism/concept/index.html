@@ -1121,6 +1121,66 @@ body.rv-mode main { padding-top: 0; }
 .pr-n { font-weight: 700; text-align: right; font-variant-numeric: tabular-nums; }
 .pr-note { margin: 0; font-size: 13.5px; color: var(--text-3); }
 @media (max-width: 640px) { .pr-list li { grid-template-columns: 64px minmax(0, 1fr) 20px; } .pr-bar { display: none; } }
+/* Confirm before ending a ritual early */
+.rv-dlg { position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; padding: 16px; background: rgba(13, 15, 18, 0.45); }
+.rv-dlg-box { width: min(480px, 100%); background: var(--bg); border-radius: 14px; padding: 24px; display: grid; gap: 12px; box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.3); }
+.rv-dlg-box h2 { margin: 0; font-size: 22px; }
+.rv-dlg-box p { margin: 0; font-size: 16.5px; line-height: 1.5; color: var(--text-2); }
+.rv-dlg-act { display: flex; justify-content: flex-end; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
+/* Pre-reads: what the owner said comes first */
+.rv-kindline { font-size: 14px; font-weight: 700; color: var(--text-3); }
+.rv-kindline .linkish { font: inherit; color: var(--text-2); text-decoration: underline; text-decoration-color: var(--border-2); text-underline-offset: 3px; }
+.rv-quote { margin: 2px 0; font-size: 21px; line-height: 1.4; font-style: italic; font-weight: 600; color: var(--text); max-width: 60ch; }
+.rv-quote.none { font-size: 17px; font-style: normal; font-weight: 600; color: var(--text-3); }
+.rv-row.rv-pre.is-done .rv-quote { color: var(--text); }
+/* Objective drawer: key-result name on its own line */
+#rec .kr { grid-template-columns: minmax(0, 1fr) auto; }
+#rec .kr .kr-n { grid-column: 1 / -1; }
+/* ---------- Shared patterns ---------- */
+.p-sec { display: grid; gap: 12px; margin-top: 28px; padding-top: 22px; border-top: 1px solid var(--border); }
+.p-sec.p-first { margin-top: 8px; }
+.p-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px 18px; flex-wrap: wrap; }
+.p-head h2 { margin: 0; font-size: 20px; }
+.p-state { font-size: 14px; font-weight: 700; color: var(--text-3); display: inline-flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.p-hint { margin: -6px 0 2px; font-size: 14.5px; color: var(--text-3); }
+.p-hint .linkish { font: inherit; color: var(--text-2); text-decoration: underline; text-decoration-color: var(--border-2); text-underline-offset: 3px; }
+.p-list { list-style: none; margin: 0; padding: 0; }
+.p-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 18px; align-items: center; padding: 11px 0; border-top: 1px solid var(--border); }
+.p-row:first-child { border-top: 0; padding-top: 4px; }
+.p-main { display: grid; gap: 2px; min-width: 0; }
+.p-kind { font-size: 12.5px; font-weight: 700; color: var(--text-3); }
+.p-title { font-size: 16px; font-weight: 800; line-height: 1.3; color: var(--text); text-decoration: none; }
+a.p-title:hover, .p-card:hover .p-title { text-decoration: underline; text-underline-offset: 3px; }
+.p-meta { font-size: 13.5px; line-height: 1.4; color: var(--text-3); }
+.p-side { display: flex; align-items: center; justify-content: flex-end; gap: 8px 12px; flex-wrap: wrap; }
+.p-tag { display: inline-flex; align-items: center; height: 22px; padding: 0 8px; border: 1px solid var(--border-2); border-radius: 999px; font-size: 12.5px; font-weight: 700; color: var(--text-2); white-space: nowrap; }
+.p-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
+.p-card { display: grid; gap: 8px; align-content: start; padding: 16px 18px; border: 1px solid var(--border-2); border-radius: 12px; background: var(--bg); color: inherit; text-decoration: none; }
+.p-card:hover { border-color: var(--text); }
+.p-card .p-title { font-size: 18px; }
+.p-why { font-size: 14.5px; line-height: 1.45; color: var(--text-2); }
+.p-why b { color: var(--text); }
+.p-tabs { margin: 0 0 4px; }
+/* Slim factor cards in one even grid, with lenses instead of column headers */
+.fgrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 900px) { .fgrid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 560px) { .fgrid { grid-template-columns: minmax(0, 1fr); } }
+.fc-dom { font-size: 12.5px; font-weight: 700; color: var(--text-3); }
+.map-lenses { display: flex; align-items: center; justify-content: space-between; gap: 10px 16px; flex-wrap: wrap; margin-bottom: 4px; }
+.map-lens-r { display: flex; align-items: center; gap: 10px 14px; flex-wrap: wrap; }
+.map-sort { display: inline-flex; align-items: center; gap: 8px; font-size: 13.5px; font-weight: 700; color: var(--text-3); }
+.map-what { font-size: 14px; font-weight: 700; color: var(--text-2); text-decoration: underline; text-decoration-color: var(--border-2); text-underline-offset: 3px; }
+.cmp-dom-l { display: block; font-size: 12px; font-weight: 600; color: var(--text-3); }
+.fcard.slim { gap: 8px; padding: 14px 16px; }
+.fcard.slim .fc-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+.fcard.slim .fc-name { font-size: 16px; }
+.fcard.slim .fc-held { font-size: 13.5px; color: var(--text-3); }
+.fgrid > * { min-width: 0; }
+.fcard.slim .ind-rate, .p-card .ind-rate { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; }
+.fcard.slim .fc-top .p-tag { flex: none; }
+.map-poll.quiet { margin: 0; }
+.map-poll.quiet > .label { display: none; }
+@media (max-width: 640px) { .p-row { grid-template-columns: minmax(0, 1fr); } .p-side { justify-content: flex-start; } }
 </style>
 </head>
 <body>
@@ -2758,13 +2818,29 @@ body.rv-mode main { padding-top: 0; }
   function rvLeft(k) { return MT.groups[k].filter(function (id) { return !rvDecided(k, id); }).length; }
   function rvCarry(key) { var on = MT.done[key] === 'Carry forward'; return '<button type="button" class="btn' + (on ? ' is-on' : '') + '" data-rvdec="' + esc(key) + '" data-rvval="Carry forward" aria-pressed="' + on + '">Carry forward</button>'; }
   function rvHere(n) { return !n || n === YOU || !!MT.attendees[n]; }
+  // Ending a ritual early asks first. Keep going is the default; Esc or the backdrop also keeps going.
+  function rvConfirm(title, body, yes, onYes) {
+    var old = $('rv-dlg'); if (old) old.remove();
+    var back = document.activeElement, d = document.createElement('div');
+    d.id = 'rv-dlg'; d.className = 'rv-dlg';
+    d.innerHTML = '<div class="rv-dlg-box" role="dialog" aria-modal="true" aria-labelledby="rv-dlg-t" aria-describedby="rv-dlg-b"><h2 id="rv-dlg-t">' + esc(title) + '</h2><p id="rv-dlg-b">' + esc(body) + '</p>' +
+      '<div class="rv-dlg-act"><button type="button" class="btn lg" data-dlg="no">Keep going</button><button type="button" class="btn brand lg" data-dlg="yes">' + esc(yes) + '</button></div></div>';
+    var close = function (go) { d.remove(); document.removeEventListener('keydown', key, true); if (go) onYes(); else if (back && back.focus) back.focus(); };
+    var key = function (e) {
+      if (e.key === 'Escape') { e.preventDefault(); close(false); }
+      if (e.key === 'Tab') { var b = d.querySelectorAll('button'), first = b[0], last = b[b.length - 1]; if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); } else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); } }
+    };
+    d.addEventListener('click', function (e) { e.stopPropagation(); var b = e.target.closest('[data-dlg]'); if (b) close(b.getAttribute('data-dlg') === 'yes'); else if (e.target === d) close(false); });
+    document.addEventListener('keydown', key, true);
+    document.body.appendChild(d); d.querySelector('[data-dlg="no"]').focus();
+  }
   function rvBar() {
     var at = RV_STEPS.map(function (s) { return s[0]; }).indexOf(MT.step);
     return '<div class="rv-bar"><div class="rv-bar-in"><span class="rv-t"><b>Focus review</b><span>' + esc(scopeLabel()) + ' · Fri 26 Sep</span></span>' +
       '<ol class="rv-rail">' + RV_STEPS.map(function (s, k) {
         return '<li class="' + (k === at ? 'on' : k < at ? 'done' : '') + '">' + (k < at && !MT.early ? '<button type="button" data-rvstep="' + s[0] + '">' : '<span>') + '<i>' + (k < at ? '✓' : k + 1) + '</i>' + s[1] + (k < at && !MT.early ? '</button>' : '</span>') + '</li>';
       }).join('') + '</ol>' +
-      (MT.step === 'receipt' ? '' : '<button type="button" class="btn" id="rv-end">End review</button>') + '</div></div>';
+      (MT.step === 'receipt' ? '<button type="button" class="btn brand" id="rv-close">Close the review</button>' : '<button type="button" class="btn" id="rv-end">End review</button>') + '</div></div>';
   }
   function rvPage(kind, title, sub, body, nav, bar) {
     $('view').innerHTML = (bar || rvBar()) + '<div class="rv"><p class="kind"><span class="kind-t">' + esc(kind) + '</span></p><h1 class="rv-h">' + title + '</h1>' + (sub ? '<p class="rv-sub">' + sub + '</p>' : '') + body + (nav ? '<div class="rv-nav">' + nav + '</div>' : '') + '</div>';
@@ -2827,11 +2903,11 @@ body.rv-mode main { padding-top: 0; }
     // 2 · Check-ins, before any decisions
     if (MT.step === 'check') {
       var list = rvActions(), before = list.filter(function (x) { return x.a.upd && x.a.upd !== '26 Sep'; }).length, open = list.filter(function (x) { return !x.a.upd && !MT.ci[x.key]; }).length;
-      rvPage('Step 2 of 4', 'Check-ins', list.length + (list.length === 1 ? ' open action' : ' open actions') + ' · ' + before + ' checked in before the review' + (open ? ' · <b>' + open + ' to go</b>' : ''),
+      rvPage('Step 2 of 4', 'Check-ins', list.length + (list.length === 1 ? ' open action' : ' open actions') + ' from insight plans · ' + before + ' checked in before the review' + (open ? ' · <b>' + open + ' to go</b>' : ''),
         rvQ('What’s changed since your last update, and is anything in the way?') +
         (list.length ? '<ul class="rv-list">' + list.map(function (x) {
           var here = rvHere(x.a.who), sk = MT.ci[x.key] === 'skip', st = PA_ST.filter(function (s) { return s[0] === x.a.st; })[0];
-          var sub = '<span class="rv-who"><span class="av' + (x.a.who === YOU ? ' me' : '') + '">' + initials(x.a.who || '?') + '</span>' + esc(x.a.who || 'No one yet') + (here ? '' : ' · <b>not here</b>') + '</span> · ' + esc(x.i.title) + ' · by ' + esc(x.a.due);
+          var sub = '<span class="rv-who"><span class="av' + (x.a.who === YOU ? ' me' : '') + '">' + initials(x.a.who || '?') + '</span>' + esc(x.a.who || 'No one yet') + (here ? '' : ' · <b>not here</b>') + '</span> · for the insight “' + esc(x.i.title) + '” · by ' + esc(x.a.due);
           var ctl = sk ? '<span class="rv-miss">Missed · counts towards stalled</span><button type="button" class="linkish" data-rvci="' + x.key + '">Undo</button>'
             : '<span class="rv-ci">' + (x.a.upd ? '<small>' + (x.a.upd === '26 Sep' ? 'Checked in now' : 'Checked in ' + esc(x.a.upd)) + '</small>' : '<small>No check-in yet</small>') +
               '<select class="select" data-pa="' + x.i.id + ':' + x.k + '" aria-label="How’s it going?">' + PA_ST.map(function (s) { return '<option value="' + s[0] + '"' + (s[0] === x.a.st ? ' selected' : '') + '>' + s[1] + '</option>'; }).join('') + '</select>' +
@@ -2902,7 +2978,7 @@ body.rv-mode main { padding-top: 0; }
       blk('Coming back', back.map(function (x) { return rvRow(x[0], esc(x[1]), '', x[2], false); })) +
       (dec.length || carriedOut.length || missed.length ? '' : '<p class="rv-empty">Nothing was decided or carried forward.</p>') +
       '<label class="w-note-l" for="m-notes">Review notes</label><textarea id="m-notes" class="w-note" rows="3" placeholder="Anything else worth recording">' + esc(MT.notes) + '</textarea>',
-      (MT.early ? '<span></span>' : '<button type="button" class="btn lg" data-rvstep="decide">Back</button>') + '<button type="button" class="btn brand lg" id="rv-close">Close the review</button>');
+      MT.early ? '' : '<button type="button" class="btn lg" data-rvstep="decide">Back</button>');
   }
   // Formal close: apply what the room decided, record misses, carry the rest forward
   function rvClose() {
@@ -2944,7 +3020,7 @@ body.rv-mode main { padding-top: 0; }
     if ((t = e.target.closest('[data-rvci]'))) { var ck = t.getAttribute('data-rvci'); MT.ci[ck] = MT.ci[ck] ? '' : 'skip'; renderMeeting(); window.scrollTo(0, y); return; }
     if ((t = e.target.closest('[data-rvdec]'))) { var dk = t.getAttribute('data-rvdec'), v = t.getAttribute('data-rvval'); MT.done[dk] = MT.done[dk] === v ? '' : v; renderMeeting(); window.scrollTo(0, y); return; }
     if ((t = e.target.closest('[data-esc-accept],[data-esc-back]'))) { var eid = t.getAttribute('data-esc-accept') || t.getAttribute('data-esc-back'); if (ST.mfRes['e-' + eid]) { MT.done[eid + ':esc'] = ST.mfRes['e-' + eid]; renderMeeting(); window.scrollTo(0, y); } return; }
-    if (e.target.closest('#rv-end')) { MT.early = MT.step; MT.visitedDecide = MT.visitedDecide || MT.step === 'decide'; MT.step = 'receipt'; renderMeeting(); window.scrollTo(0, 0); return; }
+    if (e.target.closest('#rv-end')) { rvConfirm('End the review now?', 'Everything you’ve decided so far is kept. Anything you haven’t reached carries forward to the next Focus review.', 'End review', function () { MT.early = MT.step; MT.visitedDecide = MT.visitedDecide || MT.step === 'decide'; MT.step = 'receipt'; renderMeeting(); window.scrollTo(0, 0); }); return; }
     if (e.target.closest('#rv-close')) { rvClose(); return; }
   });
   document.addEventListener('change', function (e) {
@@ -3679,6 +3755,28 @@ body.rv-mode main { padding-top: 0; }
   var INF_TAG = '<span class="inf" title="The Forge Works blueprint doesn\u2019t describe this level. Prism inferred it from the levels either side.">Inferred</span>';
 
   ST.mapView = 'factors'; ST.openInd = {};
+  /* =============================================================
+     Shared patterns, so similar things look alike everywhere:
+     section (heading + state, a rule above, no box), entity row (kind,
+     name, one grey meta line, status and one action on the right),
+     focus card (the few items that deserve attention; same anatomy plus
+     why), and quiet tags for anything that isn't a status.
+     ============================================================= */
+  document.addEventListener('change', function (e) { if (e.target.id === 'map-sort') { var y = window.scrollY; ST.mapSort = e.target.value; renderMap(); window.scrollTo(0, y); } });
+  function pSection(title, state, body, hint, cls) {
+    return '<section class="p-sec' + (cls ? ' ' + cls : '') + '"><div class="p-head"><h2>' + title + '</h2>' + (state ? '<span class="p-state">' + state + '</span>' : '') + '</div>' + (hint ? '<p class="p-hint">' + hint + '</p>' : '') + body + '</section>';
+  }
+  function pRow(o) {
+    return '<li class="p-row"><div class="p-main">' + (o.kind ? '<span class="p-kind">' + o.kind + '</span>' : '') +
+      (o.href ? '<a class="p-title" href="' + o.href + '">' + o.title + '</a>' : '<span class="p-title">' + o.title + '</span>') +
+      (o.meta ? '<span class="p-meta">' + o.meta + '</span>' : '') + '</div>' +
+      (o.status || o.act ? '<div class="p-side">' + (o.status || '') + (o.act || '') + '</div>' : '') + '</li>';
+  }
+  function pCard(o) {
+    return '<a class="p-card" href="' + o.href + '">' + (o.kind ? '<span class="p-kind">' + o.kind + '</span>' : '') + '<span class="p-title">' + o.title + '</span>' +
+      (o.status ? '<span class="p-status">' + o.status + '</span>' : '') + (o.why ? '<span class="p-why">' + o.why + '</span>' : '') + '</a>';
+  }
+  function pTag(t) { return '<span class="p-tag">' + t + '</span>'; }
   function renderMap() {
     if (ST.factor) return renderFactor(ST.factor);
     var regs = regionsInScope(), scores = {}, units = childUnits();
@@ -3696,33 +3794,49 @@ body.rv-mode main { padding-top: 0; }
       (strongest && strongest !== weakest ? 'Strongest is ' + esc(FACTOR[strongest[0]].name.toLowerCase()) + '. ' : '') +
       (worse.length ? '<b class="t-critical">' + word(worse.length) + (worse.length === 1 ? ' factor is' : ' factors are') + ' worsening over ' + ST.mapPeriod + ' days.</b> ' : '') +
       (blind.length ? word(blind.length) + (blind.length === 1 ? ' factor needs' : ' factors need') + ' management input before they can be rated, mostly in Guide.' : '');
-    var tabs = (units.length > 1 ? '<div class="seg map-tabs" role="group" aria-label="Show"><button type="button" data-mapview="factors" aria-pressed="' + (ST.mapView !== 'compare') + '">Factors</button><button type="button" data-mapview="compare" aria-pressed="' + (ST.mapView === 'compare') + '">Compare ' + (ST.div ? 'regions' : 'divisions') + '</button></div>' : '');
-    var body;
-    if (ST.mapView === 'compare' && units.length > 1) {
-      body = '<div class="card map-compare"><div class="table-scroll"><table class="cmp"><thead><tr><th>Factor</th>' + units.map(function (u) { return '<th>' + esc(u.label) + '</th>'; }).join('') + '</tr></thead><tbody>' +
-        DOMAINS.map(function (d) {
-          return '<tr class="cmp-dom"><td colspan="' + (units.length + 1) + '">' + esc(d[1]) + ' · ' + esc(d[2]) + '</td></tr>' + FACTORS.filter(function (f) { return f[1] === d[0]; }).map(function (f) {
-            return '<tr><td><a href="#map/' + f[0] + '">' + esc(f[2]) + '</a></td>' + units.map(function (u) { var sc = scoreFactor(u.regs, f[0]); return '<td><span class="ind-rate">' + levelBar(sc.v, true, sc.v == null ? 'Needs input' : null, sc.was) + (sc.v != null ? trendHTML(sc.t) : '') + '</span></td>'; }).join('') + '</tr>';
-          }).join('');
-        }).join('') + '</tbody></table></div></div>';
-    } else {
-      body = '<div class="map-grid">' + DOMAINS.map(function (d) {
-        return '<section class="map-col"><div class="map-dom"><h2>' + esc(d[1]) + '</h2><span class="label">' + esc(d[2]) + '</span></div>' +
-          FACTORS.filter(function (f) { return f[1] === d[0]; }).map(function (f) {
-            var sc = scores[f[0]];
-            var ob = objOnFactor(f[0]);
-            return '<a class="card fcard' + (sc.v == null ? ' blind' : '') + '" href="#map/' + f[0] + '"><span class="fc-name">' + esc(f[2]) + '</span>' + (ob ? '<span class="fc-obj">Strategy · ' + esc(LEVELS[ob.target]) + ' by ' + esc(ob.by) + '</span>' : '') +
-              levelBar(sc.v, false, sc.v == null ? 'Needs management input' : null, sc.was) +
-              (sc.v != null ? '<span class="fc-named">' + esc(f[4][sc.lvl]) + '</span>' : '') + wasLine(sc) +
-              '<span class="fc-meta">' + (sc.v == null ? '<span>Records don’t show this factor</span>' : '<span>' + sc.n + (sc.n === 1 ? ' signal' : ' signals') + '</span>' + trendHTML(sc.t)) + '</span>' +
-              (sc.weakest != null && sc.v != null ? '<span class="fc-held">Held back by ' + esc(FACTOR[f[0]].inds[sc.weakest].toLowerCase()) + '</span>' : '') + '</a>';
-          }).join('') + '</section>';
+    var body, compare = ST.mapView === 'compare' && units.length > 1;
+    // Lenses: which factors to show, in what order. They apply to the cards and the comparison alike.
+    var covered = objsInView().map(function (o) { return o.f; });
+    // Candidates are the ones quarterly planning would bring to the room: raised, recommended by Hiviz, or the weakest gap
+    var cands = plCandidates().map(function (c) { return c.f; }), isCand = function (k) { return cands.indexOf(k) > -1; };
+    var LENS = [['all', 'All', function () { return true; }], ['strat', 'In the strategy', function (k) { return covered.indexOf(k) > -1; }], ['cand', 'Candidates', isCand], ['input', 'Needs input', function (k) { return scores[k].v == null; }]];
+    var lens = LENS.filter(function (l) { return l[0] === ST.mapLens; })[0] || LENS[0];
+    var tr = { worse: 0, steady: 1, better: 2 }, byV = function (a, b) { var x = scores[a[0]].v, y = scores[b[0]].v; return (x == null ? 9 : x) - (y == null ? 9 : y); };
+    var SORTS = [['map', 'Map order'], ['low', 'Lowest first'], ['worse', 'Worsening first']];
+    var vis = FACTORS.filter(function (f) { return lens[2](f[0]); });
+    if (ST.mapSort === 'low') vis.sort(byV);
+    if (ST.mapSort === 'worse') vis.sort(function (a, b) { var ta = scores[a[0]].t, tb = scores[b[0]].t; return (ta in tr ? tr[ta] : 1) - (tb in tr ? tr[tb] : 1) || byV(a, b); });
+    var domName = function (k) { var f = FACTORS.filter(function (x) { return x[0] === k; })[0]; return DOMAINS.filter(function (d) { return d[0] === f[1]; })[0][1]; };
+    var lenses = '<div class="map-lenses"><div class="seg" role="group" aria-label="Show">' + LENS.map(function (l) { var n = FACTORS.filter(function (f) { return l[2](f[0]); }).length; return l[0] !== 'all' && !n ? '' : '<button type="button" data-maplens="' + l[0] + '" aria-pressed="' + (lens[0] === l[0]) + '">' + l[1] + ' <span class="c">' + n + '</span></button>'; }).join('') + '</div>' +
+      '<div class="map-lens-r"><label class="map-sort"><span>Order</span><select class="select" id="map-sort">' + SORTS.map(function (x) { return '<option value="' + x[0] + '"' + ((ST.mapSort || 'map') === x[0] ? ' selected' : '') + '>' + x[1] + '</option>'; }).join('') + '</select></label>' +
+      (units.length > 1 ? '<div class="seg" role="group" aria-label="View"><button type="button" data-mapview="factors" aria-pressed="' + !compare + '">Cards</button><button type="button" data-mapview="compare" aria-pressed="' + compare + '">Compare ' + (ST.div ? 'regions' : 'divisions') + '</button></div>' : '') + '</div></div>';
+    var rate = function (sc) { return '<span class="ind-rate">' + levelBar(sc.v, true, sc.v == null ? 'Needs input' : null, sc.was) + (sc.v != null ? trendHTML(sc.t) : '') + '</span>'; };
+    var table = !compare ? '' : '<div class="card map-compare"><div class="table-scroll"><table class="cmp"><thead><tr><th>Factor</th>' + units.map(function (u) { return '<th>' + esc(u.label) + '</th>'; }).join('') + '</tr></thead><tbody>' +
+      vis.map(function (f) {
+        return '<tr><td><a href="#map/' + f[0] + '">' + esc(f[2]) + '</a><span class="cmp-dom-l">' + esc(domName(f[0])) + '</span></td>' + units.map(function (u) { return '<td>' + rate(scoreFactor(u.regs, f[0])) + '</td>'; }).join('') + '</tr>';
+      }).join('') + '</tbody></table></div></div>';
+    {
+      // Where to focus: the clearest gap, strategy objectives not on track, then anything worsening. Three at most.
+      var picks = [], add = function (k, why) { if (picks.length < 3 && !picks.some(function (x) { return x.k === k; })) picks.push({ k: k, why: why }); };
+      var held = function (k) { var sc = scores[k]; return sc.weakest != null ? ', held back by ' + esc(FACTOR[k].inds[sc.weakest].toLowerCase()) : ''; };
+      if (weakest) add(weakest[0], '<b>The clearest gap</b>' + held(weakest[0]) + '.');
+      objsInView().forEach(function (o) { var st = objStatus(o); if (st[1] !== 'On track') add(o.f, '<b>Strategy objective ' + st[1].toLowerCase() + ':</b> ' + esc(objTitle(o)) + '.'); });
+      worse.forEach(function (f) { add(f[0], '<b>Worsening over ' + ST.mapPeriod + ' days</b>' + held(f[0]) + '.'); });
+      var focus = picks.length ? pSection('Where to focus', picks.length + (picks.length === 1 ? ' factor' : ' factors'),
+        '<div class="p-cards">' + picks.map(function (x) { return pCard({ href: '#map/' + x.k, kind: 'Factor · ' + esc(domName(x.k)), title: esc(FACTOR[x.k].name), status: rate(scores[x.k]), why: x.why }); }).join('') + '</div>',
+        'Picked by Prism: the clearest gap, strategy objectives that aren’t on track, and anything worsening.', 'p-first') : '';
+      var cards = '<div class="fgrid">' + vis.map(function (f) {
+        var sc = scores[f[0]], ob = covered.indexOf(f[0]) > -1;
+        return '<a class="card fcard slim' + (sc.v == null ? ' blind' : '') + '" href="#map/' + f[0] + '"><span class="fc-top"><span class="fc-dom">' + esc(domName(f[0])) + '</span>' + (ob ? pTag('Strategy') : isCand(f[0]) ? pTag('Candidate') : '') + '</span><span class="fc-name">' + esc(f[2]) + '</span>' +
+          rate(sc) + '<span class="fc-held">' + (sc.v == null ? 'Records don’t show this yet' : sc.weakest != null ? 'Held back by ' + esc(FACTOR[f[0]].inds[sc.weakest].toLowerCase()) : '') + '</span></a>';
       }).join('') + '</div>';
+      var all = pSection('All factors', '<button type="button" class="linkish map-what" data-help="map">What the levels mean</button>',
+        lenses + (vis.length ? (compare ? table : cards) : '<p class="empty-card">No factors in this lens.</p>'), '', picks.length ? '' : 'p-first');
+      body = focus + all + pSection('Evidence this round', '', pollSummary().replace('<p class="map-poll">', '<p class="map-poll quiet">'), 'Records, insights, the management poll and what people do in Hiviz. <button type="button" class="linkish" data-help="map">How the Map is scored</button>');
     }
     $('view').innerHTML =
       '<div class="page-top"><div><h1>Forge Works Map</h1><p class="sub">Systemic maturity across ' + esc(scopeLabel()) + ' · scored by Prism from 90 days of enriched records and insights</p></div></div>' +
-      '<p class="pv-summary">' + summary + '</p>' + pollSummary() +
-      '<div class="list-top">' + (tabs || '<span></span>') + '<div class="lvl-key"><button type="button" class="what" data-help="map">What the levels mean</button><span class="label">Maturity</span>' + [1, 2, 3].map(function (v) { return levelBar(v, true); }).join('') + levelBar(null, true, 'Needs input') + '</div></div>' +
+      '<p class="pv-summary">' + summary + '</p>' +
       body +
       '<p class="map-note">The Forge Works Map® is Forge Works IP. Level summaries are written from the Forge Works blueprint.</p>';
   }
@@ -3844,7 +3958,8 @@ body.rv-mode main { padding-top: 0; }
     return { sc: sc, mostly: LEVELS[counts.indexOf(Math.max.apply(null, counts))], gap: gap ? gap[0] : null };
   }
   document.addEventListener('click', function (e) {
-    var t = e.target.closest('[data-mapview]'); if (t) { ST.mapView = t.getAttribute('data-mapview'); renderMap(); return; }
+    var ml = e.target.closest('[data-maplens]'); if (ml) { var yl = window.scrollY; ST.mapLens = ml.getAttribute('data-maplens'); renderMap(); window.scrollTo(0, yl); return; }
+    var t = e.target.closest('[data-mapview]'); if (t) { var y = window.scrollY; ST.mapView = t.getAttribute('data-mapview'); renderMap(); window.scrollTo(0, y); return; } // tabs swap only what's below them, so stay put
     var d = e.target.closest('[data-ind]'); if (d) { var k = d.getAttribute('data-ind'); ST.openInd[k] = !ST.openInd[k]; renderFactor(ST.factor); var b = document.querySelector('[data-ind="' + k + '"]'); if (b) b.focus(); }
   });
 
@@ -4145,7 +4260,7 @@ body.rv-mode main { padding-top: 0; }
     return '<div class="rv-bar"><div class="rv-bar-in"><span class="rv-t"><b>Quarterly planning</b><span>' + esc(ORG_NAME) + ' · Fri 26 Sep</span></span>' +
       '<ol class="rv-rail">' + PL_RSTEPS.map(function (s, k) {
         return '<li class="' + (k === at ? 'on' : k < at ? 'done' : '') + '">' + (k < at && !PL.early ? '<button type="button" data-plstep="' + s[0] + '">' : '<span>') + '<i>' + (k < at ? '✓' : k + 1) + '</i>' + s[1] + (k < at && !PL.early ? '</button>' : '</span>') + '</li>';
-      }).join('') + '</ol>' + (PL.step === 'receipt' ? '' : '<button type="button" class="btn" id="pl-end">End planning</button>') + '</div></div>';
+      }).join('') + '</ol>' + (PL.step === 'receipt' ? '<button type="button" class="btn brand" id="pl-save">Close planning</button>' : '<button type="button" class="btn" id="pl-end">End planning</button>') + '</div></div>';
   }
   function plChoice(k, id, opts) {
     var cur = plDec(k, id);
@@ -4189,14 +4304,15 @@ body.rv-mode main { padding-top: 0; }
     // 2 · Pre-reads: each owner’s view of the quarter, before any decisions
     if (PL.step === 'check') {
       var todo = OBJECTIVES.filter(function (o) { return plPreDue(o) && !PL.pre[o.id]; }).length;
-      rvPage('Step 2 of 4', 'Pre-reads', OBJECTIVES.filter(function (o) { return PRE_NOTES[o.id]; }).length + ' of ' + OBJECTIVES.length + ' owners sent a pre-read' + (todo ? ' · <b>' + todo + ' to hear in the room</b>' : ''),
+      rvPage('Step 2 of 4', 'Pre-reads', OBJECTIVES.length + (OBJECTIVES.length === 1 ? ' objective' : ' objectives') + ' · each owner’s view of the quarter, written the week before · ' + OBJECTIVES.filter(function (o) { return PRE_NOTES[o.id]; }).length + ' of ' + OBJECTIVES.length + ' sent' + (todo ? ' · <b>' + todo + ' to hear in the room</b>' : ''),
         rvQ('What happened this quarter, and what would you change?') +
         '<ul class="rv-list">' + OBJECTIVES.map(function (o) {
           var n = PRE_NOTES[o.id], s = objStatus(o), p = PL.pre[o.id];
-          var sub = '<span class="badge ' + s[0] + '"><i></i>' + s[1] + '</span> ' + (n ? '<b>' + esc(n[0]) + '</b> · ' + esc(n[1]) + ': “' + esc(n[2]) + '”' : '<b>' + esc(o.owner) + '</b> · no pre-read');
+          var who = n ? n[0] : o.owner, meta = '<span class="rv-who"><span class="av' + (who === YOU ? ' me' : '') + '">' + initials(who) + '</span>' + esc(who) + '</span>' + (n ? ' · ' + esc(n[1]) : '') + ' · <span class="badge ' + s[0] + '"><i></i>' + s[1] + '</span>';
           var ctl = n ? '<span class="rv-dec">Pre-read in</span>' : !plPreDue(o) ? '<span class="rv-dec">New this quarter</span>' : p === 'skip' ? '<span class="rv-miss">Missed · recorded</span><button type="button" class="linkish" data-plpre="' + o.id + '">Undo</button>' : p === 'room' ? '<span class="rv-dec">Heard in the room</span><button type="button" class="linkish" data-plpre="' + o.id + '">Undo</button>'
             : '<span class="rv-ch"><button type="button" class="btn" data-plpre="' + o.id + '" data-plval="room">Heard in the room</button><button type="button" class="btn" data-plpre="' + o.id + '" data-plval="skip">Skip</button></span>';
-          return rvRow(objTitle(o), sub, ctl, o.id, !!(n || p || !plPreDue(o)));
+          return '<li class="rv-row rv-pre' + (n || p || !plPreDue(o) ? ' is-done' : '') + '"><div class="rv-m"><span class="rv-kindline">Objective · <button type="button" class="linkish" data-obj="' + o.id + '">' + esc(objTitle(o)) + '</button></span>' +
+            (n ? '<p class="rv-quote">“' + esc(n[2]) + '”</p>' : '<p class="rv-quote none">' + (plPreDue(o) ? 'No pre-read yet.' : 'New this quarter. No pre-read due.') + '</p>') + '<span class="rv-s">' + meta + '</span></div><div class="rv-c">' + ctl + '</div></li>';
         }).join('') + '</ul>',
         '<button type="button" class="btn lg" data-plstep="here">Back</button><span class="rv-nav-r">' + (todo ? '<small>' + todo + ' not heard will be recorded as missed</small>' : '') + '<button type="button" class="btn brand lg" data-plstep="decide">Continue to decisions</button></span>', bar);
       return;
@@ -4241,7 +4357,7 @@ body.rv-mode main { padding-top: 0; }
       blk('Missed pre-reads', missed.map(function (o) { return rvRow(objTitle(o), esc(o.owner), '<span class="rv-miss">Recorded as missed</span>', o.id, false); })) +
       '<section class="rv-rc"><h2 class="rv-h2">Coming back</h2><ul class="rv-list">' + rvRow('Next monthly progress', esc(STRAT.progress) + ' · program owners check in the week before', '', '', false) + rvRow('Next quarterly planning', 'Wednesday 7 January · owners send a pre-read the week before', '', '', false) + '</ul></section>' +
       '<label class="w-note-l" for="pl-notes">Planning notes</label><textarea id="pl-notes" class="w-note" rows="3" placeholder="Anything else worth recording">' + esc(PL.notes) + '</textarea>',
-      (PL.early ? '<span></span>' : '<button type="button" class="btn lg" data-plstep="decide">Back</button>') + '<button type="button" class="btn brand lg" id="pl-save">Close planning</button>', bar);
+      PL.early ? '' : '<button type="button" class="btn lg" data-plstep="decide">Back</button>', bar);
   }
   function plRead() {
     OBJECTIVES.forEach(function (o) { var t = $('plt-' + o.id), b = $('plb-' + o.id); if (t) PL.obj[o.id].target = +t.value; if (b) PL.obj[o.id].by = b.value; });
@@ -4282,7 +4398,7 @@ body.rv-mode main { padding-top: 0; }
     if ((t = e.target.closest('[data-plg]'))) { if (t.disabled) return; plRead(); var gi = +t.getAttribute('data-plg'); if (gi < 0) PL.step = 'check'; else PL.g = gi; renderPlanning(); window.scrollTo(0, 0); return; }
     if ((t = e.target.closest('[data-plpre]'))) { var oid = t.getAttribute('data-plpre'), v = t.getAttribute('data-plval'); PL.pre[oid] = v || ''; renderPlanning(); window.scrollTo(0, y); return; }
     if ((t = e.target.closest('[data-pldec]'))) { plRead(); var p = t.getAttribute('data-pldec').split('|'), rec = p[0] === 'obj' ? PL.obj[p[1]] : PL.cand[p[1]]; rec.d = rec.d === p[2] ? '' : p[2]; renderPlanning(); window.scrollTo(0, y); return; }
-    if (e.target.closest('#pl-end')) { plRead(); PL.early = PL.step; PL.visitedDecide = PL.visitedDecide || PL.step === 'decide'; PL.step = 'receipt'; renderPlanning(); window.scrollTo(0, 0); return; }
+    if (e.target.closest('#pl-end')) { plRead(); rvConfirm('End planning now?', 'Everything you’ve decided so far is kept. Objectives you haven’t decided stay as they are, and candidates you haven’t reached carry to the next planning.', 'End planning', function () { PL.early = PL.step; PL.visitedDecide = PL.visitedDecide || PL.step === 'decide'; PL.step = 'receipt'; renderPlanning(); window.scrollTo(0, 0); }); return; }
     if (e.target.closest('#pl-save')) plSave();
   });
   document.addEventListener('change', function (e) { var a = e.target.getAttribute && e.target.getAttribute('data-platt'); if (a && PL) { PL.att[a] = e.target.checked; renderPlanning(); } });
@@ -4376,11 +4492,11 @@ body.rv-mode main { padding-top: 0; }
     return '<div class="rv-bar"><div class="rv-bar-in"><span class="rv-t"><b>Monthly progress</b><span>' + esc(ORG_NAME) + ' · Fri 26 Sep</span></span>' +
       '<ol class="rv-rail">' + RV_STEPS.map(function (s, k) {
         return '<li class="' + (k === at ? 'on' : k < at ? 'done' : '') + '">' + (k < at && !PG.early ? '<button type="button" data-pgstep="' + s[0] + '">' : '<span>') + '<i>' + (k < at ? '✓' : k + 1) + '</i>' + s[1] + (k < at && !PG.early ? '</button>' : '</span>') + '</li>';
-      }).join('') + '</ol>' + (PG.step === 'receipt' ? '' : '<button type="button" class="btn" id="pg-end">End meeting</button>') + '</div></div>';
+      }).join('') + '</ol>' + (PG.step === 'receipt' ? '<button type="button" class="btn brand" id="pg-save">Close the meeting</button>' : '<button type="button" class="btn" id="pg-end">End meeting</button>') + '</div></div>';
   }
   function pgHere(n) { return !n || n === YOU || !!PG.att[n]; }
   function msSub(x, tag) {
-    return tag + '<span class="rv-who"><span class="av' + (x.m.who === YOU ? ' me' : '') + '">' + initials(x.m.who) + '</span>' + esc(x.m.who) + (pgHere(x.m.who) ? '' : ' · <b>not here</b>') + '</span> · ' + esc(x.p.title) + ' · by ' + esc(x.m.due) +
+    return tag + '<span class="rv-who"><span class="av' + (x.m.who === YOU ? ' me' : '') + '">' + initials(x.m.who) + '</span>' + esc(x.m.who) + (pgHere(x.m.who) ? '' : ' · <b>not here</b>') + '</span> · for the program “' + esc(x.p.title) + '” · by ' + esc(x.m.due) +
       (x.m.upd ? '<br>' + actBadge(x.m) + ' ' + (x.m.note ? '“' + esc(x.m.note) + '”' : 'Checked in ' + esc(x.m.upd)) : '');
   }
   function startProgress() {
@@ -4408,7 +4524,7 @@ body.rv-mode main { padding-top: 0; }
     // 2 · Check-ins, before any decisions
     if (PG.step === 'check') {
       var list = pgOpen(), before = list.filter(function (x) { return x.m.upd && x.m.upd !== '26 Sep'; }).length, todo = list.filter(function (x) { return !x.m.upd && !PG.ci[x.key]; }).length;
-      rvPage('Step 2 of 4', 'Check-ins', list.length + ' open milestones · ' + before + ' checked in before the meeting' + (todo ? ' · <b>' + todo + ' to go</b>' : ''),
+      rvPage('Step 2 of 4', 'Check-ins', list.length + ' open milestones on strategy programs · ' + before + ' checked in before the meeting' + (todo ? ' · <b>' + todo + ' to go</b>' : ''),
         rvQ('What’s changed since your last update, and is anything in the way?') +
         '<ul class="rv-list">' + list.map(function (x) {
           var sk = PG.ci[x.key] === 'skip', pr = x.key.split(':');
@@ -4474,7 +4590,7 @@ body.rv-mode main { padding-top: 0; }
       blk('Carried forward to next month', carriedOut.map(function (x) { return rvRow(x[1], esc(x[2]), '', openOf(x[0]), false); }), 'These go first on the agenda next time.') +
       '<section class="rv-rc"><h2 class="rv-h2">Coming back</h2><ul class="rv-list">' + rvRow('Next monthly progress', 'Monday 27 October · check-ins open 20 Oct', '', '', false) + '</ul></section>' +
       '<label class="w-note-l" for="pg-notes">Meeting notes</label><textarea id="pg-notes" class="w-note" rows="3" placeholder="Anything else worth recording">' + esc(PG.notes) + '</textarea>',
-      (PG.early ? '<span></span>' : '<button type="button" class="btn lg" data-pgstep="decide">Back</button>') + '<button type="button" class="btn brand lg" id="pg-save">Close the meeting</button>', bar);
+      PG.early ? '' : '<button type="button" class="btn lg" data-pgstep="decide">Back</button>', bar);
   }
   // Formal close: flag objectives for planning, record misses, carry the rest forward
   function pgClose() {
@@ -4509,7 +4625,7 @@ body.rv-mode main { padding-top: 0; }
     if ((t = e.target.closest('[data-pgci]'))) { var ck = t.getAttribute('data-pgci'); PG.ci[ck] = PG.ci[ck] ? '' : 'skip'; renderProgress(); window.scrollTo(0, y); return; }
     if ((t = e.target.closest('[data-pgdec]'))) { var dk = t.getAttribute('data-pgdec'), v = t.getAttribute('data-pgval'); PG.done[dk] = PG.done[dk] === v ? '' : v; renderProgress(); window.scrollTo(0, y); return; }
     if ((t = e.target.closest('[data-pgall]'))) { var ak = t.getAttribute('data-pgall'); PG.groups[ak].forEach(function (id) { if (!PG.done[id + ':' + ak]) PG.done[id + ':' + ak] = 'Agree it’s on track'; }); renderProgress(); window.scrollTo(0, y); return; }
-    if (e.target.closest('#pg-end')) { PG.early = PG.step; PG.visitedDecide = PG.visitedDecide || PG.step === 'decide'; PG.step = 'receipt'; renderProgress(); window.scrollTo(0, 0); return; }
+    if (e.target.closest('#pg-end')) { rvConfirm('End the meeting now?', 'Everything you’ve decided so far is kept. Anything you haven’t reached carries forward to next month’s progress meeting.', 'End meeting', function () { PG.early = PG.step; PG.visitedDecide = PG.visitedDecide || PG.step === 'decide'; PG.step = 'receipt'; renderProgress(); window.scrollTo(0, 0); }); return; }
     if (e.target.closest('#pg-save')) { pgClose(); return; }
   });
   document.addEventListener('change', function (e) { var a = e.target.getAttribute && e.target.getAttribute('data-pgatt'); if (a && PG) { PG.att[a] = e.target.checked; renderProgress(); } });
