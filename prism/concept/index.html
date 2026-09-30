@@ -1107,6 +1107,20 @@ body.rv-mode main { padding-top: 0; }
 .poll-send .poll-why { flex: 1 1 240px; min-height: 0; padding: 8px 12px; }
 .walk-form .poll { max-width: none; }
 @media (max-width: 640px) { .mf-row.is-poll { grid-template-columns: minmax(0, 1fr); } .mf-row.is-poll .mf-act { grid-column: 1; } }
+/* Poll results and Hiviz evidence on the Map */
+.map-poll { margin: -6px 0 18px; display: grid; gap: 2px; font-size: 15px; line-height: 1.45; max-width: 900px; }
+.map-poll .label { font-size: 13px; }
+.pr { display: grid; gap: 8px; margin-top: 10px; }
+.pr-h { margin: 0; display: grid; gap: 2px; font-size: 14.5px; }
+.pr-h .label { font-size: 13px; }
+.pr-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.pr-list li { display: grid; grid-template-columns: 78px minmax(0, 1fr) 90px 20px; gap: 10px; align-items: center; font-size: 14px; }
+.pr-l { font-size: 12.5px; font-weight: 700; color: var(--text-3); }
+.pr-bar { height: 8px; border-radius: 4px; background: var(--bg-3); overflow: hidden; }
+.pr-bar i { display: block; height: 100%; background: var(--text-2); }
+.pr-n { font-weight: 700; text-align: right; font-variant-numeric: tabular-nums; }
+.pr-note { margin: 0; font-size: 13.5px; color: var(--text-3); }
+@media (max-width: 640px) { .pr-list li { grid-template-columns: 64px minmax(0, 1fr) 20px; } .pr-bar { display: none; } }
 </style>
 </head>
 <body>
@@ -2394,7 +2408,7 @@ body.rv-mode main { padding-top: 0; }
       ['', 'Level names', 'Each factor names its own levels. Communication & coordination, for example, runs from One-way to Two-way to Open communication.'],
       ['', 'Mixed maturity', 'A factor can sit between levels, such as \u201cCompliant, some Leading\u201d. That\u2019s normal: its indicators move at different speeds.'],
       ['', 'Indicators', 'The threads Prism follows through the levels of each factor. Each record and insight is linked to the indicator it gives evidence for.'],
-      ['info', 'Needs management input', 'Some indicators, such as what safety means to leaders, can\u2019t be read from records. Focus reviews, surveys and interviews fill them in.'],
+      ['info', 'Needs management input', 'Some indicators, such as what safety means to leaders, can\u2019t be read from records. An anonymous management poll in My Focus fills them in, alongside Focus reviews, surveys and interviews fill them in.'],
       ['', 'Held back by', 'The weakest indicator under a factor, and usually the best place to act.']
     ]],
     ['sources', 'Source status', [
@@ -3123,11 +3137,11 @@ body.rv-mode main { padding-top: 0; }
     'monitoring_metrics:2': { q: 'When a manager says a site is safe, what are they usually going on?', a: ['Nothing bad has happened lately', 'Controls are checked and people feel positive', 'They don’t assume it, and keep looking for weak spots'], platform: true },
     'monitoring_metrics:3': { q: 'Where do we hear about workers’ day-to-day experience?', a: ['Only in incident reports', 'In culture and engagement surveys', 'In stories and conversations, alongside the numbers'], second: true, inf: [0] }
   };
-  var POLL_ROUND = { closes: '10 Oct', polled: 9 }; // managers in the purview asked this round
+  var POLL_ROUND = { closes: '10 Oct', polled: 8 }; // managers in the purview asked this round
   ST.pollSel = {}; ST.pollWhy = {}; ST.pollDone = {};
   // Anonymous answers so far from other managers: [Compliant, Leading, Resilient, Don't know]
   var POLL_RESP = {};
-  Object.keys(POLL).forEach(function (k, n) { var s = [[3, 2, 0, 1], [2, 3, 1, 0], [4, 1, 0, 1], [1, 3, 1, 1], [2, 2, 1, 0]][n % 5]; POLL_RESP[k] = s.slice(); });
+  Object.keys(POLL).forEach(function (k, n) { var s = [[3, 2, 0, 1], [2, 3, 1, 0], [4, 1, 0, 1], [1, 3, 1, 1], [2, 2, 1, 0]][n % 5]; POLL_RESP[k] = POLL[k].platform ? [0, 0, 0, 0] : s.slice(); }); // only poll-only indicators are asked so far
   // This fortnight's questions for you: indicators only people can answer, starting with the clearest gap
   function myPolls() {
     var g = mapGap(regionsInScope()), order = g.gap ? [g.gap] : [];
@@ -3152,12 +3166,94 @@ body.rv-mode main { padding-top: 0; }
     if (s && !s.disabled) {
       var k = s.getAttribute('data-pollsend'), lv = ST.pollSel[k], w2 = $('pw-' + k.replace(':', '-'));
       if (lv == null) return;
-      POLL_RESP[k][lv]++; ST.pollDone[k] = 'round'; ST.pollWhy[k] = w2 ? w2.value.trim() : '';
+      POLL_RESP[k][lv]++; ST.pollDone[k] = 'round'; pollApply(k); ST.pollWhy[k] = w2 ? w2.value.trim() : '';
       ST.mfRes['q-' + k] = 'Answered'; mfDone('Answered a quick question: ' + FACTOR[k.split(':')[0]].name);
       toast('Thanks. Your answer is anonymous. Results show once three or more managers have answered.');
       var y2 = window.scrollY; mfRerender(); window.scrollTo(0, y2);
     }
   });
+
+  // What Hiviz itself records about an indicator (fw-map-audit.md section 9). Counts behaviour, never the tool.
+  var PLAT = {
+    'senior_leadership:0': 'What leaders open and act on: incident insights, objectives, or crews’ requests',
+    'senior_leadership:2': 'Leaders at rituals, and leadership visits to at-risk sites',
+    'senior_leadership:3': 'Programs led or resourced by leaders, and escalations they accept',
+    'strategy:0': 'Whether plans start from incidents, objectives or Prism’s early warnings',
+    'strategy:1': 'The kind of action in every plan: more checks, better controls, or changing the work',
+    'strategy:2': 'Whose behaviour plan actions target',
+    'strategy:4': 'Objectives set and checked each month, and gaps raised for planning',
+    'risk_management:2': 'Escalations for resources, and what happened to them',
+    'safety_organisation:1': 'Whether the safety lead attends planning and progress, and in what role',
+    'operational_management:2': 'Check-in rates, stalled insights, and steady versus incident-driven engagement',
+    'operational_management:4': 'Time from a critical insight to an owner and an approved plan',
+    'resource_allocation:0': 'Budget escalations, and what programs are resourced for',
+    'resource_allocation:2': 'The level that approves plans needing resources',
+    'management_systems:2': 'Retros confirmed or challenged, and what insights are closed on',
+    'management_systems:3': 'Dismissal reasons, and repeat plans after a failed retro',
+    'learning_development:2': 'Retros reused in new plans, and plans shared across sites',
+    'communications_coordination:3': 'Help offered across regions on shared insights',
+    'communications_coordination:4': 'Multi-site insights with one shared plan, or separate local ones',
+    'decision_making:2': 'Who approves each plan, and at what level',
+    'decision_making:3': 'What triggered each funded plan or program',
+    'decision_making:4': 'Retros challenged, and plans changed after “pattern continues”',
+    'monitoring_metrics:2': 'What insights get closed on, and how “ready to close” is used',
+    'monitoring_metrics:4': 'Share of plans started from Prism’s leading insights'
+  };
+  // Live platform signals. Others wait for a quarter of activity, as the guards say.
+  function platSignal(k) {
+    if (k === 'decision_making:2') {
+      var s = 0, o = 0;
+      INSIGHTS.concat(Object.keys(PROGRAMS).map(function (p) { return PROGRAMS[p]; })).forEach(function (w) {
+        var pl = w.plan; if (!pl || pl.state !== 'agreed' || !pl.approvedBy) return;
+        if (pl.approvedBy === 'Quarterly planning' || ROLE[pl.approvedBy] === 'Group executive') s++; else o++;
+      });
+      var n = s + o; if (!n) return null;
+      return { m: (s * 1 + o * 2) / n, n: n, text: o + ' of ' + n + ' plans approved by an operational manager, ' + s + ' by a senior leader, none by the crew itself' };
+    }
+    if (k === 'senior_leadership:2') {
+      var sm = STRAT_LOG.filter(function (m) { return (m.who || []).indexOf('Morgan Hale') > -1; }).length, fr = MEETINGS.filter(function (m) { return (m.attendees || []).indexOf('Morgan Hale') > -1; }).length;
+      return { early: true, text: 'The group executive attended ' + sm + ' of ' + STRAT_LOG.length + ' strategy meetings and ' + fr + ' of ' + MEETINGS.length + ' Focus reviews on record' };
+    }
+    return null;
+  }
+  function pollCount(k) { var r = POLL_RESP[k]; return { c: r[0] + r[1] + r[2], dk: r[3], all: r[0] + r[1] + r[2] + r[3] }; }
+  // Results count towards the Map only once three or more have answered, so nobody can be singled out
+  function pollApply(only) {
+    Object.keys(POLL).forEach(function (k) {
+      if (only && k !== only) return;
+      var pc = pollCount(k), fk = k.split(':'), r = POLL_RESP[k]; if (pc.c < 3) return;
+      var v = (r[0] * 1 + r[1] * 2 + r[2] * 3) / pc.c;
+      REGIONS.forEach(function (rg) { SCORE[rg.name][fk[0]][+fk[1]] = { m: v, n: pc.c, t: 'steady', d90: 0, d45: 0, rv: 'poll' }; });
+    });
+    var ps = platSignal('decision_making:2');
+    if (ps && !POLL_RESP['decision_making:2'][0] && !POLL_RESP['decision_making:2'][1]) REGIONS.forEach(function (rg) { SCORE[rg.name].decision_making[2] = { m: ps.m, n: ps.n, t: 'steady', d90: 0, d45: 0, rv: 'hiviz' }; });
+  }
+  function pollPart() {
+    var you = Object.keys(ST.pollDone).some(function (k) { return ST.pollDone[k]; }) ? 1 : 0;
+    return [['Executive', 1, 1], ['Division', 1 + you, 2], ['Regional', 3, 4], ['Safety', 1, 1]];
+  }
+  function pollSummary() {
+    var pt = pollPart(), a = pt.reduce(function (s, x) { return s + x[1]; }, 0), n = pt.reduce(function (s, x) { return s + x[2]; }, 0);
+    var dk = Object.keys(POLL).reduce(function (s, k) { return s + POLL_RESP[k][3]; }, 0);
+    return '<p class="map-poll"><span class="label">Management poll</span><span><b>' + a + ' of ' + n + ' managers</b> have answered this round, which closes ' + esc(POLL_ROUND.closes) + ' · ' + pt.map(function (x) { return x[0].toLowerCase() + ' ' + x[1] + ' of ' + x[2]; }).join(', ') + ' · ' + dk + ' “Don’t know” answers. Anonymous, shown by level only.</span></p>';
+  }
+  // The management view of one indicator, with its flags
+  function pollResults(k) {
+    var P = POLL[k]; if (!P) return '';
+    var r = POLL_RESP[k], pc = pollCount(k), max = Math.max(1, r[0], r[1], r[2], r[3]);
+    if (!pc.all) return '<div class="pr"><p class="pr-h"><span class="label">Management view</span>' + (P.platform ? 'Not asked yet. Hiviz evidence leads here, and the poll will cross-check it in a later round.' : 'Not asked yet. It comes round in My Focus.') + '</p></div>';
+    if (pc.c < 3) return '<div class="pr"><p class="pr-h"><span class="label">Management view</span>' + pc.all + ' of ' + POLL_ROUND.polled + ' answered. Results show once three or more have.</p></div>';
+    var row = function (lbl, txt, n) { return '<li><span class="pr-l">' + lbl + '</span><span class="pr-t">' + esc(txt) + '</span><span class="pr-bar"><i style="width:' + Math.round(n / max * 100) + '%"></i></span><span class="pr-n">' + n + '</span></li>'; };
+    return '<div class="pr"><p class="pr-h"><span class="label">Management view</span>' + pc.all + ' of ' + POLL_ROUND.polled + ' managers answered · anonymous</p>' +
+      '<ul class="pr-list">' + [0, 1, 2].map(function (lv) { return row(LEVELS[lv], P.a[lv], r[lv]); }).join('') + row('', 'Don’t know', r[3]) + '</ul>' +
+      (P.second ? '<p class="pr-note">A managers’ view of the frontline. It would read better from supervisors later.</p>' : '') +
+      (P.inf ? '<p class="pr-note">The ' + P.inf.map(function (l) { return LEVELS[l]; }).join(' and ') + ' answer is worded from a level Prism inferred. Forge Works to confirm.</p>' : '') + '</div>';
+  }
+  function platLine(k) {
+    if (!PLAT[k]) return '';
+    var ps = platSignal(k);
+    return '<div class="pr"><p class="pr-h"><span class="label">Hiviz evidence</span>' + (ps && !ps.early ? esc(ps.text) + '.' : ps ? esc(ps.text) + '. Scoring starts after a quarter of activity.' : esc(PLAT[k]) + '. Scoring starts after a quarter of activity.') + '</p></div>';
+  }
 
   var MF_GROUPS = [['retro', 'Confirm a 90-day retro'], ['action', 'Your actions'], ['escalated', 'Escalated to you'], ['assign', 'Assign an owner'], ['chase', 'Chase up'], ['visit', 'Plan a visit'], ['update', 'Post an update'], ['close', 'Close'], ['poll', 'Quick question'], ['agreed', 'Agreed at a Focus review']];
   function myFocusItems() {
@@ -3332,7 +3428,7 @@ body.rv-mode main { padding-top: 0; }
     ['execute', 'Execute', 'Frontline and operations']
   ];
   var LEVELS = ['Compliant', 'Leading', 'Resilient'];
-  var EV_NAME = { Rec: 'Records', Ins: 'Insights', Mgmt: 'Management input' };
+  var EV_NAME = { Rec: 'Records', Ins: 'Insights', Mgmt: 'Management poll' };
   // [key, domain, name, question, [level names], [level summaries], [[indicator, C, L, R, evidence]]]
   // null in C/L/R = the Blueprint doesn't describe that level for this indicator yet
   var FACTORS = [
@@ -3622,7 +3718,7 @@ body.rv-mode main { padding-top: 0; }
     }
     $('view').innerHTML =
       '<div class="page-top"><div><h1>Forge Works Map</h1><p class="sub">Systemic maturity across ' + esc(scopeLabel()) + ' · scored by Prism from 90 days of enriched records and insights</p></div></div>' +
-      '<p class="pv-summary">' + summary + '</p>' +
+      '<p class="pv-summary">' + summary + '</p>' + pollSummary() +
       '<div class="list-top">' + (tabs || '<span></span>') + '<div class="lvl-key"><button type="button" class="what" data-help="map">What the levels mean</button><span class="label">Maturity</span>' + [1, 2, 3].map(function (v) { return levelBar(v, true); }).join('') + levelBar(null, true, 'Needs input') + '</div></div>' +
       body +
       '<p class="map-note">The Forge Works Map® is Forge Works IP. Level summaries are written from the Forge Works blueprint.</p>';
@@ -3649,14 +3745,14 @@ body.rv-mode main { padding-top: 0; }
           (obj.programs.length ? '<p class="f-strat-l"><span>' + (obj.programs.length === 1 ? 'Program' : 'Programs') + '</span>' + obj.programs.map(function (pid) { return '<span><button type="button" class="linkish map-link" data-prog="' + pid + '">' + esc(PROGRAMS[pid].title) + '</button> · led by ' + esc(PROGRAMS[pid].owner) + '</span>'; }).join('') + '</p>' : '') + '</section>'; })() : '') +
         '<section class="ins-sec"><span class="label">Indicators</span><p class="f-hint">Select one to see what each level looks like.</p><div class="card ind-list">' + f.inds.map(function (name, k) {
           var x = sc.inds[k], l = lvlOf(x.v), drivers = ins.filter(function (i) { return INS_FACTOR[i.id][1] === k; }), open = ST.openInd[key + k];
-          var ev = evOf(key, k).map(function (e) { return '<span class="ev-src">' + esc(EV_NAME[e]) + '</span>'; }).join('');
+          var ev = evOf(key, k).map(function (e) { return '<span class="ev-src">' + esc(EV_NAME[e]) + '</span>'; }).join('') + (PLAT[key + ':' + k] ? '<span class="ev-src">Hiviz</span>' : '');
           return '<div class="ind-row' + (open ? ' open' : '') + '"><button type="button" class="ind-btn" data-ind="' + key + k + '" aria-expanded="' + !!open + '"><span class="ind-main"><span class="ind-name">' + esc(name) + (krOf(k) ? ' <span class="kr-tag">Key result · target ' + LEVELS[krOf(k)[1]] + '</span>' : '') + '</span>' +
-            '<span class="ind-drv' + (drivers.length ? '' : ' muted') + '">' + (drivers.length ? drivers.map(function (i) { return esc(i.title); }).join(' · ') : x.v == null ? (x.mg ? 'Needs management input' : 'No evidence yet') : (x.rv ? 'Management input \u00b7 Focus review ' + x.rv : x.n + ' signals, no open insight')) + '</span></span>' +
+            '<span class="ind-drv' + (drivers.length ? '' : ' muted') + '">' + (drivers.length ? drivers.map(function (i) { return esc(i.title); }).join(' · ') : x.v == null ? (x.mg ? 'Needs management input' + (PLAT[key + ':' + k] ? ' \u00b7 Hiviz evidence building' : '') : 'No evidence yet') : (x.rv === 'poll' ? 'Management view \u00b7 ' + pollCount(key + ':' + k).all + ' of ' + POLL_ROUND.polled + ' managers answered' : x.rv === 'hiviz' ? 'Hiviz evidence \u00b7 ' + ((platSignal(key + ':' + k) || {}).n || x.n) + ' plans' : x.rv ? 'Management input \u00b7 Focus review ' + x.rv : x.n + ' signals, no open insight')) + '</span></span>' +
             '<span class="ind-rate">' + levelBar(x.v, true, x.v == null ? (x.mg ? 'Needs input' : 'Blind spot') : null, x.was) + (x.v != null ? trendHTML(x.t) : '') + '</span></button>' +
             (open ? '<div class="ind-detail"><ol class="ind-levels">' + [0, 1, 2].map(function (lv) {
                 var c = cueAt(key, k, lv);
                 return '<li class="' + (lv === l ? 'now' : '') + (x.v != null && lv === l + 1 ? ' is-next' : '') + '"><span class="il-h">' + esc(LEVELS[lv]) + (lv === l ? '<span class="tag-now">Where you are</span>' : x.v != null && lv === l + 1 ? '<span class="tag-next">Next step</span>' : '') + '</span><span class="il-t' + (c == null ? ' gap' : '') + '">' + esc(c == null ? 'Not yet described in the Forge Works Map' : c) + (cueInferred(key, k, lv) ? ' ' + INF_TAG : '') + '</span></li>';
-              }).join('') + '</ol><p class="ind-ev"><span class="label">Evidence from</span>' + ev + '</p>' +
+              }).join('') + '</ol>' + pollResults(key + ':' + k) + platLine(key + ':' + k) + '<p class="ind-ev"><span class="label">Evidence from</span>' + ev + '</p>' +
               (drivers.length ? '<p class="ind-links">' + drivers.map(function (i) { return '<button type="button" class="linkish" data-open="' + i.id + '">' + esc(i.title) + '</button>'; }).join(' · ') + '</p>' : '') + '</div>' : '') +
           '</div>';
         }).join('') + '</div></section>' +
@@ -3669,7 +3765,7 @@ body.rv-mode main { padding-top: 0; }
         '<section class="card side-card"><h2>What each level looks like</h2><ol class="lvl-desc">' + LEVELS.map(function (l, k) {
           return '<li class="' + (k === sc.lvl ? 'now' : '') + (k === next && k !== sc.lvl ? ' is-next' : '') + '"><span class="lvl-desc-h"><span><b>' + esc(l) + '</b> · ' + esc(f.lnames[k]) + '</span>' + (k === sc.lvl ? '<span class="tag-now">Where you are</span>' : k === next ? '<span class="tag-next">Next step</span>' : '') + '</span><p>' + esc(f.levels[k]) + '</p></li>';
         }).join('') + '</ol><p class="muted-p">Summarised from the Forge Works blueprint. In the live product Hiviz would write these for your situation.</p></section>' +
-        '<section class="card side-card"><h2>How this is scored</h2><p class="muted-p" style="color:var(--text)">Prism links each enriched record and insight to the factor and indicator it gives evidence for. Insights count for more than single records. A factor is rated from its indicators, can sit between levels, and is held back by its weakest indicator. Indicators that only management can evidence wait for a Focus review, survey or interview.</p></section>' +
+        '<section class="card side-card"><h2>How this is scored</h2><p class="muted-p" style="color:var(--text)">Prism links each enriched record and insight to the factor and indicator it gives evidence for. Insights count for more than single records. A factor is rated from its indicators, can sit between levels, and is held back by its weakest indicator. Indicators that only management can evidence come from an anonymous poll in My Focus, and count once three or more managers have answered. Some also draw on Hiviz itself: what people do in the platform, such as who approves plans. That counts behaviour, never the tool.</p></section>' +
       '</aside></div>';
   }
   // The Map's language, for any insight: where it sits and what the next level looks like
@@ -4668,7 +4764,7 @@ body.rv-mode main { padding-top: 0; }
     var gd = e.target.closest('[data-go]'); if (gd) { go(gd.getAttribute('data-go')); return; }
   });
 
-  fillFilters(); renderIssues(); pulse(true); route();
+  pollApply(); fillFilters(); renderIssues(); pulse(true); route();
   setInterval(function () { pulse(false); }, 5000);
 })();
 </script>
