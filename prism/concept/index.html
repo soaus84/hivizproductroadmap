@@ -1093,6 +1093,20 @@ body.rv-mode main { padding-top: 0; }
 .sp-read > span:first-child { font-size: 13px; font-weight: 700; color: var(--text-3); }
 .rv-form { flex-basis: 100%; justify-content: flex-end; margin-top: 4px; }
 .pl-count { font-size: 16px; }
+/* Management poll in My Focus */
+.mf-row.is-poll { grid-template-columns: 120px minmax(0, 1fr); }
+.mf-row.is-poll .mf-act { grid-column: 2; justify-content: flex-start; }
+.mf-row.is-poll .mf-title { font-size: 18px; font-style: italic; }
+.poll { display: grid; gap: 10px; width: 100%; max-width: 640px; }
+.poll-opts { display: grid; gap: 6px; }
+.poll-opt { text-align: left; font: inherit; font-size: 15.5px; line-height: 1.35; padding: 10px 14px; border: 1px solid var(--border-2); border-radius: 10px; background: var(--bg); color: var(--text); cursor: pointer; }
+.poll-opt:hover { border-color: var(--text); }
+.poll-opt.dk { color: var(--text-3); }
+.poll-opt.is-on { background: var(--brand); border-color: #d9c200; color: var(--text); }
+.poll-send { display: flex; gap: 10px; flex-wrap: wrap; }
+.poll-send .poll-why { flex: 1 1 240px; min-height: 0; padding: 8px 12px; }
+.walk-form .poll { max-width: none; }
+@media (max-width: 640px) { .mf-row.is-poll { grid-template-columns: minmax(0, 1fr); } .mf-row.is-poll .mf-act { grid-column: 1; } }
 </style>
 </head>
 <body>
@@ -3073,7 +3087,79 @@ body.rv-mode main { padding-top: 0; }
   ST.nudged = {}; ST.visitPlanned = ST.visitPlanned || {}; ST.mfDone = []; ST.mfWalk = -1; ST.mfSnap = null; ST.mfRes = {};
   function mySites() { var o = []; ORG.forEach(function (d) { if (d.div === MY_DIV) d.regions.forEach(function (r) { o = o.concat(r.sites); }); }); return o; }
   function myInsights() { var ids = mySites().map(function (x) { return x.id; }); return INSIGHTS.filter(function (i) { return !i.closed && !i.dismissed && i.sites.some(function (s) { return ids.indexOf(s) > -1; }); }); }
-  var MF_GROUPS = [['retro', 'Confirm a 90-day retro'], ['action', 'Your actions'], ['escalated', 'Escalated to you'], ['assign', 'Assign an owner'], ['chase', 'Chase up'], ['visit', 'Plan a visit'], ['update', 'Post an update'], ['close', 'Close'], ['agreed', 'Agreed at a Focus review']];
+  /* =============================================================
+     Management poll: the indicators only people can answer, asked one or two
+     at a time in My Focus. Managers (leaders included), anonymous.
+     Wording audited in prism/fw-map-audit.md section 8.
+     a: answers at [Compliant, Leading, Resilient]. second: a manager's view of
+     someone else. inf: levels Prism inferred. platform: Hiviz also evidences it.
+     ============================================================= */
+  var POLL = {
+    'senior_leadership:0': { q: 'When senior leaders talk about safety, what do they mostly talk about?', a: ['Incidents, audit findings and compliance', 'Goals and progress on known risks', 'What crews need to do the work well'], platform: true },
+    'senior_leadership:1': { q: 'What reason do senior leaders give most often for working safely?', a: ['The law, and our liability', 'Our zero harm goal', 'What we owe the people doing the work'] },
+    'senior_leadership:2': { q: 'How often do senior leaders spend time where the work is done?', a: ['Rarely; they hear about it in reports', 'Regularly, to push safety initiatives', 'Often, asking crews what gets in the way'], platform: true },
+    'senior_leadership:4': { q: 'If you asked a crew what our leaders care about most, what would they say?', a: ['That we follow the rules', 'That nobody gets hurt', 'That the work gets easier to do safely'], second: true },
+    'strategy:1': { q: 'What do most actions in our safety plans ask people to do?', a: ['Complete more checks, forms and training', 'Make existing controls work more reliably', 'Change how the work itself is done'], platform: true },
+    'strategy:2': { q: 'Whose behaviour do our safety improvements mostly try to change?', a: ['Frontline workers and supervisors', 'Leaders and the safety team', 'Everyone whose decisions shape the work'], platform: true },
+    'strategy:3': { q: 'When we bring in a new safety practice, where does it usually come from?', a: ['What’s common across the industry', 'A program that worked for a peer', 'Our own evidence about our own work'], inf: [1] },
+    'strategy:4': { q: 'When a big business decision is made, when does safety come into it?', a: ['Afterwards, once the decision is made', 'As one of the goals set for it', 'From the start, in how it’s shaped'], inf: [0], platform: true },
+    'risk_management:4': { q: 'Where are safety risks recorded and reviewed?', a: ['In a separate safety register', 'With operational and commercial risks', 'In one plan for how the work runs'], inf: [0] },
+    'safety_organisation:1': { q: 'When operational decisions are made, where is the safety team?', a: ['Told afterwards', 'Consulted, through a formal senior role', 'At the table, as part of running the business'], platform: true },
+    'safety_organisation:2': { q: 'What does the safety team mostly do with our leaders?', a: ['Explain the rules and what compliance needs', 'Coach them to lead on safety', 'Help them see how the work is really done'] },
+    'operational_management:2': { q: 'When do operational managers get personally involved in safety?', a: ['After a serious or reportable incident', 'Regularly, through their own safety goals', 'Every day, as part of running the work'], platform: true },
+    'resource_allocation:0': { q: 'What is most of our safety budget spent on?', a: ['Meeting what the law requires', 'Fixing risks we already know about', 'Giving crews what they need to work safely'], platform: true },
+    'resource_allocation:1': { q: 'When a job has spare time, people or equipment, what usually happens?', a: ['It’s cut as a cost', 'It’s kept where a known risk needs it', 'It’s planned in, so crews can adapt'], inf: [1] },
+    'management_systems:0': { q: 'What are most of our safety procedures written from?', a: ['Regulations and standards', 'The risks of the specific job', 'How crews actually do the work'] },
+    'management_systems:1': { q: 'Who writes our safety procedures?', a: ['Safety professionals, on their own', 'Safety professionals, after asking the frontline', 'The crews who use them, with support'] },
+    'goal_conflict_tradeoffs:2': { q: 'When safety and production pull against each other, what do leaders usually say?', a: ['“Safety first”, and it isn’t discussed further', '“Good safety is good business”', 'That the conflict is real, and how to handle it'] },
+    'learning_development:0': { q: 'What does our safety training mostly teach?', a: ['The technical skills for each role', 'Technical skills, plus teamwork and judgement', 'How to handle real situations, through practice'] },
+    'learning_development:3': { q: 'Where do people mostly learn how to do their work safely?', a: ['From courses and the training provider', 'From other companies and industry practice', 'From each other, solving problems as a team'], inf: [0] },
+    'frontline_workers:1': { q: 'How do frontline workers take part in safety decisions?', a: ['Through formal consultation, like committees', 'They help design the processes they use', 'They teach managers how the work is done'], second: true },
+    'communications_coordination:2': { q: 'When something important needs to be communicated to the crews, how is it done?', a: ['The same message, the same way, for everyone', 'Tailored to each crew and its work', 'Explained openly, with the reasons, and questions welcome'] },
+    'communications_coordination:3': { q: 'How do people in different roles and teams get to know each other’s work?', a: ['It’s left to chance', 'We encourage it, to share what works', 'We plan it, through joint planning and site visits'], platform: true },
+    'decision_making:2': { q: 'Who has to approve a crew’s idea to make its work safer?', a: ['A senior leader', 'Their operational manager', 'The crew itself, with management’s support'], platform: true },
+    'decision_making:3': { q: 'What usually triggers spending on safety?', a: ['An incident, or the regulator', 'A risk assessment that makes the case', 'Early warning signs, before anything happens'], inf: [0], platform: true },
+    'contractor_management:4': { q: 'How do we work with our main contractors on safety?', a: ['We manage them through the contract', 'We work with them as partners', 'We plan and run the work as one team'] },
+    'monitoring_metrics:2': { q: 'When a manager says a site is safe, what are they usually going on?', a: ['Nothing bad has happened lately', 'Controls are checked and people feel positive', 'They don’t assume it, and keep looking for weak spots'], platform: true },
+    'monitoring_metrics:3': { q: 'Where do we hear about workers’ day-to-day experience?', a: ['Only in incident reports', 'In culture and engagement surveys', 'In stories and conversations, alongside the numbers'], second: true, inf: [0] }
+  };
+  var POLL_ROUND = { closes: '10 Oct', polled: 9 }; // managers in the purview asked this round
+  ST.pollSel = {}; ST.pollWhy = {}; ST.pollDone = {};
+  // Anonymous answers so far from other managers: [Compliant, Leading, Resilient, Don't know]
+  var POLL_RESP = {};
+  Object.keys(POLL).forEach(function (k, n) { var s = [[3, 2, 0, 1], [2, 3, 1, 0], [4, 1, 0, 1], [1, 3, 1, 1], [2, 2, 1, 0]][n % 5]; POLL_RESP[k] = s.slice(); });
+  // This fortnight's questions for you: indicators only people can answer, starting with the clearest gap
+  function myPolls() {
+    var g = mapGap(regionsInScope()), order = g.gap ? [g.gap] : [];
+    FACTORS.forEach(function (f) { if (order.indexOf(f[0]) < 0) order.push(f[0]); });
+    var keys = [];
+    order.forEach(function (f) { Object.keys(POLL).forEach(function (k) { if (k.split(':')[0] === f && !POLL[k].platform && keys.indexOf(k) < 0) keys.push(k); }); });
+    return keys.filter(function (k) { return !ST.pollDone[k]; }).slice(0, 2 - Object.keys(ST.pollDone).filter(function (k) { return ST.pollDone[k] === 'round'; }).length);
+  }
+  // Answers in a mixed order for each person, so position doesn't lead; Don't know always last
+  function pollOrder(k) { var h = 0; (k + YOU).split('').forEach(function (c) { h = (h * 31 + c.charCodeAt(0)) % 997; }); return [[1, 2, 0], [2, 0, 1], [0, 2, 1], [1, 0, 2], [2, 1, 0]][h % 5].concat([3]); } // never the plain ladder order
+  function pollBlock(k) {
+    var P = POLL[k], sel = ST.pollSel[k], id = k.replace(':', '-');
+    return '<div class="poll"><div class="poll-opts" role="group" aria-label="Your answer">' + pollOrder(k).map(function (lv) {
+        return '<button type="button" class="poll-opt' + (lv === 3 ? ' dk' : '') + (sel === lv ? ' is-on' : '') + '" data-poll="' + k + '|' + lv + '" aria-pressed="' + (sel === lv) + '">' + esc(lv === 3 ? 'Don’t know' : P.a[lv]) + '</button>';
+      }).join('') + '</div>' +
+      '<div class="poll-send"><input type="text" class="w-note poll-why" id="pw-' + id + '" placeholder="Why? (optional)" value="' + esc(ST.pollWhy[k] || '') + '"><button type="button" class="btn" data-pollsend="' + k + '"' + (sel == null ? ' disabled' : '') + '>Send answer</button></div></div>';
+  }
+  document.addEventListener('click', function (e) {
+    var t = e.target.closest('[data-poll]');
+    if (t) { var p = t.getAttribute('data-poll').split('|'), w = $('pw-' + p[0].replace(':', '-')); if (w) ST.pollWhy[p[0]] = w.value; ST.pollSel[p[0]] = ST.pollSel[p[0]] === +p[1] ? null : +p[1]; var y = window.scrollY; render(); window.scrollTo(0, y); return; }
+    var s = e.target.closest('[data-pollsend]');
+    if (s && !s.disabled) {
+      var k = s.getAttribute('data-pollsend'), lv = ST.pollSel[k], w2 = $('pw-' + k.replace(':', '-'));
+      if (lv == null) return;
+      POLL_RESP[k][lv]++; ST.pollDone[k] = 'round'; ST.pollWhy[k] = w2 ? w2.value.trim() : '';
+      ST.mfRes['q-' + k] = 'Answered'; mfDone('Answered a quick question: ' + FACTOR[k.split(':')[0]].name);
+      toast('Thanks. Your answer is anonymous. Results show once three or more managers have answered.');
+      var y2 = window.scrollY; mfRerender(); window.scrollTo(0, y2);
+    }
+  });
+
+  var MF_GROUPS = [['retro', 'Confirm a 90-day retro'], ['action', 'Your actions'], ['escalated', 'Escalated to you'], ['assign', 'Assign an owner'], ['chase', 'Chase up'], ['visit', 'Plan a visit'], ['update', 'Post an update'], ['close', 'Close'], ['poll', 'Quick question'], ['agreed', 'Agreed at a Focus review']];
   function myFocusItems() {
     var items = [], ins = myInsights(), crit = function (i) { return i.sev === 'critical' ? 0 : 1; };
     INSIGHTS.filter(function (i) { return !i.closed && !i.dismissed && i.esc && levelOwner(i.esc.to) === YOU; }).forEach(function (i) {
@@ -3109,6 +3195,8 @@ body.rv-mode main { padding-top: 0; }
       items.push({ kind: 'action', id: 'a-' + x.w.id + '-' + k, work: x.w, ak: k, act: a, ins: x.from === 'Insight' ? x.w : null, sev: 'warning', title: a.t,
         why: x.from + ': ' + x.w.title + ' \u00b7 by ' + a.due + (a.upd ? ' \u00b7 checked in ' + a.upd : ' \u00b7 check in before ' + x.meet) });
     }); });
+    // Quick questions: the management poll, one or two a fortnight
+    myPolls().forEach(function (k) { items.push({ kind: 'poll', id: 'q-' + k, pk: k, sev: 'warning', title: POLL[k].q, why: 'Anonymous \u00b7 ' + FACTOR[k.split(':')[0]].name + ' \u00b7 answer from what you\u2019ve seen, not how it should be \u00b7 closes ' + POLL_ROUND.closes }); });
     return items;
   }
   function renderMyFocusCount() {
@@ -3123,6 +3211,7 @@ body.rv-mode main { padding-top: 0; }
     if (it.kind === 'agreed') return '<span class="badge"><i></i>Agreed</span>';
     if (it.kind === 'action') return it.act.upd ? actBadge(it.act) : '<span class="tlabel">Check-in due</span>';
     if (it.kind === 'retro') return outBadge(RETRO[it.ins.retro].outcome);
+    if (it.kind === 'poll') return '<span class="tlabel">Poll</span>';
     return sevIcon(it.sev === 'critical' ? 'critical' : 'warning');
   }
   function mfAction(it, big) {
@@ -3138,6 +3227,7 @@ body.rv-mode main { padding-top: 0; }
     if (it.kind === 'close') return '<button type="button" class="btn" data-mf-close="' + i.id + '">Close it</button>';
     if (it.kind === 'agreed') return '<button type="button" class="btn" data-mf-agreed="' + it.id + '">Mark as done</button>';
     if (it.kind === 'retro') return '<button type="button" class="btn" data-retro="' + i.retro + '">Review the retro</button>';
+    if (it.kind === 'poll') return pollBlock(it.pk);
     if (it.kind === 'action') return '<label class="pa-ci"><span class="sr">Check in</span><select class="select" data-pa="' + it.work.id + ':' + it.ak + '">' + PA_ST.map(function (x) { return '<option value="' + x[0] + '"' + (x[0] === it.act.st ? ' selected' : '') + '>' + x[1] + '</option>'; }).join('') + '</select></label>';
     return '';
   }
@@ -3158,7 +3248,7 @@ body.rv-mode main { padding-top: 0; }
       var list = items.filter(function (it) { return it.kind === g[0]; });
       if (!list.length) return '';
       return '<section class="mf-group"><h2 class="igroup-h">' + esc(g[1]) + ' <span class="tnum">' + list.length + '</span></h2><div class="card mf-list">' + list.map(function (it) {
-        return '<div class="mf-row"><span class="mf-sev">' + mfSev(it) + '</span><div class="mf-main"><span class="mf-title">' + esc(it.title) + '</span><span class="mf-why">' + esc(it.why) + '</span></div>' +
+        return '<div class="mf-row' + (it.kind === 'poll' ? ' is-poll' : '') + '"><span class="mf-sev">' + mfSev(it) + '</span><div class="mf-main"><span class="mf-title">' + esc(it.title) + '</span><span class="mf-why">' + esc(it.why) + '</span></div>' +
           '<div class="mf-act">' + mfAction(it) + mfOpen(it) + '</div></div>';
       }).join('') + '</div></section>';
     }).join('');
@@ -3181,6 +3271,8 @@ body.rv-mode main { padding-top: 0; }
     } else if (it.site) {
       var n = myInsights().filter(function (x) { return x.sites.indexOf(it.site.id) > -1; }).length;
       evidence = '<p class="walk-story">' + esc(it.site.why) + '</p><p class="muted-p">' + (n ? word(n) + (n === 1 ? ' insight involves' : ' insights involve') + ' this site.' : 'No insights involve this site.') + '</p>';
+    } else if (it.kind === 'poll') {
+      evidence = '<p class="walk-story">Your answer is anonymous. Results show once three or more managers have answered, by level, never by name.</p>';
     } else if (i) {
       evidence = '<p class="walk-story">This was agreed as part of “' + esc(i.title) + '”.</p>';
     }
