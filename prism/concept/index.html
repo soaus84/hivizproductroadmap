@@ -1575,8 +1575,8 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
     var regs = []; ORG.forEach(function (x) { if (!ST.div || x.div === ST.div) x.regions.forEach(function (g) { regs.push(g.name); }); });
     $('f-reg').innerHTML = '<option value="">All regions</option>' + regs.map(function (n) { return '<option' + (n === ST.reg ? ' selected' : '') + '>' + esc(n) + '</option>'; }).join('');
   }
-  $('f-div').addEventListener('change', function (e) { ST.div = e.target.value; ST.reg = ''; fillFilters(); if (ST.view === 'meeting') { startMeeting(); return; } render(); });
-  $('f-reg').addEventListener('change', function (e) { ST.reg = e.target.value; if (ST.reg) ORG.forEach(function (d) { d.regions.forEach(function (g) { if (g.name === ST.reg) ST.div = d.div; }); }); fillFilters(); if (ST.view === 'meeting') { startMeeting(); return; } render(); });
+  $('f-div').addEventListener('change', function (e) { ST.div = e.target.value; ST.reg = ''; fillFilters(); render(); });
+  $('f-reg').addEventListener('change', function (e) { ST.reg = e.target.value; if (ST.reg) ORG.forEach(function (d) { d.regions.forEach(function (g) { if (g.name === ST.reg) ST.div = d.div; }); }); fillFilters(); render(); });
   function sourceIssues() { return SOURCES.filter(function (s) { return ['failing', 'delayed', 'partial'].indexOf(s.status) > -1; }); }
   // The Live pill carries source health: amber when a source is late, red when one is failing
   function renderIssues() {
@@ -2783,7 +2783,7 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
     var last = lastMeeting();
     var att = {};
     managersInView().forEach(function (m) { att[m] = !last || last.attendees.indexOf(m) > -1 || m === 'You'; });
-    MT = { step: 'here', attendees: att, idx: 0, log: {}, notes: '', items: [], agreed: {}, checks: {}, retros: {}, ci: {}, done: {}, g: 0 };
+    MT = { div: ST.div, reg: ST.reg, step: 'here', attendees: att, idx: 0, log: {}, notes: '', items: [], agreed: {}, checks: {}, retros: {}, ci: {}, done: {}, g: 0 };
     MT.groups = rvItems();
     go('meeting');
   }
@@ -4134,7 +4134,7 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
   function stActions(org) {
     var planFirst = dayOf(STRAT.planning) <= dayOf(STRAT.progress);
     var pg = '<button type="button" class="btn' + (planFirst ? '' : ' brand') + '" data-pgstart="1">Start monthly progress</button>', pl = '<button type="button" class="btn' + (planFirst ? ' brand' : '') + '" data-plstart="1">Start quarterly planning</button>';
-    return '<div class="st-go">' + (org ? (planFirst ? pg + pl : pl + pg) : '') + '</div>';
+    return '<div class="st-go">' + (planFirst ? pg + pl : pl + pg) + '</div>';
   }
   function stRhythm() {
     var rows = [['Check-ins close', CHECKIN.closes], ['Monthly progress', STRAT.progress], ['Quarterly planning', STRAT.planning]].sort(function (a, b) { return dayOf(a[1]) - dayOf(b[1]); });
@@ -4483,7 +4483,6 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
     return { keep: keep, adds: adds, n: keep.length + adds.length };
   }
   function startPlanning() {
-    ST.div = ''; ST.reg = ''; fillFilters();
     var att = {}; PL_PEOPLE.forEach(function (p) { att[p] = ['Morgan Hale', 'You', 'Alex Chen', 'Dana Brooks'].indexOf(p) > -1; });
     PL = { step: 'here', att: att, obj: {}, cand: {}, pre: {}, g: 0, reach: 0, notes: '' };
     OBJECTIVES.forEach(function (o) { PL.obj[o.id] = { d: '', target: o.target, by: o.by }; });
@@ -4499,7 +4498,7 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
 
     // 1 · Who’s here, what worked this quarter, and what’s on today
     if (PL.step === 'here') {
-      var rs = retrosInView(), rc = {}; rs.forEach(function (r) { rc[r.outcome] = (rc[r.outcome] || 0) + 1; });
+      var rs = RETROS, rc = {}; rs.forEach(function (r) { rc[r.outcome] = (rc[r.outcome] || 0) + 1; });
       var worked = ['worked', 'quiet', 'partly', 'didnt', 'cant'].filter(function (k) { return rc[k]; }).map(function (k) { return lw(rc[k]) + ' ' + ({ worked: 'worked', quiet: 'went quiet', partly: 'partly worked', didnt: 'didn’t work', cant: 'can’t be judged yet' })[k]; });
       rvPage('Step 1 of 4', 'Who’s here', 'Since ' + esc(STRAT.lastPlanning) + ' · ' + esc(ORG_NAME) + ' · objectives are set for the whole company, so the group executive must be here',
         '<ul class="rv-att">' + PL_PEOPLE.map(function (p) { var req = p === 'Morgan Hale'; return '<li><label class="rv-p' + (PL.att[p] ? ' on' : '') + '"><input type="checkbox" data-platt="' + esc(p) + '"' + (PL.att[p] ? ' checked' : '') + (req ? ' disabled' : '') + '><span class="av' + (p === YOU ? ' me' : '') + '">' + initials(p) + '</span><span>' + esc(p) + '<small>' + esc(ROLE[p] || '') + (req ? ' · required' : '') + '</small></span></label></li>'; }).join('') + '</ul>' +
@@ -4712,7 +4711,6 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
       (x.m.upd ? '<br>' + actBadge(x.m) + ' ' + (x.m.note ? '“' + esc(x.m.note) + '”' : 'Checked in ' + esc(x.m.upd)) : '');
   }
   function startProgress() {
-    ST.div = ''; ST.reg = ''; fillFilters();
     var att = {}; PL_PEOPLE.forEach(function (p) { att[p] = pgPeople().indexOf(p) > -1; });
     PG = { step: 'here', att: att, raise: {}, ci: {}, done: {}, g: 0, reach: 0, notes: '' }; go('progress');
   }
@@ -5067,6 +5065,7 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
     ST.site = ST.view === 'site' ? (h[1] || '') : '';
     ST.dismissing = '';
     if (ST.view === 'meeting' && !MT) ST.view = 'focus';
+    if (ST.view === 'meeting' && MT && (ST.div !== MT.div || ST.reg !== MT.reg)) { ST.div = MT.div; ST.reg = MT.reg; fillFilters(); } // the review keeps the scope it started with
     if (prevView && prevView !== ST.view && ['insight', 'meeting'].indexOf(prevView) < 0) { ST.insTab = 'current'; }
     if (prevView && prevView !== ST.view && ['planning', 'progress'].indexOf(prevView) < 0) { ST.stTab = 'current'; }
     if (ST.view === 'planning' && !PL) ST.view = 'strategy';
