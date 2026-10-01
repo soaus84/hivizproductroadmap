@@ -32,6 +32,7 @@
   --critical-tint: #fdecea; --warning-tint: #fff4e0; --success-tint: #e9f6ee; --info-tint: #e9f1fd;
 
   --brand: #ffe500;
+  --bt-red: #e24b4a; --bt-amber: #ef9f27; --bt-green: #97c459; --bt-grey: #b4b2a9;
   --shadow: none;
   --shadow-lg: 0 24px 48px -12px rgba(0,0,0,0.22), 0 0 0 1px #0d0f12;
   --font: "Archivo", "Helvetica Neue", Arial, sans-serif;
@@ -197,8 +198,11 @@ main { padding-block: 32px 80px; }
 .icard { display: grid; gap: 12px; align-content: start; text-align: left; width: 100%; padding: 18px 20px; cursor: pointer; font: inherit; color: inherit; transition: border-color .15s, box-shadow .15s; }
 .icard:hover { border-color: var(--text); box-shadow: 0 4px 14px rgba(13,15,18,0.08); }
 .icard-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.icard-top .icard-sev { white-space: nowrap; }
 .icard-sev { display: inline-flex; align-items: center; gap: 7px; }
 .icard-sev .sev { margin-top: 0; }
+.bowtie { display: block; flex: none; }
+.bt-t { font-size: 13px; font-weight: 700; }
 .sev-t { font-size: 13px; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; }
 .icard-title { font-size: 20px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.25; }
 .icard-story { font-size: 16px; color: var(--text); line-height: 1.5; }
@@ -1581,6 +1585,24 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
       ? '<svg class="sev" width="16" height="16" viewBox="0 0 16 16" aria-label="Critical"><path d="M5.2 1h5.6L15 5.2v5.6L10.8 15H5.2L1 10.8V5.2z" fill="var(--critical-dot)"/><path d="M8 4.2v4.6M8 11.2v.4" stroke="#fff" stroke-width="1.7" stroke-linecap="round"/></svg>'
       : '<svg class="sev" width="16" height="16" viewBox="0 0 16 16" aria-label="Warning"><path d="M8 1.5 15 14H1z" fill="var(--warning-dot)" stroke="var(--warning-dot)" stroke-linejoin="round"/><path d="M8 6v3.6M8 11.6v.3" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/></svg>';
   }
+  // The insight as a bowtie: what's coming in on the left, what's coming out on the right
+  // What raised it. Good practice coming in (green) waits for positive insights, which Hiviz doesn't raise yet
+  function btIn(i) { return i.practice ? 'success' : i.sev; }
+  function btOut(i) {
+    if (i.closed || i.status === 'resolved') return 'success';
+    var r = planRead(i); return r === 'working' ? 'success' : r === 'continues' ? 'critical' : r === 'early' ? 'early' : '';
+  }
+  function bowtie(i, w, h) {
+    w = w || 34; h = h || 18; var cx = w / 2, cy = h / 2, sw = 1.5, a = btIn(i), b = btOut(i);
+    var col = { critical: 'var(--bt-red)', warning: 'var(--bt-amber)', success: 'var(--bt-green)', early: 'var(--bt-grey)' };
+    var inW = { critical: 'Critical', warning: 'Warning', success: 'Good practice' }[a], outW = { success: i.closed ? 'Closed' : 'Working', critical: 'Pattern continues', early: 'Too early to tell' }[b] || 'No outcome yet';
+    var L = sw + ',' + sw + ' ' + sw + ',' + (h - sw) + ' ' + cx + ',' + cy, R = (w - sw) + ',' + sw + ' ' + (w - sw) + ',' + (h - sw) + ' ' + cx + ',' + cy;
+    return '<svg class="bowtie" width="' + w + '" height="' + h + '" viewBox="0 0 ' + w + ' ' + h + '" role="img" aria-label="Coming in: ' + inW + '. Coming out: ' + outW + '.">' +
+      '<polygon points="' + L + '" fill="' + col[a] + '"/>' + (b ? '<polygon points="' + R + '" fill="' + col[b] + '"/>' : '') +
+      '<polygon points="' + L + '" fill="none" stroke="var(--text)" stroke-width="' + sw + '" stroke-linejoin="round"/><polygon points="' + R + '" fill="none" stroke="var(--text)" stroke-width="' + sw + '" stroke-linejoin="round"/></svg>';
+  }
+  function btLabel(i) { var a = btIn(i), b = btOut(i); return { critical: 'Critical', warning: 'Warning', success: 'Good practice' }[a] + (b === 'success' ? (i.closed ? ' · closed' : ' · working') : b === 'critical' ? ' · pattern continues' : b === 'early' ? ' · too early to tell' : ''); }
+  function btHTML(i) { return '<span class="icard-sev">' + bowtie(i) + '<span class="bt-t">' + esc(btLabel(i)) + '</span></span>'; }
   function trendHTML(t) {
     if (t === 'worse') return '<span class="trend t-critical"><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 3l7 7M4 10h5V5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>Worsening</span>';
     if (t === 'better') return '<span class="trend t-success"><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 9 9 2M4 2h5v5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>Improving</span>';
@@ -1717,7 +1739,7 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
     var srcIds = i.says.map(function (s) { return s.src; });
     var sites = i.sites.map(function (id) { return SITE[id]; });
     return '<button type="button" class="card icard" data-open="' + i.id + '">' +
-      '<span class="icard-top"><span class="icard-sev">' + sevIcon(i.sev) + '<span class="sev-t t-' + i.sev + '">' + (i.sev === 'critical' ? 'Critical' : 'Warning') + '</span></span><span class="icard-status">' + escBadge(i) + statusBadge(i) + '</span></span>' +
+      '<span class="icard-top">' + btHTML(i) + '<span class="icard-status">' + escBadge(i, true) + statusBadge(i) + '</span></span>' +
       '<span class="icard-title">' + esc(i.title) + '</span>' +
       '<span class="icard-story">' + esc(i.story) + '</span>' + mapLine(i) +
       '<span class="icard-sites">' + sites.map(function (s) { return '<span class="chip">' + esc(s.name) + '</span>'; }).join('') + '</span>' +
@@ -1794,7 +1816,7 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
     var ow = owners(); if (i.owner && ow.indexOf(i.owner) < 0) ow.unshift(i.owner);
     var gone = i.dismissed || i.closed;
     $('view').innerHTML = '<a class="back" href="#focus">← Insights</a>' +
-      '<div class="ins-head"><p class="kind"><span class="kind-t">Insight</span>' + '<span class="icard-sev">' + sevIcon(i.sev) + '<span class="sev-t t-' + i.sev + '">' + (i.sev === 'critical' ? 'Critical' : 'Warning') + '</span></span>' + '<span>Raised ' + esc(i.since) + '</span></p>' +
+      '<div class="ins-head"><p class="kind"><span class="kind-t">Insight</span>' + btHTML(i) + '<span>Raised ' + esc(i.since) + '</span></p>' +
         '<h1 class="ins-title">' + esc(i.title) + '</h1>' +
         '<div class="meta">' + statusBadge(i) + escBadge(i) + activity(i) + retroTag(i) + '</div>' +
         '<div class="meta ins-sites">' + i.sites.map(function (s) { return '<a class="chip link" href="#site/' + s + '">' + esc(SITE[s].name) + '</a>'; }).join('') + '<button type="button" class="btn sm pv-btn" data-pv="insight:' + i.id + '"><svg width="14" height="14" viewBox="0 0 22 22" aria-hidden="true"><path d="M11 2.5 20 19H2z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></svg>View through Prism</button>' + '</div></div>' +
@@ -2396,8 +2418,8 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
     l.history.push({ when: '25 Sep', who: 'Priya Nair', what: 'Escalated to ' + levelName(l.esc.to), text: ESC_REASONS[0] + '. ' + note });
   })();
 
-  function escBadge(i) {
-    if (i.esc) return '<span class="badge info"><i></i>Escalated to ' + esc(levelName(i.esc.to)) + '</span>';
+  function escBadge(i, short) {
+    if (i.esc) return short ? '<span class="badge info" title="Escalated to ' + esc(levelName(i.esc.to)) + '"><i></i>Escalated</span>' : '<span class="badge info"><i></i>Escalated to ' + esc(levelName(i.esc.to)) + '</span>';
     if (i.level !== i.home) return '<span class="tlabel">Held at ' + esc(levelName(i.level)) + '</span>';
     return '';
   }
@@ -2468,7 +2490,7 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
     var ow = owners(); if (i.owner && ow.indexOf(i.owner) < 0) ow.unshift(i.owner);
     $('sheet').innerHTML =
       '<div class="sheet-head" style="position:relative"><button type="button" class="x" id="sheet-x" aria-label="Close"><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 2l8 8M10 2l-8 8" stroke="currentColor" stroke-width="1.6"/></svg></button>' +
-        '<p class="kind"><span class="kind-t">Insight</span>' + '<span class="icard-sev">' + sevIcon(i.sev) + '<span class="sev-t t-' + i.sev + '">' + (i.sev === 'critical' ? 'Critical' : 'Warning') + '</span></span>' + '<span>Raised ' + esc(i.since) + '</span></p>' +
+        '<p class="kind"><span class="kind-t">Insight</span>' + btHTML(i) + '<span>Raised ' + esc(i.since) + '</span></p>' +
         '<h2 id="sheet-title">' + esc(i.title) + '</h2>' +
         '<div class="meta">' + statusBadge(i) + escBadge(i) + activity(i) + retroTag(i) + '</div>' +
         '<div class="meta ins-sites">' + sites.map(function (n) { return '<span class="chip">' + esc(n) + '</span>'; }).join('') + '<span class="hd-acts"><a class="open-page" href="#insight/' + i.id + '">Open page \u2192</a>' + '<button type="button" class="btn sm pv-btn" data-pv="insight:' + i.id + '"><svg width="14" height="14" viewBox="0 0 22 22" aria-hidden="true"><path d="M11 2.5 20 19H2z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></svg>View through Prism</button>' + '</span></div></div>' +
@@ -4314,7 +4336,7 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
     objs.forEach(function (o) {
       var f = FACTOR[o.f], orr = objRegs(o), sc = scoreFactor(orr, o.f), s = objStatus(o), key = 'o:' + o.id;
       c[s[1]]++; o.programs.forEach(function (pid) { open += PROGRAMS[pid].ms.filter(function (m) { return m.st !== 'done'; }).length; });
-      rows.push(tRow({ depth: 1, kind: 'objective', title: esc(f.name) + ' to ' + LEVELS[o.target], attr: 'data-obj="' + o.id + '"', owner: o.owner, mid: tLvl(sc.v) + ' → ' + LEVELS[o.target] + ' · ' + esc(o.by), status: tPill(s[0], s[1]) + (inclTag(o) ? ' ' + inclTag(o) : ''), key: key, strong: true, meta: esc(objScope(o)) }));
+      rows.push(tRow({ depth: 1, kind: 'objective', title: esc(f.name) + ' to ' + LEVELS[o.target], attr: 'data-obj="' + o.id + '"', owner: o.owner, mid: tLvl(sc.v) + ' → ' + LEVELS[o.target] + ' · ' + esc(o.by), status: tPill(s[0], s[1]), key: key, strong: true, meta: esc(objScope(o)) + (inclTag(o) && objScope(o) !== scopeLabel() ? ' · includes ' + esc(scopeLabel()) : '') }));
       if (!tOpen(key)) return;
       var progRows = function (pid, depth) {
         var p = PROGRAMS[pid], pk = 'p:' + pid, d = p.ms.filter(function (m) { return m.st === 'done'; }).length;
