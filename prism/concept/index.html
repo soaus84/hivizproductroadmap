@@ -4059,7 +4059,7 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
     var o = OBJECTIVES.filter(function (x) { return x.id === oid; })[0]; if (!o) return;
     if (trigger) recTrigger = trigger;
     var f = FACTOR[o.f], orr = objRegs(o), sc = scoreFactor(orr, o.f), st = objStatus(o);
-    var ins = insightsInView().filter(function (i) { return objFor(i) === o; });
+    var ins = insightsAll().filter(function (i) { return objFor(i) === o; });
     $('rec').innerHTML = drawerHead('Objective', [objScope(o), 'Set at quarterly planning on ' + STRAT.lastPlanning], objTitle(o), 'Owner ' + o.owner + ' · checked at monthly progress, changed only at quarterly planning') +
       '<div class="sheet-body"><div class="meta"><span class="badge ' + st[0] + '"><i></i>' + st[1] + '</span></div>' +
         '<section class="sheet-sec"><span class="label">Why this objective</span><p>' + esc(o.why) + '</p></section>' +
@@ -4078,8 +4078,8 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
   function openProgram(pid, trigger) {
     var p = PROGRAMS[pid]; if (!p) return; var o = progObjective(pid);
     if (trigger) recTrigger = trigger; ST.prog = pid;
-    var orr = o ? objRegs(o) : regionsInScope(), f = o ? FACTOR[o.f] : null;
-    var ins = o ? insightsInView().filter(function (i) { return objFor(i) === o; }) : [];
+    var orr = o ? objRegs(o) : allRegs(), f = o ? FACTOR[o.f] : null;
+    var ins = o ? insightsAll().filter(function (i) { return objFor(i) === o; }) : [];
     var allDone = p.plan.actions.length && p.plan.actions.every(function (a) { return a.st === 'done'; });
     $('rec').innerHTML = drawerHead('Program', o ? [objTitle(o), 'Applies to ' + objScope(o)] : [], p.title, 'Owner ' + p.owner + ' \u00b7 ' + p.resources) +
       '<div class="sheet-body"><div class="meta">' + statusBadge(p) + '</div>' +
@@ -4104,10 +4104,15 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
   function objScope(o) { return o.reg ? o.reg + ' region' : o.div ? o.div + ' division' : 'Whole company'; }
   function objRegs(o) {
     var all = []; ORG.forEach(function (d) { if (o.div && d.div !== o.div) return; d.regions.forEach(function (r) { if (!o.reg || r.name === o.reg) all.push(r.name); }); });
-    var mine = regionsInScope(); return all.filter(function (r) { return mine.indexOf(r) > -1; });
+    return all;
   }
+  // Strategy is company-wide: purview never re-scores it, it only marks what includes your area
+  function objTouches(o) { var mine = regionsInScope(); return objRegs(o).some(function (r) { return mine.indexOf(r) > -1; }); }
+  function allRegs() { return REGIONS.map(function (r) { return r.name; }); }
+  function insightsAll() { return INSIGHTS.filter(function (i) { return !i.closed && !i.dismissed; }); }
+  function inclTag(o) { return !ST.div && !ST.reg ? '' : objTouches(o) ? pTag('Includes ' + esc(scopeLabel())) : ''; }
   function objOnFactor(key) { return objsInView().filter(function (o) { return o.f === key; })[0] || null; }
-  function objsInView() { return OBJECTIVES.filter(function (o) { return objRegs(o).length; }); }
+  function objsInView() { return OBJECTIVES.filter(objTouches); }
   function objTitle(o) { return FACTOR[o.f].name + ' to ' + LEVELS[o.target] + ' by ' + o.by; }
   function objStatus(o) {
     var regs = objRegs(o), pr = o.programs.map(function (p) { return PROGRAMS[p]; });
@@ -4120,7 +4125,7 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
   // Which objective an insight contributes to, in the current purview
   function objFor(i) {
     var fx = INS_FACTOR[i.id]; if (!fx) return null;
-    return objsInView().filter(function (o) { return o.f === fx[0] && i.sites.some(function (s) { return objRegs(o).indexOf(SITE[s].region) > -1; }); })[0] || null;
+    return OBJECTIVES.filter(function (o) { return o.f === fx[0] && i.sites.some(function (s) { return objRegs(o).indexOf(SITE[s].region) > -1; }); })[0] || null;
   }
   function readBadge(r) { return r[0] === 'working' ? '<span class="badge success"><i></i>Working</span>' : r[0] === 'continues' ? '<span class="badge critical"><i></i>Pattern continues</span>' : '<span class="tlabel">Too early</span>'; }
 
@@ -4228,17 +4233,17 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
   function actPill(a) { return a.st === 'done' ? tPill('success', 'Done') : overdue(a) ? tPill('critical', 'Overdue') : a.st === 'risk' ? tPill('warning', 'At risk') : tPill('', a.st === 'track' ? 'On track' : 'Not started'); }
   function readPill(r) { return r === 'working' ? tPill('success', 'Working') : r === 'continues' ? tPill('critical', 'Pattern continues') : tPill('', 'Too early'); }
   // The insights that make the case for a candidate: open or closed, in the purview, on its factor
-  function candEvidence(f) { var regs = regionsInScope(); return INSIGHTS.filter(function (i) { return !i.dismissed && INS_FACTOR[i.id] && INS_FACTOR[i.id][0] === f && i.sites.some(function (s) { return regs.indexOf(SITE[s].region) > -1; }); }); }
+  function candEvidence(f) { var regs = allRegs(); return INSIGHTS.filter(function (i) { return !i.dismissed && INS_FACTOR[i.id] && INS_FACTOR[i.id][0] === f && i.sites.some(function (s) { return regs.indexOf(SITE[s].region) > -1; }); }); }
   function daysToPlanning() { var m = /(\d+) (\w+)/.exec(STRAT.planning || ''); if (!m) return 99; var mo = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'].indexOf(m[2]); var d = new Date(mo < 8 ? 2027 : 2026, mo, +m[1]); return Math.round((d - new Date(2026, 8, 26)) / 864e5); }
 
   // Strategy as one tree: goal → objectives → key results (with the insights that move them) → programs → actions; candidates near planning
   function strategyTree() {
-    var objs = objsInView(), rows = [], c = { 'On track': 0, 'At risk': 0, 'Off track': 0 }, open = 0, krN = 0, krHit = 0;
+    var objs = OBJECTIVES, rows = [], c = { 'On track': 0, 'At risk': 0, 'Off track': 0 }, open = 0, krN = 0, krHit = 0;
     rows.push(tRow({ depth: 0, kind: 'goal', title: esc(ORG_GOAL), mid: 'Company goal', strong: true }));
     objs.forEach(function (o) {
       var f = FACTOR[o.f], orr = objRegs(o), sc = scoreFactor(orr, o.f), s = objStatus(o), key = 'o:' + o.id;
       c[s[1]]++; o.programs.forEach(function (pid) { open += PROGRAMS[pid].ms.filter(function (m) { return m.st !== 'done'; }).length; });
-      rows.push(tRow({ depth: 1, kind: 'objective', title: esc(f.name) + ' to ' + LEVELS[o.target], attr: 'data-obj="' + o.id + '"', owner: o.owner, mid: tLvl(sc.v) + ' → ' + LEVELS[o.target] + ' · ' + esc(o.by), status: tPill(s[0], s[1]), key: key, strong: true, meta: esc(objScope(o)) }));
+      rows.push(tRow({ depth: 1, kind: 'objective', title: esc(f.name) + ' to ' + LEVELS[o.target], attr: 'data-obj="' + o.id + '"', owner: o.owner, mid: tLvl(sc.v) + ' → ' + LEVELS[o.target] + ' · ' + esc(o.by), status: tPill(s[0], s[1]) + (inclTag(o) ? ' ' + inclTag(o) : ''), key: key, strong: true, meta: esc(objScope(o)) }));
       if (!tOpen(key)) return;
       var progRows = function (pid, depth) {
         var p = PROGRAMS[pid], pk = 'p:' + pid, d = p.ms.filter(function (m) { return m.st === 'done'; }).length;
@@ -4262,7 +4267,7 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
     if (cands.length) {
       rows.push(tRow({ depth: 1, kind: 'candidate', title: 'Candidates for next quarter', mid: 'Planning in ' + dtp + (dtp === 1 ? ' day' : ' days'), status: tPill('', cands.length + ' to decide'), key: 'cand', dashed: true, strong: true }));
       if (tOpen('cand')) cands.forEach(function (cd) {
-        var sc = scoreFactor(regionsInScope(), cd.f), ev = candEvidence(cd.f), ck = 'c:' + cd.f;
+        var sc = scoreFactor(allRegs(), cd.f), ev = candEvidence(cd.f), ck = 'c:' + cd.f;
         rows.push(tRow({ depth: 2, kind: 'factor', title: esc(FACTOR[cd.f].name), href: '#map/' + cd.f, mid: tLvl(sc.v), status: '<span class="t-src">' + esc(cd.src) + '</span>', dashed: true, meta: esc(cd.why), key: ev.length ? ck : '' }));
         if (ev.length && tOpen(ck)) ev.forEach(function (i) { rows.push(insRow(i, 3, 'evidence for it')); });
       });
@@ -4332,7 +4337,7 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
 
   function renderStrategy() {
     if (ST.stTab === 'history') return renderStrategyHistory();
-    var org = !ST.div && !ST.reg, objs = objsInView(), regs = regionsInScope();
+    var org = !ST.div && !ST.reg, objs = OBJECTIVES, regs = allRegs();
     var st = objs.map(objStatus), counts = {}; st.forEach(function (x) { counts[x[1]] = (counts[x[1]] || 0) + 1; });
     var off = objs.filter(function (o, k) { return st[k][1] === 'Off track'; });
     // Gaps: weak or worsening factors in this purview that no objective covers
@@ -4341,29 +4346,29 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
       .sort(function (a, b) { return (a.sc.t === 'worse' ? 0 : 1) - (b.sc.t === 'worse' ? 0 : 1) || a.sc.v - b.sc.v; });
     var escOrg = INSIGHTS.filter(function (i) { return !i.closed && !i.dismissed && i.esc && i.esc.to === 'org'; });
     // Hiviz recommends a program when agreed plans cluster on one factor that has no objective
-    var byF = {}; insightsInView().forEach(function (i) { if (!i.plan || i.plan.state !== 'agreed' || !INS_FACTOR[i.id]) return; var f = INS_FACTOR[i.id][0]; if (covered.indexOf(f) > -1) return; (byF[f] = byF[f] || []).push(i); });
+    var byF = {}; insightsAll().forEach(function (i) { if (!i.plan || i.plan.state !== 'agreed' || !INS_FACTOR[i.id]) return; var f = INS_FACTOR[i.id][0]; if (covered.indexOf(f) > -1) return; (byF[f] = byF[f] || []).push(i); });
     var sugg = Object.keys(byF).filter(function (f) { return byF[f].length >= 2; });
     var worsening = gaps.filter(function (g) { return g.sc.t === 'worse'; });
 
-    var lead = objs.length ? '<b>' + word(objs.length) + (objs.length === 1 ? ' objective' : ' objectives') + (org ? '' : ' include ' + esc(scopeLabel())) + '.</b> ' +
+    var lead = objs.length ? '<b>' + word(objs.length) + (objs.length === 1 ? ' objective' : ' objectives') + (org ? '' : ', ' + (objsInView().length === objs.length ? 'all' : lw(objsInView().length)) + ' including ' + esc(scopeLabel())) + '.</b> ' +
       (function () { var t = ['On track', 'At risk', 'Off track'].filter(function (k) { return counts[k]; }).map(function (k) { return lw(counts[k]) + ' ' + k.toLowerCase(); }).join(', '); return t.charAt(0).toUpperCase() + t.slice(1); })() + '. ' +
       (off.length ? esc(FACTOR[off[0].f].name) + ' is off track: ' + esc(PROGRAMS[off[0].programs[0]].read[1].charAt(0).toLowerCase() + PROGRAMS[off[0].programs[0]].read[1].slice(1)) + ' ' : '') +
-      (worsening.length ? '<b class="t-critical">' + esc(FACTOR[worsening[0].f].name) + ' is worsening with no objective.</b>' : '') : 'No objectives include ' + esc(scopeLabel()) + '.';
+      (worsening.length ? '<b class="t-critical">' + esc(FACTOR[worsening[0].f].name) + ' is worsening with no objective.</b>' : '') : 'No objectives yet. They are set at quarterly planning.';
 
     $('view').innerHTML =
       '<div class="page-top"><div><h1>Strategy</h1><p class="sub">' + esc(ORG_NAME) + ' objectives for ' + esc(STRAT.year) + ' · set at quarterly planning</p></div>' +
         stActions(org) + '</div>' +
         stRhythm() + '<div class="view-row">' + tabsHTML('st') + viewSwitch('strategy') + '</div>' +
       '<p class="pv-summary">' + lead + '</p>' +
-      (org ? '' : '<p class="st-note">Objectives are set for all of ' + esc(ORG_NAME) + ' at quarterly planning. This shows the ones that include ' + esc(scopeLabel()) + ', measured across it.</p>') +
+      (org ? '' : '<p class="st-note">Strategy reads the same in every purview: set for all of ' + esc(ORG_NAME) + ' at quarterly planning and measured across the regions each objective applies to. Objectives that include ' + esc(scopeLabel()) + ' are marked.</p>') +
       checkinPanel() +
       '<div class="st-objs">' + objs.map(function (o, oi) {
         var f = FACTOR[o.f], orr = objRegs(o), sc = scoreFactor(orr, o.f), s = st[oi];
-        var ins = insightsInView().filter(function (i) { return objFor(i) === o; });
-        return '<section class="card st-obj"><div class="st-top"><span class="kind-t">Objective</span><span class="badge ' + s[0] + '"><i></i>' + s[1] + '</span><span class="chip">Applies to ' + esc(objScope(o)) + '</span>' + (o.flagged ? '<span class="tlabel">Flagged for planning</span>' : '') + '<button type="button" class="btn sm pv-btn" data-pv="objective:' + o.id + '"><svg width="14" height="14" viewBox="0 0 22 22" aria-hidden="true"><path d="M11 2.5 20 19H2z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></svg>View through Prism</button>' + '<span class="st-own">Set by ' + esc(ORG_NAME) + ' on ' + esc(o.set || '1 Jul') + ' · owner ' + esc(o.owner) + '</span></div>' +
+        var ins = insightsAll().filter(function (i) { return objFor(i) === o; });
+        return '<section class="card st-obj"><div class="st-top"><span class="kind-t">Objective</span><span class="badge ' + s[0] + '"><i></i>' + s[1] + '</span><span class="chip">Applies to ' + esc(objScope(o)) + '</span>' + inclTag(o) + (o.flagged ? '<span class="tlabel">Flagged for planning</span>' : '') + '<button type="button" class="btn sm pv-btn" data-pv="objective:' + o.id + '"><svg width="14" height="14" viewBox="0 0 22 22" aria-hidden="true"><path d="M11 2.5 20 19H2z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></svg>View through Prism</button>' + '<span class="st-own">Set by ' + esc(ORG_NAME) + ' on ' + esc(o.set || '1 Jul') + ' · owner ' + esc(o.owner) + '</span></div>' +
           '<h2 class="st-title"><button type="button" class="linkish" data-obj="' + o.id + '">' + esc(objTitle(o)) + '</button></h2><p class="st-why">' + esc(o.why) + '</p>' +
           '<div class="st-now"><span class="label">Today' + (org || !o.div ? '' : '') + '</span>' + factorBtn(o.f) + levelBar(sc.v, true, null, sc.was) + trendHTML(sc.t) + '<span class="st-tgt">Target: <b>' + LEVELS[o.target] + '</b> \u00b7 ' + esc(f.lnames[o.target]) + '</span></div>' +
-          '<div class="st-krs"><span class="label">Key results · ' + esc(o.div && org ? o.div + ' division' : scopeLabel()) + '</span>' + o.krs.map(function (kr) {
+          '<div class="st-krs"><span class="label">Key results · ' + esc(objScope(o)) + '</span>' + o.krs.map(function (kr) {
             var x = aggInd(orr, o.f, kr[0]), hit = lvlOf(x.v) >= kr[1];
             return '<div class="kr"><span class="kr-n">' + esc(f.inds[kr[0]]) + '</span><span class="ind-rate">' + levelBar(x.v, true, x.v == null ? 'Needs input' : null, x.was) + (x.v != null ? trendHTML(x.t) : '') + '</span><span class="kr-tg' + (hit ? ' hit' : '') + '">' + (hit ? 'Target reached' : 'Target ' + LEVELS[kr[1]]) + '</span></div>';
           }).join('') + '</div>' +
@@ -4377,9 +4382,9 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
         '</section>';
       }).join('') + '</div>' +
       '<div class="st-grid">' +
-        '<section class="card rsec"><span class="label">Gaps with no objective · ' + esc(scopeLabel()) + '</span>' +
+        '<section class="card rsec"><span class="label">Gaps with no objective · ' + esc(ORG_NAME) + '</span>' +
           (gaps.length ? '<ul class="st-gaps">' + gaps.slice(0, 4).map(function (g) {
-            var n = insightsInView().filter(function (i) { return INS_FACTOR[i.id] && INS_FACTOR[i.id][0] === g.f; }).length;
+            var n = insightsAll().filter(function (i) { return INS_FACTOR[i.id] && INS_FACTOR[i.id][0] === g.f; }).length;
             return '<li><div>' + factorBtn(g.f) + '<span class="sg-m">' + (g.sc.weakest != null ? 'Held back by ' + esc(FACTOR[g.f].inds[g.sc.weakest].toLowerCase()) : '') + (n ? ' · ' + n + (n === 1 ? ' insight' : ' insights') : '') + '</span></div><span class="ind-rate">' + levelBar(g.sc.v, true, null, g.sc.was) + trendHTML(g.sc.t) + '</span>' +
               (ST.cand[g.f] ? '<span class="sg-on">On the planning agenda</span>' : '<button type="button" class="btn sm" data-cand="' + g.f + '">Raise at planning</button>') + '</li>';
           }).join('') + '</ul>' + (gaps.length > 4 ? '<p class="muted-p">And ' + lw(gaps.length - 4) + ' more at Compliant.</p>' : '') : '<p class="muted-p">Every weak or worsening factor has an objective.</p>') +
@@ -4387,7 +4392,7 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
           (sugg.length ? sugg.map(function (fk) { var ii = byF[fk]; return '<div class="st-sugg"><span class="label">Hiviz recommends</span><p>' + word(ii.length) + ' agreed plans this quarter work on <b>' + esc(FACTOR[fk].name.toLowerCase()) + '</b> (' + esc(join(ii.map(function (i) { return FACTOR[fk].inds[INS_FACTOR[i.id][1]].toLowerCase(); }).filter(function (v, k, a) { return a.indexOf(v) === k; }))) + '). Make it a program, so the fixes add up.</p>' + (ST.cand['prog-' + fk] ? '<span class="sg-on">On the planning agenda</span>' : '<button type="button" class="btn sm" data-cand="prog-' + fk + '">Raise at planning</button>') + '</div>'; }).join('') : '') +
         '</section>' +
         (function () {
-          var rs = retrosInView(); if (!rs.length) return '';
+          var rs = RETROS; if (!rs.length) return '';
           var kinds = []; rs.forEach(function (r) { var k = RETRO_KIND[r.id]; if (kinds.indexOf(k) < 0) kinds.push(k); });
           return '<section class="card rsec"><span class="label">What worked · 90-day retros by kind of action</span><ul class="st-kinds">' + kinds.map(function (k) {
             return '<li><span class="sk-k">' + esc(k) + '</span><span class="sk-r">' + rs.filter(function (r) { return RETRO_KIND[r.id] === k; }).map(function (r) { return '<button type="button" class="sk-b" data-retro="' + r.id + '">' + outBadge(r.outcome) + '<span>' + esc(r.title) + '</span></button>'; }).join('') + '</span></li>';
@@ -4430,7 +4435,7 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
   }
   // Candidates: what was raised, plus what Hiviz thinks belongs on the agenda
   function plCandidates() {
-    var regs = regionsInScope(), covered = OBJECTIVES.map(function (o) { return o.f; }), out = [], seen = {};
+    var regs = allRegs(), covered = OBJECTIVES.map(function (o) { return o.f; }), out = [], seen = {};
     function add(f, src, why) { if (seen[f] || covered.indexOf(f) > -1) return; seen[f] = true; out.push({ f: f, src: src, why: why }); }
     function whyFor(f) { var sc = scoreFactor(regs, f), w = sc.weakest != null ? FACTOR[f].inds[sc.weakest].toLowerCase() : ''; return (sc.t === 'worse' ? 'Worsening over 90 days' : 'At ' + lvlLabel(sc.v)) + (w ? ', held back by ' + w : '') + '.'; }
     Object.keys(ST.cand).forEach(function (k) { var f = k.indexOf('prog-') === 0 ? k.slice(5) : k; add(f, k.indexOf('prog-') === 0 ? 'Raised: Hiviz suggested a program' : 'Raised from the Strategy page', whyFor(f)); });
@@ -4536,7 +4541,7 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
           var form = d.d === 'adjust' ? '<div class="pl-form rv-form"><span class="fld"><label for="plt-' + o.id + '">Target</label>' + sel('plt-' + o.id, [[1, 'Leading'], [2, 'Resilient']], d.target) + '</span><span class="fld"><label for="plb-' + o.id + '">By</label>' + sel('plb-' + o.id, PL_BY, d.by) + '</span></div>' : '';
           return rvRow(objTitle(o), tagOf(o.id) + '<span class="badge ' + s[0] + '"><i></i>' + s[1] + '</span> ' + esc(objScope(o)) + (o.flagged ? ' · <b>flagged at monthly progress</b>' : '') + (adv ? '<br>Hiviz recommends: ' + esc(adv[1]) : ''), plChoice('obj', o.id, PL_OBJ) + form, o.id, !!d.d);
         }) : PL.cands.map(function (c) {
-          var d = PL.cand[c.f], sc = scoreFactor(regionsInScope(), c.f);
+          var d = PL.cand[c.f], sc = scoreFactor(allRegs(), c.f);
           var form = d.d === 'add' ? '<div class="pl-form rv-form"><span class="fld"><label for="pct-' + c.f + '">Target</label>' + sel('pct-' + c.f, [[1, 'Leading'], [2, 'Resilient']], d.target) + '</span><span class="fld"><label for="pcb-' + c.f + '">By</label>' + sel('pcb-' + c.f, PL_BY, d.by) + '</span><span class="fld"><label for="pcs-' + c.f + '">For</label>' + sel('pcs-' + c.f, plScopes(), d.div) + '</span><span class="fld"><label for="pco-' + c.f + '">Owner</label>' + sel('pco-' + c.f, PL_PEOPLE, d.owner) + '</span></div>' : '';
           return rvRow(FACTOR[c.f].name, tagOf(c.f) + esc(c.src) + ' · ' + esc(lvlLabel(sc.v)) + '<br>' + esc(c.why), plChoice('cand', c.f, PL_CAND) + form, 'f:' + c.f, !!d.d);
         });
