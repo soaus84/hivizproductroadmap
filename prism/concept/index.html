@@ -67,6 +67,11 @@ h3 { font-size: 17px; font-weight: 800; letter-spacing: -0.01em; }
 .crumb .slash { color: var(--text-3); font-size: 22px; font-weight: 300; margin-inline: 4px; }
 .pick { appearance: none; border: 0; background: transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='14' viewBox='0 0 10 14'%3E%3Cpath d='M2 5l3-3 3 3M2 9l3 3 3-3' fill='none' stroke='%238f8f8f' stroke-width='1.4'/%3E%3C/svg%3E") no-repeat right 6px center; padding: 6px 24px 6px 8px; border-radius: 6px; font-weight: 800; font-size: 16px; cursor: pointer; }
 .pick:hover { text-decoration: underline; text-underline-offset: 3px; }
+.pv-back { margin-left: 10px; border: 0; background: none; padding: 4px 0; font: inherit; font-size: 14px; color: var(--text-2); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; white-space: nowrap; }
+.pv-back:hover { color: var(--text); }
+body.pv-home-only .crumb .pick, body.pv-home-only .crumb .slash:nth-of-type(2), body.pv-home-only .pv-back { display: none; }
+.pv-fixed { display: none; font-weight: 600; }
+body.pv-home-only .pv-fixed { display: inline; }
 .tabs { display: flex; gap: 2px; margin-left: 8px; }
 .nav-toggle { display: none; }
 .tabs a { padding: 7px 13px; border-radius: 8px; font-size: 16px; color: var(--text); font-weight: 700; }
@@ -100,6 +105,8 @@ h3 { font-size: 17px; font-weight: 800; letter-spacing: -0.01em; }
   .logo { order: 1; }
   .hdr-right { order: 2; flex: 0 0 auto; gap: 6px; }
   .crumb { order: 3; width: 100%; }
+  .crumb { flex-wrap: wrap; }
+  .pv-back { margin-left: 0; flex-basis: 100%; text-align: left; }
   .crumb .slash:first-child { display: none; }
   .nav-toggle { display: flex; order: 4; width: 100%; align-items: center; gap: 10px; padding: 2px 0 12px; background: none; border: 0; font: inherit; font-size: 17px; font-weight: 800; color: var(--text); cursor: pointer; text-align: left; }
   .nav-toggle .nav-chev { margin-left: 4px; color: var(--text-2); }
@@ -1235,6 +1242,8 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
       <select class="pick" id="f-div" aria-label="Division"></select>
       <span class="slash" aria-hidden="true">/</span>
       <select class="pick" id="f-reg" aria-label="Region"></select>
+      <span class="pv-fixed" id="pv-fixed"></span>
+      <button type="button" class="pv-back" id="pv-back" hidden></button>
     </div>
     <button type="button" class="nav-toggle" id="nav-toggle" aria-expanded="false" aria-controls="nav-tabs"><svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M2.5 4.5h13M2.5 9h13M2.5 13.5h13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span id="nav-cur">Insights</span><svg class="nav-chev" width="10" height="14" viewBox="0 0 10 14" aria-hidden="true"><path d="M2 5l3-3 3 3M2 9l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
     <nav class="tabs" id="nav-tabs" aria-label="Views">
@@ -1502,7 +1511,8 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
   /* =============================================================
      State and helpers
      ============================================================= */
-  var ST = { div: 'Infrastructure', reg: '', view: 'focus', src: '', filter: 'all', sheet: '', openSay: {} };
+  var HOME_DIV = 'Infrastructure'; // the signed-in division manager's home purview
+  var ST = { div: HOME_DIV, reg: '', view: 'focus', src: '', filter: 'all', sheet: '', openSay: {} };
   var NUM = ['No', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten'];
   function word(n) { return n < NUM.length ? NUM[n] : String(n); }
   function lw(n) { return word(n).toLowerCase(); }
@@ -1571,10 +1581,13 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
      Header
      ============================================================= */
   function fillFilters() {
-    $('f-div').innerHTML = '<option value="">' + esc(ORG_NAME) + '</option>' + ORG.map(function (x) { return '<option' + (x.div === ST.div ? ' selected' : '') + '>' + esc(x.div) + '</option>'; }).join('');
+    $('f-div').innerHTML = '<option value="">' + esc(ORG_NAME) + '</option>' + ORG.map(function (x) { return '<option value="' + esc(x.div) + '"' + (x.div === ST.div ? ' selected' : '') + '>' + esc(x.div) + (x.div === HOME_DIV ? ' (yours)' : '') + '</option>'; }).join('');
     var regs = []; ORG.forEach(function (x) { if (!ST.div || x.div === ST.div) x.regions.forEach(function (g) { regs.push(g.name); }); });
     $('f-reg').innerHTML = '<option value="">All regions</option>' + regs.map(function (n) { return '<option' + (n === ST.reg ? ' selected' : '') + '>' + esc(n) + '</option>'; }).join('');
+    var away = ST.div !== HOME_DIV || !!ST.reg; $('pv-back').hidden = !away; $('pv-back').textContent = 'Back to ' + HOME_DIV;
+    $('pv-fixed').textContent = HOME_DIV + ' division';
   }
+  $('pv-back').addEventListener('click', function () { ST.div = HOME_DIV; ST.reg = ''; fillFilters(); render(); });
   $('f-div').addEventListener('change', function (e) { ST.div = e.target.value; ST.reg = ''; fillFilters(); render(); });
   $('f-reg').addEventListener('change', function (e) { ST.reg = e.target.value; if (ST.reg) ORG.forEach(function (d) { d.regions.forEach(function (g) { if (g.name === ST.reg) ST.div = d.div; }); }); fillFilters(); render(); });
   function sourceIssues() { return SOURCES.filter(function (s) { return ['failing', 'delayed', 'partial'].indexOf(s.status) > -1; }); }
@@ -3218,7 +3231,7 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
   /* =============================================================
      My Focus: everything that needs you, until it's done
      ============================================================= */
-  var MY_DIV = 'Infrastructure'; // the signed-in division manager's purview
+  var MY_DIV = HOME_DIV; // My Focus and the poll always use the home purview
   ST.nudged = {}; ST.visitPlanned = ST.visitPlanned || {}; ST.mfDone = []; ST.mfWalk = -1; ST.mfSnap = null; ST.mfRes = {};
   function mySites() { var o = []; ORG.forEach(function (d) { if (d.div === MY_DIV) d.regions.forEach(function (r) { o = o.concat(r.sites); }); }); return o; }
   function myInsights() { var ids = mySites().map(function (x) { return x.id; }); return INSIGHTS.filter(function (i) { return !i.closed && !i.dismissed && i.sites.some(function (s) { return ids.indexOf(s) > -1; }); }); }
@@ -5080,7 +5093,7 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
     closeRec(); closeSheet(); closePrismView(); render(); window.scrollTo(0, 0);
   }
   function render() { renderView(); renderMyFocusCount(); }
-  function renderView() { document.body.classList.toggle('rv-mode', (ST.view === 'meeting' && !!MT) || (ST.view === 'progress' && !!PG) || (ST.view === 'planning' && !!PL)); if (ST.view === 'map') renderMap(); else if (ST.view === 'strategy') renderStrategy(); else if (ST.view === 'planning') renderPlanning(); else if (ST.view === 'progress') renderProgress(); else if (ST.view === 'myfocus') renderMyFocus(); else if (ST.view === 'sites') renderSites(); else if (ST.view === 'site') { if (ST.siteFeed) renderSiteFeed(ST.site); else renderSite(ST.site); } else if (ST.view === 'sources') renderSources(); else if (ST.view === 'meeting') renderMeeting();  else if (ST.view === 'insight') renderInsight(ST.insight); else renderFocus(); }
+  function renderView() { document.body.classList.toggle('pv-home-only', ST.view === 'myfocus'); document.body.classList.toggle('rv-mode', (ST.view === 'meeting' && !!MT) || (ST.view === 'progress' && !!PG) || (ST.view === 'planning' && !!PL)); if (ST.view === 'map') renderMap(); else if (ST.view === 'strategy') renderStrategy(); else if (ST.view === 'planning') renderPlanning(); else if (ST.view === 'progress') renderProgress(); else if (ST.view === 'myfocus') renderMyFocus(); else if (ST.view === 'sites') renderSites(); else if (ST.view === 'site') { if (ST.siteFeed) renderSiteFeed(ST.site); else renderSite(ST.site); } else if (ST.view === 'sources') renderSources(); else if (ST.view === 'meeting') renderMeeting();  else if (ST.view === 'insight') renderInsight(ST.insight); else renderFocus(); }
 
   document.addEventListener('click', function (e) {
     var a = e.target.closest('a[href^="#"]');
