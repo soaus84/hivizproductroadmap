@@ -286,6 +286,8 @@ main { padding-block: 32px 80px; }
 .scard .h { display: grid; grid-template-columns: 32px 1fr auto; gap: 2px 12px; align-items: center; }
 .scard .n { font-weight: 800; font-size: 18px; }
 .scard .w { grid-column: 2; font-size: 14px; font-weight: 600; color: var(--text-3); }
+.src-g { margin-top: 28px; }
+.src-gp { margin: -6px 0 14px; max-width: 72ch; }
 .scard .says-now { font-size: 16px; color: var(--text); min-height: 48px; }
 .scard .ft { display: flex; justify-content: space-between; align-items: flex-end; gap: 8px; font-size: 14px; font-weight: 700; color: var(--text-2); }
 .scard .problem-line { font-size: 15px; font-weight: 700; }
@@ -1323,8 +1325,12 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
   ];
 
   var SOURCES = [
+    { id: 'hvvisit', native: true, types: ['Leadership visit', 'Conversation'], mg: 'V', name: 'Hiviz visits', what: 'Leadership visits and crew conversations', how: 'Built into Hiviz', status: 'live', last: 8940, today: 0,
+      now: 'Priya Nair at Harbour Bridge Deck: the crew said rope goes on as a tag line when the rigging box is empty.', hist: '213122312213122413' },
+    { id: 'hvobs', native: true, types: ['Observation', 'Good practice'], mg: 'O', name: 'Hiviz observations', what: 'Observations from the Hiviz field app', how: 'Built into Hiviz', status: 'live', last: 7, today: 37,
+      now: 'A spotter at Ridge Road stopped a reversing grader when someone walked behind it.', hist: '354465546656576578' },
     { id: 'procore', types: ['Observation', 'Near miss', 'Incident'], mg: 'P', name: 'Procore', what: 'Observations, incidents', how: 'Webhook', status: 'live', last: 2, today: 184,
-      now: 'Tag lines failing on steel lifts at North Yard, and positive spotter reports at Ridge Road.', hist: '342546735846957468' },
+      now: 'Tag lines failing on steel lifts at North Yard.', hist: '342546735846957468' },
     { id: 'mitti', types: ['Inspection', 'Hazard', 'Action'], mg: 'M', name: 'Mitti', what: 'Inspections, issues', how: 'Webhook', status: 'failing', last: 212, today: 31,
       now: 'Nothing since 6:10 am. Before that: rope used as tag lines at Harbour Bridge Deck.', hist: '354463540000000000',
       problem: 'Deliveries failing since 6:10 am with “401 Unauthorised”. The API token was probably changed.',
@@ -1349,6 +1355,7 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
   ];
   var SRC_STATUS = { live: ['success', 'Live'], delayed: ['warning', 'Delayed'], partial: ['warning', 'Partly imported'], failing: ['critical', 'Failing'], none: ['info', 'Not connected'] };
   var SRC = {}; SOURCES.forEach(function (s) { SRC[s.id] = s; });
+  ORG.forEach(function (d) { d.regions.forEach(function (r) { r.sites.forEach(function (x) { if (x.src.length && x.state !== 'quiet') x.src = ['hvobs'].concat(x.src); }); }); });
 
   // tone on a read: critical | warning | success | '' (neutral)
   function R(when, site, text, reads) { return { when: when, site: site, text: text, reads: reads }; }
@@ -1396,7 +1403,9 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
           R('26 Sep', 'ny', 'NM-2318 · "tag line frayed, load spun on lift of B14, crew stepped clear"', [['Energy released', 'critical'], ['Control failed', 'critical']]),
           R('19 Sep', 'ny', 'NM-2290 · "beam rotated in wind, passed over access path"', [['Energy released', 'critical'], ['Control failed', 'critical']]) ] },
         { src: 'mitti', n: 4, text: 'Rope being used in place of tag lines at Harbour Bridge Deck.', recs: [
-          R('25 Sep', 'hb', 'Issue · "rope being used as tagline again" · deck level', [['At-risk condition', 'warning'], ['Control degraded', 'warning']]) ] }
+          R('25 Sep', 'hb', 'Issue · "rope being used as tagline again" · deck level', [['At-risk condition', 'warning'], ['Control degraded', 'warning']]) ] },
+        { src: 'hvvisit', n: 2, text: 'On leadership visits, crews said rope goes on when the rigging box is empty.', recs: [
+          R('12 Sep', 'hb', 'VIS-2041 · Leadership visit · Priya Nair · "we use rope when the rigging box is empty, it happens most weeks"', [['Why it happens', 'warning'], ['Control degraded', 'warning']]) ] }
       ] },
     { id: 'pre', sev: 'warning', status: 'working', owner: 'Tom Walsh', trend: 'worse', lead: false, since: '1 Sep', updated: 16, short: 'pre-start checks',
       sites: ['st', 'hb'], hist: '1101101110111011101111011111',
@@ -1419,8 +1428,10 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
       latest: 'Spotter roster in place on both sites. One repeat on 2 September, none since.',
       next: 'Keep it for two more weeks, then close.',
       says: [
-        { src: 'procore', n: 7, text: 'Spotters now calling stops on reversing plant. One repeat on 2 September.', recs: [
-          R('24 Sep', 'rr', 'OB-7741 · "spotter stopped the reversing grader when ped walked behind"', [['Positive performance', 'success'], ['Control held', 'success']]) ] }
+        { src: 'hvobs', n: 7, text: 'Spotters now calling stops on reversing plant. One repeat on 2 September.', recs: [
+          R('24 Sep', 'rr', 'HVO-7741 · Good practice · "spotter stopped the reversing grader when ped walked behind"', [['Positive performance', 'success'], ['Control held', 'success']]) ] },
+        { src: 'hvvisit', n: 3, text: 'Crews on visits said the roster makes it clear who spots, so nobody assumes.', recs: [
+          R('16 Sep', 'rr', 'VIS-2033 · Leadership visit · Tom Walsh · "now we know who\u2019s spotting each shift, nobody guesses"', [['Control held', 'success']]) ] }
       ] },
     { id: 'house', sev: 'warning', status: 'resolved', owner: 'Tom Walsh', trend: 'better', lead: false, since: '20 Jun', updated: 2, short: 'blocked access routes',
       sites: ['cc', 'st'], hist: '0000000000000000000000000000',
@@ -1474,7 +1485,7 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
   function F(src, ago, site, raw, line, tags) { return { src: src, at: Date.now() - ago * 60000, site: site, raw: raw, line: line, tags: tags }; }
   var FEED = [
     F('procore', 2, 'ny', 'NM-2318\ncategory: Near Miss\nloc: North Yard / Laydown B\n"tag line frayed, load spun on lift of B14, crew stepped clear"', '<b>Energy released.</b> A frayed tag line let a steel beam spin during a lift.', [['Control failed', 'critical'], ['Suspended load', ''], ['Suspended loads insight', '']]),
-    F('procore', 38, 'rr', 'OB-7741\ncategory: Positive\nloc: Ridge Rd IC / ramp 2\n"spotter stopped the reversing grader when ped walked behind"', '<b>Control held.</b> A spotter stopped reversing plant when someone walked behind it.', [['Positive', 'success'], ['Spotters insight', '']]),
+    F('hvobs', 38, 'rr', 'HVO-7741 · Good practice\nloc: Ridge Rd IC / ramp 2\n"spotter stopped the reversing grader when ped walked behind"', '<b>Control held.</b> A spotter stopped reversing plant when someone walked behind it.', [['Positive', 'success'], ['Spotters insight', '']]),
     F('servicenow', 4, 'rs', 'x_permit_isolation ISO-40912\nstate: closed 05:52\ntest_for_dead_at: (empty)\nshift: night', '<b>Control bypassed.</b> An isolation was closed with no test recorded.', [['Could have been fatal', 'critical'], ['Handovers insight', '']]),
     F('servicenow', 61, 'ql', 'x_permit_work PTW-88102\nstate: issued\nwork: "haul road shoulder repair near live traffic"', '<b>Work continues</b> at a site that hasn’t reported anything for 19 days.', [['Gone quiet', 'warning'], ['Handovers insight', '']]),
     F('intelex', 11, 'st', 'Daily Pre-Start v3 · TBM-2\nstarted 06:31:02 · submitted 06:31:40\n24 of 24 "Yes" · "all good"', '<b>Done in 38 seconds</b>, with the same answers as yesterday.', [['Weak signal', 'warning'], ['Pre-start insight', '']]),
@@ -1493,6 +1504,8 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
                 ['INC-3{n} · First aid\n"minor cut, treated on site, gloves replaced"', '<b>One-off.</b> Minor first aid, treated on site.', [['Set aside', '']]]],
       servicenow: [['x_permit_work PTW-88{n}\nstate: closed · all checks recorded', '<b>Routine.</b> Permit closed with every check recorded.', [['Set aside', '']]]],
       hammertech: [['Induction · {g} workers · day shift', '<b>Context.</b> New workers inducted.', [['Set aside', '']]]],
+      hvobs: [['HVO-5{n} · Good practice\n"exclusion zone set and held through the whole lift"', '<b>Control held.</b> Exclusion zone kept for the full lift.', [['Positive', 'success']]],
+              ['HVO-5{n} · Observation\n"lanyard anchor point checked before use, all good"', '<b>Routine.</b> Anchor checked before use.', [['Set aside', '']]]],
       evotix: [['row {n}: 2026-09-{d}, first aid,\n"minor strain lifting materials, rested"', '<b>One-off.</b> Minor strain, rested and returned.', [['Set aside', '']]]]
     };
     var n = 100;
@@ -1505,6 +1518,7 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
         n++;
         FEED.push(F(src, mins, site.id, t[0].replace('{n}', n).replace('{g}', 2 + (k % 5)).replace('{d}', ('0' + (25 - k)).slice(-2)), t[1], t[2]));
       }
+      if (site.src.indexOf('hvobs') > -1 && site.visit <= 30) { n++; FEED.push(F('hvvisit', site.visit * 1440 + 300, site.id, 'VIS-2' + n + ' · Leadership visit\n' + r.rm + ' · 45 min · ' + (2 + si % 3) + ' crew conversations', '<b>Leadership visit.</b> ' + esc(r.rm) + ' walked the site and talked with crews.', [['Leadership visit', '']])); }
     }); }); });
   })();
   var FAILS = {
@@ -1513,6 +1527,7 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
     hammertech: [{ at: Date.now() - 20 * 60000, level: 'warn', raw: 'GET /v1/inspections?modified_since=…\n200 OK after 94 s', line: '<b>Slow response.</b> Hiviz will keep retrying.' }]
   };
   var ARRIVALS = [
+    ['hvobs', 'ny', 'HVO-5590 · Observation\nby Priya Nair · North Yard\n"tag line swapped for a new one before the B16 lift"', '<b>Control restored.</b> A worn tag line was replaced before a lift.', [['Good practice', 'success'], ['Suspended loads insight', '']], 'Observation at North Yard'],
     ['procore', 'ny', 'OB-7760\ncategory: Hazard\n"exclusion zone tape down near crane"', '<b>Control degraded.</b> Exclusion zone down near a crane.', [['At-risk', 'warning'], ['Suspended loads insight', '']], 'Hazard at North Yard'],
     ['servicenow', 'rs', 'x_permit_isolation ISO-40931\nclosed 07:15 · test_for_dead_at 07:09', '<b>Control held.</b> Tested before sign-off.', [['Good practice', 'success'], ['Handovers insight', '']], 'Isolation tested before sign-off'],
     ['intelex', 'hb', 'Daily Pre-Start v3\nstarted 07:02:10 · submitted 07:02:41\n24 of 24 "Yes"', '<b>Done in 31 seconds.</b>', [['Weak signal', 'warning'], ['Pre-start insight', '']], 'Pre-start in 31 seconds'],
@@ -1545,6 +1560,19 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
   function stalled(i) { return i.status === 'working' && i.updated >= 14; }
   function recCount(i) { return i.says.reduce(function (a, s) { return a + s.n; }, 0); }
   function owners() { var o = [YOU]; regionsInView().forEach(function (x) { if (o.indexOf(x.r.rm) < 0) o.push(x.r.rm); }); o.push('Dana Brooks'); return o; }
+  // Owner pickers list everyone; the people closest to the work come first
+  function nearWork(i) {
+    var o = [];
+    (i.sites || []).forEach(function (s) { var rg = SITE[s].region, dv = regionDiv(rg), rm; ORG.forEach(function (d) { d.regions.forEach(function (r) { if (r.name === rg) rm = r.rm; }); }); [DIV_LEAD[dv], rm].forEach(function (p) { if (p && o.indexOf(p) < 0) o.push(p); }); });
+    if (o.indexOf('Dana Brooks') < 0) o.push('Dana Brooks');
+    return o;
+  }
+  function ownerOpts(near, cur, nearLbl) {
+    var opt = function (p) { return '<option value="' + esc(p) + '"' + (p === cur ? ' selected' : '') + '>' + esc(p) + (ROLE[p] ? ' · ' + esc(ROLE[p]) : '') + '</option>'; };
+    var rest = Object.keys(ROLE).filter(function (p) { return near.indexOf(p) < 0; });
+    if (cur && near.indexOf(cur) < 0 && rest.indexOf(cur) < 0) near = [cur].concat(near);
+    return '<optgroup label="' + esc(nearLbl || 'Closest to the work') + '">' + near.map(opt).join('') + '</optgroup>' + (rest.length ? '<optgroup label="Everyone else">' + rest.map(opt).join('') + '</optgroup>' : '');
+  }
   function scopeLabel() { return ST.reg ? ST.reg + ' region' : ST.div ? ST.div + ' division' : ORG_NAME; }
 
   /* Icons and small visuals */
@@ -1789,7 +1817,7 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
           (gone ? '' : '<div class="nxt">' + statusBadge(i) + '<p>' + esc(nextStep(i)) + '</p></div>') +
           (gone ? '<p class="muted-p">' + (i.dismissed ? 'Dismissed by ' + esc(i.dismissed.who) + '.' : 'Closed.') + '</p>' :
           (ST.dismissing === i.id ? dismissForm(i.id, 'page') :
-            '<span class="fld col"><label for="i-owner">Owner</label><select class="select wide" id="i-owner"><option value="">No owner</option>' + ow.map(function (o) { return '<option' + (o === i.owner ? ' selected' : '') + '>' + esc(o) + '</option>'; }).join('') + '</select></span>' +
+            '<span class="fld col"><label for="i-owner">Owner</label><select class="select wide" id="i-owner"><option value="">No owner</option>' + ownerOpts(nearWork(i), i.owner) + '</select></span>' +
             '<details class="st-change"><summary>Change status</summary>' + '<span class="fld col"><label for="i-status">Status</label><select class="select wide" id="i-status">' + [['new', 'New'], ['plan', 'Agree to plan'], ['working', 'In progress'], ['resolved', 'Ready to close'], ['closed', 'Close it']].map(function (o) { return '<option value="' + o[0] + '"' + (o[0] === i.status ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select></span>' + '</details>' +
             '<label class="w-note-l" for="i-note">Add an update</label><textarea class="w-note" id="i-note" rows="2" placeholder="What’s happened since the last update"></textarea>' +
             '<div class="meet-actions"><button type="button" class="btn brand" id="i-post">Post update</button><button type="button" class="btn" data-dopen="' + i.id + '">Dismiss…</button></div>')) +
@@ -1875,6 +1903,7 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
   var TAG_INSIGHT = { 'Suspended loads insight': 'load', 'Handovers insight': 'hand', 'Pre-start insight': 'pre', 'Spotters insight': 'spot' };
   var RECS = {}, recSeq = 0;
   function recType(raw) {
+    if (/VIS-/.test(raw)) return 'Leadership visit'; if (/HVO-/.test(raw)) return /Good practice/.test(raw) ? 'Good practice' : 'Observation';
     if (/ISO-/.test(raw)) return 'Isolation permit'; if (/PTW-|x_permit_work/.test(raw)) return 'Permit';
     if (/NM-/.test(raw)) return 'Near miss'; if (/OB-/.test(raw)) return 'Observation'; if (/INC-/.test(raw)) return 'Incident';
     if (/Pre-Start/.test(raw)) return 'Pre-start'; if (/Issue|category: Hazard/.test(raw)) return 'Hazard'; if (/[Ii]nspection/.test(raw)) return 'Inspection';
@@ -2321,7 +2350,7 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
           (prop ? '<button type="button" class="btn sm" data-pa-remove="' + i.id + ':' + k + '" aria-label="Remove this action">Remove</button>'
                 : '<label class="pa-ci"><span class="sr">Check in</span><select class="select" data-pa="' + i.id + ':' + k + '">' + PA_ST.map(function (x) { return '<option value="' + x[0] + '"' + (x[0] === a.st ? ' selected' : '') + '>' + x[1] + '</option>'; }).join('') + '</select></label>') + '</li>';
       }).join('') + '</ol>' +
-      (prop ? '<div class="pa-add"><input type="text" class="w-note" id="pa-t-' + i.id + '" placeholder="Add an action: what will be done"><select class="select" id="pa-w-' + i.id + '"><option value="">Who</option>' + people.map(function (o) { return '<option>' + esc(o) + '</option>'; }).join('') + '</select><select class="select pa-due" id="pa-d-' + i.id + '" aria-label="By when"><option value="">By when</option>' + [[0, 'Immediately'], [3, 'In 3 days'], [7, 'In 7 days'], [30, 'In 30 days']].map(function (d) { return '<option value="' + addDays('26 Sep', d[0]) + '">' + d[1] + '</option>'; }).join('') + '</select><button type="button" class="btn" data-pa-add="' + i.id + '">Add</button></div>' : '') +
+      (prop ? '<div class="pa-add"><input type="text" class="w-note" id="pa-t-' + i.id + '" placeholder="Add an action: what will be done"><select class="select" id="pa-w-' + i.id + '"><option value="">Who</option>' + ownerOpts(i.sites ? nearWork(i) : people, '') + '</select><select class="select pa-due" id="pa-d-' + i.id + '" aria-label="By when"><option value="">By when</option>' + [[0, 'Immediately'], [3, 'In 3 days'], [7, 'In 7 days'], [30, 'In 30 days']].map(function (d) { return '<option value="' + addDays('26 Sep', d[0]) + '">' + d[1] + '</option>'; }).join('') + '</select><button type="button" class="btn" data-pa-add="' + i.id + '">Add</button></div>' : '') +
       (o.split ? '' : '<div class="plan-check"><span class="label">Is it working?</span>' +
         (pl.read ? '<p>' + (pl.read[0] === 'working' ? '<span class="badge success"><i></i>Working</span>' : pl.read[0] === 'continues' ? '<span class="badge critical"><i></i>Pattern continues</span>' : '<span class="tlabel">Too early</span>') + ' ' + esc(pl.read[1]) + '</p>' : '<p class="pc-l">Prism starts reading once the plan is approved.</p>') +
         '<p class="pc-l">Prism listens for: ' + esc(pl.expect) + '</p></div>') +
@@ -2466,7 +2495,7 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
         }).join('') + '</dl></section>' +
       '</div>' +
       '<div class="sheet-foot">' +
-        '<span class="fld"><label for="s-owner">Owner</label><select class="select" id="s-owner"><option value="">No owner</option>' + ow.map(function (o) { return '<option' + (o === i.owner ? ' selected' : '') + '>' + esc(o) + '</option>'; }).join('') + '</select></span>' +
+        '<span class="fld"><label for="s-owner">Owner</label><select class="select" id="s-owner"><option value="">No owner</option>' + ownerOpts(nearWork(i), i.owner) + '</select></span>' +
         '<span class="fld"><label for="s-status">Status</label><select class="select" id="s-status">' + [['new', 'New'], ['plan', 'Agree to plan'], ['working', 'In progress'], ['resolved', 'Ready to close']].map(function (o) { return '<option value="' + o[0] + '"' + (o[0] === i.status ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select></span>' +
         (i.status === 'resolved' ? '<button type="button" class="btn dark" id="s-close">Close insight</button>' : '') +
         '<button type="button" class="btn" data-dopen="' + i.id + '">Dismiss\u2026</button>' +
@@ -2715,7 +2744,9 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
       '<div class="seg src-tabs" role="group" aria-label="Show"><button type="button" data-srctab="cards" aria-pressed="' + (ST.srcTab !== 'feed') + '">Sources</button><button type="button" data-srctab="feed" aria-pressed="' + (ST.srcTab === 'feed') + '">Feed</button></div>' +
       (ST.srcTab === 'feed' ? '<p class="muted-p feed-note">Every record behind ' + esc(scopeLabel()) + ', newest first, as Prism read it.</p>' + feedHTML('all', function (r) { return sitesInViewIds().indexOf(r.site) > -1; }, ['src', 'type', 'site']) :
       pipeHTML() +
-      '<div class="sgrid">' + SOURCES.map(function (s) {
+      [[true, 'Built into Hiviz', 'Leadership visits and observations recorded in the Hiviz app. On their own they’re enough for Prism to find patterns and score the Map, so Hiviz works before anything else is connected.'],
+       [false, 'Connected systems', 'The systems sites already use. Each one adds depth: incidents, permits, pre-starts and inspections.']].map(function (g) { return '<div class="sec-t src-g"><h2>' + g[1] + '</h2></div><p class="muted-p src-gp">' + g[2] + '</p>' +
+      '<div class="sgrid">' + SOURCES.filter(function (s) { return !!s.native === g[0]; }).map(function (s) {
         var st = SRC_STATUS[s.status];
         return '<button type="button" class="card scard" data-src="' + s.id + '">' +
           '<div class="h"><span class="mg lg' + (s.status === 'none' ? ' off' : '') + '">' + esc(s.mg) + '</span><span class="n">' + esc(s.name) + '</span><span class="badge ' + st[0] + '"><i></i>' + st[1] + '</span><span class="w">' + esc(s.how) + '</span></div>' +
@@ -2723,7 +2754,7 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
           '<p class="says-now">' + (s.problem && s.status !== 'none' ? '<span class="problem-line t-' + st[0] + '">' + esc(s.problem) + '</span>' : esc(s.now)) + '</p>' +
           '<div class="ft"><span>' + (s.status === 'none' ? 'Nothing received' : 'Last ' + esc(lastOf(s)) + ' · ' + s.today + ' today') + '</span></div>' +
         '</button>';
-      }).join('') + '</div>');
+      }).join('') + '</div>'; }).join(''));
   }
   function renderSource(s) {
     if (!s) { ST.src = ''; return renderSources(); }
@@ -2789,7 +2820,7 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
   }
   function managersInView() {
     var o = [];
-    if (ST.div === 'Infrastructure' || !ST.div) o.push('You');
+    ORG.forEach(function (d) { if ((!ST.div || d.div === ST.div) && DIV_LEAD[d.div] && o.indexOf(DIV_LEAD[d.div]) < 0) o.push(DIV_LEAD[d.div]); });
     regionsInView().forEach(function (x) { if (o.indexOf(x.r.rm) < 0) o.push(x.r.rm); });
     o.push('Dana Brooks');
     return o;
@@ -3017,7 +3048,7 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
         var ow = i.owner ? esc(i.owner === YOU ? 'You' : i.owner) : 'No owner';
         var en = key === 'esc' ? i.esc || MT.escWas[id] : null;
         if (key === 'esc') return rvRow(i.title, tag + esc(nameOf(en.by)) + ' escalated this: ' + esc(en.reason) + (en.note ? '. “' + esc(en.note) + '”' : ''), dec && dec !== 'Carry forward' ? '<span class="rv-dec">' + esc(dec) + '</span>' : '<span class="rv-ch"><button type="button" class="btn" data-esc-back="' + i.id + '">Send back</button><button type="button" class="btn" data-esc-accept="' + i.id + '">Accept</button>' + rvCarry(id + ':esc') + '</span>', i.id, !!dec);
-        if (key === 'assign') return rvRow(i.title, tag + esc(i.story), '<select class="select" data-rvowner="' + i.id + '" aria-label="Owner"><option value="">Choose an owner</option>' + managersInView().map(function (o) { return '<option' + (o === i.owner ? ' selected' : '') + '>' + esc(o) + '</option>'; }).join('') + '</select><span class="rv-ch">' + rvCarry(id + ':assign') + '</span>', i.id, !!dec);
+        if (key === 'assign') return rvRow(i.title, tag + esc(i.story), '<select class="select" data-rvowner="' + i.id + '" aria-label="Owner"><option value="">Choose an owner</option>' + ownerOpts(managersInView(), i.owner, 'In this review') + '</select><span class="rv-ch">' + rvCarry(id + ':assign') + '</span>', i.id, !!dec);
         if (key === 'plan') return '<li class="rv-row rv-plan-row' + (dec ? ' is-done' : '') + '"><div class="rv-m"><button type="button" class="rv-title linkish" data-open="' + i.id + '">' + esc(i.title) + '</button><span class="rv-s">' + tag + 'Owner ' + ow + ' · ' + esc(i.next) + '</span></div>' + planHTML(i, 'rv-plan', { split: true, bare: true }) + (MT.agreed[id] ? '' : '<div class="rv-c rv-c-plan"><span class="rv-ch">' + rvCarry(id + ':plan') + '</span></div>') + '</li>';
         if (key === 'stalled') return rvRow(i.title, tag + ow + ' · no update in ' + i.updated + ' days' + (i.latest ? ' · last: “' + esc(i.latest) + '”' : ''), rvChoice(id + ':' + key, ['Chase the owner', 'Owner needs help', 'Carry forward'], dec), i.id, !!dec);
         if (key === 'moving') return rvRow(i.title, tag + ow + ' · ' + esc(planSummary(i)) + (i.plan && i.plan.read ? ' · ' + esc(i.plan.read[1]) : ''), rvChoice(id + ':' + key, ['Keep the plan', 'Revise the plan', 'Carry forward'], dec), i.id, !!dec);
@@ -3474,7 +3505,7 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
     var i = it.ins;
     if (it.kind === 'assign') {
       var ow = owners();
-      return '<span class="fld"><label for="mfo-' + i.id + '" class="sr">Owner</label><select class="select" id="mfo-' + i.id + '" data-mf-assign="' + i.id + '"><option value="">Choose an owner</option>' + ow.map(function (o) { return '<option>' + esc(o) + '</option>'; }).join('') + '</select></span>';
+      return '<span class="fld"><label for="mfo-' + i.id + '" class="sr">Owner</label><select class="select" id="mfo-' + i.id + '" data-mf-assign="' + i.id + '"><option value="">Choose an owner</option>' + ownerOpts(nearWork(i), '') + '</select></span>';
     }
     if (it.kind === 'escalated') return '<button type="button" class="btn" data-esc-accept="' + i.id + '">Accept</button><a class="btn" href="#insight/' + i.id + '">Send back or pass up</a>';
     if (it.kind === 'chase') return '<button type="button" class="btn" data-mf-nudge="' + i.id + '">Nudge ' + esc(i.owner) + '</button>';
@@ -3753,7 +3784,7 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
     tick: [['management_systems', 2]], spot: [['frontline_workers', 2]], edge: [['contractor_management', 1]], house: [['monitoring_metrics', 1]] };
   // Records map to a factor through their insight, or by record type
   var TYPE_FACTOR = { 'Pre-start': ['monitoring_metrics', 1], 'Inspection': ['monitoring_metrics', 1], 'Permit': ['decision_making', 1], 'Isolation permit': ['decision_making', 1],
-    'Observation': ['frontline_workers', 3], 'Near miss': ['frontline_workers', 3], 'Hazard': ['frontline_workers', 3], 'Induction': ['contractor_management', 1], 'Incident': ['learning_development', 2], 'Action': ['operational_management', 3] };
+    'Observation': ['frontline_workers', 3], 'Good practice': ['frontline_workers', 3], 'Leadership visit': ['senior_leadership', 2], 'Conversation': ['senior_leadership', 2], 'Near miss': ['frontline_workers', 3], 'Hazard': ['frontline_workers', 3], 'Induction': ['contractor_management', 1], 'Incident': ['learning_development', 2], 'Action': ['operational_management', 3] };
   function recFactor(r) { var i = r.insights.filter(function (id) { return INS_FACTOR[id]; })[0]; return i ? INS_FACTOR[i] : TYPE_FACTOR[r.type] || null; }
 
   // Per region, per indicator: { m: 1..3 or null, n: evidence, t: trend, mg: needs management input }
@@ -4051,6 +4082,8 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
      Objectives are set only at company purview, at quarterly planning. Insights are
      responsive; strategy is proactive.
      ============================================================= */
+  function shortDay(t) { var m = /^(\w{3})\w* (\d+) (\w{3})/.exec(t || ''); return m ? m[1] + ' ' + m[2] + ' ' + m[3] : t; }
+  function dayMon(t) { var m = /(\d+) (\w{3})/.exec(t || ''); return m ? m[1] + ' ' + m[2] : t; }
   var STRAT = { planning: 'Wednesday 1 October', lastPlanning: '1 Jul', progress: 'Monday 6 October', lastProgress: '1 Sep', year: 'the year to June 2027' };
   // [key, factor, target level, by, division scope ('' = whole company), owner, why, key results [[indicator, target level]], program ids]
   var OBJECTIVES = [
@@ -4170,10 +4203,9 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
 
   // Header actions mirror Insights: past meetings, then start; the next meeting due is the primary
   function dayOf(t) { var M = { January: 0, February: 1, March: 2, April: 3, May: 4, June: 5, July: 6, August: 7, September: 8, October: 9, November: 10, December: 11 }, m = /(\d+) (\w+)/.exec(t || ''); return m ? new Date(m[2] === 'January' ? 2027 : 2026, M[m[2]], +m[1]) : new Date(2099, 0, 1); }
-  function stActions(org) {
-    var planFirst = dayOf(STRAT.planning) <= dayOf(STRAT.progress);
-    var pg = '<button type="button" class="btn' + (planFirst ? '' : ' brand') + '" data-pgstart="1">Start monthly progress</button>', pl = '<button type="button" class="btn' + (planFirst ? ' brand' : '') + '" data-plstart="1">Start quarterly planning</button>';
-    return '<div class="st-go">' + (planFirst ? pg + pl : pl + pg) + '</div>';
+  function stActions() {
+    // Quarterly planning is the primary, on the right; monthly progress sits beside it
+    return '<div class="st-go"><button type="button" class="btn" data-pgstart="1">Start monthly progress</button><button type="button" class="btn brand" data-plstart="1">Start quarterly planning</button></div>';
   }
   function stRhythm() {
     var rows = [['Check-ins close', CHECKIN.closes], ['Monthly progress', STRAT.progress], ['Quarterly planning', STRAT.planning]].sort(function (a, b) { return dayOf(a[1]) - dayOf(b[1]); });
@@ -4241,7 +4273,7 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
     }[k] || '';
     return '<svg class="t-ic" width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" role="img" aria-label="' + (T_KIND[k] || k) + '"><title>' + (T_KIND[k] || k) + '</title>' + p + '</svg>';
   }
-  function tOpen(k) { return ST.tOpen[k] !== false; }
+  function tOpen(k) { return k.indexOf('sy:') === 0 ? ST.tOpen[k] === true : ST.tOpen[k] !== false; } // evidence starts closed
   function tPill(tone, text) { return '<span class="badge' + (tone ? ' ' + tone : '') + '">' + (tone ? '<i></i>' : '') + esc(text) + '</span>'; }
   function tLvl(v) { return levelBar(v, true, v == null ? 'Needs input' : LEVELS[lvlOf(v)]); }
   function tTrend(t) { return t === 'worse' ? tPill('critical', 'Worsening') : t === 'better' ? tPill('success', 'Improving') : tPill('', 'Steady'); }
@@ -4357,14 +4389,23 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
       rows.push(tRow({ depth: 2, kind: 'factor', title: esc(FACTOR[fx[0]].name), href: '#map/' + fx[0], mid: tLvl(fsc.v), status: tTrend(fsc.t) }));
       if (o) { var s = objStatus(o); rows.push(tRow({ depth: 3, kind: 'objective', title: esc(objTitle(o)), attr: 'data-obj="' + o.id + '"', owner: o.owner, mid: esc(objScope(o)), status: tPill(s[0], s[1]) })); }
     }
-    rows.push(tGroupHead('What it’s made of, and what’s being done'));
-    rows.push(tRow({ depth: 1, kind: 'record', title: recCount(i) + ' records', mid: 'from ' + i.says.length + (i.says.length === 1 ? ' tool' : ' tools'), meta: i.says.map(function (sy) { return '<span class="t-chip">' + esc(SRC[sy.src].name) + ' ' + sy.n + '</span>'; }).join('') }));
+    // What's being done first, then the evidence it rests on
+    rows.push(tGroupHead('What’s being done'));
     if (i.plan) {
       var pl = i.plan, pk = 'pl:' + i.id;
       rows.push(tRow({ depth: 1, kind: 'plan', title: 'Plan', mid: pl.state === 'agreed' ? esc(approvedLine(pl)) : 'Proposed by Hiviz', status: pl.state === 'agreed' ? (pl.read ? readPill(pl.read[0]) : tPill('', 'Listening')) : tPill('warning', 'Agree to plan'), key: pk }));
       if (tOpen(pk)) pl.actions.forEach(function (a) { rows.push(tRow({ depth: 2, kind: 'action', title: esc(a.t), owner: a.who, mid: 'by ' + esc(a.due), status: actPill(a), done: a.st === 'done' })); });
-    }
+    } else rows.push(tRow({ depth: 1, kind: 'plan', title: 'No plan yet', mid: i.owner ? esc(i.owner) + ' to agree one' : 'Needs an owner first', dashed: true }));
     if (o && fx) o.programs.forEach(function (pid) { var p = PROGRAMS[pid]; rows.push(tRow({ depth: 1, kind: 'program', title: esc(p.title), attr: 'data-prog="' + pid + '"', owner: p.owner, mid: 'works on the same objective', status: readPill(p.read[0]), linked: true })); });
+    rows.push(tGroupHead('What it’s made of · ' + recCount(i) + ' records from ' + i.says.length + (i.says.length === 1 ? ' source' : ' sources')));
+    i.says.forEach(function (sy, k) {
+      var sk = 'sy:' + i.id + ':' + k;
+      rows.push(tRow({ depth: 1, kind: 'record', title: esc(SRC[sy.src].name), mid: esc(sy.text), status: tPill('', sy.n + (sy.n === 1 ? ' record' : ' records')), key: sk }));
+      if (tOpen(sk)) {
+        sy.recs.forEach(function (r) { var rc = RECS[r.id]; rows.push(tRow({ depth: 2, kind: 'record', title: esc(r.text), attr: 'data-rec="' + r.id + '"', mid: esc(r.when) + ' · ' + esc(SITE[r.site] ? SITE[r.site].name : ''), status: rc ? typeLabel(rc.type) : '' })); });
+        if (sy.n > sy.recs.length) rows.push(tRow({ depth: 2, kind: 'record', title: 'And ' + (sy.n - sy.recs.length) + ' more like these', mid: 'In the ' + esc(SRC[sy.src].name) + ' feed', href: '#sources/' + sy.src, dashed: true }));
+      }
+    });
     return tCrumb(crumb) + tFrame(rows);
   }
   document.addEventListener('click', function (e) {
@@ -4396,7 +4437,7 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
 
     $('view').innerHTML =
       '<div class="page-top"><div><h1>Strategy</h1><p class="sub">' + esc(ORG_NAME) + ' objectives for ' + esc(STRAT.year) + ' · set at quarterly planning</p></div>' +
-        stActions(org) + '</div>' +
+        stActions() + '</div>' +
         stRhythm() + '<div class="view-row">' + tabsHTML('st') + viewSwitch('strategy') + '</div>' +
       '<p class="pv-summary">' + lead + '</p>' +
       (org ? '' : '<p class="st-note">Strategy reads the same in every purview: set for all of ' + esc(ORG_NAME) + ' at quarterly planning and measured across the regions each objective applies to. Objectives that include ' + esc(scopeLabel()) + ' are marked.</p>') +
@@ -4507,7 +4548,7 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
   function plGroupsOn() { return PL_GROUPS.filter(function (g) { return plIds(g[0]).length; }); }
   function plBar() {
     var at = PL_RSTEPS.map(function (s) { return s[0]; }).indexOf(PL.step);
-    return '<div class="rv-bar"><div class="rv-bar-in"><span class="rv-t"><b>Quarterly planning</b><span>' + esc(ORG_NAME) + ' · Fri 26 Sep</span></span>' +
+    return '<div class="rv-bar"><div class="rv-bar-in"><span class="rv-t"><b>Quarterly planning</b><span>' + esc(ORG_NAME) + ' · ' + esc(shortDay(STRAT.planning)) + '</span></span>' +
       '<ol class="rv-rail">' + PL_RSTEPS.map(function (s, k) {
         return '<li class="' + (k === at ? 'on' : k < at ? 'done' : '') + '">' + (k < at && !PL.early ? '<button type="button" data-plstep="' + s[0] + '">' : '<span>') + '<i>' + (k < at ? '✓' : k + 1) + '</i>' + s[1] + (k < at && !PL.early ? '</button>' : '</span>') + '</li>';
       }).join('') + '</ol>' + (PL.step === 'receipt' ? '<button type="button" class="btn brand" id="pl-save">Close planning</button>' : '<button type="button" class="btn" id="pl-end">End planning</button>') + '</div></div>';
@@ -4596,7 +4637,7 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
     var missed = OBJECTIVES.filter(function (o) { return plPreDue(o) && (PL.pre[o.id] === 'skip' || (!PL.pre[o.id] && PL.visitedDecide)); });
     var blk = function (h, items, note) { return items.length ? '<section class="rv-rc"><h2 class="rv-h2">' + h + ' <span class="rv-n">' + items.length + '</span></h2>' + (note ? '<p class="rv-s">' + note + '</p>' : '') + '<ul class="rv-list">' + items.join('') + '</ul></section>' : ''; };
     var scopeName = function (d) { return d.div ? (d.div.indexOf('reg:') === 0 ? d.div.slice(4) + ' region' : d.div + ' division') : 'Whole company'; };
-    rvPage('Step 4 of 4', 'Summary', (PL.early ? 'Ended early · ' : '') + esc(ORG_NAME) + ' · Friday 26 September · ' + esc(join(PL_PEOPLE.filter(function (p) { return PL.att[p]; }))),
+    rvPage('Step 4 of 4', 'Summary', (PL.early ? 'Ended early · ' : '') + esc(ORG_NAME) + ' · ' + esc(STRAT.planning) + ' · ' + esc(join(PL_PEOPLE.filter(function (p) { return PL.att[p]; }))),
       blk('Objectives for next quarter', nx2.keep.map(function (o) { var d = PL.obj[o.id]; return rvRow(d.d === 'adjust' ? FACTOR[o.f].name + ' to ' + LEVELS[+d.target] + ' by ' + d.by : objTitle(o), (d.d === 'adjust' ? 'Adjusted' : d.d === 'keep' ? 'Kept' : 'Kept, not discussed') + ' · ' + esc(objScope(o)) + ' · owner ' + esc(o.owner), '', o.id, false); })
         .concat(nx2.adds.map(function (c) { var d = PL.cand[c.f]; return rvRow(FACTOR[c.f].name + ' to ' + LEVELS[+d.target] + ' by ' + d.by, 'New · ' + esc(scopeName(d)) + ' · ' + esc(d.owner) + ' scopes a program by the next monthly progress', '', 'f:' + c.f, false); })),
         nx2.n > 3 ? '<b class="t-warning">That’s ' + lw(nx2.n) + ' objectives. Hiviz recommends no more than three.</b>' : '') +
@@ -4630,12 +4671,12 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
       var regs = objRegs(o), inds = FACTOR[c.f].inds.map(function (_, k) { return { k: k, x: aggInd(regs, c.f, k) }; }).filter(function (y) { return y.x.v != null && !mgmtOnly(c.f, y.k); }).sort(function (a, b) { return a.x.v - b.x.v; });
       o.krs = inds.slice(0, 2).map(function (y) { return [y.k, d.target]; });
       o.shapedBy = candEvidence(c.f).map(function (i) { return i.id; });
-      PROGRAMS[pid] = { title: 'Program to be scoped', owner: d.owner, resources: 'To be agreed', expect: 'To be set when the program is scoped.', read: ['early', 'Starts next quarter.'],
-        ms: [A('Scope the program and bring it to the monthly progress meeting', d.owner, '6 Oct')] };
+      PROGRAMS[pid] = { title: 'Program to be drafted', owner: d.owner, resources: 'To be agreed', expect: 'Drafted by ' + d.owner + ' and approved at monthly progress on ' + STRAT.progress + '.', read: ['early', 'Starts once it’s approved at monthly progress.'],
+        ms: [A('Draft the program: what it will do, resources and first actions', d.owner, dayMon(STRAT.progress))] };
       progWrap(pid, true); if (o.krs.length) PROGRAMS[pid].kr = o.krs[0][0];
       OBJECTIVES.push(o);
     });
-    STRAT_LOG.unshift({ type: 'Quarterly planning', date: '26 Sep', who: Object.keys(PL.att).filter(function (k) { return PL.att[k]; }), lines: lines, notes: PL.notes, carried: carriedC });
+    STRAT_LOG.unshift({ type: 'Quarterly planning', date: dayMon(STRAT.planning), who: Object.keys(PL.att).filter(function (k) { return PL.att[k]; }), lines: lines, notes: PL.notes, carried: carriedC });
     STRAT.lastPlanning = '26 Sep'; STRAT.planning = 'Wednesday 7 January';
     ST.cand = {}; carriedC.forEach(function (f) { ST.cand[f] = true; });
     PL = null; go('strategy'); toast('Planning closed. Objectives for next quarter are on the Strategy page.' + (carriedC.length ? ' ' + carriedC.length + (carriedC.length === 1 ? ' candidate carries' : ' candidates carry') + ' to next time.' : ''));
@@ -4739,7 +4780,7 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
   }
   function pgBar() {
     var at = RV_STEPS.map(function (s) { return s[0]; }).indexOf(PG.step);
-    return '<div class="rv-bar"><div class="rv-bar-in"><span class="rv-t"><b>Monthly progress</b><span>' + esc(ORG_NAME) + ' · Fri 26 Sep</span></span>' +
+    return '<div class="rv-bar"><div class="rv-bar-in"><span class="rv-t"><b>Monthly progress</b><span>' + esc(ORG_NAME) + ' · ' + esc(shortDay(STRAT.progress)) + '</span></span>' +
       '<ol class="rv-rail">' + RV_STEPS.map(function (s, k) {
         return '<li class="' + (k === at ? 'on' : k < at ? 'done' : '') + '">' + (k < at && !PG.early ? '<button type="button" data-pgstep="' + s[0] + '">' : '<span>') + '<i>' + (k < at ? '✓' : k + 1) + '</i>' + s[1] + (k < at && !PG.early ? '</button>' : '</span>') + '</li>';
       }).join('') + '</ol>' + (PG.step === 'receipt' ? '<button type="button" class="btn brand" id="pg-save">Close the meeting</button>' : '<button type="button" class="btn" id="pg-end">End meeting</button>') + '</div></div>';
@@ -4831,7 +4872,7 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
     var checkedNow = pgOpen().filter(function (x) { return x.m.upd === '26 Sep'; }).length;
     var blk = function (h, items, note) { return items.length ? '<section class="rv-rc"><h2 class="rv-h2">' + h + ' <span class="rv-n">' + items.length + '</span></h2>' + (note ? '<p class="rv-s">' + note + '</p>' : '') + '<ul class="rv-list">' + items.join('') + '</ul></section>' : ''; };
     var openOf = function (id) { return /^o-/.test(id) ? id : id.split(':')[0]; };
-    rvPage('Step 4 of 4', 'Summary', (PG.early ? 'Ended early · ' : '') + esc(ORG_NAME) + ' · Friday 26 September · ' + esc(join(PL_PEOPLE.filter(function (p) { return PG.att[p]; }))),
+    rvPage('Step 4 of 4', 'Summary', (PG.early ? 'Ended early · ' : '') + esc(ORG_NAME) + ' · ' + esc(STRAT.progress) + ' · ' + esc(join(PL_PEOPLE.filter(function (p) { return PG.att[p]; }))),
       blk('Decided', dec.map(function (x) { return rvRow(x[0], esc(x[1]), '', openOf(x[2]), false); })) +
       (checkedNow ? '<p class="rv-line">' + checkedNow + (checkedNow === 1 ? ' action' : ' actions') + ' checked in during the meeting.</p>' : '') +
       blk('Taken to quarterly planning', planning.map(function (x) { return rvRow(x[0], esc(x[1]), '', openOf(x[2]), false); }), 'Quarterly planning is on ' + esc(STRAT.planning) + '.') +
@@ -4861,7 +4902,7 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
     if (noted) lines.push(noted + (noted === 1 ? ' action' : ' actions') + ' agreed on track without discussion.');
     if (PG.early) lines.unshift('Ended early. ' + carried.length + (carried.length === 1 ? ' item carries' : ' items carry') + ' forward to next month.');
     else if (carried.length) lines.push(carried.length + (carried.length === 1 ? ' item carries' : ' items carry') + ' forward to next month.');
-    STRAT_LOG.unshift({ type: 'Monthly progress', date: '26 Sep', who: Object.keys(PG.att).filter(function (k) { return PG.att[k]; }), lines: lines, notes: PG.notes, carried: carried });
+    STRAT_LOG.unshift({ type: 'Monthly progress', date: dayMon(STRAT.progress), who: Object.keys(PG.att).filter(function (k) { return PG.att[k]; }), lines: lines, notes: PG.notes, carried: carried });
     STRAT.lastProgress = '26 Sep'; STRAT.progress = 'Monday 27 October'; PG = null; go('strategy');
     toast('Monthly progress closed' + (carried.length ? '. ' + carried.length + (carried.length === 1 ? ' item carries' : ' items carry') + ' forward.' : '.') + ' Check-ins for the next meeting open on 20 Oct.');
   }
@@ -5047,7 +5088,7 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
     var items = STRAT_LOG.map(function (m, k) { return { f: m.type === 'Quarterly planning' ? 'planning' : 'progress', ts: histTs(m.date), date: m.date, kind: m.type, title: m.type + ' \u00b7 ' + ORG_NAME, sub: m.lines[0] || '', open: 'data-hstrat="' + k + '"' }; });
     Object.keys(PROGRAMS).forEach(function (pid) { var p = PROGRAMS[pid]; if (p.status === 'resolved' || p.closed) items.push({ f: 'program', ts: histTs('26 Sep'), date: '26 Sep', kind: 'Program', title: p.title, sub: p.closed ? 'Closed' : 'Ready to close at the next quarterly planning', open: 'data-prog="' + pid + '"' }); });
     $('view').innerHTML =
-      '<div class="page-top"><div><h1>Strategy</h1><p class="sub">' + esc(ORG_NAME) + ' · strategy meetings, newest first</p></div>' + stActions(org).replace('<button type="button" class="btn" data-stpast="1">Past meetings</button>', '') + '</div>' +
+      '<div class="page-top"><div><h1>Strategy</h1><p class="sub">' + esc(ORG_NAME) + ' · strategy meetings, newest first</p></div>' + stActions().replace('<button type="button" class="btn" data-stpast="1">Past meetings</button>', '') + '</div>' +
       tabsHTML('st') +
       histList(items, [['all', 'All'], ['progress', 'Monthly progress'], ['planning', 'Quarterly planning'], ['program', 'Programs']]);
   }
