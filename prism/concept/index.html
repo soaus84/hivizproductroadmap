@@ -803,6 +803,7 @@ button.ind-btn:hover .ind-name { text-decoration: underline; text-underline-offs
 .pa:first-child { border-top: 1px solid var(--border); }
 .pa-main { display: grid; gap: 4px; }
 .pa-t { font-size: 16px; font-weight: 700; line-height: 1.35; }
+.pa-t .t-ic, .mf-title .t-ic, .rv-title .t-ic, .sp-ms .t-ic { vertical-align: -2px; margin-right: 7px; color: var(--text); }
 .pa.st-done .pa-t { color: var(--text-3); text-decoration: line-through; text-decoration-thickness: 1px; }
 .pa-meta { display: flex; align-items: center; gap: 6px 12px; flex-wrap: wrap; font-size: 14px; font-weight: 600; color: var(--text-2); }
 .pa-meta .av { width: 22px; height: 22px; font-size: 10px; }
@@ -1181,6 +1182,45 @@ a.p-title:hover, .p-card:hover .p-title { text-decoration: underline; text-under
 .map-poll.quiet { margin: 0; }
 .map-poll.quiet > .label { display: none; }
 @media (max-width: 640px) { .p-row { grid-template-columns: minmax(0, 1fr); } .p-side { justify-content: flex-start; } }
+/* ---------- Tree view ---------- */
+.view-row { display: flex; align-items: center; justify-content: space-between; gap: 10px 16px; flex-wrap: wrap; margin: 4px 0 18px; }
+.view-row.solo { justify-content: flex-end; margin-top: -8px; }
+.view-sw button { height: 32px; }
+.tree-v { display: grid; }
+.t-sum { display: flex; gap: 8px; flex-wrap: wrap; margin: 0 0 12px; }
+.t-legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12.5px; color: var(--text-3); margin: 0 0 8px; }
+.t-legend span { display: inline-flex; align-items: center; gap: 5px; }
+.t-hdr, .t-row { display: grid; grid-template-columns: minmax(0, 1fr) 40px 230px 170px; gap: 10px; align-items: center; }
+.t-hdr { font-size: 12px; font-weight: 700; color: var(--text-3); padding: 8px 0; border-bottom: 1px solid var(--border); }
+.t-row { padding: 8px 0; border-bottom: 1px solid var(--border); }
+.t-nm { display: flex; align-items: flex-start; gap: 6px; min-width: 0; padding-left: calc(var(--d) * 22px); }
+.t-chev { flex: none; width: 20px; height: 20px; border: 0; background: none; padding: 0; cursor: pointer; color: var(--text-2); font-size: 12px; line-height: 20px; }
+.t-sp { flex: none; width: 20px; }
+.t-ic { flex: none; margin-top: 2px; color: var(--text); }
+.t-txt { display: grid; gap: 2px; min-width: 0; }
+.t-t { font: inherit; font-size: 15px; font-weight: 600; color: var(--text); text-align: left; text-decoration: none; line-height: 1.35; }
+a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offset: 3px; }
+.t-row.strong .t-t { font-weight: 800; }
+.t-row.linked .t-t { color: var(--text-2); font-weight: 600; }
+.t-row.dashed .t-t { color: var(--text-2); }
+.t-row.dashed .t-ic { color: var(--text-3); }
+.t-row.done .t-t { color: var(--text-3); text-decoration: line-through; text-decoration-thickness: 1px; }
+.t-meta { display: flex; gap: 6px; flex-wrap: wrap; font-size: 13px; color: var(--text-3); line-height: 1.4; }
+.t-chip { display: inline-flex; align-items: center; height: 20px; padding: 0 7px; border-radius: 999px; background: var(--bg-2); font-size: 12px; font-weight: 600; color: var(--text-2); }
+.t-own .av { width: 26px; height: 26px; font-size: 10.5px; }
+.t-mid { font-size: 13px; color: var(--text-2); display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.t-st { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.t-src { font-size: 12.5px; color: var(--text-3); }
+.t-group { margin-top: 14px; padding: 8px 0 6px; font-size: 13px; font-weight: 800; color: var(--text-3); border-bottom: 1px solid var(--border); }
+.t-crumb { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin: 0 0 12px; font-size: 13.5px; color: var(--text-2); }
+.t-crumb .t-ic { margin: 0; }
+.t-sep { color: var(--text-3); }
+@media (max-width: 760px) {
+  .t-hdr { display: none; }
+  .t-row { grid-template-columns: minmax(0, 1fr) auto; }
+  .t-row .t-own { display: none; }
+  .t-row .t-mid, .t-row .t-st { grid-column: 1 / -1; padding-left: calc(var(--d) * 22px + 26px); }
+}
 </style>
 </head>
 <body>
@@ -1693,6 +1733,7 @@ a.p-title:hover, .p-card:hover .p-title { text-decoration: underline; text-under
         '<div class="meta ins-sites">' + i.sites.map(function (s) { return '<a class="chip link" href="#site/' + s + '">' + esc(SITE[s].name) + '</a>'; }).join('') + '<button type="button" class="btn sm pv-btn" data-pv="insight:' + i.id + '"><svg width="14" height="14" viewBox="0 0 22 22" aria-hidden="true"><path d="M11 2.5 20 19H2z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></svg>View through Prism</button>' + '</div></div>' +
       (i.dismissed ? '<div class="banner info"><b>Dismissed: ' + esc(i.dismissed.reason) + '</b>' + (i.dismissed.note ? '<p>' + esc(i.dismissed.note) + '</p>' : '') + '<p>Prism won’t raise this again unless the pattern changes.</p></div>' : '') +
       (i.closed ? '<div class="banner info"><b>Closed</b><p>Prism will reopen it if the pattern returns.</p></div>' : '') +
+      '<div class="view-row solo">' + viewSwitch('insight') + '</div>' +
       '<div class="ins-grid"><div class="ins-main">' +
         '<section class="ins-sec"><span class="label">The story</span><p class="ins-story">' + esc(i.story) + '</p></section>' +
         (gone ? '' : '<section class="ins-sec"><span class="label">Hiviz recommends</span><p class="next">' + esc(i.next) + '</p>' + recSrc(i) + '</section>') +
@@ -1720,6 +1761,7 @@ a.p-title:hover, .p-card:hover .p-title { text-decoration: underline; text-under
           return '<li><span class="hist-dot" aria-hidden="true"></span><div><p class="hist-what">' + esc(h.what) + '</p>' + (h.text ? '<p class="hist-text">' + esc(h.text) + '</p>' : '') + '<p class="hist-meta">' + esc(h.when) + ' · ' + esc(h.who === YOU ? 'You' : h.who) + '</p></div></li>';
         }).join('') + '</ol></section>' +
       '</aside></div>';
+    if (ST.tview.insight === 'tree') treeSwap(insightTree(i));
   }
   document.addEventListener('change', function (e) {
     if (ST.view !== 'insight') return;
@@ -2236,7 +2278,7 @@ a.p-title:hover, .p-card:hover .p-title { text-decoration: underline; text-under
     return '<section class="' + cls + ' plan' + (prop ? ' prop' : '') + '"><div class="plan-head"><span class="label">Plan' + (o.split && !o.bare ? nowTag(i, 'plan') : '') + '</span><span class="plan-state">' + (prop ? 'Proposed by Hiviz \u00b7 ' + (o.split ? (!i.owner ? 'needs an owner to approve it' : 'waiting for ' + (i.owner === YOU ? 'your' : esc(i.owner) + '\u2019s') + ' approval') : 'waiting for the owner\u2019s approval') : esc(approvedLine(pl)) + (o.split ? ' \u00b7 ' + esc(planSummary(i).replace(/^All/, 'all')) : '')) + '</span></div>' +
       '<ol class="plan-acts">' + pl.actions.map(function (a, k) {
         var st = PA_ST.filter(function (x) { return x[0] === a.st; })[0];
-        return '<li class="pa st-' + a.st + '"><div class="pa-main"><span class="pa-t">' + esc(a.t) + '</span><span class="pa-meta">' + who(a) + '<span>by ' + esc(a.due) + '</span></span>' + linkHTML(i, k, a) + '</div>' +
+        return '<li class="pa st-' + a.st + '"><div class="pa-main"><span class="pa-t">' + tIcon('action') + esc(a.t) + '</span><span class="pa-meta">' + who(a) + '<span>by ' + esc(a.due) + '</span></span>' + linkHTML(i, k, a) + '</div>' +
           (prop ? '<button type="button" class="btn sm" data-pa-remove="' + i.id + ':' + k + '" aria-label="Remove this action">Remove</button>'
                 : '<label class="pa-ci"><span class="sr">Check in</span><select class="select" data-pa="' + i.id + ':' + k + '">' + PA_ST.map(function (x) { return '<option value="' + x[0] + '"' + (x[0] === a.st ? ' selected' : '') + '>' + x[1] + '</option>'; }).join('') + '</select></label>') + '</li>';
       }).join('') + '</ol>' +
@@ -2446,7 +2488,7 @@ a.p-title:hover, .p-card:hover .p-title { text-decoration: underline; text-under
     ]],
     ['words', 'Words we use', [
       ['', 'Is it handled?', 'Insight status: New, Agree to plan, In progress, Stalled, Ready to close, Closed.'],
-      ['', 'Is the work getting done?', 'Each action or milestone: Not started, On track, At risk, Done. Overdue when it passes its date. Owners can update any time; the check-in before a meeting just confirms it.'],
+      ['', 'Is the work getting done?', 'Each action, on an insight plan or a program: Not started, On track, At risk, Done. Overdue when it passes its date. Owners can update any time; the check-in before a meeting just confirms it.'],
       ['', 'Is it having an effect?', 'Prism’s read on a plan or program: Too early, Working, Pattern continues.'],
       ['', 'Did it make a difference?', 'The 90-day retro: Worked, Quiet, Partly, Didn’t work, Can’t tell.'],
       ['', 'Are we getting more mature?', 'Map factors and indicators: Improving, Steady, Worsening over 90 days. Objectives: On track, At risk, Off track.'],
@@ -2456,7 +2498,7 @@ a.p-title:hover, .p-card:hover .p-title { text-decoration: underline; text-under
       ['', 'Strategy', 'The few Forge Works Map factors the company has chosen to mature this year. Insights respond to what the records show; strategy is proactive.'],
       ['', 'Objective', 'A factor, a target level and a date, for the whole company or one division. Only set or changed at quarterly planning, with company leadership in the room.'],
       ['', 'Key result', 'An indicator with a target level. Prism scores it from the records, so progress shows every week, not once a quarter.'],
-      ['', 'Program', 'Planned work towards an objective, with an owner, milestones and resources. Like a plan, it says what Prism should listen for.'],
+      ['', 'Program', 'Planned work towards an objective, with an owner, actions and resources. Like a plan, it says what Prism should listen for.'],
       ['', 'Gap with no objective', 'A weak or worsening factor that nobody has chosen to act on. Raise it at the next quarterly planning.'],
       ['', 'Cadence', 'Quarterly planning sets objectives. A monthly progress meeting checks key results and programs. Fortnightly Focus reviews work the insights.']
     ]],
@@ -2876,8 +2918,8 @@ a.p-title:hover, .p-card:hover .p-title { text-decoration: underline; text-under
     'monitoring_metrics:2': 'When our managers say a site is safe, what do they mean?',
     'monitoring_metrics:3': 'How much of workers’ real experience shows up in our data?'
   };
-  function rvRow(title, sub, ctl, id, done) {
-    return '<li class="rv-row' + (done ? ' is-done' : '') + '"><div class="rv-m">' + (id ? '<button type="button" class="rv-title linkish" ' + (/^f:/.test(id) ? 'data-factor="' + id.slice(2) : /^v:/.test(id) ? 'data-factor="' + id.slice(2).split(':')[0] : (/^r-/.test(id) ? 'data-retro' : /^p-/.test(id) ? 'data-prog' : /^o-/.test(id) ? 'data-obj' : 'data-open') + '="' + id) + '">' + esc(title) + '</button>' : '<span class="rv-title">' + esc(title) + '</span>') + (sub ? '<span class="rv-s">' + sub + '</span>' : '') + '</div><div class="rv-c">' + ctl + '</div></li>';
+  function rvRow(title, sub, ctl, id, done, ic) {
+    return '<li class="rv-row' + (done ? ' is-done' : '') + '"><div class="rv-m">' + (id ? '<button type="button" class="rv-title linkish" ' + (/^f:/.test(id) ? 'data-factor="' + id.slice(2) : /^v:/.test(id) ? 'data-factor="' + id.slice(2).split(':')[0] : (/^r-/.test(id) ? 'data-retro' : /^p-/.test(id) ? 'data-prog' : /^o-/.test(id) ? 'data-obj' : 'data-open') + '="' + id) + '">' + (ic ? tIcon(ic) : '') + esc(title) + '</button>' : '<span class="rv-title">' + (ic ? tIcon(ic) : '') + esc(title) + '</span>') + (sub ? '<span class="rv-s">' + sub + '</span>' : '') + '</div><div class="rv-c">' + ctl + '</div></li>';
   }
   function rvChoice(key, opts, cur) {
     return '<span class="rv-ch">' + opts.map(function (o) { return '<button type="button" class="btn' + (cur === o ? ' is-on' : '') + '" data-rvdec="' + esc(key) + '" data-rvval="' + esc(o) + '" aria-pressed="' + (cur === o) + '">' + esc(o) + '</button>'; }).join('') + '</span>';
@@ -2912,7 +2954,7 @@ a.p-title:hover, .p-card:hover .p-title { text-decoration: underline; text-under
             : '<span class="rv-ci">' + (x.a.upd ? '<small>' + (x.a.upd === '26 Sep' ? 'Checked in now' : 'Checked in ' + esc(x.a.upd)) + '</small>' : '<small>No check-in yet</small>') +
               '<select class="select" data-pa="' + x.i.id + ':' + x.k + '" aria-label="How’s it going?">' + PA_ST.map(function (s) { return '<option value="' + s[0] + '"' + (s[0] === x.a.st ? ' selected' : '') + '>' + s[1] + '</option>'; }).join('') + '</select>' +
               (x.a.upd ? '' : '<button type="button" class="btn" data-rvci="' + x.key + '">Skip</button>') + '</span>';
-          return rvRow(x.a.t, sub, ctl, x.i.id, sk || !!x.a.upd);
+          return rvRow(x.a.t, sub, ctl, x.i.id, sk || !!x.a.upd, 'action');
         }).join('') + '</ul>' : '<p class="rv-empty">No open actions to check in on.</p>'),
         '<button type="button" class="btn lg" data-rvstep="here">Back</button><span class="rv-nav-r">' + (open ? '<small>' + open + ' not checked in will be recorded as missed</small>' : '') + '<button type="button" class="btn brand lg" data-rvstep="decide">Continue to decisions</button></span>');
       return;
@@ -2973,7 +3015,7 @@ a.p-title:hover, .p-card:hover .p-title { text-decoration: underline; text-under
       blk('Decided', dec.map(function (x) { return rvRow(x[0], esc(x[1]), '', x[2], false); })) +
       (checkedNow ? '<p class="rv-line">' + checkedNow + (checkedNow === 1 ? ' action' : ' actions') + ' checked in during the review.</p>' : '') +
       (notified.length ? '<p class="rv-line">Notified of their new actions: ' + esc(join(notified.map(function (w) { return w === YOU ? 'you' : w; }))) + '.</p>' : '') +
-      blk('Missed check-ins', missed.map(function (x) { return rvRow(x.a.t, esc(x.a.who || 'No one yet') + ' · ' + esc(x.i.title), '<span class="rv-miss">Counts towards stalled</span>', x.i.id, false); })) +
+      blk('Missed check-ins', missed.map(function (x) { return rvRow(x.a.t, esc(x.a.who || 'No one yet') + ' · ' + esc(x.i.title), '<span class="rv-miss">Counts towards stalled</span>', x.i.id, false, 'action'); })) +
       blk('Carried forward to the next review', carriedOut.map(function (x) { return rvRow(x[1], esc(x[2]), '', x[0], false); }), 'These go first on the agenda next time.') +
       blk('Coming back', back.map(function (x) { return rvRow(x[0], esc(x[1]), '', x[2], false); })) +
       (dec.length || carriedOut.length || missed.length ? '' : '<p class="rv-empty">Nothing was decided or carried forward.</p>') +
@@ -3423,7 +3465,7 @@ a.p-title:hover, .p-card:hover .p-title { text-decoration: underline; text-under
       var list = items.filter(function (it) { return it.kind === g[0]; });
       if (!list.length) return '';
       return '<section class="mf-group"><h2 class="igroup-h">' + esc(g[1]) + ' <span class="tnum">' + list.length + '</span></h2><div class="card mf-list">' + list.map(function (it) {
-        return '<div class="mf-row' + (it.kind === 'poll' ? ' is-poll' : '') + '"><span class="mf-sev">' + mfSev(it) + '</span><div class="mf-main"><span class="mf-title">' + esc(it.title) + '</span><span class="mf-why">' + esc(it.why) + '</span></div>' +
+        return '<div class="mf-row' + (it.kind === 'poll' ? ' is-poll' : '') + '"><span class="mf-sev">' + mfSev(it) + '</span><div class="mf-main"><span class="mf-title">' + (it.kind === 'action' ? tIcon('action') : '') + esc(it.title) + '</span><span class="mf-why">' + esc(it.why) + '</span></div>' +
           '<div class="mf-act">' + mfAction(it) + mfOpen(it) + '</div></div>';
       }).join('') + '</div></section>';
     }).join('');
@@ -3851,6 +3893,7 @@ a.p-title:hover, .p-card:hover .p-title { text-decoration: underline; text-under
     var krOf = function (k) { return obj ? obj.krs.filter(function (kr) { return kr[0] === k; })[0] : null; };
     $('view').innerHTML = '<a class="back" href="#map">← Map</a>' +
       '<div class="ins-head"><div class="meta"><span class="tlabel">' + esc(dom[1]) + '</span><span class="label">' + esc(dom[2]) + '</span></div><h1 class="ins-title">' + esc(f.name) + '</h1><p class="sub">' + esc(f.q) + '</p></div>' +
+      '<div class="view-row solo">' + viewSwitch('factor') + '</div>' +
       '<div class="ins-grid"><div class="ins-main">' +
         '<section class="card side-card f-rating"><span class="label">' + esc(scopeLabel()) + ' today</span><div class="f-rate-row">' + levelBar(sc.v, false, sc.v == null ? 'Needs management input' : null, sc.was) + (sc.v != null ? trendHTML(sc.t) : '') + '</div>' +
           (sc.v != null ? '<p class="f-named">' + esc(f.lnames[sc.lvl]) + '</p>' + wasLine(sc) : '') +
@@ -3884,6 +3927,7 @@ a.p-title:hover, .p-card:hover .p-title { text-decoration: underline; text-under
         }).join('') + '</ol><p class="muted-p">Summarised from the Forge Works blueprint. In the live product Hiviz would write these for your situation.</p></section>' +
         '<section class="card side-card"><h2>How this is scored</h2><p class="muted-p" style="color:var(--text)">Prism links each enriched record and insight to the factor and indicator it gives evidence for. Insights count for more than single records. A factor is rated from its indicators, can sit between levels, and is held back by its weakest indicator. Indicators that only management can evidence come from an anonymous poll in My Focus, and count once three or more managers have answered. Some also draw on Hiviz itself: what people do in the platform, such as who approves plans. That counts behaviour, never the tool.</p></section>' +
       '</aside></div>';
+    if (ST.tview.factor === 'tree') treeSwap(factorTree(key));
   }
   // The Map's language, for any insight: where it sits and what the next level looks like
   // Where a recommendation comes from: the indicator it moves, and Forge Works guidance for its next level
@@ -3998,6 +4042,8 @@ a.p-title:hover, .p-card:hover .p-title { text-decoration: underline; text-under
       ms: [A('Coach supervisors to back every stop', 'Alex Chen', '22 Aug', 'done'), A('Log stops and restarts in Procore and Intelex', 'Dana Brooks', '19 Sep', 'done'),
            A('Share one stop story a week across the group', 'Alex Chen', '31 Oct', 'track')] }
   };
+  // Each program moves one key result (an indicator of its objective's factor)
+  PROGRAMS['p-hand'].kr = 4; PROGRAMS['p-meas'].kr = 1; PROGRAMS['p-stop'].kr = 2;
   // A program is work, like an insight: a plan of actions (its milestones), a lifecycle and a recorded approval.
   function progWrap(pid, proposed) {
     var p = PROGRAMS[pid]; p.id = pid; p.kind = 'program'; p.history = p.history || [];
@@ -4125,6 +4171,165 @@ a.p-title:hover, .p-card:hover .p-title { text-decoration: underline; text-under
     }
     return '<section class="card rsec"><span class="label">From other meetings</span>' + (li.length ? '<ul class="rlist fo-list">' + li.map(function (x) { return '<li><span class="fo-src">' + esc(x[0]) + '</span><span class="fo-t">' + x[1] + '</span>' + (x[2] ? '<span>' + esc(x[2]) + '</span>' : '') + '</li>'; }).join('') + '</ul>' : '<p class="muted-p">Nothing handed over since last time.</p>') + '</section>';
   }
+  /* =============================================================
+     Tree view: one pattern for how things relate. A Report | Tree switch
+     on the Strategy, factor and insight pages, so both can be compared.
+     Every row: type marker, name, owner, now → target, status.
+     Type is shown by shape in one colour; colour stays for status.
+     (Icon set and colour to get its own review wave.)
+     ============================================================= */
+  ST.tview = { strategy: 'report', factor: 'report', insight: 'report' }; ST.tOpen = {};
+  var T_KIND = { goal: 'Goal', objective: 'Objective', kr: 'Key result', program: 'Program', milestone: 'Action', insight: 'Insight', factor: 'Factor', indicator: 'Indicator', record: 'Records', plan: 'Plan', action: 'Action', candidate: 'Candidates' };
+  function tIcon(k) {
+    var p = {
+      goal: '<path d="M8 1.5 14.5 8 8 14.5 1.5 8z" fill="currentColor"/>',
+      objective: '<circle cx="8" cy="8" r="6.2"/><circle cx="8" cy="8" r="3.2"/><circle cx="8" cy="8" r="0.9" fill="currentColor"/>',
+      kr: '<path d="M3 13V8.5M8 13V5M13 13V2.5"/>',
+      indicator: '<path d="M3 13V8.5M8 13V5M13 13V2.5"/>',
+      program: '<rect x="2" y="5.5" width="9" height="8" rx="1.5"/><path d="M5 3h8.5a.5.5 0 0 1 .5.5V11"/>',
+      milestone: '<circle cx="8" cy="8" r="5.5"/>',
+      action: '<circle cx="8" cy="8" r="5.5"/>',
+      insight: '<path d="M8 2.2 14 13H2z" stroke-linejoin="round"/>',
+      factor: '<path d="M8 1.8 13.6 5v6L8 14.2 2.4 11V5z" stroke-linejoin="round"/>',
+      record: '<path d="M4 1.8h5.5L12.5 5v9.2h-8.5z M9.5 1.8V5h3" stroke-linejoin="round"/>',
+      plan: '<path d="M6 4.5h7.5M6 8h7.5M6 11.5h7.5M2.5 4.5l1 1 1.5-2M2.5 8l1 1 1.5-2M2.5 11.5l1 1 1.5-2"/>',
+      candidate: '<circle cx="8" cy="8" r="5.5" stroke-dasharray="2.2 2"/>'
+    }[k] || '';
+    return '<svg class="t-ic" width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" role="img" aria-label="' + (T_KIND[k] || k) + '"><title>' + (T_KIND[k] || k) + '</title>' + p + '</svg>';
+  }
+  function tOpen(k) { return ST.tOpen[k] !== false; }
+  function tPill(tone, text) { return '<span class="badge' + (tone ? ' ' + tone : '') + '">' + (tone ? '<i></i>' : '') + esc(text) + '</span>'; }
+  function tLvl(v) { return levelBar(v, true, v == null ? 'Needs input' : LEVELS[lvlOf(v)]); }
+  function tTrend(t) { return t === 'worse' ? tPill('critical', 'Worsening') : t === 'better' ? tPill('success', 'Improving') : tPill('', 'Steady'); }
+  // One row of the tree. o: depth, kind, title, href | attr, owner, mid, status, meta, key (collapsible), dashed, linked
+  function tRow(o) {
+    var name = o.href ? '<a class="t-t" href="' + o.href + '">' + o.title + '</a>' : o.attr ? '<button type="button" class="t-t linkish" ' + o.attr + '>' + o.title + '</button>' : '<span class="t-t">' + o.title + '</span>';
+    return '<div class="t-row' + (o.dashed ? ' dashed' : '') + (o.linked ? ' linked' : '') + (o.done ? ' done' : '') + (o.strong ? ' strong' : '') + '" style="--d:' + (o.depth || 0) + '">' +
+      '<div class="t-nm">' + (o.key ? '<button type="button" class="t-chev" data-tkey="' + esc(o.key) + '" aria-expanded="' + tOpen(o.key) + '" aria-label="' + (tOpen(o.key) ? 'Collapse' : 'Expand') + '">' + (tOpen(o.key) ? '▾' : '▸') + '</button>' : '<span class="t-sp"></span>') + tIcon(o.kind) +
+        '<span class="t-txt">' + name + (o.meta ? '<span class="t-meta">' + o.meta + '</span>' : '') + '</span></div>' +
+      '<span class="t-own">' + (o.owner ? '<span class="av' + (o.owner === YOU ? ' me' : '') + '" title="' + esc(o.owner) + '">' + initials(o.owner) + '</span>' : '') + '</span>' +
+      '<span class="t-mid">' + (o.mid || '') + '</span><span class="t-st">' + (o.status || '') + '</span></div>';
+  }
+  function tFrame(rows, sum) {
+    return '<div class="tree-v">' + (sum ? '<div class="t-sum">' + sum + '</div>' : '') +
+      '<div class="t-legend">' + ['goal', 'objective', 'kr', 'program', 'action', 'insight', 'factor'].map(function (k) { return '<span>' + tIcon(k) + T_KIND[k] + '</span>'; }).join('') + '</div>' +
+      '<div class="t-hdr"><span>Name</span><span>Owner</span><span>Now → target</span><span>Status</span></div>' + rows.join('') + '</div>';
+  }
+  function tCrumb(parts) { return '<p class="t-crumb">' + parts.map(function (x) { return tIcon(x[0]) + '<span>' + x[1] + '</span>'; }).join('<span class="t-sep">›</span>') + '</p>'; }
+  function tGroupHead(t) { return '<div class="t-group">' + t + '</div>'; }
+  function viewSwitch(page) {
+    var v = ST.tview[page];
+    return '<div class="seg view-sw" role="group" aria-label="View"><button type="button" data-tview="' + page + ':report" aria-pressed="' + (v !== 'tree') + '">Report</button><button type="button" data-tview="' + page + ':tree" aria-pressed="' + (v === 'tree') + '">Tree</button></div>';
+  }
+  // Swap everything after the switch for the tree, leaving the page header as it is
+  function treeSwap(html) { var r = $('view').querySelector('.view-row'); if (!r) return; while (r.nextSibling) r.parentNode.removeChild(r.nextSibling); r.insertAdjacentHTML('afterend', html); }
+  function insRow(i, depth, mid) { return tRow({ depth: depth, kind: 'insight', title: esc(i.title), attr: 'data-open="' + i.id + '"', owner: i.owner, mid: mid || 'contributes', status: statusBadge(i), linked: true }); }
+  // Action and milestone status, in the same pill style as everything else in the tree
+  function actPill(a) { return a.st === 'done' ? tPill('success', 'Done') : overdue(a) ? tPill('critical', 'Overdue') : a.st === 'risk' ? tPill('warning', 'At risk') : tPill('', a.st === 'track' ? 'On track' : 'Not started'); }
+  function readPill(r) { return r === 'working' ? tPill('success', 'Working') : r === 'continues' ? tPill('critical', 'Pattern continues') : tPill('', 'Too early'); }
+  // The insights that make the case for a candidate: open or closed, in the purview, on its factor
+  function candEvidence(f) { var regs = regionsInScope(); return INSIGHTS.filter(function (i) { return !i.dismissed && INS_FACTOR[i.id] && INS_FACTOR[i.id][0] === f && i.sites.some(function (s) { return regs.indexOf(SITE[s].region) > -1; }); }); }
+  function daysToPlanning() { var m = /(\d+) (\w+)/.exec(STRAT.planning || ''); if (!m) return 99; var mo = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'].indexOf(m[2]); var d = new Date(mo < 8 ? 2027 : 2026, mo, +m[1]); return Math.round((d - new Date(2026, 8, 26)) / 864e5); }
+
+  // Strategy as one tree: goal → objectives → key results (with the insights that move them) → programs → actions; candidates near planning
+  function strategyTree() {
+    var objs = objsInView(), rows = [], c = { 'On track': 0, 'At risk': 0, 'Off track': 0 }, open = 0, krN = 0, krHit = 0;
+    rows.push(tRow({ depth: 0, kind: 'goal', title: esc(ORG_GOAL), mid: 'Company goal', strong: true }));
+    objs.forEach(function (o) {
+      var f = FACTOR[o.f], orr = objRegs(o), sc = scoreFactor(orr, o.f), s = objStatus(o), key = 'o:' + o.id;
+      c[s[1]]++; o.programs.forEach(function (pid) { open += PROGRAMS[pid].ms.filter(function (m) { return m.st !== 'done'; }).length; });
+      rows.push(tRow({ depth: 1, kind: 'objective', title: esc(f.name) + ' to ' + LEVELS[o.target], attr: 'data-obj="' + o.id + '"', owner: o.owner, mid: tLvl(sc.v) + ' → ' + LEVELS[o.target] + ' · ' + esc(o.by), status: tPill(s[0], s[1]), key: key, strong: true, meta: esc(objScope(o)) }));
+      if (!tOpen(key)) return;
+      var progRows = function (pid, depth) {
+        var p = PROGRAMS[pid], pk = 'p:' + pid, d = p.ms.filter(function (m) { return m.st === 'done'; }).length;
+        rows.push(tRow({ depth: depth, kind: 'program', title: esc(p.title), attr: 'data-prog="' + pid + '"', owner: p.owner, mid: d + ' of ' + p.ms.length + ' done', status: readPill(p.read[0]), key: pk, meta: depth === 2 ? 'Not linked to a key result yet' : '' }));
+        if (tOpen(pk)) p.ms.forEach(function (m) { rows.push(tRow({ depth: depth + 1, kind: 'action', title: esc(m.t), attr: 'data-prog="' + pid + '"', owner: m.who, mid: 'by ' + esc(m.due), status: actPill(m), done: m.st === 'done' })); }); // done actions stay: progress, not hidden scope
+      };
+      // Key results are what's measured, so the work sits under them
+      o.krs.forEach(function (kr) {
+        var x = aggInd(orr, o.f, kr[0]), hit = lvlOf(x.v) >= kr[1], kk = 'k:' + o.id + ':' + kr[0];
+        var progs = o.programs.filter(function (pid) { return PROGRAMS[pid].kr === kr[0]; });
+        krN++; if (hit) krHit++;
+        rows.push(tRow({ depth: 2, kind: 'kr', title: esc(f.inds[kr[0]]), href: '#map/' + o.f, mid: tLvl(x.v) + ' → ' + LEVELS[kr[1]], status: hit ? tPill('success', 'Reached') : tTrend(x.t), key: progs.length ? kk : '', meta: progs.length || hit ? '' : 'No program working on this yet' }));
+        if (progs.length && tOpen(kk)) progs.forEach(function (pid) { progRows(pid, 3); });
+      });
+      o.programs.filter(function (pid) { return !o.krs.some(function (kr) { return kr[0] === PROGRAMS[pid].kr; }); }).forEach(function (pid) { progRows(pid, 2); });
+      // The insights that made the case when planning chose this objective
+      (o.shapedBy || []).forEach(function (iid) { var si = insightById(iid); if (si) rows.push(insRow(si, 2, 'shaped this objective')); });
+    });
+    // In the last week before quarterly planning, the candidates for next quarter join the tree
+    var dtp = daysToPlanning(), cands = dtp >= 0 && dtp <= 7 ? plCandidates() : [];
+    if (cands.length) {
+      rows.push(tRow({ depth: 1, kind: 'candidate', title: 'Candidates for next quarter', mid: 'Planning in ' + dtp + (dtp === 1 ? ' day' : ' days'), status: tPill('', cands.length + ' to decide'), key: 'cand', dashed: true, strong: true }));
+      if (tOpen('cand')) cands.forEach(function (cd) {
+        var sc = scoreFactor(regionsInScope(), cd.f), ev = candEvidence(cd.f), ck = 'c:' + cd.f;
+        rows.push(tRow({ depth: 2, kind: 'factor', title: esc(FACTOR[cd.f].name), href: '#map/' + cd.f, mid: tLvl(sc.v), status: '<span class="t-src">' + esc(cd.src) + '</span>', dashed: true, meta: esc(cd.why), key: ev.length ? ck : '' }));
+        if (ev.length && tOpen(ck)) ev.forEach(function (i) { rows.push(insRow(i, 3, 'evidence for it')); });
+      });
+    }
+    var sum = tPill('', objs.length + (objs.length === 1 ? ' objective' : ' objectives')) + (c['On track'] ? tPill('success', c['On track'] + ' on track') : '') + (c['At risk'] ? tPill('warning', c['At risk'] + ' at risk') : '') + (c['Off track'] ? tPill('critical', c['Off track'] + ' off track') : '') +
+      tPill('', krHit + ' of ' + krN + ' key results reached') + tPill('', open + (open === 1 ? ' open action' : ' open actions')) + (cands.length ? tPill('', cands.length + ' candidates for next quarter') : '');
+    return tFrame(rows, sum);
+  }
+
+  // A factor: what it affects (objective, programs), and every indicator with the evidence behind it
+  function factorTree(key) {
+    var f = FACTOR[key], regs = regionsInScope(), sc = scoreFactor(regs, key), obj = objOnFactor(key), rows = [];
+    var dom = DOMAINS.filter(function (d) { return d[0] === f.domain; })[0];
+    rows.push(tRow({ depth: 0, kind: 'factor', title: esc(f.name), mid: tLvl(sc.v), status: tTrend(sc.t), strong: true, meta: sc.weakest != null ? 'Held back by ' + esc(f.inds[sc.weakest].toLowerCase()) : '' }));
+    if (obj) {
+      rows.push(tGroupHead('What it affects'));
+      var s = objStatus(obj);
+      rows.push(tRow({ depth: 1, kind: 'objective', title: esc(objTitle(obj)), attr: 'data-obj="' + obj.id + '"', owner: obj.owner, mid: LEVELS[obj.target] + ' by ' + esc(obj.by), status: tPill(s[0], s[1]) }));
+      obj.programs.forEach(function (pid) { var p = PROGRAMS[pid], d = p.ms.filter(function (m) { return m.st === 'done'; }).length; rows.push(tRow({ depth: 2, kind: 'program', title: esc(p.title), attr: 'data-prog="' + pid + '"', owner: p.owner, mid: d + ' of ' + p.ms.length + ' done', status: readPill(p.read[0]) })); });
+    }
+    rows.push(tGroupHead('Indicators, and the evidence behind each'));
+    var ins = INSIGHTS.filter(function (i) { return INS_FACTOR[i.id] && INS_FACTOR[i.id][0] === key && !i.dismissed && i.sites.some(function (s) { return regs.indexOf(SITE[s].region) > -1; }); });
+    f.inds.forEach(function (name, k) {
+      var x = sc.inds[k], kr = obj ? obj.krs.filter(function (r) { return r[0] === k; })[0] : null, ik = 'i:' + key + ':' + k, kins = ins.filter(function (i) { return INS_FACTOR[i.id][1] === k; });
+      var ev = [], e = evOf(key, k), pk = key + ':' + k;
+      if (e.indexOf('Rec') > -1 && x.n && x.rv !== 'poll') ev.push('Records ' + x.n);
+      if (kins.length) ev.push((kins.length === 1 ? '1 insight' : kins.length + ' insights'));
+      if (POLL[pk] && pollCount(pk).all) ev.push('Poll ' + pollCount(pk).all + ' of ' + POLL_ROUND.polled);
+      if (PLAT[pk]) ev.push('Hiviz');
+      rows.push(tRow({ depth: 1, kind: 'indicator', title: esc(name), mid: tLvl(x.v), status: (x.v != null ? tTrend(x.t) : tPill('', 'Needs input')) + (kr ? ' ' + pTag('Key result') : ''), key: kins.length ? ik : '', meta: ev.length ? ev.map(function (t) { return '<span class="t-chip">' + esc(t) + '</span>'; }).join('') : 'No evidence yet' }));
+      if (kins.length && tOpen(ik)) kins.forEach(function (i) { rows.push(insRow(i, 2, 'gives evidence')); });
+    });
+    return tCrumb([['goal', esc(ORG_GOAL)], ['factor', esc(dom[1])]]) + tFrame(rows);
+  }
+
+  // An insight: what it affects up the tree, and what it's made of and what's being done below it
+  function insightTree(i) {
+    var fx = INS_FACTOR[i.id], o = objFor(i), rows = [], regs = [];
+    i.sites.forEach(function (s) { if (regs.indexOf(SITE[s].region) < 0) regs.push(SITE[s].region); });
+    var crumb = [['goal', esc(ORG_GOAL)]];
+    if (o) crumb.push(['objective', esc(objTitle(o))]);
+    if (fx) crumb.push([o && o.krs.some(function (k) { return k[0] === fx[1]; }) ? 'kr' : 'indicator', esc(FACTOR[fx[0]].inds[fx[1]])]);
+    rows.push(tRow({ depth: 0, kind: 'insight', title: esc(i.title), owner: i.owner, mid: esc(i.sites.map(function (s) { return SITE[s].name; }).join(', ')), status: statusBadge(i), strong: true }));
+    if (fx) {
+      rows.push(tGroupHead('What it affects'));
+      var x = aggInd(regs, fx[0], fx[1]), fsc = scoreFactor(regs, fx[0]);
+      rows.push(tRow({ depth: 1, kind: o && o.krs.some(function (k) { return k[0] === fx[1]; }) ? 'kr' : 'indicator', title: esc(FACTOR[fx[0]].inds[fx[1]]), href: '#map/' + fx[0], mid: tLvl(x.v), status: tTrend(x.t) }));
+      rows.push(tRow({ depth: 2, kind: 'factor', title: esc(FACTOR[fx[0]].name), href: '#map/' + fx[0], mid: tLvl(fsc.v), status: tTrend(fsc.t) }));
+      if (o) { var s = objStatus(o); rows.push(tRow({ depth: 3, kind: 'objective', title: esc(objTitle(o)), attr: 'data-obj="' + o.id + '"', owner: o.owner, mid: esc(objScope(o)), status: tPill(s[0], s[1]) })); }
+    }
+    rows.push(tGroupHead('What it’s made of, and what’s being done'));
+    rows.push(tRow({ depth: 1, kind: 'record', title: recCount(i) + ' records', mid: 'from ' + i.says.length + (i.says.length === 1 ? ' tool' : ' tools'), meta: i.says.map(function (sy) { return '<span class="t-chip">' + esc(SRC[sy.src].name) + ' ' + sy.n + '</span>'; }).join('') }));
+    if (i.plan) {
+      var pl = i.plan, pk = 'pl:' + i.id;
+      rows.push(tRow({ depth: 1, kind: 'plan', title: 'Plan', mid: pl.state === 'agreed' ? esc(approvedLine(pl)) : 'Proposed by Hiviz', status: pl.state === 'agreed' ? (pl.read ? readPill(pl.read[0]) : tPill('', 'Listening')) : tPill('warning', 'Agree to plan'), key: pk }));
+      if (tOpen(pk)) pl.actions.forEach(function (a) { rows.push(tRow({ depth: 2, kind: 'action', title: esc(a.t), owner: a.who, mid: 'by ' + esc(a.due), status: actPill(a), done: a.st === 'done' })); });
+    }
+    if (o && fx) o.programs.forEach(function (pid) { var p = PROGRAMS[pid]; rows.push(tRow({ depth: 1, kind: 'program', title: esc(p.title), attr: 'data-prog="' + pid + '"', owner: p.owner, mid: 'works on the same objective', status: readPill(p.read[0]), linked: true })); });
+    return tCrumb(crumb) + tFrame(rows);
+  }
+  document.addEventListener('click', function (e) {
+    var t = e.target.closest('[data-tview]');
+    if (t) { var p = t.getAttribute('data-tview').split(':'), y = window.scrollY; ST.tview[p[0]] = p[1]; render(); window.scrollTo(0, y); return; }
+    var k = e.target.closest('[data-tkey]');
+    if (k) { var key = k.getAttribute('data-tkey'), y2 = window.scrollY; ST.tOpen[key] = !tOpen(key); render(); window.scrollTo(0, y2); }
+  });
+
   function renderStrategy() {
     if (ST.stTab === 'history') return renderStrategyHistory();
     var org = !ST.div && !ST.reg, objs = objsInView(), regs = regionsInScope();
@@ -4148,7 +4353,7 @@ a.p-title:hover, .p-card:hover .p-title { text-decoration: underline; text-under
     $('view').innerHTML =
       '<div class="page-top"><div><h1>Strategy</h1><p class="sub">' + esc(ORG_NAME) + ' objectives for ' + esc(STRAT.year) + ' · set at quarterly planning</p></div>' +
         stActions(org) + '</div>' +
-        stRhythm() + tabsHTML('st') +
+        stRhythm() + '<div class="view-row">' + tabsHTML('st') + viewSwitch('strategy') + '</div>' +
       '<p class="pv-summary">' + lead + '</p>' +
       (org ? '' : '<p class="st-note">Objectives are set for all of ' + esc(ORG_NAME) + ' at quarterly planning. This shows the ones that include ' + esc(scopeLabel()) + ', measured across it.</p>') +
       checkinPanel() +
@@ -4165,7 +4370,7 @@ a.p-title:hover, .p-card:hover .p-title { text-decoration: underline; text-under
           o.programs.map(function (pid) {
             var p = PROGRAMS[pid], d = p.ms.filter(function (m) { return m.st === 'done'; }).length;
             return '<div class="st-prog"><div class="sp-head"><span class="label">Program</span><h3><button type="button" class="linkish map-link" data-prog="' + pid + '">' + esc(p.title) + '</button></h3><span class="sp-meta">' + statusBadge(p) + ' ' + esc(p.owner) + ' · ' + d + ' of ' + p.ms.length + ' actions done · ' + esc(p.resources) + '</span></div>' +
-              '<details class="sp-det"><summary>' + p.ms.length + ' actions</summary><ul class="ra-acts sp-ms">' + p.ms.map(function (m) { return '<li>' + actBadge(m) + '<span class="ra-t">' + esc(m.t) + '</span><span class="ra-m">' + esc(m.who) + ' · by ' + esc(m.due) + '</span></li>'; }).join('') + '</ul></details>' +
+              '<details class="sp-det"><summary>' + p.ms.length + ' actions</summary><ul class="ra-acts sp-ms">' + p.ms.map(function (m) { return '<li>' + tIcon('action') + actBadge(m) + '<span class="ra-t">' + esc(m.t) + '</span><span class="ra-m">' + esc(m.who) + ' · by ' + esc(m.due) + '</span></li>'; }).join('') + '</ul></details>' +
               '<p class="sp-read"><span>Is it working?</span>' + (p.read[0] === 'working' ? '<span class="badge success"><i></i>Working</span>' : p.read[0] === 'continues' ? '<span class="badge critical"><i></i>Pattern continues</span>' : '<b>Too early to tell</b>') + ' ' + esc(p.read[1]) + '</p></div>';
           }).join('') +
           '<div class="st-ins"><span class="label">Insights contributing</span>' + (ins.length ? '<div class="links">' + ins.map(function (i) { return '<button type="button" class="link-item" data-open="' + i.id + '"><b>' + esc(i.title) + '</b><span>' + esc(FACTOR[o.f].inds[INS_FACTOR[i.id][1]]) + ' · ' + esc(planSummary(i) || statusText(i)) + '</span></button>'; }).join('') + '</div>' : '<p class="muted-p">No open insights on this factor right now.</p>') + '</div>' +
@@ -4190,6 +4395,7 @@ a.p-title:hover, .p-card:hover .p-title { text-decoration: underline; text-under
         })() +
       '</div>' +
       '<p class="map-note">' + (org ? 'Objectives can only be changed at quarterly planning, with ' + esc(ORG_NAME) + ' leadership in the room. Last: ' + esc(STRAT.lastPlanning) + ' \u00b7 next: ' + esc(STRAT.planning) + '.' : 'Want an objective changed? Raise it at quarterly planning on ' + esc(STRAT.planning) + '.') + '</p>';
+    if (ST.tview.strategy === 'tree') treeSwap(strategyTree());
   }
   document.addEventListener('click', function (e) {
     var c = e.target.closest('[data-cand]'); if (!c) return;
@@ -4380,9 +4586,10 @@ a.p-title:hover, .p-card:hover .p-title { text-decoration: underline; text-under
       var d = PL.cand[c.f], id = 'o-' + c.f, pid = 'p-' + c.f, o = { id: id, f: c.f, target: d.target, by: d.by, div: d.div.indexOf('reg:') === 0 ? regionDiv(d.div.slice(4)) : d.div, reg: d.div.indexOf('reg:') === 0 ? d.div.slice(4) : '', owner: d.owner, why: c.why, krs: [], programs: [pid], set: '26 Sep' };
       var regs = objRegs(o), inds = FACTOR[c.f].inds.map(function (_, k) { return { k: k, x: aggInd(regs, c.f, k) }; }).filter(function (y) { return y.x.v != null && !mgmtOnly(c.f, y.k); }).sort(function (a, b) { return a.x.v - b.x.v; });
       o.krs = inds.slice(0, 2).map(function (y) { return [y.k, d.target]; });
+      o.shapedBy = candEvidence(c.f).map(function (i) { return i.id; });
       PROGRAMS[pid] = { title: 'Program to be scoped', owner: d.owner, resources: 'To be agreed', expect: 'To be set when the program is scoped.', read: ['early', 'Starts next quarter.'],
         ms: [A('Scope the program and bring it to the monthly progress meeting', d.owner, '6 Oct')] };
-      progWrap(pid, true);
+      progWrap(pid, true); if (o.krs.length) PROGRAMS[pid].kr = o.krs[0][0];
       OBJECTIVES.push(o);
     });
     STRAT_LOG.unshift({ type: 'Quarterly planning', date: '26 Sep', who: Object.keys(PL.att).filter(function (k) { return PL.att[k]; }), lines: lines, notes: PL.notes, carried: carriedC });
@@ -4515,7 +4722,7 @@ a.p-title:hover, .p-card:hover .p-title { text-decoration: underline; text-under
       OBJECTIVES.forEach(function (o) { var regs = objRegs(o); o.krs.forEach(function (kr) { var t = monthInd(regs, o.f, kr[0]).t; if (t === 'better') moved++; if (t === 'worse') slipped++; }); });
       rvPage('Step 1 of 4', 'Who’s here', 'Since ' + esc(STRAT.lastProgress) + ' · ' + esc(ORG_NAME) + ' · ' + lw(moved) + (moved === 1 ? ' key result' : ' key results') + ' moved forward, ' + lw(slipped) + ' slipped',
         '<ul class="rv-att">' + PL_PEOPLE.map(function (p) { var req = p === 'Morgan Hale'; return '<li><label class="rv-p' + (PG.att[p] ? ' on' : '') + '"><input type="checkbox" data-pgatt="' + esc(p) + '"' + (PG.att[p] ? ' checked' : '') + (req ? ' disabled' : '') + '><span class="av' + (p === YOU ? ' me' : '') + '">' + initials(p) + '</span><span>' + esc(p) + '<small>' + esc(ROLE[p] || '') + (req ? ' · required' : '') + '</small></span></label></li>'; }).join('') + '</ul>' +
-        '<h2 class="rv-h2">On today</h2><ol class="rv-agenda"><li><b>Check-ins</b><span>' + open.length + ' milestones · ' + open.filter(function (x) { return !x.m.upd; }).length + ' not checked in yet</span></li>' +
+        '<h2 class="rv-h2">On today</h2><ol class="rv-agenda"><li><b>Check-ins</b><span>' + open.length + ' actions · ' + open.filter(function (x) { return !x.m.upd; }).length + ' not checked in yet</span></li>' +
           PG_GROUPS.filter(function (g) { return gs[g[0]].length; }).map(function (g) { return '<li><b>' + esc(g[1]) + '</b><span>' + gs[g[0]].length + '</span></li>'; }).join('') + '</ol>',
         '<span></span><button type="button" class="btn brand lg" data-pgstep="check">Start with check-ins</button>', bar);
       return;
@@ -4524,7 +4731,7 @@ a.p-title:hover, .p-card:hover .p-title { text-decoration: underline; text-under
     // 2 · Check-ins, before any decisions
     if (PG.step === 'check') {
       var list = pgOpen(), before = list.filter(function (x) { return x.m.upd && x.m.upd !== '26 Sep'; }).length, todo = list.filter(function (x) { return !x.m.upd && !PG.ci[x.key]; }).length;
-      rvPage('Step 2 of 4', 'Check-ins', list.length + ' open milestones on strategy programs · ' + before + ' checked in before the meeting' + (todo ? ' · <b>' + todo + ' to go</b>' : ''),
+      rvPage('Step 2 of 4', 'Check-ins', list.length + ' open actions on strategy programs · ' + before + ' checked in before the meeting' + (todo ? ' · <b>' + todo + ' to go</b>' : ''),
         rvQ('What’s changed since your last update, and is anything in the way?') +
         '<ul class="rv-list">' + list.map(function (x) {
           var sk = PG.ci[x.key] === 'skip', pr = x.key.split(':');
@@ -4532,7 +4739,7 @@ a.p-title:hover, .p-card:hover .p-title { text-decoration: underline; text-under
             : '<span class="rv-ci">' + (x.m.upd ? '<small>' + (x.m.upd === '26 Sep' ? 'Checked in now' : 'Checked in ' + esc(x.m.upd)) + '</small>' : '<small>No check-in yet</small>') +
               '<select class="select" data-pa="' + pr[0] + ':' + pr[1] + '" aria-label="How’s it going?">' + PA_ST.map(function (s) { return '<option value="' + s[0] + '"' + (s[0] === x.m.st ? ' selected' : '') + '>' + s[1] + '</option>'; }).join('') + '</select>' +
               (x.m.upd ? '' : '<button type="button" class="btn" data-pgci="' + x.key + '">Skip</button>') + '</span>';
-          return rvRow(x.m.t, msSub(x, tagOf(x.key)), ctl, pr[0], sk || !!x.m.upd);
+          return rvRow(x.m.t, msSub(x, tagOf(x.key)), ctl, pr[0], sk || !!x.m.upd, 'action');
         }).join('') + '</ul>',
         '<button type="button" class="btn lg" data-pgstep="here">Back</button><span class="rv-nav-r">' + (todo ? '<small>' + todo + ' not checked in will be recorded as missed</small>' : '') + '<button type="button" class="btn brand lg" data-pgstep="decide">Continue to decisions</button></span>', bar);
       return;
@@ -4557,7 +4764,7 @@ a.p-title:hover, .p-card:hover .p-title { text-decoration: underline; text-under
         }
         var x = pgMs(id), mx = { m: x.m, p: x.p };
         var extra = key === 'disagree' ? '<br>Prism: ' + esc(x.p.read[1]) : '';
-        return rvRow(x.m.t, msSub(mx, tagOf(id)) + extra + cmHTML(x.m), pgChoice(id + ':' + key, PG_CHOICES[key]), id.split(':')[0], !!dec);
+        return rvRow(x.m.t, msSub(mx, tagOf(id)) + extra + cmHTML(x.m), pgChoice(id + ':' + key, PG_CHOICES[key]), id.split(':')[0], !!dec, 'action');
       });
       rvPage('Step 3 of 4 · Decide · ' + total + ' items in ' + gsOn.length + ' groups', esc(g[1]) + ' <span class="rv-n">' + ids.length + '</span>', '',
         '<ol class="rv-groups">' + gsOn.map(function (x, k) { var all = !pgLeft(x[0]), can = k <= PG.reach || (k === PG.g + 1 && !left); return '<li class="' + (k === PG.g ? 'on' : all && k <= PG.reach ? 'done' : '') + '"><button type="button" data-pgg="' + k + '"' + (can ? '' : ' disabled') + '>' + (all && k !== PG.g && k <= PG.reach ? '✓ ' : '') + esc(x[1]) + ' <span>' + PG.groups[x[0]].length + '</span></button></li>'; }).join('') + '</ol>' +
@@ -4584,9 +4791,9 @@ a.p-title:hover, .p-card:hover .p-title { text-decoration: underline; text-under
     var openOf = function (id) { return /^o-/.test(id) ? id : id.split(':')[0]; };
     rvPage('Step 4 of 4', 'Summary', (PG.early ? 'Ended early · ' : '') + esc(ORG_NAME) + ' · Friday 26 September · ' + esc(join(PL_PEOPLE.filter(function (p) { return PG.att[p]; }))),
       blk('Decided', dec.map(function (x) { return rvRow(x[0], esc(x[1]), '', openOf(x[2]), false); })) +
-      (checkedNow ? '<p class="rv-line">' + checkedNow + (checkedNow === 1 ? ' milestone' : ' milestones') + ' checked in during the meeting.</p>' : '') +
+      (checkedNow ? '<p class="rv-line">' + checkedNow + (checkedNow === 1 ? ' action' : ' actions') + ' checked in during the meeting.</p>' : '') +
       blk('Taken to quarterly planning', planning.map(function (x) { return rvRow(x[0], esc(x[1]), '', openOf(x[2]), false); }), 'Quarterly planning is on ' + esc(STRAT.planning) + '.') +
-      blk('Missed check-ins', missed.map(function (x) { return rvRow(x.m.t, esc(x.m.who) + ' · ' + esc(x.p.title), '<span class="rv-miss">Recorded as missed</span>', x.key.split(':')[0], false); })) +
+      blk('Missed check-ins', missed.map(function (x) { return rvRow(x.m.t, esc(x.m.who) + ' · ' + esc(x.p.title), '<span class="rv-miss">Recorded as missed</span>', x.key.split(':')[0], false, 'action'); })) +
       blk('Carried forward to next month', carriedOut.map(function (x) { return rvRow(x[1], esc(x[2]), '', openOf(x[0]), false); }), 'These go first on the agenda next time.') +
       '<section class="rv-rc"><h2 class="rv-h2">Coming back</h2><ul class="rv-list">' + rvRow('Next monthly progress', 'Monday 27 October · check-ins open 20 Oct', '', '', false) + '</ul></section>' +
       '<label class="w-note-l" for="pg-notes">Meeting notes</label><textarea id="pg-notes" class="w-note" rows="3" placeholder="Anything else worth recording">' + esc(PG.notes) + '</textarea>',
@@ -4609,7 +4816,7 @@ a.p-title:hover, .p-card:hover .p-title { text-decoration: underline; text-under
     });
     pgOpen().forEach(function (x) { if (PG.ci[x.key] === 'skip' || (!x.m.upd && PG.visitedDecide)) { lines.push('Missed check-in: ' + x.m.t + ' (' + x.m.who + ')'); logEvent(x.p, 'Check-in missed', x.m.t + ' · ' + x.m.who, 'Monthly progress'); } });
     var noted = PG.groups.noted.filter(function (id) { return pgDecided('noted', id) === 'Agree it’s on track'; }).length;
-    if (noted) lines.push(noted + (noted === 1 ? ' milestone' : ' milestones') + ' agreed on track without discussion.');
+    if (noted) lines.push(noted + (noted === 1 ? ' action' : ' actions') + ' agreed on track without discussion.');
     if (PG.early) lines.unshift('Ended early. ' + carried.length + (carried.length === 1 ? ' item carries' : ' items carry') + ' forward to next month.');
     else if (carried.length) lines.push(carried.length + (carried.length === 1 ? ' item carries' : ' items carry') + ' forward to next month.');
     STRAT_LOG.unshift({ type: 'Monthly progress', date: '26 Sep', who: Object.keys(PG.att).filter(function (k) { return PG.att[k]; }), lines: lines, notes: PG.notes, carried: carried });
