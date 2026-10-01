@@ -65,11 +65,23 @@ h3 { font-size: 17px; font-weight: 800; letter-spacing: -0.01em; }
 .logo small { font-family: var(--mono); font-weight: 600; font-size: 11.5px; letter-spacing: 0.08em; text-transform: uppercase; background: var(--brand); color: var(--text); padding: 2px 6px; border-radius: 3px; vertical-align: 3px; }
 .crumb { display: flex; align-items: center; gap: 2px; }
 .crumb .slash { color: var(--text-3); font-size: 22px; font-weight: 300; margin-inline: 4px; }
-.pick { appearance: none; border: 0; background: transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='14' viewBox='0 0 10 14'%3E%3Cpath d='M2 5l3-3 3 3M2 9l3 3 3-3' fill='none' stroke='%238f8f8f' stroke-width='1.4'/%3E%3C/svg%3E") no-repeat right 6px center; padding: 6px 24px 6px 8px; border-radius: 6px; font-weight: 800; font-size: 16px; cursor: pointer; }
-.pick:hover { text-decoration: underline; text-underline-offset: 3px; }
+.pv-pick { position: relative; }
+.pv-btn { display: flex; align-items: center; gap: 6px; border: 0; background: none; padding: 6px 8px; border-radius: 6px; font: inherit; font-weight: 800; font-size: 16px; color: var(--text); cursor: pointer; white-space: nowrap; }
+.pv-btn .pv-sep { color: var(--text-3); font-weight: 300; font-size: 20px; margin-inline: 2px; }
+.pv-btn svg { flex: none; color: var(--text-3); margin-left: 2px; }
+.pv-btn:hover .pv-path { text-decoration: underline; text-underline-offset: 3px; }
+.pv-btn[aria-expanded="true"] { background: var(--bg-3); }
+.pv-menu { position: absolute; top: calc(100% + 6px); left: 0; z-index: 40; width: max-content; min-width: 280px; max-width: calc(100vw - 32px); max-height: min(70vh, 520px); overflow: auto; background: var(--bg); border-radius: 10px; box-shadow: var(--shadow-lg); padding: 6px; }
+.pv-menu button { display: flex; width: 100%; align-items: baseline; gap: 8px; border: 0; background: none; text-align: left; font: inherit; font-size: 15px; color: var(--text); padding: 7px 10px; border-radius: 6px; cursor: pointer; }
+.pv-menu button:hover, .pv-menu button:focus-visible { background: var(--bg-2); outline: none; }
+.pv-menu button[aria-current="true"] { background: var(--brand); }
+.pv-menu .pv-l0 { font-weight: 800; }
+.pv-menu .pv-l1 { font-weight: 700; margin-top: 4px; }
+.pv-menu .pv-l2 { padding-left: 26px; }
+.pv-menu .pv-you { margin-left: auto; font-size: 13px; color: var(--text-3); font-weight: 500; }
 .pv-back { margin-left: 10px; border: 0; background: none; padding: 4px 0; font: inherit; font-size: 14px; color: var(--text-2); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; white-space: nowrap; }
 .pv-back:hover { color: var(--text); }
-body.pv-home-only .crumb .pick, body.pv-home-only .crumb .slash:nth-of-type(2), body.pv-home-only .pv-back { display: none; }
+body.pv-home-only .pv-pick, body.pv-home-only .pv-back { display: none; }
 .pv-fixed { display: none; font-weight: 600; }
 body.pv-home-only .pv-fixed { display: inline; }
 .tabs { display: flex; gap: 2px; margin-left: 8px; }
@@ -1239,9 +1251,10 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
     </a>
     <div class="crumb" role="group" aria-label="Purview">
       <span class="slash" aria-hidden="true">/</span>
-      <select class="pick" id="f-div" aria-label="Division"></select>
-      <span class="slash" aria-hidden="true">/</span>
-      <select class="pick" id="f-reg" aria-label="Region"></select>
+      <div class="pv-pick">
+        <button type="button" class="pv-btn" id="pv-btn" aria-haspopup="true" aria-expanded="false" aria-controls="pv-menu"></button>
+        <div class="pv-menu" id="pv-menu" role="menu" aria-label="Choose a purview" hidden></div>
+      </div>
       <span class="pv-fixed" id="pv-fixed"></span>
       <button type="button" class="pv-back" id="pv-back" hidden></button>
     </div>
@@ -1581,15 +1594,28 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
      Header
      ============================================================= */
   function fillFilters() {
-    $('f-div').innerHTML = '<option value="">' + esc(ORG_NAME) + '</option>' + ORG.map(function (x) { return '<option value="' + esc(x.div) + '"' + (x.div === ST.div ? ' selected' : '') + '>' + esc(x.div) + (x.div === HOME_DIV ? ' (yours)' : '') + '</option>'; }).join('');
-    var regs = []; ORG.forEach(function (x) { if (!ST.div || x.div === ST.div) x.regions.forEach(function (g) { regs.push(g.name); }); });
-    $('f-reg').innerHTML = '<option value="">All regions</option>' + regs.map(function (n) { return '<option' + (n === ST.reg ? ' selected' : '') + '>' + esc(n) + '</option>'; }).join('');
+    var chev = '<svg width="10" height="14" viewBox="0 0 10 14" aria-hidden="true"><path d="M2 5l3-3 3 3M2 9l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>';
+    var path = ST.div ? [ST.div].concat(ST.reg ? [ST.reg] : []) : [ORG_NAME];
+    $('pv-btn').innerHTML = '<span class="pv-path">' + path.map(esc).join('</span><span class="pv-sep" aria-hidden="true">/</span><span class="pv-path">') + '</span>' + chev;
+    $('pv-btn').setAttribute('aria-label', 'Purview: ' + scopeLabel() + '. Change');
+    var item = function (lvl, div, reg, label, you) { var on = ST.div === div && ST.reg === reg; return '<button type="button" role="menuitem" class="pv-l' + lvl + '" data-pv-div="' + esc(div) + '" data-pv-reg="' + esc(reg) + '"' + (on ? ' aria-current="true"' : '') + '>' + esc(label) + (you ? '<span class="pv-you">Yours</span>' : '') + '</button>'; };
+    $('pv-menu').innerHTML = item(0, '', '', ORG_NAME + ' · whole company') + ORG.map(function (d) { return item(1, d.div, '', d.div + ' division', d.div === HOME_DIV) + d.regions.map(function (g) { return item(2, d.div, g.name, g.name + ' region'); }).join(''); }).join('');
     var away = ST.div !== HOME_DIV || !!ST.reg; $('pv-back').hidden = !away; $('pv-back').textContent = 'Back to ' + HOME_DIV;
     $('pv-fixed').textContent = HOME_DIV + ' division';
   }
   $('pv-back').addEventListener('click', function () { ST.div = HOME_DIV; ST.reg = ''; fillFilters(); render(); });
-  $('f-div').addEventListener('change', function (e) { ST.div = e.target.value; ST.reg = ''; fillFilters(); render(); });
-  $('f-reg').addEventListener('change', function (e) { ST.reg = e.target.value; if (ST.reg) ORG.forEach(function (d) { d.regions.forEach(function (g) { if (g.name === ST.reg) ST.div = d.div; }); }); fillFilters(); render(); });
+  function pvMenu(open) { $('pv-menu').hidden = !open; $('pv-btn').setAttribute('aria-expanded', open ? 'true' : 'false'); if (open) { var c = $('pv-menu').querySelector('[aria-current]') || $('pv-menu').querySelector('button'); c.focus(); } }
+  $('pv-btn').addEventListener('click', function (e) { e.stopPropagation(); pvMenu($('pv-menu').hidden); });
+  $('pv-menu').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-pv-div]'); if (!b) return; e.stopPropagation();
+    ST.div = b.getAttribute('data-pv-div'); ST.reg = b.getAttribute('data-pv-reg'); pvMenu(false); fillFilters(); render(); $('pv-btn').focus();
+  });
+  $('pv-menu').addEventListener('keydown', function (e) {
+    var bs = [].slice.call($('pv-menu').querySelectorAll('button')), k = bs.indexOf(document.activeElement);
+    if (e.key === 'Escape') { e.preventDefault(); pvMenu(false); $('pv-btn').focus(); }
+    else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); bs[(k + (e.key === 'ArrowDown' ? 1 : -1) + bs.length) % bs.length].focus(); }
+  });
+  document.addEventListener('click', function (e) { if (!$('pv-menu').hidden && !e.target.closest('.pv-pick')) pvMenu(false); });
   function sourceIssues() { return SOURCES.filter(function (s) { return ['failing', 'delayed', 'partial'].indexOf(s.status) > -1; }); }
   // The Live pill carries source health: amber when a source is late, red when one is failing
   function renderIssues() {
