@@ -159,6 +159,7 @@ main { padding-block: 32px 80px; }
 .badge.warning { color: #fff; background: var(--warning); border-color: var(--warning); }
 .badge.critical { color: #fff; background: var(--critical); border-color: var(--critical); }
 .badge.info { color: #fff; background: var(--info); border-color: var(--info); }
+.due-late { color: var(--critical); font-weight: 700; }
 .t-success { color: var(--success); } .t-warning { color: var(--warning); } .t-critical { color: var(--critical); } .t-info { color: var(--info); }
 
 /* Source monograms (neutral, never coloured) */
@@ -833,10 +834,13 @@ button.ind-btn:hover .ind-name { text-decoration: underline; text-underline-offs
 .pa-meta { display: flex; align-items: center; gap: 6px 12px; flex-wrap: wrap; font-size: 14px; font-weight: 600; color: var(--text-2); }
 .pa-meta .av { width: 22px; height: 22px; font-size: 10px; }
 .pa-none { color: var(--warning); font-weight: 700; }
-.pa.st-risk .pa-ci select { border-color: var(--warning); color: var(--warning); font-weight: 800; }
-.pa.st-done .pa-ci select { color: var(--success); font-weight: 800; }
+.select.pa-sel.st-risk { border-color: var(--warning); color: var(--warning); font-weight: 800; }
+.select.pa-sel.st-late { border-color: var(--critical); color: var(--critical); font-weight: 800; }
+.select.pa-sel.st-track { border-color: var(--info); color: var(--info); font-weight: 800; }
+.select.pa-sel.st-done { border-color: var(--success); color: var(--success); font-weight: 800; }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-.pa-add { display: grid; grid-template-columns: minmax(0, 1fr) auto auto auto; gap: 8px; align-items: center; }
+.pa-add { display: grid; grid-template-columns: minmax(0, 1fr) auto auto auto auto; gap: 8px; align-items: center; }
+.pa-new { justify-self: start; }
 .pa-add .w-note { min-height: 0; padding: 8px 10px; }
 .plan-exp { margin: 0; display: grid; gap: 2px; font-size: 15px; }
 .plan-foot { display: flex; align-items: center; justify-content: space-between; gap: 10px 16px; flex-wrap: wrap; }
@@ -1028,8 +1032,8 @@ button.pv-node:hover .pv-t { text-decoration: underline; text-underline-offset: 
 /* ---------- Focus review: full screen, stepped, readable on a projector ---------- */
 body.rv-mode .hdr, body.rv-mode .open-page { display: none; }
 body.rv-mode main { padding-top: 0; }
-.rv-bar { position: sticky; top: 0; z-index: 30; background: var(--bg); border-bottom: 1px solid var(--border); margin-inline: -24px; }
-.rv-bar-in { max-width: 1120px; margin: 0 auto; padding: 12px 24px; display: flex; align-items: center; gap: 12px 16px; flex-wrap: wrap; }
+.rv-bar { position: sticky; top: 0; z-index: 30; background: var(--bg); border-bottom: 1px solid var(--border); margin-inline: calc(50% - 50vw); }
+.rv-bar-in { max-width: none; margin: 0; padding: 12px 24px; display: flex; align-items: center; gap: 12px 16px; flex-wrap: wrap; }
 .rv-t { display: grid; } .rv-t b { font-size: 17px; font-weight: 800; } .rv-t span { font-size: 13.5px; color: var(--text-3); }
 .rv-rail { list-style: none; display: flex; gap: 6px; margin: 0 0 0 auto; padding: 0; flex-wrap: wrap; }
 .rv-rail li > * { display: inline-flex; align-items: center; gap: 7px; height: 34px; padding: 0 12px 0 6px; border-radius: 999px; border: 1px solid var(--border); font: inherit; font-size: 14px; font-weight: 700; color: var(--text-3); background: none; }
@@ -1074,9 +1078,23 @@ body.rv-mode main { padding-top: 0; }
 .rv-groups { list-style: none; margin: 0; padding: 0; display: flex; gap: 6px; flex-wrap: wrap; }
 .rv-groups button { height: 32px; padding: 0 12px; border-radius: 999px; border: 1px solid var(--border); background: none; font: inherit; font-size: 14px; font-weight: 700; color: var(--text-3); cursor: pointer; }
 .rv-groups button span { font-weight: 600; margin-left: 2px; }
+.rv-groups .g-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: 1px; }
+.rv-groups .g-dot.critical { background: var(--critical-dot); } .rv-groups .g-dot.warning { background: var(--warning-dot); }
 .rv-groups .on button { background: var(--brand); border-color: #d9c200; color: var(--text); }
 .rv-groups .done button { color: var(--text-2); }
-.rv-nav { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; padding-top: 22px; margin-top: 8px; border-top: 1px solid var(--border); }
+/* Full-width footer, fixed, so the next step is always in reach */
+.rv-nav { position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; padding: 14px 24px calc(14px + env(safe-area-inset-bottom, 0px)); background: var(--bg); border-top: 1px solid var(--border); }
+body.rv-mode main { padding-bottom: 140px; }
+body.rv-mode .foot { display: none; }
+body.rv-mode .toast { bottom: 96px; }
+@media (max-width: 720px) {
+  .rv-bar { position: static; }
+  .rv-nav { flex-wrap: nowrap; padding: 10px 16px calc(10px + env(safe-area-inset-bottom, 0px)); }
+  .rv-nav .btn.lg { height: 42px; padding: 0 14px; font-size: 15px; }
+  .rv-nav-r { flex-wrap: wrap; justify-content: flex-end; gap: 4px 10px; }
+  .rv-nav-r small { flex-basis: 100%; text-align: right; font-size: 12.5px; }
+  body.rv-mode main { padding-bottom: 110px; }
+}
 .rv-nav-r { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-left: auto; } .rv-nav-r small { font-size: 14px; color: var(--text-3); font-weight: 700; }
 .btn.lg { height: 46px; padding: 0 20px; font-size: 16.5px; }
 .rv-att { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 10px; }
@@ -2312,14 +2330,21 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
    ['edge', 0, 'Subcontractor says the method is on track for 29 Sep.', '25 Sep'], ['pre', 0, '', '19 Sep'], ['spot', 0, '', '19 Sep'], ['house', 0, '', '19 Sep']
   ].forEach(function (c) { var pl = PLANS[c[0]], a = pl && pl.actions[c[1]]; if (a) { a.note = c[2]; a.upd = c[3]; } });
   var PA_ST = [['todo', 'Not started'], ['track', 'On track'], ['risk', 'At risk'], ['done', 'Done']];
+  function paSelect(ref, a, label) {
+    var tone = a.st === 'done' ? 'st-done' : overdue(a) ? 'st-late' : a.st === 'risk' ? 'st-risk' : a.st === 'track' ? 'st-track' : '';
+    return '<select class="select pa-sel ' + tone + '" data-pa="' + ref + '"' + (label ? ' aria-label="' + label + '"' : '') + '>' + PA_ST.map(function (x) { return '<option value="' + x[0] + '"' + (x[0] === a.st ? ' selected' : '') + '>' + x[1] + '</option>'; }).join('') + '</select>';
+  }
   function planAgreed(i) { return !i.plan || i.plan.state === 'agreed'; }
   function overdue(a) { var m = /^(\d+) (\w{3})/.exec(a.due || ''); return a.st !== 'done' && !!m && MON[m[2]] != null && new Date(2026, MON[m[2]], +m[1]) < new Date(2026, 8, 26); }
   function actBadge(a) {
     if (a.st === 'done') return '<span class="badge success"><i></i>Done</span>';
     if (overdue(a)) return '<span class="badge critical"><i></i>Overdue</span>';
     if (a.st === 'risk') return '<span class="badge warning"><i></i>At risk</span>';
-    return '<span class="tlabel">' + (a.st === 'track' ? 'On track' : 'Not started') + '</span>';
+    if (a.st === 'track') return '<span class="badge info"><i></i>On track</span>';
+    return '<span class="tlabel">Not started</span>';
   }
+  // Due dates turn red once they've passed
+  function dueHTML(a) { return overdue(a) ? '<span class="due-late">by ' + esc(a.due) + ' · overdue</span>' : 'by ' + esc(a.due); }
   // An insight moves to In progress once it has an owner and an agreed plan
   // New = nobody owns it. With an owner it waits on the plan (Agree to plan), then moves to In progress
   function autoProgress(i) {
@@ -2368,11 +2393,12 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
     return '<section class="' + cls + ' plan' + (prop ? ' prop' : '') + '"><div class="plan-head"><span class="label">Plan' + (o.split && !o.bare ? nowTag(i, 'plan') : '') + '</span><span class="plan-state">' + (prop ? 'Proposed by Hiviz \u00b7 ' + (o.split ? (!i.owner ? 'needs an owner to approve it' : 'waiting for ' + (i.owner === YOU ? 'your' : esc(i.owner) + '\u2019s') + ' approval') : 'waiting for the owner\u2019s approval') : esc(approvedLine(pl)) + (o.split ? ' \u00b7 ' + esc(planSummary(i).replace(/^All/, 'all')) : '')) + '</span></div>' +
       '<ol class="plan-acts">' + pl.actions.map(function (a, k) {
         var st = PA_ST.filter(function (x) { return x[0] === a.st; })[0];
-        return '<li class="pa st-' + a.st + '"><div class="pa-main"><span class="pa-t">' + tIcon('action') + esc(a.t) + '</span><span class="pa-meta">' + who(a) + '<span>by ' + esc(a.due) + '</span></span>' + linkHTML(i, k, a) + '</div>' +
+        return '<li class="pa st-' + a.st + '"><div class="pa-main"><span class="pa-t">' + tIcon('action') + esc(a.t) + '</span><span class="pa-meta">' + who(a) + '<span>' + dueHTML(a) + '</span></span>' + linkHTML(i, k, a) + '</div>' +
           (prop ? '<button type="button" class="btn sm" data-pa-remove="' + i.id + ':' + k + '" aria-label="Remove this action">Remove</button>'
-                : '<label class="pa-ci"><span class="sr">Check in</span><select class="select" data-pa="' + i.id + ':' + k + '">' + PA_ST.map(function (x) { return '<option value="' + x[0] + '"' + (x[0] === a.st ? ' selected' : '') + '>' + x[1] + '</option>'; }).join('') + '</select></label>') + '</li>';
+                : '<label class="pa-ci"><span class="sr">Check in</span>' + paSelect(i.id + ':' + k, a) + '</label>') + '</li>';
       }).join('') + '</ol>' +
-      (prop ? '<div class="pa-add"><input type="text" class="w-note" id="pa-t-' + i.id + '" placeholder="Add an action: what will be done"><select class="select" id="pa-w-' + i.id + '"><option value="">Who</option>' + ownerOpts(i.sites ? nearWork(i) : people, '') + '</select><select class="select pa-due" id="pa-d-' + i.id + '" aria-label="By when"><option value="">By when</option>' + [[0, 'Immediately'], [3, 'In 3 days'], [7, 'In 7 days'], [30, 'In 30 days']].map(function (d) { return '<option value="' + addDays('26 Sep', d[0]) + '">' + d[1] + '</option>'; }).join('') + '</select><button type="button" class="btn" data-pa-add="' + i.id + '">Add</button></div>' : '') +
+      (prop && !(ST.paOpen || {})[i.id] ? '<button type="button" class="btn sm pa-new" data-pa-open="' + i.id + '">+ Add action</button>' : '') +
+      (prop && (ST.paOpen || {})[i.id] ? '<div class="pa-add"><input type="text" class="w-note" id="pa-t-' + i.id + '" placeholder="What will be done"><select class="select" id="pa-w-' + i.id + '"><option value="">Who</option>' + ownerOpts(i.sites ? nearWork(i) : people, '') + '</select><select class="select pa-due" id="pa-d-' + i.id + '" aria-label="By when"><option value="">By when</option>' + [[0, 'Immediately'], [3, 'In 3 days'], [7, 'In 7 days'], [30, 'In 30 days']].map(function (d) { return '<option value="' + addDays('26 Sep', d[0]) + '">' + d[1] + '</option>'; }).join('') + '</select><button type="button" class="btn" data-pa-add="' + i.id + '">Add</button><button type="button" class="linkish" data-pa-cancel="' + i.id + '">Cancel</button></div>' : '') +
       (o.split ? '' : '<div class="plan-check"><span class="label">Is it working?</span>' +
         (pl.read ? '<p>' + (pl.read[0] === 'working' ? '<span class="badge success"><i></i>Working</span>' : pl.read[0] === 'continues' ? '<span class="badge critical"><i></i>Pattern continues</span>' : '<span class="tlabel">Too early</span>') + ' ' + esc(pl.read[1]) + '</p>' : '<p class="pc-l">Prism starts reading once the plan is approved.</p>') +
         '<p class="pc-l">Prism listens for: ' + esc(pl.expect) + '</p></div>') +
@@ -2397,11 +2423,15 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
     }
     var rm = e.target.closest('[data-pa-remove]');
     if (rm) { var pr = rm.getAttribute('data-pa-remove').split(':'), ri = workById(pr[0]); ri.plan.actions.splice(+pr[1], 1); rerenderFor(ri.id); return; }
+    var po = e.target.closest('[data-pa-open]');
+    if (po) { var oid = po.getAttribute('data-pa-open'); ST.paOpen = ST.paOpen || {}; ST.paOpen[oid] = true; rerenderFor(oid); var inp = $('pa-t-' + oid); if (inp) inp.focus(); return; }
+    var pc = e.target.closest('[data-pa-cancel]');
+    if (pc) { var cid = pc.getAttribute('data-pa-cancel'); ST.paOpen[cid] = false; rerenderFor(cid); return; }
     var ad = e.target.closest('[data-pa-add]');
     if (ad) {
       var id = ad.getAttribute('data-pa-add'), ai = workById(id), t = $('pa-t-' + id).value.trim();
       if (!t) { $('pa-t-' + id).focus(); return; }
-      ai.plan.actions.push(A(t, $('pa-w-' + id).value, $('pa-d-' + id).value.trim() || 'no date')); rerenderFor(id);
+      ai.plan.actions.push(A(t, $('pa-w-' + id).value, $('pa-d-' + id).value.trim() || 'no date')); ST.paOpen[id] = false; rerenderFor(id);
     }
   });
   document.addEventListener('change', function (e) {
@@ -2912,6 +2942,13 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
     ['views', 'Views differ', 'Managers answered this differently. What are you each seeing that the others might not be?'],
     ['noted', 'Noted', 'On track. No discussion needed unless someone raises it.']
   ];
+  // Where the weight is: the worst severity in a group, shown as a dot on its tab
+  function grpDot(t) { return t ? '<i class="g-dot ' + t + '" aria-hidden="true"></i>' : ''; }
+  function rvTone(key) {
+    if (['esc', 'assign', 'plan', 'stalled', 'moving'].indexOf(key) < 0) return '';
+    var sev = (MT.groups[key] || []).map(function (id) { var i = insightById(id); return i ? i.sev : ''; });
+    return sev.indexOf('critical') > -1 ? 'critical' : sev.indexOf('warning') > -1 ? 'warning' : '';
+  }
   function rvGroup(k) { return RV_GROUPS.filter(function (g) { return g[0] === k; })[0]; }
   // What’s on the agenda, by the decision it needs. Items carried from the last review go first.
   function rvItems() {
@@ -3041,10 +3078,10 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
         rvQ('What’s changed since your last update, and is anything in the way?') +
         (list.length ? '<ul class="rv-list">' + list.map(function (x) {
           var here = rvHere(x.a.who), sk = MT.ci[x.key] === 'skip', st = PA_ST.filter(function (s) { return s[0] === x.a.st; })[0];
-          var sub = '<span class="rv-who"><span class="av' + (x.a.who === YOU ? ' me' : '') + '">' + initials(x.a.who || '?') + '</span>' + esc(x.a.who || 'No one yet') + (here ? '' : ' · <b>not here</b>') + '</span> · for the insight “' + esc(x.i.title) + '” · by ' + esc(x.a.due);
+          var sub = '<span class="rv-who"><span class="av' + (x.a.who === YOU ? ' me' : '') + '">' + initials(x.a.who || '?') + '</span>' + esc(x.a.who || 'No one yet') + (here ? '' : ' · <b>not here</b>') + '</span> · for the insight “' + esc(x.i.title) + '” · ' + dueHTML(x.a);
           var ctl = sk ? '<span class="rv-miss">Missed · counts towards stalled</span><button type="button" class="linkish" data-rvci="' + x.key + '">Undo</button>'
-            : '<span class="rv-ci">' + (x.a.upd ? '<small>' + (x.a.upd === '26 Sep' ? 'Checked in now' : 'Checked in ' + esc(x.a.upd)) + '</small>' : '<small>No check-in yet</small>') +
-              '<select class="select" data-pa="' + x.i.id + ':' + x.k + '" aria-label="How’s it going?">' + PA_ST.map(function (s) { return '<option value="' + s[0] + '"' + (s[0] === x.a.st ? ' selected' : '') + '>' + s[1] + '</option>'; }).join('') + '</select>' +
+            : '<span class="rv-ci">' + (x.a.upd ? '<small>' + (x.a.upd === '26 Sep' ? 'Checked in now' : 'Checked in ' + esc(x.a.upd)) + '</small>' : '<small class="t-warning">No check-in yet</small>') +
+              paSelect(x.i.id + ':' + x.k, x.a, 'How’s it going?') +
               (x.a.upd ? '' : '<button type="button" class="btn" data-rvci="' + x.key + '">Skip</button>') + '</span>';
           return rvRow(x.a.t, sub, ctl, x.i.id, sk || !!x.a.upd, 'action');
         }).join('') + '</ul>' : '<p class="rv-empty">No open actions to check in on.</p>'),
@@ -3082,7 +3119,7 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
       var openG = gs.filter(function (x) { return rvLeft(x[0]); }), last2 = MT.g === gs.length - 1;
       var wait = left ? left + ' still to decide here' : last2 && openG.length ? openG.map(function (x) { return x[1]; }).join(', ') + ' still to decide' : '';
       rvPage('Step 3 of 4 · Decide · ' + total + ' items in ' + gs.length + ' groups', esc(g[1]) + ' <span class="rv-n">' + ids.length + '</span>', '',
-        '<ol class="rv-groups">' + gs.map(function (x, k) { var all = !rvLeft(x[0]), can = k <= MT.reach || (k === MT.g + 1 && !left); return '<li class="' + (k === MT.g ? 'on' : all && k <= MT.reach ? 'done' : '') + '"><button type="button" data-rvg="' + k + '"' + (can ? '' : ' disabled') + '>' + (all && k !== MT.g && k <= MT.reach ? '✓ ' : '') + esc(x[1]) + ' <span>' + MT.groups[x[0]].length + '</span></button></li>'; }).join('') + '</ol>' +
+        '<ol class="rv-groups">' + gs.map(function (x, k) { var all = !rvLeft(x[0]), can = k <= MT.reach || (k === MT.g + 1 && !left); return '<li class="' + (k === MT.g ? 'on' : all && k <= MT.reach ? 'done' : '') + '"><button type="button" data-rvg="' + k + '"' + (can ? '' : ' disabled') + '>' + (all && k !== MT.g && k <= MT.reach ? '✓ ' : grpDot(rvTone(x[0]))) + esc(x[1]) + ' <span>' + MT.groups[x[0]].length + '</span></button></li>'; }).join('') + '</ol>' +
         rvQ(g[2]) + (key === 'noted' && left ? '<p class="rv-all"><button type="button" class="btn" data-rvall="noted">Agree they’re all on track</button></p>' : '') + '<ul class="rv-list">' + rows.join('') + '</ul>',
         '<button type="button" class="btn lg" data-rvg="' + (MT.g - 1) + '">Back</button><span class="rv-nav-r">' + (wait ? '<small>' + esc(wait) + '</small>' : '') + (!last2 ? '<button type="button" class="btn brand lg" data-rvg="' + (MT.g + 1) + '"' + (left ? ' disabled' : '') + '>Next: ' + esc(gs[MT.g + 1][1]) + '</button>' : '<button type="button" class="btn brand lg" data-rvstep="receipt"' + (wait ? ' disabled' : '') + '>Finish and summarise</button>') + '</span>');
       return;
@@ -3537,7 +3574,7 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
     if (it.kind === 'agreed') return '<button type="button" class="btn" data-mf-agreed="' + it.id + '">Mark as done</button>';
     if (it.kind === 'retro') return '<button type="button" class="btn" data-retro="' + i.retro + '">Review the retro</button>';
     if (it.kind === 'poll') return pollBlock(it.pk);
-    if (it.kind === 'action') return '<label class="pa-ci"><span class="sr">Check in</span><select class="select" data-pa="' + it.work.id + ':' + it.ak + '">' + PA_ST.map(function (x) { return '<option value="' + x[0] + '"' + (x[0] === it.act.st ? ' selected' : '') + '>' + x[1] + '</option>'; }).join('') + '</select></label>';
+    if (it.kind === 'action') return '<label class="pa-ci"><span class="sr">Check in</span>' + paSelect(it.work.id + ':' + it.ak, it.act) + '</label>';
     return '';
   }
   function mfOpen(it) {
@@ -4323,7 +4360,7 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
   function treeSwap(html) { var r = $('view').querySelector('.view-row'); if (!r) return; while (r.nextSibling) r.parentNode.removeChild(r.nextSibling); r.insertAdjacentHTML('afterend', html); }
   function insRow(i, depth, mid) { return tRow({ depth: depth, kind: 'insight', title: esc(i.title), attr: 'data-open="' + i.id + '"', owner: i.owner, mid: mid || 'contributes', status: statusBadge(i), linked: true }); }
   // Action and milestone status, in the same pill style as everything else in the tree
-  function actPill(a) { return a.st === 'done' ? tPill('success', 'Done') : overdue(a) ? tPill('critical', 'Overdue') : a.st === 'risk' ? tPill('warning', 'At risk') : tPill('', a.st === 'track' ? 'On track' : 'Not started'); }
+  function actPill(a) { return a.st === 'done' ? tPill('success', 'Done') : overdue(a) ? tPill('critical', 'Overdue') : a.st === 'risk' ? tPill('warning', 'At risk') : (a.st === 'track' ? tPill('info', 'On track') : tPill('', 'Not started')); }
   function readPill(r) { return r === 'working' ? tPill('success', 'Working') : r === 'continues' ? tPill('critical', 'Pattern continues') : tPill('', 'Too early'); }
   // The insights that make the case for a candidate: open or closed, in the purview, on its factor
   function candEvidence(f) { var regs = allRegs(); return INSIGHTS.filter(function (i) { return !i.dismissed && INS_FACTOR[i.id] && INS_FACTOR[i.id][0] === f && i.sites.some(function (s) { return regs.indexOf(SITE[s].region) > -1; }); }); }
@@ -4341,7 +4378,7 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
       var progRows = function (pid, depth) {
         var p = PROGRAMS[pid], pk = 'p:' + pid, d = p.ms.filter(function (m) { return m.st === 'done'; }).length;
         rows.push(tRow({ depth: depth, kind: 'program', title: esc(p.title), attr: 'data-prog="' + pid + '"', owner: p.owner, mid: d + ' of ' + p.ms.length + ' done', status: readPill(p.read[0]), key: pk, meta: depth === 2 ? 'Not linked to a key result yet' : '' }));
-        if (tOpen(pk)) p.ms.forEach(function (m) { rows.push(tRow({ depth: depth + 1, kind: 'action', title: esc(m.t), attr: 'data-prog="' + pid + '"', owner: m.who, mid: 'by ' + esc(m.due), status: actPill(m), done: m.st === 'done' })); }); // done actions stay: progress, not hidden scope
+        if (tOpen(pk)) p.ms.forEach(function (m) { rows.push(tRow({ depth: depth + 1, kind: 'action', title: esc(m.t), attr: 'data-prog="' + pid + '"', owner: m.who, mid: dueHTML(m), status: actPill(m), done: m.st === 'done' })); }); // done actions stay: progress, not hidden scope
       };
       // Key results are what's measured, so the work sits under them
       o.krs.forEach(function (kr) {
@@ -4416,7 +4453,7 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
     if (i.plan) {
       var pl = i.plan, pk = 'pl:' + i.id;
       rows.push(tRow({ depth: 1, kind: 'plan', title: 'Plan', mid: pl.state === 'agreed' ? esc(approvedLine(pl)) : 'Proposed by Hiviz', status: pl.state === 'agreed' ? (pl.read ? readPill(pl.read[0]) : tPill('', 'Listening')) : tPill('warning', 'Agree to plan'), key: pk }));
-      if (tOpen(pk)) pl.actions.forEach(function (a) { rows.push(tRow({ depth: 2, kind: 'action', title: esc(a.t), owner: a.who, mid: 'by ' + esc(a.due), status: actPill(a), done: a.st === 'done' })); });
+      if (tOpen(pk)) pl.actions.forEach(function (a) { rows.push(tRow({ depth: 2, kind: 'action', title: esc(a.t), owner: a.who, mid: dueHTML(a), status: actPill(a), done: a.st === 'done' })); });
     } else rows.push(tRow({ depth: 1, kind: 'plan', title: 'No plan yet', mid: i.owner ? esc(i.owner) + ' to agree one' : 'Needs an owner first', dashed: true }));
     if (o && fx) o.programs.forEach(function (pid) { var p = PROGRAMS[pid]; rows.push(tRow({ depth: 1, kind: 'program', title: esc(p.title), attr: 'data-prog="' + pid + '"', owner: p.owner, mid: 'works on the same objective', status: readPill(p.read[0]), linked: true })); });
     rows.push(tGroupHead('What it’s made of · ' + recCount(i) + ' records from ' + i.says.length + (i.says.length === 1 ? ' source' : ' sources')));
@@ -4644,7 +4681,7 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
         }) : PL.cands.map(function (c) {
           var d = PL.cand[c.f], sc = scoreFactor(allRegs(), c.f);
           var form = d.d === 'add' ? '<div class="pl-form rv-form"><span class="fld"><label for="pct-' + c.f + '">Target</label>' + sel('pct-' + c.f, [[1, 'Leading'], [2, 'Resilient']], d.target) + '</span><span class="fld"><label for="pcb-' + c.f + '">By</label>' + sel('pcb-' + c.f, PL_BY, d.by) + '</span><span class="fld"><label for="pcs-' + c.f + '">For</label>' + sel('pcs-' + c.f, plScopes(), d.div) + '</span><span class="fld"><label for="pco-' + c.f + '">Owner</label>' + sel('pco-' + c.f, PL_PEOPLE, d.owner) + '</span></div>' : '';
-          return rvRow(FACTOR[c.f].name, tagOf(c.f) + esc(c.src) + ' · ' + esc(lvlLabel(sc.v)) + '<br>' + esc(c.why), plChoice('cand', c.f, PL_CAND) + form, 'f:' + c.f, !!d.d);
+          return rvRow(FACTOR[c.f].name, tagOf(c.f) + esc(c.src) + ' · ' + levelBar(sc.v, true, null, sc.was) + ' ' + trendHTML(sc.t) + '<br>' + esc(c.why), plChoice('cand', c.f, PL_CAND) + form, 'f:' + c.f, !!d.d);
         });
       rvPage('Step 3 of 4 · Decide · ' + (OBJECTIVES.length + PL.cands.length) + ' items in ' + gs.length + ' groups', esc(g[1]) + ' <span class="rv-n">' + plIds(key).length + '</span>', '',
         '<ol class="rv-groups">' + gs.map(function (x, k) { var all = !plLeft(x[0]), can = k <= PL.reach || (k === PL.g + 1 && !left); return '<li class="' + (k === PL.g ? 'on' : all && k <= PL.reach ? 'done' : '') + '"><button type="button" data-plg="' + k + '"' + (can ? '' : ' disabled') + '>' + (all && k !== PL.g && k <= PL.reach ? '✓ ' : '') + esc(x[1]) + ' <span>' + plIds(x[0]).length + '</span></button></li>'; }).join('') + '</ol>' +
@@ -4780,6 +4817,12 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
     ['noted', 'Noted', 'Checked in and in line with Prism. No discussion needed unless someone raises it.']
   ];
   var PG_CHOICES = { disagree: ['Keep the plan', 'Adjust the plan', 'Take to planning', 'Carry forward'], help: ['Help agreed', 'Adjust the plan', 'Take to planning', 'Carry forward'], obj: ['On course', 'Take to planning', 'Carry forward'], noted: ['Agree it’s on track', 'Carry forward'] };
+  function pgTone(key) {
+    if (key === 'disagree' || key === 'help') return PG.groups[key].length ? 'warning' : '';
+    if (key !== 'obj') return '';
+    var st = PG.groups.obj.map(function (id) { var o = OBJECTIVES.filter(function (x) { return x.id === id; })[0]; return o ? objStatus(o)[0] : ''; });
+    return st.indexOf('critical') > -1 ? 'critical' : st.indexOf('warning') > -1 ? 'warning' : '';
+  }
   function pgLast() { return STRAT_LOG.filter(function (m) { return m.type === 'Monthly progress'; })[0] || null; }
   function pgOpen() { return pgItems().filter(function (x) { return !(x.m.st === 'done' && !x.m.upd); }); }
   // Milestones sorted by what they need; a milestone with no check-in is handled in check-ins, not here
@@ -4841,8 +4884,8 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
         '<ul class="rv-list">' + list.map(function (x) {
           var sk = PG.ci[x.key] === 'skip', pr = x.key.split(':');
           var ctl = sk ? '<span class="rv-miss">Missed · recorded</span><button type="button" class="linkish" data-pgci="' + x.key + '">Undo</button>'
-            : '<span class="rv-ci">' + (x.m.upd ? '<small>' + (x.m.upd === '26 Sep' ? 'Checked in now' : 'Checked in ' + esc(x.m.upd)) + '</small>' : '<small>No check-in yet</small>') +
-              '<select class="select" data-pa="' + pr[0] + ':' + pr[1] + '" aria-label="How’s it going?">' + PA_ST.map(function (s) { return '<option value="' + s[0] + '"' + (s[0] === x.m.st ? ' selected' : '') + '>' + s[1] + '</option>'; }).join('') + '</select>' +
+            : '<span class="rv-ci">' + (x.m.upd ? '<small>' + (x.m.upd === '26 Sep' ? 'Checked in now' : 'Checked in ' + esc(x.m.upd)) + '</small>' : '<small class="t-warning">No check-in yet</small>') +
+              paSelect(pr[0] + ':' + pr[1], x.m, 'How’s it going?') +
               (x.m.upd ? '' : '<button type="button" class="btn" data-pgci="' + x.key + '">Skip</button>') + '</span>';
           return rvRow(x.m.t, msSub(x, tagOf(x.key)), ctl, pr[0], sk || !!x.m.upd, 'action');
         }).join('') + '</ul>',
@@ -4863,7 +4906,7 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
         var dec = pgDecided(key, id);
         if (key === 'obj') {
           var o = OBJECTIVES.filter(function (x) { return x.id === id; })[0], s = objStatus(o), regs = objRegs(o), f = FACTOR[o.f];
-          var krs = o.krs.map(function (kr) { var t = monthInd(regs, o.f, kr[0]).t; return esc(f.inds[kr[0]]) + ' ' + (t === 'better' ? 'moved forward' : t === 'worse' ? 'slipped' : 'held'); }).join(' · ');
+          var krs = o.krs.map(function (kr) { var t = monthInd(regs, o.f, kr[0]).t; return esc(f.inds[kr[0]]) + ' ' + trendHTML(t); }).join(' · ');
           var reads = o.programs.map(function (pid) { return PROGRAMS[pid].read[1]; }).join(' ');
           return rvRow(objTitle(o), tagOf(id) + '<span class="badge ' + s[0] + '"><i></i>' + s[1] + '</span> ' + esc(objScope(o)) + '<br>This month: ' + krs + '. ' + esc(reads), pgChoice(id + ':obj', PG_CHOICES.obj), id, !!dec);
         }
@@ -4872,7 +4915,7 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
         return rvRow(x.m.t, msSub(mx, tagOf(id)) + extra + cmHTML(x.m), pgChoice(id + ':' + key, PG_CHOICES[key]), id.split(':')[0], !!dec, 'action');
       });
       rvPage('Step 3 of 4 · Decide · ' + total + ' items in ' + gsOn.length + ' groups', esc(g[1]) + ' <span class="rv-n">' + ids.length + '</span>', '',
-        '<ol class="rv-groups">' + gsOn.map(function (x, k) { var all = !pgLeft(x[0]), can = k <= PG.reach || (k === PG.g + 1 && !left); return '<li class="' + (k === PG.g ? 'on' : all && k <= PG.reach ? 'done' : '') + '"><button type="button" data-pgg="' + k + '"' + (can ? '' : ' disabled') + '>' + (all && k !== PG.g && k <= PG.reach ? '✓ ' : '') + esc(x[1]) + ' <span>' + PG.groups[x[0]].length + '</span></button></li>'; }).join('') + '</ol>' +
+        '<ol class="rv-groups">' + gsOn.map(function (x, k) { var all = !pgLeft(x[0]), can = k <= PG.reach || (k === PG.g + 1 && !left); return '<li class="' + (k === PG.g ? 'on' : all && k <= PG.reach ? 'done' : '') + '"><button type="button" data-pgg="' + k + '"' + (can ? '' : ' disabled') + '>' + (all && k !== PG.g && k <= PG.reach ? '✓ ' : grpDot(pgTone(x[0]))) + esc(x[1]) + ' <span>' + PG.groups[x[0]].length + '</span></button></li>'; }).join('') + '</ol>' +
         rvQ(g[2]) + (key === 'noted' && left ? '<p class="rv-all"><button type="button" class="btn" data-pgall="noted">Agree they’re all on track</button></p>' : '') + '<ul class="rv-list">' + rows.join('') + '</ul>',
         '<button type="button" class="btn lg" data-pgg="' + (PG.g - 1) + '">Back</button><span class="rv-nav-r">' + (wait ? '<small>' + esc(wait) + '</small>' : '') + (!lastG ? '<button type="button" class="btn brand lg" data-pgg="' + (PG.g + 1) + '"' + (left ? ' disabled' : '') + '>Next: ' + esc(gsOn[PG.g + 1][1]) + '</button>' : '<button type="button" class="btn brand lg" data-pgstep="receipt"' + (wait ? ' disabled' : '') + '>Finish and summarise</button>') + '</span>', bar);
       return;
@@ -4953,7 +4996,7 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
     return '<section class="card ci-panel"><div class="ci-head"><div><span class="label">Check-ins for monthly progress</span><p class="rlead"><b>' + cs.inn + ' of ' + cs.total + '</b> owners have checked in. Closes ' + esc(CHECKIN.closes) + '.</p></div>' +
         (cs.missing.length ? '<p class="muted-p">Waiting on ' + esc(join(cs.missing.map(function (x) { return x.m.who === YOU ? 'you' : x.m.who; }).filter(function (v, i, a) { return a.indexOf(v) === i; }))) + '. <button type="button" class="linkish rt-undo" data-nudge="1">Send a reminder</button></p>' : '') + '</div>' +
       (mine.length ? '<div class="ci-mine"><span class="label">Your check-ins</span>' + mine.map(function (x) {
-        return '<div class="ci-form"><div><b>' + esc(x.m.t) + '</b><span class="muted-p">' + esc(x.p.title) + ' · by ' + esc(x.m.due) + (x.m.upd ? ' · checked in ' + esc(x.m.upd) : '') + '</span></div>' +
+        return '<div class="ci-form"><div><b>' + esc(x.m.t) + '</b><span class="muted-p">' + esc(x.p.title) + ' · ' + dueHTML(x.m) + (x.m.upd ? ' · checked in ' + esc(x.m.upd) : '') + '</span></div>' +
           '<select class="select" id="ci-s-' + x.key.replace(':', '-') + '">' + PA_ST.map(function (s) { return '<option value="' + s[0] + '"' + (s[0] === x.m.st ? ' selected' : '') + '>' + s[1] + '</option>'; }).join('') + '</select>' +
           '<input type="text" class="w-note" id="ci-n-' + x.key.replace(':', '-') + '" placeholder="What changed, what’s blocking, what you need" value="' + esc(x.m.note || '') + '">' +
           '<button type="button" class="btn" data-myci="' + x.key + '">' + (x.m.upd ? 'Update' : 'Check in') + '</button></div>';
