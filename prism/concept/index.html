@@ -319,7 +319,7 @@ main { padding-block: 32px 80px; }
 .frow.err .read .line b { color: var(--critical); } .frow.warn .read .line b { color: var(--warning); }
 
 .fresh { animation: fresh 2.4s ease-out; }
-@keyframes fresh { 0% { box-shadow: inset 3px 0 0 var(--info); } 100% { box-shadow: inset 3px 0 0 transparent; } }
+@keyframes fresh { 0% { background-color: var(--info-tint); } 100% { background-color: transparent; } }
 .fhead { display: grid; grid-template-columns: 92px minmax(0, 1fr) minmax(0, 1.1fr); gap: 16px; padding: 0 16px; height: 42px; align-items: center; background: var(--bg); border-bottom: 1px solid var(--border); font-size: 12px; color: var(--text-3); font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; }
 @media (max-width: 760px) { .fhead { display: none; } .frow { grid-template-columns: 1fr; gap: 8px; } }
 
@@ -944,7 +944,7 @@ button.pv-node:hover .pv-t { text-decoration: underline; text-underline-offset: 
 .mc-dl > div { display: grid; gap: 2px; }
 .mc-dl dt { font-size: 13.5px; font-weight: 800; color: var(--text-2); }
 .mc-dl dd { margin: 0; font-size: 15px; line-height: 1.4; }
-.mc-dl .nx { padding-left: 10px; border-left: 3px solid var(--brand); }
+.mc-dl .nx dd { font-weight: 700; }
 .mc-dl .nx dt { color: var(--text); }
 .inf-t { color: var(--text-3); font-size: 13px; font-weight: 600; cursor: help; }
 .plan-check { display: grid; gap: 6px; padding: 12px 14px; border: 1px solid var(--border); border-radius: 10px; }
@@ -1087,6 +1087,15 @@ body.rv-mode main { padding-top: 0; }
 body.rv-mode main { padding-bottom: 140px; }
 body.rv-mode .foot { display: none; }
 body.rv-mode .toast { bottom: 96px; }
+/* Push-in panel: on wide screens a drawer opened from the page docks beside it instead of covering it */
+@media (min-width: 1100px) {
+  body.panel-open main { max-width: none; margin: 0 var(--panel-w) 0 0; }
+  body.panel-open .rv-bar { margin-left: -24px; margin-right: calc(-24px - var(--panel-w)); }
+  body.panel-open .scrim { display: none; }
+  body.panel-open #sheet, body.panel-open #rec { top: var(--panel-top, 64px); bottom: var(--panel-bot, 0px); right: 0; width: var(--panel-w); border-radius: 0; box-shadow: none; border-left: 1px solid var(--border); z-index: 29; }
+  body.panel-open .sheet-foot .select { max-width: 100%; }
+}
+:root { --panel-w: 500px; }
 @media (max-width: 720px) {
   .rv-bar { position: static; }
   .rv-nav { flex-wrap: nowrap; padding: 10px 16px calc(10px + env(safe-area-inset-bottom, 0px)); }
@@ -3013,8 +3022,12 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
       }).join('') + '</ol>' +
       (MT.step === 'receipt' ? '<button type="button" class="btn brand" id="rv-close">Close the review</button>' : '<button type="button" class="btn" id="rv-end">End review</button>') + '</div></div>';
   }
+  var rvLastPage = '';
   function rvPage(kind, title, sub, body, nav, bar) {
+    var sig = (kind + '|' + title).replace(/<[^>]+>/g, '').replace(/\d+/g, '');
+    if (sig !== rvLastPage) { rvLastPage = sig; $('sheet').hidden = true; ST.sheet = ''; $('rec').hidden = true; }
     $('view').innerHTML = (bar || rvBar()) + '<div class="rv"><p class="kind"><span class="kind-t">' + esc(kind) + '</span></p><h1 class="rv-h">' + title + '</h1>' + (sub ? '<p class="rv-sub">' + sub + '</p>' : '') + body + (nav ? '<div class="rv-nav">' + nav + '</div>' : '') + '</div>';
+    syncPanel();
   }
   function rvQ(q, lbl) { return '<p class="rv-q"><span class="rv-q-l">' + esc(lbl || 'Ask the room') + '</span><span class="rv-q-t">“' + esc(q) + '”</span></p>'; }
   // The leadership check, asked plainly: how it actually is today, not how it should be
@@ -3108,7 +3121,7 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
         var en = key === 'esc' ? i.esc || MT.escWas[id] : null;
         if (key === 'esc') return rvRow(i.title, tag + esc(nameOf(en.by)) + ' escalated this: ' + esc(en.reason) + (en.note ? '. “' + esc(en.note) + '”' : ''), dec && dec !== 'Carry forward' ? '<span class="rv-dec">' + esc(dec) + '</span>' : '<span class="rv-ch"><button type="button" class="btn" data-esc-back="' + i.id + '">Send back</button><button type="button" class="btn" data-esc-accept="' + i.id + '">Accept</button>' + rvCarry(id + ':esc') + '</span>', i.id, !!dec);
         if (key === 'assign') return rvRow(i.title, tag + esc(i.story), '<select class="select" data-rvowner="' + i.id + '" aria-label="Owner"><option value="">Choose an owner</option>' + ownerOpts(managersInView(), i.owner, 'In this review') + '</select><span class="rv-ch">' + rvCarry(id + ':assign') + '</span>', i.id, !!dec);
-        if (key === 'plan') return '<li class="rv-row rv-plan-row' + (dec ? ' is-done' : '') + '"><div class="rv-m"><button type="button" class="rv-title linkish" data-open="' + i.id + '">' + esc(i.title) + '</button><span class="rv-s">' + tag + 'Owner ' + ow + ' · ' + esc(i.next) + '</span></div>' + planHTML(i, 'rv-plan', { split: true, bare: true }) + (MT.agreed[id] ? '' : '<div class="rv-c rv-c-plan"><span class="rv-ch">' + rvCarry(id + ':plan') + '</span></div>') + '</li>';
+        if (key === 'plan') return '<li class="rv-row rv-plan-row' + (dec ? ' is-done' : '')+ '"><div class="rv-m"><button type="button" class="rv-title linkish" data-open="' + i.id + '">' + esc(i.title) + '</button><span class="rv-s">' + tag + 'Owner ' + ow + ' · ' + esc(i.next) + '</span></div>' + planHTML(i, 'rv-plan', { split: true, bare: true }) + (MT.agreed[id] ? '' : '<div class="rv-c rv-c-plan"><span class="rv-ch">' + rvCarry(id + ':plan') + '</span></div>') + '</li>';
         if (key === 'stalled') return rvRow(i.title, tag + ow + ' · no update in ' + i.updated + ' days' + (i.latest ? ' · last: “' + esc(i.latest) + '”' : ''), rvChoice(id + ':' + key, ['Chase the owner', 'Owner needs help', 'Carry forward'], dec), i.id, !!dec);
         if (key === 'moving') return rvRow(i.title, tag + ow + ' · ' + esc(planSummary(i)) + (i.plan && i.plan.read ? ' · ' + esc(i.plan.read[1]) : ''), rvChoice(id + ':' + key, ['Keep the plan', 'Revise the plan', 'Carry forward'], dec), i.id, !!dec);
         if (key === 'close') return rvRow(i.title, tag + ow + (i.latest ? ' · ' + esc(i.latest) : ''), rvChoice(id + ':' + key, ['Keep watching', 'Close it'], dec), i.id, !!dec);
@@ -3885,6 +3898,12 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
     regs.forEach(function (r) { var c = SCORE[r][f][k]; if (c.mg) mg = true; if (c.rv) rv = c.rv; if (c.m) { sum += c.m * c.n; was += Math.max(1, Math.min(3, c.m - c[key])) * c.n; n += c.n; } });
     return n ? { v: sum / n, was: was / n, n: n, rv: rv, t: trendOf((sum - was) / n) } : { v: null, was: null, n: 0, t: 'steady', mg: mg };
   }
+  // An objective is met when its key results are, so its Now reads as key results reached
+  function krNow(o) {
+    var regs = objRegs(o), hit = o.krs.filter(function (kr) { return lvlOf(aggInd(regs, o.f, kr[0]).v) >= kr[1]; }).length;
+    var same = o.krs.every(function (kr) { return kr[1] === o.target; });
+    return hit + ' of ' + o.krs.length + (o.krs.length === 1 ? ' key result' : ' key results') + ' at ' + (same ? LEVELS[o.target] : 'target') + ' · ' + esc(o.by);
+  }
   function lvlOf(v) { return v == null ? -1 : v < 1.75 ? 0 : v < 2.5 ? 1 : 2; }
   // Maturity can be mixed: "Compliant, some Leading"
   function lvlLabel(v) {
@@ -4335,7 +4354,7 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
   function tOpen(k) { return k.indexOf('sy:') === 0 ? ST.tOpen[k] === true : ST.tOpen[k] !== false; } // evidence starts closed
   function tPill(tone, text) { return '<span class="badge' + (tone ? ' ' + tone : '') + '">' + (tone ? '<i></i>' : '') + esc(text) + '</span>'; }
   function tLvl(v) { return levelBar(v, true, v == null ? 'Needs input' : LEVELS[lvlOf(v)]); }
-  function tTrend(t) { return t === 'worse' ? tPill('critical', 'Worsening') : t === 'better' ? tPill('success', 'Improving') : tPill('', 'Steady'); }
+  function tTrend(t) { return t === 'worse' ? tPill('critical', 'Worsening') : t === 'better' ? tPill('success', 'Improving') : tPill('info', 'Steady'); }
   // One row of the tree. o: depth, kind, title, href | attr, owner, mid, status, meta, key (collapsible), dashed, linked
   function tRow(o) {
     var name = o.href ? '<a class="t-t" href="' + o.href + '">' + o.title + '</a>' : o.attr ? '<button type="button" class="t-t linkish" ' + o.attr + '>' + o.title + '</button>' : '<span class="t-t">' + o.title + '</span>';
@@ -4373,7 +4392,7 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
     objs.forEach(function (o) {
       var f = FACTOR[o.f], orr = objRegs(o), sc = scoreFactor(orr, o.f), s = objStatus(o), key = 'o:' + o.id;
       c[s[1]]++; o.programs.forEach(function (pid) { open += PROGRAMS[pid].ms.filter(function (m) { return m.st !== 'done'; }).length; });
-      rows.push(tRow({ depth: 1, kind: 'objective', title: esc(f.name) + ' to ' + LEVELS[o.target], attr: 'data-obj="' + o.id + '"', owner: o.owner, mid: tLvl(sc.v) + ' → ' + LEVELS[o.target] + ' · ' + esc(o.by), status: tPill(s[0], s[1]), key: key, strong: true, meta: esc(objScope(o)) + (inclTag(o) && objScope(o) !== scopeLabel() ? ' · includes ' + esc(scopeLabel()) : '') }));
+      rows.push(tRow({ depth: 1, kind: 'objective', title: esc(f.name) + ' to ' + LEVELS[o.target], attr: 'data-obj="' + o.id + '"', owner: o.owner, mid: krNow(o), status: tPill(s[0], s[1]), key: key, strong: true, meta: esc(objScope(o)) + (inclTag(o) && objScope(o) !== scopeLabel() ? ' · includes ' + esc(scopeLabel()) : '') }));
       if (!tOpen(key)) return;
       var progRows = function (pid, depth) {
         var p = PROGRAMS[pid], pk = 'p:' + pid, d = p.ms.filter(function (m) { return m.st === 'done'; }).length;
@@ -4413,9 +4432,9 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
     var dom = DOMAINS.filter(function (d) { return d[0] === f.domain; })[0];
     rows.push(tRow({ depth: 0, kind: 'factor', title: esc(f.name), mid: tLvl(sc.v), status: tTrend(sc.t), strong: true, meta: sc.weakest != null ? 'Held back by ' + esc(f.inds[sc.weakest].toLowerCase()) : '' }));
     if (obj) {
-      rows.push(tGroupHead('What it affects'));
+      rows.push(tGroupHead('What’s being done'));
       var s = objStatus(obj);
-      rows.push(tRow({ depth: 1, kind: 'objective', title: esc(objTitle(obj)), attr: 'data-obj="' + obj.id + '"', owner: obj.owner, mid: LEVELS[obj.target] + ' by ' + esc(obj.by), status: tPill(s[0], s[1]) }));
+      rows.push(tRow({ depth: 1, kind: 'objective', title: esc(objTitle(obj)), attr: 'data-obj="' + obj.id + '"', owner: obj.owner, mid: krNow(obj), status: tPill(s[0], s[1]), meta: 'Measured across ' + esc(objScope(obj).toLowerCase() === 'whole company' ? 'the whole company' : objScope(obj)) }));
       obj.programs.forEach(function (pid) { var p = PROGRAMS[pid], d = p.ms.filter(function (m) { return m.st === 'done'; }).length; rows.push(tRow({ depth: 2, kind: 'program', title: esc(p.title), attr: 'data-prog="' + pid + '"', owner: p.owner, mid: d + ' of ' + p.ms.length + ' done', status: readPill(p.read[0]) })); });
     }
     rows.push(tGroupHead('Indicators, and the evidence behind each'));
@@ -4423,11 +4442,11 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
     f.inds.forEach(function (name, k) {
       var x = sc.inds[k], kr = obj ? obj.krs.filter(function (r) { return r[0] === k; })[0] : null, ik = 'i:' + key + ':' + k, kins = ins.filter(function (i) { return INS_FACTOR[i.id][1] === k; });
       var ev = [], e = evOf(key, k), pk = key + ':' + k;
-      if (e.indexOf('Rec') > -1 && x.n && x.rv !== 'poll') ev.push('Records ' + x.n);
+      if (e.indexOf('Rec') > -1 && x.n && x.rv !== 'poll') ev.push(x.n + (x.n === 1 ? ' record' : ' records'));
       if (kins.length) ev.push((kins.length === 1 ? '1 insight' : kins.length + ' insights'));
-      if (POLL[pk] && pollCount(pk).all) ev.push('Poll ' + pollCount(pk).all + ' of ' + POLL_ROUND.polled);
-      if (PLAT[pk]) ev.push('Hiviz');
-      rows.push(tRow({ depth: 1, kind: 'indicator', title: esc(name), mid: tLvl(x.v), status: (x.v != null ? tTrend(x.t) : tPill('', 'Needs input')) + (kr ? ' ' + pTag('Key result') : ''), key: kins.length ? ik : '', meta: ev.length ? ev.map(function (t) { return '<span class="t-chip">' + esc(t) + '</span>'; }).join('') : 'No evidence yet' }));
+      if (POLL[pk] && pollCount(pk).all) ev.push(pollCount(pk).all + ' of ' + POLL_ROUND.polled + ' polled');
+      if (PLAT[pk]) ev.push('Hiviz evidence');
+      rows.push(tRow({ depth: 1, kind: kr ? 'kr' : 'indicator', title: esc(name), mid: tLvl(x.v), status: x.v != null ? tTrend(x.t) : '', key: kins.length ? ik : '', meta: ev.length ? ev.map(function (t) { return '<span class="t-chip">' + esc(t) + '</span>'; }).join('') : 'No evidence yet' }));
       if (kins.length && tOpen(ik)) kins.forEach(function (i) { rows.push(insRow(i, 2, 'gives evidence')); });
     });
     return tCrumb([['goal', esc(ORG_GOAL)], ['factor', esc(dom[1])]]) + tFrame(rows);
@@ -5224,7 +5243,30 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
     $('live-pill').setAttribute('aria-current', ST.view === 'sources' ? 'page' : 'false');
     closeRec(); closeSheet(); closePrismView(); render(); window.scrollTo(0, 0);
   }
-  function render() { renderView(); renderMyFocusCount(); }
+  function render() { renderView(); renderMyFocusCount(); syncPanel(); }
+  var OPENERS = ['data-open', 'data-retro', 'data-prog', 'data-obj', 'data-factor', 'data-rec', 'data-assign'];
+  function syncPanel() {
+    var open = !$('sheet').hidden || !$('rec').hidden;
+    var on = open && $('help').hidden && window.innerWidth >= 1100;
+    document.body.classList.toggle('panel-open', on);
+    var rv = document.body.classList.contains('rv-mode'), bar = document.querySelector(rv ? '.rv-bar' : '.hdr'), nav = rv && document.querySelector('.rv-nav');
+    document.body.style.setProperty('--panel-top', (bar ? bar.getBoundingClientRect().bottom : 64) + 'px');
+    document.body.style.setProperty('--panel-bot', (nav ? nav.offsetHeight : 0) + 'px');
+  }
+  // Capture phase: note what kind of drawer a page click opens
+  document.addEventListener('click', function (e) {
+    var t = e.target.closest('[' + OPENERS.join('],[') + ']'); if (!t || !$('view').contains(t)) return;
+    var a = OPENERS.filter(function (n) { return t.hasAttribute(n); })[0]; if (!a) return;
+    setTimeout(function () { keepOne(a); syncPanel(); }, 0);
+  }, true);
+  // A click in the page replaces what's open; links inside a drawer still stack on top
+  function keepOne(a) {
+    if (a === 'data-open' || a === 'data-assign') { if (!$('sheet').hidden) $('rec').hidden = true; }
+    else if (!$('rec').hidden) { $('sheet').hidden = true; ST.sheet = ''; }
+  }
+  ['sheet', 'rec', 'help'].forEach(function (id) { new MutationObserver(syncPanel).observe($(id), { attributes: true, attributeFilter: ['hidden'] }); });
+  window.addEventListener('resize', syncPanel);
+  window.addEventListener('scroll', function () { if (document.body.classList.contains('panel-open')) syncPanel(); }, { passive: true });
   function renderView() { document.body.classList.toggle('pv-home-only', ST.view === 'myfocus'); document.body.classList.toggle('rv-mode', (ST.view === 'meeting' && !!MT) || (ST.view === 'progress' && !!PG) || (ST.view === 'planning' && !!PL)); if (ST.view === 'map') renderMap(); else if (ST.view === 'strategy') renderStrategy(); else if (ST.view === 'planning') renderPlanning(); else if (ST.view === 'progress') renderProgress(); else if (ST.view === 'myfocus') renderMyFocus(); else if (ST.view === 'sites') renderSites(); else if (ST.view === 'site') { if (ST.siteFeed) renderSiteFeed(ST.site); else renderSite(ST.site); } else if (ST.view === 'sources') renderSources(); else if (ST.view === 'meeting') renderMeeting();  else if (ST.view === 'insight') renderInsight(ST.insight); else renderFocus(); }
 
   document.addEventListener('click', function (e) {
