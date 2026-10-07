@@ -1087,6 +1087,41 @@ body.rv-mode main { padding-top: 0; }
 body.rv-mode main { padding-bottom: 140px; }
 body.rv-mode .foot { display: none; }
 body.rv-mode .toast { bottom: 96px; }
+/* ---------- Board report: its own full-screen page. Pages or tree, same report ---------- */
+.rp-per { display: inline-flex; align-items: center; gap: 8px; margin-left: auto; } .rp-per b { font-size: 16px; min-width: 70px; text-align: center; }
+.rp-act { display: inline-flex; gap: 8px; }
+.rp-rail { margin: 0 0 4px; flex-wrap: wrap; }
+.rp-rail li button { display: inline-flex; align-items: center; gap: 6px; border: 0; background: none; font: inherit; cursor: pointer; color: inherit; }
+.rp-cover { margin: 0; font-size: 14.5px; color: var(--text-3); }
+.rp-lead { font-size: 24px; line-height: 1.45; font-weight: 600; margin: 0; max-width: 60ch; }
+.rp-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-top: 6px; }
+.rp-tile { display: grid; gap: 6px; align-content: start; text-align: left; padding: 18px; border: 1px solid var(--border); border-radius: 12px; background: var(--bg); font: inherit; color: inherit; cursor: pointer; }
+.rp-tile:hover { border-color: var(--text); }
+.rp-num { font-size: 44px; font-weight: 900; letter-spacing: -0.03em; line-height: 1; font-variant-numeric: tabular-nums; }
+.rp-tm { font-size: 15px; font-weight: 800; }
+.rp-th { font-size: 14.5px; color: var(--text-2); line-height: 1.4; }
+.rp-dir { margin: 0; font-size: 14.5px; font-weight: 800; color: var(--text-3); } .rp-dir.steady { color: var(--info); } .rp-dir.t-success { color: var(--success); } .rp-dir.t-critical { color: var(--critical); }
+.rp-ms { display: grid; gap: 0; border: 1px solid var(--border); border-radius: 12px; background: var(--bg); }
+.rp-m { display: grid; grid-template-columns: 170px minmax(0, 1fr); gap: 20px; padding: 22px 24px; border-top: 1px solid var(--border); }
+.rp-m:first-child { border-top: 0; }
+.rp-m .rp-num { font-size: 52px; }
+.rp-body { display: grid; gap: 6px; align-content: start; }
+.rp-body h3 { margin: 0; font-size: 19px; font-weight: 800; }
+.rp-why { margin: 0; font-size: 17px; line-height: 1.5; }
+.rp-src { margin: 4px 0 0; font-size: 14px; color: var(--text-3); }
+.rp-src .linkish { font-weight: 800; color: var(--text); }
+.rp-behind { list-style: none; margin: 8px 0 0; padding: 0; display: grid; }
+.rp-behind li { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 12px; align-items: start; padding: 10px 0; border-top: 1px solid var(--border); }
+.rp-behind li > svg, .rp-behind li > .badge, .rp-behind li > .trend { margin-top: 2px; }
+.rp-behind .t { display: block; font-weight: 800; font-size: 15.5px; } .rp-behind .t a { color: inherit; }
+.rp-behind .s { display: block; font-size: 14.5px; color: var(--text-2); line-height: 1.45; }
+.rp-needs { margin: 0; padding-left: 26px; display: grid; gap: 18px; }
+.rp-needs h3 { margin: 0; font-size: 20px; font-weight: 800; } .rp-needs h3 a { color: inherit; }
+.rp-needs p { margin: 4px 0 0; font-size: 17px; line-height: 1.5; color: var(--text-2); }
+.rp-none { color: var(--text-3); margin: 6px 0 0; }
+body.rp-mode .open-page { display: none; }
+@media (max-width: 720px) { .rp-m { grid-template-columns: 1fr; gap: 6px; } .rp-num { font-size: 36px; } .rp-act .btn:not(:last-child) { display: none; } }
+@media print { .rv-bar, .rv-nav, .rp-rail { display: none !important; } }
 /* Push-in panel: on wide screens a drawer opened from the page docks beside it instead of covering it */
 @media (min-width: 1100px) {
   body.panel-open main { max-width: none; margin: 0 var(--panel-w) 0 0; }
@@ -3022,10 +3057,12 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
       }).join('') + '</ol>' +
       (MT.step === 'receipt' ? '<button type="button" class="btn brand" id="rv-close">Close the review</button>' : '<button type="button" class="btn" id="rv-end">End review</button>') + '</div></div>';
   }
+  // A new page never carries the last page's drawer, or its cover
+  function closeDrawers() { $('sheet').hidden = true; ST.sheet = ''; $('rec').hidden = true; if ($('help').hidden) $('scrim').hidden = true; }
   var rvLastPage = '';
   function rvPage(kind, title, sub, body, nav, bar) {
     var sig = (kind + '|' + title).replace(/<[^>]+>/g, '').replace(/\d+/g, '');
-    if (sig !== rvLastPage) { rvLastPage = sig; $('sheet').hidden = true; ST.sheet = ''; $('rec').hidden = true; }
+    if (sig !== rvLastPage) { rvLastPage = sig; closeDrawers(); }
     $('view').innerHTML = (bar || rvBar()) + '<div class="rv"><p class="kind"><span class="kind-t">' + esc(kind) + '</span></p><h1 class="rv-h">' + title + '</h1>' + (sub ? '<p class="rv-sub">' + sub + '</p>' : '') + body + (nav ? '<div class="rv-nav">' + nav + '</div>' : '') + '</div>';
     syncPanel();
   }
@@ -4371,9 +4408,176 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
   }
   function tCrumb(parts) { return '<p class="t-crumb">' + parts.map(function (x) { return tIcon(x[0]) + '<span>' + x[1] + '</span>'; }).join('<span class="t-sep">›</span>') + '</p>'; }
   function tGroupHead(t) { return '<div class="t-group">' + t + '</div>'; }
+  /* =============================================================
+     Board report: one page. The answer, a handful of simple numbers with
+     the reason each moved, and what needs the board. Counts come straight
+     from the source systems; Prism adds the reading on top.
+     ============================================================= */
+  ST.board = { slice: 'q3' };
+  // Earlier quarters are frozen snapshots; the current one is worked out live
+  var BR_PERIODS = [['q3', 'Q3 2026', '1 July – 26 September', 'as at 26 September'], ['q2', 'Q2 2026', '1 April – 30 June', 'published 1 July'], ['q1', 'Q1 2026', '1 January – 31 March', 'published 1 April']];
+  var BR_SNAP = {
+    q2: { inj: 3, sif: 9, ctl: 64, fix: [1, 4], visit: [7, 13], obj: [1, 3], kr: [2, 6], up: 2, down: 3, see: [9, 13], under: 6, thin: 18 },
+    q1: { inj: 4, sif: 11, ctl: 58, fix: [1, 3], visit: [6, 13], obj: [0, 3], kr: [1, 6], up: 1, down: 4, see: [8, 13], under: 9, thin: 24 }
+  };
+  var BR_WHY_SNAP = {
+    q2: { inj: 'Two hand injuries from sheet edges, one strain.', sif: 'Mostly suspended loads and isolations at shift change.', ctl: 'Isolation tests skipped at night shift change.', fix: 'Dust extraction stuck. Briefing-only plans didn’t.', down: 'Monitoring, contractor management and frontline workforce slipped.', visit: 'Quarry Link and Coastal Aged Care not visited.', obj: 'Objectives set on 1 April; programs still being scoped.', up: 'Contractor management and frontline workforce improved.', see: 'Two sites still on paper, one source failing.', under: 'Mostly near misses near plant logged as minor.', thin: 'Pre-starts and inspections with no detail.' },
+    q1: { inj: 'Strains and cuts, one lost-time hand injury.', sif: 'Falls from height during facade work.', ctl: 'Edge protection removed and not reinstated.', fix: 'Briefing-only plans didn’t hold.', down: 'Four factors slipped as facade work ramped up.', visit: 'Most leadership visits went to the same three sites.', obj: 'First quarter with objectives.', up: 'Frontline workforce improved.', see: 'Three sites on paper.', under: 'Events near live services logged as minor.', thin: 'Many records were a single word.' }
+  };
+  function brNow() {
+    var sites = [], regs = allRegs(), keep = ST.mapPeriod; ST.mapPeriod = 90;
+    ORG.forEach(function (d) { d.regions.forEach(function (r) { r.sites.forEach(function (x) { sites.push(x); }); }); });
+    var g = mapGap(regs), rs = RETROS.filter(function (r) { return histTs(r.closed) >= histTs('1 Jul'); });
+    var on = OBJECTIVES.filter(function (o) { return objStatus(o)[1] === 'On track'; }).length, krN = 0, krH = 0;
+    OBJECTIVES.forEach(function (o) { o.krs.forEach(function (kr) { krN++; if (lvlOf(aggInd(objRegs(o), o.f, kr[0]).v) >= kr[1]) krH++; }); });
+    var bad = SOURCES.filter(function (x) { return x.status === 'failing'; }).map(function (x) { return x.id; });
+    var seen = sites.filter(function (x) { return x.state !== 'none' && x.state !== 'quiet' && !x.src.some(function (id) { return bad.indexOf(id) > -1; }); });
+    // Prism's quarterly counts of high-potential events and control performance, read across every record
+    var out = { inj: 2, sif: 6, ctl: 71, fix: [rs.filter(function (r) { return r.outcome === 'worked' || r.outcome === 'quiet'; }).length, rs.length],
+      visit: [sites.filter(function (x) { return x.visit <= 30; }).length, sites.length], obj: [on, OBJECTIVES.length], kr: [krH, krN],
+      up: FACTORS.filter(function (f) { return g.sc[f[0]].t === 'better'; }).length, down: FACTORS.filter(function (f) { return g.sc[f[0]].t === 'worse'; }).length,
+      see: [seen.length, sites.length], under: 4, thin: 11, _sites: sites };
+    ST.mapPeriod = keep; return out;
+  }
+  // The report payload: themes, each with a headline and a few measures, each measure with what's behind it
+  function rpWhy(per, live) {
+    var unseen = live._sites.filter(function (x) { return x.visit > 30; }).map(function (x) { return x.name; });
+    return per === 'q3' ? {
+      inj: 'Both hand injuries, at Creek Crossing and Tower 3. Counted as Intelex records them.',
+      sif: 'Suspended loads at North Yard and Harbour Bridge Deck, and isolations closed before testing at shift change.',
+      ctl: 'Spotters and isolation tests now hold. Tag lines are still improvised at Harbour Bridge Deck.',
+      fix: 'Dust extraction and lone-working rosters stuck. Re-briefing pre-starts didn’t.',
+      visit: 'Not visited in a month: ' + join(unseen) + '.',
+      obj: 'Frontline workforce is on track. Pre-starts are still ticked, not done, so monitoring and metrics is off track.',
+      up: 'Contractor management, frontline workforce, learning and operational management.',
+      down: 'Monitoring and metrics: pre-starts are ticked, not done.',
+      see: 'Mitti is failing, two sites have gone quiet and Depot Upgrade is still on paper.',
+      under: 'For example NM-2290: a beam swung over an access path, logged as a minor near miss. Prism reads it as could have been fatal.',
+      thin: 'Mostly pre-starts and weekly inspections with identical answers and no detail.' } : BR_WHY_SNAP[per];
+  }
+  var RP_THEMES = [
+    ['happened', 'What happened', 'Did anything hurt someone, or nearly kill them?', [['Recordable injuries', 'inj', 'n', true, 'From Intelex, as reported'], ['Events that could have been fatal', 'sif', 'n', true, 'Prism’s reading of every record']]],
+    ['controls', 'Are controls holding', 'When it mattered, did the controls work, and did our fixes stick?', [['Critical controls holding in the field', 'ctl', 'p', false, 'Prism’s reading of every record'], ['Fixes that worked, at 90 days', 'fix', 'f', false, 'Hiviz retros']]],
+    ['leaders', 'Are leaders there', 'Are leaders seeing the work for themselves?', [['Sites visited by a leader in the last 30 days', 'visit', 'f', false, 'Hiviz visits']]],
+    ['plan', 'Is the plan working', 'Is the strategy moving the things it set out to?', [['Objectives on track', 'obj', 'f', false, 'Hiviz strategy'], ['Forge Works factors getting better', 'up', 'n', false, 'The Forge Works Map'], ['Forge Works factors getting worse', 'down', 'n', true, 'The Forge Works Map']]]
+  ];
+  var RP_HEAD = {
+    q3: { happened: 'Fewer injuries and fewer events that could have been fatal.', controls: 'Controls are holding more often, and more of our fixes are sticking.', leaders: 'More sites are seeing a leader, but three haven’t in a month.', plan: 'One objective on track; the Map is mostly improving.', trust: 'Reporting is getting better, but a failing source and two quiet sites leave gaps.' },
+    q2: { happened: 'Fewer injuries and serious events than Q1.', controls: 'Controls held more often, but only one fix stuck.', leaders: 'Leaders reached more sites than in Q1.', plan: 'The first objective came on track.', trust: 'Better reporting, but four sites were hard to see.' },
+    q1: { happened: 'The baseline: four injuries and eleven serious events.', controls: 'Fewer than six in ten controls held.', leaders: 'Leadership visits clustered at three sites.', plan: 'The first quarter with objectives.', trust: 'Three sites still on paper.' }
+  };
+  var RP_ANSWER = {
+    q3: 'Fewer events that could have been fatal, and critical controls are holding more often. But leaders haven’t been to three sites in a month, and one serious exposure, controls failing at handovers, still has no owner.',
+    q2: 'Fewer serious events and controls held more often than in Q1, but isolations at shift change were the biggest exposure, only one fix stuck, and four sites were hard to see.',
+    q1: 'The first quarter with objectives. Falls from height during facade work were the biggest exposure, and most plans relied on briefings.'
+  };
+  function rpVal(v, k) { return v == null ? '—' : k === 'p' ? v + '%' : k === 'f' ? v[0] + ' of ' + v[1] : String(v); }
+  function rpDir(a, b, k, lowGood) {
+    if (b == null) return ['', 'First period'];
+    var x = k === 'f' ? a[0] / a[1] : a, y = k === 'f' ? b[0] / b[1] : b; if (x === y) return ['steady', 'Same as ' + rpVal(b, k)];
+    var good = lowGood ? x < y : x > y; return [good ? 't-success' : 't-critical', (good ? 'Better than ' : 'Worse than ') + rpVal(b, k)];
+  }
+  // The next level behind each measure, for the period that's live
+  function rpBehind(key) {
+    var recs = function (f) { return Object.keys(RECS).map(function (k) { return RECS[k]; }).filter(f).slice(0, 6).map(function (r) { return { kind: 'record', title: (SRC[r.src] ? SRC[r.src].name + ' · ' : '') + (r.raw || '').split('\n')[0].slice(0, 90), sub: (SITE[r.site] ? SITE[r.site].name : '') + (r.when ? ' · ' + r.when : ''), attr: 'data-rec="' + r.id + '"' }; }); };
+    var ins = function (f) { return INSIGHTS.filter(function (i) { return !i.dismissed && f(i); }).map(function (i) { return { kind: 'insight', ins: i, title: i.title, sub: i.story, attr: 'data-open="' + i.id + '"' }; }); };
+    var sites = []; ORG.forEach(function (d) { d.regions.forEach(function (r) { r.sites.forEach(function (x) { sites.push(x); }); }); });
+    var bad = SOURCES.filter(function (x) { return x.status === 'failing'; }).map(function (x) { return x.id; });
+    if (key === 'inj') return recs(function (r) { return r.src === 'intelex' && r.type === 'Incident'; });
+    if (key === 'sif') return ins(function (i) { return i.read.some(function (r) { return r[0] === 'Could have been' && /Fatal|Serious/.test(r[1]); }); });
+    if (key === 'ctl') return ins(function (i) { return i.read.some(function (r) { return r[0] === 'Control'; }); }).map(function (x) { x.sub = 'Control: ' + x.ins.read.filter(function (r) { return r[0] === 'Control'; })[0][1] + '. ' + x.ins.story; return x; });
+    if (key === 'fix') return RETROS.filter(function (r) { return histTs(r.closed) >= histTs('1 Jul'); }).map(function (r) { return { kind: 'retro', badge: outBadge(r.outcome), title: r.title, sub: r.summary, attr: 'data-retro="' + r.id + '"' }; });
+    if (key === 'visit') return sites.slice().sort(function (a, b) { return b.visit - a.visit; }).map(function (x) { return { kind: 'site', title: x.name, sub: x.visit > 30 ? 'Not visited in ' + x.visit + ' days' : 'Visited ' + x.visit + ' days ago', attr: 'data-site="' + x.id + '"', warn: x.visit > 30 }; });
+    if (key === 'obj') return OBJECTIVES.map(function (o) { var st = objStatus(o); return { kind: 'objective', badge: '<span class="badge ' + st[0] + '"><i></i>' + st[1] + '</span>', title: objTitle(o), sub: krNow(o), attr: 'data-obj="' + o.id + '"' }; });
+    if (key === 'up' || key === 'down') { var keep = ST.mapPeriod; ST.mapPeriod = 90; var g = mapGap(allRegs()); ST.mapPeriod = keep; return FACTORS.filter(function (f) { return g.sc[f[0]].t === (key === 'up' ? 'better' : 'worse'); }).map(function (f) { var sc = g.sc[f[0]]; return { kind: 'factor', badge: trendHTML(sc.t), title: FACTOR[f[0]].name, sub: 'Now ' + lvlLabel(sc.v), attr: 'data-factor="' + f[0] + '"' }; }); }
+    if (key === 'see') return sites.filter(function (x) { return x.state === 'none' || x.state === 'quiet' || x.src.some(function (id) { return bad.indexOf(id) > -1; }); }).map(function (x) { return { kind: 'site', title: x.name, sub: x.state === 'none' ? 'Reports on paper' : x.state === 'quiet' ? 'Gone quiet. ' + x.why : 'Sends through ' + SOURCES.filter(function (s2) { return bad.indexOf(s2.id) > -1 && x.src.indexOf(s2.id) > -1; }).map(function (s2) { return s2.name; }).join(', ') + ', which is failing', attr: 'data-site="' + x.id + '"', warn: true }; });
+    if (key === 'under') return recs(function (r) { return /NM-/.test(r.raw || '') && (r.tags || []).some(function (t) { return t[1] === 'critical'; }); }).map(function (x) { x.sub = 'Logged as a minor near miss · Prism reads it as could have been fatal · ' + x.sub; return x; });
+    if (key === 'thin') return recs(function (r) { return /Pre-Start|inspection/i.test(r.raw || '') && /Yes|all good|pass/i.test(r.raw || ''); });
+    return [];
+  }
+  ST.rep = { per: 'q3', page: 0 };
+  function rpPeriod() { var i = BR_PERIODS.map(function (x) { return x[0]; }).indexOf(ST.rep.per); return { i: i, cur: BR_PERIODS[i], prev: BR_PERIODS[i + 1] || null }; }
+  function rpData() {
+    var P = rpPeriod(), live = brNow(), cur = P.cur[0] === 'q3' ? live : BR_SNAP[P.cur[0]], was = P.prev ? (P.prev[0] === 'q3' ? live : BR_SNAP[P.prev[0]]) : null;
+    return { P: P, cur: cur, was: was, why: rpWhy(P.cur[0], live), live: P.cur[0] === 'q3' };
+  }
+  function rpBehindHTML(key, D) {
+    if (!D.live) return '<p class="rp-none">A frozen snapshot, ' + esc(D.P.cur[3]) + '. The records behind it are kept with the snapshot.</p>';
+    var all = rpBehind(key), items = all.slice(0, 5); if (!items.length) return '<p class="rp-none">Nothing behind this one this period.</p>';
+    var more = all.length - items.length;
+    return '<ul class="rp-behind">' + items.map(function (x) {
+      var t = x.href ? '<a href="' + x.href + '">' + esc(x.title) + '</a>' : '<button type="button" class="linkish" ' + x.attr + '>' + esc(x.title) + '</button>';
+      return '<li>' + (x.ins ? bowtie(x.ins) : x.badge || tIcon(x.kind === 'site' ? 'factor' : x.kind === 'retro' ? 'plan' : x.kind)) + '<div><span class="t">' + t + '</span><span class="s' + (x.warn ? ' t-warning' : '') + '">' + esc(x.sub) + '</span></div></li>';
+    }).join('') + '</ul>' + (more > 0 ? '<p class="rp-none">And ' + more + ' more.</p>' : '');
+  }
+  function openSiteCard(id, trigger) {
+    var x = SITE[id]; if (!x) return; if (trigger) recTrigger = trigger;
+    var st = STATE[x.state] || ['', ''], ins = INSIGHTS.filter(function (i) { return !i.dismissed && !i.closed && i.sites.indexOf(id) > -1; });
+    $('rec').innerHTML = drawerHead('Site', [x.region + ' region'], x.name, x.why) +
+      '<div class="sheet-body">' +
+        '<section class="sheet-sec"><span class="label">State</span><p><span class="badge ' + st[0] + '"><i></i>' + st[1] + '</span></p></section>' +
+        '<section class="sheet-sec"><span class="label">Leadership visits</span><p class="' + (x.visit > 30 ? 't-warning' : '') + '" style="font-weight:700">' + (x.visit > 30 ? 'Not visited in ' + x.visit + ' days' : 'Last visited ' + x.visit + ' days ago') + '</p></section>' +
+        '<section class="sheet-sec"><span class="label">What it reports through</span><p>' + (x.src.length ? esc(join(x.src.map(function (s2) { var so = SRC[s2]; return so.name + (so.status === 'failing' ? ' (failing)' : so.status === 'partial' ? ' (partly imported)' : ''); }))) : 'Nothing. It reports on paper.') + '</p></section>' +
+        '<section class="sheet-sec"><span class="label">Open insights here</span>' + (ins.length ? '<div class="links">' + ins.map(function (i) { return '<button type="button" class="link-item" data-fopen="' + i.id + '"><b>' + esc(i.title) + '</b><span>' + esc(statusText(i)) + '</span></button>'; }).join('') + '</div>' : '<p class="muted-p">None open.</p>') + '</section>' +
+      '</div>';
+    $('rec').hidden = false; $('scrim').hidden = false; $('rec-x').focus();
+  }
+  function rpBar(D, title) {
+    var P = D.P, older = BR_PERIODS[P.i + 1], newer = BR_PERIODS[P.i - 1];
+    return '<div class="rv-bar"><div class="rv-bar-in"><span class="rv-t"><b>Board report</b><span>' + esc(ORG_NAME) + '</span></span>' +
+      '<span class="rp-per"><button type="button" class="btn sm" data-rpper="' + (older ? older[0] : '') + '"' + (older ? '' : ' disabled') + ' aria-label="Earlier period">‹</button><b>' + esc(P.cur[1]) + '</b><button type="button" class="btn sm" data-rpper="' + (newer ? newer[0] : '') + '"' + (newer ? '' : ' disabled') + ' aria-label="Later period">›</button></span>' +
+      
+      '<span class="rp-act"><button type="button" class="btn" data-br-share="1">Share</button><button type="button" class="btn" data-br-print="1">Print</button><a class="btn" href="#strategy" aria-label="Close the report">Close</a></span></div></div>';
+  }
+  function rpMeasure(m, D) {
+    var a = D.cur[m[1]], b = D.was ? D.was[m[1]] : null, d = rpDir(a, b, m[2], m[3]), open = true;
+    return '<div class="rp-m"><div class="rp-num">' + rpVal(a, m[2]) + '</div><div class="rp-body"><h3>' + esc(m[0]) + '</h3><p class="rp-dir ' + d[0] + '">' + esc(d[1]) + ' · ' + esc(D.P.prev ? D.P.prev[1] : '') + '</p><p class="rp-why">' + esc(D.why[m[1]] || '') + '</p>' +
+      '<p class="rp-src">' + esc(m[4]) + '</p>' + (open ? rpBehindHTML(m[1], D) : '') + '</div></div>';
+  }
+  function renderReport() {
+    var D = rpData(), pages = [['overview', 'The answer']].concat(RP_THEMES.map(function (t) { return [t[0], t[1]]; }));
+    if (ST.rep.page >= pages.length) ST.rep.page = 0;
+    var pg = ST.rep.page, bar = rpBar(D);
+    var rail = '<ol class="rv-rail rp-rail">' + pages.map(function (x, k) { return '<li class="' + (k === pg ? 'on' : '') + '"><button type="button" data-rppage="' + k + '"><i>' + (k + 1) + '</i>' + esc(x[1]) + '</button></li>'; }).join('') + '</ol>';
+    var cover = '<p class="rp-cover">Safety of work · ' + esc(D.P.cur[1]) + ' · ' + esc(D.P.cur[2]) + ' · ' + esc(D.P.cur[3]) + (D.P.prev ? ' · compared with ' + esc(D.P.prev[1]) : '') + '</p>';
+    var body;
+    var key = pages[pg][0], th = RP_THEMES.filter(function (t) { return t[0] === key; })[0];
+    if (key === 'overview') {
+      body = cover + '<h1 class="rv-h">The answer</h1><p class="rp-lead">' + esc(RP_ANSWER[D.P.cur[0]]) + '</p><div class="rp-grid">' + RP_THEMES.map(function (t, k) {
+        var m = t[3][0], a = D.cur[m[1]], b = D.was ? D.was[m[1]] : null, d = rpDir(a, b, m[2], m[3]);
+        return '<button type="button" class="rp-tile" data-rppage="' + (k + 1) + '"><span class="label">' + esc(t[1]) + '</span><span class="rp-num">' + rpVal(a, m[2]) + '</span><span class="rp-tm">' + esc(m[0]) + '</span><span class="rp-dir ' + d[0] + '">' + esc(d[1]) + '</span><span class="rp-th">' + esc(RP_HEAD[D.P.cur[0]][t[0]]) + '</span></button>';
+      }).join('') + '</div>';
+    } else {
+      body = cover + '<p class="kind"><span class="kind-t">' + esc(th[1]) + '</span></p><h1 class="rv-h">' + esc(RP_HEAD[D.P.cur[0]][th[0]]) + '</h1>' + rvQ(th[2], 'The question') + '<div class="rp-ms">' + th[3].map(function (m) { return rpMeasure(m, D); }).join('') + '</div>';
+    }
+    var nav = '<div class="rv-nav">' + (pg > 0 ? '<button type="button" class="btn lg" data-rppage="' + (pg - 1) + '">Back</button>' : '<span></span>') + '<span class="rv-nav-r">' + (pg < pages.length - 1 ? '<button type="button" class="btn brand lg" data-rppage="' + (pg + 1) + '">Next: ' + esc(pages[pg + 1][1]) + '</button>' : '<a class="btn brand lg" href="#strategy">Close the report</a>') + '</span></div>';
+    $('view').innerHTML = bar + '<div class="rv rp">' + rail + body + '</div>' + nav;
+    syncPanel();
+  }
+  document.addEventListener('click', function (e) {
+    var sc = e.target.closest('[data-site]'); if (sc) { e.preventDefault(); e.stopPropagation(); if (!sc.closest('#sheet, #rec')) { $('sheet').hidden = true; ST.sheet = ''; } closeRec(); openSiteCard(sc.getAttribute('data-site'), sc); return; }
+    if (ST.view !== 'report') return;
+    var a = e.target.closest('#sheet a[href^="#"], #rec a[href^="#"]'); if (!a) return;
+    var h = a.getAttribute('href').slice(1).split('/'); e.preventDefault(); e.stopPropagation();
+    if (h[0] === 'insight' && h[1]) { closeRec(); openSheet(h[1]); return; }
+    if (h[0] === 'site' && h[1]) { closeRec(); openSiteCard(h[1], a); return; }
+    if (h[0] === 'map' && h[1]) { closeRec(); openFactor(h[1], a); return; }
+    if (h[0] === 'strategy') { var o = OBJECTIVES.filter(function (x) { return objTitle(x) === a.textContent.trim(); })[0]; if (o) { closeRec(); openObjective(o.id, a); return; } }
+    toast('That opens outside the report. Close the report to go there.');
+  }, true);
+  document.addEventListener('click', function (e) {
+    if (ST.view !== 'report') { if (e.target.closest('[data-rpgo]')) { ST.rep.page = 0; go('report'); } return; }
+    var t, y = window.scrollY;
+    if ((t = e.target.closest('[data-rppage]'))) { closeDrawers(); ST.rep.page = +t.getAttribute('data-rppage'); renderReport(); window.scrollTo(0, 0); return; }
+    if ((t = e.target.closest('[data-rpper]'))) { if (t.disabled || !t.getAttribute('data-rpper')) return; closeDrawers(); ST.rep.per = t.getAttribute('data-rpper'); renderReport(); return; }
+  }, true);
+  document.addEventListener('click', function (e) {
+    if (e.target.closest('[data-br-print]')) { window.print(); return; }
+    if (e.target.closest('[data-br-share]')) { toast('Link copied. Anyone you share it with opens this report at ' + (ST.view === 'report' ? rpPeriod().cur[1] : 'this period') + '.'); }
+  });
   function viewSwitch(page) {
     var v = ST.tview[page];
-    return '<div class="seg view-sw" role="group" aria-label="View"><button type="button" data-tview="' + page + ':report" aria-pressed="' + (v !== 'tree') + '">Report</button><button type="button" data-tview="' + page + ':tree" aria-pressed="' + (v === 'tree') + '">Tree</button></div>';
+    return '<div class="seg view-sw" role="group" aria-label="View"><button type="button" data-tview="' + page + ':report" aria-pressed="' + (v !== 'tree') + '">Report</button><button type="button" data-tview="' + page + ':tree" aria-pressed="' + (v === 'tree') + '">Tree</button>' + '</div>' + (page === 'strategy' ? '<button type="button" class="btn" data-rpgo="1">Board report</button>' : '');
   }
   // Swap everything after the switch for the tree, leaving the page header as it is
   function treeSwap(html) { var r = $('view').querySelector('.view-row'); if (!r) return; while (r.nextSibling) r.parentNode.removeChild(r.nextSibling); r.insertAdjacentHTML('afterend', html); }
@@ -5222,7 +5426,7 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
   function route(target) {
     var h = (target || (location.hash || '').slice(1) || (ST.div || ST.reg ? 'focus' : 'strategy')).split('/');
     var prevView = ST.view;
-    ST.view = ['focus', 'sites', 'site', 'sources', 'meeting', 'insight', 'myfocus', 'map', 'strategy', 'planning', 'progress'].indexOf(h[0]) > -1 ? h[0] : 'focus';
+    ST.view = ['focus', 'sites', 'site', 'sources', 'meeting', 'insight', 'myfocus', 'map', 'strategy', 'planning', 'progress', 'report'].indexOf(h[0]) > -1 ? h[0] : 'focus';
     ST.factor = ST.view === 'map' ? (h[1] || '') : '';
     if (!ST.keepWalk) { ST.mfSnap = null; if (ST.view === 'myfocus') ST.mfWalk = -1; } ST.keepWalk = false;
     ST.insight = ST.view === 'insight' ? (h[1] || '') : '';
@@ -5234,6 +5438,7 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
     if (prevView && prevView !== ST.view && ['planning', 'progress'].indexOf(prevView) < 0) { ST.stTab = 'current'; }
     if (ST.view === 'planning' && !PL) ST.view = 'strategy';
     if (ST.view === 'progress' && !PG) ST.view = 'strategy';
+    if (ST.view === 'report' && h[1] && BR_PERIODS.some(function (x) { return x[0] === h[1]; })) ST.rep.per = h[1];
     var tab = ['meeting', 'insight'].indexOf(ST.view) > -1 ? 'focus' : ST.view === 'site' ? 'sites' : ST.view === 'planning' || ST.view === 'progress' ? 'strategy' : ST.view;
     ST.src = ST.view === 'sources' ? (h[1] || '') : '';
     if (ST.src === 'feed') { ST.src = ''; ST.srcTab = 'feed'; } else if (ST.view === 'sources' && !ST.src) ST.srcTab = 'cards';
@@ -5267,7 +5472,7 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
   ['sheet', 'rec', 'help'].forEach(function (id) { new MutationObserver(syncPanel).observe($(id), { attributes: true, attributeFilter: ['hidden'] }); });
   window.addEventListener('resize', syncPanel);
   window.addEventListener('scroll', function () { if (document.body.classList.contains('panel-open')) syncPanel(); }, { passive: true });
-  function renderView() { document.body.classList.toggle('pv-home-only', ST.view === 'myfocus'); document.body.classList.toggle('rv-mode', (ST.view === 'meeting' && !!MT) || (ST.view === 'progress' && !!PG) || (ST.view === 'planning' && !!PL)); if (ST.view === 'map') renderMap(); else if (ST.view === 'strategy') renderStrategy(); else if (ST.view === 'planning') renderPlanning(); else if (ST.view === 'progress') renderProgress(); else if (ST.view === 'myfocus') renderMyFocus(); else if (ST.view === 'sites') renderSites(); else if (ST.view === 'site') { if (ST.siteFeed) renderSiteFeed(ST.site); else renderSite(ST.site); } else if (ST.view === 'sources') renderSources(); else if (ST.view === 'meeting') renderMeeting();  else if (ST.view === 'insight') renderInsight(ST.insight); else renderFocus(); }
+  function renderView() { document.body.classList.toggle('pv-home-only', ST.view === 'myfocus'); document.body.classList.toggle('rv-mode', (ST.view === 'meeting' && !!MT) || (ST.view === 'progress' && !!PG) || (ST.view === 'planning' && !!PL) || ST.view === 'report'); document.body.classList.toggle('rp-mode', ST.view === 'report'); if (ST.view === 'report') renderReport(); else if (ST.view === 'map') renderMap(); else if (ST.view === 'strategy') renderStrategy(); else if (ST.view === 'planning') renderPlanning(); else if (ST.view === 'progress') renderProgress(); else if (ST.view === 'myfocus') renderMyFocus(); else if (ST.view === 'sites') renderSites(); else if (ST.view === 'site') { if (ST.siteFeed) renderSiteFeed(ST.site); else renderSite(ST.site); } else if (ST.view === 'sources') renderSources(); else if (ST.view === 'meeting') renderMeeting();  else if (ST.view === 'insight') renderInsight(ST.insight); else renderFocus(); }
 
   document.addEventListener('click', function (e) {
     var a = e.target.closest('a[href^="#"]');
