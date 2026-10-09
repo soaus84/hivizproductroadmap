@@ -32,7 +32,7 @@
   --critical-tint: #fdecea; --warning-tint: #fff4e0; --success-tint: #e9f6ee; --info-tint: #e9f1fd;
 
   --brand: #ffe500;
-  --bt-red: #e24b4a; --bt-amber: #ef9f27; --bt-green: #97c459; --bt-grey: #b4b2a9;
+  --bt-red: #e24b4a; --bt-amber: #ef9f27; --bt-green: #97c459; --bt-grey: #b4b2a9; --bt-blue: #378add;
   --shadow: none;
   --shadow-lg: 0 24px 48px -12px rgba(0,0,0,0.22), 0 0 0 1px #0d0f12;
   --font: "Archivo", "Helvetica Neue", Arial, sans-serif;
@@ -1652,11 +1652,11 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
   function btIn(i) { return i.practice ? 'success' : i.sev; }
   function btOut(i) {
     if (i.closed || i.status === 'resolved') return 'success';
-    var r = planRead(i); return r === 'working' ? 'success' : r === 'continues' ? 'critical' : r === 'early' ? 'early' : '';
+    var r = planRead(i); return r === 'working' ? 'success' : r === 'continues' ? 'critical' : r === 'early' || (i.plan && i.plan.state === 'agreed') ? 'early' : '';
   }
   function bowtie(i, w, h) {
     w = w || 34; h = h || 18; var cx = w / 2, cy = h / 2, sw = 1.5, a = btIn(i), b = btOut(i);
-    var col = { critical: 'var(--bt-red)', warning: 'var(--bt-amber)', success: 'var(--bt-green)', early: 'var(--bt-grey)' };
+    var col = { critical: 'var(--bt-red)', warning: 'var(--bt-amber)', success: 'var(--bt-green)', early: 'var(--bt-blue)' };
     var inW = { critical: 'Critical', warning: 'Warning', success: 'Good practice' }[a], outW = { success: i.closed ? 'Closed' : 'Working', critical: 'Pattern continues', early: 'Too early to tell' }[b] || 'No outcome yet';
     var L = sw + ',' + sw + ' ' + sw + ',' + (h - sw) + ' ' + cx + ',' + cy, R = (w - sw) + ',' + sw + ' ' + (w - sw) + ',' + (h - sw) + ' ' + cx + ',' + cy;
     return '<svg class="bowtie" width="' + w + '" height="' + h + '" viewBox="0 0 ' + w + ' ' + h + '" role="img" aria-label="Coming in: ' + inW + '. Coming out: ' + outW + '.">' +
@@ -1694,7 +1694,7 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
     if (i.status === 'plan') return '<span class="badge"><i></i>Agree to plan</span>';
     if (i.status === 'resolved') return '<span class="badge success"><i></i>Ready to close</span>';
     if (stalled(i)) return '<span class="badge warning"><i></i>Stalled ' + i.updated + 'd</span>';
-    return '<span class="badge"><i></i>In progress</span>';
+    return '<span class="badge info"><i></i>In progress</span>';
   }
   function mgStack(ids) { return '<span class="stack">' + ids.map(function (id) { var s = SRC[id]; return '<span class="mg" title="' + esc(s.name) + '">' + esc(s.mg) + '</span>'; }).join('') + '</span>'; }
   // 28-day evidence histogram. Neutral greys, last 7 days darker.
