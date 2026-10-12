@@ -1089,8 +1089,8 @@ body.rv-mode main { padding-bottom: 140px; }
 body.rv-mode .foot { display: none; }
 body.rv-mode .toast { bottom: 96px; }
 /* ---------- Board report: its own full-screen page. Pages or tree, same report ---------- */
-.rp-per { display: inline-flex; align-items: center; gap: 8px; margin-left: auto; } .rp-per b { font-size: 16px; min-width: 70px; text-align: center; }
-.rp-act { display: inline-flex; gap: 8px; }
+.rp-per { display: inline-flex; align-items: center; gap: 8px; margin-left: 18px; padding-left: 18px; border-left: 1px solid var(--border); } .rp-per b { font-size: 18px; font-weight: 900; min-width: 82px; text-align: center; }
+.rp-act { display: inline-flex; gap: 8px; margin-left: auto; }
 .rp-rail { margin: 0 0 4px; flex-wrap: wrap; }
 .rp-rail li button { display: inline-flex; align-items: center; gap: 6px; border: 0; background: none; font: inherit; cursor: pointer; color: inherit; }
 .rp-cover { margin: 0; font-size: 14.5px; color: var(--text-3); }
@@ -1333,6 +1333,7 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
       <a href="#sites" data-view="sites">Sites</a>
       <a href="#map" data-view="map">Map</a>
       <a href="#strategy" data-view="strategy">Strategy</a>
+      <a href="#report" data-view="report">Report</a>
     </nav>
     <div class="hdr-right">
       <a class="live" id="live-pill" href="#sources" aria-label="Sources: live data arriving"><span class="dot" aria-hidden="true"></span><span class="lbl">Live</span><span class="live-alert" id="src-alert" hidden></span><span class="txt" id="live-txt" aria-live="polite"></span></a>
@@ -4528,7 +4529,7 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
     return '<div class="rv-bar"><div class="rv-bar-in"><span class="rv-t"><b>Board report</b><span>' + esc(ORG_NAME) + '</span></span>' +
       '<span class="rp-per"><button type="button" class="btn sm" data-rpper="' + (older ? older[0] : '') + '"' + (older ? '' : ' disabled') + ' aria-label="Earlier period">‹</button><b>' + esc(P.cur[1]) + '</b><button type="button" class="btn sm" data-rpper="' + (newer ? newer[0] : '') + '"' + (newer ? '' : ' disabled') + ' aria-label="Later period">›</button></span>' +
       
-      '<span class="rp-act"><button type="button" class="btn" data-br-share="1">Share</button><button type="button" class="btn" data-br-print="1">Print</button><a class="btn" href="#strategy" aria-label="Close the report">Close</a></span></div></div>';
+      '<span class="rp-act"><button type="button" class="btn" data-br-share="1">Share</button><button type="button" class="btn" data-br-print="1">Print</button><button type="button" class="btn" data-rpclose="1">Close</button></span></div></div>';
   }
   function rpMeasure(m, D) {
     var a = D.cur[m[1]], b = D.was ? D.was[m[1]] : null, d = rpDir(a, b, m[2], m[3]), open = true;
@@ -4551,7 +4552,7 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
     } else {
       body = cover + '<p class="kind"><span class="kind-t">' + esc(th[1]) + '</span></p><h1 class="rv-h">' + esc(RP_HEAD[D.P.cur[0]][th[0]]) + '</h1>' + rvQ(th[2], 'The question') + '<div class="rp-ms">' + th[3].map(function (m) { return rpMeasure(m, D); }).join('') + '</div>';
     }
-    var nav = '<div class="rv-nav">' + (pg > 0 ? '<button type="button" class="btn lg" data-rppage="' + (pg - 1) + '">Back</button>' : '<span></span>') + '<span class="rv-nav-r">' + (pg < pages.length - 1 ? '<button type="button" class="btn brand lg" data-rppage="' + (pg + 1) + '">Next: ' + esc(pages[pg + 1][1]) + '</button>' : '<a class="btn brand lg" href="#strategy">Close the report</a>') + '</span></div>';
+    var nav = '<div class="rv-nav">' + (pg > 0 ? '<button type="button" class="btn lg" data-rppage="' + (pg - 1) + '">Back</button>' : '<span></span>') + '<span class="rv-nav-r">' + (pg < pages.length - 1 ? '<button type="button" class="btn brand lg" data-rppage="' + (pg + 1) + '">Next: ' + esc(pages[pg + 1][1]) + '</button>' : '<button type="button" class="btn brand lg" data-rpclose="1">Close the report</button>') + '</span></div>';
     $('view').innerHTML = bar + '<div class="rv rp">' + rail + body + '</div>' + nav;
     syncPanel();
   }
@@ -4567,8 +4568,9 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
     toast('That opens outside the report. Close the report to go there.');
   }, true);
   document.addEventListener('click', function (e) {
-    if (ST.view !== 'report') { if (e.target.closest('[data-rpgo]')) { ST.rep.page = 0; go('report'); } return; }
+    if (ST.view !== 'report') return;
     var t, y = window.scrollY;
+    if (e.target.closest('[data-rpclose]')) { closeDrawers(); go(ST.rpFrom || 'focus'); return; }
     if ((t = e.target.closest('[data-rppage]'))) { closeDrawers(); ST.rep.page = +t.getAttribute('data-rppage'); renderReport(); window.scrollTo(0, 0); return; }
     if ((t = e.target.closest('[data-rpper]'))) { if (t.disabled || !t.getAttribute('data-rpper')) return; closeDrawers(); ST.rep.per = t.getAttribute('data-rpper'); renderReport(); return; }
   }, true);
@@ -4578,7 +4580,7 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
   });
   function viewSwitch(page) {
     var v = ST.tview[page];
-    return '<div class="seg view-sw" role="group" aria-label="View"><button type="button" data-tview="' + page + ':report" aria-pressed="' + (v !== 'tree') + '">Report</button><button type="button" data-tview="' + page + ':tree" aria-pressed="' + (v === 'tree') + '">Tree</button>' + '</div>' + (page === 'strategy' ? '<button type="button" class="btn" data-rpgo="1">Board report</button>' : '');
+    return '<div class="seg view-sw" role="group" aria-label="View"><button type="button" data-tview="' + page + ':report" aria-pressed="' + (v !== 'tree') + '">Report</button><button type="button" data-tview="' + page + ':tree" aria-pressed="' + (v === 'tree') + '">Tree</button>' + '</div>';
   }
   // Swap everything after the switch for the tree, leaving the page header as it is
   function treeSwap(html) { var r = $('view').querySelector('.view-row'); if (!r) return; while (r.nextSibling) r.parentNode.removeChild(r.nextSibling); r.insertAdjacentHTML('afterend', html); }
@@ -5440,6 +5442,8 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
     if (ST.view === 'planning' && !PL) ST.view = 'strategy';
     if (ST.view === 'progress' && !PG) ST.view = 'strategy';
     if (ST.view === 'report' && h[1] && BR_PERIODS.some(function (x) { return x[0] === h[1]; })) ST.rep.per = h[1];
+    if (ST.view === 'report' && prevView && prevView !== 'report') { ST.rep.page = 0; ST.rpFrom = ST.lastHash; }
+    if (ST.view !== 'report') ST.lastHash = h.join('/');
     var tab = ['meeting', 'insight'].indexOf(ST.view) > -1 ? 'focus' : ST.view === 'site' ? 'sites' : ST.view === 'planning' || ST.view === 'progress' ? 'strategy' : ST.view;
     ST.src = ST.view === 'sources' ? (h[1] || '') : '';
     if (ST.src === 'feed') { ST.src = ''; ST.srcTab = 'feed'; } else if (ST.view === 'sources' && !ST.src) ST.srcTab = 'cards';
