@@ -1,0 +1,362 @@
+<!doctype html>
+<html lang="en">
+<head>
+<title>Forge Works voice</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Hiviz Prism — shared styles. Keep this block identical across all Prism pages. */
+:root {
+  color-scheme: light;
+  --ground: #ffffff;
+  --surface: #ffffff;
+  --surface-2: #f4f5f7;
+  --line: #dcdfe4;
+  --line-soft: #eceef1;
+  --text: #101216;
+  --text-2: #3b424d;
+  --muted: #69717d;
+  --accent: #ffe500;          /* hi-vis highlight yellow */
+  --accent-ink: #101216;
+  --accent-soft: #fff8c2;
+  --accent-edge: #d9bf00;
+  /* Spectrum — one band per enrichment dimension */
+  --b-signal: #d2483a;
+  --b-energy: #cf7422;
+  --b-barrier: #a88f12;
+  --b-hazard: #25935e;
+  --b-fw: #2f78c2;
+  --b-reason: #7657d6;
+  --ok: #25935e;
+  --warn: #b87d12;
+  --bad: #d2483a;
+  --shadow: 0 1px 2px rgba(16,18,22,0.05);
+  --display: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --body: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-font-smoothing: antialiased; }
+body {
+  margin: 0; background: var(--ground); color: var(--text);
+  font-family: var(--body); font-size: 15px; line-height: 1.6;
+}
+a { color: inherit; }
+a:focus-visible, button:focus-visible, input:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; border-radius: 3px; }
+code, .mono { font-family: var(--mono); font-size: 0.86em; }
+code { background: var(--surface-2); border: 1px solid var(--line-soft); padding: 0 5px; border-radius: 4px; color: var(--text-2); }
+
+.wrap { max-width: 1120px; margin: 0 auto; padding-inline: 24px; }
+@media (max-width: 560px) { .wrap { padding-inline: 16px; } }
+
+/* Top bar */
+.topbar { border-bottom: 1px solid var(--line); background: var(--ground); position: sticky; top: env(safe-area-inset-top, 0px); z-index: 10; }
+.topbar .wrap { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-block: 12px; flex-wrap: wrap; }
+.brand { display: flex; align-items: baseline; gap: 8px; text-decoration: none; }
+.brand-hiviz { font-family: var(--display); font-weight: 900; font-size: 17px; letter-spacing: -0.01em; }
+.brand-prism { font-family: var(--mono); font-size: 12px; font-weight: 500; background: var(--accent); color: var(--accent-ink); padding: 1px 6px; border-radius: 3px; letter-spacing: 0.08em; text-transform: uppercase; }
+.pagenav { display: flex; gap: 4px; flex-wrap: wrap; }
+.pagenav a { font-size: 13px; text-decoration: none; color: var(--text-2); padding: 5px 11px; border-radius: 6px; border: 1px solid transparent; }
+.pagenav a:hover { color: var(--text); border-color: var(--line); }
+.pagenav a[aria-current="page"] { color: var(--text); background: var(--surface-2); border-color: var(--line); }
+.pagenav a.ext { display: inline-flex; align-items: center; gap: 5px; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* Type */
+h1, h2, h3 { font-family: var(--display); letter-spacing: -0.02em; text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(34px, 5.4vw, 60px); line-height: 1.02; font-weight: 800; letter-spacing: -0.03em; }
+h2 { font-size: clamp(24px, 3vw, 32px); line-height: 1.12; font-weight: 800; }
+h3 { font-size: 17px; line-height: 1.3; font-weight: 700; letter-spacing: -0.01em; }
+.eyebrow { font-family: var(--body); font-weight: 700; font-size: 11.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+.lede { font-size: 18px; line-height: 1.55; color: var(--text-2); max-width: 62ch; }
+.prose { max-width: 66ch; color: var(--text-2); }
+.prose p { margin: 0 0 12px; }
+.muted { color: var(--muted); }
+.small { font-size: 13px; }
+
+section.block { padding-block: 56px; border-top: 1px solid var(--line-soft); }
+.block-head { display: grid; gap: 10px; margin-bottom: 28px; max-width: 72ch; }
+
+/* Chips */
+.chip { display: inline-flex; align-items: center; gap: 6px; font-family: var(--mono); font-size: 11.5px; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--line); color: var(--text-2); background: var(--surface); white-space: nowrap; }
+.chip .dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.chip.p1 { background: var(--accent); color: var(--accent-ink); border-color: var(--accent-edge); }
+.chip.ok { color: var(--ok); border-color: color-mix(in srgb, var(--ok) 40%, transparent); }
+.chip.warn { color: var(--warn); border-color: color-mix(in srgb, var(--warn) 40%, transparent); }
+.chip.bad { color: var(--bad); border-color: color-mix(in srgb, var(--bad) 40%, transparent); }
+
+/* Tables */
+.table-scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+table.data { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+table.data th { text-align: left; font-family: var(--mono); font-weight: 500; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); padding: 10px 14px; border-bottom: 1px solid var(--line); background: var(--surface-2); white-space: nowrap; }
+table.data td { padding: 11px 14px; border-bottom: 1px solid var(--line-soft); vertical-align: top; color: var(--text-2); }
+table.data tr:last-child td { border-bottom: none; }
+table.data td strong { color: var(--text); font-weight: 600; }
+
+.footer { padding-block: 40px 56px; border-top: 1px solid var(--line-soft); color: var(--muted); font-size: 13px; }
+.footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+</style>
+<style>
+  .hero { padding-block: 64px 48px; display: grid; gap: 40px; }
+  .hero-text { display: grid; gap: 20px; max-width: 760px; }
+  .hero-text h1 em { font-style: normal; color: var(--accent-ink); background: linear-gradient(transparent 14%, var(--accent) 14%, var(--accent) 94%, transparent 94%); padding-inline: 0.1em; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+  .cta-row { display: flex; gap: 10px; flex-wrap: wrap; }
+  .btn { display: inline-flex; align-items: center; gap: 8px; text-decoration: none; font-weight: 500; font-size: 14px; padding: 10px 16px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); color: var(--text); }
+  .btn:hover { border-color: var(--muted); }
+  .btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent-edge); font-weight: 700; }
+  .btn.primary:hover { filter: brightness(1.06); }
+
+  .figure { border: 1px solid var(--line); border-radius: 14px; background: var(--surface); padding: 20px; box-shadow: var(--shadow); }
+  .fig-scroll svg { display: block; width: 100%; height: auto; }
+  .fig-scroll .mm-narrow { display: none; max-width: 420px; margin-inline: auto; }
+  @media (max-width: 860px) {
+    .fig-scroll .mm-wide { display: none; }
+    .fig-scroll .mm-narrow { display: block; }
+  }
+  .figcap { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-top: 12px; font-size: 13px; color: var(--muted); }
+  svg text { font-family: var(--mono); }
+  .svg-card { fill: var(--surface-2); stroke: var(--line); }
+  .svg-ink { fill: var(--text); }
+  .svg-mute { fill: var(--muted); }
+  .svg-link-in { stroke: var(--muted); fill: none; }
+  .svg-hub { fill: var(--surface-2); stroke: var(--text-2); }
+  .svg-hub-glyph { fill: none; stroke: var(--text); }
+  .fig-mk svg { display: block; width: 100%; height: auto; }
+  .svg-disp { font-family: var(--display); }
+  .svg-ink2 { fill: var(--text-2); }
+
+  .mm .branch { fill: none; stroke: var(--c); stroke-width: 2.25; stroke-linecap: round; }
+  .mm .node-box { fill: color-mix(in srgb, var(--c) 14%, var(--surface)); stroke: var(--c); stroke-width: 1.25; }
+  .mm .node-dot { fill: var(--c); }
+  .mm .node-label { fill: var(--c); font-size: 10.5px; letter-spacing: 0.06em; }
+  .mm .node-value { fill: var(--text); font-size: 13.5px; }
+  .c-signal { --c: var(--b-signal); } .c-energy { --c: var(--b-energy); } .c-barrier { --c: var(--b-barrier); }
+  .c-hazard { --c: var(--b-hazard); } .c-fw { --c: var(--b-fw); } .c-reason { --c: var(--b-reason); }
+
+  .three { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 16px; }
+  .four { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 16px; }
+  @media (max-width: 900px) { .four { grid-template-columns: repeat(2, minmax(0,1fr)); } }
+  @media (max-width: 720px) { .three, .four { grid-template-columns: 1fr; } }
+
+  .point { display: grid; gap: 8px; align-content: start; }
+  .point p { margin: 0; color: var(--text-2); font-size: 14.5px; }
+
+  .step { border: 1px solid var(--line); border-radius: 12px; background: var(--surface); padding: 18px; display: grid; gap: 10px; align-content: start; }
+  .step-n { justify-self: start; font-family: var(--mono); font-size: 12px; font-weight: 500; background: var(--accent); color: var(--accent-ink); padding: 1px 7px; border-radius: 3px; }
+  .step p { margin: 0; font-size: 14px; color: var(--text-2); }
+  .step .reuse { font-size: 12px; color: var(--muted); border-top: 1px solid var(--line-soft); padding-top: 10px; }
+
+  .outputs { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1.1fr); gap: 32px; align-items: start; }
+  @media (max-width: 860px) { .outputs { grid-template-columns: minmax(0,1fr); } .kv { grid-template-columns: minmax(0,1fr); } .kv dd .chip { white-space: normal; } }
+  .out-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; }
+  .out-list li { padding: 14px 0; border-bottom: 1px solid var(--line-soft); display: grid; gap: 4px; }
+  .out-list li:first-child { padding-top: 0; }
+  .out-list li span { color: var(--text-2); font-size: 14px; }
+
+  .insight { border: 1px solid var(--line); border-radius: 12px; background: var(--surface); overflow: hidden; }
+  .insight-top { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; padding: 14px 18px; border-bottom: 1px solid var(--line-soft); background: var(--surface-2); }
+  .insight-body { padding: 18px; display: grid; gap: 14px; }
+  .insight-body h3 { font-size: 19px; }
+  .insight-body p { margin: 0; color: var(--text-2); font-size: 14.5px; }
+  .kv { display: grid; grid-template-columns: 130px 1fr; gap: 6px 14px; font-size: 13px; }
+  .kv dt { color: var(--muted); font-family: var(--mono); font-size: 11.5px; padding-top: 2px; }
+  .kv dd { margin: 0; color: var(--text-2); display: flex; flex-wrap: wrap; gap: 6px; }
+  .why { border-left: 2px solid var(--b-reason); padding-left: 12px; font-size: 13.5px; color: var(--text-2); }
+  .insight-foot { display: flex; gap: 8px; flex-wrap: wrap; padding: 14px 18px; border-top: 1px solid var(--line-soft); }
+  .fake-btn { font-size: 13px; padding: 6px 12px; border-radius: 6px; border: 1px solid var(--line); color: var(--text-2); }
+  .fake-btn.go { background: var(--accent); color: var(--accent-ink); border-color: var(--accent-edge); font-weight: 700; }
+
+  .yes { color: var(--ok); font-weight: 600; }
+  .no { color: var(--muted); }
+  .part { color: var(--warn); }
+  table.data td:first-child { color: var(--text); }
+  table.data th.us, table.data td.us { background: var(--accent-soft); }
+
+  .reuse-strip { display: flex; flex-wrap: wrap; gap: 8px; }
+
+  .five { display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); gap: 14px; }
+  @media (max-width: 1000px) { .five { grid-template-columns: repeat(2, minmax(0,1fr)); } }
+  @media (max-width: 560px) { .five { grid-template-columns: 1fr; } }
+  .loop-note { margin: 22px 0 0; }
+  .loop-note a { font-weight: 600; text-underline-offset: 3px; }
+  .rules { list-style: none; margin: 22px 0 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 10px 28px; max-width: 900px; }
+  @media (max-width: 720px) { .rules { grid-template-columns: 1fr; } }
+  .rules li { position: relative; padding-left: 22px; color: var(--text-2); font-size: 14.5px; }
+  .rules li::before { content: ""; position: absolute; left: 0; top: 7px; width: 10px; height: 10px; border-radius: 2px; background: var(--accent); border: 1px solid var(--accent-edge); }
+</style>
+
+<style>
+  .vx { display: grid; grid-template-columns: minmax(0,1fr) auto minmax(0,1fr); gap: 18px; align-items: stretch; }
+  .vx .card { border: 1px solid var(--line); border-radius: 12px; padding: 18px 20px; background: var(--surface); display: grid; gap: 8px; align-content: start; }
+  .vx .arrow { display: grid; place-items: center; color: var(--muted); font-size: 22px; }
+  .vx .raw { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 13.5px; line-height: 1.5; color: var(--text-2); white-space: pre-wrap; }
+  .vx dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; font-size: 14.5px; }
+  .vx dt { color: var(--muted); } .vx dd { margin: 0; font-weight: 600; }
+  .vx .crit { color: #c42b1c; }
+  .layers { display: grid; gap: 12px; }
+  .layer { display: grid; grid-template-columns: 44px minmax(0,1fr); gap: 16px; align-items: start; border: 1px solid var(--line); border-radius: 12px; padding: 18px 20px; background: var(--surface); }
+  .layer .n { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; border: 1.5px solid var(--text); }
+  .layer.voice { border-color: var(--accent-edge); box-shadow: inset 0 0 0 1px var(--accent-edge); }
+  .layer.voice .n { background: var(--accent); border-color: var(--accent-edge); }
+  .layer h3 { margin: 0 0 4px; font-size: 18px; } .layer p { margin: 0; color: var(--text-2); font-size: 15px; }
+  .quotes { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 8px; }
+  .quotes li { font-size: 16px; font-weight: 600; line-height: 1.4; padding-left: 14px; position: relative; }
+  .quotes li::before { content: "“"; position: absolute; left: 0; color: var(--muted); }
+  .note { font-size: 13px; color: var(--muted); margin: 10px 0 0; }
+  .rec { border: 1px solid var(--line); border-radius: 12px; padding: 18px 20px; background: var(--surface); display: grid; gap: 8px; max-width: 760px; }
+  .rec .who { font-size: 12.5px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
+  .rec p { margin: 0; font-size: 17px; line-height: 1.5; } .rec .src { font-size: 13.5px; color: var(--text-2); }
+  .loop { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 14px; counter-reset: s; }
+  .loop .point { border-top: 2px solid var(--text); padding-top: 12px; }
+  @media (max-width: 860px) { .vx { grid-template-columns: 1fr; } .vx .arrow { transform: rotate(90deg); } .loop { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 560px) { .loop { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="index.html"><span class="brand-hiviz">Hiviz</span><span class="brand-prism">Prism</span></a>
+    <nav class="pagenav" aria-label="Prism pages">
+      <a href="index.html">Pitch</a>
+      <a href="voice.html" aria-current="page">Forge Works voice</a>
+      <a href="scope.html">Platform scope</a>
+      <a href="profiler.html">Product-in profiler</a>
+      <a href="concept/index.html" target="_blank" rel="noopener" class="ext">Concept<svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M4.5 2.5H2.5a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V7.5M7 1.5h3.5V5M10.5 1.5 5.5 6.5" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+    </nav>
+  </div>
+</header>
+<main>
+  <div class="wrap">
+    <section class="hero">
+      <div class="hero-text">
+        <span class="eyebrow">For Forge Works consultants</span>
+        <h1>Improving the safety of work, <em>at scale.</em></h1>
+        <p class="lede">Everything Forge Works knows about how work really happens, written down once and carried by Prism to every site, every record, every day. The judgement clients hire you for no longer waits for the next engagement. It’s there on every shift, in every manager’s week, at every company that plugs in.</p>
+      </div>
+    </section>
+  </div>
+
+  <section class="block">
+    <div class="wrap">
+      <div class="block-head">
+        <span class="eyebrow">1 · Your read, on every record</span>
+        <h2>Every record gets a Forge Works read</h2>
+        <p class="prose">Records flow in from the systems sites already use. Prism reads each one the way you would, joins what different systems are saying into one pattern, and puts it in front of the manager who can act. Sites keep working as they do; your judgement lands on everything they already log.</p>
+      </div>
+      <div class="vx">
+        <div class="card"><span class="label">As it arrives, from the incident system</span><div class="raw">NM-2290 · Near miss · Minor
+“beam rotated in wind,
+passed over access path”</div></div>
+        <div class="arrow" aria-hidden="true">→</div>
+        <div class="card"><span class="label">As Prism reads it</span><dl>
+          <dt>Energy</dt><dd>Suspended load, released</dd>
+          <dt>Control</dt><dd class="crit">Failed: no tag line held it</dd>
+          <dt>Could have been</dt><dd class="crit">Fatal, not minor</dd>
+          <dt>Map® factor</dt><dd>Resource allocation</dd>
+          <dt>Joins</dt><dd>Two more lifts this month, at two sites</dd>
+        </dl></div>
+      </div>
+      <div class="four" style="margin-top:22px">
+        <div class="point"><h3>Arrives</h3><p>From every tool, plus Hiviz’s own visits and observations. No new forms.</p></div>
+        <div class="point"><h3>Read</h3><p>Signal, energy, whether the control held, what it could have been.</p></div>
+        <div class="point"><h3>Joined</h3><p>Records from different tools and sites become one pattern.</p></div>
+        <div class="point"><h3>Raised</h3><p>The few that matter go to the manager who owns them, with a plan to agree.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="wrap">
+      <div class="block-head">
+        <span class="eyebrow">2 · Where your voice lives</span>
+        <h2>Every Prism job reads with three layers. The middle one is you.</h2>
+        <p class="prose">Each job, from critical risk to senior leadership, carries these layers every time it runs. The middle one is what no other product can copy.</p>
+      </div>
+      <div class="layers">
+        <div class="layer"><span class="n">1</span><div><h3>The Forge Works method</h3><p>The shared language: the Forge Works Map® Blueprint with its 15 factors and three maturity levels, and the definitions of signal, energy and barrier. This is what keeps every reading consistent.</p></div></div>
+        <div class="layer voice"><span class="n">2</span><div><h3>The Forge Works voice</h3><p>What Forge Works consultants look for, won’t accept and would recommend, written down for each safety domain and led by David Provan and Ivica Ninic. Prism reads every record against it, and recommends the way you would.</p>
+          <ul class="quotes">
+            <li>A pre-start finished in under a minute isn’t a check.</li>
+            <li>Count what could have happened, not only what did.</li>
+            <li>Fix the work before the worker: equipment and rosters before more briefings.</li>
+            <li>A quiet site isn’t a safe site until its reporting is proven.</li>
+          </ul>
+          <p class="note">Illustrative positions. The real ones are written and owned by Forge Works.</p></div></div>
+        <div class="layer"><span class="n">3</span><div><h3>The client’s own context</h3><p>Their critical control register and management system, when they connect them, so a reading can say which of their own controls or procedures was involved.</p></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="wrap">
+      <div class="block-head">
+        <span class="eyebrow">3 · Heard on every site</span>
+        <h2>Every recommendation carries your reasoning</h2>
+        <p class="prose">Managers see the advice, the reason for it, and the Forge Works guidance behind it. Your thinking, credited, every time it’s used.</p>
+      </div>
+      <div class="rec">
+        <span class="who">Hiviz recommends</span>
+        <p>Check the rigging gear audit happens on the 30th, and ask whether the rigging subcontractor uses the same gear on other jobs.</p>
+        <span class="src">Why: three suspended-load events at two sites, all where tag lines were missing or improvised. Guidance: Forge Works on fixing equipment before re-briefing crews.</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="wrap">
+      <div class="block-head">
+        <span class="eyebrow">4 · It learns from you</span>
+        <h2>Your judgement sharpens it, every week</h2>
+        <p class="prose">Consultants review a weekly sample of how Prism is reading the work, plus anything a manager flagged as wrong. Sharpen a position once and every client benefits on the next run. The more you teach it, the further your judgement travels.</p>
+      </div>
+      <div class="loop">
+        <div class="point"><h3>Prism reads</h3><p>Every record, every day, against the guidance.</p></div>
+        <div class="point"><h3>You review a sample</h3><p>A short weekly set of readings and recommendations, plus anything a manager flagged as wrong.</p></div>
+        <div class="point"><h3>You sharpen the guidance</h3><p>Agree, refine or overrule. The change goes into the voice, not into one client.</p></div>
+        <div class="point"><h3>Every client benefits</h3><p>The next readings, everywhere, use the sharper guidance.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="wrap">
+      <div class="block-head">
+        <span class="eyebrow">5 · Every safety domain</span>
+        <h2>One job per domain, each carrying its part of the voice</h2>
+        <p class="prose">Most of the domains are Forge Works Map® factors.</p>
+      </div>
+      <div class="table-scroll">
+        <table class="data">
+          <thead><tr><th>Domain</th><th>What the job does</th><th>What it reads with</th></tr></thead>
+          <tbody>
+            <tr><td>Critical risk</td><td>Checks critical controls are in place and holding, and flags the ones that failed or were bypassed</td><td>Barrier states and energy types, Forge Works’ view on critical controls, the client’s control register</td></tr>
+            <tr><td>Incidents</td><td>Reads every event for what it could have been, and catches high-potential events logged as minor</td><td>Signal and energy types, Forge Works’ view on serious-harm potential</td></tr>
+            <tr><td>Investigation</td><td>Steers investigations towards systemic causes rather than individual blame</td><td>Forge Works’ investigation approach, the Map® Blueprint</td></tr>
+            <tr><td>Senior leadership</td><td>Reads what leaders actually do: visits, approvals, showing up</td><td>Map® Blueprint and Forge Works’ view on senior leadership</td></tr>
+            <tr><td>Monitoring and metrics</td><td>Spots checks that are ticked rather than done, and reporting too thin to act on</td><td>Map® Blueprint and Forge Works’ view on measuring what matters</td></tr>
+            <tr><td>Contractor management</td><td>Watches how new contractors are verified before they start</td><td>Map® Blueprint, the client’s management system</td></tr>
+            <tr><td>Learning</td><td>Tests whether fixes stuck at 90 days, and which kinds of fix work best</td><td>The 90-day retro, Forge Works’ hierarchy of fixes</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="prose loop-note"><b>Forge Works, consulting on every site, every day.</b> Improving the safety of work, at scale. <a href="concept/index.html#focus" target="_blank" rel="noopener">See it in the concept →</a></p>
+    </div>
+  </section>
+</main>
+
+
+<footer class="footer">
+  <div class="wrap">
+    <span>Hiviz Prism · internal concept, not for external distribution</span>
+    <span class="mono">prism/README.md · prism/SCOPE.md</span>
+  </div>
+</footer>
+
+</body>
+</html>
