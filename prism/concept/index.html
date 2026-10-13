@@ -250,6 +250,21 @@ main { padding-block: 32px 80px; }
 .kv dd { margin: 0; font-weight: 800; font-size: 17px; }
 .rec-src, .sheet-sec p.rec-src, .ins-sec p.rec-src { margin: 6px 0 0; font-size: 13.5px; font-weight: 600; line-height: 1.4; color: var(--text-3); }
 .walk-next + .rec-src { margin: -4px 0 0; }
+.principle { margin: 2px 0 0; display: grid; gap: 8px; padding: 14px 16px; border: 1px solid var(--border); border-radius: 10px; background: var(--bg); }
+.principle .pr-k { font-size: 11.5px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-3); }
+.principle blockquote { margin: 0; font-size: 17px; line-height: 1.45; font-weight: 700; font-style: italic; color: var(--text); }
+.principle figcaption { display: flex; align-items: center; gap: 10px; }
+.principle figcaption b { display: block; font-size: 14px; font-weight: 800; }
+.principle figcaption small { display: block; font-size: 12.5px; color: var(--text-3); }
+.principle .pr-av { width: 36px; height: 36px; overflow: hidden; padding: 0; }
+.principle .pr-av img { width: 100%; height: 100%; object-fit: cover; display: block; border-radius: 50%; }
+.principle .pr-note { font-size: 12px; color: var(--text-3); }
+.rp-cols { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 28px; align-items: start; }
+.rp-main { display: grid; gap: 18px; min-width: 0; }
+.rp-aside { position: sticky; top: 96px; }
+.rp-aside .principle { padding: 18px; }
+.rp-aside .principle blockquote { font-size: 19px; }
+@media (max-width: 960px) { .rp-cols { grid-template-columns: 1fr; } .rp-aside { position: static; order: -1; margin-bottom: 10px; } }
 .next { border: 0; background: var(--brand); border-radius: 10px; padding: 14px 16px; font-size: 17px; font-weight: 600; color: var(--text); }
 .update { font-size: 16px; color: var(--text); display: flex; gap: 10px; align-items: flex-start; }
 .sheet-foot { border-top: 1px solid var(--border); padding: 12px 20px; display: flex; gap: 10px 14px; align-items: center; flex-wrap: wrap; background: var(--bg); }
@@ -1064,6 +1079,33 @@ body.rv-mode main { padding-top: 0; }
 .rv-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px 24px; align-items: center; padding: 18px 20px; border-top: 1px solid var(--border); }
 .rv-row:first-child { border-top: 0; }
 .rv-row.is-done .rv-title { color: var(--text-3); }
+.rv-s { display: block; }
+.rv-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; font-size: 15px; color: var(--text-3); }
+.rv-meta .rv-sep { color: var(--border-2); }
+.rv-of { display: inline-flex; align-items: center; gap: 6px; color: var(--text-2); }
+.rv-say { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 10px; align-items: baseline; margin-top: 8px; font-size: 16px; line-height: 1.45; color: var(--text); }
+.rv-say > b { font-size: 11.5px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-3); white-space: nowrap; }
+.rv-say q { font-style: italic; quotes: "\201C" "\201D"; }
+.rv-ch .btn { height: 34px; padding: 0 12px; font-size: 14px; }
+.rv-ch { justify-content: flex-end; }
+.rv-row > .rv-c { max-width: 340px; }
+.rv-row.rv-plan-row > .rv-c { max-width: none; }
+.rv-carry-l { flex-basis: 100%; text-align: right; border: 0; background: none; padding: 2px 0; font: inherit; font-size: 13.5px; font-weight: 700; color: var(--text-3); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.rv-carry-l:hover { color: var(--text); }
+.rv-carry-l.is-on { color: var(--text); text-decoration: none; }
+.rv-carry-l.is-on::before { content: "✓ "; }
+.rv-below { grid-column: 1 / -1; }
+.att-st { display: block; margin-top: 3px; font-size: 13px; font-weight: 800; color: var(--text-3); white-space: nowrap; }
+.att-st.t-success { color: var(--success); } .att-st.t-warning { color: var(--warning); } .att-st.t-critical { color: var(--critical); }
+.rv-agenda .g-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 8px; vertical-align: 2px; }
+.rv-agenda .g-dot.critical { background: var(--critical-dot); } .rv-agenda .g-dot.warning { background: var(--warning-dot); }
+.rv-agenda span.t-warning { color: var(--warning); font-weight: 800; } .rv-agenda span.t-success { color: var(--success); font-weight: 800; }
+.rv-n.n-success { background: var(--success-tint); color: var(--success); border-color: transparent; }
+.rv-n.n-warning { background: var(--warning-tint); color: var(--warning); border-color: transparent; }
+.rv-n.n-info { background: var(--info-tint); color: var(--info); border-color: transparent; }
+.rv-pills { display: inline-flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+.rv-line .badge { font-size: 13px; }
+.rv-below .rv-form { justify-content: flex-start; }
 .rv-m { display: grid; gap: 4px; min-width: 0; }
 .rv-title { font-size: 20px; font-weight: 800; line-height: 1.3; text-align: left; }
 .rv-s { font-size: 16px; line-height: 1.45; color: var(--text-3); }
@@ -1889,7 +1931,7 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
       '<div class="view-row solo">' + viewSwitch('insight') + '</div>' +
       '<div class="ins-grid"><div class="ins-main">' +
         '<section class="ins-sec"><span class="label">The story</span><p class="ins-story">' + esc(i.story) + '</p></section>' +
-        (gone ? '' : '<section class="ins-sec"><span class="label">Hiviz recommends</span><p class="next">' + esc(i.next) + '</p>' + recSrc(i) + '</section>') +
+        (gone ? '' : '<section class="ins-sec"><span class="label">Hiviz recommends</span><p class="next">' + esc(i.next) + '</p>' + recSrc(i) + principleHTML(i) + '</section>') +
         (i.dismissed ? '' : planHTML(i, 'ins-sec', { split: true }) + checkHTML(i, 'ins-sec') + retroSecHTML(i, 'ins-sec')) +
         '<section class="ins-sec"><span class="label">What each source says · ' + recCount(i) + ' records from ' + i.says.length + (i.says.length === 1 ? ' system' : ' systems') + '</span>' +
           i.says.map(function (s) {
@@ -2574,7 +2616,7 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
         (ST.dismissing === i.id ? '<section class="sheet-sec">' + dismissForm(i.id, 'sheet') + '</section>' : '') +
         '<section class="sheet-sec"><span class="label">The story</span><p>' + esc(i.story) + '</p>' +
           (i.latest ? '<div class="upd-note"><span class="upd-l">Latest update \u00b7 ' + (i.owner ? esc(i.owner) + ' \u00b7 ' : '') + i.updated + (i.updated === 1 ? ' day' : ' days') + ' ago</span><p>' + esc(i.latest) + '</p></div>' : '') + '</section>' +
-        (i.dismissed || i.closed ? '' : '<section class="sheet-sec"><span class="label">Hiviz recommends</span><p class="next">' + esc(i.next) + '</p>' + recSrc(i) + '</section>') +
+        (i.dismissed || i.closed ? '' : '<section class="sheet-sec"><span class="label">Hiviz recommends</span><p class="next">' + esc(i.next) + '</p>' + recSrc(i) + principleHTML(i) + '</section>') +
         (i.dismissed ? '' : planHTML(i, 'sheet-sec', { split: true }) + checkHTML(i, 'sheet-sec') + retroSecHTML(i, 'sheet-sec')) +
         (INS_FACTOR[i.id] ? '<section class="sheet-sec mc"><span class="label">On the Forge Works Map</span>' + mapBody(i) + '</section>' : '') +
         '<section class="sheet-sec"><span class="label">What each source says · ' + recCount(i) + ' records from ' + i.says.length + (i.says.length === 1 ? ' system' : ' systems') + '</span><div class="says">' +
@@ -3033,7 +3075,31 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
     return MT.done[id + ':' + k] || '';
   }
   function rvLeft(k) { return MT.groups[k].filter(function (id) { return !rvDecided(k, id); }).length; }
-  function rvCarry(key) { var on = MT.done[key] === 'Carry forward'; return '<button type="button" class="btn' + (on ? ' is-on' : '') + '" data-rvdec="' + esc(key) + '" data-rvval="Carry forward" aria-pressed="' + on + '">Carry forward</button>'; }
+  // Carry forward is the fallback, not a choice: a quiet link under the choices
+  function carryLink(attrs, on) { return '<button type="button" class="rv-carry-l' + (on ? ' is-on' : '') + '" ' + attrs + ' aria-pressed="' + on + '">' + (on ? 'Carried forward' : 'Carry forward') + '</button>'; }
+  function rvCarry(key) { return carryLink('data-rvdec="' + esc(key) + '" data-rvval="Carry forward"', MT.done[key] === 'Carry forward'); }
+  // One meta line, always in this order: status, person, what it belongs to, date
+  function rvWho(n, here) { return n ? '<span class="rv-who"><span class="av' + (n === YOU ? ' me' : '') + '">' + initials(n) + '</span>' + esc(n === YOU ? 'You' : n) + (here === false ? ' · <b>not here</b>' : '') + '</span>' : '<span>No owner yet</span>'; }
+  function rvOf(kind, title) { return '<span class="rv-of">' + tIcon(kind) + esc(title) + '</span>'; }
+  function rvMeta(parts) { return '<span class="rv-meta">' + parts.filter(Boolean).join('<span class="rv-sep" aria-hidden="true">·</span>') + '</span>'; }
+  // One way to show a voice: a small label, then their words
+  function rvSay(by, text, quote) { return text ? '<span class="rv-say"><b>' + esc(by) + '</b><span>' + (quote ? '<q>' + esc(text) + '</q>' : esc(text)) + '</span></span>' : ''; }
+  // Status at a glance in the summaries: what each decision means, in colour
+  function decTone(t) {
+    return /Carr/.test(t) ? 'info' : /Adjust|Revise|Take to planning|Taken to planning|needs help|Chase|Find more|Send back|Challenge|Ask for more|Decline/.test(t) ? 'warning' : /Keep|On course|Help agreed|Confirm|Accept|Agree|Heard|Kept|Close it|Approve|Endorse|New/.test(t) ? 'success' : '';
+  }
+  function decPills(t) { return '<span class="rv-pills">' + t.split(' · ').map(function (d) { var k = decTone(d); return '<span class="badge' + (k ? ' ' + k : '') + '">' + (k ? '<i></i>' : '') + esc(d) + '</span>'; }).join('') + '</span>'; }
+  function pill(tone, t) { return '<span class="badge' + (tone ? ' ' + tone : '') + '">' + (tone ? '<i></i>' : '') + esc(t) + '</span>'; }
+  // Who's here: how each person's own work stands coming into the meeting
+  function attStatus(here, items, kind) {
+    // The line never depends on attendance, so ticking someone in or out never changes the card
+    if (!items.length) return '<span class="att-st">Nothing due</span>';
+    var late = items.filter(function (x) { return x.late; }).length, done = items.filter(function (x) { return x.done; }).length, n = items.length;
+    var tone = late ? 'critical' : done === n ? 'success' : 'warning';
+    var txt = kind === 'pre' ? (done === n ? 'Pre-read sent' : 'Pre-read due') : late ? late + ' overdue' : done === n ? (n === 1 ? 'Checked in' : 'All ' + n + ' checked in') : done + ' of ' + n + ' checked in';
+    return '<span class="att-st t-' + tone + '">' + txt + '</span>';
+  }
+  function ciWhen(a) { return a.upd ? (a.upd === '26 Sep' ? 'Checked in now' : 'Checked in ' + esc(a.upd)) : '<span class="t-warning">No check-in yet</span>'; }
   function rvHere(n) { return !n || n === YOU || !!MT.attendees[n]; }
   // Ending a ritual early asks first. Keep going is the default; Esc or the backdrop also keeps going.
   function rvConfirm(title, body, yes, onYes) {
@@ -3099,11 +3165,13 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
     'monitoring_metrics:2': 'When our managers say a site is safe, what do they mean?',
     'monitoring_metrics:3': 'How much of workers’ real experience shows up in our data?'
   };
-  function rvRow(title, sub, ctl, id, done, ic) {
-    return '<li class="rv-row' + (done ? ' is-done' : '') + '"><div class="rv-m">' + (id ? '<button type="button" class="rv-title linkish" ' + (/^f:/.test(id) ? 'data-factor="' + id.slice(2) : /^v:/.test(id) ? 'data-factor="' + id.slice(2).split(':')[0] : (/^r-/.test(id) ? 'data-retro' : /^p-/.test(id) ? 'data-prog' : /^o-/.test(id) ? 'data-obj' : 'data-open') + '="' + id) + '">' + (ic ? tIcon(ic) : '') + esc(title) + '</button>' : '<span class="rv-title">' + (ic ? tIcon(ic) : '') + esc(title) + '</span>') + (sub ? '<span class="rv-s">' + sub + '</span>' : '') + '</div><div class="rv-c">' + ctl + '</div></li>';
+  function rvRow(title, sub, ctl, id, done, ic, below) {
+    return '<li class="rv-row' + (done === 'decided' ? ' is-decided' : done ? ' is-done' : '') + '"><div class="rv-m">' + (id ? '<button type="button" class="rv-title linkish" ' + (/^f:/.test(id) ? 'data-factor="' + id.slice(2) : /^v:/.test(id) ? 'data-factor="' + id.slice(2).split(':')[0] : (/^r-/.test(id) ? 'data-retro' : /^p-/.test(id) ? 'data-prog' : /^o-/.test(id) ? 'data-obj' : 'data-open') + '="' + id) + '">' + (ic ? tIcon(ic) : '') + esc(title) + '</button>' : '<span class="rv-title">' + (ic ? tIcon(ic) : '') + esc(title) + '</span>') + (sub ? '<span class="rv-s">' + sub + '</span>' : '') + '</div><div class="rv-c">' + ctl + '</div>' + (below ? '<div class="rv-below">' + below + '</div>' : '') + '</li>';
   }
   function rvChoice(key, opts, cur) {
-    return '<span class="rv-ch">' + opts.map(function (o) { return '<button type="button" class="btn' + (cur === o ? ' is-on' : '') + '" data-rvdec="' + esc(key) + '" data-rvval="' + esc(o) + '" aria-pressed="' + (cur === o) + '">' + esc(o) + '</button>'; }).join('') + '</span>';
+    var carry = opts.indexOf('Carry forward') > -1;
+    return '<span class="rv-ch">' + opts.filter(function (o) { return o !== 'Carry forward'; }).map(function (o) { return '<button type="button" class="btn' + (cur === o ? ' is-on' : '') + '" data-rvdec="' + esc(key) + '" data-rvval="' + esc(o) + '" aria-pressed="' + (cur === o) + '">' + esc(o) + '</button>'; }).join('') +
+      (carry ? carryLink('data-rvdec="' + esc(key) + '" data-rvval="Carry forward"', cur === 'Carry forward') : '') + '</span>';
   }
   function renderMeeting() {
     if (!MT) return renderFocus();
@@ -3115,10 +3183,10 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
       var on = rvGroupsOn(), acts = rvActions();
       rvPage('Step 1 of 4', 'Who’s here', esc(since) + ' · ' + esc(scopeLabel()),
         '<ul class="rv-att">' + managersInView().map(function (p) {
-          return '<li><label class="rv-p' + (MT.attendees[p] ? ' on' : '') + '"><input type="checkbox" data-att="' + esc(p) + '"' + (MT.attendees[p] ? ' checked' : '') + (p === YOU ? ' disabled' : '') + '><span class="av' + (p === YOU ? ' me' : '') + '">' + initials(p) + '</span><span>' + esc(p === YOU ? 'You' : p) + '<small>' + esc(ROLE[p] || '') + '</small></span></label></li>';
+          return '<li><label class="rv-p' + (MT.attendees[p] ? ' on' : '') + '"><input type="checkbox" data-att="' + esc(p) + '"' + (MT.attendees[p] ? ' checked' : '') + (p === YOU ? ' disabled' : '') + '><span class="av' + (p === YOU ? ' me' : '') + '">' + initials(p) + '</span><span>' + esc(p === YOU ? 'You' : p) + '<small>' + esc(ROLE[p] || '') + '</small>' + attStatus(!!MT.attendees[p], rvActions().filter(function (x) { return x.a.who === p; }).map(function (x) { return { done: !!x.a.upd, late: overdue(x.a) }; })) + '</span></label></li>';
         }).join('') + '</ul>' +
-        '<h2 class="rv-h2">On today</h2><ol class="rv-agenda"><li><b>Check-ins</b><span>' + acts.length + (acts.length === 1 ? ' action' : ' actions') + ' · ' + acts.filter(function (x) { return !x.a.upd; }).length + ' not checked in yet</span></li>' +
-          on.map(function (g) { return '<li><b>' + esc(g[1]) + '</b><span>' + MT.groups[g[0]].length + '</span></li>'; }).join('') + '</ol>',
+        '<h2 class="rv-h2">On today</h2><ol class="rv-agenda"><li><b>Check-ins</b><span>' + acts.length + (acts.length === 1 ? ' action' : ' actions') + ' · <span class="t-warning">' + acts.filter(function (x) { return !x.a.upd; }).length + ' not checked in yet</span></span></li>' +
+          on.map(function (g) { return '<li><b>' + grpDot(rvTone(g[0])) + esc(g[1]) + '</b><span>' + MT.groups[g[0]].length + '</span></li>'; }).join('') + '</ol>',
         '<span></span><button type="button" class="btn brand lg" data-rvstep="check">Start with check-ins</button>');
       return;
     }
@@ -3130,9 +3198,9 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
         rvQ('What’s changed since your last update, and is anything in the way?') +
         (list.length ? '<ul class="rv-list">' + list.map(function (x) {
           var here = rvHere(x.a.who), sk = MT.ci[x.key] === 'skip', st = PA_ST.filter(function (s) { return s[0] === x.a.st; })[0];
-          var sub = '<span class="rv-who"><span class="av' + (x.a.who === YOU ? ' me' : '') + '">' + initials(x.a.who || '?') + '</span>' + esc(x.a.who || 'No one yet') + (here ? '' : ' · <b>not here</b>') + '</span> · for the insight “' + esc(x.i.title) + '” · ' + dueHTML(x.a);
+          var sub = rvMeta([rvWho(x.a.who, here), rvOf('insight', x.i.title), dueHTML(x.a), ciWhen(x.a)]);
           var ctl = sk ? '<span class="rv-miss">Missed · counts towards stalled</span><button type="button" class="linkish" data-rvci="' + x.key + '">Undo</button>'
-            : '<span class="rv-ci">' + (x.a.upd ? '<small>' + (x.a.upd === '26 Sep' ? 'Checked in now' : 'Checked in ' + esc(x.a.upd)) + '</small>' : '<small class="t-warning">No check-in yet</small>') +
+            : '<span class="rv-ci">' +
               paSelect(x.i.id + ':' + x.k, x.a, 'How’s it going?') +
               (x.a.upd ? '' : '<button type="button" class="btn" data-rvci="' + x.key + '">Skip</button>') + '</span>';
           return rvRow(x.a.t, sub, ctl, x.i.id, sk || !!x.a.upd, 'action');
@@ -3150,21 +3218,21 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
         var dec = rvDecided(key, id), i = insightById(id), tag = carried.indexOf(id) > -1 ? '<span class="rv-carry">Carried from ' + esc(last.short) + '</span> ' : '';
         if (key === 'views') {
           var pk = id.slice(2);
-          return rvRow(POLL[pk].q, tag + FACTOR[pk.split(':')[0]].name + ' · anonymous, across all managers polled<br>' + splitLine(pk), rvChoice(id + ':' + key, ['Heard both sides', 'Find more evidence', 'Carry forward'], dec), 'v:' + pk, !!dec);
+          return rvRow(POLL[pk].q, rvMeta([tag, esc(FACTOR[pk.split(':')[0]].name), 'Anonymous, across all managers polled']) + '<span class="rv-say"><b>Answers</b><span>' + splitLine(pk) + '</span></span>', rvChoice(id + ':' + key, ['Heard both sides', 'Find more evidence', 'Carry forward'], dec), 'v:' + pk, dec ? 'decided' : false);
         }
         if (key === 'retro') {
           var r = RETRO[id] || RETRO[i.retro];
-          return rvRow(r.title, tag + outBadge(r.outcome) + ' ' + esc(r.summary), '<span class="rv-ch">' + retroReview(r) + (MT.retros[r.id] ? '' : rvCarry(id + ':retro')) + '</span>', i ? i.id : r.id, !!dec);
+          return rvRow(r.title, rvMeta([tag, outBadge(r.outcome), '90-day retro']) + rvSay('Prism', r.summary), '<span class="rv-ch">' + retroReview(r) + (MT.retros[r.id] ? '' : rvCarry(id + ':retro')) + '</span>', i ? i.id : r.id, dec ? 'decided' : false);
         }
         var ow = i.owner ? esc(i.owner === YOU ? 'You' : i.owner) : 'No owner';
         var en = key === 'esc' ? i.esc || MT.escWas[id] : null;
-        if (key === 'esc') return rvRow(i.title, tag + esc(nameOf(en.by)) + ' escalated this: ' + esc(en.reason) + (en.note ? '. “' + esc(en.note) + '”' : ''), dec && dec !== 'Carry forward' ? '<span class="rv-dec">' + esc(dec) + '</span>' : '<span class="rv-ch"><button type="button" class="btn" data-esc-back="' + i.id + '">Send back</button><button type="button" class="btn" data-esc-accept="' + i.id + '">Accept</button>' + rvCarry(id + ':esc') + '</span>', i.id, !!dec);
-        if (key === 'assign') return rvRow(i.title, tag + esc(i.story), '<select class="select" data-rvowner="' + i.id + '" aria-label="Owner"><option value="">Choose an owner</option>' + ownerOpts(managersInView(), i.owner, 'In this review') + '</select><span class="rv-ch">' + rvCarry(id + ':assign') + '</span>', i.id, !!dec);
-        if (key === 'plan') return '<li class="rv-row rv-plan-row' + (dec ? ' is-done' : '')+ '"><div class="rv-m"><button type="button" class="rv-title linkish" data-open="' + i.id + '">' + esc(i.title) + '</button><span class="rv-s">' + tag + 'Owner ' + ow + ' · ' + esc(i.next) + '</span></div>' + planHTML(i, 'rv-plan', { split: true, bare: true }) + (MT.agreed[id] ? '' : '<div class="rv-c rv-c-plan"><span class="rv-ch">' + rvCarry(id + ':plan') + '</span></div>') + '</li>';
-        if (key === 'stalled') return rvRow(i.title, tag + ow + ' · no update in ' + i.updated + ' days' + (i.latest ? ' · last: “' + esc(i.latest) + '”' : ''), rvChoice(id + ':' + key, ['Chase the owner', 'Owner needs help', 'Carry forward'], dec), i.id, !!dec);
-        if (key === 'moving') return rvRow(i.title, tag + ow + ' · ' + esc(planSummary(i)) + (i.plan && i.plan.read ? ' · ' + esc(i.plan.read[1]) : ''), rvChoice(id + ':' + key, ['Keep the plan', 'Revise the plan', 'Carry forward'], dec), i.id, !!dec);
-        if (key === 'close') return rvRow(i.title, tag + ow + (i.latest ? ' · ' + esc(i.latest) : ''), rvChoice(id + ':' + key, ['Keep watching', 'Close it'], dec), i.id, !!dec);
-        return rvRow(i.title, ow + ' · ' + esc(planSummary(i) || statusText(i)) + (planRead(i) === 'working' ? ' · Prism reads it as working' : ''), rvChoice(id + ':' + key, ['Agree it’s on track', 'Carry forward'], dec), i.id, !!dec);
+        if (key === 'esc') return rvRow(i.title, rvMeta([tag, rvWho(en.by), 'Escalated: ' + esc(en.reason)]) + rvSay(nameOf(en.by), en.note, true), dec && dec !== 'Carry forward' ? '<span class="rv-dec">' + esc(dec) + '</span>' : '<span class="rv-ch"><button type="button" class="btn" data-esc-back="' + i.id + '">Send back</button><button type="button" class="btn" data-esc-accept="' + i.id + '">Accept</button>' + rvCarry(id + ':esc') + '</span>', i.id, dec ? 'decided' : false);
+        if (key === 'assign') return rvRow(i.title, rvMeta([tag, rvWho(i.owner)]) + rvSay('Prism', i.story), '<span class="rv-ch"><select class="select" data-rvowner="' + i.id + '" aria-label="Owner"><option value="">Choose an owner</option>' + ownerOpts(managersInView(), i.owner, 'In this review') + '</select>' + rvCarry(id + ':assign') + '</span>', i.id, dec ? 'decided' : false);
+        if (key === 'plan') return '<li class="rv-row rv-plan-row' + (dec ? ' is-decided' : '')+ '"><div class="rv-m"><button type="button" class="rv-title linkish" data-open="' + i.id + '">' + esc(i.title) + '</button><span class="rv-s">' + rvMeta([tag, rvWho(i.owner)]) + rvSay('Hiviz recommends', i.next) + '</span></div>' + planHTML(i, 'rv-plan', { split: true, bare: true }) + (MT.agreed[id] ? '' : '<div class="rv-c rv-c-plan"><span class="rv-ch">' + rvCarry(id + ':plan') + '</span></div>') + '</li>';
+        if (key === 'stalled') return rvRow(i.title, rvMeta([tag, rvWho(i.owner), 'No update in ' + i.updated + ' days']) + rvSay(i.owner ? nameOf(i.owner) + ', last update' : 'Last update', i.latest, true), rvChoice(id + ':' + key, ['Chase the owner', 'Owner needs help', 'Carry forward'], dec), i.id, dec ? 'decided' : false);
+        if (key === 'moving') return rvRow(i.title, rvMeta([tag, rvWho(i.owner), esc(planSummary(i))]) + rvSay('Prism', i.plan && i.plan.read ? i.plan.read[1] : ''), rvChoice(id + ':' + key, ['Keep the plan', 'Revise the plan', 'Carry forward'], dec), i.id, dec ? 'decided' : false);
+        if (key === 'close') return rvRow(i.title, rvMeta([tag, rvWho(i.owner)]) + rvSay(i.owner ? nameOf(i.owner) + ', last update' : 'Last update', i.latest, true), rvChoice(id + ':' + key, ['Keep watching', 'Close it'], dec), i.id, dec ? 'decided' : false);
+        return rvRow(i.title, rvMeta([rvWho(i.owner), esc(planSummary(i) || statusText(i))]) + (planRead(i) === 'working' ? rvSay('Prism', 'Reads it as working.') : ''), rvChoice(id + ':' + key, ['Agree it’s on track', 'Carry forward'], dec), i.id, dec ? 'decided' : false);
       });
       var left = rvLeft(key), total = gs.reduce(function (a, x) { return a + MT.groups[x[0]].length; }, 0);
       MT.reach = Math.max(MT.reach || 0, MT.g);
@@ -3191,14 +3259,14 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
     rvActions().forEach(function (x) { if (MT.ci[x.key] === 'skip' || (!x.a.upd && MT.visitedDecide)) missed.push(x); });
     var notified = []; Object.keys(MT.agreed).forEach(function (id) { insightById(id).plan.actions.forEach(function (a) { if (a.who && notified.indexOf(a.who) < 0) notified.push(a.who); }); });
     var checkedNow = rvActions().filter(function (x) { return x.a.upd === '26 Sep'; }).length;
-    var blk = function (h, items, note) { return items.length ? '<section class="rv-rc"><h2 class="rv-h2">' + h + ' <span class="rv-n">' + items.length + '</span></h2>' + (note ? '<p class="rv-s">' + note + '</p>' : '') + '<ul class="rv-list">' + items.join('') + '</ul></section>' : ''; };
+    var blk = function (h, items, note, tone) { return items.length ? '<section class="rv-rc"><h2 class="rv-h2">' + h + ' <span class="rv-n' + (tone ? ' n-' + tone : '') + '">' + items.length + '</span></h2>' + (note ? '<p class="rv-s">' + note + '</p>' : '') + '<ul class="rv-list">' + items.join('') + '</ul></section>' : ''; };
     rvPage('Step 4 of 4', 'Summary', (MT.early ? 'Ended early · ' : '') + esc(scopeLabel()) + ' · Friday 26 September · ' + esc(join(managersInView().filter(function (p) { return MT.attendees[p]; }).map(function (p) { return p === YOU ? 'You' : p; }))),
-      blk('Decided', dec.map(function (x) { return rvRow(x[0], esc(x[1]), '', x[2], false); })) +
-      (checkedNow ? '<p class="rv-line">' + checkedNow + (checkedNow === 1 ? ' action' : ' actions') + ' checked in during the review.</p>' : '') +
+      blk('Decided', dec.map(function (x) { return rvRow(x[0], '', decPills(x[1]), x[2], false); }), '', 'success') +
+      (checkedNow ? '<p class="rv-line">' + pill('success', checkedNow + (checkedNow === 1 ? ' action' : ' actions') + ' checked in during the review') + '</p>' : '') +
       (notified.length ? '<p class="rv-line">Notified of their new actions: ' + esc(join(notified.map(function (w) { return w === YOU ? 'you' : w; }))) + '.</p>' : '') +
-      blk('Missed check-ins', missed.map(function (x) { return rvRow(x.a.t, esc(x.a.who || 'No one yet') + ' · ' + esc(x.i.title), '<span class="rv-miss">Counts towards stalled</span>', x.i.id, false, 'action'); })) +
-      blk('Carried forward to the next review', carriedOut.map(function (x) { return rvRow(x[1], esc(x[2]), '', x[0], false); }), 'These go first on the agenda next time.') +
-      blk('Coming back', back.map(function (x) { return rvRow(x[0], esc(x[1]), '', x[2], false); })) +
+      blk('Missed check-ins', missed.map(function (x) { return rvRow(x.a.t, rvMeta([rvWho(x.a.who), rvOf('insight', x.i.title)]), pill('warning', 'Missed · counts towards stalled'), x.i.id, false, 'action'); }), '', 'warning') +
+      blk('Carried forward to the next review', carriedOut.map(function (x) { return rvRow(x[1], esc(x[2]), pill('info', 'Carried forward'), x[0], false); }), 'These go first on the agenda next time.', 'info') +
+      blk('Coming back', back.map(function (x) { return rvRow(x[0], esc(x[1]), pill('info', 'Scheduled'), x[2], false); })) +
       (dec.length || carriedOut.length || missed.length ? '' : '<p class="rv-empty">Nothing was decided or carried forward.</p>') +
       '<label class="w-note-l" for="m-notes">Review notes</label><textarea id="m-notes" class="w-note" rows="3" placeholder="Anything else worth recording">' + esc(MT.notes) + '</textarea>',
       MT.early ? '' : '<button type="button" class="btn lg" data-rvstep="decide">Back</button>');
@@ -4118,6 +4186,27 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
   }
   // The Map's language, for any insight: where it sits and what the next level looks like
   // Where a recommendation comes from: the indicator it moves, and Forge Works guidance for its next level
+  // Forge Works principles: short, signed lines the consultants write. Prism picks the one that fits; it never writes them.
+  var EXPERTS = { di: ['David Provan', 'CEO, Forge Works', 'DP', 'data:image/jpeg;base64,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'], in: ['Ivica Ninic', 'Risk specialist, Forge Works', 'IN', 'data:image/jpeg;base64,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'] };
+  var PRINCIPLES = {
+    volt: ['in', 'Remember, a critical risk with no control is always 100% likely.'],
+    edge: ['in', 'A control that comes off for the work has to be part of the work plan, or it won’t go back on.'],
+    load: ['in', 'Find the energy first. Then ask what’s really standing between it and a person.'],
+    hand: ['di', 'Controls rarely fail during the work. They fail when the work changes hands.'],
+    pre: ['di', 'A check finished in under a minute isn’t a check. It’s a signature.'],
+    tick: ['di', 'A form that always passes has stopped looking.'],
+    fat: ['di', 'When the plan and the clock disagree, the clock usually wins. Design for that.'],
+    spot: ['di', 'Fix the work before the worker. A roster changes more than a reminder.'],
+    house: ['in', 'Make the safe way the easy way, and it becomes the normal way.']
+  };
+  // A signed principle: the heading says what it is, the person says whose it is
+  function principleCard(who, text) {
+    var x = EXPERTS[who];
+    return '<figure class="principle"><span class="pr-k">Principle</span><blockquote>“' + esc(text) + '”</blockquote>' +
+      '<figcaption><span class="av pr-av"><img src="' + x[3] + '" alt=""></span><span><b>' + esc(x[0]) + '</b><small>' + esc(x[1]) + '</small></span></figcaption>' +
+      '</figure>';
+  }
+  function principleHTML(i) { var pr = PRINCIPLES[i.id]; return pr ? principleCard(pr[0], pr[1]) : ''; }
   function recSrc(i) {
     var fx = INS_FACTOR[i.id]; if (!fx) return '';
     var regs = []; i.sites.forEach(function (s) { if (regs.indexOf(SITE[s].region) < 0) regs.push(SITE[s].region); });
@@ -4463,6 +4552,12 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
     ['leaders', 'Are leaders there', 'Are leaders seeing the work for themselves?', [['Sites visited by a leader in the last 30 days', 'visit', 'f', false, 'Hiviz visits']]],
     ['plan', 'Is the plan working', 'Is the strategy moving the things it set out to?', [['Objectives on track', 'obj', 'f', false, 'Hiviz strategy'], ['Forge Works factors getting better', 'up', 'n', false, 'The Forge Works Map'], ['Forge Works factors getting worse', 'down', 'n', true, 'The Forge Works Map']]]
   ];
+  var RP_PRINCIPLE = {
+    happened: ['in', 'Count what could have happened, not only what did.'],
+    controls: ['in', 'A control you can’t verify isn’t a control.'],
+    leaders: ['di', 'You can’t lead work you never see.'],
+    plan: ['di', 'A plan is finished when the pattern stops, not when the actions are ticked.']
+  };
   var RP_HEAD = {
     q3: { happened: 'Fewer injuries and fewer events that could have been fatal.', controls: 'Controls are holding more often, and more of our fixes are sticking.', leaders: 'More sites are seeing a leader, but three haven’t in a month.', plan: 'One objective on track; the Map is mostly improving.', trust: 'Reporting is getting better, but a failing source and two quiet sites leave gaps.' },
     q2: { happened: 'Fewer injuries and serious events than Q1.', controls: 'Controls held more often, but only one fix stuck.', leaders: 'Leaders reached more sites than in Q1.', plan: 'The first objective came on track.', trust: 'Better reporting, but four sites were hard to see.' },
@@ -4550,7 +4645,8 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
         return '<button type="button" class="rp-tile" data-rppage="' + (k + 1) + '"><span class="label">' + esc(t[1]) + '</span><span class="rp-num">' + rpVal(a, m[2]) + '</span><span class="rp-tm">' + esc(m[0]) + '</span><span class="rp-dir ' + d[0] + '">' + esc(d[1]) + '</span><span class="rp-th">' + esc(RP_HEAD[D.P.cur[0]][t[0]]) + '</span></button>';
       }).join('') + '</div>';
     } else {
-      body = cover + '<p class="kind"><span class="kind-t">' + esc(th[1]) + '</span></p><h1 class="rv-h">' + esc(RP_HEAD[D.P.cur[0]][th[0]]) + '</h1>' + rvQ(th[2], 'The question') + '<div class="rp-ms">' + th[3].map(function (m) { return rpMeasure(m, D); }).join('') + '</div>';
+      body = cover + '<p class="kind"><span class="kind-t">' + esc(th[1]) + '</span></p><h1 class="rv-h">' + esc(RP_HEAD[D.P.cur[0]][th[0]]) + '</h1>' + '<div class="rp-cols"><div class="rp-main">' + rvQ(th[2], 'The question') + '<div class="rp-ms">' + th[3].map(function (m) { return rpMeasure(m, D); }).join('') + '</div></div>' +
+        (RP_PRINCIPLE[th[0]] ? '<aside class="rp-aside">' + principleCard(RP_PRINCIPLE[th[0]][0], RP_PRINCIPLE[th[0]][1]) + '</aside>' : '') + '</div>';
     }
     var nav = '<div class="rv-nav">' + (pg > 0 ? '<button type="button" class="btn lg" data-rppage="' + (pg - 1) + '">Back</button>' : '<span></span>') + '<span class="rv-nav-r">' + (pg < pages.length - 1 ? '<button type="button" class="btn brand lg" data-rppage="' + (pg + 1) + '">Next: ' + esc(pages[pg + 1][1]) + '</button>' : '<button type="button" class="btn brand lg" data-rpclose="1">Close the report</button>') + '</span></div>';
     $('view').innerHTML = bar + '<div class="rv rp">' + rail + body + '</div>' + nav;
@@ -4866,10 +4962,10 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
       var rs = RETROS, rc = {}; rs.forEach(function (r) { rc[r.outcome] = (rc[r.outcome] || 0) + 1; });
       var worked = ['worked', 'quiet', 'partly', 'didnt', 'cant'].filter(function (k) { return rc[k]; }).map(function (k) { return lw(rc[k]) + ' ' + ({ worked: 'worked', quiet: 'went quiet', partly: 'partly worked', didnt: 'didn’t work', cant: 'can’t be judged yet' })[k]; });
       rvPage('Step 1 of 4', 'Who’s here', 'Since ' + esc(STRAT.lastPlanning) + ' · ' + esc(ORG_NAME) + ' · objectives are set for the whole company, so the group executive must be here',
-        '<ul class="rv-att">' + PL_PEOPLE.map(function (p) { var req = p === 'Morgan Hale'; return '<li><label class="rv-p' + (PL.att[p] ? ' on' : '') + '"><input type="checkbox" data-platt="' + esc(p) + '"' + (PL.att[p] ? ' checked' : '') + (req ? ' disabled' : '') + '><span class="av' + (p === YOU ? ' me' : '') + '">' + initials(p) + '</span><span>' + esc(p) + '<small>' + esc(ROLE[p] || '') + (req ? ' · required' : '') + '</small></span></label></li>'; }).join('') + '</ul>' +
+        '<ul class="rv-att">' + PL_PEOPLE.map(function (p) { var req = p === 'Morgan Hale'; return '<li><label class="rv-p' + (PL.att[p] ? ' on' : '') + '"><input type="checkbox" data-platt="' + esc(p) + '"' + (PL.att[p] ? ' checked' : '') + (req ? ' disabled' : '') + '><span class="av' + (p === YOU ? ' me' : '') + '">' + initials(p) + '</span><span>' + esc(p) + '<small>' + esc(ROLE[p] || '') + (req ? ' · required' : '') + '</small>' + attStatus(!!PL.att[p], OBJECTIVES.filter(function (o) { return o.owner === p && plPreDue(o) !== undefined; }).map(function (o) { return { done: !!PRE_NOTES[o.id] || !plPreDue(o), late: false }; }), 'pre') + '</span></label></li>'; }).join('') + '</ul>' +
         '<h2 class="rv-h2">On today</h2><ol class="rv-agenda">' +
-          '<li><b>Pre-reads</b><span>' + OBJECTIVES.filter(function (o) { return PRE_NOTES[o.id]; }).length + ' of ' + OBJECTIVES.length + ' owners sent one</span></li>' +
-          '<li><b>Current objectives</b><span>' + OBJECTIVES.length + '</span></li>' +
+          '<li><b>Pre-reads</b><span>' + (function () { var n = OBJECTIVES.filter(function (o) { return PRE_NOTES[o.id]; }).length; return '<span class="' + (n === OBJECTIVES.length ? 't-success' : 't-warning') + '">' + n + ' of ' + OBJECTIVES.length + ' owners sent one</span>'; })() + '</span></li>' +
+          '<li><b>' + grpDot(OBJECTIVES.some(function (o) { return objStatus(o)[0] === 'critical'; }) ? 'critical' : OBJECTIVES.some(function (o) { return objStatus(o)[0] === 'warning'; }) ? 'warning' : '') + 'Current objectives</b><span>' + OBJECTIVES.length + '</span></li>' +
           '<li><b>Candidates</b><span>' + PL.cands.length + '</span></li></ol>' +
         (rs.length ? '<p class="rv-line">This quarter ' + lw(rs.length) + (rs.length === 1 ? ' plan' : ' plans') + ' reached 90 days: ' + esc(join(worked)) + '.</p>' : ''),
         '<span></span><button type="button" class="btn brand lg" data-plstep="check">Start with pre-reads</button>', bar);
@@ -4903,11 +4999,11 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
       var rows = key === 'obj' ? OBJECTIVES.map(function (o) {
           var d = PL.obj[o.id], s = objStatus(o), adv = OBJ_ADVICE[o.id];
           var form = d.d === 'adjust' ? '<div class="pl-form rv-form"><span class="fld"><label for="plt-' + o.id + '">Target</label>' + sel('plt-' + o.id, [[1, 'Leading'], [2, 'Resilient']], d.target) + '</span><span class="fld"><label for="plb-' + o.id + '">By</label>' + sel('plb-' + o.id, PL_BY, d.by) + '</span></div>' : '';
-          return rvRow(objTitle(o), tagOf(o.id) + '<span class="badge ' + s[0] + '"><i></i>' + s[1] + '</span> ' + esc(objScope(o)) + (o.flagged ? ' · <b>flagged at monthly progress</b>' : '') + (adv ? '<br>Hiviz recommends: ' + esc(adv[1]) : ''), plChoice('obj', o.id, PL_OBJ) + form, o.id, !!d.d);
+          return rvRow(objTitle(o), rvMeta([tagOf(o.id), '<span class="badge ' + s[0] + '"><i></i>' + s[1] + '</span>', esc(objScope(o)), rvWho(o.owner), o.flagged ? '<b>Flagged at monthly progress</b>' : '']) + (adv ? rvSay('Hiviz recommends', adv[1]) : ''), plChoice('obj', o.id, PL_OBJ), o.id, d.d ? 'decided' : false, '', form);
         }) : PL.cands.map(function (c) {
           var d = PL.cand[c.f], sc = scoreFactor(allRegs(), c.f);
           var form = d.d === 'add' ? '<div class="pl-form rv-form"><span class="fld"><label for="pct-' + c.f + '">Target</label>' + sel('pct-' + c.f, [[1, 'Leading'], [2, 'Resilient']], d.target) + '</span><span class="fld"><label for="pcb-' + c.f + '">By</label>' + sel('pcb-' + c.f, PL_BY, d.by) + '</span><span class="fld"><label for="pcs-' + c.f + '">For</label>' + sel('pcs-' + c.f, plScopes(), d.div) + '</span><span class="fld"><label for="pco-' + c.f + '">Owner</label>' + sel('pco-' + c.f, PL_PEOPLE, d.owner) + '</span></div>' : '';
-          return rvRow(FACTOR[c.f].name, tagOf(c.f) + esc(c.src) + ' · ' + levelBar(sc.v, true, null, sc.was) + ' ' + trendHTML(sc.t) + '<br>' + esc(c.why), plChoice('cand', c.f, PL_CAND) + form, 'f:' + c.f, !!d.d);
+          return rvRow(FACTOR[c.f].name, rvMeta([tagOf(c.f), levelBar(sc.v, true, null, sc.was) + ' ' + trendHTML(sc.t), esc(c.src)]) + rvSay('Why now', c.why), plChoice('cand', c.f, PL_CAND), 'f:' + c.f, d.d ? 'decided' : false, '', form);
         });
       rvPage('Step 3 of 4 · Decide · ' + (OBJECTIVES.length + PL.cands.length) + ' items in ' + gs.length + ' groups', esc(g[1]) + ' <span class="rv-n">' + plIds(key).length + '</span>', '',
         '<ol class="rv-groups">' + gs.map(function (x, k) { var all = !plLeft(x[0]), can = k <= PL.reach || (k === PL.g + 1 && !left); return '<li class="' + (k === PL.g ? 'on' : all && k <= PL.reach ? 'done' : '') + '"><button type="button" data-plg="' + k + '"' + (can ? '' : ' disabled') + '>' + (all && k !== PL.g && k <= PL.reach ? '✓ ' : '') + esc(x[1]) + ' <span>' + plIds(x[0]).length + '</span></button></li>'; }).join('') + '</ol>' +
@@ -4920,16 +5016,16 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
     // 4 · Summary: next quarter’s objectives, and what happens next
     var nx2 = plNext(), gone = OBJECTIVES.filter(function (o) { return PL.obj[o.id].d === 'retire'; }), skipped = PL.cands.filter(function (c) { return PL.cand[c.f].d === 'skip'; }), open = PL.cands.filter(function (c) { return !PL.cand[c.f].d; });
     var missed = OBJECTIVES.filter(function (o) { return plPreDue(o) && (PL.pre[o.id] === 'skip' || (!PL.pre[o.id] && PL.visitedDecide)); });
-    var blk = function (h, items, note) { return items.length ? '<section class="rv-rc"><h2 class="rv-h2">' + h + ' <span class="rv-n">' + items.length + '</span></h2>' + (note ? '<p class="rv-s">' + note + '</p>' : '') + '<ul class="rv-list">' + items.join('') + '</ul></section>' : ''; };
+    var blk = function (h, items, note, tone) { return items.length ? '<section class="rv-rc"><h2 class="rv-h2">' + h + ' <span class="rv-n' + (tone ? ' n-' + tone : '') + '">' + items.length + '</span></h2>' + (note ? '<p class="rv-s">' + note + '</p>' : '') + '<ul class="rv-list">' + items.join('') + '</ul></section>' : ''; };
     var scopeName = function (d) { return d.div ? (d.div.indexOf('reg:') === 0 ? d.div.slice(4) + ' region' : d.div + ' division') : 'Whole company'; };
     rvPage('Step 4 of 4', 'Summary', (PL.early ? 'Ended early · ' : '') + esc(ORG_NAME) + ' · ' + esc(STRAT.planning) + ' · ' + esc(join(PL_PEOPLE.filter(function (p) { return PL.att[p]; }))),
-      blk('Objectives for next quarter', nx2.keep.map(function (o) { var d = PL.obj[o.id]; return rvRow(d.d === 'adjust' ? FACTOR[o.f].name + ' to ' + LEVELS[+d.target] + ' by ' + d.by : objTitle(o), (d.d === 'adjust' ? 'Adjusted' : d.d === 'keep' ? 'Kept' : 'Kept, not discussed') + ' · ' + esc(objScope(o)) + ' · owner ' + esc(o.owner), '', o.id, false); })
-        .concat(nx2.adds.map(function (c) { var d = PL.cand[c.f]; return rvRow(FACTOR[c.f].name + ' to ' + LEVELS[+d.target] + ' by ' + d.by, 'New · ' + esc(scopeName(d)) + ' · ' + esc(d.owner) + ' scopes a program by the next monthly progress', '', 'f:' + c.f, false); })),
+      blk('Objectives for next quarter', nx2.keep.map(function (o) { var d = PL.obj[o.id]; return rvRow(d.d === 'adjust' ? FACTOR[o.f].name + ' to ' + LEVELS[+d.target] + ' by ' + d.by : objTitle(o), rvMeta([esc(objScope(o)), rvWho(o.owner)]), d.d === 'adjust' ? pill('warning', 'Adjusted') : d.d === 'keep' ? pill('success', 'Kept') : pill('', 'Kept, not discussed'), o.id, false); })
+        .concat(nx2.adds.map(function (c) { var d = PL.cand[c.f]; return rvRow(FACTOR[c.f].name + ' to ' + LEVELS[+d.target] + ' by ' + d.by, rvMeta([esc(scopeName(d)), rvWho(d.owner), 'Drafts a program by the next monthly progress']), pill('info', 'New'), 'f:' + c.f, false); })),
         nx2.n > 3 ? '<b class="t-warning">That’s ' + lw(nx2.n) + ' objectives. Hiviz recommends no more than three.</b>' : '') +
-      blk('Retired', gone.map(function (o) { return rvRow(objTitle(o), esc(objScope(o)) + ' · Prism writes its retro', '', o.id, false); })) +
-      blk('Not this quarter', skipped.map(function (c) { return rvRow(FACTOR[c.f].name, 'Stays with the Focus reviews', '', 'f:' + c.f, false); })) +
-      blk('Carried to next planning', open.map(function (c) { return rvRow(FACTOR[c.f].name, 'Not reached', '', 'f:' + c.f, false); }), 'These go first on the agenda next time.') +
-      blk('Missed pre-reads', missed.map(function (o) { return rvRow(objTitle(o), esc(o.owner), '<span class="rv-miss">Recorded as missed</span>', o.id, false); })) +
+      blk('Retired', gone.map(function (o) { return rvRow(objTitle(o), esc(objScope(o)) + ' · Prism writes its retro', pill('', 'Retired'), o.id, false); })) +
+      blk('Not this quarter', skipped.map(function (c) { return rvRow(FACTOR[c.f].name, 'Stays with the Focus reviews', pill('', 'Not this quarter'), 'f:' + c.f, false); })) +
+      blk('Carried to next planning', open.map(function (c) { return rvRow(FACTOR[c.f].name, 'Not reached', pill('info', 'Carried'), 'f:' + c.f, false); }), 'These go first on the agenda next time.', 'info') +
+      blk('Missed pre-reads', missed.map(function (o) { return rvRow(objTitle(o), rvMeta([rvWho(o.owner)]), pill('warning', 'Recorded as missed'), o.id, false); }), '', 'warning') +
       '<section class="rv-rc"><h2 class="rv-h2">Coming back</h2><ul class="rv-list">' + rvRow('Next monthly progress', esc(STRAT.progress) + ' · program owners check in the week before', '', '', false) + rvRow('Next quarterly planning', 'Wednesday 7 January · owners send a pre-read the week before', '', '', false) + '</ul></section>' +
       '<label class="w-note-l" for="pl-notes">Planning notes</label><textarea id="pl-notes" class="w-note" rows="3" placeholder="Anything else worth recording">' + esc(PL.notes) + '</textarea>',
       PL.early ? '' : '<button type="button" class="btn lg" data-plstep="decide">Back</button>', bar);
@@ -5043,10 +5139,11 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
     ['noted', 'Noted', 'Checked in and in line with Prism. No discussion needed unless someone raises it.']
   ];
   var PG_CHOICES = { disagree: ['Keep the plan', 'Adjust the plan', 'Take to planning', 'Carry forward'], help: ['Help agreed', 'Adjust the plan', 'Take to planning', 'Carry forward'], obj: ['On course', 'Take to planning', 'Carry forward'], noted: ['Agree it’s on track', 'Carry forward'] };
-  function pgTone(key) {
-    if (key === 'disagree' || key === 'help') return PG.groups[key].length ? 'warning' : '';
+  function pgTone(key, ids) {
+    ids = ids || PG.groups[key];
+    if (key === 'disagree' || key === 'help') return ids.length ? 'warning' : '';
     if (key !== 'obj') return '';
-    var st = PG.groups.obj.map(function (id) { var o = OBJECTIVES.filter(function (x) { return x.id === id; })[0]; return o ? objStatus(o)[0] : ''; });
+    var st = ids.map(function (id) { var o = OBJECTIVES.filter(function (x) { return x.id === id; })[0]; return o ? objStatus(o)[0] : ''; });
     return st.indexOf('critical') > -1 ? 'critical' : st.indexOf('warning') > -1 ? 'warning' : '';
   }
   function pgLast() { return STRAT_LOG.filter(function (m) { return m.type === 'Monthly progress'; })[0] || null; }
@@ -5066,8 +5163,9 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
   function pgLeft(k) { return PG.groups[k].filter(function (id) { return !pgDecided(k, id); }).length; }
   function pgGroupsOn() { return PG_GROUPS.filter(function (g) { return PG.groups[g[0]].length; }); }
   function pgChoice(key, opts) {
-    var cur = PG.done[key];
-    return '<span class="rv-ch">' + opts.map(function (o) { return '<button type="button" class="btn' + (cur === o ? ' is-on' : '') + '" data-pgdec="' + esc(key) + '" data-pgval="' + esc(o) + '" aria-pressed="' + (cur === o) + '">' + esc(o) + '</button>'; }).join('') + '</span>';
+    var cur = PG.done[key], carry = opts.indexOf('Carry forward') > -1;
+    return '<span class="rv-ch">' + opts.filter(function (o) { return o !== 'Carry forward'; }).map(function (o) { return '<button type="button" class="btn' + (cur === o ? ' is-on' : '') + '" data-pgdec="' + esc(key) + '" data-pgval="' + esc(o) + '" aria-pressed="' + (cur === o) + '">' + esc(o) + '</button>'; }).join('') +
+      (carry ? carryLink('data-pgdec="' + esc(key) + '" data-pgval="Carry forward"', cur === 'Carry forward') : '') + '</span>';
   }
   function pgBar() {
     var at = RV_STEPS.map(function (s) { return s[0]; }).indexOf(PG.step);
@@ -5078,8 +5176,7 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
   }
   function pgHere(n) { return !n || n === YOU || !!PG.att[n]; }
   function msSub(x, tag) {
-    return tag + '<span class="rv-who"><span class="av' + (x.m.who === YOU ? ' me' : '') + '">' + initials(x.m.who) + '</span>' + esc(x.m.who) + (pgHere(x.m.who) ? '' : ' · <b>not here</b>') + '</span> · for the program “' + esc(x.p.title) + '” · by ' + esc(x.m.due) +
-      (x.m.upd ? '<br>' + actBadge(x.m) + ' ' + (x.m.note ? '“' + esc(x.m.note) + '”' : 'Checked in ' + esc(x.m.upd)) : '');
+    return rvMeta([tag, x.m.upd ? actBadge(x.m) : '', rvWho(x.m.who, pgHere(x.m.who)), rvOf('program', x.p.title), dueHTML(x.m), ciWhen(x.m)]) + rvSay(nameOf(x.m.who), x.m.note, true);
   }
   function startProgress() {
     var att = {}; PL_PEOPLE.forEach(function (p) { att[p] = pgPeople().indexOf(p) > -1; });
@@ -5095,9 +5192,9 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
       var gs = pgGroups(), open = pgOpen(), moved = 0, slipped = 0;
       OBJECTIVES.forEach(function (o) { var regs = objRegs(o); o.krs.forEach(function (kr) { var t = monthInd(regs, o.f, kr[0]).t; if (t === 'better') moved++; if (t === 'worse') slipped++; }); });
       rvPage('Step 1 of 4', 'Who’s here', 'Since ' + esc(STRAT.lastProgress) + ' · ' + esc(ORG_NAME) + ' · ' + lw(moved) + (moved === 1 ? ' key result' : ' key results') + ' moved forward, ' + lw(slipped) + ' slipped',
-        '<ul class="rv-att">' + PL_PEOPLE.map(function (p) { var req = p === 'Morgan Hale'; return '<li><label class="rv-p' + (PG.att[p] ? ' on' : '') + '"><input type="checkbox" data-pgatt="' + esc(p) + '"' + (PG.att[p] ? ' checked' : '') + (req ? ' disabled' : '') + '><span class="av' + (p === YOU ? ' me' : '') + '">' + initials(p) + '</span><span>' + esc(p) + '<small>' + esc(ROLE[p] || '') + (req ? ' · required' : '') + '</small></span></label></li>'; }).join('') + '</ul>' +
-        '<h2 class="rv-h2">On today</h2><ol class="rv-agenda"><li><b>Check-ins</b><span>' + open.length + ' actions · ' + open.filter(function (x) { return !x.m.upd; }).length + ' not checked in yet</span></li>' +
-          PG_GROUPS.filter(function (g) { return gs[g[0]].length; }).map(function (g) { return '<li><b>' + esc(g[1]) + '</b><span>' + gs[g[0]].length + '</span></li>'; }).join('') + '</ol>',
+        '<ul class="rv-att">' + PL_PEOPLE.map(function (p) { var req = p === 'Morgan Hale'; return '<li><label class="rv-p' + (PG.att[p] ? ' on' : '') + '"><input type="checkbox" data-pgatt="' + esc(p) + '"' + (PG.att[p] ? ' checked' : '') + (req ? ' disabled' : '') + '><span class="av' + (p === YOU ? ' me' : '') + '">' + initials(p) + '</span><span>' + esc(p) + '<small>' + esc(ROLE[p] || '') + (req ? ' · required' : '') + '</small>' + attStatus(!!PG.att[p], pgOpen().filter(function (x) { return x.m.who === p; }).map(function (x) { return { done: !!x.m.upd, late: overdue(x.m) }; })) + '</span></label></li>'; }).join('') + '</ul>' +
+        '<h2 class="rv-h2">On today</h2><ol class="rv-agenda"><li><b>Check-ins</b><span>' + open.length + ' actions · <span class="t-warning">' + open.filter(function (x) { return !x.m.upd; }).length + ' not checked in yet</span></span></li>' +
+          PG_GROUPS.filter(function (g) { return gs[g[0]].length; }).map(function (g) { return '<li><b>' + grpDot(pgTone(g[0], gs[g[0]])) + esc(g[1]) + '</b><span>' + gs[g[0]].length + '</span></li>'; }).join('') + '</ol>',
         '<span></span><button type="button" class="btn brand lg" data-pgstep="check">Start with check-ins</button>', bar);
       return;
     }
@@ -5110,7 +5207,7 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
         '<ul class="rv-list">' + list.map(function (x) {
           var sk = PG.ci[x.key] === 'skip', pr = x.key.split(':');
           var ctl = sk ? '<span class="rv-miss">Missed · recorded</span><button type="button" class="linkish" data-pgci="' + x.key + '">Undo</button>'
-            : '<span class="rv-ci">' + (x.m.upd ? '<small>' + (x.m.upd === '26 Sep' ? 'Checked in now' : 'Checked in ' + esc(x.m.upd)) + '</small>' : '<small class="t-warning">No check-in yet</small>') +
+            : '<span class="rv-ci">' +
               paSelect(pr[0] + ':' + pr[1], x.m, 'How’s it going?') +
               (x.m.upd ? '' : '<button type="button" class="btn" data-pgci="' + x.key + '">Skip</button>') + '</span>';
           return rvRow(x.m.t, msSub(x, tagOf(x.key)), ctl, pr[0], sk || !!x.m.upd, 'action');
@@ -5134,11 +5231,11 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
           var o = OBJECTIVES.filter(function (x) { return x.id === id; })[0], s = objStatus(o), regs = objRegs(o), f = FACTOR[o.f];
           var krs = o.krs.map(function (kr) { var t = monthInd(regs, o.f, kr[0]).t; return esc(f.inds[kr[0]]) + ' ' + trendHTML(t); }).join(' · ');
           var reads = o.programs.map(function (pid) { return PROGRAMS[pid].read[1]; }).join(' ');
-          return rvRow(objTitle(o), tagOf(id) + '<span class="badge ' + s[0] + '"><i></i>' + s[1] + '</span> ' + esc(objScope(o)) + '<br>This month: ' + krs + '. ' + esc(reads), pgChoice(id + ':obj', PG_CHOICES.obj), id, !!dec);
+          return rvRow(objTitle(o), rvMeta([tagOf(id), '<span class="badge ' + s[0] + '"><i></i>' + s[1] + '</span>', esc(objScope(o)), rvWho(o.owner)]) + '<span class="rv-say"><b>This month</b><span>' + krs + '</span></span>' + rvSay('Prism', reads), pgChoice(id + ':obj', PG_CHOICES.obj), id, dec ? 'decided' : false);
         }
         var x = pgMs(id), mx = { m: x.m, p: x.p };
-        var extra = key === 'disagree' ? '<br>Prism: ' + esc(x.p.read[1]) : '';
-        return rvRow(x.m.t, msSub(mx, tagOf(id)) + extra + cmHTML(x.m), pgChoice(id + ':' + key, PG_CHOICES[key]), id.split(':')[0], !!dec, 'action');
+        var extra = key === 'disagree' ? rvSay('Prism', x.p.read[1]) : '';
+        return rvRow(x.m.t, msSub(mx, tagOf(id)) + extra + cmHTML(x.m), pgChoice(id + ':' + key, PG_CHOICES[key]), id.split(':')[0], dec ? 'decided' : false, 'action');
       });
       rvPage('Step 3 of 4 · Decide · ' + total + ' items in ' + gsOn.length + ' groups', esc(g[1]) + ' <span class="rv-n">' + ids.length + '</span>', '',
         '<ol class="rv-groups">' + gsOn.map(function (x, k) { var all = !pgLeft(x[0]), can = k <= PG.reach || (k === PG.g + 1 && !left); return '<li class="' + (k === PG.g ? 'on' : all && k <= PG.reach ? 'done' : '') + '"><button type="button" data-pgg="' + k + '"' + (can ? '' : ' disabled') + '>' + (all && k !== PG.g && k <= PG.reach ? '✓ ' : grpDot(pgTone(x[0]))) + esc(x[1]) + ' <span>' + PG.groups[x[0]].length + '</span></button></li>'; }).join('') + '</ol>' +
@@ -5161,15 +5258,15 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
     });
     pgOpen().forEach(function (x) { if (PG.ci[x.key] === 'skip' || (!x.m.upd && PG.visitedDecide)) missed.push(x); });
     var checkedNow = pgOpen().filter(function (x) { return x.m.upd === '26 Sep'; }).length;
-    var blk = function (h, items, note) { return items.length ? '<section class="rv-rc"><h2 class="rv-h2">' + h + ' <span class="rv-n">' + items.length + '</span></h2>' + (note ? '<p class="rv-s">' + note + '</p>' : '') + '<ul class="rv-list">' + items.join('') + '</ul></section>' : ''; };
+    var blk = function (h, items, note, tone) { return items.length ? '<section class="rv-rc"><h2 class="rv-h2">' + h + ' <span class="rv-n' + (tone ? ' n-' + tone : '') + '">' + items.length + '</span></h2>' + (note ? '<p class="rv-s">' + note + '</p>' : '') + '<ul class="rv-list">' + items.join('') + '</ul></section>' : ''; };
     var openOf = function (id) { return /^o-/.test(id) ? id : id.split(':')[0]; };
     rvPage('Step 4 of 4', 'Summary', (PG.early ? 'Ended early · ' : '') + esc(ORG_NAME) + ' · ' + esc(STRAT.progress) + ' · ' + esc(join(PL_PEOPLE.filter(function (p) { return PG.att[p]; }))),
-      blk('Decided', dec.map(function (x) { return rvRow(x[0], esc(x[1]), '', openOf(x[2]), false); })) +
-      (checkedNow ? '<p class="rv-line">' + checkedNow + (checkedNow === 1 ? ' action' : ' actions') + ' checked in during the meeting.</p>' : '') +
-      blk('Taken to quarterly planning', planning.map(function (x) { return rvRow(x[0], esc(x[1]), '', openOf(x[2]), false); }), 'Quarterly planning is on ' + esc(STRAT.planning) + '.') +
-      blk('Missed check-ins', missed.map(function (x) { return rvRow(x.m.t, esc(x.m.who) + ' · ' + esc(x.p.title), '<span class="rv-miss">Recorded as missed</span>', x.key.split(':')[0], false, 'action'); })) +
-      blk('Carried forward to next month', carriedOut.map(function (x) { return rvRow(x[1], esc(x[2]), '', openOf(x[0]), false); }), 'These go first on the agenda next time.') +
-      '<section class="rv-rc"><h2 class="rv-h2">Coming back</h2><ul class="rv-list">' + rvRow('Next monthly progress', 'Monday 27 October · check-ins open 20 Oct', '', '', false) + '</ul></section>' +
+      blk('Decided', dec.map(function (x) { return rvRow(x[0], '', decPills(x[1]), openOf(x[2]), false); }), '', 'success') +
+      (checkedNow ? '<p class="rv-line">' + pill('success', checkedNow + (checkedNow === 1 ? ' action' : ' actions') + ' checked in during the meeting') + '</p>' : '') +
+      blk('Taken to quarterly planning', planning.map(function (x) { return rvRow(x[0], esc(x[1]), pill('warning', 'Taken to planning'), openOf(x[2]), false); }), 'Quarterly planning is on ' + esc(STRAT.planning) + '.', 'warning') +
+      blk('Missed check-ins', missed.map(function (x) { return rvRow(x.m.t, rvMeta([rvWho(x.m.who), rvOf('program', x.p.title)]), pill('warning', 'Recorded as missed'), x.key.split(':')[0], false, 'action'); }), '', 'warning') +
+      blk('Carried forward to next month', carriedOut.map(function (x) { return rvRow(x[1], esc(x[2]), pill('info', 'Carried forward'), openOf(x[0]), false); }), 'These go first on the agenda next time.', 'info') +
+      '<section class="rv-rc"><h2 class="rv-h2">Coming back</h2><ul class="rv-list">' + rvRow('Next monthly progress', 'Monday 27 October · check-ins open 20 Oct', pill('info', 'Scheduled'), '', false) + '</ul></section>' +
       '<label class="w-note-l" for="pg-notes">Meeting notes</label><textarea id="pg-notes" class="w-note" rows="3" placeholder="Anything else worth recording">' + esc(PG.notes) + '</textarea>',
       PG.early ? '' : '<button type="button" class="btn lg" data-pgstep="decide">Back</button>', bar);
   }
