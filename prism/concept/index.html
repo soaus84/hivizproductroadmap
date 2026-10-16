@@ -187,6 +187,19 @@ main { padding-block: 32px 80px; }
 .brief { padding: 18px 20px; display: grid; gap: 10px; margin-bottom: 28px; }
 .brief-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
 .brief-head .who { display: flex; align-items: center; gap: 8px; }
+.ask { padding: 18px 20px; display: grid; gap: 12px; margin: -12px 0 28px; }
+.ask-head { display: flex; align-items: center; gap: 12px; }
+.ask-head h2 { font-size: 18px; font-weight: 800; margin: 0; }
+.ask-head small { display: block; font-size: 13px; color: var(--text-3); }
+.ask-av { width: 40px; height: 40px; padding: 0; overflow: hidden; flex: none; }
+.ask-av img { width: 100%; height: 100%; object-fit: cover; display: block; border-radius: 50%; }
+.ask-form { display: flex; gap: 8px; }
+.ask-form .w-note { flex: 1; min-width: 0; padding: 8px 12px; }
+.ask-try { margin: 0; font-size: 14px; color: var(--text-3); }
+.ask-try .linkish, .ask-refs .linkish { color: var(--text-2); font-weight: 700; text-decoration: underline; text-decoration-color: var(--border-2); text-underline-offset: 3px; }
+.ask-a { display: grid; gap: 8px; padding-top: 12px; border-top: 1px solid var(--border); }
+.ask-a p { margin: 0; font-size: 17px; line-height: 1.5; color: var(--text); max-width: 72ch; }
+.ask-refs { display: flex; gap: 16px; flex-wrap: wrap; font-size: 14px; }
 .brief p.story { font-size: 20px; line-height: 1.5; color: var(--text); max-width: 72ch; font-weight: 500; }
 .brief p.story b { color: var(--text); font-weight: 800; }
 
@@ -1836,6 +1849,7 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
 
       '<div class="card brief"><div class="brief-head"><span class="who"><svg width="16" height="16" viewBox="0 0 22 22" aria-hidden="true"><path d="M11 2.5 20 19H2z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></svg><h2>The story right now</h2></span><span class="label">Written by Prism from ' + linked + ' linked records</span></div>' +
         '<p class="story">' + storyFor(all) + '</p></div>' +
+      askHTML(all) +
 
       '<div class="list-top"><div class="seg" role="group" aria-label="Filter insights">' + FILTERS.map(function (x) {
           return '<button type="button" data-filter="' + x[0] + '" aria-pressed="' + (x[0] === ST.filter) + '">' + esc(x[1]) + '<span class="c">' + all.filter(x[2]).length + '</span></button>';
@@ -1843,6 +1857,35 @@ a.t-t:hover, button.t-t:hover { text-decoration: underline; text-underline-offse
       (rows || '<p class="card empty-card">Nothing matches this filter.</p>') +
       '<a class="feed-link" href="#sources/feed">See the feed behind these insights →</a>';
   }
+
+  // Ask David: Hiviz answers in David's voice, from his guidance and what's on this page
+  function askAnswer(q, all) {
+    var t = q.toLowerCase(), open = all.filter(function (i) { return !i.closed && !i.dismissed; });
+    var pick = function (id) { return open.filter(function (i) { return i.id === id; })[0]; };
+    var noOwner = open.filter(function (i) { return i.status === 'new'; }).sort(function (a, b) { return (a.sev === 'critical' ? 0 : 1) - (b.sev === 'critical' ? 0 : 1); });
+    if (/visit|site|where|go/.test(t)) return { text: 'Go to Quarry Link first. It has sent nothing for 19 days while permits are still being issued, and no leader has been there in 41. Don’t ask the crew why reports stopped. Ask what work has changed since they did.', ins: [] };
+    if (/handover|shift change|hand over/.test(t) && pick('hand')) return { text: 'Stand at the next night-shift permit handover at Rail Stabling Yard. Listen for what the incoming crew is told about isolations, then ask them to say it back. What they can’t repeat is what gets lost.', ins: [pick('hand')] };
+    if (/fatigue|night|tired|roster/.test(t) && pick('fat')) return { text: 'Stop asking night crews to push through. Find out who approves extending a run and how often they say yes. Then change the roster or the work, so the plan still holds at 3am.', ins: [pick('fat')] };
+    if (/pre-?start|check|inspection|form/.test(t)) return { text: 'Join one pre-start and one inspection this week and watch them, don’t audit them. If either is done in under a minute, ask the crew which questions they would cut, and cut them.', ins: [pick('pre'), pick('tick')].filter(Boolean) };
+    var top = noOwner[0];
+    return top ? { text: 'Start with what nobody owns. ' + noOwner.length + (noOwner.length === 1 ? ' insight needs' : ' insights need') + ' an owner, and ' + top.title.charAt(0).toLowerCase() + top.title.slice(1) + ' is ' + (top.sev === 'critical' ? 'critical' : 'the most pressing') + '. Give it an owner today, then go and see the work it’s about before you agree a plan.', ins: [top] }
+      : { text: 'Nothing here is without an owner, so go and see the work behind the one that’s stalled longest. Ask the owner what’s in the way, not when it’ll be done.', ins: [] };
+  }
+  function askHTML(all) {
+    var x = EXPERTS.di, a = ST.askQ ? askAnswer(ST.askQ, all) : null;
+    return '<section class="card ask" aria-labelledby="ask-h"><div class="ask-head"><span class="av ask-av"><img src="' + x[3] + '" alt=""></span><span><h2 id="ask-h">Ask David</h2><small>Hiviz answers from David Provan’s guidance and what’s on this page</small></span></div>' +
+      '<form class="ask-form" id="ask-form"><label class="sr" for="ask-q">Your question</label><input class="w-note" id="ask-q" type="text" autocomplete="off" placeholder="What should I do first this week?" value="' + esc(ST.askQ || '') + '"><button type="submit" class="btn">Ask</button></form>' +
+      (a ? '<div class="ask-a"><p>' + esc(a.text) + '</p>' + (a.ins.length ? '<div class="ask-refs">' + a.ins.map(function (i) { return '<button type="button" class="linkish" data-open="' + i.id + '">' + esc(i.title) + '</button>'; }).join('') + '</div>' : '') + '</div>'
+         : '<p class="ask-try">Try: <button type="button" class="linkish" data-ask="Where should I visit this week?">Where should I visit this week?</button> · <button type="button" class="linkish" data-ask="What do I do about the handovers?">What do I do about the handovers?</button></p>') +
+      '</section>';
+  }
+  document.addEventListener('submit', function (e) {
+    if (e.target.id !== 'ask-form') return; e.preventDefault();
+    var q = $('ask-q').value.trim(); if (!q) return; ST.askQ = q; render(); $('ask-q').focus();
+  });
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-ask]'); if (!b) return; ST.askQ = b.getAttribute('data-ask'); render();
+  });
 
   function row(i) {
     var srcIds = i.says.map(function (s) { return s.src; });
